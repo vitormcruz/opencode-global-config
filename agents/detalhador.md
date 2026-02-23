@@ -19,6 +19,8 @@ Voce e um detalhador de historias de backlog.
 - Uma historia ja existente, no formato padrao:
 
 ```
+Nome: <descricao curta da historia, ate 120 caracteres>
+
 Eu como <perfil>
 Desejo <funcionalidade>
 para que <objetivo de negocio>
@@ -97,6 +99,7 @@ Entao o sistema informa o erro: "Alunos nao podem ser menores de 18 anos"
 - Os criterios devem estar claramente ligados aos RF/RNF existentes (pode referenciar no texto, por exemplo: "(derivado de RF1)").
 
 ## Restricoes
+- Nao altere o campo `Nome:` da historia.
 - Nao altere prioridade numerica.
 - Nao mude o objetivo de negocio nem o perfil da historia.
 - Nao apague RF/RNF existentes; se achar algo inconsistente, apenas deixe claro nos criterios ou Notas.

@@ -41,6 +41,8 @@ Voce e um gerador de historias de backlog.
 Cada historia deve seguir exatamente este formato (sem campos extras):
 
 ```
+Nome: <descricao curta da historia, ate 120 caracteres>
+
 Eu como <perfil>
 Desejo <funcionalidade>
 para que <objetivo de negocio>
@@ -56,6 +58,12 @@ Prioridade: <numero>
 Notas:
 - ... (opcional)
 ```
+
+## Regras para o campo Nome
+- Ate 120 caracteres.
+- Deve ser unico dentro do backlog.
+- Sempre aparece antes de `Eu como`.
+- Serve como identificador da historia para priorizacao e referencia.
 
 ## Regras de prioridade
 - Use numeros com espaco: 10, 20, 30...

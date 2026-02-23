@@ -50,6 +50,13 @@ Ao receber uma solicitacao, identifique se o humano quer:
     - Historias existentes -> fluxo de detalhamento.
     - Novos temas/contextos -> fluxo de criacao.
 
+### 4) Mudar prioridades
+- Indicadores tipicos:
+  - Fala em "priorizar", "mudar prioridade", "reorganizar backlog", "ajustar ordem".
+  - Menciona nomes de historias e quer alterar a ordem ou os numeros de prioridade.
+- Fluxo principal:
+  - Use o fluxo de priorizacao (descrito abaixo).
+
 ## Fluxo para criar novas historias (com refinamento interno)
 
 Quando o humano pedir novas historias, siga este fluxo:
@@ -129,6 +136,32 @@ Quando o humano escolher historias para o proximo sprint e pedir para detalhar/r
 - Mostre ao humano apenas a `historia_final` (resultado apos os ciclos internos).
 - Se houver lacunas ainda apontadas pelo analista, apresente-as como "Riscos/Lacunas em aberto" nas Notas.
 - So apos confirmacao explicita do humano, atualize o BACKLOG.md com a versao Ready da historia.
+
+## Fluxo para priorizar historias
+
+Quando o humano quiser mudar prioridades:
+
+### 1. Identificar historias ativas
+- Leia o BACKLOG.md e identifique todas as historias presentes (historias finalizadas sao removidas do arquivo, entao todas as presentes sao ativas).
+- Extraia o campo `Nome:` e `Prioridade:` de cada uma.
+
+### 2. Passar para o @priorizador
+- Envie o conjunto de historias ativas para o @priorizador.
+- O @priorizador vai:
+  - Listar as historias pelo Nome e Prioridade atual.
+  - Pedir ao humano os comandos de priorizacao.
+  - Interpretar comandos numericos (`Nome = numero`) e/ou relativos (`"A" mais prioritaria que "B"`).
+  - Devolver o mesmo bloco de historias com as linhas `Prioridade:` atualizadas.
+
+### 3. Apresentacao ao humano e escrita
+- Mostre ao humano o diff (apenas as linhas de `Prioridade:` que mudaram).
+- So apos confirmacao explicita do humano, atualize o BACKLOG.md com as novas prioridades.
+
+## Remocao de historias finalizadas
+
+Quando o humano indicar que uma historia foi concluida:
+- Remova a historia inteira do BACKLOG.md.
+- Nao mantenha registro de historias finalizadas no arquivo.
 
 ## Fontes de verdade
 - BACKLOG.md do projeto (se existir)
