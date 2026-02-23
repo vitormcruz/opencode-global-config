@@ -59,7 +59,7 @@ Notas:
 | `analista` | subagent (read-only) | Faz perguntas para identificar lacunas de contexto (personas, objetivos, restricoes, NFRs) |
 | `gerador-historias` | subagent (read-only) | Gera historias no formato padrao com RF/RNF e prioridade numerica |
 | `priorizador` | subagent (read-only) | Sugere reordenacao e ajuste de prioridade numerica |
-| `detalhador` | subagent (read-only) | Sugere quebra de historias grandes em incrementos e identifica spikes |
+| `detalhador` | subagent (read-only) | Torna historias Ready gerando criterios de aceitacao (Dado/Quando/Entao) a partir de RF/RNF |
 | `revisor` | subagent (read-only) | Revisa clareza, consistencia e nivel de detalhe |
 
 ### Permissoes dos subagentes
@@ -88,8 +88,8 @@ Todos os subagentes:
 
 - [x] **Etapa 6:** Discutir e criar `agents/gerador-historias.md`
 - [ ] **Etapa 7:** Discutir e criar `agents/priorizador.md`
-- [ ] **Etapa 8:** Discutir e criar `agents/detalhador.md`
-- [ ] **Etapa 9:** Discutir e criar `agents/revisor.md`
+- [x] **Etapa 8:** Discutir e criar `agents/detalhador.md`
+- [x] **Etapa 9:** Discutir e criar `agents/revisor.md`
 - [ ] **Etapa 10:** Smoke test manual
 
 ---
@@ -105,7 +105,9 @@ Todos os subagentes:
 └── agents/
     ├── elaborar-backlog.md
     ├── analista.md
-    └── gerador-historias.md
+    ├── gerador-historias.md
+    ├── detalhador.md
+    └── revisor.md
 ```
 
 ---
@@ -166,9 +168,9 @@ Notas:
 - Nao reescreve texto das historias
 
 ### `detalhador`
-- Sugere quebra de historias grandes em 2-5 incrementos
-- Identifica spikes quando houver incerteza tecnica
-- Nao produz especificacao detalhada
+- Torna historias Ready gerando criterios de aceitacao a partir de RF/RNF
+- Formato: Cenario + Dado/Quando/Entao com exemplos concretos entre aspas
+- Nao altera prioridade nem objetivo de negocio
 
 ### `revisor`
 - Revisa clareza, ambiguidade, duplicidade
