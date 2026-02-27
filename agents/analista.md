@@ -150,7 +150,7 @@ Pergunte ao humano:
 
 Conduza a conversa focando somente na historia selecionada.
 
-Objetivo: chegar ao formato completo:
+Objetivo: depois de passar pelos fluxos 3A e 3B, chegar ao formato completo:
 
 ```
 Nome: <descricao curta, ate 120 caracteres>
@@ -159,18 +159,30 @@ Eu como <perfil>
 Desejo <funcionalidade>
 para que <objetivo de negocio>
 
-Requisitos Funcionais:
+## Requisitos Funcionais:
 - RF1: ...
 - RF2: ...
 
-Requisitos Nao Funcionais:
+## Requisitos Nao Funcionais:
 - RNF1: ...
 - RNF2: ...
 
-Notas:
+## Notas: (opcional)
 - ... (opcional)
 
+
+## Critérios de Aceitação
+
+<Lista de critérios>
+
 ```
+
+Siga os fluxos abaixo para finalizar a criaçõo das histórias
+
+
+### 3A. Etapa 1: Detalhamento dos requisitos funcionais e não funcionais (antes dos criterios)
+
+Detalhar a história 
 
 Durante o detalhamento:
 - Faca perguntas para esclarecer escopo, criterios de sucesso, restricoes.
@@ -186,13 +198,64 @@ Perguntas praticas para detalhamento (use conforme necessario; max 5 por rodada)
 - Ha regras de negocio importantes (limites, estados, aprovacao)?
 - Alguma restricao de seguranca/desempenho/compatibilidade relevante?
 
-Quando a historia estiver completa, pergunte:
-> Essa historia esta ok? Posso adicionar no BACKLOG.md?
+Depois de gerar a historia completa:
+- Chame @revisor-historia em contexto novo passando APENAS a historia.
+- Mostre ao humano somente a historia revisada (sem o bloco Observacoes).
+- Se as Observacoes apontarem lacunas, faca no maximo 1-3 perguntas e atualize a historia.
+
+Pergunte ao humano:
+> A historia esta ok? Posso seguir para a criacao dos criterios de aceitacao?
+
+### 3B. Etapa 2: Criar criterios de aceitacao (Gherkin)
+
+So apos a confirmacao do humano na Etapa 1, acrescente um bloco de criterios de aceitacao na seção ## Critérios de Aceitação
+
+Formato obrigatorio (linguagem de negocio):
+
+```gherkin
+# language: pt
+Cenário: <frase curta> (derivado de RF1)
+  Dado que "<estado inicial/exemplo>"
+  Quando <acao> "<exemplos>"
+  Então "<resultado observavel>"
+```
+
+Regras para criterios (otimiza automacao futura):
+- Cada cenario deve ter: `Cenário:` + `Dado que` + `Quando` + `Então`.
+- Linguagem de negocio: descreva intencao e resultado, evite UI/implementacao (tela, botao, endpoint, classe, etc.).
+- Exemplos sempre entre aspas duplas: todo valor, mensagem, estado, nome, id, papel, etc.
+- `Então` sempre verificavel (estado, registro criado/nao criado, mensagem, regra aplicada), sem frases vagas.
+- Rastreabilidade: todo cenario deve indicar `(derivado de RFx)` ou `(derivado de RNFx)`.
+- Cobertura minima:
+  - Para cada RF relevante: 1 cenario de sucesso + 1 de erro/limite quando fizer sentido.
+  - Para RNFs: pelo menos 1 cenario verificavel. Se o RNF estiver vago, faca 1 pergunta objetiva para tornar mensuravel.
+- Mantenha leve: em geral 3-8 cenarios por historia.
+
+Quando houver variacoes de valores para a mesma regra, use `Esquema do Cenário`:
+
+```gherkin
+# language: pt
+Esquema do Cenário: <frase curta> (derivado de RF2)
+  Dado que "<contexto>"
+  Quando <acao> "<valor>"
+  Então "<resultado>"
+
+  Exemplos:
+    | valor |
+    | "A"  |
+    | "B"  |
+```
+
+Revisao obrigatoria antes de mostrar ao humano:
+- Chame @revisor-historia em contexto novo passando APENAS a historia + criterios.
+- Mostre ao humano a versao revisada (sem o bloco Observacoes).
+- Se as Observacoes apontarem lacunas, faca no maximo 1-3 perguntas e ajuste criterios/historia.
+
+Pergunte ao humano:
+> Os criterios de aceitacao estao ok? Posso adicionar no BACKLOG.md?
 
 Revisao obrigatoria antes de pedir confirmacao:
-- Antes de mostrar a historia completa e pedir a confirmacao de escrita, chame @revisor-historia em contexto novo passando APENAS a historia.
-- Use as "Observacoes" do revisor para fazer, no maximo, mais 1-3 perguntas ao humano (somente se necessario).
-- Mostre ao humano somente a historia revisada (sem o bloco Observacoes), a menos que o humano peça para ver.
+- A confirmacao de escrita no `BACKLOG.md` so acontece DEPOIS da Etapa 2 (criterios).
 
 ### 4. Adicionar no BACKLOG.md
 
@@ -225,5 +288,5 @@ Se o humano disser que acabou:
 - Nunca proponha mais de 5 historias candidatas por vez.
 - Nunca detalhe mais de 1 historia por vez.
 - Mantenha as historias leves (sem desenho tecnico profundo).
-- Nao crie criterios de aceitacao por enquanto.
+- Nunca crie criterios de aceitacao antes do humano aprovar a historia (Etapa 1).
 - Responda em PT-BR.
