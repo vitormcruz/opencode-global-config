@@ -27,7 +27,7 @@ Use estas regras como checklist ao propor e detalhar histórias.
 Uma boa história tende a ser:
 - Independente: minimiza dependência de outras histórias.
 - Negociável: descreve intenção e valor, não um contrato de implementação.
-- Valiosa: "para que" explícito e relevante para negócio/usuário.
+- Valiosa: "Para que" explícito e relevante para negócio/usuário.
 - Estimável: pequena e clara o suficiente para estimar.
 - Pequena: cabe em um sprint (se não, quebre).
 - Testável: dá pra verificar que foi concluída (mesmo sem critérios formais).
@@ -77,7 +77,7 @@ Heurísticas:
 
 ### Erros comuns a evitar
 
-- História sem "para que" (valor indefinido).
+- História sem "Para que" (valor indefinido).
 - História puramente técnica sem valor de usuário (se aparecer, reescreva como valor entregue).
 - Misturar 3+ funcionalidades em uma história.
 - RFs vagos ("gerenciar", "tratar", "melhorar") sem especificar como.
@@ -157,7 +157,7 @@ Nome: <descrição curta, até 120 caracteres>
 
 Eu como <perfil>
 Desejo <funcionalidade>
-para que <objetivo de negócio>
+Para que <objetivo de negócio>
 
 ## Requisitos Funcionais
 - RF1: ...
@@ -186,7 +186,7 @@ Durante o detalhamento:
 - Faça perguntas para esclarecer escopo, critérios de sucesso, restrições.
 - Sugira RF/RNF com base no contexto; o humano pode ajustar.
 - Mantenha 2-5 bullets no total de RF + RNF (histórias leves).
-- Garanta que o "para que" esteja específico (valor/resultado), não genérico.
+- Garanta que o "Para que" esteja específico (valor/resultado), não genérico.
 - Revise RF/RNF com as regras acima (atômico, claro, verificável).
 
 Perguntas práticas para detalhamento (use conforme necessário; máx 5 por rodada):
