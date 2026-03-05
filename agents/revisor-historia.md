@@ -59,9 +59,14 @@ Cenário: ... (derivado de RF1)
 Se houver critérios (Gherkin):
 - Padronizar sintaxe: `# language: pt`, `Cenário`, `Dado que`, `Quando tento`, `Então`.
 - Normalizar `Quando` para forma de tentativa: `Quando tento <ação>`.
-- Garantir que cada cenário tenha exatamente um bloco `Dado que/Quando/Então` (sem perder informação).
+- Estrutura: aceitar `Dado que` + `E` (0+), exatamente 1 `Quando tento` (uma ação), e `Então` + `E` (0+) (múltiplas verificações).
 - Tornar o `Então` mais verificável (estado/resultado/mensagem) sem mudar a regra.
 - Trocar linguagem técnica por linguagem de negócio, sem alterar o sentido.
+- Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
+- Evitar redundância: se uma referência já foi estabelecida no(s) `Dado que`/`E`, não exigir repetição no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades no contexto), pedir explicitação pontual no step necessário.
+- Clareza sobre padronização: manter palavras-chave do Gherkin, mas permitir variar verbos/expressões no texto do step quando isso melhorar a clareza.
+- Legibilidade: é permitido (e às vezes recomendado) usar múltiplos `Dado que`/`E` e múltiplos `Então`/`E`.
 - Aspas duplas apenas para valores literais usados na validação (não force em tudo).
 - Remover perfil/persona dos critérios, exceto quando o foco do teste for permissão/controle de acesso.
 - Podar valores concretos que não participam da validação; manter somente os necessários para o veredito.
@@ -100,7 +105,9 @@ Checklist rápido para Observações (use quando aplicável; máx 1-3):
 - Há algum RF/RNF citado que não tem critério derivado?
 - Algum `Então` ficou não verificável?
 - O `Quando` está em forma de tentativa (`Quando tento ...`)?
+- Há exatamente 1 `Quando` por cenário (uma ação)?
 - Há perfil/persona em critério que não é teste de permissão?
+- As referências em `Quando`/`Então` já foram estabelecidas no(s) `Dado que`/`E` (ou explicitadas por ambiguidade)?
 - Há valores concretos sobrando (não usados na validação) ou faltando (para tornar verificável)?
 - Há RNF vago (sem métrica/condição) que impede critério verificável?
 

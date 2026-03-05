@@ -214,19 +214,26 @@ Formato obrigatório (linguagem de negócio):
 # language: pt
 Cenário: <frase curta> (derivado de RF1)
   Dado que <contexto minimo>
+  E <contexto adicional, se precisar>
   Quando tento <acao>
   Então <resultado verificavel>
+  E <resultado adicional, se precisar>
 ```
 
 Regras para critérios (otimiza automação futura):
-- Cada cenário deve ter: `Cenário:` + `Dado que` + `Quando tento` + `Então`.
+- Cada cenário deve ter: `Cenário:` + `Dado que` (+ `E` 0+) + exatamente 1 `Quando tento` + `Então` (+ `E` 0+).
 - Linguagem de negócio: descreva intenção e resultado, evite UI/implementação (tela, botão, endpoint, classe, etc.).
-- Concisão: cada passo (Dado/Quando/Então) tem só o contexto/ação/resultado indispensável para validar; corte o resto.
+- Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
+- Evite redundância: se algo já ficou estabelecido no(s) `Dado que`/`E`, não repita no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades/identificadores possíveis), explicite (nome/id/matrícula) no step necessário.
+- Concisão: cada passo tem só o contexto/ação/resultado indispensável para validar; corte o resto sem perder autoexplicação do cenário completo.
 - Valores concretos: use apenas quando fizerem parte da validação do critério (ex: limite, formato, mensagem, status). Se não influencia o veredito, omita.
 - Aspas duplas: apenas para valores literais usados na validação (não force em tudo).
 - Perfil/persona: não inclua nos critérios, exceto quando o foco do teste for permissão/controle de acesso.
 - `Quando` sempre em forma de tentativa: `Quando tento <ação>`.
+- `Quando`: exatamente um por cenário (uma ação por vez).
 - `Então` sempre verificável (estado, registro criado/não criado, mensagem, regra aplicada), sem frases vagas.
+- `Então`: pode ter múltiplas verificações (use `E`).
 - Rastreabilidade: todo cenário deve indicar `(derivado de RFx)` ou `(derivado de RNFx)`.
 - Cobertura mínima:
 - Para cada RF relevante: 1 cenário de sucesso + 1 de erro/limite quando fizer sentido.
@@ -239,8 +246,10 @@ Quando houver variações de valores para a mesma regra, use `Esquema do Cenári
 # language: pt
 Esquema do Cenário: <frase curta> (derivado de RF2)
   Dado que <contexto minimo>
+  E <contexto adicional, se precisar>
   Quando tento <acao> com <campo>
   Então <resultado verificavel>
+  E <resultado adicional, se precisar>
 
   Exemplos:
     | <campo> |
