@@ -1,0 +1,210 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+opencode-link
+
+Cria links simbolicos em ~/.config/opencode apontando para este repo.
+
+Uso:
+  ./scripts/opencode-link [--yes]
+
+Opcoes:
+  --yes      Nao pergunta confirmacao
+  --help     Mostra esta ajuda
+EOF
+}
+
+assume_yes=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --yes) assume_yes=1 ;;
+    --help|-h) usage; exit 0 ;;
+    *) echo "Opcao desconhecida: $1" >&2; usage >&2; exit 2 ;;
+  esac
+  shift
+done
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd "${script_dir}/.." && pwd -P)"
+
+opencode_dir="${HOME}/.config/opencode"
+timestamp="$(date +%Y%m%d-%H%M%S)"
+backup_dir="${HOME}/.config/opencode-backup/${timestamp}"
+
+say() { printf '%s\n' "$*"; }
+
+resolve_path() {
+  if command -v realpath >/dev/null 2>&1; then
+    realpath -m "$1" 2>/dev/null || true
+    return 0
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$1" <<'PY' 2>/dev/null || true
+import os,sys
+print(os.path.realpath(sys.argv[1]))
+PY
+    return 0
+  fi
+  printf '%s\n' "$1"
+}
+
+current_target() {
+  # Retorna o caminho resolvido para onde o symlink aponta.
+  # Se nao for symlink, retorna string vazia.
+  local dest="$1"
+  if [ ! -L "$dest" ]; then
+    printf '%s' ""
+    return 0
+  fi
+
+  local t
+  t="$(readlink "$dest" 2>/dev/null || true)"
+  if [ -z "$t" ]; then
+    printf '%s' ""
+    return 0
+  fi
+
+  if [ "${t#/}" = "$t" ]; then
+    t="$(dirname "$dest")/$t"
+  fi
+
+  resolve_path "$t"
+}
+
+ensure_dir() {
+  mkdir -p "$1"
+}
+
+backup_if_exists() {
+  local dest="$1"
+
+  if [ ! -e "$dest" ] && [ ! -L "$dest" ]; then
+    return 0
+  fi
+
+  ensure_dir "$backup_dir"
+
+  local base
+  base="$backup_dir/$(basename "$dest")"
+
+  local out="$base"
+  if [ -e "$out" ] || [ -L "$out" ]; then
+    local i=1
+    while [ $i -lt 100 ]; do
+      if [ ! -e "${base}.${i}" ] && [ ! -L "${base}.${i}" ]; then
+        out="${base}.${i}"
+        break
+      fi
+      i=$((i + 1))
+    done
+  fi
+
+  mv "$dest" "$out"
+}
+
+link_one() {
+  local source="$1"
+  local dest="$2"
+
+  local src_abs
+  src_abs="$(resolve_path "$source")"
+  if [ -z "$src_abs" ]; then src_abs="$source"; fi
+
+  local cur
+  cur="$(current_target "$dest")"
+  local src_res
+  src_res="$(resolve_path "$src_abs")"
+
+  if [ -n "$cur" ] && [ -n "$src_res" ] && [ "$cur" = "$src_res" ]; then
+    return 0
+  fi
+
+  backup_if_exists "$dest"
+  ln -s "$src_abs" "$dest"
+}
+
+confirm() {
+  if [ "$assume_yes" -eq 1 ]; then
+    return 0
+  fi
+
+  if ! [ -t 0 ] || ! [ -t 1 ]; then
+    echo "Sem TTY para confirmacao; use --yes" >&2
+    exit 2
+  fi
+
+  printf 'Aplicar estas alteracoes? [y/N] '
+  read -r ans || true
+  case "$ans" in y|Y|yes|YES) return 0 ;; esac
+  say "Cancelado."
+  exit 1
+}
+
+status_line() {
+  local source="$1"
+  local dest="$2"
+
+  local src_abs
+  src_abs="$(resolve_path "$source")"
+  if [ -z "$src_abs" ]; then src_abs="$source"; fi
+
+  local cur
+  cur="$(current_target "$dest")"
+  local src_res
+  src_res="$(resolve_path "$src_abs")"
+
+  if [ -n "$cur" ] && [ -n "$src_res" ] && [ "$cur" = "$src_res" ]; then
+    say "OK    $dest"
+    return 0
+  fi
+
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
+    say "BK    $dest"
+    say "LN    $dest -> $src_abs"
+    return 0
+  fi
+
+  say "LN    $dest -> $src_abs"
+}
+
+plan() {
+  say "Repo:   $repo_root"
+  say "Destino: $opencode_dir"
+  say "Backup: $backup_dir"
+  say "Plano:"
+
+  if [ ! -d "$opencode_dir" ]; then
+    say "MKDIR $opencode_dir"
+  fi
+
+  status_line "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
+  status_line "$repo_root/agents" "$opencode_dir/agents"
+  status_line "$repo_root/opencode.json" "$opencode_dir/opencode.json"
+  status_line "$repo_root/skills" "$opencode_dir/skills"
+  status_line "$repo_root/scripts" "$opencode_dir/scripts"
+}
+
+apply() {
+  say "Aplicando..."
+
+  ensure_dir "$opencode_dir"
+
+  link_one "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
+  link_one "$repo_root/agents" "$opencode_dir/agents"
+  link_one "$repo_root/opencode.json" "$opencode_dir/opencode.json"
+  link_one "$repo_root/skills" "$opencode_dir/skills"
+  link_one "$repo_root/scripts" "$opencode_dir/scripts"
+
+  say "Pronto."
+}
+
+main() {
+  plan
+  confirm
+  apply
+}
+
+main

@@ -5,7 +5,7 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 ## Como funciona
 
 - O OpenCode le configuracoes globais a partir de `~/.config/opencode`.
-- Este repo fica em outro lugar (ex.: `/mnt/c/Users/<usr>>/Projetos/opencode-config`) e e conectado por links simbólicos.
+- Este repo fica em outro lugar (ex.: `/mnt/c/Users/<usr>/Projetos/opencode-config`) e e conectado por links simbolicos.
 
 Links usados neste ambiente WSL:
 
@@ -20,6 +20,28 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/agents \
 
 ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/opencode.json \
       ~/.config/opencode/opencode.json
+```
+
+## Bootstrap (usuario)
+
+Depois de clonar este repo em qualquer caminho, rode:
+
+```bash
+./scripts/opencode-link
+```
+
+Modo nao-interativo (bom para automatizar):
+
+```bash
+./scripts/opencode-link --yes
+```
+
+## Bootstrap (OpenCode / agente)
+
+Quando o usuario pedir algo como "configure este repo", o comando canonico é:
+
+```bash
+bash ./scripts/opencode-link --yes
 ```
 
 ## Ideia

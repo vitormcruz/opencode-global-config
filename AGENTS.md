@@ -12,6 +12,15 @@
 - Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
 - Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
 
+### Atalho: "configure este repo"
+
+- Se o humano pedir explicitamente "configure este repo" (ou equivalente), isso conta como confirmacao para executar o bootstrap.
+- Comando canonico:
+
+```bash
+bash ./scripts/opencode-link --yes
+```
+
 ## Configuracao Global via Links Simbolicos
 
 - Este repo `opencode-config` e o fonte de verdade das configs globais do OpenCode.
