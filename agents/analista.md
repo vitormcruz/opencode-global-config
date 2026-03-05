@@ -213,15 +213,19 @@ Formato obrigatório (linguagem de negócio):
 ```gherkin
 # language: pt
 Cenário: <frase curta> (derivado de RF1)
-  Dado que "<estado inicial/exemplo>"
-  Quando <ação> "<exemplos>"
-  Então "<resultado observável>"
+  Dado que <contexto minimo>
+  Quando tento <acao>
+  Então <resultado verificavel>
 ```
 
 Regras para critérios (otimiza automação futura):
-- Cada cenário deve ter: `Cenário:` + `Dado que` + `Quando` + `Então`.
+- Cada cenário deve ter: `Cenário:` + `Dado que` + `Quando tento` + `Então`.
 - Linguagem de negócio: descreva intenção e resultado, evite UI/implementação (tela, botão, endpoint, classe, etc.).
-- Exemplos sempre entre aspas duplas: todo valor, mensagem, estado, nome, id, papel, etc.
+- Concisão: cada passo (Dado/Quando/Então) tem só o contexto/ação/resultado indispensável para validar; corte o resto.
+- Valores concretos: use apenas quando fizerem parte da validação do critério (ex: limite, formato, mensagem, status). Se não influencia o veredito, omita.
+- Aspas duplas: apenas para valores literais usados na validação (não force em tudo).
+- Perfil/persona: não inclua nos critérios, exceto quando o foco do teste for permissão/controle de acesso.
+- `Quando` sempre em forma de tentativa: `Quando tento <ação>`.
 - `Então` sempre verificável (estado, registro criado/não criado, mensagem, regra aplicada), sem frases vagas.
 - Rastreabilidade: todo cenário deve indicar `(derivado de RFx)` ou `(derivado de RNFx)`.
 - Cobertura mínima:
@@ -234,14 +238,14 @@ Quando houver variações de valores para a mesma regra, use `Esquema do Cenári
 ```gherkin
 # language: pt
 Esquema do Cenário: <frase curta> (derivado de RF2)
-  Dado que "<contexto>"
-  Quando <ação> "<valor>"
-  Então "<resultado>"
+  Dado que <contexto minimo>
+  Quando tento <acao> com <campo>
+  Então <resultado verificavel>
 
   Exemplos:
-    | valor |
-    | "A"  |
-    | "B"  |
+    | <campo> |
+    | "A"     |
+    | "B"     |
 ```
 
 Revisão obrigatória antes de mostrar ao humano:
