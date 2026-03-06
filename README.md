@@ -43,8 +43,3 @@ Quando o usuario pedir algo como "configure este repo", o comando canonico é:
 ```bash
 bash ./scripts/opencode-link --yes
 ```
-
-## Ideia
-
-- Manter todas as regras de agentes, arquivos e configs do OpenCode versionadas em um repo Git separado.
-- Facilitar reaproveitar a mesma configuracao em outras máquinas apenas recriando estes links simbolicos.

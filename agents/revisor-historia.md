@@ -55,6 +55,7 @@ Cenário: ... (derivado de RF1)
 - Tornar "Para que" mais claro quando já estiver implícito no texto (sem inventar valor novo).
 - Tornar RF/RNF mais verificáveis SEM adicionar novos comportamentos (apenas deixar mais concreto o que já está descrito).
 - Reordenar RF/RNF quando isso melhorar a leitura, sem remover conteúdo.
+- Reduzir detalhes de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara) quando não forem regra de negócio; se parecer lei/contrato, pergunte em Observações.
 
 Se houver critérios (Gherkin):
 - Padronizar sintaxe: `# language: pt`, `Cenário`, `Dado que`, `Quando tento`, `Então`.
@@ -70,6 +71,8 @@ Se houver critérios (Gherkin):
 - Aspas duplas apenas para valores literais usados na validação (não force em tudo).
 - Remover perfil/persona dos critérios, exceto quando o foco do teste for permissão/controle de acesso.
 - Podar valores concretos que não participam da validação; manter somente os necessários para o veredito.
+- Foco em negócio: evitar regra de produto/implementação (ex: máximo de caracteres, tipo numérico, regex, máscara). Se parecer exigência legal/contratual, não assuma: pergunte em Observações.
+- Anti-exploratório: não exigir cobertura de combinatória/casos limite. Se houver excesso de cenários de borda sem motivação de negócio, condensar para o essencial.
 - Se faltar valor concreto para tornar o `Então` verificável, perguntar em Observações (sem inventar).
 - Melhorar nomes de cenários para ficarem claros e rastreáveis.
 
@@ -108,6 +111,8 @@ Checklist rápido para Observações (use quando aplicável; máx 1-3):
 - Há exatamente 1 `Quando` por cenário (uma ação)?
 - Há perfil/persona em critério que não é teste de permissão?
 - As referências em `Quando`/`Então` já foram estabelecidas no(s) `Dado que`/`E` (ou explicitadas por ambiguidade)?
+- Há critério virando validação técnica/regra de produto (tamanho, tipo, regex, máscara) sem motivação de negócio?
+- Há casos limite/combinatória sem motivação de negócio?
 - Há valores concretos sobrando (não usados na validação) ou faltando (para tornar verificável)?
 - Há RNF vago (sem métrica/condição) que impede critério verificável?
 
