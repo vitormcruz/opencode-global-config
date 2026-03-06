@@ -226,7 +226,9 @@ Regras para critérios (otimiza automação futura):
 - Cada cenário deve ter: `Cenário:` + `Dado que` (+ `E` 0+) + exatamente 1 `Quando tento` + `Então` (+ `E` 0+).
 - Linguagem de negócio: descreva intenção e resultado, evite UI/implementação (tela, botão, endpoint, classe, etc.).
 - Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
-- Evite redundância: se algo já ficou estabelecido no(s) `Dado que`/`E`, não repita no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Evite redundância de contexto: se o(s) `Dado que`/`E` já fixou(aram) o alvo/identidade sem ambiguidade, não repita em todos os steps.
+- Repetição útil: no `Então`, repetir valores do `Quando` é recomendado quando isso valida persistência/aplicação correta (muda o veredito do teste).
+- Regra prática: repita no `Então` o que valida estado/dados finais; evite repetir apenas contexto já estabelecido.
 - Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades/identificadores possíveis), explicite (nome/id/matrícula) no step necessário.
 - Concisão: cada passo tem só o contexto/ação/resultado indispensável para validar; corte o resto sem perder autoexplicação do cenário completo.
 - Foco em negócio: critérios descrevem a intenção do negócio e o resultado observável. Evite regra de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara), salvo se o humano confirmar que é exigência legal/contratual.

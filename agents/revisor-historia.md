@@ -64,7 +64,8 @@ Se houver critérios (Gherkin):
 - Tornar o `Então` mais verificável (estado/resultado/mensagem) sem mudar a regra.
 - Trocar linguagem técnica por linguagem de negócio, sem alterar o sentido.
 - Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
-- Evitar redundância: se uma referência já foi estabelecida no(s) `Dado que`/`E`, não exigir repetição no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Evitar redundância de contexto: se uma referência/alvo já foi estabelecida no(s) `Dado que`/`E`, não exigir repetição no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Repetição útil: no `Então`, permitir/recomendar repetir valores informados no `Quando` quando isso valida persistência/resultado (não é redundância; é verificação).
 - Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades no contexto), pedir explicitação pontual no step necessário.
 - Clareza sobre padronização: manter palavras-chave do Gherkin, mas permitir variar verbos/expressões no texto do step quando isso melhorar a clareza.
 - Legibilidade: é permitido (e às vezes recomendado) usar múltiplos `Dado que`/`E` e múltiplos `Então`/`E`.
@@ -111,6 +112,8 @@ Checklist rápido para Observações (use quando aplicável; máx 1-3):
 - Há exatamente 1 `Quando` por cenário (uma ação)?
 - Há perfil/persona em critério que não é teste de permissão?
 - As referências em `Quando`/`Então` já foram estabelecidas no(s) `Dado que`/`E` (ou explicitadas por ambiguidade)?
+- O `Então` repete valores do `Quando` apenas quando isso valida persistência/resultado?
+- Não está exigindo repetição de identificador/alvo em todos os steps se o `Dado` já fixou o alvo?
 - Há critério virando validação técnica/regra de produto (tamanho, tipo, regex, máscara) sem motivação de negócio?
 - Há casos limite/combinatória sem motivação de negócio?
 - Há valores concretos sobrando (não usados na validação) ou faltando (para tornar verificável)?
