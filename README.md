@@ -30,6 +30,8 @@ Depois de clonar este repo em qualquer caminho, rode:
 ./scripts/opencode-link
 ```
 
+Se ja existir algo em `~/.config/opencode`, o script pode perguntar se voce quer importar as diferencas para dentro deste repo antes de criar os links (para nao perder customizacoes locais e conseguir versionar depois).
+
 Modo nao-interativo (bom para automatizar):
 
 ```bash
