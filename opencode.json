@@ -1,3 +1,12 @@
 {
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [],
+  "instructions": ["~/.config/opencode/AGENTS.md"],
+  "mcp": {
+    "crawl4ai": {
+      "type": "remote",
+      "url": "http://localhost:11235/mcp/sse",
+      "enabled": true
+    }
+  }
 }

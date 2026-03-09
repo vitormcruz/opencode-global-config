@@ -29,17 +29,3 @@ Depois de clonar este repo em qualquer caminho, rode:
 ```bash
 ./scripts/opencode-link
 ```
-
-Modo nao-interativo (bom para automatizar):
-
-```bash
-./scripts/opencode-link --yes
-```
-
-## Bootstrap (OpenCode / agente)
-
-Quando o usuario pedir algo como "configure este repo", o comando canonico é:
-
-```bash
-bash ./scripts/opencode-link --yes
-```

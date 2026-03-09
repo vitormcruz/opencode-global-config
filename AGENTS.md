@@ -65,3 +65,61 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
   - Implementacao: script `~/.config/opencode/scripts/opencode-svgtoimage`.
   - Saida: JSON com `imagePath` (caminho do PNG) e `markdown` (`![](<caminho_png>)`).
   - Agentes devem usar esta skill sempre que o humano pedir para criar ou converter imagens/diagramas baseados em SVG.
+  - 
+## MCPs
+
+### Sempre use MCP Crawl4AI para pesquisas na web
+
+Quando o usuário pedir para fazer uma pesquisa, busca, ou obter informações da internet (ex: "pesquise sobre X", "busque informações de Y", "qual o preço de Z", "notícias sobre W", "melhores produtos de 2025/2026"), você **DEVE**:
+
+1. **Usar APENAS o MCP Crawl4AI** - Nunca usar websearch, curl, ou outras ferramentas de busca
+2. **Ferramentas disponíveis do Crawl4AI:**
+  - `crawl4ai_md` - Extrai conteúdo de páginas web em formato markdown (MAIS IMPORTANTE)
+  - `crawl4ai_html` - Retorna HTML processado da página
+  - `crawl4ai_screenshot` - Captura screenshot PNG da página
+  - `crawl4ai_pdf` - Gera PDF da página
+  - `crawl4ai_crawl` - Crawl de múltiplas URLs retornando JSON
+  - `crawl4ai_execute_js` - Executa JavaScript na página
+
+## Se o MCP Crawl4AI não estiver disponível
+
+Se ao tentar usar o MCP Crawl4AI você receber erro (container não está rodando ou MCP não configurado), você **DEVE** perguntar ao usuário:
+
+> "O MCP Crawl4AI não está disponível. Deseja que eu instale e configure agora? Isso vai baixar o Docker e configurar o ambiente automaticamente."
+
+Se o usuário confirmar, execute o script de instalação:
+```bash
+bash ~/.config/opencode/scripts/crawl4ai/install-crawl4ai-mcp.sh
+```
+
+## Exemplos de como FAZER
+
+| Prompt do usuário | O que fazer |
+|-----------------|-------------|
+| "Pesquise as melhores canetas 3D de 2025" | Usar `crawl4ai_md` para buscar a página |
+| "Qual o preço do 3Doodler?" | Usar `crawl4ai_md` no site oficial |
+| "Busque notícias sobre IA" | Usar `crawl4ai_md` em sites de notícias |
+| "Qual o preço médio de um notebook?" | Usar `crawl4ai_md` em sites de preços |
+
+## Exemplos de como NÃO FAZER
+
+- **NÃO** use `websearch` - Esta ferramenta está DESATIVADA para pesquisas
+- **NÃO** use `curl` ou `bash` para buscar páginas web
+- **NÃO** responda com conhecimento do modelo quando o usuário pedir pesquisa
+- **NÃO** tente instalar o MCP sem perguntar primeiro ao usuário
+
+## Quando perguntar ao usuário
+
+**NÃO** pergunte se o usuário quer usar pesquisa web - simplesmente USE o MCP Crawl4AI.
+
+A única exceção é quando o MCP **não estiver instalado ou configurado** - neste caso, pergunte se deseja instalar.
+
+## Como usar o Crawl4AI
+
+Para buscar informações sobre um produto, primeiro encontre o site relevante e use `crawl4ai_md` com a URL.
+
+Exemplo de fluxo:
+1. Identificar URL relevante (ex: site oficial do produto)
+2. Usar `crawl4ai_md` com a URL
+3. Analisar o conteúdo retornado em markdown
+4. Responder com as informações obtidas
