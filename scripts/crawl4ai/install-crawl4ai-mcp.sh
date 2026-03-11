@@ -189,7 +189,7 @@ Quando o usuário pedir para fazer uma pesquisa, busca, ou obter informações d
 
 ## Quando perguntar ao usuário
 
-**NÃO** pergunte se o usuário quer usar pesquisa web - simplesmente USE o MCP Crawl4AI.
+**NÃO** pergunte se o usuário quer usar pesquisa web - simplesmente USE o MCP.
 
 A única exceção é se você não tiver certeza se o usuário quer uma pesquisa ou não - neste caso, pode perguntar uma vez, mas depois use sempre o MCP.
 
