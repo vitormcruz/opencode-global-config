@@ -7,6 +7,10 @@
 - Responda de forma curta por padrao.
 - Detalhe apenas quando o humano pedir explicitamente ou quando houver risco de ambiguidade/erro.
 - Prefira listas curtas a textos longos.
+- Textos de resposta com mais de 20 linhas são supeitos. Humanos não gostam de ler muita coisa, então respostas muito longas não são eficientes e deixam de ser lidas
+- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique muito clara a importância dele ou se o humano pedir explicitamente.
+- Ao invés de dar uma resposta muito longa, resuma em até 20 ~30 linhas (no máximo) e pergunte se o humano quer se aprofundar mais em algum outro detalhe ou mesmo que dê uma explicação bem mais detalhada.
+- Você pode criar mais linhas desde que a resposta estreja estruturada mais em bullets e seja menos densa, de modo que a densidade normal de palavras em  20~30 linhas também não seja ultrapassada   
 
 ## Acao
 - Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
@@ -58,16 +62,15 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
       - Use o campo `markdown` diretamente na resposta ao humano para exibir a imagem.
    - Nao tente converter SVG em PNG manualmente; sempre prefira a skill `svg-to-image`.
 
-## Skills disponiveis
+## COMMITS
 
-- svg-to-image
-   - Converte um SVG recebido via stdin em PNG salvo em `/tmp`.
-   - Implementacao: script `~/.config/opencode/scripts/opencode-svgtoimage`.
-   - Saida: JSON com `imagePath` (caminho do PNG) e `markdown` (`![](<caminho_png>)`).
-   - Agentes devem usar esta skill sempre que o humano pedir para criar ou converter imagens/diagramas baseados em SVG.
+- Proponha mensagens de commit sempre que o humano pedir
+- Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre. 
+- NUNCA realize o commit independentemente.
+- SEMPRE pergunte ao humano antes de realizar o commit.
+- SÓ realize o commit quando o humano autorizar
   
 ## MCPs
-
 
 ## Pesquisa Web
 

@@ -1,4 +1,5 @@
 ---
+name: svg-to-image
 description: Converte um SVG em PNG para exibir ao usuario final
 ---
 
