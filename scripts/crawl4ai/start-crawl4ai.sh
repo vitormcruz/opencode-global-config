@@ -4,7 +4,7 @@
 # Script de Controle: Crawl4AI MCP
 # 
 # Usage:
-#   source ~/.config/opencode/start-crawl4ai.sh   # Carrega funções
+#   source ~/.config/opencode/scripts/crawl4ai/start-crawl4ai.sh   # Carrega funções
 #   crawl4ai-start     # Inicia o container
 #   crawl4ai-stop      # Para o container
 #   crawl4ai-restart   # Reinicia o container
@@ -12,7 +12,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 
 CRAWL4AI_NAME="crawl4ai-mcp"
-CRAWL4AI_IMAGE="unclecode/crawl4ai:latest"
+CRAWL4AI_IMAGE="crawl4ai-sanitized:latest"
 CRAWL4AI_PORT="11235"
 
 crawl4ai-start() {

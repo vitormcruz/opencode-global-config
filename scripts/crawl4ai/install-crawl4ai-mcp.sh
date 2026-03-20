@@ -56,6 +56,26 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
+# 2b. Construir imagem sanitizada (corrige descriptions vazias e $ref/$defs)
+# ═══════════════════════════════════════════════════════════════════════════
+print_info "Construindo imagem crawl4ai-sanitized..."
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOCKER_DIR="$SCRIPT_DIR/docker"
+
+if [ -d "$DOCKER_DIR" ] && [ -f "$DOCKER_DIR/Dockerfile" ]; then
+    if docker build -t crawl4ai-sanitized:latest "$DOCKER_DIR"; then
+        print_success "Imagem crawl4ai-sanitized construida"
+    else
+        print_error "Falha ao construir imagem sanitizada"
+        exit 1
+    fi
+else
+    print_error "Diretorio docker nao encontrado: $DOCKER_DIR"
+    exit 1
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
 # 3. Criar diretório de configuração
 # ═══════════════════════════════════════════════════════════════════════════
 print_info "Criando diretório de configuração..."
@@ -69,7 +89,8 @@ print_success "Diretório criado: $CONFIG_DIR"
 # ═══════════════════════════════════════════════════════════════════════════
 print_info "Criando script de start/stop/status..."
 
-cat > "$CONFIG_DIR/start-crawl4ai.sh" << 'SCRIPT_EOF'
+mkdir -p "$CONFIG_DIR/scripts/crawl4ai"
+cat > "$CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh" << 'SCRIPT_EOF'
 #!/bin/bash
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -84,7 +105,7 @@ cat > "$CONFIG_DIR/start-crawl4ai.sh" << 'SCRIPT_EOF'
 # ═══════════════════════════════════════════════════════════════════════════
 
 CRAWL4AI_NAME="crawl4ai-mcp"
-CRAWL4AI_IMAGE="unclecode/crawl4ai:latest"
+CRAWL4AI_IMAGE="crawl4ai-sanitized:latest"
 CRAWL4AI_PORT="11235"
 
 crawl4ai-start() {
