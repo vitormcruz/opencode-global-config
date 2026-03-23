@@ -31,6 +31,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "${script_dir}/.." && pwd -P)"
 
 opencode_dir="${HOME}/.config/opencode"
+bashrc_file="${HOME}/.bashrc"
 timestamp="$(date +%Y%m%d-%H%M%S)"
 backup_dir="${HOME}/.config/opencode-backup/${timestamp}"
 
@@ -76,6 +77,22 @@ current_target() {
 
 ensure_dir() {
   mkdir -p "$1"
+}
+
+bashrc_has_exa() {
+  [ -f "$bashrc_file" ] && grep -Eq '^[[:space:]]*export[[:space:]]+OPENCODE_ENABLE_EXA=1([[:space:]]*|[[:space:]]*#.*)$' "$bashrc_file"
+}
+
+setup_bashrc() {
+  if bashrc_has_exa; then
+    return 0
+  fi
+
+  cat >>"$bashrc_file" <<'EOF'
+
+# opencode-config: websearch (Exa AI)
+export OPENCODE_ENABLE_EXA=1
+EOF
 }
 
 backup_if_exists() {
@@ -185,6 +202,12 @@ plan() {
   status_line "$repo_root/opencode.json" "$opencode_dir/opencode.json"
   status_line "$repo_root/skills" "$opencode_dir/skills"
   status_line "$repo_root/scripts" "$opencode_dir/scripts"
+
+  if bashrc_has_exa; then
+    say "OK    $bashrc_file OPENCODE_ENABLE_EXA=1"
+  else
+    say "ENV   $bashrc_file << OPENCODE_ENABLE_EXA=1"
+  fi
 }
 
 apply() {
@@ -197,6 +220,7 @@ apply() {
   link_one "$repo_root/opencode.json" "$opencode_dir/opencode.json"
   link_one "$repo_root/skills" "$opencode_dir/skills"
   link_one "$repo_root/scripts" "$opencode_dir/scripts"
+  setup_bashrc
 
   say "Pronto."
 }
