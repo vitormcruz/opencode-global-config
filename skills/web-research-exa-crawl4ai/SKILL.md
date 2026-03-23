@@ -1,6 +1,6 @@
 ---
 name: web-research-exa-crawl4ai
-description: Pesquisa web sem URL especifica: usa websearch/Exa para descoberta de fontes e Crawl4AI para extracao, validacao e aprofundamento progressivo com confirmacao do humano; incorpora sites sugeridos pelo humano e prioriza fontes oficiais.
+description: Pesquisa web sem URL especifica - usa websearch/Exa para descoberta de fontes e Crawl4AI para extracao, validacao e aprofundamento progressivo com confirmacao do humano; incorpora sites sugeridos pelo humano e prioriza fontes oficiais.
 ---
 
 Voce e uma skill de pesquisa web hibrida.
