@@ -1,20 +1,15 @@
 ---
 name: prompt-improver
 description: >
-  OBRIGATORIO: Carregar na PRIMEIRA mensagem de qualquer sessao, SEM EXCECOES,
-  independentemente do topico ou intencao do usuario, para perguntar ao usuario
-  (via tool question) se ele deseja melhorar o prompt antes de o agente responder.
-  Nas mensagens seguintes, carregar SOMENTE quando o
-  usuario pedir explicitamente: "melhore este prompt", "reescreva este
-  prompt", "qual framework devo usar", "deixe este prompt mais claro",
-  "me ajude a estruturar este prompt", "esse prompt nao esta funcionando",
-  "como escrevo um bom prompt para X", "improve this prompt",
-  "prompt engineering", ou qualquer pedido explicito de engenharia de
-  prompts. Analisa e melhora prompts usando 27 frameworks baseados em
-  pesquisa, organizados em 7 categorias de intencao (criar, transformar,
-  raciocinar, criticar, recuperar, clarificar, agentico). Recomenda o
-  framework certo com base na intencao, faz perguntas direcionadas e
-  entrega um resultado estruturado e de alta qualidade.
+  OBRIGATORIO na PRIMEIRA mensagem de qualquer sessao, SEM EXCECOES.
+  Tudo que o humano envia ao agente e um prompt — nao existe distincao
+  entre "pergunta", "afirmacao" ou "tarefa". Na primeira mensagem:
+  NAO processe o prompt; pergunte (sim/nao) se o humano quer melhorar
+  o prompt antes. Nas mensagens seguintes: ative SOMENTE quando o
+  humano pedir explicitamente ("melhore este prompt", "reescreva este
+  prompt", "qual framework devo usar", "me ajude a estruturar este
+  prompt", "improve this prompt", "prompt engineering", ou pedido
+  explicito equivalente).
 ---
 
 # Prompt Improver
@@ -24,16 +19,34 @@ frameworks. Ajude o usuario a transformar prompts vagos ou incompletos em
 prompts bem estruturados e eficazes por meio de analise, dialogo e aplicacao
 de frameworks.
 
+## Principio fundamental
+
+Tudo que o humano envia ao agente e um **prompt** — sem excecao.
+Nao existe distincao entre "pergunta", "afirmacao", "tarefa" ou "prompt".
+Qualquer texto enviado pelo humano e um prompt a ser potencialmente melhorado.
+
 ## Quando ativar esta skill
 
-**Na primeira mensagem de uma sessao nova:**
-Use a tool `question` para perguntar ao usuario se ele gostaria de melhorar o prompt antes de voce responder.
-Exemplo de pergunta: "Gostaria de melhorar este prompt com frameworks estruturados antes de eu responder?"
-- Se o usuario responder **sim**: acione o fluxo completo de melhoria de prompt (secao "Processo principal") antes de responder a pergunta original.
-- Se o usuario responder **nao**: responda a pergunta/tarefa original normalmente, sem mencionar o prompt-improver.
+### Na primeira mensagem de uma sessao nova (OBRIGATORIO)
 
-**Depois da primeira mensagem:**
-NAO ative esta skill por conta propria. Ative SOMENTE quando o usuario pedir
+1. **NAO processe o prompt.** Nao responda, nao analise, nao execute nada.
+2. Use a tool `question` com uma pergunta simples de sim/nao:
+   - "Quer melhorar este prompt antes de eu responder?"
+   - Apenas duas opcoes: **Sim** e **Nao**. Sem opcoes extras.
+3. **Se o humano responder "sim":**
+   - Acione o fluxo completo de melhoria (secao "Processo principal").
+   - Apresente o prompt melhorado ao humano.
+   - **Depois, responda ao prompt melhorado** (nao ao original).
+4. **Se o humano responder "nao":**
+   - Responda ao prompt original normalmente, sem mencionar a skill.
+
+> **ATENCAO:** Esta pergunta e SEMPRE obrigatoria na primeira mensagem.
+> Nenhuma outra regra deste documento (incluindo "Quando NAO usar frameworks")
+> pode ser usada para justificar pular esta pergunta.
+
+### Depois da primeira mensagem
+
+NAO ative esta skill por conta propria. Ative SOMENTE quando o humano pedir
 explicitamente, com frases como:
 - "melhore este prompt"
 - "reescreva este prompt"
@@ -42,11 +55,6 @@ explicitamente, com frases como:
 - "este prompt nao esta funcionando"
 - "improve this prompt"
 - ou qualquer pedido explicito de engenharia de prompts
-
-**Nunca ative apos a primeira mensagem em:**
-- conversas de codigo ou tarefas tecnicas normais
-- perguntas factuais ou conceituais
-- quando o usuario nao pediu ajuda com prompt
 
 ---
 
@@ -227,6 +235,11 @@ Mostre o prompt melhorado com:
 ---
 
 ## Quando NAO usar frameworks
+
+> **IMPORTANTE:** Esta secao se aplica SOMENTE apos a skill ter sido acionada,
+> quando voce esta decidindo qual framework aplicar ao prompt. Esta secao
+> NUNCA se aplica a decisao de perguntar sim/nao na primeira mensagem —
+> essa pergunta e SEMPRE obrigatoria, independentemente do conteudo do prompt.
 
 Frameworks adicionam estrutura — mas estrutura tem custo. Pule-os quando:
 
