@@ -1,15 +1,17 @@
 ---
 name: prompt-improver
 description: >
-  OBRIGATORIO na PRIMEIRA mensagem de qualquer sessao, SEM EXCECOES.
-  Tudo que o humano envia ao agente e um prompt — nao existe distincao
-  entre "pergunta", "afirmacao" ou "tarefa". Na primeira mensagem:
-  NAO processe o prompt; pergunte (sim/nao) se o humano quer melhorar
-  o prompt antes. Nas mensagens seguintes: ative SOMENTE quando o
-  humano pedir explicitamente ("melhore este prompt", "reescreva este
-  prompt", "qual framework devo usar", "me ajude a estruturar este
-  prompt", "improve this prompt", "prompt engineering", ou pedido
-  explicito equivalente).
+   OBRIGATÓRIO na PRIMEIRA mensagem de qualquer sessão, SEM EXCEÇÕES.
+   Tudo que o humano envia ao agente é um prompt — não existe distinção
+   entre "pergunta", "afirmação" ou "tarefa". Na primeira mensagem:
+   NÃO processe o prompt; a primeira saída do agente DEVE ser uma chamada
+   para `functions.question` perguntando se o humano quer melhorar
+   o prompt antes. Nas mensagens seguintes: ative SOMENTE quando o
+   humano pedir explicitamente ("melhore este prompt", "reescreva este
+   prompt", "qual framework devo usar", "me ajude a estruturar este
+   prompt", "improve this prompt", "prompt engineering", ou pedido
+   explícito equivalente).
+license: MIT
 ---
 
 # Prompt Improver
@@ -27,22 +29,25 @@ Qualquer texto enviado pelo humano e um prompt a ser potencialmente melhorado.
 
 ## Quando ativar esta skill
 
-### Na primeira mensagem de uma sessao nova (OBRIGATORIO)
+### Na primeira mensagem de uma sessão nova (OBRIGATÓRIO)
 
-1. **NAO processe o prompt.** Nao responda, nao analise, nao execute nada.
-2. Use a tool `question` com uma pergunta simples de sim/nao:
+1. **NÃO processe o prompt.** Não responda, não analise, não execute nada.
+2. A **primeira saída obrigatória** do agente deve ser uma chamada para a tool `functions.question`.
+3. Use **exatamente uma** pergunta simples de sim/não:
    - "Quer melhorar este prompt antes de eu responder?"
-   - Apenas duas opcoes: **Sim** e **Nao**. Sem opcoes extras.
-3. **Se o humano responder "sim":**
+   - Apenas duas opções: **Sim** e **Não**. Sem opções extras.
+4. **Não** escreva essa pergunta em texto livre no chat. Perguntar sem usar `functions.question` conta como descumprimento desta skill.
+5. **Se o humano responder "sim":**
    - Acione o fluxo completo de melhoria (secao "Processo principal").
    - Apresente o prompt melhorado ao humano.
    - **Depois, responda ao prompt melhorado** (nao ao original).
-4. **Se o humano responder "nao":**
+6. **Se o humano responder "nao":**
    - Responda ao prompt original normalmente, sem mencionar a skill.
 
-> **ATENCAO:** Esta pergunta e SEMPRE obrigatoria na primeira mensagem.
+> **ATENÇÃO:** Esta pergunta é SEMPRE obrigatória na primeira mensagem.
 > Nenhuma outra regra deste documento (incluindo "Quando NAO usar frameworks")
 > pode ser usada para justificar pular esta pergunta.
+> Pergunta em texto livre **não substitui** a chamada para `functions.question`.
 
 ### Depois da primeira mensagem
 
@@ -239,7 +244,8 @@ Mostre o prompt melhorado com:
 > **IMPORTANTE:** Esta secao se aplica SOMENTE apos a skill ter sido acionada,
 > quando voce esta decidindo qual framework aplicar ao prompt. Esta secao
 > NUNCA se aplica a decisao de perguntar sim/nao na primeira mensagem —
-> essa pergunta e SEMPRE obrigatoria, independentemente do conteudo do prompt.
+> essa pergunta e SEMPRE obrigatoria, independentemente do conteudo do prompt,
+> e deve ser feita com `functions.question`.
 
 Frameworks adicionam estrutura — mas estrutura tem custo. Pule-os quando:
 
