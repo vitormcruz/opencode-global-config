@@ -12,6 +12,18 @@
   "agent": {
     "plan": {
       "model": "opencode/gpt-5.2"
+    },
+    "aws-analista": {
+      "permission": {
+        "skill": {
+          "aws-*": "allow"
+        }
+      }
+    }
+  },
+  "permission": {
+    "skill": {
+      "aws-*": "deny"
     }
   }
 }
