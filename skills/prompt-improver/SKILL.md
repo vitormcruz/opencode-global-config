@@ -1,16 +1,14 @@
 ---
 name: prompt-improver
 description: >
-   OBRIGATÓRIO na PRIMEIRA mensagem de qualquer sessão, SEM EXCEÇÕES.
-   Tudo que o humano envia ao agente é um prompt — não existe distinção
-   entre "pergunta", "afirmação" ou "tarefa". Na primeira mensagem:
-   NÃO processe o prompt; a primeira saída do agente DEVE ser uma chamada
-   para `functions.question` perguntando se o humano quer melhorar
-   o prompt antes. Nas mensagens seguintes: ative SOMENTE quando o
-   humano pedir explicitamente ("melhore este prompt", "reescreva este
-   prompt", "qual framework devo usar", "me ajude a estruturar este
-   prompt", "improve this prompt", "prompt engineering", ou pedido
-   explícito equivalente).
+   Ative SOMENTE quando o humano pedir explicitamente para melhorar,
+   reescrever, estruturar, revisar ou avaliar um prompt. Exemplos de
+   ativacao explicita: "melhore este prompt", "reescreva este prompt",
+   "me ajude a estruturar este prompt", "qual framework devo usar",
+   "improve this prompt", "melhore:", "prompt engineering". Nunca se
+   autoative por contexto. Depois de gerar o prompt melhorado, mostre-o
+   ao humano, peca revisao e pergunte se ele quer ajusta-lo, aprova-lo
+   ou usa-lo. Nunca aplique ou execute o prompt melhorado automaticamente.
 license: MIT
 ---
 
@@ -29,37 +27,19 @@ Qualquer texto enviado pelo humano e um prompt a ser potencialmente melhorado.
 
 ## Quando ativar esta skill
 
-### Na primeira mensagem de uma sessão nova (OBRIGATÓRIO)
-
-1. **NÃO processe o prompt.** Não responda, não analise, não execute nada.
-2. A **primeira saída obrigatória** do agente deve ser uma chamada para a tool `functions.question`.
-3. Use **exatamente uma** pergunta simples de sim/não:
-   - "Quer melhorar este prompt antes de eu responder?"
-   - Apenas duas opções: **Sim** e **Não**. Sem opções extras.
-4. **Não** escreva essa pergunta em texto livre no chat. Perguntar sem usar `functions.question` conta como descumprimento desta skill.
-5. **Se o humano responder "sim":**
-   - Acione o fluxo completo de melhoria (secao "Processo principal").
-   - Apresente o prompt melhorado ao humano.
-   - **Depois, responda ao prompt melhorado** (nao ao original).
-6. **Se o humano responder "nao":**
-   - Responda ao prompt original normalmente, sem mencionar a skill.
-
-> **ATENÇÃO:** Esta pergunta é SEMPRE obrigatória na primeira mensagem.
-> Nenhuma outra regra deste documento (incluindo "Quando NAO usar frameworks")
-> pode ser usada para justificar pular esta pergunta.
-> Pergunta em texto livre **não substitui** a chamada para `functions.question`.
-
-### Depois da primeira mensagem
-
-NAO ative esta skill por conta propria. Ative SOMENTE quando o humano pedir
-explicitamente, com frases como:
+Ative SOMENTE quando o humano pedir explicitamente, com frases como:
 - "melhore este prompt"
 - "reescreva este prompt"
 - "qual framework devo usar"
 - "me ajude a estruturar isto"
 - "este prompt nao esta funcionando"
 - "improve this prompt"
+- "melhore:"
 - ou qualquer pedido explicito de engenharia de prompts
+
+Nunca se autoative por contexto.
+Se o humano nao pediu engenharia de prompts explicitamente, responda
+normalmente.
 
 ---
 
@@ -212,6 +192,9 @@ Com as informacoes coletadas:
 > templates em `assets/templates/`. Carregue-os via ferramenta Read quando
 > precisar de orientacao detalhada sobre um framework especifico.
 
+> Importante: melhorar um prompt e diferente de usa-lo. Esta skill deve
+> primeiro mostrar a proposta melhorada e aguardar decisao explicita do humano.
+
 ### 6. Apresentar melhorias
 
 Mostre o prompt melhorado com:
@@ -220,12 +203,23 @@ Mostre o prompt melhorado com:
 - Componentes do framework aplicados
 - Justificativa para as melhorias
 
+**Fluxo obrigatorio ao apresentar o prompt melhorado:**
+- Mostre o prompt melhorado por completo, de forma copiavel.
+- Pare apos apresentar o prompt; nao o execute ainda.
+- Pergunte objetivamente se o humano quer:
+  - ajustar o prompt,
+  - aprovar a versao atual, ou
+  - usar o prompt aprovado.
+- So passe a responder/executar o prompt quando houver aprovacao explicita para usa-lo.
+- Se o humano pedir ajustes, revise o prompt e apresente a nova versao antes de qualquer execucao.
+
 ### 7. Iterar
 
 - Confirme se as melhorias estao alinhadas com a intencao
 - Refine com base no feedback
 - Mude ou combine frameworks se necessario
-- Continue ate o usuario estar satisfeito
+- Continue ate o usuario aprovar explicitamente a versao final
+- Depois da aprovacao, ofereca usar o prompt aprovado; nao assuma uso automatico
 
 ---
 
@@ -242,10 +236,7 @@ Mostre o prompt melhorado com:
 ## Quando NAO usar frameworks
 
 > **IMPORTANTE:** Esta secao se aplica SOMENTE apos a skill ter sido acionada,
-> quando voce esta decidindo qual framework aplicar ao prompt. Esta secao
-> NUNCA se aplica a decisao de perguntar sim/nao na primeira mensagem —
-> essa pergunta e SEMPRE obrigatoria, independentemente do conteudo do prompt,
-> e deve ser feita com `functions.question`.
+> quando voce esta decidindo qual framework aplicar ao prompt.
 
 Frameworks adicionam estrutura — mas estrutura tem custo. Pule-os quando:
 
