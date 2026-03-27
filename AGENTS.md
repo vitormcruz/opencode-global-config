@@ -41,6 +41,9 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/AGENTS.md \
 ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/agents \
       ~/.config/opencode/agents
 
+ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/commands \
+      ~/.config/opencode/commands
+
 ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/opencode.json \
       ~/.config/opencode/opencode.json
 

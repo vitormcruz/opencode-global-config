@@ -33,6 +33,7 @@ O `scripts/opencode-link` conecta estes caminhos:
 
 - `~/.config/opencode/AGENTS.md` -> `AGENTS.md`
 - `~/.config/opencode/agents` -> `agents`
+- `~/.config/opencode/commands` -> `commands`
 - `~/.config/opencode/opencode.json` -> `opencode.json`
 - `~/.config/opencode/skills` -> `skills`
 - `~/.config/opencode/scripts` -> `scripts`
@@ -49,6 +50,7 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 - `AGENTS.md`: instrucoes globais carregadas pelo OpenCode
 - `agents/`: agentes customizados
+- `commands/`: comandos customizados do OpenCode
 - `opencode.json`: configuracao principal do OpenCode e MCPs
 - `skills/`: skills no formato canonico `skills/<nome>/SKILL.md`
 - `scripts/`: utilitarios e bootstrap local

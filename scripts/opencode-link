@@ -199,6 +199,7 @@ plan() {
 
   status_line "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
   status_line "$repo_root/agents" "$opencode_dir/agents"
+  status_line "$repo_root/commands" "$opencode_dir/commands"
   status_line "$repo_root/opencode.json" "$opencode_dir/opencode.json"
   status_line "$repo_root/skills" "$opencode_dir/skills"
   status_line "$repo_root/scripts" "$opencode_dir/scripts"
@@ -217,6 +218,7 @@ apply() {
 
   link_one "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
   link_one "$repo_root/agents" "$opencode_dir/agents"
+  link_one "$repo_root/commands" "$opencode_dir/commands"
   link_one "$repo_root/opencode.json" "$opencode_dir/opencode.json"
   link_one "$repo_root/skills" "$opencode_dir/skills"
   link_one "$repo_root/scripts" "$opencode_dir/scripts"

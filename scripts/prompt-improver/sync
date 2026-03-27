@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# sync - Importa/atualiza arquivos do upstream ckelsoe/claude-skill-prompt-architect
+# sync - Importa/atualiza arquivos do upstream ckelsoe/prompt-architect
 # Uso: ./scripts/prompt-improver/sync [--yes] [--check-only]
 set -euo pipefail
 
-UPSTREAM_REPO="https://github.com/ckelsoe/claude-skill-prompt-architect.git"
+UPSTREAM_REPO="https://github.com/ckelsoe/prompt-architect.git"
 UPSTREAM_BRANCH="main"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../skills/prompt-improver" && pwd -P)"
 TMPDIR_BASE="${TMPDIR:-/tmp}"
 TMPDIR_WORK=""
+COUNT_REFS=0
+COUNT_ASSETS=0
+COUNT_PY=0
+UPSTREAM_SKILL_DIR=""
 
 assume_yes=0
 check_only=0
@@ -27,8 +31,9 @@ Opcoes:
 O que faz:
   1. Clona o repo upstream em diretorio temporario
   2. Valida que a licenca ainda e MIT (aborta se nao for)
-  3. Copia references/, assets/, scripts/ e LICENSE
-  4. Registra metadados em UPSTREAM.md
+  3. Localiza a skill upstream compativel (layout v2 ou v3)
+  4. Copia references/, assets/, scripts/ e LICENSE
+  5. Registra metadados em UPSTREAM.md
   5. NAO sobrescreve SKILL.md (versao adaptada)
 EOF
 }
@@ -42,6 +47,21 @@ trap cleanup EXIT
 
 die() { echo "ERRO: $*" >&2; exit 1; }
 info() { echo "[sync] $*"; }
+
+resolve_upstream_skill_dir() {
+  local base_dir="$1"
+
+  for candidate in \
+    "$base_dir/skills/prompt-architect" \
+    "$base_dir/prompt-architect"; do
+    if [ -d "$candidate" ]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
 
 # --- Parse args ---
 while [ $# -gt 0 ]; do
@@ -79,6 +99,8 @@ GIT_SSL_NO_VERIFY=1 git clone --depth=1 --branch "$UPSTREAM_BRANCH" "$UPSTREAM_R
   2>&1 | sed 's/^/  [git] /'
 
 UPSTREAM_DIR="$TMPDIR_WORK/upstream"
+UPSTREAM_SKILL_DIR="$(resolve_upstream_skill_dir "$UPSTREAM_DIR")" || \
+  die "Nao encontrei o diretorio da skill upstream. Layout nao reconhecido."
 
 # --- Captura metadados ---
 UPSTREAM_COMMIT=$(git -C "$UPSTREAM_DIR" rev-parse HEAD)
@@ -90,6 +112,7 @@ if [ -f "$UPSTREAM_DIR/package.json" ]; then
 fi
 
 info "Upstream: commit $UPSTREAM_COMMIT_SHORT | versao $UPSTREAM_VERSION | $UPSTREAM_DATE"
+info "Skill upstream localizada em $UPSTREAM_SKILL_DIR"
 
 # --- Valida licenca ---
 info "Validando licenca ..."
@@ -121,7 +144,7 @@ fi
 info "Copiando arquivos do upstream ..."
 
 # references/frameworks/
-SRC_REFS="$UPSTREAM_DIR/prompt-architect/references"
+SRC_REFS="$UPSTREAM_SKILL_DIR/references"
 DST_REFS="$SKILL_DIR/references"
 if [ -d "$SRC_REFS" ]; then
   rm -rf "$DST_REFS"
@@ -133,7 +156,7 @@ else
 fi
 
 # assets/templates/
-SRC_ASSETS="$UPSTREAM_DIR/prompt-architect/assets"
+SRC_ASSETS="$UPSTREAM_SKILL_DIR/assets"
 DST_ASSETS="$SKILL_DIR/assets"
 if [ -d "$SRC_ASSETS" ]; then
   rm -rf "$DST_ASSETS"
@@ -145,7 +168,7 @@ else
 fi
 
 # scripts Python
-SRC_PY="$UPSTREAM_DIR/prompt-architect/scripts"
+SRC_PY="$UPSTREAM_SKILL_DIR/scripts"
 DST_PY="$SKILL_DIR/scripts"
 if [ -d "$SRC_PY" ]; then
   rm -rf "$DST_PY"
@@ -163,10 +186,11 @@ info "  LICENSE copiado"
 # --- Atualiza UPSTREAM.md ---
 info "Atualizando UPSTREAM.md ..."
 SYNC_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
-cat > "$SKILL_DIR/UPSTREAM.md" <<EOF
+UPSTREAM_MD_TMP="$SKILL_DIR/UPSTREAM.md.tmp"
+cat > "$UPSTREAM_MD_TMP" <<EOF
 # Metadados do Upstream
 
-repositorio: https://github.com/ckelsoe/claude-skill-prompt-architect
+repositorio: https://github.com/ckelsoe/prompt-architect
 branch: $UPSTREAM_BRANCH
 versao: $UPSTREAM_VERSION
 commit: $UPSTREAM_COMMIT
@@ -196,9 +220,10 @@ Para verificar se ha atualizacoes sem sincronizar:
 
 ## Licenca
 
-MIT License - Copyright (c) 2025 prompt-architect contributors
+MIT License - Copyright (c) 2025-2026 prompt-architect contributors
 Autoria original: Charles Kelsoe <charles@kelsoe.com>
 EOF
+mv "$UPSTREAM_MD_TMP" "$SKILL_DIR/UPSTREAM.md"
 
 info "Sincronizacao concluida."
 info "  Upstream: $UPSTREAM_VERSION @ $UPSTREAM_COMMIT_SHORT"
