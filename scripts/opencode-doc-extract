@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+# opencode-doc-extract
+# Extrai conteudo de documentos (pdf, docx, pptx, xlsx, html, imagens) via Docling.
+# Entrada: JSON via stdin
+# Saida:   1 linha JSON via stdout
+set -euo pipefail
+
+# --------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------
+die_json() {
+  local msg="$1"
+  local hint="${2:-}"
+  printf '{"ok":false,"engine":"docling","artifacts":[],"stdout":"","stderr":"%s","hint":"%s"}\n' \
+    "$(printf '%s' "$msg" | sed 's/"/\\"/g')" \
+    "$(printf '%s' "$hint" | sed 's/"/\\"/g')"
+  exit 0
+}
+
+DOCLING_INSTALL_HINT="Recomendado: pipx install docling | Se pipx nao instalado: pip install --user pipx && pipx ensurepath | Ubuntu/WSL: sudo apt-get install -y pipx && pipx install docling | Docs: https://github.com/docling-project/docling"
+
+# --------------------------------------------------------------------------
+# Verificar docling
+# --------------------------------------------------------------------------
+if ! command -v docling >/dev/null 2>&1; then
+  die_json "docling nao encontrado no PATH" "$DOCLING_INSTALL_HINT"
+fi
+
+# --------------------------------------------------------------------------
+# Ler JSON do stdin
+# --------------------------------------------------------------------------
+input="$(cat)"
+
+read_json() {
+  local key="$1"
+  printf '%s' "$input" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+v=d.get('$key')
+if v is None:
+    sys.exit(0)
+if isinstance(v,(dict,list)):
+    print(json.dumps(v))
+else:
+    print(v)
+" 2>/dev/null || true
+}
+
+source_file="$(read_json source)"
+to="$(read_json to)"
+output_dir="$(read_json outputDir)"
+ocr="$(read_json ocr)"
+tables="$(read_json tables)"
+image_export_mode="$(read_json imageExportMode)"
+extra_args_json="$(read_json extraArgs)"
+
+# --------------------------------------------------------------------------
+# Validacoes basicas
+# --------------------------------------------------------------------------
+if [ -z "$source_file" ]; then
+  die_json "Campo 'source' e obrigatorio"
+fi
+
+# Aceita URL ou arquivo local
+is_url=0
+case "$source_file" in
+  http://*|https://*) is_url=1 ;;
+esac
+
+if [ "$is_url" -eq 0 ] && [ ! -f "$source_file" ]; then
+  die_json "Arquivo fonte nao encontrado: $source_file"
+fi
+
+# Formato de saida
+if [ -z "$to" ]; then
+  to="md"
+fi
+
+case "$to" in
+  md|markdown|json|text|txt|html) ;;
+  *) die_json "Formato 'to' invalido: '$to'. Use: md, json, text ou html" ;;
+esac
+
+# Normalizar 'text' -> 'text' (docling usa 'text')
+if [ "$to" = "txt" ]; then
+  to="text"
+fi
+
+# --------------------------------------------------------------------------
+# Resolver outputDir
+# --------------------------------------------------------------------------
+if [ -z "$output_dir" ]; then
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  output_dir="./out/doc-extract/${timestamp}"
+fi
+mkdir -p "$output_dir"
+
+# --------------------------------------------------------------------------
+# Montar argumentos do docling
+# --------------------------------------------------------------------------
+args=()
+
+# formato de saida
+args+=("--to" "$to")
+
+# diretorio de saida
+args+=("--output" "$output_dir")
+
+# OCR (default: habilitado)
+if [ "$ocr" = "false" ] || [ "$ocr" = "False" ] || [ "$ocr" = "0" ]; then
+  args+=("--no-ocr")
+fi
+
+# Tabelas (default: habilitado)
+if [ "$tables" = "false" ] || [ "$tables" = "False" ] || [ "$tables" = "0" ]; then
+  args+=("--no-table-structure")
+fi
+
+# Modo de exportacao de imagens
+if [ -n "$image_export_mode" ]; then
+  args+=("--image-export-mode" "$image_export_mode")
+fi
+
+# Extra args
+if [ -n "$extra_args_json" ]; then
+  while IFS= read -r arg; do
+    args+=("$arg")
+  done < <(python3 -c "
+import json,sys
+for a in json.loads(sys.argv[1]):
+    print(a)
+" "$extra_args_json" 2>/dev/null || true)
+fi
+
+# arquivo/url fonte (sempre por ultimo)
+args+=("$source_file")
+
+# --------------------------------------------------------------------------
+# Executar docling
+# --------------------------------------------------------------------------
+stdout_file="$(mktemp)"
+stderr_file="$(mktemp)"
+
+trap 'rm -f "$stdout_file" "$stderr_file"' EXIT
+
+docling_ok=0
+docling "${args[@]}" >"$stdout_file" 2>"$stderr_file" && docling_ok=1 || docling_ok=0
+
+stdout_content="$(cat "$stdout_file")"
+stderr_content="$(cat "$stderr_file")"
+
+if [ "$docling_ok" -eq 0 ]; then
+  printf '{"ok":false,"engine":"docling","artifacts":[],"stdout":%s,"stderr":%s,"hint":""}\n' \
+    "$(python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$stdout_content")" \
+    "$(python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$stderr_content")"
+  exit 0
+fi
+
+# --------------------------------------------------------------------------
+# Coletar artifacts gerados
+# --------------------------------------------------------------------------
+# Docling gera arquivos no outputDir com extensao correspondente ao formato
+ext="$to"
+if [ "$to" = "text" ]; then
+  ext="txt"
+elif [ "$to" = "md" ] || [ "$to" = "markdown" ]; then
+  ext="md"
+fi
+
+artifacts_json="$(python3 -c "
+import os, json, sys
+
+output_dir = sys.argv[1]
+ext = sys.argv[2]
+
+files = []
+if os.path.isdir(output_dir):
+    for f in sorted(os.listdir(output_dir)):
+        if f.endswith('.' + ext):
+            files.append(os.path.join(output_dir, f))
+
+print(json.dumps(files))
+" "$output_dir" "$ext" 2>/dev/null || echo "[]")"
+
+# --------------------------------------------------------------------------
+# Saida de sucesso
+# --------------------------------------------------------------------------
+printf '{"ok":true,"engine":"docling","artifacts":%s,"stdout":%s,"stderr":%s,"hint":""}\n' \
+  "$artifacts_json" \
+  "$(python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$stdout_content")" \
+  "$(python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$stderr_content")"

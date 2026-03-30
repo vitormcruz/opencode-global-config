@@ -224,6 +224,19 @@ apply() {
   link_one "$repo_root/scripts" "$opencode_dir/scripts"
   setup_bashrc
 
+  say ""
+  say "--- Verificando dependencias das skills ---"
+  local install_deps_script="${script_dir}/opencode-install-deps"
+  if [ -x "$install_deps_script" ]; then
+    if [ "$assume_yes" -eq 1 ]; then
+      "$install_deps_script" --yes
+    else
+      "$install_deps_script"
+    fi
+  else
+    say "AVISO: $install_deps_script nao encontrado ou nao executavel."
+  fi
+
   say "Pronto."
 }
 

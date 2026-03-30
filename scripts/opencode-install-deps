@@ -1,0 +1,271 @@
+#!/usr/bin/env bash
+# opencode-install-deps
+# Instala/verifica dependencias das skills do opencode-config.
+#
+# - Dependencias user-space (pipx, docling): instala automaticamente se possivel.
+# - Dependencias que precisam de sudo (pandoc, ocrmypdf etc.): sugere o comando.
+#
+# Uso: ./scripts/opencode-install-deps [--yes] [--quiet]
+
+set -euo pipefail
+
+assume_yes=0
+quiet=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --yes)   assume_yes=1 ;;
+    --quiet) quiet=1 ;;
+    --help|-h)
+      cat <<'EOF'
+opencode-install-deps
+
+Verifica e instala dependencias das skills do opencode-config.
+
+Uso:
+  ./scripts/opencode-install-deps [--yes] [--quiet]
+
+Opcoes:
+  --yes      Instala sem pedir confirmacao
+  --quiet    Suprime saida de progresso
+  --help     Mostra esta ajuda
+EOF
+      exit 0
+      ;;
+    *) echo "Opcao desconhecida: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+say()  { [ "$quiet" -eq 0 ] && printf '%s\n' "$*" || true; }
+warn() { printf '%s\n' "$*" >&2; }
+
+# --------------------------------------------------------------------------
+# Detectar OS
+# --------------------------------------------------------------------------
+detect_os() {
+  if [ -f /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "wsl"
+  elif [ "$(uname)" = "Darwin" ]; then
+    echo "macos"
+  elif [ "$(uname)" = "Linux" ]; then
+    echo "linux"
+  else
+    echo "unknown"
+  fi
+}
+
+OS="$(detect_os)"
+
+# --------------------------------------------------------------------------
+# Helpers de status
+# --------------------------------------------------------------------------
+status_ok()      { say "  OK       $*"; }
+status_installed(){ say "  INSTALLED $*"; }
+status_missing() { say "  MISSING   $*"; }
+status_hint()    { say "            $*"; }
+
+# --------------------------------------------------------------------------
+# Verificar se comando existe no PATH
+# --------------------------------------------------------------------------
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+# --------------------------------------------------------------------------
+# Instalar pipx em user-space (sem sudo)
+# --------------------------------------------------------------------------
+install_pipx_userspace() {
+  if has_cmd pip3; then
+    say "  -> Tentando: pip3 install --user pipx"
+    pip3 install --user pipx --quiet && return 0
+  fi
+  if has_cmd pip; then
+    say "  -> Tentando: pip install --user pipx"
+    pip install --user pipx --quiet && return 0
+  fi
+  return 1
+}
+
+# --------------------------------------------------------------------------
+# Instalar docling via pipx
+# --------------------------------------------------------------------------
+install_docling_pipx() {
+  say "  -> Instalando docling via pipx..."
+  pipx install docling 2>&1 | while IFS= read -r line; do
+    say "     $line"
+  done
+  # Garantir que pipx ensurepath foi executado
+  pipx ensurepath 2>/dev/null || true
+}
+
+# --------------------------------------------------------------------------
+# Confirmar acao (respeita --yes)
+# --------------------------------------------------------------------------
+confirm_action() {
+  local msg="$1"
+  if [ "$assume_yes" -eq 1 ]; then return 0; fi
+  if ! [ -t 0 ] || ! [ -t 1 ]; then return 0; fi
+  printf '%s [y/N] ' "$msg"
+  read -r ans || true
+  case "$ans" in y|Y|yes|YES) return 0 ;; esac
+  return 1
+}
+
+# --------------------------------------------------------------------------
+# Lista de pacotes sudo necessarios
+# --------------------------------------------------------------------------
+SUDO_PKGS=()
+
+need_sudo_pkg() {
+  SUDO_PKGS+=("$1")
+}
+
+# --------------------------------------------------------------------------
+# Main: verificar cada dependencia
+# --------------------------------------------------------------------------
+say ""
+say "=== opencode-install-deps ==="
+say "OS detectado: $OS"
+say ""
+say "--- Verificando dependencias ---"
+say ""
+
+# --- pandoc ---
+say "[pandoc] Skill: md-export"
+if has_cmd pandoc; then
+  status_ok "pandoc $(pandoc --version 2>/dev/null | head -1 | awk '{print $2}')"
+else
+  status_missing "pandoc"
+  case "$OS" in
+    wsl|linux)
+      status_hint "Instalar: sudo apt-get install -y pandoc"
+      need_sudo_pkg "pandoc"
+      ;;
+    macos)
+      status_hint "Instalar: brew install pandoc"
+      ;;
+    *)
+      status_hint "Instalar: https://pandoc.org/installing.html"
+      ;;
+  esac
+fi
+say ""
+
+# --- pipx ---
+say "[pipx] Necessario para instalar docling"
+if has_cmd pipx; then
+  status_ok "pipx $(pipx --version 2>/dev/null | head -1)"
+else
+  status_missing "pipx"
+  case "$OS" in
+    wsl|linux)
+      # Tentar instalar via pip --user primeiro
+      if install_pipx_userspace 2>/dev/null; then
+        # Recarregar PATH
+        export PATH="$HOME/.local/bin:$PATH"
+        if has_cmd pipx; then
+          status_installed "pipx (via pip --user)"
+        else
+          status_missing "pipx (pip install ok mas nao encontrado no PATH)"
+          status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+          status_hint "Ou: sudo apt-get install -y pipx"
+          need_sudo_pkg "pipx"
+        fi
+      else
+        status_hint "Instalar: sudo apt-get install -y pipx"
+        status_hint "Alternativa: pip3 install --user pipx"
+        need_sudo_pkg "pipx"
+      fi
+      ;;
+    macos)
+      status_hint "Instalar: brew install pipx"
+      ;;
+    *)
+      status_hint "Instalar: pip3 install --user pipx"
+      ;;
+  esac
+fi
+say ""
+
+# --- docling ---
+say "[docling] Skill: doc-extract"
+if has_cmd docling; then
+  status_ok "docling $(docling --version 2>/dev/null | head -1 | awk '{print $NF}' || echo '(versao desconhecida)')"
+else
+  status_missing "docling"
+  if has_cmd pipx; then
+    if confirm_action "  Instalar docling via pipx agora?"; then
+      install_docling_pipx
+      export PATH="$HOME/.local/bin:$PATH"
+      if has_cmd docling; then
+        status_installed "docling"
+      else
+        status_missing "docling instalado mas nao encontrado no PATH"
+        status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+        status_hint "Ou adicione ao ~/.bashrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
+      fi
+    else
+      status_hint "Para instalar depois: pipx install docling"
+    fi
+  else
+    status_hint "Primeiro instale pipx, depois: pipx install docling"
+  fi
+fi
+say ""
+
+# --- OCR (opcional, melhora extracao de PDFs escaneados) ---
+say "[ocrmypdf + tesseract + ghostscript + qpdf] Opcional: OCR de PDFs"
+ocr_missing=()
+has_cmd ocrmypdf   || ocr_missing+=("ocrmypdf")
+has_cmd tesseract  || ocr_missing+=("tesseract-ocr")
+has_cmd gs         || ocr_missing+=("ghostscript")
+has_cmd qpdf       || ocr_missing+=("qpdf")
+
+if [ ${#ocr_missing[@]} -eq 0 ]; then
+  status_ok "ocrmypdf, tesseract, ghostscript, qpdf"
+else
+  for pkg in "${ocr_missing[@]}"; do
+    status_missing "$pkg"
+  done
+  case "$OS" in
+    wsl|linux)
+      status_hint "Instalar: sudo apt-get install -y ${ocr_missing[*]}"
+      for pkg in "${ocr_missing[@]}"; do
+        need_sudo_pkg "$pkg"
+      done
+      ;;
+    macos)
+      status_hint "Instalar: brew install ${ocr_missing[*]}"
+      ;;
+    *)
+      status_hint "Consulte: https://ocrmypdf.readthedocs.io/en/latest/installation.html"
+      ;;
+  esac
+fi
+say ""
+
+# --------------------------------------------------------------------------
+# Sumario de comandos sudo necessarios
+# --------------------------------------------------------------------------
+if [ ${#SUDO_PKGS[@]} -gt 0 ]; then
+  say "--- Pacotes que precisam de sudo ---"
+  say ""
+  case "$OS" in
+    wsl|linux)
+      say "Execute manualmente:"
+      say ""
+      say "  sudo apt-get update && sudo apt-get install -y ${SUDO_PKGS[*]}"
+      say ""
+      ;;
+    macos)
+      say "Execute manualmente:"
+      say ""
+      say "  brew install ${SUDO_PKGS[*]}"
+      say ""
+      ;;
+  esac
+else
+  say "--- Tudo verificado, nenhum comando sudo necessario ---"
+  say ""
+fi
+
+say "=== Concluido ==="
