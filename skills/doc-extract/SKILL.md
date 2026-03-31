@@ -3,8 +3,10 @@ name: doc-extract
 description: >
   Extrai conteudo de documentos (PDF, DOCX, PPTX, XLSX, HTML, imagens e outros)
   convertendo para Markdown, JSON, texto ou HTML usando Docling.
-  Use quando o humano pedir para ler, analisar, resumir ou extrair dados
-  de um arquivo que nao e Markdown.
+  Use quando: (1) o humano pedir para ler, analisar, resumir ou extrair dados
+  de um arquivo que nao e Markdown; (2) uma URL apontar para arquivo binario
+  (.pdf, .docx, .pptx, .xlsx, .png, .jpg etc.) — crawl4ai falha nesses casos
+  com ERR_FAILED e doc-extract e o substituto correto.
 ---
 
 Voce e uma skill de extracao de conteudo de documentos.
@@ -20,6 +22,9 @@ para `md`, `json`, `text` ou `html`, facilitando que a IA leia e processe o cont
 - Humano quer converter um documento para Markdown para processamento posterior
 - Humano quer extrair tabelas ou texto estruturado de um arquivo
 - Humano quer que a IA "entenda" o conteudo de um documento existente
+- **URL aponta para PDF, DOCX, PPTX, XLSX ou imagem** — `crawl4ai` falha com `ERR_FAILED` em arquivos
+  binarios; use `doc-extract` sempre que a URL terminar em `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.png`,
+  `.jpg`, `.jpeg`, `.tiff`, `.bmp` ou `.gif`
 
 ## Quando nao usar
 
@@ -66,8 +71,18 @@ Script: `~/.config/opencode/scripts/opencode-doc-extract`
 1. `outputDir` default: `./out/doc-extract/<timestamp>/`
 2. Se `docling` nao estiver no PATH, retornar `ok: false` com `hint` de instalacao.
 3. Nao tentar instalar dependencias; apenas informar.
-4. Para PDFs escaneados (sem texto), OCR e ativado por padrao; desative com `"ocr": false` se o PDF ja tiver texto selecionavel.
+4. Para PDFs escaneados (sem texto), OCR e ativado por padrao; desative com `"ocr": false` se o PDF
+   ja tiver texto selecionavel.
 5. O agente deve ler o(s) arquivo(s) gerados em `artifacts` para obter o conteudo extraido.
+6. **Imagens base64 no output**: o Docling inclui imagens como `![Image](data:image/...base64...)`.
+   Essas linhas sao longas e poluem o contexto. Ao ler o `.md` gerado, ignore linhas que comecem com
+   `![Image](data:image/` — o conteudo util (texto, tabelas, headings) esta nas demais linhas.
+   Para evitar o problema na origem, prefira `"imageExportMode": "placeholder"` (ja e o default).
+7. **Arquivos grandes**: use `Read` com `offset` e `limit` para navegar o `.md` gerado em secoes
+   (ex: `offset=1, limit=100`, depois `offset=101, limit=100`, etc.).
+   Para extrair uma informacao especifica sem ler tudo, delegue ao agente `Task/explore` com uma
+   pergunta objetiva — ele usa `Read offset+limit` e `Grep` internamente e devolve so o trecho
+   relevante, economizando contexto.
 
 ## Exemplos de uso pelo agente
 

@@ -1,6 +1,11 @@
 ---
 name: web-research-exa-crawl4ai
-description: Pesquisa web sem URL especifica - usa websearch/Exa para descoberta de fontes e Crawl4AI para extracao, validacao e aprofundamento progressivo com confirmacao do humano; incorpora sites sugeridos pelo humano e prioriza fontes oficiais.
+description: >
+  Pesquisa web sem URL especifica - usa websearch/Exa para descoberta de fontes
+  e Crawl4AI para extracao, validacao e aprofundamento progressivo com confirmacao
+  do humano; incorpora sites sugeridos pelo humano e prioriza fontes oficiais.
+  Quando uma URL descoberta apontar para documento binario (PDF, DOCX, XLSX,
+  imagem etc.), delegar extracao para a skill doc-extract em vez de crawl4ai.
 ---
 
 Voce e uma skill de pesquisa web hibrida.
@@ -48,6 +53,9 @@ Use esta skill quando o humano pedir:
    - priorizar fonte oficial, fontes primarias e fontes sugeridas pelo humano
 3. Extracao:
    - usar `crawl4ai_md` nas URLs selecionadas
+   - **ATENCAO**: se a URL terminar em `.pdf`, `.docx`, `.pptx`, `.xlsx` ou for uma imagem
+     (`.png`, `.jpg`, `.jpeg`, `.tiff`, `.bmp`, `.gif`), `crawl4ai` falha com `ERR_FAILED`.
+     Nestes casos, use a skill `doc-extract` para baixar e extrair o conteudo do arquivo.
    - se necessario, usar `crawl4ai_execute_js`
    - usar `crawl4ai_html` apenas em caso de perda de estrutura relevante
 4. Validacao:
@@ -100,4 +108,9 @@ Use um texto neste formato:
 - Nao faca crawl de URLs claramente redundantes ou de baixa qualidade se ja houver cobertura suficiente.
 
 ## Fallback
-Se `websearch` nao estiver disponivel, informe isso brevemente e execute a melhor estrategia possivel apenas com `Crawl4AI`, deixando claro que a descoberta de fontes pode ficar menos eficiente.
+Se `websearch` nao estiver disponivel, informe isso brevemente e execute a melhor estrategia possivel
+apenas com `Crawl4AI`, deixando claro que a descoberta de fontes pode ficar menos eficiente.
+
+**Fallback para documentos binarios**: `crawl4ai` nao consegue abrir arquivos PDF, Office ou imagens
+diretamente (retorna `ERR_FAILED`). Sempre que uma URL selecionada for um documento binario, use a
+skill `doc-extract` como substituto — ela baixa o arquivo e extrai texto/tabelas via Docling.
