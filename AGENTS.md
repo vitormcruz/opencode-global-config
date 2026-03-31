@@ -3,19 +3,6 @@
 ## Idioma
 - PT-BR (ASCII ok).
 
-## Concisao
-- Responda de forma curta por padrao.
-- Detalhe apenas quando o humano pedir explicitamente ou quando houver risco de ambiguidade/erro.
-- Prefira listas curtas a textos longos.
-- Textos de resposta com mais de 20 linhas são supeitos. Humanos não gostam de ler muita coisa, então respostas muito longas não são eficientes e deixam de ser lidas
-- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique muito clara a importância dele ou se o humano pedir explicitamente.
-- Ao invés de dar uma resposta muito longa, resuma em até 20 ~30 linhas (no máximo) e pergunte se o humano quer se aprofundar mais em algum outro detalhe ou mesmo que dê uma explicação bem mais detalhada.
-- Você pode criar mais linhas desde que a resposta estreja estruturada mais em bullets e seja menos densa, de modo que a densidade normal de palavras em  20~30 linhas também não seja ultrapassada   
-
-## Acao
-- Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
-- Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
-
 ### Atalho: "configure este repo"
 
 - Se o humano pedir explicitamente "configure este repo" (ou equivalente), isso conta como confirmacao para executar o bootstrap.
@@ -56,6 +43,30 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 
 - Assim voce mantem estas configs versionadas em um repo Git separado (`opencode-config`), mas o OpenCode continua lendo tudo a partir de `~/.config/opencode`.
 
+## Concisao
+- Responda de forma curta por padrao.
+- Detalhe apenas quando o humano pedir explicitamente ou quando houver risco de ambiguidade/erro.
+- Prefira listas curtas a textos longos.
+- Textos de resposta com mais de 20 linhas são supeitos. Humanos não gostam de ler muita coisa, então respostas muito
+  longas não são eficientes e deixam de ser lidas
+- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique muito clara a importância dele ou se o humano
+- pedir explicitamente.
+- Ao invés de dar uma resposta muito longa, resuma em até 20 ~30 linhas (no máximo) e pergunte se o humano quer se
+- aprofundar mais em algum outro detalhe ou mesmo que dê uma explicação bem mais detalhada.
+- Você pode criar mais linhas desde que a resposta estreja estruturada mais em bullets e seja menos densa, de modo que
+- a densidade normal de palavras em 20~30 linhas também não seja ultrapassada
+
+# Geração de arquivos MD
+- Nunca ultrapasse mais de 120 colunas, de texto, faça word-wrap para garantir essa regra
+
+# Exibição de Texto copie e cola
+- Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e colar, faça isso em um bloco de código 
+único para facilitar a cópia.
+
+## Acao
+- Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
+- Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
+
 ## Imagens e diagramas
 
 - Quando o humano pedir para criar, visualizar ou converter imagens, diagramas, fluxogramas ou similares:
@@ -72,5 +83,9 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 - NUNCA realize o commit independentemente.
 - SEMPRE pergunte ao humano antes de realizar o commit.
 - SÓ realize o commit quando o humano autorizar
-  
-## MCPs
+
+# Criação de Skills
+- Ao criar novas skills, para serem aceionadas corretamente, as descrições das skills precisam possuir todas as 
+instruções de ativação, deixar uma ativação no corpo da skill não a faz ser atiavada.
+- Ao criar novas skills, **não descreva** formas de ativação da skill em seu corpo sem que isso tenha sido descrito 
+nas descrições
