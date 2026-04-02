@@ -2,6 +2,7 @@
 
 ## Idioma
 - PT-BR (ASCII ok).
+- REGRA IMPORTANTE: sempre use acentuação quando estiver escrevendo texto em PT-BR.
 
 ### Atalho: "configure este repo"
 
@@ -79,7 +80,9 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 ## COMMITS
 
 - Proponha mensagens de commit sempre que o humano pedir
-- Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre. 
+- Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre.
+- O humano sempre que validar tudo antes do commit, então **não** realize o commit antes do humano validar e dar ok.
+- Mostre a mensagem de commit, mas SEMPRE espere confirmação do humano para realizar o commit
 - NUNCA realize o commit independentemente.
 - SEMPRE pergunte ao humano antes de realizar o commit.
 - SÓ realize o commit quando o humano autorizar
