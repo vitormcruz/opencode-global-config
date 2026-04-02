@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@slkiser/opencode-quota"] //, "chat-mermaid@latest"],
+  "plugin": ["@slkiser/opencode-quota"], //, "chat-mermaid@latest"],
   //"instructions": ["~/.config/opencode/AGENTS.md"],
   "mcp": {
     "crawl4ai": {
