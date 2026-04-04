@@ -271,6 +271,11 @@ apply() {
     say "AVISO: $install_deps_script nao encontrado ou nao executavel."
   fi
 
+  if [ -f "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh" ]; then
+    say "Executando install-crawl4ai-mcp.sh..."
+    bash "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh"
+  fi
+
   say "Pronto."
 }
 
