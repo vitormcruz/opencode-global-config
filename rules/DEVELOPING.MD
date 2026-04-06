@@ -17,11 +17,24 @@ Para iniciar um fluxo, o humano vai dizer algo como: "desenvolver", "iniciar des
 
 ## Fluxo de Desenvolvimento
 
-- Para iniciar o Fluxo de Desenvolvimento, você espera que exista algum **insumo da funcionalidade**, como história de 
-usuário com critérios de aceitação e regras de negócio. Se não te passarem isso no início do fluxo, você deve perguntar qual 
-insumo deve utilizar, seja arquivo ou um texto corrido.
+As Etapas do fluxo de desenvolvimento são as seguintes:
+
+1. Planejamento
+2. Execução
+3. Revisão 
+4. Testes
+
+Para iniciar o humano vai pedir para desenvolver uma funcionalidade, ou iniciar o desenvolvimento. Para iniciar o 
+Fluxo de Desenvolvimento, você espera que exista algum **insumo da funcionalidade**, como história de usuário com 
+critérios de aceitação e regras de negócio. 
+- Se não te passarem isso no início do fluxo, você deve perguntar qual insumo deve utilizar, seja arquivo ou um texto corrido. 
 - Se não existir insumo, sugira o uso do @analista para a criação de histórias e critérios de aceitação
-- A primeira coisa é utilizar o insumo da funcionalidade para pensar, sem construir nada, sobre o que deve ser feito e montar um plano:
+- Identifique no repositório se existem regras de documentação de requisitos, planejamento etc. Siga as regras definidas,
+  se não existirem, sugira ao humano a criação de documentação de critérios de aceitação e ADR, mais atualização dos 
+  Agents.md conforme mais coisas são implementadas
+
+Com o insumo informado, inicia-se a etapa de **Planejamento**:
+- Utilize o insumo da funcionalidade para pensar, sem construir nada, sobre o que deve ser feito e montar um plano:
   - Você só pode fazer esse planejamento em modo planning.
   - Não inicie o planejamento sem estar no modo planning, insista para o humano trocar de modo.
   - Avalie como o sistema se encontra hoje e como adaptar a nova funcionalidade, considerando as seguintes frentes de conhecimento:
@@ -32,7 +45,7 @@ insumo deve utilizar, seja arquivo ou um texto corrido.
     - Modelagem de segurança (usando o @anlista_cyber) - gera um **Plano de Segurança**
     - Testes **manuais** - gera um **Plano de Testes**
     - Plano de codificação, backend e frontend, com TDD. Testes automatizados entram aqui: quais devem ser criados? em 
-    - qual proporção? Vale apena criar testes end-to-end nessa funcionalidade? - gera um **Plano de Codificação**  
+      qual proporção? Vale apena criar testes end-to-end nessa funcionalidade? - gera um **Plano de Codificação**  
     - Documentação - gera um **Plano de Documentação**
     - Execução de testes - gera um **Plano execução de testes**
   - Se envolver a criação ou modificação do modelo de dados conceitual, chame o @analista-bd passando o insumo para ele
@@ -48,22 +61,40 @@ insumo deve utilizar, seja arquivo ou um texto corrido.
   - Nos planos, leve em considerações mudanças nas decisões de arquitetura, sugira registro em algum documento de arquitetura,
     de preferência uma ADR.
   - Se precisar, faça pesquisas na internet para incrementar o planejamento, caso haja dúvidas.
-- Depois de pensar e analisar a nova funcionalidade, junte todos os planos em um plano de execução divido em etapas, 
-- na mesma ordem das frentes de conhecimento 
+- Depois de pensar e analisar a nova funcionalidade, junte todos os planos em um plano de execução divido em etapas.
 - Sugira escrever esse plano em um arquivo e commitar, e seguir a validação a partir deste arquivo escrito
-- Uma vez estando tudo validado, use esse arquivo commitado de planejamento para iniciar a construção, vc deve estar no 
-  modo de build para isso
+
+Uma vez estando tudo validado, use esse arquivo commitado de planejamento para iniciar a **Execucao**, vc deve estar no 
+modo de build para isso
 - É **absolutamente** imprenscindível que você siga as **Boas Práticas de Codificação**
 - Para executar o plano relativo à modelagem, utilize o @analista-bd em Modo B: CONSTRUIR, passando o plano gerado.
 - A execução do plano pode ser feita de maneira maios autônoma possível, pergunte ao humano apenas questões que desviem 
   de mais do planejado
-- EXECUTE O PLANO ATONOMAMENTE: Durante a execução do plano, tente resolver problemas que aparecerem no meio do caminho 
+- EXECUTE O PLANO AUTONOMAMENTE: Durante a execução do plano, tente resolver problemas que aparecerem no meio do caminho 
   autonomamente, desde que não desviem muito do planejado, ou que vc esteja tendo muita dificuldade — nestes casos, 
   pergunte ao humano.
 - EXCEÇÃO DA AUTONOMIA DURANTE A EXECUÇÃO: na refatoração do código, confirme as alterações com o humano.
-- Ao final da construção, execute o plano de testes manuais como se vc fosse um humano.
-- Depois de tudo, sugira apagar o arquivo de plano.
+
+
+Depois da execução finalizar, inicia-se a **Revisão**, você deve estar no
+modo de build para isso:
+- Tudo aqui acontece com contextos limpos
+- Chame o @analista-bd para revisar a execução relativa ao BD, se existir.
+- Chame o @anlista_cyber para revisar a execução em relação à segurança 
+- Revise o restante
+- Faça ajustes que julgar necessário autonomamente.
+- Solicite ajuda ao humano em caso de dúvida, opu se muita coisa mudar em relação ao planejamento original
+
+
+Depois da revisão, iniciam-se os **Testes**, você deve estar no modo de build para isso:
+- Rode todos os testes automatizados
+- Execute o plano de testes manuais como se vc fosse um humano.
+- Use o @anlista_cyber para executar testes funcionais de segurança, como de penetração. 
+- Faça ajustes que julgar necessário autonomamente.
+- Solicite ajuda ao humano em caso de dúvida, ou se muita coisa mudar em relação ao planejamento original
+- Depois de executar os testes, sugira apagar o arquivo de plano.
 - Ao final de tudo, ofereça uma proposta de commit, MAS NÃO REALIZE O COMMIT. Aguarde validação e confirmação do humano
+- Ao commitar, o fluxo de desenvolvimento termina
  
 
 ## Boas Práticas de Codificação
@@ -84,68 +115,6 @@ Aplique:
 
 - 12Factor
 - Testes devem seguir a Pirâmide de Testes
-
-## Documentação auxiliar de software
-
-## Orientações gerais
-
-- Sempre é melhor uma especificação executável. Tente ao máximo transformar as especificações e documentos diversos em
-  algo executável
-- Sugira usar uma ferramenta de Especificação por Exemplo, como Cocumber e Concordion, se uma já não estiver sendo 
-  utilizada, discuta com o humano a melhor opção para o projeto.
-
-### Escopo
-- README, guia rápido, instalação, configuração, solução de problemas (runbook), perguntas frequentes,
-  comandos (CLI), exemplos, guias "como fazer".
-- Público: desenvolvimento, operações/SRE, suporte, contribuidores.
-- Objetivo: destravar tarefa/erro rapidamente (pessoas com pressa).
-
-### Princípios (baseados em pesquisa)
-- Assuma leitura por varredura: a pessoa procura pontos de entrada, não lê tudo em ordem.
-- Otimize custo/benefício: reduza tempo até a resposta e o esforço mental.
-- "Curto" ajuda no essencial, mas não busque "o menor possível" como regra: use camadas e boa navegação.
-
-### Estrutura padrão (ordem recomendada)
-- Comece com um bloco curto: o que é, quando usar, requisitos, e um exemplo mínimo que funcione.
-- Em seguida: passo a passo do caso mais comum.
-- Depois: variações comuns e configurações típicas.
-- Inclua solução de problemas: sintomas, causa provável, como diagnosticar, como corrigir.
-- Feche com referência: opções/parâmetros, valores padrão, e links para detalhes.
-
-### Técnicas para aumentar leitura/uso
-- Títulos e subtítulos descritivos e orientados à tarefa; trate subtítulos como "menu" de acesso.
-- Coloque palavras-chave no início de títulos e frases.
-- Parágrafos curtos e com uma ideia; evite "paredão de texto".
-- A primeira frase do parágrafo deve dizer o ponto central (leitores com pressa focam nela).
-- Converta prosa em listas; prefira listas curtas e consistentes.
-- Procedimentos em passos numerados com verbos no imperativo (ex.: "Instale", "Configure", "Reinicie").
-- Exemplos copiáveis e completos; diga o resultado esperado quando isso evita tentativa e erro.
-- Linguagem objetiva; evite texto promocional, exageros e "venda".
-
-### Heurísticas de tamanho (para docs auxiliares)
-- O caminho principal deve caber em 1-2 minutos de leitura e em poucas rolagens de tela.
-- Se uma seção tiver muitos passos ou muitos caminhos alternativos, quebre em:
-  - "Básico" (curto)
-  - "Detalhes" (em outra seção/página, com links)
-- Se o documento ficar inevitavelmente longo, adicione navegação interna e divida bem em seções.
-
-### Quando ser detalhado (sem perder leitores)
-- Use camadas:
-  - Comece com um guia rápido.
-  - Aponte para aprofundamentos por assunto (desempenho, segurança, casos raros).
-- Crie rotas por intenção:
-  - "Quero instalar" (passo a passo)
-  - "Quero configurar" (opções e exemplos)
-  - "Deu erro" (solução de problemas)
-  - "Quero entender" (conceitos, quando necessário)
-
-### Checklist finalizar a documentação
-- O topo responde: o que é, quando usar, como começar agora?
-- Há um exemplo mínimo que roda e um resultado esperado?
-- Os títulos/subtítulos ajudam a localizar rapidamente uma tarefa ou erro?
-- O texto tem parágrafos curtos, listas, e passos numerados quando aplicável?
-- A seção de solução de problemas cobre os erros mais prováveis (sintoma -> causa -> solução)?
-- Se for longo: há sumário com links, âncoras por seção, e as seções estão bem separadas?
 
 ## ADRs (Decisões de Arquitetura)
 
