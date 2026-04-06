@@ -11,7 +11,7 @@
   },
   "agent": {
     "plan": {
-      "model": "github-copilot/gpt-5.2"
+      "model": "github-copilot/gpt-5.4"
     },
     "build": {
       "model": "github-copilot/claude-sonnet-4.6"
