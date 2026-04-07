@@ -1,9 +1,9 @@
 # Plano de Testes Automatizados — opencode-config
 
-> Status: PROPOSTA v2 — aguardando revisão e aprovação.
+> Status: PROPOSTA v3 — aguardando revisão e aprovação.
 > Data: 2026-04-06
-> Atualizado: 2026-04-07 (v2: Docker, testes comportamentais, provider
-> interativo, sem CI)
+> Atualizado: 2026-04-07 (v3: AGENTS.md local, 5 symlinks, regra de
+> testes, upstream de skills)
 
 ---
 
@@ -36,6 +36,10 @@ silenciosamente.
 - Cobre: listagem de agentes/MCPs, prompts, ativação de skills,
   slash commands
 
+> **Nota:** `AGENTS.md` é arquivo de instruções **deste projeto**,
+> não uma configuração global do OpenCode. O bootstrap linka apenas
+> `agents/`, `commands/`, `opencode.json`, `skills/` e `scripts/`.
+
 ---
 
 ## 3. O Que Precisa Ser Testado
@@ -45,7 +49,8 @@ silenciosamente.
 | Aspecto | Validação |
 |---------|-----------|
 | Criação de `~/.config/opencode/` | Diretório existe após execução |
-| 6 symlinks | Cada link aponta para o caminho correto no repo |
+| 5 symlinks | Cada link aponta para o caminho correto no repo |
+| `AGENTS.md` não linkado | `~/.config/opencode/AGENTS.md` **não** existe |
 | Idempotência | Rodar 2× não duplica nada, links continuam OK |
 | Backup | Se destino já existe, é movido para backup |
 | `.bashrc` | Linha `OPENCODE_ENABLE_EXA=1` presente, sem duplicata |
@@ -92,6 +97,8 @@ altera arquivos |
 |---------|-----------|
 | Responsabilidade única | Só altera `~/.bashrc`, sem criar ou
 sobrescrever arquivos em `~/.config/opencode/` (requer refatoração) |
+| Sem `AGENTS.md` global | Não cria `~/.config/opencode/AGENTS.md`
+nem referencia `instructions` apontando para ele |
 | Docker check | Aborta se Docker não disponível |
 | `.bashrc` idempotente | Bloco adicionado corretamente; sem duplicata
 ao rodar 2× |
@@ -100,8 +107,10 @@ ao rodar 2× |
 
 | Aspecto | Validação |
 |---------|-----------|
-| Arquivos obrigatórios | `AGENTS.md`, `opencode.json`, `README.md`
-existem |
+| Arquivos obrigatórios do repo | `AGENTS.md`, `opencode.json`,
+`README.md` existem |
+| Itens linkados globalmente | Apenas `agents/`, `commands/`,
+`opencode.json`, `skills/`, `scripts/` |
 | Skills | Cada dir em `skills/` contém `SKILL.md` |
 | Agentes | Cada `.md` em `agents/` tem frontmatter válido |
 | `opencode.json` | JSON válido |
@@ -275,7 +284,8 @@ tests/
 
 - `tests/bootstrap/opencode-link.bats`:
   - Execução com `--yes` em sandbox
-  - Validação dos 6 symlinks (`assert_symlink_to`)
+  - Validação dos 5 symlinks (`assert_symlink_to`)
+  - Validar que `~/.config/opencode/AGENTS.md` **não** é criado
   - Idempotência (rodar 2×)
   - Backup de configs pré-existentes
   - `.bashrc` contém `OPENCODE_ENABLE_EXA=1`
@@ -372,13 +382,39 @@ Tudo que cria arquivos em `~/.config/opencode/` deve ser removido.
 
 ---
 
-### Etapa 8 — Smoke Test E2E
+### Etapa 8 — Atualização do `AGENTS.md` do projeto
+
+**O quê:** Tornar o `AGENTS.md` adequado ao seu papel de instrução
+deste projeto, removendo o que não pertence a ele e adicionando
+regras permanentes.
+
+**Mudanças:**
+
+1. Remover a seção `## Imagens e diagramas` — esse comportamento
+   pertence à skill `svg-to-image` e deve viver em
+   `skills/svg-to-image/SKILL.md`
+2. Adicionar regra de testes obrigatórios:
+   - Toda evolução funcional do repo deve criar ou atualizar testes
+   - Válido para: novos scripts, skills, comandos, agentes e
+     mudanças no bootstrap
+3. Adicionar padrão de upstream para skills externas:
+   - Skills baseadas em repositórios externos devem seguir o
+     esquema já existente no repo (`UPSTREAM.md` + script de sync)
+   - Ao criar uma skill desse tipo, registrar origem e estruturar
+     para permitir atualização futura
+
+**Entregável:** `AGENTS.md` atualizado.
+
+---
+
+### Etapa 9 — Smoke Test E2E
 
 **O quê:** Teste de ponta a ponta na Camada 1.
 
 - `tests/smoke.bats`:
   - Executa `opencode-link --yes` em sandbox
-  - Valida TODOS os symlinks
+  - Valida os 5 symlinks
+  - Valida que `~/.config/opencode/AGENTS.md` não existe
   - Valida `.bashrc`
   - Valida que `opencode.json` no destino é legível e válido
   - Valida que skills são acessíveis via symlink
@@ -387,7 +423,7 @@ Tudo que cria arquivos em `~/.config/opencode/` deve ser removido.
 
 ---
 
-### Etapa 9 — Dockerfile + Setup Interativo do Container
+### Etapa 10 — Dockerfile + Setup Interativo do Container
 
 **O quê:** Infraestrutura da Camada 2.
 
@@ -413,7 +449,7 @@ Tudo que cria arquivos em `~/.config/opencode/` deve ser removido.
 
 ---
 
-### Etapa 10 — Testes Comportamentais do OpenCode
+### Etapa 11 — Testes Comportamentais do OpenCode
 
 **O quê:** Validar comportamento do OpenCode via API HTTP.
 
@@ -452,9 +488,10 @@ Tudo que cria arquivos em `~/.config/opencode/` deve ser removido.
 | 5. Crawl4AI refatoração | Local | 5–8 |
 | 6. Wrappers | Local | 20–25 |
 | 7. Auxiliares | Local | 5–8 |
-| 8. Smoke | Local | 5–10 |
-| 9. Docker setup | Docker | — |
-| 10. Comportamentais | Docker | 15–20 |
+| 8. Atualização AGENTS.md | — | — |
+| 9. Smoke | Local | 5–10 |
+| 10. Docker setup | Docker | — |
+| 11. Comportamentais | Docker | 15–20 |
 | **Total** | | **~85–117** |
 
 ---
@@ -479,7 +516,8 @@ mínimos, poucos testes |
 
 | # | Decisão | Resolução |
 |---|---------|-----------|
-| 1 | `install-crawl4ai-mcp.sh` | Só altera `~/.bashrc` |
+| 1 | `install-crawl4ai-mcp.sh` | Só altera `~/.bashrc`; não cria
+`AGENTS.md` global |
 | 2 | Fixture PDF | Commitar PDF mínimo em `tests/fixtures/` |
 | 3 | Coverage (`kcov`) | Fora do escopo |
 | 4 | Framework | BATS-core + bats-assert + bats-file |
@@ -489,6 +527,11 @@ mínimos, poucos testes |
 | 8 | Provider no container | Setup interativo na 1ª execução; env var
 do host mapeada; `.test-env` gitignored |
 | 9 | CI (GitHub Actions) | Fora do escopo |
+| 10 | `AGENTS.md` | Arquivo do projeto; não linkado globalmente |
+| 11 | Seção `Imagens e diagramas` | Removida do `AGENTS.md`; pertence
+à skill `svg-to-image` |
+| 12 | Novas skills externas | Devem seguir padrão de upstream
+(`UPSTREAM.md` + script de sync) |
 
 ---
 
@@ -509,11 +552,17 @@ teardown() { common_teardown; }
   assert_dir_exist "$TEST_CONFIG_DIR"
 }
 
-@test "opencode-link --yes cria symlink para AGENTS.md" {
+@test "opencode-link --yes cria symlink para agents/" {
   run bash "$REPO_ROOT/scripts/opencode-link" --yes
   assert_success
-  assert_symlink_to "$TEST_CONFIG_DIR/AGENTS.md" \
-    "$REPO_ROOT/AGENTS.md"
+  assert_symlink_to "$TEST_CONFIG_DIR/agents" \
+    "$REPO_ROOT/agents"
+}
+
+@test "opencode-link não cria symlink para AGENTS.md" {
+  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  assert_success
+  assert_not_exist "$TEST_CONFIG_DIR/AGENTS.md"
 }
 
 @test "opencode-link é idempotente" {
