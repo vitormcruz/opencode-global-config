@@ -88,7 +88,7 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 - SÓ realize o commit quando o humano autorizar
 
 # Criação de Skills
-- Ao criar novas skills, para serem aceionadas corretamente, as descrições das skills precisam possuir todas as 
-instruções de ativação, deixar uma ativação no corpo da skill não a faz ser atiavada.
+- Ao criar novas skills, para serem acionadas corretamente, as descrições das skills precisam possuir todas as 
+instruções de ativação, deixar uma ativação no corpo da skill não a faz ser ativada.
 - Ao criar novas skills, **não descreva** formas de ativação da skill em seu corpo sem que isso tenha sido descrito 
 nas descrições
