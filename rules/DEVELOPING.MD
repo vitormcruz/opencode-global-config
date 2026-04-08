@@ -37,6 +37,9 @@ Com o insumo informado, inicia-se a etapa de **Planejamento**:
 - Utilize o insumo da funcionalidade para pensar, sem construir nada, sobre o que deve ser feito e montar um plano:
   - Você só pode fazer esse planejamento em modo planning.
   - Não inicie o planejamento sem estar no modo planning, insista para o humano trocar de modo.
+  - O planejamento deve ser dividido em etapas que sejam fáceis de serem executadas uma por vez se for necessário
+  - Divida etapas em tamanhos que pelo menos se encaixem em janelas de contextos medianas.
+  - PARA CADA ETAPA, estime um nível de complexidade e um nível de consumo de contexto e ADICIONE O VALOR á etapa.
   - Avalie como o sistema se encontra hoje e como adaptar a nova funcionalidade, considerando as seguintes frentes de conhecimento:
     - Modelagem conceitual (usando o @analista-bd) - gera um **Plano de Modelagem de Dados**
       - A validação de cada etapa do @analista-bd é sempre do HUMANO, mesmo quando um agente o acionar.
@@ -47,7 +50,7 @@ Com o insumo informado, inicia-se a etapa de **Planejamento**:
     - Plano de codificação, backend e frontend, com TDD. Testes automatizados entram aqui: quais devem ser criados? em 
       qual proporção? Vale apena criar testes end-to-end nessa funcionalidade? - gera um **Plano de Codificação**  
     - Documentação - gera um **Plano de Documentação**
-    - Execução de testes - gera um **Plano execução de testes**
+    - Execução de testes (exploratórios, funcionais, que executam a aceitação etc) - gera um **Plano execução de testes**
   - Se envolver a criação ou modificação do modelo de dados conceitual, chame o @analista-bd passando o insumo para ele
     pensar no que deve ser feito (Modo A: PLANEJAR). 
   - Se envolver criação de uma modelagem de segurança/riscos, chame o @analista_cyber. 
@@ -61,6 +64,8 @@ Com o insumo informado, inicia-se a etapa de **Planejamento**:
   - Nos planos, leve em considerações mudanças nas decisões de arquitetura, sugira registro em algum documento de arquitetura,
     de preferência uma ADR.
   - Se precisar, faça pesquisas na internet para incrementar o planejamento, caso haja dúvidas.
+  - Ao planejar uso de bibliotecas, pesquise se todas as versões utilizadas são seguras, se uncontrar uma falha de segurança, 
+    procure por uma versão segura.
 - Depois de pensar e analisar a nova funcionalidade, junte todos os planos em um plano de execução divido em etapas.
 - Sugira escrever esse plano em um arquivo e commitar, e seguir a validação a partir deste arquivo escrito
 
@@ -70,9 +75,10 @@ modo de build para isso
 - Para executar o plano relativo à modelagem, utilize o @analista-bd em Modo B: CONSTRUIR, passando o plano gerado.
 - A execução do plano pode ser feita de maneira maios autônoma possível, pergunte ao humano apenas questões que desviem 
   de mais do planejado
-- EXECUTE O PLANO AUTONOMAMENTE: Durante a execução do plano, tente resolver problemas que aparecerem no meio do caminho 
-  autonomamente, desde que não desviem muito do planejado, ou que vc esteja tendo muita dificuldade — nestes casos, 
-  pergunte ao humano.
+- O plano pode ser executado inteiramente ou apenas algumas etapas, siga o orientado pelo HUMANO 
+- FAÇA A EXECUÇÃO AUTONOMAMENTE: Durante a execução, seja do plano completo ou de uma etapa, tente resolver problemas 
+- que aparecerem no meio do caminho autonomamente, desde que não desviem muito do planejado, ou que vc esteja tendo 
+- muita dificuldade — nestes casos, pergunte ao humano.
 - EXCEÇÃO DA AUTONOMIA DURANTE A EXECUÇÃO: na refatoração do código, confirme as alterações com o humano.
 
 
