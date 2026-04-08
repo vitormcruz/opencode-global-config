@@ -31,12 +31,13 @@ source ~/.bashrc
 
 O `scripts/opencode-link` conecta estes caminhos:
 
-- `~/.config/opencode/AGENTS.md` -> `AGENTS.md`
 - `~/.config/opencode/agents` -> `agents`
 - `~/.config/opencode/commands` -> `commands`
 - `~/.config/opencode/opencode.json` -> `opencode.json`
 - `~/.config/opencode/skills` -> `skills`
 - `~/.config/opencode/scripts` -> `scripts`
+
+O arquivo `AGENTS.md` e local a este repo e **nao** e linkado globalmente.
 
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
@@ -48,21 +49,7 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 ## Dependencias das skills
 
-O bootstrap (`opencode-link`) chama automaticamente `scripts/opencode-install-deps`, que:
-
-- **Instala automaticamente** (user-space, sem sudo):
-  - `docling` via `pipx` (skill `doc-extract`)
-  - `pipx` via `pip --user` se necessario
-
-- **Sugere o comando** para instalar via sudo (nao executa sozinho):
-  - `pandoc` — skill `md-export`
-  - `tesseract-ocr`, `ocrmypdf`, `ghostscript`, `qpdf` — OCR opcional para PDFs
-
-Para instalar as dependencias que precisam de sudo (Ubuntu/WSL):
-
-```bash
-sudo apt-get update && sudo apt-get install -y pandoc pipx tesseract-ocr ocrmypdf ghostscript qpdf
-```
+O bootstrap (`opencode-link`) chama automaticamente `scripts/opencode-install-deps`
 
 ### Dependencias instaladas manualmente (nao gerenciadas pelo bootstrap)
 
@@ -79,23 +66,45 @@ Para rodar so a verificacao de dependencias:
 ./scripts/opencode-install-deps
 ```
 
-## Estrutura do repo
+## Testes
 
-- `AGENTS.md`: instrucoes globais carregadas pelo OpenCode
-- `agents/`: agentes customizados
-- `commands/`: comandos customizados do OpenCode
-- `opencode.json`: configuracao principal do OpenCode e MCPs
-- `skills/`: skills no formato canonico `skills/<nome>/SKILL.md`
-  - `skills/md-export/`: converte Markdown para docx/pptx/xlsx via Pandoc
-  - `skills/doc-extract/`: extrai conteudo de PDF/docx/imagens via Docling
-  - `skills/svg-to-image/`: converte SVG em PNG para exibir ao usuario
-  - `skills/aws-sso-login/`: valida/renova sessao AWS SSO para um profile
-  - `skills/aws-add-account-sso/`: adiciona novos perfis AWS SSO no ~/.aws/config
-  - `skills/web-research-exa-crawl4ai/`: pesquisa web hibrida (Exa + Crawl4AI)
-  - `skills/prompt-improver/`: melhora e estrutura prompts
-- `scripts/`: utilitarios e bootstrap local
-  - `scripts/opencode-link`: bootstrap principal (cria symlinks)
-  - `scripts/opencode-install-deps`: verifica e instala dependencias das skills
-  - `scripts/opencode-md-export`: script da skill md-export
-  - `scripts/opencode-doc-extract`: script da skill doc-extract
-  - `scripts/opencode-svgtoimage`: script da skill svg-to-image
+Os testes usam BATS-core com bibliotecas versionadas no proprio repo em
+`tests/bats-libs/`.
+
+Pre-requisitos:
+
+- `make`
+- dependencias externas conforme o alvo escolhido
+- Docker para a Camada 2 (`make test-behavioral`)
+
+Alvos disponiveis:
+
+```bash
+make help
+make test
+make test-unit
+make test-integration
+make test-smoke
+make test-bootstrap
+make test-behavioral
+make test-infra
+```
+
+Resumo dos alvos:
+
+- `make test`: roda a Camada 1 (sem Docker)
+- `make test-unit`: estrutura estatica
+- `make test-integration`: wrappers que dependem de ferramentas externas
+- `make test-smoke`: smoke test E2E da Camada 1
+- `make test-bootstrap`: testes do bootstrap
+- `make test-behavioral`: Camada 2 via API HTTP do OpenCode
+- `make test-infra`: valida a infra minima do BATS
+
+Para a Camada 2, crie ou reutilize o container de testes com:
+
+```bash
+bash tests/setup-container.sh
+```
+
+Esse script faz o setup interativo do container e salva apenas configuracao em
+`tests/.test-env`. A API key real nao e salva em arquivo.
