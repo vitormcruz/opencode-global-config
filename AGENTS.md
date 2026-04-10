@@ -10,8 +10,10 @@
 - Comando canonico:
 
 ```bash
-bash ./scripts/opencode-link --yes
+bash ./scripts/bootstrap_repo/opencode-link --yes
 ```
+- Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os comandos prontos para copia e cola em um bloco unico.
+- Aguarde a execucao desses comandos pelo humano antes de seguir com a configuracao do repo.
 
 ## Configuracao Global via Links Simbolicos
 
@@ -22,9 +24,6 @@ Padrao de links (exemplo neste ambiente WSL):
 
 ```bash
 mkdir -p ~/.config/opencode
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/AGENTS.md \
-      ~/.config/opencode/AGENTS.md
 
 ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/agents \
       ~/.config/opencode/agents
@@ -68,15 +67,6 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 - Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
 - Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
 
-## Imagens e diagramas
-
-- Quando o humano pedir para criar, visualizar ou converter imagens, diagramas, fluxogramas ou similares:
-   - Se o pedido envolver SVG (fornecido pelo humano ou gerado pelo agente):
-      - Envie o SVG completo via stdin para a skill `svg-to-image` (`~/.config/opencode/scripts/opencode-svgtoimage`).
-      - Leia o JSON de resposta.
-      - Use o campo `markdown` diretamente na resposta ao humano para exibir a imagem.
-   - Nao tente converter SVG em PNG manualmente; sempre prefira a skill `svg-to-image`.
-
 ## COMMITS
 
 - Proponha mensagens de commit sempre que o humano pedir
@@ -92,3 +82,24 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 instruções de ativação, deixar uma ativação no corpo da skill não a faz ser ativada.
 - Ao criar novas skills, **não descreva** formas de ativação da skill em seu corpo sem que isso tenha sido descrito 
 nas descrições
+
+# Regras Obrigatórias Pora Testes
+- Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
+- Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
+- Framework: BATS-core em `tests/` — rodar com `make test`.
+- A estrutura de testes deve espelhar a estrutura do código.
+- Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `_test`.
+- Não criar testes para scripts cuja única função é executar ou orquestrar testes.
+- Scripts de bootstrap devem ficar em `scripts/bootstrap_repo/`.
+- Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
+- Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.
+
+# README
+- Mantenha a seção de dependências do `README.md` atualizada sempre que mudar bootstrap, scripts, skills ou requisitos de instalação.
+- A seção deve ser enxuta e voltada ao humano: listar claramente o que é instalado automaticamente e quais comandos com `sudo` o humano precisa executar.
+
+# Upstream de Skills Externas
+- Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:
+  - Criar `UPSTREAM.md` na pasta da skill com a origem e instruções de sync.
+  - Registrar a skill em `skills/list-updatable` para permitir atualização futura.
+  - Usar `skills/update-upstream-skill` para sincronizar.

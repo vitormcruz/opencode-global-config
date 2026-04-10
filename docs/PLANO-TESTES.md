@@ -10,7 +10,7 @@
 ## 1. Resumo do Problema
 
 Este repositório é a fonte de verdade das configurações globais do
-OpenCode. O bootstrap (`scripts/opencode-link`) cria symlinks em
+OpenCode. O bootstrap (`scripts/bootstrap_repo/opencode-link`) cria symlinks em
 `~/.config/opencode`, edita `~/.bashrc` e instala dependências. Hoje
 **não existe nenhum teste automatizado** que valide se esse processo
 produz o estado esperado. Qualquer alteração pode quebrar o setup
@@ -30,7 +30,7 @@ silenciosamente.
 ### Camada 2 — Docker (container Ubuntu + OpenCode)
 
 - Container persistente com OpenCode instalado
-- Repo copiado + `opencode-link --yes` executado dentro do container
+- Repo copiado + `scripts/bootstrap_repo/opencode-link --yes` executado dentro do container
 - `opencode serve` rodando dentro do container
 - Testes fazem chamadas HTTP à API
 - Cobre: listagem de agentes/MCPs, prompts, ativação de skills,
@@ -44,7 +44,7 @@ silenciosamente.
 
 ## 3. O Que Precisa Ser Testado
 
-### 3.1 Bootstrap (`opencode-link`)
+### 3.1 Bootstrap (`scripts/bootstrap_repo/opencode-link`)
 
 | Aspecto | Validação |
 |---------|-----------|
@@ -58,7 +58,7 @@ silenciosamente.
 | `--help` | Exibe ajuda, exit 0 |
 | Opção inválida | Exit 2 |
 
-### 3.2 Verificação de dependências (`opencode-install-deps`)
+### 3.2 Verificação de dependências (`scripts/bootstrap_repo/opencode-install-deps`)
 
 | Aspecto | Validação |
 |---------|-----------|
@@ -192,7 +192,7 @@ RUN apt-get update && apt-get install -y curl git jq
 RUN curl -fsSL https://opencode.ai/install | bash
 COPY . /opt/opencode-config
 WORKDIR /opt/opencode-config
-RUN bash ./scripts/opencode-link --yes
+RUN bash ./scripts/bootstrap_repo/opencode-link --yes
 EXPOSE 4096
 ```
 
@@ -212,9 +212,10 @@ tests/
 │   └── sample.svg
 ├── helpers/
 │   └── test_helper.bash      # setup/teardown compartilhado
-├── bootstrap/
-│   ├── opencode-link.bats
-│   └── opencode-install-deps.bats
+├── scripts/
+│   └── bootstrap_repo/
+│       ├── opencode-link_test.bats
+│       └── opencode-install-deps_test.bats
 ├── wrappers/
 │   ├── doc-extract.bats
 │   ├── md-export.bats
@@ -278,11 +279,11 @@ tests/
 
 ---
 
-### Etapa 3 — Testes do Bootstrap (`opencode-link`)
+### Etapa 3 — Testes do Bootstrap (`scripts/bootstrap_repo/opencode-link`)
 
 **O quê:** Testar o fluxo principal do repo.
 
-- `tests/bootstrap/opencode-link.bats`:
+- `tests/scripts/bootstrap_repo/opencode-link_test.bats`:
   - Execução com `--yes` em sandbox
   - Validação dos 5 symlinks (`assert_symlink_to`)
   - Validar que `~/.config/opencode/AGENTS.md` **não** é criado
@@ -297,11 +298,11 @@ tests/
 
 ---
 
-### Etapa 4 — Testes do `opencode-install-deps`
+### Etapa 4 — Testes do `scripts/bootstrap_repo/opencode-install-deps`
 
 **O quê:** Testar detecção de deps e formatação de saída.
 
-- `tests/bootstrap/opencode-install-deps.bats`:
+- `tests/scripts/bootstrap_repo/opencode-install-deps_test.bats`:
   - `--help` retorna 0
   - `--quiet` suprime saída
   - Detecção de OS funciona
@@ -318,7 +319,8 @@ tests/
 
 **Problema:** O script hoje cria arquivos diretamente em
 `~/.config/opencode/` (`opencode.json`, `AGENTS.md`,
-`scripts/crawl4ai/`), conflitando com os symlinks do `opencode-link`.
+`scripts/crawl4ai/`), conflitando com os symlinks do
+`scripts/bootstrap_repo/opencode-link`.
 O `opencode.json` deste repo já inclui a config do MCP do Crawl4AI.
 
 **Refatoração:** O script deve ficar responsável apenas por:
@@ -539,7 +541,7 @@ do host mapeada; `.test-env` gitignored |
 
 ```bash
 #!/usr/bin/env bats
-# tests/bootstrap/opencode-link.bats
+# tests/scripts/bootstrap_repo/opencode-link_test.bats
 
 load "../helpers/test_helper"
 
@@ -547,32 +549,32 @@ setup()    { common_setup; }
 teardown() { common_teardown; }
 
 @test "opencode-link --yes cria diretório ~/.config/opencode" {
-  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
   assert_dir_exist "$TEST_CONFIG_DIR"
 }
 
 @test "opencode-link --yes cria symlink para agents/" {
-  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
   assert_symlink_to "$TEST_CONFIG_DIR/agents" \
     "$REPO_ROOT/agents"
 }
 
 @test "opencode-link não cria symlink para AGENTS.md" {
-  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
   assert_not_exist "$TEST_CONFIG_DIR/AGENTS.md"
 }
 
 @test "opencode-link é idempotente" {
-  bash "$REPO_ROOT/scripts/opencode-link" --yes
-  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
 }
 
 @test "opencode-link adiciona OPENCODE_ENABLE_EXA=1 ao .bashrc" {
-  run bash "$REPO_ROOT/scripts/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
   run grep "OPENCODE_ENABLE_EXA=1" "$TEST_BASHRC"
   assert_success

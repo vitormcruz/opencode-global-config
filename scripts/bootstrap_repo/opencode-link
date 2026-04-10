@@ -8,7 +8,7 @@ opencode-link
 Cria links simbolicos em ~/.config/opencode apontando para este repo.
 
 Uso:
-  ./scripts/opencode-link [--yes]
+  ./scripts/bootstrap_repo/opencode-link [--yes]
 
 Opcoes:
   --yes      Nao pergunta confirmacao
@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
 done
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(cd "${script_dir}/.." && pwd -P)"
+repo_root="$(cd "${script_dir}/../.." && pwd -P)"
 
 opencode_dir="${HOME}/.config/opencode"
 bashrc_file="${HOME}/.bashrc"
@@ -197,7 +197,6 @@ plan() {
     say "MKDIR $opencode_dir"
   fi
 
-  status_line "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
   status_line "$repo_root/agents" "$opencode_dir/agents"
   status_line "$repo_root/commands" "$opencode_dir/commands"
   status_line "$repo_root/opencode.json" "$opencode_dir/opencode.json"
@@ -216,7 +215,6 @@ apply() {
 
   ensure_dir "$opencode_dir"
 
-  link_one "$repo_root/AGENTS.md" "$opencode_dir/AGENTS.md"
   link_one "$repo_root/agents" "$opencode_dir/agents"
   link_one "$repo_root/commands" "$opencode_dir/commands"
   link_one "$repo_root/opencode.json" "$opencode_dir/opencode.json"

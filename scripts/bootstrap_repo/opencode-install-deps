@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # opencode-install-deps
-# Instala/verifica dependencias das skills do opencode-config.
+# Instala/verifica dependencias do repo e das skills do opencode-config.
 #
 # - Dependencias user-space (pipx, docling): instala automaticamente se possivel.
-# - Dependencias que precisam de sudo (pandoc, ocrmypdf etc.): sugere o comando.
+# - Dependencias que precisam de sudo (make, pandoc, ocrmypdf etc.): sugere o comando.
 #
-# Uso: ./scripts/opencode-install-deps [--yes] [--quiet]
+# Uso: ./scripts/bootstrap_repo/opencode-install-deps [--yes] [--quiet]
 
 set -euo pipefail
 
@@ -23,7 +23,7 @@ opencode-install-deps
 Verifica e instala dependencias das skills do opencode-config.
 
 Uso:
-  ./scripts/opencode-install-deps [--yes] [--quiet]
+  ./scripts/bootstrap_repo/opencode-install-deps [--yes] [--quiet]
 
 Opcoes:
   --yes      Instala sem pedir confirmacao
@@ -129,6 +129,27 @@ say ""
 say "--- Verificando dependencias ---"
 say ""
 
+# --- make ---
+say "[make] Necessario para executar o Makefile de testes"
+if has_cmd make; then
+  status_ok "make $(make --version 2>/dev/null | head -1 | awk '{print $3}')"
+else
+  status_missing "make"
+  case "$OS" in
+    wsl|linux)
+      status_hint "Instalar: sudo apt-get install -y make"
+      need_sudo_pkg "make"
+      ;;
+    macos)
+      status_hint "Instalar: brew install make"
+      ;;
+    *)
+      status_hint "Instale o GNU Make para usar o Makefile do repo"
+      ;;
+  esac
+fi
+say ""
+
 # --- pandoc ---
 say "[pandoc] Skill: md-export"
 if has_cmd pandoc; then
@@ -209,6 +230,30 @@ else
   else
     status_hint "Primeiro instale pipx, depois: pipx install docling"
   fi
+fi
+say ""
+
+# --- conversor SVG ---
+say "[resvg ou rsvg-convert] Skill: svg-to-image"
+if has_cmd resvg; then
+  status_ok "resvg"
+elif has_cmd rsvg-convert; then
+  status_ok "rsvg-convert"
+else
+  status_missing "resvg"
+  status_missing "rsvg-convert"
+  case "$OS" in
+    wsl|linux)
+      status_hint "Instalar: sudo apt-get install -y librsvg2-bin"
+      need_sudo_pkg "librsvg2-bin"
+      ;;
+    macos)
+      status_hint "Instalar: brew install librsvg"
+      ;;
+    *)
+      status_hint "Instale resvg ou rsvg-convert para usar a skill svg-to-image"
+      ;;
+  esac
 fi
 say ""
 

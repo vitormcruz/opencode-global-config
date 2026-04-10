@@ -1,42 +1,57 @@
 #!/bin/bash
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Script de Instalação: Crawl4AI MCP para OpenCode
-# 
-# Este script configura automaticamente:
-# - Docker + Container Crawl4AI
-# - Script de start/stop/status
-# - Configuração OpenCode (opencode.json)
-# - Instruções AGENTS.md
-# - Auto-inicialização no WSL (.bashrc)
-# ═══════════════════════════════════════════════════════════════════════════
+# install-crawl4ai-mcp.sh
+#
+# Responsabilidade: configurar Docker + container Crawl4AI e registrar
+# o auto-start no ~/.bashrc.
+#
+# O que este script FAZ:
+#   1. Verifica Docker instalado e em execução
+#   2. Pull da imagem unclecode/crawl4ai:latest
+#   3. Build da imagem crawl4ai-sanitized:latest
+#   4. Garante bloco de auto-start no ~/.bashrc (idempotente)
+#   5. Inicia o container pela primeira vez
+#
+# O que este script NÃO FAZ:
+#   - Não cria nem modifica arquivos em ~/.config/opencode/
+#   - Não cria AGENTS.md global
+#   - Não cria opencode.json
+#   - Não cria scripts em ~/.config/opencode/scripts/
+#
+# A configuração do MCP (opencode.json) e os symlinks são gerenciados
+# pelo script scripts/bootstrap_repo/opencode-link, que é o fonte de verdade
+# para o setup global.
 
 set -e
 
-# Cores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Função para print com cores
-print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+print_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+print_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOCKER_DIR="$SCRIPT_DIR/docker"
+
+BASHRC="${HOME}/.bashrc"
+MARKER_START="# Crawl4AI MCP - INICIO"
+MARKER_END="# Crawl4AI MCP - FIM"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 1. Verificar Docker instalado
+# 1. Verificar Docker
 # ═══════════════════════════════════════════════════════════════════════════
 print_info "Verificando Docker..."
 
-if ! command -v docker &> /dev/null; then
+if ! command -v docker &>/dev/null; then
     print_error "Docker não está instalado. Instale o Docker primeiro."
     exit 1
 fi
 
-if ! docker info &> /dev/null; then
+if ! docker info &>/dev/null; then
     print_error "Docker não está em execução. Inicie o Docker primeiro."
     exit 1
 fi
@@ -44,7 +59,7 @@ fi
 print_success "Docker está instalado e em execução"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 2. Baixar imagem Crawl4AI
+# 2. Pull da imagem Crawl4AI
 # ═══════════════════════════════════════════════════════════════════════════
 print_info "Baixando imagem Crawl4AI..."
 
@@ -56,241 +71,78 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 2b. Construir imagem sanitizada (corrige descriptions vazias e $ref/$defs)
+# 3. Build da imagem sanitizada
 # ═══════════════════════════════════════════════════════════════════════════
 print_info "Construindo imagem crawl4ai-sanitized..."
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-DOCKER_DIR="$SCRIPT_DIR/docker"
+if [ ! -d "$DOCKER_DIR" ] || [ ! -f "$DOCKER_DIR/Dockerfile" ]; then
+    print_error "Diretório docker não encontrado: $DOCKER_DIR"
+    exit 1
+fi
 
-if [ -d "$DOCKER_DIR" ] && [ -f "$DOCKER_DIR/Dockerfile" ]; then
-    if docker build -t crawl4ai-sanitized:latest "$DOCKER_DIR"; then
-        print_success "Imagem crawl4ai-sanitized construida"
-    else
-        print_error "Falha ao construir imagem sanitizada"
-        exit 1
-    fi
+if docker build -t crawl4ai-sanitized:latest "$DOCKER_DIR"; then
+    print_success "Imagem crawl4ai-sanitized construída"
 else
-    print_error "Diretorio docker nao encontrado: $DOCKER_DIR"
+    print_error "Falha ao construir imagem sanitizada"
     exit 1
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 3. Criar diretório de configuração
+# 4. Bloco de auto-start no ~/.bashrc (idempotente via markers)
 # ═══════════════════════════════════════════════════════════════════════════
-print_info "Criando diretório de configuração..."
+print_info "Configurando auto-start no .bashrc..."
 
-CONFIG_DIR="$HOME/.config/opencode"
-mkdir -p "$CONFIG_DIR"
-print_success "Diretório criado: $CONFIG_DIR"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 4. Criar script start-crawl4ai.sh
-# ═══════════════════════════════════════════════════════════════════════════
-print_info "Criando script de start/stop/status..."
-
-mkdir -p "$CONFIG_DIR/scripts/crawl4ai"
-cat > "$CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh" << 'SCRIPT_EOF'
-#!/bin/bash
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Script de Controle: Crawl4AI MCP
-# 
-# Usage:
-#   source ~/.config/opencode/scripts/crawl4ai/start-crawl4ai.sh   # Carrega funções
-#   crawl4ai-start     # Inicia o container
-#   crawl4ai-stop      # Para o container
-#   crawl4ai-restart   # Reinicia o container
-#   crawl4ai-status   # Mostra status
-# ═══════════════════════════════════════════════════════════════════════════
-
-CRAWL4AI_NAME="crawl4ai-mcp"
-CRAWL4AI_IMAGE="crawl4ai-sanitized:latest"
-CRAWL4AI_PORT="11235"
-
-crawl4ai-start() {
-    if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
-        echo "Container $CRAWL4AI_NAME já está em execução"
-    else
-        echo "Iniciando container Crawl4AI MCP..."
-        docker rm -f "$CRAWL4AI_NAME" 2>/dev/null || true
-        docker run -d --name "$CRAWL4AI_NAME" -p "${CRAWL4AI_PORT}:${CRAWL4AI_PORT}" "$CRAWL4AI_IMAGE"
-        echo "Container Crawl4AI MCP iniciado na porta $CRAWL4AI_PORT"
-    fi
-}
-
-crawl4ai-stop() {
-    if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
-        echo "Parando container Crawl4AI MCP..."
-        docker stop "$CRAWL4AI_NAME" && docker rm "$CRAWL4AI_NAME"
-        echo "Container Crawl4AI MCP parado e removido"
-    else
-        echo "Container Crawl4AI MCP não está em execução"
-    fi
-}
-
-crawl4ai-restart() {
-    crawl4ai-stop
-    crawl4ai-start
-}
-
-crawl4ai-status() {
-    if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
-        echo "Container Crawl4AI MCP está em execução"
-        docker ps --filter "name=$CRAWL4AI_NAME" --format "  Status: {{.Status}}\n  Porta: {{.Ports}}"
-    else
-        echo "Container Crawl4AI MCP NÃO está em execução"
-    fi
-}
-
-# Auto-iniciar ao carregar o script
-crawl4ai-start
-SCRIPT_EOF
-
-chmod +x "$CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh"
-print_success "Script criado: $CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 5. Criar opencode.json
-# ═══════════════════════════════════════════════════════════════════════════
-print_info "Criando opencode.json..."
-
-cat > "$CONFIG_DIR/opencode.json" << 'CONFIG_EOF'
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": [],
-  "instructions": ["~/.config/opencode/AGENTS.md"],
-  "mcp": {
-    "crawl4ai": {
-      "type": "remote",
-      "url": "http://localhost:11235/mcp/sse",
-      "enabled": true
-    }
-  }
-}
-CONFIG_EOF
-
-print_success "opencode.json criado"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 6. Criar AGENTS.md
-# ═══════════════════════════════════════════════════════════════════════════
-print_info "Criando AGENTS.md..."
-
-cat > "$CONFIG_DIR/AGENTS.md" << 'AGENTS_EOF'
-# Instruções Globais - Pesquisa Web
-
-## REGRA PRINCIPAL: Sempre use MCP Crawl4AI para pesquisas na web
-
-Quando o usuário pedir para fazer uma pesquisa, busca, ou obter informações da internet (ex: "pesquise sobre X", "busque informações de Y", "qual o preço de Z", "notícias sobre W", "melhores produtos de 2025/2026"), você **DEVE**:
-
-1. **Usar APENAS o MCP Crawl4AI** - Nunca usar websearch, curl, ou outras ferramentas de busca
-2. **Ferramentas disponíveis do Crawl4AI:**
-   - `crawl4ai_md` - Extrai conteúdo de páginas web em formato markdown (MAIS IMPORTENTE)
-   - `crawl4ai_html` - Retorna HTML processado da página
-   - `crawl4ai_screenshot` - Captura screenshot PNG da página
-   - `crawl4ai_pdf` - Gera PDF da página
-   - `crawl4ai_crawl` - Crawl de múltiplas URLs retornando JSON
-   - `crawl4ai_execute_js` - Executa JavaScript na página
-
-## Exemplos de como FAZER
-
-| Prompt do usuário | O que fazer |
-|-----------------|-------------|
-| "Pesquise as melhores canetas 3D de 2025" | Usar `crawl4ai_md` para buscar a página |
-| "Qual o preço do 3Doodler?" | Usar `crawl4ai_md` no site oficial |
-| "Busque notícias sobre IA" | Usar `crawl4ai_md` em sites de notícias |
-| "Qual o preço médio de um notebook?" | Usar `crawl4ai_md` em sites de preços |
-
-## Exemplos de como NÃO FAZER
-
-- **NÃO** use `websearch` - Esta ferramenta está DESATIVADA para pesquisas
-- **NÃO** use `curl` ou `bash` para buscar páginas web
-- **NÃO** responda com conhecimento do modelo quando o usuário pedir pesquisa
-
-## Quando perguntar ao usuário
-
-**NÃO** pergunte se o usuário quer usar pesquisa web - simplesmente USE o MCP.
-
-A única exceção é se você não tiver certeza se o usuário quer uma pesquisa ou não - neste caso, pode perguntar uma vez, mas depois use sempre o MCP.
-
-## Como usar o Crawl4AI
-
-Para buscar informações sobre um produto, primeiro encontre o site relevante e use `crawl4ai_md` com a URL.
-
-Exemplo de fluxo:
-1. Identificar URL relevante (ex: site oficial do produto)
-2. Usar `crawl4ai_md` com a URL
-3. Analisar o conteúdo retornado em markdown
-4. Responder com as informações obtidas
-AGENTS_EOF
-
-print_success "AGENTS.md criado"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 7. Atualizar .bashrc
-# ═══════════════════════════════════════════════════════════════════════════
-print_info "Atualizando .bashrc..."
-
-BASHRC="$HOME/.bashrc"
-MARKER_START="# Crawl4AI MCP - INICIO"
-MARKER_END="# Crawl4AI MCP - FIM"
-
-# Verificar se já existe configuração
+# Remove bloco anterior se existir (idempotência)
 if grep -q "$MARKER_START" "$BASHRC" 2>/dev/null; then
-    print_warning "Configuração Crawl4AI já existe no .bashrc, removendo..."
-    # Remover configuração existente
+    print_warning "Bloco Crawl4AI já existe no .bashrc — atualizando..."
     sed -i "/$MARKER_START/,/$MARKER_END/d" "$BASHRC"
 fi
 
-# Adicionar nova configuração
 cat >> "$BASHRC" << BASHRC_EOF
 
 $MARKER_START
-# Auto-iniciar Crawl4AI MCP
-if [ -f ~/.config/opencode/scripts/crawl4ai/start-crawl4ai.sh ]; then
-    source ~/.config/opencode/scripts/crawl4ai/start-crawl4ai.sh
-fi
+# Auto-iniciar Crawl4AI MCP ao abrir terminal
+_crawl4ai_autostart() {
+    local name="crawl4ai-mcp"
+    local image="crawl4ai-sanitized:latest"
+    local port="11235"
+    if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
+        if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^\${name}\$"; then
+            docker rm -f "\$name" 2>/dev/null || true
+            docker run -d --name "\$name" -p "\${port}:\${port}" "\$image" \
+                >/dev/null 2>&1 || true
+        fi
+    fi
+}
+_crawl4ai_autostart
 $MARKER_END
 BASHRC_EOF
 
 print_success ".bashrc atualizado"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 8. Testar inicialização
+# 5. Iniciar container
 # ═══════════════════════════════════════════════════════════════════════════
-print_info "Testando inicialização..."
+print_info "Iniciando container Crawl4AI MCP..."
 
-# Carregar script e iniciar
-source "$CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh"
+CRAWL4AI_NAME="crawl4ai-mcp"
+CRAWL4AI_PORT="11235"
 
-# Verificar status
+docker rm -f "$CRAWL4AI_NAME" 2>/dev/null || true
+docker run -d --name "$CRAWL4AI_NAME" -p "${CRAWL4AI_PORT}:${CRAWL4AI_PORT}" \
+    crawl4ai-sanitized:latest
+
 if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
-    print_success "Container Crawl4AI MCP está em execução na porta $CRAWL4AI_PORT"
+    print_success "Container Crawl4AI MCP em execução na porta $CRAWL4AI_PORT"
 else
     print_warning "Container pode não ter iniciado corretamente"
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
-# FIM
-# ═══════════════════════════════════════════════════════════════════════════
 echo ""
-echo "══════════════════════════════════════════════════════════════════════════"
-print_success "Instalação concluída com sucesso!"
-echo "══════════════════════════════════════════════════════════════════════════"
+print_success "Instalação concluída!"
 echo ""
-echo "Arquivos criados:"
-echo "  - $CONFIG_DIR/scripts/crawl4ai/start-crawl4ai.sh"
-echo "  - $CONFIG_DIR/scripts/crawl4ai/install-crawl4ai-mcp.sh"
-echo "  - $CONFIG_DIR/opencode.json"
-echo "  - $CONFIG_DIR/AGENTS.md"
-echo ""
-echo "O container Crawl4AI MCP será iniciado automaticamente ao abrir o terminal."
-echo ""
-echo "Comandos disponíveis (após abrir novo terminal):"
-echo "  source ~/.config/opencode/scripts/crawl4ai/start-crawl4ai.sh"
-echo "  crawl4ai-start    # Iniciar"
-echo "  crawl4ai-stop     # Parar"
-echo "  crawl4ai-restart  # Reiniciar"
-echo "  crawl4ai-status   # Ver status"
-echo ""
+echo "Comandos úteis:"
+echo "  docker ps -f name=crawl4ai-mcp     # Ver status"
+echo "  docker stop crawl4ai-mcp           # Parar"
+echo "  docker start crawl4ai-mcp          # Reiniciar"

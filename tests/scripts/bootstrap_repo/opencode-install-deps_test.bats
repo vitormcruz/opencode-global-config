@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# tests/bootstrap/opencode-install-deps.bats — testa o script de dependências
+# tests/scripts/bootstrap_repo/opencode-install-deps_test.bats — testa o script de dependências
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/opencode-install-deps"
+SCRIPT="$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }
@@ -86,6 +86,26 @@ teardown() { common_teardown; }
   assert_success
   assert_output --partial "MISSING   make"
   assert_output --partial "Instalar: sudo apt-get install -y make"
+
+  rm -rf "$fake_bin"
+}
+
+@test "opencode-install-deps exibe hint de librsvg2-bin quando conversor SVG está ausente" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in bash grep uname head awk command; do
+    local p
+    p="$(command -v "$cmd")"
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[resvg ou rsvg-convert] Skill: svg-to-image"
+  assert_output --partial "MISSING   resvg"
+  assert_output --partial "MISSING   rsvg-convert"
+  assert_output --partial "Instalar: sudo apt-get install -y librsvg2-bin"
 
   rm -rf "$fake_bin"
 }

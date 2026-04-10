@@ -13,7 +13,7 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 Depois de clonar este repo, rode:
 
 ```bash
-./scripts/opencode-link
+./scripts/bootstrap_repo/opencode-link
 ```
 
 No ambiente WSL deste repo, o script faz duas coisas:
@@ -29,7 +29,7 @@ source ~/.bashrc
 
 ## O que o script faz
 
-O `scripts/opencode-link` conecta estes caminhos:
+O `scripts/bootstrap_repo/opencode-link` conecta estes caminhos:
 
 - `~/.config/opencode/agents` -> `agents`
 - `~/.config/opencode/commands` -> `commands`
@@ -49,33 +49,32 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 ## Dependencias das skills
 
-O bootstrap (`opencode-link`) chama automaticamente `scripts/opencode-install-deps`
+O bootstrap (`opencode-link`) chama automaticamente
+`scripts/bootstrap_repo/opencode-install-deps`.
 
-### Dependencias instaladas manualmente (nao gerenciadas pelo bootstrap)
+Instaladas automaticamente pelo bootstrap (quando possivel):
 
-- **`resvg` ou `rsvg-convert`** — skill `svg-to-image` (conversao SVG → PNG)
-  - Ubuntu/WSL: `sudo apt-get install -y librsvg2-bin` (instala `rsvg-convert`)
-  - Alternativa mais fiel: [resvg releases](https://github.com/RazrFalcon/resvg/releases)
+- `pipx`
+- `docling`
 
-- **AWS CLI v2** — skills `aws-sso-login` e `aws-add-account-sso`
-  - Instrucoes: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-
-Para rodar so a verificacao de dependencias:
+Pacotes que precisam de `sudo` no Ubuntu/WSL:
 
 ```bash
-./scripts/opencode-install-deps
+sudo apt-get update && sudo apt-get install -y \
+  make pandoc pipx tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
+```
+
+Dependencia externa fora desse comando:
+
+- AWS CLI v2 para `aws-sso-login` e `aws-add-account-sso`
+
+Para rodar so a verificação de dependências:
+
+```bash
+./scripts/bootstrap_repo/opencode-install-deps
 ```
 
 ## Testes
-
-Os testes usam BATS-core com bibliotecas versionadas no proprio repo em
-`tests/bats-libs/`.
-
-Pre-requisitos:
-
-- `make`
-- dependencias externas conforme o alvo escolhido
-- Docker para a Camada 2 (`make test-behavioral`)
 
 Alvos disponiveis:
 
@@ -85,8 +84,9 @@ make test
 make test-unit
 make test-integration
 make test-smoke
-make test-bootstrap
-make test-behavioral
+make test-bootstrap-repo
+make test-mcp
+make test-opencode-integration
 make test-infra
 ```
 
@@ -96,15 +96,25 @@ Resumo dos alvos:
 - `make test-unit`: estrutura estatica
 - `make test-integration`: wrappers que dependem de ferramentas externas
 - `make test-smoke`: smoke test E2E da Camada 1
-- `make test-bootstrap`: testes do bootstrap
-- `make test-behavioral`: Camada 2 via API HTTP do OpenCode
+- `make test-bootstrap-repo`: testes do bootstrap
+- `make test-mcp`: testes dos artefatos MCP fora do contexto do OpenCode
+- `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
 - `make test-infra`: valida a infra minima do BATS
 
-Para a Camada 2, crie ou reutilize o container de testes com:
+Controle manual do container de testes:
 
 ```bash
-bash tests/setup-container.sh
+bash tests/opencode-int-test/container-test-opencode.sh --up
+bash tests/opencode-int-test/container-test-opencode.sh --down
 ```
 
-Esse script faz o setup interativo do container e salva apenas configuracao em
-`tests/.test-env`. A API key real nao e salva em arquivo.
+Os testes usam BATS-core com bibliotecas versionadas no próprio repo em
+`tests/bats-libs/`.
+
+Documentação do framework: [BATS-core](https://bats-core.readthedocs.io/)
+
+Pre-requisitos:
+
+- `make`
+- dependencias externas conforme o alvo escolhido
+- Docker para a Camada 2 (`make test-opencode-integration`)
