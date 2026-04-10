@@ -1,8 +1,7 @@
 #!/usr/bin/env bats
-# tests/smoke.bats — smoke test E2E da Camada 1
-# Valida o estado completo do sistema após bootstrap
+# tests/scripts/bootstrap_repo/repo-state-test.bats — valida o estado do repo após bootstrap
 
-load "helpers/test_helper"
+load "../../helpers/test_helper"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }
@@ -11,7 +10,7 @@ teardown() { common_teardown; }
 # Bootstrap completo
 # ---------------------------------------------------------------------------
 
-@test "smoke: opencode-link --yes executa com sucesso" {
+@test "repo-state: opencode-link --yes executa com sucesso" {
   run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_success
 }
@@ -20,32 +19,32 @@ teardown() { common_teardown; }
 # Diretório e symlinks
 # ---------------------------------------------------------------------------
 
-@test "smoke: ~/.config/opencode existe após bootstrap" {
+@test "repo-state: ~/.config/opencode existe após bootstrap" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_dir_exist "$TEST_CONFIG_DIR"
 }
 
-@test "smoke: symlink agents/ aponta para repo" {
+@test "repo-state: symlink agents/ aponta para repo" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_symlink_to "$REPO_ROOT/agents" "$TEST_CONFIG_DIR/agents"
 }
 
-@test "smoke: symlink commands/ aponta para repo" {
+@test "repo-state: symlink commands/ aponta para repo" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_symlink_to "$REPO_ROOT/commands" "$TEST_CONFIG_DIR/commands"
 }
 
-@test "smoke: symlink opencode.json aponta para repo" {
+@test "repo-state: symlink opencode.json aponta para repo" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_symlink_to "$REPO_ROOT/opencode.json" "$TEST_CONFIG_DIR/opencode.json"
 }
 
-@test "smoke: symlink skills/ aponta para repo" {
+@test "repo-state: symlink skills/ aponta para repo" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_symlink_to "$REPO_ROOT/skills" "$TEST_CONFIG_DIR/skills"
 }
 
-@test "smoke: symlink scripts/ aponta para repo" {
+@test "repo-state: symlink scripts/ aponta para repo" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_symlink_to "$REPO_ROOT/scripts" "$TEST_CONFIG_DIR/scripts"
 }
@@ -54,7 +53,7 @@ teardown() { common_teardown; }
 # AGENTS.md NÃO deve existir como symlink global
 # ---------------------------------------------------------------------------
 
-@test "smoke: ~/.config/opencode/AGENTS.md não existe" {
+@test "repo-state: ~/.config/opencode/AGENTS.md não existe" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_not_exist "$TEST_CONFIG_DIR/AGENTS.md"
 }
@@ -63,7 +62,7 @@ teardown() { common_teardown; }
 # .bashrc
 # ---------------------------------------------------------------------------
 
-@test "smoke: .bashrc contém OPENCODE_ENABLE_EXA=1" {
+@test "repo-state: .bashrc contém OPENCODE_ENABLE_EXA=1" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   run grep "OPENCODE_ENABLE_EXA=1" "$TEST_BASHRC"
   assert_success
@@ -73,12 +72,12 @@ teardown() { common_teardown; }
 # opencode.json acessível via symlink e válido
 # ---------------------------------------------------------------------------
 
-@test "smoke: opencode.json é legível via symlink" {
+@test "repo-state: opencode.json é legível via symlink" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   assert_file_exist "$TEST_CONFIG_DIR/opencode.json"
 }
 
-@test "smoke: opencode.json é JSON válido (JSONC via node)" {
+@test "repo-state: opencode.json é JSON válido (JSONC via node)" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   run node -e "
 const fs = require('fs');
@@ -107,7 +106,7 @@ console.log('valid');
 # Skills acessíveis via symlink
 # ---------------------------------------------------------------------------
 
-@test "smoke: skills/ acessível via symlink contém ao menos uma skill" {
+@test "repo-state: skills/ acessível via symlink contém ao menos uma skill" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   local skills_dir="$TEST_CONFIG_DIR/skills"
   run bash -c "ls '$skills_dir' | head -1"
@@ -115,7 +114,7 @@ console.log('valid');
   [ -n "$output" ]
 }
 
-@test "smoke: cada skill acessível tem SKILL.md" {
+@test "repo-state: cada skill acessível tem SKILL.md" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   local skills_dir="$TEST_CONFIG_DIR/skills"
   local failed=0

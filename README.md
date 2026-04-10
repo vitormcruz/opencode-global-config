@@ -83,11 +83,9 @@ make help
 make test
 make test-unit
 make test-integration
-make test-smoke
 make test-bootstrap-repo
 make test-mcp
 make test-opencode-integration
-make test-infra
 ```
 
 Resumo dos alvos:
@@ -95,11 +93,9 @@ Resumo dos alvos:
 - `make test`: roda a Camada 1 (sem Docker)
 - `make test-unit`: estrutura estatica
 - `make test-integration`: wrappers que dependem de ferramentas externas
-- `make test-smoke`: smoke test E2E da Camada 1
-- `make test-bootstrap-repo`: testes do bootstrap
+- `make test-bootstrap-repo`: testes do bootstrap e do estado final do repo
 - `make test-mcp`: testes dos artefatos MCP fora do contexto do OpenCode
 - `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
-- `make test-infra`: valida a infra minima do BATS
 
 Controle manual do container de testes:
 

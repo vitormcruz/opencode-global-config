@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/scripts/bootstrap_repo/opencode-install-deps_test.bats — testa o script de dependências
+# tests/scripts/bootstrap_repo/opencode-install-deps-test.bats — testa o script de dependências
 
 load "../../helpers/test_helper"
 

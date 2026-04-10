@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/scripts/bootstrap_repo/opencode-link_test.bats — testa o script de bootstrap
+# tests/scripts/bootstrap_repo/opencode-link-test.bats — testa o script de bootstrap
 
 load "../../helpers/test_helper"
 

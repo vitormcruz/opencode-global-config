@@ -214,8 +214,9 @@ tests/
 │   └── test_helper.bash      # setup/teardown compartilhado
 ├── scripts/
 │   └── bootstrap_repo/
-│       ├── opencode-link_test.bats
-│       └── opencode-install-deps_test.bats
+│       ├── opencode-link-test.bats
+│       ├── opencode-install-deps-test.bats
+│       └── repo-state-test.bats
 ├── wrappers/
 │   ├── doc-extract.bats
 │   ├── md-export.bats
@@ -233,7 +234,6 @@ tests/
 │   ├── prompts.bats
 │   ├── skills-activation.bats
 │   └── commands.bats
-├── smoke.bats
 ├── Dockerfile
 ├── setup-container.sh        # criação interativa do container
 └── .test-env                 # gitignored — nunca commitar
@@ -255,12 +255,11 @@ tests/
   - `make test` — todos os testes da Camada 1
   - `make test-unit` — só estrutura estática
   - `make test-integration` — só wrappers (precisa de deps externas)
-  - `make test-smoke` — só smoke test
-  - `make test-behavioral` — Camada 2 (Docker)
-- 1 teste trivial para validar que a infra funciona
+  - `make test-bootstrap-repo` — bootstrap e estado final do repo
+  - `make test-opencode-integration` — Camada 2 (Docker)
 - Atualizar `.gitignore` com `tests/.test-env`
 
-**Entregável:** `bats tests/` funciona e exibe 1 teste passando.
+**Entregável:** `bats tests/` funciona.
 
 ---
 
@@ -283,7 +282,7 @@ tests/
 
 **O quê:** Testar o fluxo principal do repo.
 
-- `tests/scripts/bootstrap_repo/opencode-link_test.bats`:
+- `tests/scripts/bootstrap_repo/opencode-link-test.bats`:
   - Execução com `--yes` em sandbox
   - Validação dos 5 symlinks (`assert_symlink_to`)
   - Validar que `~/.config/opencode/AGENTS.md` **não** é criado
@@ -302,7 +301,7 @@ tests/
 
 **O quê:** Testar detecção de deps e formatação de saída.
 
-- `tests/scripts/bootstrap_repo/opencode-install-deps_test.bats`:
+- `tests/scripts/bootstrap_repo/opencode-install-deps-test.bats`:
   - `--help` retorna 0
   - `--quiet` suprime saída
   - Detecção de OS funciona
@@ -409,11 +408,11 @@ regras permanentes.
 
 ---
 
-### Etapa 9 — Smoke Test E2E
+### Etapa 9 — Repo State Test E2E
 
 **O quê:** Teste de ponta a ponta na Camada 1.
 
-- `tests/smoke.bats`:
+- `tests/scripts/bootstrap_repo/repo-state-test.bats`:
   - Executa `opencode-link --yes` em sandbox
   - Valida os 5 symlinks
   - Valida que `~/.config/opencode/AGENTS.md` não existe
@@ -429,7 +428,7 @@ regras permanentes.
 
 **O quê:** Infraestrutura da Camada 2.
 
-- `tests/Dockerfile`:
+- `tests/opencode-int-test/Dockerfile`:
   - Base Ubuntu 24.04
   - OpenCode instalado via `curl | bash`
   - Repo copiado + `opencode-link --yes` executado
@@ -447,7 +446,7 @@ regras permanentes.
 
 - `tests/.test-env` adicionado ao `.gitignore`
 
-**Entregável:** `make test-behavioral` sobe container e conecta.
+**Entregável:** `make test-opencode-integration` sobe container e conecta.
 
 ---
 
@@ -491,7 +490,7 @@ regras permanentes.
 | 6. Wrappers | Local | 20–25 |
 | 7. Auxiliares | Local | 5–8 |
 | 8. Atualização AGENTS.md | — | — |
-| 9. Smoke | Local | 5–10 |
+| 9. Repo state | Local | 5–10 |
 | 10. Docker setup | Docker | — |
 | 11. Comportamentais | Docker | 15–20 |
 | **Total** | | **~85–117** |
@@ -541,9 +540,9 @@ do host mapeada; `.test-env` gitignored |
 
 ```bash
 #!/usr/bin/env bats
-# tests/scripts/bootstrap_repo/opencode-link_test.bats
+# tests/scripts/bootstrap_repo/opencode-link-test.bats
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

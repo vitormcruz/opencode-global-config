@@ -76,6 +76,10 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 - NUNCA realize o commit independentemente.
 - SEMPRE pergunte ao humano antes de realizar o commit.
 - SÓ realize o commit quando o humano autorizar
+- NUNCA simular rename ou move como delete + create.
+- Sempre usar `git mv` para mover ou renomear arquivos versionados, preservando histórico.
+- Se um arquivo versionado precisar ser movido e editado, primeiro fazer o `git mv` e só depois editar.
+- Essa regra não tem exceção.
 
 # Criação de Skills
 - Ao criar novas skills, para serem acionadas corretamente, as descrições das skills precisam possuir todas as 
@@ -88,7 +92,7 @@ nas descrições
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
 - Framework: BATS-core em `tests/` — rodar com `make test`.
 - A estrutura de testes deve espelhar a estrutura do código.
-- Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `_test`.
+- Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `-test`.
 - Não criar testes para scripts cuja única função é executar ou orquestrar testes.
 - Scripts de bootstrap devem ficar em `scripts/bootstrap_repo/`.
 - Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
