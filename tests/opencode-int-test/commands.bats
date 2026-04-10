@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
-# tests/behavioral/commands.bats — valida slash commands registrados no OpenCode
+# tests/opencode-int-test/commands.bats — valida slash commands registrados no OpenCode
 
-load "../helpers/behavioral_helper"
+load "behavioral_helper"
 
 setup_file() { require_opencode_serve; }
 

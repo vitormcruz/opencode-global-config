@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
-# tests/behavioral/mcp.bats — valida MCPs registrados no OpenCode
+# tests/opencode-int-test/mcp.bats — valida MCPs registrados no OpenCode
 
-load "../helpers/behavioral_helper"
+load "behavioral_helper"
 
 setup_file() { require_opencode_serve; }
 
@@ -17,7 +17,7 @@ setup_file() { require_opencode_serve; }
   assert_success
 }
 
-@test "behavioral: crawl4ai MCP tem status 'connected'" {
+@test "behavioral: crawl4ai MCP está connected no ambiente de teste" {
   run bash -c "
     curl -sf '${OPENCODE_BASE_URL}/mcp' \
       | jq -r '.crawl4ai.status // empty'

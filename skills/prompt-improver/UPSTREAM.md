@@ -3,9 +3,9 @@
 repositorio: https://github.com/ckelsoe/prompt-architect
 branch: main
 versao: 3.2.2
-commit: f3056b5c5cd2c08ed5bb3f8e9de14bc7b86b9236
-data_commit: 2026-03-26 10:09:31 -0400
-sincronizado_em: 2026-03-26 19:17 UTC
+commit: 6e12013eb782042595b99878d66ca46f68fc7885
+data_commit: 2026-03-30 17:30:47 -0400
+sincronizado_em: 2026-04-07 15:11 UTC
 
 ## Arquivos sincronizados
 

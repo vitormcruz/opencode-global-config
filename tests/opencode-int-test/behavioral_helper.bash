@@ -1,28 +1,36 @@
 #!/usr/bin/env bash
-# tests/helpers/behavioral_helper.bash — helpers para testes da Camada 2 (Docker)
+# tests/opencode-int-test/behavioral_helper.bash — helpers da integração do OpenCode
 
 BATS_LIBS_DIR="$(dirname "${BASH_SOURCE[0]}")/../bats-libs"
 load "$BATS_LIBS_DIR/bats-support/load.bash"
 load "$BATS_LIBS_DIR/bats-assert/load.bash"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TEST_ENV="$REPO_ROOT/tests/.test-env"
+TEST_ENV="$REPO_ROOT/tests/opencode-int-test/.test-env"
 
-OPENCODE_PORT="${OPENCODE_PORT:-4096}"
-OPENCODE_BASE_URL="http://localhost:${OPENCODE_PORT}"
+OPENCODE_PORT="${OPENCODE_PORT:-4196}"
+OPENCODE_BASE_URL="http://127.0.0.1:${OPENCODE_PORT}"
+
+load_test_model() {
+  if [[ -f "$TEST_ENV" ]]; then
+    # shellcheck source=/dev/null
+    source "$TEST_ENV"
+  fi
+}
 
 # Verifica se o container está disponível antes de executar testes
 require_opencode_serve() {
   if ! curl -sf "${OPENCODE_BASE_URL}/" &>/dev/null; then
-    skip "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/setup-container.sh"
+    skip "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/opencode-int-test/container-test-opencode.sh --up"
   fi
 }
 
 # Cria uma sessão e retorna o ID
 create_session() {
+  load_test_model
   curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d '{}' \
+    -d "{\"model\":\"${OPENCODE_TEST_MODEL:-opencode/big-pickle}\"}" \
     | jq -r '.id // empty'
 }
 

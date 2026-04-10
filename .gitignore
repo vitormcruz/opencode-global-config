@@ -13,3 +13,9 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Testes — config local do container (nunca commitar)
+tests/opencode-int-test/.test-env
+
+**/node_modules/**
+#./out/

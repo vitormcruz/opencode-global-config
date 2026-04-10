@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
-# tests/behavioral/agents.bats — valida agentes carregados pelo OpenCode
+# tests/opencode-int-test/agents.bats — valida agentes carregados pelo OpenCode
 
-load "../helpers/behavioral_helper"
+load "behavioral_helper"
 
 setup_file() { require_opencode_serve; }
 

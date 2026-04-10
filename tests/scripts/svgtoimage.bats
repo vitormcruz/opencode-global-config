@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/wrappers/svgtoimage.bats — testa o wrapper opencode-svgtoimage
+# tests/scripts/svgtoimage.bats — testa o wrapper opencode-svgtoimage
 
 load "../helpers/test_helper"
 

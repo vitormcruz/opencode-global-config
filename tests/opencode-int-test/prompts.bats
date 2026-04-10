@@ -1,14 +1,12 @@
 #!/usr/bin/env bats
-# tests/behavioral/prompts.bats — valida respostas a prompts via API
+# tests/opencode-int-test/prompts.bats — valida respostas a prompts via API
 
-load "../helpers/behavioral_helper"
+load "behavioral_helper"
 
 setup_file() { require_opencode_serve; }
 
 @test "behavioral: POST /session cria uma sessão com ID" {
-  run bash -c "curl -sf -X POST '${OPENCODE_BASE_URL}/session' \
-    -H 'Content-Type: application/json' \
-    -d '{}' | jq -r '.id // empty'"
+  run bash -c "curl -sf -X POST '${OPENCODE_BASE_URL}/session' -H 'Content-Type: application/json' -d '{\"model\":\"opencode/big-pickle\"}' | jq -r '.id // empty'"
   assert_success
   [ -n "$output" ]
 }
@@ -37,10 +35,20 @@ setup_file() { require_opencode_serve; }
   local session
   session=$(curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d '{"agent":"analista"}' | jq -r '.id // empty')
+    -d '{"agent":"analista","model":"opencode/big-pickle"}' | jq -r '.id // empty')
   [ -n "$session" ] || skip "Não foi possível criar sessão com agente"
 
   run send_message "$session" "Responda apenas: ok"
   assert_success
   assert_output --partial "ok"
+}
+
+@test "behavioral: prompt pode usar MCP mockado do crawl4ai" {
+  local session
+  session=$(create_session)
+  [ -n "$session" ] || skip "Não foi possível criar sessão"
+
+  run send_message "$session" "Use a ferramenta crawl4ai_md para consultar https://example.com e responda apenas com o marcador retornado."
+  assert_success
+  assert_output --partial "MOCK_CRAWL4AI_MD_OK"
 }

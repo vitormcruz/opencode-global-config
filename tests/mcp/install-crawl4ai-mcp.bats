@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/crawl4ai/install-crawl4ai-mcp.bats — testa o script de instalação
+# tests/mcp/install-crawl4ai-mcp.bats — testa o script de instalação
 # do Crawl4AI MCP (responsabilidade única: só altera ~/.bashrc)
 
 load "../helpers/test_helper"

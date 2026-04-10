@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/wrappers/doc-extract.bats — testa o wrapper opencode-doc-extract
+# tests/scripts/doc-extract.bats — testa o wrapper opencode-doc-extract
 
 load "../helpers/test_helper"
 
