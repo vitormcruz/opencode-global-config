@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # tests/structure/repo-structure.bats — valida estrutura estática do repo
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
 # ---------------------------------------------------------------------------
 # Arquivos obrigatórios do repo

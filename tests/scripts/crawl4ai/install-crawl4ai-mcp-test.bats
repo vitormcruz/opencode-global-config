@@ -2,7 +2,7 @@
 # tests/mcp/install-crawl4ai-mcp.bats — testa o script de instalação
 # do Crawl4AI MCP (responsabilidade única: só altera ~/.bashrc)
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/crawl4ai/install-crawl4ai-mcp.sh"
 

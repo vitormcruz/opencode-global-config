@@ -4,7 +4,7 @@
 load "../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/opencode-svgtoimage"
-FIXTURE_SVG="$REPO_ROOT/tests/fixtures/sample.svg"
+FIXTURE_SVG="$REPO_ROOT/tests/test-resources/sample.svg"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

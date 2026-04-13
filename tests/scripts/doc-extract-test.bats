@@ -4,7 +4,7 @@
 load "../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/opencode-doc-extract"
-FIXTURE_PDF="$REPO_ROOT/tests/fixtures/sample.pdf"
+FIXTURE_PDF="$REPO_ROOT/tests/test-resources/sample.pdf"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

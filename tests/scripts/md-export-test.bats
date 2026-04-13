@@ -4,7 +4,7 @@
 load "../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/opencode-md-export"
-FIXTURE_MD="$REPO_ROOT/tests/fixtures/sample.md"
+FIXTURE_MD="$REPO_ROOT/tests/test-resources/sample.md"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

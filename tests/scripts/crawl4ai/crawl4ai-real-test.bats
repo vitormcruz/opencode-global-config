@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # tests/mcp/crawl4ai-real.bats — valida o MCP real do Crawl4AI fora do contexto do OpenCode
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

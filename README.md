@@ -88,20 +88,16 @@ Alvos disponiveis:
 ```bash
 make help
 make test
-make test-unit
-make test-integration
+make test-scripts
 make test-bootstrap-repo
-make test-mcp
 make test-opencode-integration
 ```
 
 Resumo dos alvos:
 
-- `make test`: roda a Camada 1 (sem Docker)
-- `make test-unit`: estrutura estatica
-- `make test-integration`: wrappers que dependem de ferramentas externas
-- `make test-bootstrap-repo`: testes do bootstrap e do estado final do repo
-- `make test-mcp`: testes dos artefatos MCP fora do contexto do OpenCode
+- `make test`: roda a Camada 1 — todos os testes em `tests/scripts/` (sem Docker)
+- `make test-scripts`: idem (alias explicito para `tests/scripts/`)
+- `make test-bootstrap-repo`: so os testes de bootstrap do repo
 - `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
 
 Controle manual do container de testes:

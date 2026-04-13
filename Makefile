@@ -7,22 +7,15 @@ TESTS_DIR     := tests
 
 export BATS_LIB_PATH
 
-.PHONY: test test-unit test-integration test-bootstrap-repo \
-        test-opencode-integration test-mcp help
+.PHONY: test test-scripts test-bootstrap-repo \
+        test-opencode-integration help
 
 ## Todos os testes da Camada 1 (sem Docker)
 test:
-	$(BATS) $(TESTS_DIR)/structure \
-	        $(TESTS_DIR)/scripts/bootstrap_repo \
-	        $(TESTS_DIR)/skills \
-	        $(TESTS_DIR)/mcp/install-crawl4ai-mcp.bats
+	$(BATS) $(TESTS_DIR)/scripts
 
-## Só estrutura estática (sem deps externas)
-test-unit:
-	$(BATS) $(TESTS_DIR)/structure
-
-## Só wrappers (precisa de pandoc/docling/resvg)
-test-integration:
+## Só scripts (bootstrap_repo + wrappers + skills + crawl4ai)
+test-scripts:
 	$(BATS) $(TESTS_DIR)/scripts
 
 ## Só bootstrap do repo
@@ -35,10 +28,6 @@ test-bootstrap-repo:
 ## OpenCode via container Docker (sobe e desce automaticamente)
 test-opencode-integration:
 	@bash -c 'set -e; trap "bash tests/opencode-int-test/container-test-opencode.sh --down" EXIT; bash tests/opencode-int-test/container-test-opencode.sh --up; $(BATS) $(TESTS_DIR)/opencode-int-test'
-
-## Testes dos artefatos MCP (fora do contexto do OpenCode)
-test-mcp:
-	$(BATS) $(TESTS_DIR)/mcp
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

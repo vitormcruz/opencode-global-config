@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # tests/skills/update-upstream-skill.bats — testa scripts/skills/update-upstream-skill
 
-load "../helpers/test_helper"
+load "../../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/skills/update-upstream-skill"
 
