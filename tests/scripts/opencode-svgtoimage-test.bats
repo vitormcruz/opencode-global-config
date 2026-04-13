@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/scripts/svgtoimage.bats — testa o wrapper opencode-svgtoimage
+# tests/scripts/opencode-svgtoimage-test.bats — testa o wrapper opencode-svgtoimage
 
 load "../helpers/test_helper"
 
@@ -41,19 +41,27 @@ teardown() { common_teardown; }
 # SVG via stdin com resvg → JSON com imagePath, PNG existe
 # ---------------------------------------------------------------------------
 
-@test "svgtoimage com resvg gera PNG e retorna imagePath (requer resvg)" {
-  if ! command -v resvg >/dev/null 2>&1; then
-    skip "resvg não disponível neste ambiente"
-  fi
+@test "svgtoimage com resvg gera PNG e retorna imagePath" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
 
-  run bash -c "cat '$FIXTURE_SVG' | SVG2PNG_BIN=resvg bash '$SCRIPT'"
+  # Mock de resvg: copia o arquivo de entrada para o de saída (simula conversão)
+  cat > "$fake_bin/resvg" <<'MOCK'
+#!/usr/bin/env bash
+# resvg <entrada.svg> <saida.png>
+cp "$1" "$2"
+MOCK
+  chmod +x "$fake_bin/resvg"
+
+  run env PATH="$fake_bin:$PATH" SVG2PNG_BIN=resvg bash -c "cat '$FIXTURE_SVG' | bash '$SCRIPT'"
   assert_success
   assert_output --partial '"imagePath"'
 
-  # Extrai o caminho e verifica que o arquivo existe
   local img_path
   img_path="$(echo "$output" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['imagePath'])")"
   assert_file_exist "$img_path"
+
+  rm -rf "$fake_bin"
 }
 
 @test "svgtoimage com rsvg-convert gera PNG e retorna imagePath (requer rsvg-convert)" {

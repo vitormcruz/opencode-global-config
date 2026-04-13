@@ -103,8 +103,8 @@ Resumo dos alvos:
 Controle manual do container de testes:
 
 ```bash
-bash tests/opencode-int-test/container-test-opencode.sh --up
-bash tests/opencode-int-test/container-test-opencode.sh --down
+bash tests/opencode-int-test/docker/container-test-opencode.sh --up
+bash tests/opencode-int-test/docker/container-test-opencode.sh --down
 ```
 
 Os testes usam `bats` do PATH e bibliotecas auxiliares instaladas pelo

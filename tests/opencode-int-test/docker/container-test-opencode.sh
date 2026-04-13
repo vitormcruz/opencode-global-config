@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# tests/opencode-int-test/container-test-opencode.sh — gerencia o container Docker dos testes do OpenCode
+# tests/opencode-int-test/docker/container-test-opencode.sh — gerencia o container Docker dos testes do OpenCode
 #
 # Uso:
-#   bash tests/container-test-opencode.sh --up
-#   bash tests/container-test-opencode.sh --down
-#   bash tests/container-test-opencode.sh --help
+#   bash tests/opencode-int-test/docker/container-test-opencode.sh --up
+#   bash tests/opencode-int-test/docker/container-test-opencode.sh --down
+#   bash tests/opencode-int-test/docker/container-test-opencode.sh --help
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-TEST_ENV="${OPENCODE_TEST_ENV:-$SCRIPT_DIR/.test-env}"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 CONTAINER_NAME="opencode-config-test"
 IMAGE_NAME="opencode-config-test:latest"
@@ -52,21 +51,6 @@ remove_container_if_exists() {
 # ---------------------------------------------------------------------------
 # Seleção de modelo
 # ---------------------------------------------------------------------------
-
-save_model() {
-  local model="$1"
-  cat > "$TEST_ENV" <<EOF
-OPENCODE_TEST_MODEL=${model}
-EOF
-  log "Modelo salvo em $TEST_ENV"
-}
-
-load_saved_model() {
-  if [[ -f "$TEST_ENV" ]]; then
-    # shellcheck source=/dev/null
-    source "$TEST_ENV"
-  fi
-}
 
 list_models() {
   docker run --rm "$IMAGE_NAME" /root/.opencode/bin/opencode --pure models
@@ -119,7 +103,6 @@ EOF
 }
 
 select_model_if_needed() {
-  load_saved_model
   if [[ -n "${OPENCODE_TEST_MODEL:-}" ]]; then
     log "Modelo já configurado: ${OPENCODE_TEST_MODEL}"
     return 0
@@ -135,8 +118,8 @@ select_model_if_needed() {
   preferred_count="$(printf '%s\n' "$models" | grep -ic 'big[- ]pickle' || true)"
   if [[ "$preferred_count" -eq 1 ]]; then
     preferred_model="$(printf '%s\n' "$models" | grep -i 'big[- ]pickle' | head -1)"
-    save_model "$preferred_model"
-    log "Modelo selecionado automaticamente: $preferred_model"
+    export OPENCODE_TEST_MODEL="$preferred_model"
+    log "Modelo selecionado automaticamente: ${OPENCODE_TEST_MODEL}"
     return 0
   fi
 
@@ -147,8 +130,8 @@ select_model_if_needed() {
   fi
 
   OPENCODE_TEST_MODEL="$(choose_model_interactively "$models")"
-  save_model "$OPENCODE_TEST_MODEL"
-  log "Modelo selecionado: $OPENCODE_TEST_MODEL"
+  export OPENCODE_TEST_MODEL
+  log "Modelo selecionado: ${OPENCODE_TEST_MODEL}"
 }
 
 # ---------------------------------------------------------------------------
@@ -157,7 +140,7 @@ select_model_if_needed() {
 
 prepare_mock_artifacts() {
   log "Preparando artefatos do mock MCP..."
-  npm --prefix "$SCRIPT_DIR/mcp-mock" install
+  npm --prefix "$REPO_ROOT/tests/opencode-int-test/mcp-mock" install
 }
 
 build_image() {
@@ -172,8 +155,6 @@ build_image() {
 # ---------------------------------------------------------------------------
 
 start_container() {
-  load_saved_model
-
   if container_running; then
     log "Container '${CONTAINER_NAME}' já está em execução."
   else
@@ -185,6 +166,7 @@ start_container() {
     docker run -d \
       --name "$CONTAINER_NAME" \
       -p "${PORT}:4096" \
+      -e "OPENCODE_TEST_MODEL=${OPENCODE_TEST_MODEL:-opencode/big-pickle}" \
       "$IMAGE_NAME"
   fi
 
@@ -222,14 +204,15 @@ stop_container() {
 case "${1:-}" in
   --help|-h)
     cat <<'EOF'
-Uso: bash tests/opencode-int-test/container-test-opencode.sh [opção]
+Uso: bash tests/opencode-int-test/docker/container-test-opencode.sh [opção]
 
 --up       Faz o setup interativo na primeira execução e sobe o container
 --down     Para o container de testes
 --help     Exibe esta ajuda
 
-O arquivo tests/opencode-int-test/.test-env é gitignored e nunca deve ser commitado.
-Ele guarda apenas o modelo escolhido para os testes.
+O modelo é configurado via variável de ambiente OPENCODE_TEST_MODEL.
+Se não estiver definida, o script tenta detectar automaticamente (preferindo
+'big-pickle') ou solicita escolha interativa.
 EOF
     exit 0
     ;;
@@ -244,6 +227,6 @@ EOF
     stop_container
     ;;
   *)
-    die "Opção desconhecida: $1. Use --help para ver as opções."
+    die "Opção desconhecida: ${1:-}. Use --help para ver as opções."
     ;;
 esac

@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/scripts/md-export.bats — testa o wrapper opencode-md-export
+# tests/scripts/opencode-md-export-test.bats — testa o wrapper opencode-md-export
 
 load "../helpers/test_helper"
 

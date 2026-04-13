@@ -27,7 +27,7 @@ test-bootstrap-repo:
 
 ## OpenCode via container Docker (sobe e desce automaticamente)
 test-opencode-integration:
-	@bash -c 'set -e; trap "bash tests/opencode-int-test/container-test-opencode.sh --down" EXIT; bash tests/opencode-int-test/container-test-opencode.sh --up; $(BATS) $(TESTS_DIR)/opencode-int-test'
+	@bash -c 'set -e; trap "bash tests/opencode-int-test/docker/container-test-opencode.sh --down" EXIT; bash tests/opencode-int-test/docker/container-test-opencode.sh --up; $(BATS) $(TESTS_DIR)/opencode-int-test'
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

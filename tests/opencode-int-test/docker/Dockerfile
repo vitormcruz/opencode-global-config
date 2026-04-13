@@ -19,14 +19,14 @@ COPY . /opt/opencode-config
 WORKDIR /opt/opencode-config
 
 # Config de teste dedicada para o ambiente de integração do OpenCode
-RUN cp tests/opencode-int-test/fixtures/opencode.test.json opencode.json
+RUN cp tests/opencode-int-test/config/opencode.test.json opencode.json
 
 # Executa bootstrap (cria symlinks em /root/.config/opencode)
 RUN bash ./scripts/bootstrap_repo/opencode-link --yes
 
-RUN chmod +x tests/opencode-int-test/entrypoint.sh
+RUN chmod +x tests/opencode-int-test/docker/entrypoint.sh
 
 EXPOSE 4096
 
 # Sobe o mock MCP local e depois o opencode serve
-CMD ["/opt/opencode-config/tests/opencode-int-test/entrypoint.sh"]
+CMD ["/opt/opencode-config/tests/opencode-int-test/docker/entrypoint.sh"]

@@ -1,12 +1,12 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/prompts.bats — valida respostas a prompts via API
+# tests/opencode-int-test/prompts-test.bats — valida respostas a prompts via API
 
-load "behavioral_helper"
+load "helpers/behavioral_helper"
 
 setup_file() { require_opencode_serve; }
 
 @test "behavioral: POST /session cria uma sessão com ID" {
-  run bash -c "curl -sf -X POST '${OPENCODE_BASE_URL}/session' -H 'Content-Type: application/json' -d '{\"model\":\"opencode/big-pickle\"}' | jq -r '.id // empty'"
+  run create_session
   assert_success
   [ -n "$output" ]
 }
@@ -32,10 +32,11 @@ setup_file() { require_opencode_serve; }
 }
 
 @test "behavioral: seleção de agente específico funciona" {
-  local session
+  local session model
+  model="${OPENCODE_TEST_MODEL:-opencode/big-pickle}"
   session=$(curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d '{"agent":"analista","model":"opencode/big-pickle"}' | jq -r '.id // empty')
+    -d "{\"agent\":\"analista\",\"model\":\"${model}\"}" | jq -r '.id // empty')
   [ -n "$session" ] || skip "Não foi possível criar sessão com agente"
 
   run send_message "$session" "Responda apenas: ok"
