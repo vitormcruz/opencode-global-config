@@ -3,8 +3,14 @@
 
 load "../../helpers/test_helper"
 
-setup()    { common_setup; }
-teardown() { common_teardown; }
+setup() {
+  common_setup
+  export OPENCODE_SKIP_DEPS=1
+}
+
+teardown() {
+  common_teardown
+}
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções
@@ -97,10 +103,25 @@ teardown() { common_teardown; }
   assert_success
 }
 
+@test "opencode-link adiciona BATS_LIB_PATH ao .bashrc" {
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  assert_success
+  run grep 'BATS_LIB_PATH="$HOME/.local/lib/bats"' "$TEST_BASHRC"
+  assert_success
+}
+
 @test "opencode-link não duplica OPENCODE_ENABLE_EXA=1 ao rodar 2x" {
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
   run grep -c "OPENCODE_ENABLE_EXA=1" "$TEST_BASHRC"
+  assert_success
+  [ "$output" -eq 1 ]
+}
+
+@test "opencode-link não duplica BATS_LIB_PATH ao rodar 2x" {
+  bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  run grep -c 'BATS_LIB_PATH="$HOME/.local/lib/bats"' "$TEST_BASHRC"
   assert_success
   [ "$output" -eq 1 ]
 }

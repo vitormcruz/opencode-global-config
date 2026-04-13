@@ -5,8 +5,15 @@ load "../../helpers/test_helper"
 
 SCRIPT="$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps"
 
-setup()    { common_setup; }
-teardown() { common_teardown; }
+setup() {
+  common_setup
+  common_setup_deps
+}
+
+teardown() {
+  common_teardown_deps
+  common_teardown
+}
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções
@@ -72,6 +79,23 @@ teardown() { common_teardown; }
   assert_output --partial "OS detectado:"
 }
 
+@test "opencode-install-deps exibe MISSING para bats quando ausente do PATH" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in grep uname head awk tar gzip cp rm mkdir mktemp tr; do
+    local p
+    p="$(command -v "$cmd")"
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "MISSING   bats-core"
+
+  rm -rf "$fake_bin"
+}
+
 @test "opencode-install-deps exibe MISSING para make quando ausente do PATH" {
   local fake_bin
   fake_bin="$(mktemp -d)"
@@ -124,6 +148,18 @@ teardown() { common_teardown; }
   assert_output --partial "pandoc"
 }
 
+@test "opencode-install-deps instala libs BATS em ~/.local/lib/bats" {
+  run bash "$SCRIPT" --yes
+
+  assert_success
+  assert_dir_exist "$TEST_HOME/.local/lib/bats/bats-support"
+  assert_dir_exist "$TEST_HOME/.local/lib/bats/bats-assert"
+  assert_dir_exist "$TEST_HOME/.local/lib/bats/bats-file"
+  assert_file_exist "$TEST_HOME/.local/lib/bats/bats-support/load.bash"
+  assert_file_exist "$TEST_HOME/.local/lib/bats/bats-assert/load.bash"
+  assert_file_exist "$TEST_HOME/.local/lib/bats/bats-file/load.bash"
+}
+
 # ---------------------------------------------------------------------------
 # Dependência ausente → exibe MISSING + hint
 # ---------------------------------------------------------------------------
@@ -161,6 +197,16 @@ teardown() { common_teardown; }
 @test "opencode-install-deps --yes retorna exit 0" {
   run bash "$SCRIPT" --yes
   assert_success
+}
+
+@test "opencode-install-deps exibe OK para lib BATS já instalada" {
+  mkdir -p "$TEST_HOME/.local/lib/bats/bats-support"
+  printf '#!/usr/bin/env bash\n' > "$TEST_HOME/.local/lib/bats/bats-support/load.bash"
+  printf '%s\n' '0954abb9925cad550424cebca2b99255d4eabe96' > "$TEST_HOME/.local/lib/bats/bats-support/.opencode-version"
+
+  run bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "OK       bats-support 0954abb9925cad550424cebca2b99255d4eabe96"
 }
 
 @test "opencode-install-deps exibe cabeçalho de conclusão" {

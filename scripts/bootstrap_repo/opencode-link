@@ -83,16 +83,38 @@ bashrc_has_exa() {
   [ -f "$bashrc_file" ] && grep -Eq '^[[:space:]]*export[[:space:]]+OPENCODE_ENABLE_EXA=1([[:space:]]*|[[:space:]]*#.*)$' "$bashrc_file"
 }
 
-setup_bashrc() {
-  if bashrc_has_exa; then
-    return 0
-  fi
+bashrc_has_local_bin_path() {
+  [ -f "$bashrc_file" ] && grep -Eq '\$HOME/\.local/bin|\$\{HOME\}/\.local/bin' "$bashrc_file"
+}
 
-  cat >>"$bashrc_file" <<'EOF'
+bashrc_has_bats_lib_path() {
+  [ -f "$bashrc_file" ] && grep -Eq '^[[:space:]]*export[[:space:]]+BATS_LIB_PATH="\$HOME/\.local/lib/bats"([[:space:]]*|[[:space:]]*#.*)$' "$bashrc_file"
+}
+
+setup_bashrc() {
+  if ! bashrc_has_exa; then
+    cat >>"$bashrc_file" <<'EOF'
 
 # opencode-config: websearch (Exa AI)
 export OPENCODE_ENABLE_EXA=1
 EOF
+  fi
+
+  if ! bashrc_has_local_bin_path; then
+    cat >>"$bashrc_file" <<'EOF'
+
+# opencode-config: binários locais (bats-core etc.)
+export PATH="$HOME/.local/bin:$PATH"
+EOF
+  fi
+
+  if ! bashrc_has_bats_lib_path; then
+    cat >>"$bashrc_file" <<'EOF'
+
+# opencode-config: bibliotecas do BATS
+export BATS_LIB_PATH="$HOME/.local/lib/bats"
+EOF
+  fi
 }
 
 backup_if_exists() {
@@ -208,6 +230,18 @@ plan() {
   else
     say "ENV   $bashrc_file << OPENCODE_ENABLE_EXA=1"
   fi
+
+  if bashrc_has_local_bin_path; then
+    say "OK    $bashrc_file PATH includes ~/.local/bin"
+  else
+    say "ENV   $bashrc_file << PATH=\$HOME/.local/bin:\$PATH"
+  fi
+
+  if bashrc_has_bats_lib_path; then
+    say "OK    $bashrc_file BATS_LIB_PATH=\$HOME/.local/lib/bats"
+  else
+    say "ENV   $bashrc_file << BATS_LIB_PATH=\$HOME/.local/lib/bats"
+  fi
 }
 
 apply() {
@@ -225,7 +259,9 @@ apply() {
   say ""
   say "--- Verificando dependencias das skills ---"
   local install_deps_script="${script_dir}/opencode-install-deps"
-  if [ -x "$install_deps_script" ]; then
+  if [ "${OPENCODE_SKIP_DEPS:-0}" = "1" ]; then
+    say "SKIP  verificacao de dependencias (OPENCODE_SKIP_DEPS=1)"
+  elif [ -x "$install_deps_script" ]; then
     if [ "$assume_yes" -eq 1 ]; then
       "$install_deps_script" --yes
     else

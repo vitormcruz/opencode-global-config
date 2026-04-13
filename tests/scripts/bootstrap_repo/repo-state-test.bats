@@ -3,7 +3,10 @@
 
 load "../../helpers/test_helper"
 
-setup()    { common_setup; }
+setup() {
+  common_setup
+  export OPENCODE_SKIP_DEPS=1
+}
 teardown() { common_teardown; }
 
 # ---------------------------------------------------------------------------

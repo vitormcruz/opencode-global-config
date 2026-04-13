@@ -9,6 +9,19 @@
 
 set -euo pipefail
 
+BATS_LIB_INSTALL_DIR="${BATS_LIB_INSTALL_DIR:-$HOME/.local/lib/bats}"
+BATS_BIN_DIR="${BATS_BIN_DIR:-$HOME/.local/bin}"
+
+BATS_CORE_REF="${BATS_CORE_REF:-v1.13.0}"
+BATS_CORE_URL="${BATS_CORE_URL:-https://github.com/bats-core/bats-core/archive/${BATS_CORE_REF}.tar.gz}"
+
+BATS_SUPPORT_REF="${BATS_SUPPORT_REF:-0954abb9925cad550424cebca2b99255d4eabe96}"
+BATS_ASSERT_REF="${BATS_ASSERT_REF:-697471b7a89d3ab38571f38c6c7c4b460d1f5e35}"
+BATS_FILE_REF="${BATS_FILE_REF:-6bee58bec7c2f4aed1a7425ccd4bdc42b4a84599}"
+BATS_SUPPORT_URL="${BATS_SUPPORT_URL:-https://github.com/bats-core/bats-support/archive/${BATS_SUPPORT_REF}.tar.gz}"
+BATS_ASSERT_URL="${BATS_ASSERT_URL:-https://github.com/bats-core/bats-assert/archive/${BATS_ASSERT_REF}.tar.gz}"
+BATS_FILE_URL="${BATS_FILE_URL:-https://github.com/bats-core/bats-file/archive/${BATS_FILE_REF}.tar.gz}"
+
 assume_yes=0
 quiet=0
 
@@ -69,6 +82,234 @@ status_hint()    { say "            $*"; }
 # Verificar se comando existe no PATH
 # --------------------------------------------------------------------------
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+download_to_file() {
+  local source="$1"
+  local dest="$2"
+
+  case "$source" in
+    file://*)
+      cp "${source#file://}" "$dest"
+      return 0
+      ;;
+  esac
+
+  if [ -f "$source" ]; then
+    cp "$source" "$dest"
+    return 0
+  fi
+
+  if has_cmd curl; then
+    curl -fsSL "$source" -o "$dest"
+    return 0
+  fi
+
+  if has_cmd wget; then
+    wget -qO "$dest" "$source"
+    return 0
+  fi
+
+  return 1
+}
+
+bats_core_version_file() {
+  printf '%s/.opencode-version\n' "$BATS_BIN_DIR/bats-core-install"
+}
+
+read_bats_core_ref() {
+  local version_file
+  version_file="$(bats_core_version_file)"
+  if [ ! -f "$version_file" ]; then return 1; fi
+  tr -d '\n' < "$version_file"
+}
+
+bats_core_ready() {
+  local expected_ref="$1"
+  local current_ref
+
+  if [ ! -x "$BATS_BIN_DIR/bats" ]; then return 1; fi
+
+  current_ref="$(read_bats_core_ref 2>/dev/null || true)"
+  [ -n "$current_ref" ] && [ "$current_ref" = "$expected_ref" ]
+}
+
+install_bats_core() {
+  local ref="$1"
+  local url="$2"
+  local tmp_dir archive extract_dir source_dir
+
+  tmp_dir="$(mktemp -d)"
+  archive="$tmp_dir/bats-core.tar.gz"
+  extract_dir="$tmp_dir/extract"
+
+  mkdir -p "$extract_dir" "$BATS_BIN_DIR"
+  download_to_file "$url" "$archive"
+  tar -xzf "$archive" -C "$extract_dir"
+
+  source_dir=""
+  for candidate in "$extract_dir"/*; do
+    if [ -f "$candidate/bin/bats" ]; then
+      source_dir="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$source_dir" ]; then
+    warn "Falha ao localizar bin/bats em $url"
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  # Instala usando o install.sh embutido do bats-core (para ~/.local)
+  PREFIX="$HOME/.local" bash "$source_dir/install.sh" "$HOME/.local" >/dev/null 2>&1
+
+  # Salva versão instalada
+  local install_dir="$BATS_BIN_DIR/bats-core-install"
+  mkdir -p "$install_dir"
+  printf '%s\n' "$ref" > "$install_dir/.opencode-version"
+
+  rm -rf "$tmp_dir"
+}
+
+ensure_bats_core() {
+  say "[bats-core] Runner dos testes automatizados"
+
+  if bats_core_ready "$BATS_CORE_REF"; then
+    status_ok "bats $("$BATS_BIN_DIR/bats" --version 2>/dev/null | awk '{print $NF}' || echo "$BATS_CORE_REF")"
+    say ""
+    return 0
+  fi
+
+  status_missing "bats-core $BATS_CORE_REF"
+  status_hint "Destino: $BATS_BIN_DIR/bats"
+
+  if ! has_cmd tar || ! has_cmd gzip; then
+    status_hint "Instale tar e gzip para baixar e extrair bats-core"
+    say ""
+    return 0
+  fi
+
+  if ! has_cmd curl && ! has_cmd wget && [ ! -f "$BATS_CORE_URL" ] && [ "${BATS_CORE_URL#file://}" = "$BATS_CORE_URL" ]; then
+    status_hint "Instale curl ou wget para baixar bats-core"
+    say ""
+    return 0
+  fi
+
+  if confirm_action "  Instalar bats-core $BATS_CORE_REF em $BATS_BIN_DIR agora?"; then
+    if install_bats_core "$BATS_CORE_REF" "$BATS_CORE_URL"; then
+      status_installed "bats-core $BATS_CORE_REF"
+    else
+      status_missing "bats-core"
+      status_hint "Falha ao instalar bats-core"
+    fi
+  else
+    status_hint "Para instalar depois, rode novamente o bootstrap"
+  fi
+  say ""
+}
+
+bats_lib_version_file() {
+  printf '%s/.opencode-version\n' "$BATS_LIB_INSTALL_DIR/$1"
+}
+
+read_bats_lib_ref() {
+  local version_file
+  version_file="$(bats_lib_version_file "$1")"
+
+  if [ ! -f "$version_file" ]; then
+    return 1
+  fi
+
+  tr -d '\n' < "$version_file"
+}
+
+bats_library_ready() {
+  local name="$1"
+  local expected_ref="$2"
+  local current_ref
+
+  if [ ! -f "$BATS_LIB_INSTALL_DIR/$name/load.bash" ]; then
+    return 1
+  fi
+
+  current_ref="$(read_bats_lib_ref "$name" 2>/dev/null || true)"
+  [ -n "$current_ref" ] && [ "$current_ref" = "$expected_ref" ]
+}
+
+install_bats_library() {
+  local name="$1"
+  local ref="$2"
+  local url="$3"
+  local tmp_dir archive extract_dir source_dir version_file
+
+  tmp_dir="$(mktemp -d)"
+  archive="$tmp_dir/$name.tar.gz"
+  extract_dir="$tmp_dir/extract"
+
+  mkdir -p "$extract_dir" "$BATS_LIB_INSTALL_DIR"
+  download_to_file "$url" "$archive"
+  tar -xzf "$archive" -C "$extract_dir"
+
+  source_dir=""
+  for candidate in "$extract_dir"/*; do
+    if [ -f "$candidate/load.bash" ]; then
+      source_dir="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$source_dir" ]; then
+    warn "Falha ao localizar load.bash em $url"
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  rm -rf "$BATS_LIB_INSTALL_DIR/$name"
+  cp -R "$source_dir" "$BATS_LIB_INSTALL_DIR/$name"
+  version_file="$(bats_lib_version_file "$name")"
+  printf '%s\n' "$ref" > "$version_file"
+  rm -rf "$tmp_dir"
+}
+
+ensure_bats_library() {
+  local name="$1"
+  local ref="$2"
+  local url="$3"
+
+  say "[$name] Biblioteca auxiliar do BATS"
+  if bats_library_ready "$name" "$ref"; then
+    status_ok "$name $ref"
+    say ""
+    return 0
+  fi
+
+  status_missing "$name"
+  status_hint "Destino: $BATS_LIB_INSTALL_DIR/$name"
+
+  if ! has_cmd tar || ! has_cmd gzip; then
+    status_hint "Instale tar e gzip para baixar e extrair $name"
+    say ""
+    return 0
+  fi
+
+  if ! has_cmd curl && ! has_cmd wget && [ ! -f "$url" ] && [ "${url#file://}" = "$url" ]; then
+    status_hint "Instale curl ou wget para baixar $name"
+    say ""
+    return 0
+  fi
+
+  if confirm_action "  Instalar $name em $BATS_LIB_INSTALL_DIR agora?"; then
+    if install_bats_library "$name" "$ref" "$url"; then
+      status_installed "$name"
+    else
+      status_missing "$name"
+      status_hint "Falha ao instalar $name"
+    fi
+  else
+    status_hint "Para instalar depois, rode novamente o bootstrap"
+  fi
+  say ""
+}
 
 # --------------------------------------------------------------------------
 # Instalar pipx em user-space (sem sudo)
@@ -149,6 +390,12 @@ else
   esac
 fi
 say ""
+
+ensure_bats_core
+
+ensure_bats_library "bats-support" "$BATS_SUPPORT_REF" "$BATS_SUPPORT_URL"
+ensure_bats_library "bats-assert" "$BATS_ASSERT_REF" "$BATS_ASSERT_URL"
+ensure_bats_library "bats-file" "$BATS_FILE_REF" "$BATS_FILE_URL"
 
 # --- pandoc ---
 say "[pandoc] Skill: md-export"

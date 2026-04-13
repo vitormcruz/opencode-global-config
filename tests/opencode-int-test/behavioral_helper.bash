@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # tests/opencode-int-test/behavioral_helper.bash — helpers da integração do OpenCode
 
-BATS_LIBS_DIR="$(dirname "${BASH_SOURCE[0]}")/../bats-libs"
-load "$BATS_LIBS_DIR/bats-support/load.bash"
-load "$BATS_LIBS_DIR/bats-assert/load.bash"
+BATS_LIB_PATH="${BATS_LIB_PATH:-$HOME/.local/lib/bats}"
+export BATS_LIB_PATH
+
+bats_load_library bats-support
+bats_load_library bats-assert
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TEST_ENV="$REPO_ROOT/tests/opencode-int-test/.test-env"

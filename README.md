@@ -54,14 +54,21 @@ O bootstrap (`opencode-link`) chama automaticamente
 
 Instaladas automaticamente pelo bootstrap (quando possivel):
 
+- `bats`
 - `pipx`
 - `docling`
+- `bats-support`
+- `bats-assert`
+- `bats-file`
+
+As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
+bootstrap garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
 
 Pacotes que precisam de `sudo` no Ubuntu/WSL:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y \
-  make pandoc pipx tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
+  make bats pandoc pipx tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
 ```
 
 Dependencia externa fora desse comando:
@@ -104,8 +111,8 @@ bash tests/opencode-int-test/container-test-opencode.sh --up
 bash tests/opencode-int-test/container-test-opencode.sh --down
 ```
 
-Os testes usam BATS-core com bibliotecas versionadas no próprio repo em
-`tests/bats-libs/`.
+Os testes usam `bats` do PATH e bibliotecas auxiliares instaladas pelo
+bootstrap em `~/.local/lib/bats`.
 
 Documentação do framework: [BATS-core](https://bats-core.readthedocs.io/)
 

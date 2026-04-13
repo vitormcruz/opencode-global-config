@@ -1,7 +1,11 @@
 # Makefile — opencode-config test targets
 
-BATS        := tests/bats-libs/bats-core/bin/bats
-TESTS_DIR   := tests
+BATS_LIB_PATH ?= $(HOME)/.local/lib/bats
+BATS_LOCAL    := $(HOME)/.local/bin/bats
+BATS          ?= $(shell test -x "$(BATS_LOCAL)" && echo "$(BATS_LOCAL)" || echo bats)
+TESTS_DIR     := tests
+
+export BATS_LIB_PATH
 
 .PHONY: test test-unit test-integration test-bootstrap-repo \
         test-opencode-integration test-mcp help
