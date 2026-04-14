@@ -6,6 +6,7 @@ load "../../helpers/test_helper"
 setup() {
   common_setup
   export OPENCODE_SKIP_DEPS=1
+  export OPENCODE_SKIP_SKILL_SYNC=1
 }
 
 teardown() {

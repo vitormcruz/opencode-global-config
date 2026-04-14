@@ -210,4 +210,36 @@ Avalie as seguintes coisas para determinar as modificações nas instruções:
 - Mudanças no pom.xml
 - Mudanças no requirement.txt
 - Mudanças no package.json
+- Mudanças na estrutura de diretórios do projeto
+
+## Skills de Apoio
+
+Quando uma skill disponível cobrir a tarefa atual, carregue-a via tool `skill`
+antes de agir. Isso garante que o agente opera com playbooks especializados.
+
+**Planejamento:**
+- `planning-and-task-breakdown` — quebrar work em tarefas ordenadas
+- `spec-driven-development` — criar especificação antes de codar
+
+**Execução:**
+- `test-driven-development` — TDD, ciclo red-green-refactor (usa
+  `references/testing-patterns.md`)
+- `code-simplification` — refatoração para clareza após implementação
+- `api-and-interface-design` — design de APIs e contratos de interface
+- `frontend-ui-engineering` — UIs de produção com acessibilidade (usa
+  `references/accessibility-checklist.md`)
+- `performance-optimization` — otimização baseada em medição (usa
+  `references/performance-checklist.md`)
+- `documentation-and-adrs` — registrar decisões em `docs/adr/`
+
+**Revisão:**
+- `code-review-and-quality` — revisão multi-eixo antes de merge
+- `security-and-hardening` — endurecimento e checklist OWASP (usa
+  `references/security-checklist.md`)
+- `accessibility-audit` — auditoria WCAG / a11y
+
+**Testes e Debug:**
+- `debugging-and-error-recovery` — debugging sistemático root-cause
+- `git-workflow-and-versioning` — workflow Git e versionamento
+
 

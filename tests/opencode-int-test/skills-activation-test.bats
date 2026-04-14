@@ -41,3 +41,27 @@ setup_file() { require_opencode_serve; }
   run bash -c "echo '$output' | grep -qi 'sim'"
   assert_success
 }
+
+@test "behavioral: skill test-driven-development tem trigger TDD" {
+  local session
+  session=$(create_session)
+  [ -n "$session" ] || skip "Não foi possível criar sessão"
+
+  run send_message "$session" \
+    "Existe uma skill chamada test-driven-development? Responda apenas sim ou nao."
+  assert_success
+  run bash -c "echo '$output' | grep -qi 'sim'"
+  assert_success
+}
+
+@test "behavioral: skill accessibility-audit é mencionável" {
+  local session
+  session=$(create_session)
+  [ -n "$session" ] || skip "Não foi possível criar sessão"
+
+  run send_message "$session" \
+    "Existe uma skill chamada accessibility-audit? Responda apenas sim ou nao."
+  assert_success
+  run bash -c "echo '$output' | grep -qi 'sim'"
+  assert_success
+}

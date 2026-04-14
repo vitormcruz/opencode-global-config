@@ -274,10 +274,45 @@ apply() {
   say "Pronto."
 }
 
+sync_skills() {
+  say ""
+  say "--- Sincronizando skills upstream ---"
+
+  if [ "${OPENCODE_SKIP_SKILL_SYNC:-0}" = "1" ]; then
+    say "SKIP  sincronizacao de skills (OPENCODE_SKIP_SKILL_SYNC=1)"
+    return 0
+  fi
+
+  local list_script="${script_dir}/../skills/list-updatable"
+  local update_script="${script_dir}/../skills/update-upstream-skill"
+
+  if [ ! -x "$list_script" ] || [ ! -x "$update_script" ]; then
+    say "AVISO: scripts de sync nao encontrados, pulando."
+    return 0
+  fi
+
+  while IFS= read -r skill; do
+    say "Sincronizando: $skill"
+    "$update_script" "$skill"
+  done < <("$list_script")
+}
+
+warn_shannon() {
+  say ""
+  say "--- Shannon Plugin (pentest) ---"
+  say "Shannon NAO e instalado automaticamente (requer Docker + bun)."
+  say "Para instalar manualmente:"
+  say "  bash scripts/bootstrap_repo/opencode-install-shannon"
+  say "Leia as implicacoes de licenca AGPL-3.0 em:"
+  say "  scripts/bootstrap_repo/UPSTREAM-shannon.md"
+}
+
 main() {
   plan
   confirm
   apply
+  sync_skills
+  warn_shannon
 }
 
 main

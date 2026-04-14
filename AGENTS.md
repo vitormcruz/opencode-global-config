@@ -107,3 +107,65 @@ nas descrições
   - Criar `UPSTREAM.md` na pasta da skill com a origem e instruções de sync.
   - Registrar a skill em `skills/list-updatable` para permitir atualização futura.
   - Usar `skills/update-upstream-skill` para sincronizar.
+
+## Manutencao de Upstream — Padrao do Repo
+
+### Estrutura obrigatoria por skill externa
+
+```
+skills/<nome>/
+  SKILL.md        # adaptado localmente — NUNCA sobrescrito pelo sync
+  UPSTREAM.md     # metadados de sync (SHA, data, origem, licenca)
+  references/     # arquivos de referencia copiados do upstream (se houver)
+```
+
+### O que o UPSTREAM.md deve conter
+
+- URL do repositorio + branch
+- Commit SHA + data do commit upstream
+- Data do ultimo sync
+- Lista de arquivos sincronizados (o que muda a cada sync)
+- Lista do que NAO e sincronizado (SKILL.md adaptado)
+- Instrucoes de como rodar o sync
+- Licenca do upstream
+- `description_lang` + `description_note` (lingua e decisao de adaptacao)
+
+### Lingua da description de skills externas
+
+- Ao importar uma skill externa, **perguntar ao humano**: manter lingua de
+  origem ou converter para PT-BR?
+- Registrar a decisao no `UPSTREAM.md` da skill:
+  ```
+  description_lang: en
+  description_note: >
+    Kept in English (source language). Triggers extracted from
+    "When to Use" section to improve activation.
+  ```
+- Padrao recomendado: manter lingua de origem — LLMs entendem associacoes
+  semanticas cross-language e isso preserva proximidade com o upstream.
+- A description **deve ser enriquecida** com triggers explícitos extraídos
+  do corpo da skill (secao "When to Use"), pois o OpenCode ativa a skill
+  com base exclusivamente na description.
+
+### Regra de ouro do sync
+
+O script de sync **nunca sobrescreve** `SKILL.md`. Ele so copia na criacao
+inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
+
+### Checklist pos-sync
+
+1. Revisar diff do conteudo copiado (references, assets, etc.)
+2. Verificar se mudancas upstream afetam o `SKILL.md` local
+3. Atualizar `SKILL.md` manualmente se necessario
+4. Atualizar `UPSTREAM.md` com novo SHA (feito automaticamente pelo script)
+5. Rodar `make test` para garantir que nada quebrou
+
+### Scripts de sync disponiveis
+
+| Skill(s) | Script |
+|---|---|
+| prompt-improver | `scripts/prompt-improver/sync` |
+| 12 skills addyosmani | `scripts/addyosmani/sync` |
+| accessibility-audit | `scripts/accessibility-audit/sync` |
+
+Todos suportam `--yes` e `--check-only`.

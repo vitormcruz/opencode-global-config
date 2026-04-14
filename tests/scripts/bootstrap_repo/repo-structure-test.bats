@@ -83,6 +83,107 @@ load "../../helpers/test_helper"
 }
 
 # ---------------------------------------------------------------------------
+# Skills addyosmani (12) — SKILL.md + UPSTREAM.md obrigatórios
+# ---------------------------------------------------------------------------
+
+@test "skills/test-driven-development tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/test-driven-development/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/test-driven-development/UPSTREAM.md"
+}
+
+@test "skills/code-review-and-quality tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/code-review-and-quality/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/code-review-and-quality/UPSTREAM.md"
+}
+
+@test "skills/code-simplification tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/code-simplification/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/code-simplification/UPSTREAM.md"
+}
+
+@test "skills/security-and-hardening tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/security-and-hardening/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/security-and-hardening/UPSTREAM.md"
+}
+
+@test "skills/documentation-and-adrs tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/documentation-and-adrs/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/documentation-and-adrs/UPSTREAM.md"
+}
+
+@test "skills/debugging-and-error-recovery tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/debugging-and-error-recovery/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/debugging-and-error-recovery/UPSTREAM.md"
+}
+
+@test "skills/git-workflow-and-versioning tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/git-workflow-and-versioning/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/git-workflow-and-versioning/UPSTREAM.md"
+}
+
+@test "skills/spec-driven-development tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/spec-driven-development/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/spec-driven-development/UPSTREAM.md"
+}
+
+@test "skills/planning-and-task-breakdown tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/planning-and-task-breakdown/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/planning-and-task-breakdown/UPSTREAM.md"
+}
+
+@test "skills/api-and-interface-design tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/api-and-interface-design/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/api-and-interface-design/UPSTREAM.md"
+}
+
+@test "skills/performance-optimization tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/performance-optimization/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/performance-optimization/UPSTREAM.md"
+}
+
+@test "skills/frontend-ui-engineering tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/frontend-ui-engineering/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/frontend-ui-engineering/UPSTREAM.md"
+}
+
+# ---------------------------------------------------------------------------
+# Skills com references/ obrigatórios
+# ---------------------------------------------------------------------------
+
+@test "skills/test-driven-development tem references/testing-patterns.md" {
+  assert_file_exist "$REPO_ROOT/skills/test-driven-development/references/testing-patterns.md"
+}
+
+@test "skills/security-and-hardening tem references/security-checklist.md" {
+  assert_file_exist "$REPO_ROOT/skills/security-and-hardening/references/security-checklist.md"
+}
+
+@test "skills/performance-optimization tem references/performance-checklist.md" {
+  assert_file_exist "$REPO_ROOT/skills/performance-optimization/references/performance-checklist.md"
+}
+
+@test "skills/frontend-ui-engineering tem references/accessibility-checklist.md" {
+  assert_file_exist "$REPO_ROOT/skills/frontend-ui-engineering/references/accessibility-checklist.md"
+}
+
+# ---------------------------------------------------------------------------
+# Skill accessibility-audit (antigravity)
+# ---------------------------------------------------------------------------
+
+@test "skills/accessibility-audit tem SKILL.md e UPSTREAM.md" {
+  assert_file_exist "$REPO_ROOT/skills/accessibility-audit/SKILL.md"
+  assert_file_exist "$REPO_ROOT/skills/accessibility-audit/UPSTREAM.md"
+}
+
+@test "skills/accessibility-audit tem resources/implementation-playbook.md" {
+  assert_file_exist "$REPO_ROOT/skills/accessibility-audit/resources/implementation-playbook.md"
+}
+
+# ---------------------------------------------------------------------------
+# Shannon plugin — script e UPSTREAM.md
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # Agentes — cada .md em agents/ deve ter frontmatter válido
 # ---------------------------------------------------------------------------
 
@@ -159,6 +260,14 @@ console.log('valid');
 
 @test "scripts/bootstrap_repo/opencode-install-deps é executável" {
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps"
+}
+
+@test "scripts/addyosmani/sync é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/addyosmani/sync"
+}
+
+@test "scripts/accessibility-audit/sync é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/accessibility-audit/sync"
 }
 
 @test "scripts/opencode-doc-extract é executável" {

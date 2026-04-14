@@ -36,6 +36,22 @@ SCRIPT="$REPO_ROOT/scripts/skills/list-updatable"
   assert_output --partial "prompt-improver"
 }
 
+@test "list-updatable lista as 12 skills addyosmani" {
+  run bash "$SCRIPT"
+  assert_success
+  assert_output --partial "test-driven-development"
+  assert_output --partial "code-review-and-quality"
+  assert_output --partial "security-and-hardening"
+  assert_output --partial "performance-optimization"
+  assert_output --partial "frontend-ui-engineering"
+}
+
+@test "list-updatable lista accessibility-audit" {
+  run bash "$SCRIPT"
+  assert_success
+  assert_output --partial "accessibility-audit"
+}
+
 @test "list-updatable não lista skills sem UPSTREAM.md" {
   run bash "$SCRIPT"
   assert_success

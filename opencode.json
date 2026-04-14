@@ -5,6 +5,12 @@
   ],
   //, "chat-mermaid@latest"],
   //"instructions": ["~/.config/opencode/AGENTS.md"],
+
+  "compaction": {
+    "auto": false,
+    "prune": true,
+    "reserved": 10000
+  },
   "mcp": {
     "crawl4ai": {
       "type": "remote",
@@ -35,7 +41,7 @@
   "provider": {
     "github-copilot": {
       "models": {
-        "gpt-*": {
+        "gpt-5.4": {
           "options": {
             "reasoningEffort": "medium",
             "textVerbosity": "low",
