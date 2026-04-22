@@ -18,11 +18,15 @@ require_opencode_serve() {
 }
 
 # Cria uma sessão e retorna o ID
-# Usa OPENCODE_TEST_MODEL (env var) com fallback para opencode/big-pickle
+# Exige OPENCODE_TEST_MODEL definido — sem fallback
 create_session() {
+  if [[ -z "${OPENCODE_TEST_MODEL:-}" ]]; then
+    echo "ERRO: OPENCODE_TEST_MODEL não definido. Defina o modelo antes de rodar testes." >&2
+    return 1
+  fi
   curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d "{\"model\":\"${OPENCODE_TEST_MODEL:-opencode/big-pickle}\"}" \
+    -d "{\"model\":\"${OPENCODE_TEST_MODEL}\"}" \
     | jq -r '.id // empty'
 }
 

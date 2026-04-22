@@ -14,6 +14,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 CONTAINER_NAME="opencode-config-test"
 IMAGE_NAME="opencode-config-test:latest"
 PORT=4196
+MODEL_FILE="/tmp/opencode-test-model"
 
 # ---------------------------------------------------------------------------
 # Utilitários
@@ -51,6 +52,19 @@ remove_container_if_exists() {
 # ---------------------------------------------------------------------------
 # Seleção de modelo
 # ---------------------------------------------------------------------------
+
+extract_models_from_config() {
+  local config_file="$1"
+  jq -r '
+    (
+      [.agent[]? | .model? // empty]
+    ) + (
+      [.provider? // {} | to_entries[] |
+        .key as $p | .value.models? // {} | keys[] |
+        "\($p)/\(.)"]
+    ) | unique | .[]
+  ' "$config_file" 2>/dev/null || true
+}
 
 list_models() {
   docker run --rm "$IMAGE_NAME" /root/.opencode/bin/opencode --pure models
@@ -105,7 +119,28 @@ EOF
 select_model_if_needed() {
   if [[ -n "${OPENCODE_TEST_MODEL:-}" ]]; then
     log "Modelo já configurado: ${OPENCODE_TEST_MODEL}"
+    printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
     return 0
+  fi
+
+  # Tenta extrair modelos de OPENCODE_CONFIG, se definido
+  if [[ -n "${OPENCODE_CONFIG:-}" ]]; then
+    if [[ -f "$OPENCODE_CONFIG" ]]; then
+      local config_models
+      config_models="$(extract_models_from_config "$OPENCODE_CONFIG")"
+      if [[ -n "$config_models" ]]; then
+        log "Modelos encontrados em OPENCODE_CONFIG ($OPENCODE_CONFIG):"
+        OPENCODE_TEST_MODEL="$(choose_model_interactively "$config_models")"
+        export OPENCODE_TEST_MODEL
+        log "Modelo selecionado: ${OPENCODE_TEST_MODEL}"
+        printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
+        return 0
+      else
+        warn "Nenhum modelo encontrado em OPENCODE_CONFIG: $OPENCODE_CONFIG"
+      fi
+    else
+      warn "OPENCODE_CONFIG aponta para arquivo inexistente: $OPENCODE_CONFIG"
+    fi
   fi
 
   log "Detectando modelos disponíveis..."
@@ -116,22 +151,38 @@ select_model_if_needed() {
   fi
 
   preferred_count="$(printf '%s\n' "$models" | grep -ic 'big[- ]pickle' || true)"
-  if [[ "$preferred_count" -eq 1 ]]; then
+  if [[ "$preferred_count" -ge 1 ]]; then
     preferred_model="$(printf '%s\n' "$models" | grep -i 'big[- ]pickle' | head -1)"
-    export OPENCODE_TEST_MODEL="$preferred_model"
-    log "Modelo selecionado automaticamente: ${OPENCODE_TEST_MODEL}"
-    return 0
-  fi
-
-  if [[ "$preferred_count" -gt 1 ]]; then
-    warn "Mais de um modelo compatível com 'Big Pickle' foi encontrado."
-  else
-    warn "Modelo preferido 'Big Pickle' não encontrado."
+    warn "================================================================"
+    warn "ATENÇÃO: O modelo '${preferred_model}' (Big Pickle) é um modelo"
+    warn "externo que COLETA DADOS enviados a ele. Não envie informações"
+    warn "sensíveis ou corporativas durante os testes."
+    warn "================================================================"
+    local confirm=""
+    while :; do
+      read -rp "Deseja usar '${preferred_model}'? (sim/não): " confirm >&2
+      case "$confirm" in
+        sim|s|S|Sim|SIM)
+          export OPENCODE_TEST_MODEL="$preferred_model"
+          log "Modelo confirmado: ${OPENCODE_TEST_MODEL}"
+          printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
+          return 0
+          ;;
+        não|nao|n|N|Não|NAO|NÃO)
+          log "Modelo recusado. Escolha outro da lista:"
+          break
+          ;;
+        *)
+          printf '%s\n' "Responda 'sim' ou 'não'." >&2
+          ;;
+      esac
+    done
   fi
 
   OPENCODE_TEST_MODEL="$(choose_model_interactively "$models")"
   export OPENCODE_TEST_MODEL
   log "Modelo selecionado: ${OPENCODE_TEST_MODEL}"
+  printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
 }
 
 # ---------------------------------------------------------------------------
@@ -156,35 +207,60 @@ build_image() {
 
 start_container() {
   if container_running; then
-    log "Container '${CONTAINER_NAME}' já está em execução."
+    log "Container '${CONTAINER_NAME}' já está em execução. Reusando."
+  elif container_exists; then
+    log "Container '${CONTAINER_NAME}' existe parado. Reiniciando..."
+    docker start "$CONTAINER_NAME"
   else
-    if container_exists; then
-      log "Container '${CONTAINER_NAME}' já existe, recriando..."
-      remove_container_if_exists
-    fi
     log "Criando e iniciando container '${CONTAINER_NAME}'..."
+    if [[ -z "${OPENCODE_TEST_MODEL:-}" ]]; then
+      die "OPENCODE_TEST_MODEL não definido. Execute select_model_if_needed antes."
+    fi
+    local -a docker_env=(
+      -e "OPENCODE_TEST_MODEL=${OPENCODE_TEST_MODEL}"
+    )
+    local -a docker_volumes=()
+    if [[ -n "${OPENCODE_CONFIG:-}" && -f "${OPENCODE_CONFIG}" ]]; then
+      docker_env+=(-e "OPENCODE_CONFIG=/tmp/host-opencode-config.json")
+      docker_volumes+=(-v "${OPENCODE_CONFIG}:/tmp/host-opencode-config.json:ro")
+    fi
+    # Monta certificados CA do host para providers corporativos (SSL)
+    local host_ca="/etc/ssl/certs/ca-certificates.crt"
+    if [[ -f "$host_ca" ]]; then
+      docker_env+=(-e "NODE_EXTRA_CA_CERTS=/etc/ssl/certs/host-ca-certificates.crt")
+      docker_volumes+=(-v "${host_ca}:/etc/ssl/certs/host-ca-certificates.crt:ro")
+    fi
     docker run -d \
       --name "$CONTAINER_NAME" \
       -p "${PORT}:4096" \
-      -e "OPENCODE_TEST_MODEL=${OPENCODE_TEST_MODEL:-opencode/big-pickle}" \
+      "${docker_env[@]}" \
+      "${docker_volumes[@]+"${docker_volumes[@]}"}" \
       "$IMAGE_NAME"
   fi
 
   # Aguarda OpenCode estar disponível
   log "Aguardando OpenCode ficar disponível na porta ${PORT}..."
-  local retries=30
+  local retries=45
   local i=0
   while [[ $i -lt $retries ]]; do
     if curl -sf "http://127.0.0.1:${PORT}/" &>/dev/null; then
       log "OpenCode disponível em http://127.0.0.1:${PORT}/"
       return 0
     fi
+    # Verifica se o container ainda está rodando
+    if ! container_running; then
+      warn "Container '${CONTAINER_NAME}' parou inesperadamente."
+      warn "Logs do container:"
+      docker logs "$CONTAINER_NAME" 2>&1 | tail -20 >&2
+      return 1
+    fi
     sleep 2
-    ((i++))
+    i=$((i + 1))
   done
 
-  warn "OpenCode não respondeu após $((retries * 2))s. Verifique os logs:"
-  warn "  docker logs ${CONTAINER_NAME}"
+  warn "OpenCode não respondeu após $((retries * 2))s."
+  warn "Logs do container:"
+  docker logs "$CONTAINER_NAME" 2>&1 | tail -20 >&2
   return 1
 }
 
@@ -206,18 +282,31 @@ case "${1:-}" in
     cat <<'EOF'
 Uso: bash tests/opencode-int-test/docker/container-test-opencode.sh [opção]
 
---up       Faz o setup interativo na primeira execução e sobe o container
+--up       Reusa container existente; se não houver, faz build e cria
+--rebuild  Força rebuild da imagem e recria o container do zero
 --down     Para o container de testes
 --help     Exibe esta ajuda
 
 O modelo é configurado via variável de ambiente OPENCODE_TEST_MODEL.
-Se não estiver definida, o script tenta detectar automaticamente (preferindo
-'big-pickle') ou solicita escolha interativa.
+Se não estiver definida, o script verifica OPENCODE_CONFIG:
+  - Se apontar para um opencode.json válido, extrai os modelos de
+    agent.*.model e provider.*.models e oferece seleção interativa.
+  - Caso contrário, tenta detectar automaticamente (preferindo
+    'big-pickle') ou solicita escolha interativa.
 EOF
     exit 0
     ;;
   --up)
     check_docker
+    if ! container_exists; then
+      build_image
+      select_model_if_needed
+    fi
+    start_container
+    ;;
+  --rebuild)
+    check_docker
+    remove_container_if_exists
     build_image
     select_model_if_needed
     start_container
