@@ -32,8 +32,11 @@ setup_file() { require_opencode_serve; }
 }
 
 @test "behavioral: seleção de agente específico funciona" {
+  [[ -n "${OPENCODE_TEST_MODEL:-}" ]] || {
+    echo "ERRO: OPENCODE_TEST_MODEL não definido." >&2; return 1;
+  }
   local session model
-  model="${OPENCODE_TEST_MODEL:-opencode/big-pickle}"
+  model="${OPENCODE_TEST_MODEL}"
   session=$(curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
     -d "{\"agent\":\"analista\",\"model\":\"${model}\"}" | jq -r '.id // empty')
