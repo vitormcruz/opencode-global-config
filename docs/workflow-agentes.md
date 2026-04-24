@@ -41,6 +41,15 @@ otimizado para:
 ## Fluxo — Diagrama de Sequência
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+    'actorTextColor': '#000000',
+    'signalTextColor': '#000000',
+    'labelTextColor': '#000000',
+    'noteBkgColor': '#ffffff',
+    'noteTextColor': '#000000',
+    'activationBorderColor': '#666666',
+    'sequenceNumberColor': '#000000'
+}}}%%
 sequenceDiagram
     actor Humano
     participant eng as eng-software
@@ -52,7 +61,7 @@ sequenceDiagram
 
     %% ── VALIDAÇÃO DE ENTRADA ────────────────────
     rect rgb(255, 250, 240)
-    Note over eng, rev: VALIDAÇÃO DE ENTRADA
+    Note over Humano, rev: VALIDAÇÃO DE ENTRADA
 
     Humano ->> eng: Nova funcionalidade (requisitos)
 
@@ -71,7 +80,7 @@ sequenceDiagram
 
     %% ── PLANEJAMENTO ──────────────────────────
     rect rgb(230, 245, 255)
-    Note over eng, rev: PLANEJAMENTO
+    Note over Humano, rev: PLANEJAMENTO
 
     eng ->> dba: Analisar modelagem de dados
     dba -->> eng: Modelo proposto + impactos
@@ -94,7 +103,7 @@ sequenceDiagram
 
     %% ── REVISÃO DO PLANO ──────────────────────
     rect rgb(255, 245, 230)
-    Note over eng, rev: REVISÃO DO PLANO
+    Note over Humano, rev: REVISÃO DO PLANO
 
     eng ->> rev: Submete plano para revisão
     rev ->> rev: Registra resultado da revisão<br/>no arquivo de planejamento
@@ -126,7 +135,7 @@ sequenceDiagram
 
     %% ── CONSTRUÇÃO ────────────────────────────
     rect rgb(230, 255, 230)
-    Note over eng, rev: CONSTRUÇÃO
+    Note over Humano, rev: CONSTRUÇÃO
 
     eng ->> dba: Criar/atualizar modelo, scripts e migrações
     dba -->> eng: Artefatos de BD +<br/>classes/comportamentos a alterar
@@ -144,7 +153,7 @@ sequenceDiagram
 
     %% ── REVISÃO DA CONSTRUÇÃO ─────────────────
     rect rgb(255, 245, 230)
-    Note over eng, rev: REVISÃO DA CONSTRUÇÃO
+    Note over Humano, rev: REVISÃO DA CONSTRUÇÃO
 
     eng ->> rev: Submete construção para revisão
     rev ->> rev: Registra resultado da revisão<br/>no arquivo de planejamento
@@ -173,7 +182,7 @@ sequenceDiagram
 
     %% ── TESTES ────────────────────────────────
     rect rgb(245, 230, 255)
-    Note over eng, rev: TESTES
+    Note over Humano, rev: TESTES
 
     eng ->> qa: Executar testes automatizados + manuais
     qa -->> eng: Resultado dos testes
@@ -207,7 +216,7 @@ sequenceDiagram
 
     %% ── FINALIZAÇÃO ───────────────────────────
     rect rgb(255, 255, 230)
-    Note over eng, rev: FINALIZAÇÃO
+    Note over Humano, rev: FINALIZAÇÃO
 
     eng ->> prod: Revisão final de documentação e estrutura
     prod -->> eng: Docs atualizados / status da estrutura
