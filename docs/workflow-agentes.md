@@ -26,6 +26,28 @@ otimizado para:
 - **Revisões sem loop automático** — após ajustar apontamentos
   de revisão, `eng-software` pergunta ao humano se deve
   resubmeter para nova revisão. O humano decide.
+- **Arquivo de planejamento — regras de escrita:**
+  - Na **construção**, `eng-software` apenas marca etapas
+    como concluídas (checkbox). O conteúdo do plano não é
+    alterado.
+  - Na **revisão**, `rev` escreve apenas na seção dedicada
+    de revisão. O plano original permanece intacto.
+  - Modificações no plano só ocorrem na fase de
+    **Revisão do Plano**, antes da aprovação do humano.
+- **Contexto via arquivo** — `eng-software` referencia o
+  arquivo de planejamento como fonte de contexto para
+  subagentes, evitando acúmulo de histórico na conversa.
+- **Base de revisão** — `rev` avalia com base no plano
+  aprovado e nos insumos originais do humano (requisitos,
+  critérios de aceitação, regras de negócio, ou qualquer
+  formato que o humano tenha fornecido). O formato dos
+  insumos não é prescrito pelo workflow.
+- **Falha de subagente** — se um subagente não consegue
+  completar sua tarefa (erro, incerteza, falta de
+  informação), ele devolve o problema para `eng-software`
+  com uma descrição do impedimento. `eng-software` decide:
+  corrigir e retentar, consultar o humano, ou pular a
+  etapa com registro no arquivo.
 
 ## Agentes
 
@@ -84,20 +106,22 @@ sequenceDiagram
 
     eng ->> dba: Analisar modelagem de dados
     dba -->> eng: Modelo proposto + impactos
-
-    eng ->> qa: Planejar testes (manuais, aceitação, exploratórios)
-    qa -->> eng: Plano de testes
+    eng ->> eng: Agrega ao plano
 
     eng ->> eng: Planeja implementação do código
+    Note right of eng: Com base no modelo do dba
 
-    eng ->> sec: Analisar requisitos de segurança
-    Note right of sec: Analisa com base no plano<br/>de implementação do eng
-    sec -->> eng: Requisitos e restrições de segurança
+    eng ->> sec: Analisar requisitos + planejar testes de segurança
+    Note right of sec: Recebe plano acumulado<br/>(modelo + implementação)
+    sec -->> eng: Requisitos, restrições e plano de testes de segurança
+    eng ->> eng: Agrega ao plano
 
-    eng ->> sec: Planejar testes de segurança
-    sec -->> eng: Plano de testes de segurança
+    eng ->> qa: Planejar testes (manuais, aceitação, exploratórios)
+    Note right of qa: Recebe plano acumulado<br/>(modelo + implementação + segurança)
+    qa -->> eng: Plano de testes
+    eng ->> eng: Agrega ao plano
 
-    eng ->> eng: Consolida plano e persiste<br/>no arquivo de planejamento
+    eng ->> eng: Persiste plano consolidado<br/>no arquivo de planejamento
 
     end
 
@@ -105,23 +129,24 @@ sequenceDiagram
     rect rgb(255, 245, 230)
     Note over Humano, rev: REVISÃO DO PLANO
 
-    eng ->> rev: Submete plano para revisão
-    rev ->> rev: Registra resultado da revisão<br/>no arquivo de planejamento
+    eng ->> rev: Submete plano (arquivo) para revisão
+    rev ->> rev: Revisa e registra apontamentos<br/>no arquivo de planejamento
     rev -->> eng: Feedback (aprovado / ajustes por agente)
 
     opt Plano reprovado
-        eng ->> eng: Ajusta plano próprio
+        eng ->> eng: Ajusta plano no arquivo
         opt rev indicou ajuste para subagente
             eng ->> dba: Ajustar modelagem
             dba -->> eng: Modelo ajustado
+            eng ->> eng: Atualiza plano no arquivo
             eng ->> sec: Ajustar requisitos de segurança
             sec -->> eng: Requisitos ajustados
+            eng ->> eng: Atualiza plano no arquivo
         end
-        eng ->> eng: Marca etapas ajustadas no arquivo
-        eng ->> Humano: Ajustes feitos. Resubmeter para revisão?
+        eng ->> Humano: Ajustes aplicados no arquivo. Resubmeter para revisão?
         alt Humano: sim
-            eng ->> rev: Resubmete plano
-            rev ->> rev: Registra nova revisão no arquivo
+            eng ->> rev: Resubmete plano (arquivo)
+            rev ->> rev: Revisa e atualiza apontamentos<br/>no arquivo de planejamento
             rev -->> eng: Feedback
         else Humano: não, seguir
             Note right of eng: Segue para aprovação
@@ -147,7 +172,7 @@ sequenceDiagram
         sec -->> eng: Configs geradas
     end
 
-    eng ->> eng: Marca etapas concluídas no arquivo
+    eng ->> eng: Marca etapas concluídas<br/>no arquivo (apenas checkbox)
 
     end
 
@@ -167,7 +192,7 @@ sequenceDiagram
             eng ->> sec: Ajustar segurança
             sec -->> eng: Ajustes de segurança
         end
-        eng ->> eng: Marca etapas ajustadas no arquivo
+        eng ->> eng: Corrige código conforme apontamentos
         eng ->> Humano: Ajustes feitos. Resubmeter para revisão?
         alt Humano: sim
             eng ->> rev: Resubmete construção
@@ -243,7 +268,9 @@ sequenceDiagram
    lateral.
 2. **Arquivo de planejamento como fonte de verdade** —
    plano, revisões e status das etapas ficam persistidos.
-   Permite retomada em caso de interrupção.
+   Permite retomada em caso de interrupção. Construção
+   apenas marca conclusão (checkbox); revisão escreve
+   somente na seção dedicada de revisão.
 3. **`curador-produto` valida, não define** — verifica se a
    entrada do humano é consistente com a documentação do
    produto. Não cria escopo nem requisitos.
@@ -257,7 +284,14 @@ sequenceDiagram
    falhas de teste são tratadas como bugs.
 7. **`rev` persiste revisões no arquivo** — registra
    feedback em seção separada do arquivo de planejamento.
+   Não altera o plano original.
 8. **`qa` não analisa código** — foca em execução de testes.
 9. **Testes de segurança são do `sec`**, não do `qa`.
 10. **`curador-produto` faz revisão final** — garante que
     docs e estrutura do projeto estão atualizados.
+11. **Contexto via arquivo** — `eng-software` usa o arquivo
+    de planejamento como fonte de contexto para subagentes,
+    não o histórico acumulado da conversa.
+12. **Falha de subagente** — devolve impedimento para
+    `eng-software`, que decide: retentar, consultar o
+    humano, ou pular com registro no arquivo.
