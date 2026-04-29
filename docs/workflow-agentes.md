@@ -9,46 +9,6 @@ otimizado para:
 - **qualidade** através de gates de revisão obrigatórios;
 - **governança** com o humano no loop em pontos-chave.
 
-## Regras gerais
-
-- **`eng-software` é o único ponto de entrada** — subagentes
-  são sempre acionados por ele, nunca diretamente pelo humano.
-- **Qualquer agente pode consultar o humano** a qualquer
-  momento para esclarecer dúvidas da sua especialidade.
-- **Humano aprova o plano** antes da construção iniciar.
-- **Subagentes são stateless** — recebem contexto mínimo,
-  executam, devolvem resultado.
-- **Arquivo de planejamento** — o plano consolidado e os
-  resultados de revisão são persistidos em um arquivo dentro
-  do projeto, seguindo a estrutura de documentação definida.
-  Etapas são marcadas no arquivo à medida que são concluídas,
-  permitindo retomada em caso de interrupção.
-- **Revisões sem loop automático** — após ajustar apontamentos
-  de revisão, `eng-software` pergunta ao humano se deve
-  resubmeter para nova revisão. O humano decide.
-- **Arquivo de planejamento — regras de escrita:**
-  - Na **construção**, `eng-software` apenas marca etapas
-    como concluídas (checkbox). O conteúdo do plano não é
-    alterado.
-  - Na **revisão**, `rev` escreve apenas na seção dedicada
-    de revisão. O plano original permanece intacto.
-  - Modificações no plano só ocorrem na fase de
-    **Revisão do Plano**, antes da aprovação do humano.
-- **Contexto via arquivo** — `eng-software` referencia o
-  arquivo de planejamento como fonte de contexto para
-  subagentes, evitando acúmulo de histórico na conversa.
-- **Base de revisão** — `rev` avalia com base no plano
-  aprovado e nos insumos originais do humano (requisitos,
-  critérios de aceitação, regras de negócio, ou qualquer
-  formato que o humano tenha fornecido). O formato dos
-  insumos não é prescrito pelo workflow.
-- **Falha de subagente** — se um subagente não consegue
-  completar sua tarefa (erro, incerteza, falta de
-  informação), ele devolve o problema para `eng-software`
-  com uma descrição do impedimento. `eng-software` decide:
-  corrigir e retentar, consultar o humano, ou pular a
-  etapa com registro no arquivo.
-
 ## Agentes
 
 | Sigla             | Nome completo          | Tipo                    | Modos              |
@@ -57,8 +17,96 @@ otimizado para:
 | `curador-produto` | Curador de Produto     | Subagente               | val                 |
 | `dba`             | Analista de BD         | Subagente               | plan · build · val  |
 | `sec`             | Analista Cyber         | Subagente               | plan · build · val  |
-| `rev`             | Revisor                | Subagente               | val                 |
+| `rev`              | Revisor Integrativo    | Subagente               | val                 |
 | `qa`              | Testador               | Subagente               | plan · val          |
+
+## Premissas
+
+### Orquestração
+
+1. **`eng-software` como hub central e único ponto de
+   entrada** — todo contexto entre subagentes passa por
+   `eng-software`, evitando comunicação lateral.
+   Subagentes são sempre acionados por ele, nunca
+   diretamente pelo humano.
+2. **Subagentes são stateless** — recebem contexto mínimo,
+   executam, devolvem resultado.
+3. **Qualquer agente pode consultar o humano** a qualquer
+   momento para esclarecer dúvidas da sua especialidade.
+4. **Falha de subagente** — se não consegue completar a
+   tarefa (erro, incerteza, falta de informação), devolve
+   o impedimento para `eng-software`, que decide: corrigir
+   e retentar, consultar o humano, ou pular com registro
+   no arquivo.
+
+### Governança
+
+5. **Humano aprova o plano** antes da construção iniciar.
+6. **Humano controla re-revisões** — após ajustes, o humano
+   decide se resubmete para revisão ou segue adiante.
+   Isso evita loops infinitos.
+7. **Pós-planejamento, tudo se baseia no plano aprovado** —
+   falhas de teste são tratadas como bugs.
+
+### Revisão
+
+8. **Revisão híbrida: especialistas + integrativa** —
+   revisores especializados (`dba`, `sec`, `qa`) revisam
+   e corrigem artefatos da sua área, devolvendo resumo
+   estruturado. `rev` atua como revisor integrativo:
+   verifica consistência entre as partes e aderência ao
+   plano, mas **não corrige** — devolve relatório para
+   `eng-software` aplicar diretamente (exceto correções
+   complexas, delegadas ao especialista).
+9. **Revisores são sempre instâncias novas com contexto
+   limpo** — toda revisão é executada por uma instância
+   nova do agente, sem histórico da conversa anterior.
+   O agente que planejou ou construiu **nunca** revisa
+   na mesma instância. Isso elimina viés de confirmação
+   e garante avaliação independente. **Esta regra não tem
+   exceção e se aplica tanto aos revisores especializados
+   (`dba`, `sec`, `qa`) quanto ao revisor integrativo
+   (`rev`).**
+10. **Base de revisão** — revisores avaliam com base no
+    plano aprovado e nos insumos originais do humano
+    (requisitos, critérios de aceitação, regras de
+    negócio). O formato dos insumos não é prescrito
+    pelo workflow.
+11. **Formato do resumo de revisão especializada:**
+    - **Achado**: o que estava errado
+    - **Ação**: o que foi corrigido
+    - **Severidade**: bloqueante ou melhoria
+
+### Arquivo de planejamento
+
+12. **Arquivo como fonte de verdade** — plano, revisões e
+    status das etapas ficam persistidos. Permite retomada
+    em caso de interrupção.
+13. **Regras de escrita do arquivo:**
+    - Na **construção**, `eng-software` apenas marca
+      etapas como concluídas (checkbox). O conteúdo do
+      plano não é alterado.
+    - Na **revisão**, resumos dos revisores e relatório
+      do `rev` são persistidos na seção dedicada. O plano
+      original permanece intacto.
+    - Modificações no plano só ocorrem na fase de
+      **Revisão do Plano**, antes da aprovação do humano.
+14. **Contexto via arquivo** — `eng-software` usa o arquivo
+    de planejamento como fonte de contexto para subagentes,
+    não o histórico acumulado da conversa.
+
+### Papéis específicos
+
+15. **`curador-produto` valida, não define** — verifica se
+    a entrada do humano é consistente com a documentação
+    do produto. Não cria escopo nem requisitos. Faz
+    revisão final de documentação e estrutura.
+16. **`sec` analisa após plano de código** — requisitos de
+    segurança são avaliados com base no plano de
+    implementação feito pelo `eng-software`.
+17. **`qa` não analisa código** — foca em execução de
+    testes.
+18. **Testes de segurança são do `sec`**, não do `qa`.
 
 ## Fluxo — Diagrama de Sequência
 
@@ -129,28 +177,38 @@ sequenceDiagram
     rect rgb(255, 245, 230)
     Note over Humano, rev: REVISÃO DO PLANO
 
-    eng ->> rev: Submete plano (arquivo) para revisão
-    rev ->> rev: Revisa e registra apontamentos<br/>no arquivo de planejamento
-    rev -->> eng: Feedback (aprovado / ajustes por agente)
+    Note right of eng: Revisão especializada<br/>(instâncias limpas, revisam e corrigem)
+    eng ->> dba: Revisar modelagem do plano
+    dba ->> dba: Revisa, corrige e<br/>registra resumo no arquivo
+    dba -->> eng: Resumo (achado · ação · severidade)
 
-    opt Plano reprovado
-        eng ->> eng: Ajusta plano no arquivo
-        opt rev indicou ajuste para subagente
+    eng ->> sec: Revisar segurança do plano
+    sec ->> sec: Revisa, corrige e<br/>registra resumo no arquivo
+    sec -->> eng: Resumo (achado · ação · severidade)
+
+    eng ->> qa: Revisar testabilidade do plano
+    qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
+    qa -->> eng: Resumo (achado · ação · severidade)
+
+    Note right of eng: Revisão integrativa<br/>(consistência + aderência ao plano)
+    eng ->> rev: Submete plano para revisão integrativa
+    rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
+    rev -->> eng: Relatório (achados integrativos)
+
+    opt Ajustes integrativos necessários
+        eng ->> eng: Aplica ajustes diretamente
+        opt Ajuste complexo demais para eng-software
             eng ->> dba: Ajustar modelagem
-            dba -->> eng: Modelo ajustado
-            eng ->> eng: Atualiza plano no arquivo
-            eng ->> sec: Ajustar requisitos de segurança
-            sec -->> eng: Requisitos ajustados
-            eng ->> eng: Atualiza plano no arquivo
+            dba -->> eng: Modelo ajustado + resumo
         end
-        eng ->> Humano: Ajustes aplicados no arquivo. Resubmeter para revisão?
-        alt Humano: sim
-            eng ->> rev: Resubmete plano (arquivo)
-            rev ->> rev: Revisa e atualiza apontamentos<br/>no arquivo de planejamento
-            rev -->> eng: Feedback
-        else Humano: não, seguir
-            Note right of eng: Segue para aprovação
-        end
+    end
+
+    eng ->> Humano: Plano revisado. Resubmeter para revisão?
+    alt Humano: sim
+        eng ->> rev: Resubmete plano
+        rev -->> eng: Feedback
+    else Humano: não, seguir
+        Note right of eng: Segue para aprovação
     end
 
     eng ->> Humano: Apresenta plano para aprovação
@@ -180,27 +238,40 @@ sequenceDiagram
     rect rgb(255, 245, 230)
     Note over Humano, rev: REVISÃO DA CONSTRUÇÃO
 
-    eng ->> rev: Submete construção para revisão
-    rev ->> rev: Registra resultado da revisão<br/>no arquivo de planejamento
-    rev -->> eng: Feedback (aprovado / ajustes por agente)
+    Note right of eng: Revisão especializada<br/>(instâncias limpas, revisam e corrigem)
+    eng ->> dba: Revisar artefatos de BD
+    dba ->> dba: Revisa, corrige e<br/>registra resumo no arquivo
+    dba -->> eng: Resumo (achado · ação · severidade)
 
-    opt Construção reprovada
-        eng ->> eng: Ajusta código
-        opt rev indicou ajuste para subagente
+    eng ->> sec: Revisar segurança da implementação
+    sec ->> sec: Revisa, corrige e<br/>registra resumo no arquivo
+    sec -->> eng: Resumo (achado · ação · severidade)
+
+    eng ->> qa: Revisar cobertura de testes
+    qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
+    qa -->> eng: Resumo (achado · ação · severidade)
+
+    Note right of eng: Revisão integrativa<br/>(consistência + aderência ao plano)
+    eng ->> rev: Submete construção para revisão integrativa
+    rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
+    rev -->> eng: Relatório (achados integrativos)
+
+    opt Ajustes integrativos necessários
+        eng ->> eng: Aplica ajustes diretamente
+        opt Ajuste complexo demais para eng-software
             eng ->> dba: Ajustar artefatos de BD
-            dba -->> eng: Artefatos ajustados
+            dba -->> eng: Artefatos ajustados + resumo
             eng ->> sec: Ajustar segurança
-            sec -->> eng: Ajustes de segurança
+            sec -->> eng: Ajustes de segurança + resumo
         end
-        eng ->> eng: Corrige código conforme apontamentos
-        eng ->> Humano: Ajustes feitos. Resubmeter para revisão?
-        alt Humano: sim
-            eng ->> rev: Resubmete construção
-            rev ->> rev: Registra nova revisão no arquivo
-            rev -->> eng: Feedback
-        else Humano: não, seguir
-            Note right of eng: Segue para testes
-        end
+    end
+
+    eng ->> Humano: Revisão concluída. Resubmeter para revisão?
+    alt Humano: sim
+        eng ->> rev: Resubmete construção
+        rev -->> eng: Feedback
+    else Humano: não, seguir
+        Note right of eng: Segue para testes
     end
 
     end
@@ -253,45 +324,10 @@ sequenceDiagram
 
 ## Especialidades dos Subagentes
 
-| Agente             | No planejamento                                  | Na construção                                                                         | Na validação                                           |
-|--------------------|--------------------------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------|
-| `curador-produto`  | —                                                | —                                                                                     | Valida entrada contra docs do produto; revisão final   |
-| `dba`              | Modela dados                                     | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar | Valida integridade do modelo                           |
-| `sec`              | Analisa requisitos de segurança (pós-plano de código) | Gera configs de segurança se necessário                                           | Planeja e executa testes de segurança                  |
-| `qa`               | Planeja testes manuais, aceitação, exploratórios | —                                                                                     | Sobe aplicação, executa testes automatizados e manuais |
-| `rev`              | —                                                | —                                                                                     | Revisa ao final de cada fase; persiste resultado no arquivo |
-
-## Premissas da v1
-
-1. **`eng-software` como hub central** — todo contexto entre
-   subagentes passa por `eng-software`, evitando comunicação
-   lateral.
-2. **Arquivo de planejamento como fonte de verdade** —
-   plano, revisões e status das etapas ficam persistidos.
-   Permite retomada em caso de interrupção. Construção
-   apenas marca conclusão (checkbox); revisão escreve
-   somente na seção dedicada de revisão.
-3. **`curador-produto` valida, não define** — verifica se a
-   entrada do humano é consistente com a documentação do
-   produto. Não cria escopo nem requisitos.
-4. **`sec` analisa após plano de código** — requisitos de
-   segurança são avaliados com base no plano de
-   implementação feito pelo `eng-software`.
-5. **Humano controla re-revisões** — após ajustes, o humano
-   decide se resubmete para revisão ou segue adiante.
-   Isso evita loops infinitos.
-6. **Pós-planejamento, tudo se baseia no plano aprovado** —
-   falhas de teste são tratadas como bugs.
-7. **`rev` persiste revisões no arquivo** — registra
-   feedback em seção separada do arquivo de planejamento.
-   Não altera o plano original.
-8. **`qa` não analisa código** — foca em execução de testes.
-9. **Testes de segurança são do `sec`**, não do `qa`.
-10. **`curador-produto` faz revisão final** — garante que
-    docs e estrutura do projeto estão atualizados.
-11. **Contexto via arquivo** — `eng-software` usa o arquivo
-    de planejamento como fonte de contexto para subagentes,
-    não o histórico acumulado da conversa.
-12. **Falha de subagente** — devolve impedimento para
-    `eng-software`, que decide: retentar, consultar o
-    humano, ou pular com registro no arquivo.
+| Agente             | No planejamento                                       | Na construção                                                                         | Na validação                                                                             |
+|--------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| `curador-produto`  | —                                                     | —                                                                                     | Valida entrada contra docs do produto; revisão final                                     |
+| `dba`              | Modela dados                                          | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar | Revisa e corrige artefatos de BD; devolve resumo                                         |
+| `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                 | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo         |
+| `qa`               | Planeja testes manuais, aceitação, exploratórios        | —                                                                                     | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
+| `rev`              | —                                                     | —                                                                                     | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório para `eng-software` |
