@@ -81,6 +81,36 @@ Para rodar so a verificação de dependências:
 ./scripts/bootstrap_repo/opencode-install-deps
 ```
 
+## Configuração VS Code
+
+Depois de rodar o bootstrap do OpenCode, rode o script de sincronização para
+configurar o VS Code Copilot com os mesmos agents, skills, commands e
+instructions deste repo:
+
+```powershell
+.\scripts\bootstrap_repo\vscode-sync.ps1
+```
+
+O script requer PowerShell 5.1+ (nativo no Windows 10/11).
+
+O que é sincronizado:
+
+- `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
+- `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
+- `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
+- `AGENTS.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
+- MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
+
+Skills com scripts externos (doc-extract, md-export, prompt-improver): o
+script copia o executável para dentro da pasta da skill e reescreve a
+referência no `SKILL.md` para usar `wsl bash` ou `wsl python`.
+
+Para aplicar sem confirmação interativa:
+
+```powershell
+.\scripts\bootstrap_repo\vscode-sync.ps1 -Yes
+```
+
 ## Testes
 
 Alvos disponiveis:
