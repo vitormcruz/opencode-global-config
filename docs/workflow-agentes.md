@@ -47,6 +47,18 @@ otimizado para:
    Isso evita loops infinitos.
 7. **Pós-planejamento, tudo se baseia no plano aprovado** —
    falhas de teste são tratadas como bugs.
+8. **Planeje perguntando, execute com autonomia** — no
+   planejamento, `eng-software` deve consultar o humano
+   o máximo possível para alinhar escopo e expectativas.
+   Na construção, deve executar com máxima autonomia,
+   sem intervenções desnecessárias. A **única exceção**
+   é o gate de refatoração (ver premissa 25).
+9. **Granularidade sensível ao contexto** —
+   `eng-software` deve avaliar o tamanho do plano em
+   relação à capacidade de revisão do humano e ao
+   contexto do agente. Se o plano for grande demais,
+   sugere dividir. Se for pequeno demais, sugere agregar
+   funcionalidades. A decisão final é do humano.
 
 ### Revisão
 
@@ -79,9 +91,11 @@ otimizado para:
 
 ### Arquivo de planejamento
 
-12. **Arquivo como fonte de verdade** — plano, revisões e
-    status das etapas ficam persistidos. Permite retomada
-    em caso de interrupção.
+12. **Arquivo como fonte de verdade temporária** — plano,
+    revisões e status das etapas ficam persistidos.
+    Permite retomada em caso de interrupção.
+    **O arquivo é descartável**: ao fim do processo de
+    implementação, `curador-produto` o exclui.
 13. **Regras de escrita do arquivo:**
     - Na **construção**, `eng-software` apenas marca
       etapas como concluídas (checkbox). O conteúdo do
@@ -90,23 +104,85 @@ otimizado para:
       do `rev` são persistidos na seção dedicada. O plano
       original permanece intacto.
     - Modificações no plano só ocorrem na fase de
-      **Revisão do Plano**, antes da aprovação do humano.
+      **Revisão do Plano**, antes da aprovação do humano,
+      **ou durante o gate de refatoração** na construção
+      (ver premissa 25).
+    - Quando o plano é alterado durante a construção,
+      o histórico da mudança (motivo, o que mudou, decisão
+      do humano) deve ser registrado no arquivo para que
+      todos os agentes tenham conhecimento e a retomada
+      seja possível.
 14. **Contexto via arquivo** — `eng-software` usa o arquivo
     de planejamento como fonte de contexto para subagentes,
     não o histórico acumulado da conversa.
 
+### Mapa do Produto
+
+15. **O workflow exige um "Mapa do Produto"** — seção no
+    arquivo de contexto do agente (ex.: AGENTS.md,
+    instructions.md) que descreve como o projeto está
+    organizado: estrutura de diretórios, convenções de
+    documentação, padrões de nomenclatura, e qualquer
+    informação que permita a `curador-produto` validar
+    entradas e verificar consistência.
+16. **Conteúdo do Mapa é livre** — o workflow não prescreve
+    formato nem conteúdo. Cada projeto preenche conforme
+    sua realidade. O Mapa funciona como o hotspot do
+    framework: a estrutura do workflow é fixa, o Mapa é
+    o ponto de variação por projeto.
+17. **`curador-produto` é o guardião do Mapa** — se a seção
+    não existir, `curador-produto` detecta a ausência e
+    pode sugerir uma organização inicial ao humano ou
+    aceitar o que o humano fornecer. O humano decide o
+    conteúdo; `curador-produto` orienta o processo se
+    solicitado.
+18. **Posicionamento recomendado** — o Mapa do Produto deve
+    ficar no **início** do arquivo de contexto, logo após
+    as regras globais de comportamento. LLMs têm viés de
+    primazia e o Mapa é contexto fundacional: o agente
+    precisa entender o produto antes de interpretar
+    regras de workflow e executar tarefas.
+
 ### Papéis específicos
 
-15. **`curador-produto` valida, não define** — verifica se
-    a entrada do humano é consistente com a documentação
-    do produto. Não cria escopo nem requisitos. Faz
-    revisão final de documentação e estrutura.
-16. **`sec` analisa após plano de código** — requisitos de
+19. **`curador-produto` valida, não define** — verifica se
+    a entrada do humano é consistente com o Mapa do
+    Produto. Não cria escopo nem requisitos. Faz revisão
+    final de documentação e estrutura. Ao fim do processo,
+    exclui o arquivo de planejamento.
+20. **`sec` analisa após plano de código** — requisitos de
     segurança são avaliados com base no plano de
     implementação feito pelo `eng-software`.
-17. **`qa` não analisa código** — foca em execução de
+21. **`qa` não analisa código** — foca em execução de
     testes.
-18. **Testes de segurança são do `sec`**, não do `qa`.
+22. **Testes de segurança são do `sec`**, não do `qa`.
+
+### Construção
+
+23. **Construção em três etapas (TDD):**
+    1. **Testes primeiro** — `eng-software` implementa os
+       testes automatizados que devem falhar.
+    2. **Código** — implementa o código que faz os testes
+       passarem.
+    3. **Análise de refatoração** — avalia como acomodar o
+       código novo ao existente.
+24. **Na etapa de testes e código, `eng-software` executa
+    com autonomia** — sem consultar o humano, seguindo o
+    plano aprovado.
+25. **Gate de refatoração** — a análise de refatoração é
+    um ponto sensível. Acomodar código novo ao existente
+    **pode mudar o plano**. Quando `eng-software`
+    identifica essa possibilidade, **deve sempre consultar
+    o humano**. Os cenários possíveis são:
+    - Nada muda → segue normalmente.
+    - Ajuste mínimo no plano → `eng-software` propõe,
+      humano aprova, registra no arquivo e segue.
+    - Mudança significativa → a construção é pausada e o
+      plano é revisado por completo (volta à fase de
+      Revisão do Plano).
+    Independente do cenário, a decisão e o motivo devem
+    ser registrados no arquivo de planejamento para
+    rastreabilidade e retomada.
 
 ## Fluxo — Diagrama de Sequência
 
@@ -223,11 +299,32 @@ sequenceDiagram
     eng ->> dba: Criar/atualizar modelo, scripts e migrações
     dba -->> eng: Artefatos de BD +<br/>classes/comportamentos a alterar
 
-    eng ->> eng: Implementa código
+    Note right of eng: Etapa 1 — Testes primeiro
+    eng ->> eng: Implementa testes automatizados<br/>(devem falhar)
+
+    Note right of eng: Etapa 2 — Código
+    eng ->> eng: Implementa código que faz<br/>os testes passarem
 
     opt Necessidade de configs de segurança
         eng ->> sec: Gerar configs de segurança
         sec -->> eng: Configs geradas
+    end
+
+    Note right of eng: Etapa 3 — Gate de refatoração
+    eng ->> eng: Analisa como acomodar<br/>código novo ao existente
+
+    alt Refatoração não afeta o plano
+        eng ->> eng: Aplica refatoração e segue
+    else Refatoração pode mudar o plano
+        eng ->> Humano: Propõe ajustes ao plano
+        alt Humano: ajuste mínimo
+            eng ->> eng: Atualiza plano no arquivo<br/>(registra motivo e decisão)
+        else Humano: mudança significativa
+            Note right of eng: Pausa construção →<br/>volta à Revisão do Plano
+            eng ->> eng: Registra pausa no arquivo
+        else Humano: nada muda
+            eng ->> eng: Registra decisão e segue
+        end
     end
 
     eng ->> eng: Marca etapas concluídas<br/>no arquivo (apenas checkbox)
@@ -326,7 +423,7 @@ sequenceDiagram
 
 | Agente             | No planejamento                                       | Na construção                                                                         | Na validação                                                                             |
 |--------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| `curador-produto`  | —                                                     | —                                                                                     | Valida entrada contra docs do produto; revisão final                                     |
+| `curador-produto`  | —                                                     | —                                                                                     | Valida entrada contra Mapa do Produto; guardião do Mapa; revisão final                   |
 | `dba`              | Modela dados                                          | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar | Revisa e corrige artefatos de BD; devolve resumo                                         |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                 | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo         |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios        | —                                                                                     | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
