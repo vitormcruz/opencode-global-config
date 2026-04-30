@@ -154,7 +154,10 @@ otimizado para:
     pode sugerir uma organização inicial ao humano ou
     aceitar o que o humano fornecer. O humano decide o
     conteúdo; `curador-produto` orienta o processo se
-    solicitado.
+    solicitado. **É o único agente que atualiza
+    diretamente o Mapa do Produto** — mantém a seção
+    atualizada ao longo do workflow (validação, revisões
+    e finalização).
 22. **Posicionamento recomendado** — o Mapa do Produto deve
     ficar no **início** do arquivo de contexto, logo após
     as regras globais de comportamento. LLMs têm viés de
@@ -166,9 +169,15 @@ otimizado para:
 
 23. **`curador-produto` valida, não define** — verifica se
     a entrada do humano é consistente com o Mapa do
-    Produto. Não cria escopo nem requisitos. Faz revisão
-    final de documentação e estrutura. Ao fim do processo,
-    exclui o arquivo de planejamento.
+    Produto. Não cria escopo nem requisitos. Participa
+    dos loops de revisão verificando se documentação
+    planejada/produzida está conforme o Mapa. **Atualiza
+    diretamente** o Mapa do Produto e documentação de
+    produto; para artefatos de outros domínios (código,
+    BD, segurança), devolve instruções de ajuste ao
+    `orq`. Faz revisão final de documentação e
+    estrutura. Ao fim do processo, exclui o arquivo de
+    planejamento.
 24. **`sec` analisa após plano de código** — requisitos de
     segurança são avaliados com base no plano de
     implementação feito pelo `eng-software`.
@@ -211,7 +220,7 @@ otimizado para:
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes, mantém Status do arquivo                                    |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa do Produto; guardião do Mapa; revisão final                    |
+| `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa; guardião do Mapa (atualiza diretamente); revisa docs nos loops; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
@@ -308,13 +317,17 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> orq: Resumo (achado · ação · severidade)
 
+    orq ->> prod: Revisar documentação planejada (Mapa)
+    prod ->> prod: Verifica aderência ao Mapa do Produto
+    prod -->> orq: Resumo (achado · ação · severidade)
+
     Note right of orq: Revisão integrativa
     orq ->> rev: Revisão integrativa do plano
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
     rev -->> orq: Relatório (achados integrativos)
 
-    opt Ajustes integrativos necessários
-        orq ->> eng: Aplicar ajustes integrativos
+    opt Ajustes necessários (rev + curador-produto)
+        orq ->> eng: Aplicar ajustes (integrativos + documentação)
         eng -->> orq: Ajustes aplicados (resumo curto)
         opt Ajuste complexo demais para eng-software
             orq ->> dba: Ajustar modelagem
@@ -392,13 +405,17 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> orq: Resumo (achado · ação · severidade)
 
+    orq ->> prod: Revisar documentação produzida (Mapa)
+    prod ->> prod: Verifica aderência ao Mapa do Produto
+    prod -->> orq: Resumo (achado · ação · severidade)
+
     Note right of orq: Revisão integrativa
     orq ->> rev: Revisão integrativa da construção
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
     rev -->> orq: Relatório (achados integrativos)
 
-    opt Ajustes integrativos necessários
-        orq ->> eng: Aplicar ajustes integrativos
+    opt Ajustes necessários (rev + curador-produto)
+        orq ->> eng: Aplicar ajustes (integrativos + documentação)
         eng -->> orq: Ajustes aplicados (resumo curto)
         opt Ajuste complexo demais para eng-software
             orq ->> dba: Ajustar artefatos de BD
@@ -528,3 +545,17 @@ Esta seção é referência para implementação — cada harness
 ### rev
 
 ### curador-produto
+
+- **Checklist do Mapa** `prompt` `val`
+  Ao revisar, verificar: estrutura de diretórios, convenções
+  de nomenclatura, padrões de documentação definidos no Mapa.
+
+- **Atualiza Mapa diretamente** `prompt` `val`
+  Quando a funcionalidade implementada altera estrutura,
+  nomenclatura ou convenções do projeto, atualizar o Mapa
+  do Produto diretamente (sem delegar).
+
+- **Delega outros domínios** `prompt` `val`
+  Para ajustes em código, BD ou segurança detectados na
+  revisão, devolver instruções claras ao `orq` para
+  delegar ao agente correto.
