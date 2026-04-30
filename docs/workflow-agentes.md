@@ -488,3 +488,43 @@ chamados por outro agente podem interagir com o humano.
 **OpenCode**: subagentes podem interagir com o humano desde
 que configurados com o ferramental adequado (tool `ask`).
 Não há restrição de tipo de agente.
+
+## Harness por Agente
+
+Estratégias de contenção e direcionamento que podem ser
+ativadas como regras de prompt, ferramentas ou skills.
+Esta seção é referência para implementação — cada harness
+é avaliado e configurado conforme o projeto.
+
+### eng-software
+
+- **Smoke tests pós-construção** `prompt` `build`
+  Executar todos os testes ao final da etapa de construção.
+  Só prosseguir para a próxima fase se todos passarem.
+
+- **Testes existentes são intocáveis** `prompt` `build`
+  Se um teste que não estava previsto para modificação
+  falhar após alterações, não ajustá-lo. Registrar a
+  falha no arquivo e perguntar ao humano se o problema
+  é no código novo ou no teste.
+
+- **Regressão incremental** `prompt` `build`
+  Após cada modificação em código que já possui testes
+  sem previsão de alteração, executar esses testes para
+  verificar que o comportamento existente não foi afetado.
+
+- **Análise estática** `tool` `build · val`
+  Usar ferramentas determinísticas do projeto (SonarQube,
+  ESLint, Checkstyle, etc.) para validar o código antes
+  de declarar a etapa concluída. Achados bloqueantes
+  devem ser corrigidos antes de prosseguir.
+
+### dba
+
+### sec
+
+### qa
+
+### rev
+
+### curador-produto
