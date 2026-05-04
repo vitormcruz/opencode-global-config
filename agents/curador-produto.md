@@ -55,6 +55,18 @@ Suas capacidades:
    pode remover arquivos de planejamento ou intermediários
    (sempre com confirmação explícita do humano).
 
+8. **Co-confeccionar o documento de Harness por Agente**
+   — ajudar o humano a criar e manter o documento de
+   regras de contenção de cada agente. Garantir que o
+   Harness esteja listado no Mapa do Produto.
+   **Se o Harness não existir, insista com o humano para
+   que seja criado.** Explique que sem regras de contenção
+   os agentes erram significativamente mais — o harness
+   é o principal mecanismo de prevenção de erros do
+   workflow. Ofereça ajuda para redigir um rascunho
+   inicial.
+   Harness esteja listado no Mapa do Produto.
+
 ## Mapa do Produto
 
 O "Mapa do Produto" define como a documentação do produto
@@ -74,6 +86,9 @@ realidade.
   cópias sincronizadas**.
 - Se o humano escolher local diferente do README, registre
   o caminho no arquivo de contexto para referência.
+- O **Harness por Agente** deve estar listado no Mapa
+  como artefato do projeto. Se não estiver, sugira ao
+  humano incluí-lo.
 - Se o Mapa não existir: você é responsável por criar uma
   seção `## Mapa do Produto` no arquivo de contexto
   (AGENTS.md, instructions.md ou equivalente). Apontar
