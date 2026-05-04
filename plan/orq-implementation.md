@@ -6,93 +6,145 @@ Status: AGUARDANDO APROVAÇÃO DO HUMANO
 
 ## 1. Resumo
 
-Criar `agents/orq.md` — roteador stateless que:
-- Lê o arquivo de planejamento
-- Identifica a fase pelo campo `Status`
-- Spawna o agente adequado
-- Recebe resumo curto (≤ 5 linhas)
+Criar `agents/orq.md` — roteador stateless com duas funções:
+- **Rotear**: lê o arquivo de planejamento, identifica a fase
+  pelo campo `Status`, spawna o agente adequado, recebe resumo
+  curto (≤ 5 linhas)
+- **Verificar harness**: após cada retorno de agente, verifica
+  se as evidências de execução do harness foram produzidas.
+  **Esta é a tarefa mais importante do `orq`** (premissa 32)
 - Nunca executa tarefas de domínio
 
 ---
 
-## 2. Comportamentos do `orq` extraídos do workflow
+## 2. Decisões resolvidas
 
-### 2.1 Regras transversais (premissas 1, 2, 3, 5, 7, 16)
+| # | Decisão | Resolução |
+|---|---------|-----------|
+| D1 | Mapeamento `analista-bd` ↔ `dba` | `analista-bd` será renomeado para `dba` (via `git mv`) |
+| D2 | Agentes inexistentes | `orq` será criado agora; agentes futuros serão conectados quando prontos |
+| D3 | Template do arquivo de planejamento | Não será definido agora |
+
+---
+
+## 3. Comportamentos do `orq` extraídos do workflow
+
+### 3.1 Regras transversais (premissas 1, 2, 3, 5, 7, 16, 30–32)
 
 | # | Regra | Origem |
 |---|-------|--------|
 | P1 | Roteador stateless — lê arquivo, identifica fase, spawna agente | Premissa 1 |
 | P2 | Resultado no arquivo + resumo curto (≤ 5 linhas) de volta | Premissa 2 |
 | P3 | Instância nova a cada fase (obrigatório em voltas, recomendado geral) | Premissa 3 |
-| P5 | Falha de agente → registra impedimento → consulta humano (corrigir/ajustar/pular) | Premissa 5 |
+| P5 | Falha de agente → registra impedimento → consulta humano | Premissa 5 |
 | P7 | Humano controla re-revisões (evitar loops infinitos) | Premissa 7 |
-| P16 | Campo `Status` no topo do arquivo (ex: `Status: CONSTRUÇÃO — etapa 2/3`) | Premissa 16 |
+| P16 | Campo `Status` no topo do arquivo | Premissa 16 |
+| P30 | Harness é artefato formal — `curador-produto` co-confecciona | Premissa 30 |
+| P31 | Agente produz lista de evidências de harness ao final | Premissa 31 |
+| P32 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 32 |
 
-### 2.2 Ações por fase
+### 3.2 Verificação de harness (detalhamento)
+
+Após cada retorno de agente, `orq` deve:
+1. Verificar se o resumo contém a lista de evidências de harness
+2. Validar que cada item do harness do agente tem evidência
+   correspondente (apontando para log ou artefato)
+3. Se ausente ou incompleta → rejeitar retorno e solicitar
+   que o agente complete a execução
+4. Só avançar para o próximo passo quando evidências estiverem OK
+
+O `orq` não avalia a **qualidade** das evidências (isso é
+domínio dos revisores) — verifica apenas a **presença** e
+**completude** da lista.
+
+### 3.3 Ações por fase
 
 #### VALIDAÇÃO
 - Cria arquivo de planejamento com `Status: VALIDAÇÃO`
 - Spawna `curador-produto` → validar entrada contra docs
+- ✓ Verifica evidências de harness do `curador-produto`
 - Atualiza `Status: PLANEJAMENTO`
 
 #### PLANEJAMENTO
 - Spawna `eng-software` → planejar implementação
+- ✓ Verifica evidências de harness
 - Spawna `dba` → modelagem de dados
+- ✓ Verifica evidências de harness
 - Spawna `sec` → requisitos de segurança (pós-plano código)
+- ✓ Verifica evidências de harness
 - Spawna `qa` → planejar testes
+- ✓ Verifica evidências de harness
 - Atualiza `Status: REVISÃO DO PLANO`
 
 #### REVISÃO DO PLANO
 - Spawna `dba` (instância limpa) → revisar modelagem
+- ✓ Verifica evidências de harness
 - Spawna `sec` (instância limpa) → revisar segurança
+- ✓ Verifica evidências de harness
 - Spawna `qa` (instância limpa) → revisar testabilidade
+- ✓ Verifica evidências de harness
+- Spawna `curador-produto` → revisar documentação (Mapa)
+- ✓ Verifica evidências de harness
 - Spawna `rev` → revisão integrativa
-- Se ajustes integrativos: spawna `eng-software` (e/ou especialista)
+- ✓ Verifica evidências de harness
+- Se ajustes necessários: spawna `eng-software` (e/ou especialista)
 - Pergunta humano: "Resubmeter?" (P7)
 - Apresenta plano ao humano para aprovação
 - Atualiza `Status: CONSTRUÇÃO`
 
 #### CONSTRUÇÃO
 - Spawna `dba` → criar/atualizar modelo e migrações
+- ✓ Verifica evidências de harness
 - Spawna `eng-software` → TDD (testes → código → refatoração)
+- ✓ Verifica evidências de harness
 - Recebe resultado:
   - Concluído → `Status: REVISÃO DA CONSTRUÇÃO`
   - Gate disparado → `Status: REVISÃO DO PLANO` (volta)
 
 #### REVISÃO DA CONSTRUÇÃO
 - Spawna `dba` (instância limpa) → revisar artefatos BD
+- ✓ Verifica evidências de harness
 - Spawna `sec` (instância limpa) → revisar segurança
+- ✓ Verifica evidências de harness
 - Spawna `qa` (instância limpa) → revisar cobertura
+- ✓ Verifica evidências de harness
+- Spawna `curador-produto` → revisar documentação (Mapa)
+- ✓ Verifica evidências de harness
 - Spawna `rev` → revisão integrativa
+- ✓ Verifica evidências de harness
 - Se ajustes: spawna `eng-software` (e/ou especialista)
 - Pergunta humano: "Resubmeter?" (P7)
 - Atualiza `Status: TESTES`
 
 #### TESTES
 - Spawna `qa` → executar testes automatizados + manuais
+- ✓ Verifica evidências de harness
 - Se falharam: spawna `eng-software` → corrigir → humano decide re-execução
 - Spawna `sec` → testes de segurança
+- ✓ Verifica evidências de harness
 - Se falharam: spawna `eng-software` → corrigir → humano decide re-execução
 - Atualiza `Status: FINALIZAÇÃO`
 
 #### FINALIZAÇÃO
 - Spawna `curador-produto` → revisão final (docs + estrutura)
+- ✓ Verifica evidências de harness
 - Informa humano: funcionalidade concluída
 
 ---
 
-## 3. Artefato: `agents/orq.md`
+## 4. Artefato: `agents/orq.md`
 
-### 3.1 Frontmatter
+### 4.1 Frontmatter
 
 ```yaml
 ---
 description: >
   Orquestrador stateless do workflow multi-agente.
   Lê o arquivo de planejamento, identifica a fase pelo campo Status,
-  spawna o agente adequado e recebe resumo curto. Nunca executa tarefas
-  de domínio. Entrada: requisitos de nova funcionalidade ou retomada
-  de workflow em andamento.
+  spawna o agente adequado e recebe resumo curto. Após cada retorno,
+  verifica evidências de execução do harness — rejeita retornos
+  incompletos (premissa 32). Nunca executa tarefas de domínio.
+  Entrada: requisitos de nova funcionalidade ou retomada de workflow.
 mode: primary
 temperature: 0.1
 permission:
@@ -110,25 +162,32 @@ permission:
 ---
 ```
 
-### 3.2 Corpo (estrutura planejada)
+### 4.2 Corpo (estrutura planejada)
 
 Seções do corpo do agente:
 
 1. **Identidade** — roteador stateless, PT-BR, nunca executa domínio
-2. **Arquivo de planejamento** — formato esperado, campo Status,
+2. **Duas funções** — rotear + verificar harness
+3. **Arquivo de planejamento** — formato esperado, campo Status,
    criação, leitura, atualização de Status
-3. **Contrato com agentes spawnados** — resultado no arquivo +
-   resumo ≤ 5 linhas; instância nova a cada fase
-4. **Tratamento de falha** — impedimento → consulta humano →
+4. **Contrato com agentes spawnados** — resultado no arquivo +
+   resumo ≤ 5 linhas + evidências de harness; instância nova a
+   cada fase
+5. **Verificação de harness** — protocolo de verificação:
+   - Checar presença da lista de evidências no retorno
+   - Validar completude contra o harness do agente
+   - Rejeitar e solicitar reenvio se incompleto
+   - Avançar somente com evidências OK
+6. **Tratamento de falha** — impedimento → consulta humano →
    3 opções (corrigir, ajustar escopo, pular com registro)
-5. **Fluxo por fase** — tabela de decisão:
+7. **Fluxo por fase** — tabela de decisão:
    Status lido → ação → agente(s) a spawnar → próximo Status
-6. **Governança** — humano aprova plano; humano controla
+8. **Governança** — humano aprova plano; humano controla
    re-revisões; sem loops automáticos
-7. **Retomada** — se o arquivo já existe com Status preenchido,
+9. **Retomada** — se o arquivo já existe com Status preenchido,
    retomar a partir da fase indicada
 
-### 3.3 Compatibilidade VS Code
+### 4.3 Compatibilidade VS Code
 
 O `vscode-sync.ps1` já converte `agents/*.md` → `*.agent.md`:
 - Strip-AgentFrontmatter mantém apenas `description`
@@ -137,42 +196,48 @@ O `vscode-sync.ps1` já converte `agents/*.md` → `*.agent.md`:
 - Agentes spawnados precisam ser `mode: primary` para interagir
   com o humano (restrição da plataforma)
 
-**Impacto**: agentes que hoje são `mode: subagent` e que `orq`
-precisa spawnar com interação humana:
-- `analista-bd.md` → atualmente `mode: subagent` → **precisa mudar
-  para `primary`** se for usado como `dba` no workflow
-- `revisor-historia.md` → `mode: subagent` → sem impacto (não
-  participa do workflow)
+---
 
-**Decisão necessária**: os agentes `dba`, `sec`, `qa`, `rev`,
-`eng-software` e `curador-produto` ainda não existem neste repo.
-Serão criados em etapa posterior. Este plano cobre apenas o `orq`.
+## 5. Renomeação: `analista-bd` → `dba`
+
+O `analista-bd` será renomeado para `dba` via `git mv`:
+
+```bash
+git mv agents/analista-bd.md agents/dba.md
+```
+
+**Impactos a atualizar:**
+- `AGENTS.md` — referência ao agente
+- `tests/opencode-int-test/agents-test.bats` — teste que busca
+  `analista-bd` passa a buscar `dba`
+- `vscode-sync.ps1` — sem mudança (processa `agents/*.md`
+  genericamente)
+- Conteúdo do `agents/dba.md` — atualizar identidade e
+  referências internas
 
 ---
 
-## 4. Agentes referenciados pelo workflow (ainda não existentes)
+## 6. Agentes referenciados (ainda não existentes)
 
-O `orq` referencia agentes que precisarão ser criados:
+| Agente | Existente? | Observação |
+|--------|-----------|-------------|
+| `eng-software` | Não | Será criado depois |
+| `curador-produto` | Não | Será criado depois |
+| `dba` | **Sim** | Após renomeação do `analista-bd` |
+| `sec` | Não | Será criado depois |
+| `qa` | Não | Será criado depois |
+| `rev` | Não | Será criado depois |
 
-| Agente no workflow | Existente? | Observação |
-|--------------------|-----------|-------------|
-| `eng-software` | Não | — |
-| `curador-produto` | Não | — |
-| `dba` | **Parcial** | `analista-bd` cobre parte do escopo |
-| `sec` | Não | — |
-| `qa` | Não | — |
-| `rev` | Não | — |
-
-**Decisão para o humano**: mapear `analista-bd` → `dba` (renomear?)
-ou manter separados? Isso afeta o `task` permission do `orq`.
+O `orq` será implementado agora referenciando todos.
+Agentes que ainda não existem serão conectados quando prontos.
 
 ---
 
-## 5. Modificações em testes
+## 7. Modificações em testes
 
-### 5.1 Teste existente: `tests/opencode-int-test/agents-test.bats`
+### 7.1 `tests/opencode-int-test/agents-test.bats`
 
-Adicionar:
+**Adicionar:**
 
 ```bats
 @test "behavioral: GET /agent lista o agente orq" {
@@ -182,30 +247,34 @@ Adicionar:
 }
 ```
 
-### 5.2 Nenhum outro teste existente é afetado
+**Alterar** (renomeação analista-bd → dba):
 
-- `commands-test.bats`, `skills-activation-test.bats`, etc. não
-  tocam em agentes.
+```bats
+# DE:
+@test "behavioral: GET /agent lista o agente analista-bd" {
+  ...
+  assert_output --partial "analista-bd"
+}
+
+# PARA:
+@test "behavioral: GET /agent lista o agente dba" {
+  ...
+  assert_output --partial "dba"
+}
+```
+
+### 7.2 Nenhum outro teste existente é afetado
 
 ---
 
-## 6. Checklist de entrega
+## 8. Checklist de entrega
 
+- [ ] `git mv agents/analista-bd.md agents/dba.md`
+- [ ] Atualizar conteúdo de `agents/dba.md` (identidade)
 - [ ] Criar `agents/orq.md` com frontmatter + corpo
-- [ ] Adicionar teste em `agents-test.bats`
-- [ ] Rodar `make test` — validar que o novo agente é listado
-- [ ] Verificar que `vscode-sync.ps1` gera `orq.agent.md` corretamente
-- [ ] Atualizar `AGENTS.md` se necessário (description do orq no
-      contexto de agentes disponíveis)
-
----
-
-## 7. Decisões pendentes (para o humano)
-
-1. **Mapeamento `analista-bd` ↔ `dba`**: renomear ou manter separados?
-2. **Agentes inexistentes**: o `orq` deve ser criado agora referenciando
-   agentes futuros (graceful fallback) ou só após todos existirem?
-3. **Formato do arquivo de planejamento**: definir template agora ou
-   deixar para a implementação do `eng-software`?
-4. **Harnesses do orq**: incluir regras de harness (ex: timeout por
-   fase, limite de re-tentativas) ou manter simples na v1?
+- [ ] Atualizar teste `analista-bd` → `dba` em `agents-test.bats`
+- [ ] Adicionar teste do `orq` em `agents-test.bats`
+- [ ] Atualizar `AGENTS.md` (referências ao `dba` e novo `orq`)
+- [ ] Rodar `make test`
+- [ ] Verificar que `vscode-sync.ps1` gera `orq.agent.md` e
+      `dba.agent.md` corretamente
