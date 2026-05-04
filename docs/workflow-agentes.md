@@ -13,15 +13,15 @@ otimizado para:
 
 ## Agentes
 
-| Sigla             | Nome completo          | Tipo               | Modos              |
-|-------------------|------------------------|---------------------|---------------------|
-| `orq`             | Orquestrador           | Roteador stateless  | —                   |
-| `eng-software`    | Engenheiro de Software | Executor            | plan · build · val  |
-| `curador-produto` | Curador de Produto     | Executor            | val                 |
-| `dba`             | Analista de BD         | Executor            | plan · build · val  |
-| `sec`             | Analista Cyber         | Executor            | plan · build · val  |
-| `rev`             | Revisor Integrativo    | Executor            | val                 |
-| `qa`              | Testador               | Executor            | plan · val          |
+| Sigla             | Nome completo          | Tipo               | Fases onde atua                                              |
+|-------------------|------------------------|---------------------|--------------------------------------------------------------|
+| `orq`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
+| `eng-software`    | Engenheiro de Software | Executor            | Planejamento, Construção, Ajustes integrativos               |
+| `curador-produto` | Curador de Produto     | Executor            | Validação, Revisão do Plano, Revisão da Construção, Finalização |
+| `dba`             | Analista de BD         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
+| `sec`             | Analista Cyber         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção, Testes |
+| `rev`             | Revisor Integrativo    | Executor            | Revisão do Plano, Revisão da Construção                        |
+| `qa`              | Testador               | Executor            | Planejamento, Revisão do Plano, Revisão da Construção, Testes  |
 
 ## Premissas
 
@@ -139,11 +139,11 @@ otimizado para:
 
 19. **O workflow exige um "Mapa do Produto"** — seção no
     arquivo de contexto do agente (ex.: AGENTS.md,
-    instructions.md) que descreve como o projeto está
-    organizado: estrutura de diretórios, convenções de
-    documentação, padrões de nomenclatura, e qualquer
-    informação que permita a `curador-produto` validar
-    entradas e verificar consistência.
+    instructions.md) que define como a documentação do
+    produto se organiza e como deve ser mantida. Funciona
+    como contrato de documentação: permite ao
+    `curador-produto` validar entradas e verificar
+    consistência.
 20. **Conteúdo do Mapa é livre** — o workflow não prescreve
     formato nem conteúdo. Cada projeto preenche conforme
     sua realidade. O Mapa funciona como o hotspot do
