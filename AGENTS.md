@@ -87,6 +87,14 @@ instruções de ativação, deixar uma ativação no corpo da skill não a faz s
 - Ao criar novas skills, **não descreva** formas de ativação da skill em seu corpo sem que isso tenha sido descrito 
 nas descrições
 
+# Sincronização Workflow ↔ Agentes
+- Agentes implementados devem estar sincronizados com o
+  workflow definido em `docs/workflow-agentes.md`.
+- Qualquer mudança no workflow deve refletir nos agentes
+  correspondentes, e vice-versa.
+- Mudanças no workflow **ou** nos agentes **sempre** passam
+  pelo humano antes de serem aplicadas — sem exceção.
+
 # Regras Obrigatórias Pora Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.

@@ -23,6 +23,56 @@ otimizado para:
 | `rev`             | Revisor Integrativo    | Executor            | Revisão do Plano, Revisão da Construção                        |
 | `qa`              | Testador               | Executor            | Planejamento, Revisão do Plano, Revisão da Construção, Testes  |
 
+### Especialidades
+
+| Agente             | No planejamento                                        | Na construção                                                                          | Na validação                                                                              |
+|--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes, verifica evidências de harness                              |
+| `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
+| `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa; guardião do Mapa; revisa docs nos loops; co-confecciona harness; revisão final |
+| `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
+| `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
+| `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
+| `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
+
+## Contratos do Workflow
+
+O workflow se apoia em quatro contratos formais. Cada um
+é um artefato do projeto — deve existir, ser mantido e
+ser verificável.
+
+### 1. Mapa do Produto
+
+Seção no arquivo de contexto do agente (AGENTS.md,
+instructions.md ou equivalente) que define como a
+documentação do produto se organiza e como deve ser
+mantida. É o contrato de documentação do projeto.
+Premissas detalhadas: 19–22.
+
+### 2. Harness por Agente
+
+Documento com as regras de contenção e direcionamento
+de cada agente — ativadas como regras de prompt,
+ferramentas ou skills. `curador-produto` é co-responsável
+por ajudar a confeccioná-lo e o Harness deve estar
+listado no Mapa do Produto. Premissas detalhadas: 30–32.
+
+### 3. Arquivo de Planejamento
+
+Arquivo temporário que serve de fonte de verdade durante
+o processamento do workflow. É a entrada e saída dos
+agentes — todo resultado é persistido nele, todo contexto
+é lido dele. Descartável ao fim do processo.
+Premissas detalhadas: 15–18.
+
+### 4. Verificação de Harness
+
+Saída obrigatória dos agentes: lista de evidências de
+execução do harness apontando para logs ou artefatos que
+comprovem o cumprimento das regras. O `orq` é responsável
+por verificar essas evidências — **esta é a sua tarefa
+mais importante**. Premissas detalhadas: 30–32.
+
 ## Premissas
 
 ### Orquestração
@@ -31,7 +81,8 @@ otimizado para:
    planejamento, identifica a fase atual pelo campo
    `Status`, spawna o agente adequado e recebe de volta
    apenas um resumo curto. `orq` **nunca executa** tarefas
-   de domínio; sua única função é rotear.
+   de domínio; suas funções são **rotear** e **verificar
+   evidências de harness** (ver premissa 32).
 2. **Contrato de retorno: resultado no arquivo, resumo
    curto** — todo agente spawnado por `orq` persiste seu
    resultado no arquivo de planejamento e retorna apenas
@@ -214,17 +265,77 @@ otimizado para:
     ser registrados no arquivo de planejamento para
     rastreabilidade e retomada.
 
-## Especialidades dos Agentes
+### Harness por Agente
 
-| Agente             | No planejamento                                        | Na construção                                                                          | Na validação                                                                              |
-|--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes, mantém Status do arquivo                                    |
-| `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa; guardião do Mapa (atualiza diretamente); revisa docs nos loops; revisão final |
-| `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
-| `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
-| `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
-| `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
+30. **Harness como artefato formal do projeto** — cada
+    agente possui um conjunto de regras de contenção e
+    direcionamento (harness) que podem ser ativadas como
+    regras de prompt, ferramentas ou skills. O documento
+    de Harness é um artefato do projeto — `curador-produto`
+    é co-responsável por ajudar a confeccioná-lo e deve
+    registrá-lo no Mapa do Produto. Cada harness é
+    avaliado e configurado conforme o projeto.
+31. **Evidência de execução do harness** — todo agente
+    que possui harness deve produzir, ao final da sua
+    execução, uma lista de evidências de cumprimento
+    apontando para logs ou artefatos que comprovem a
+    execução. Essa lista é persistida no arquivo de
+    planejamento.
+32. **Verificação de harness pelo `orq`** — após receber
+    o retorno de um agente, `orq` verifica se as
+    evidências de harness foram produzidas. Se estiverem
+    ausentes ou incompletas, `orq` rejeita o retorno e
+    solicita ao agente que complete a execução. **Esta é
+    a tarefa mais importante do `orq`** — garante que
+    as regras de contenção estão sendo efetivamente
+    seguidas, não apenas declaradas.
+
+#### eng-software
+
+- **Smoke tests pós-construção** `prompt` `build`
+  Executar todos os testes ao final da etapa de construção.
+  Só prosseguir para a próxima fase se todos passarem.
+
+- **Testes existentes são intocáveis** `prompt` `build`
+  Se um teste que não estava previsto para modificação
+  falhar após alterações, não ajustá-lo. Registrar a
+  falha no arquivo e perguntar ao humano se o problema
+  é no código novo ou no teste.
+
+- **Regressão incremental** `prompt` `build`
+  Após cada modificação em código que já possui testes
+  sem previsão de alteração, executar esses testes para
+  verificar que o comportamento existente não foi afetado.
+
+- **Análise estática** `tool` `build · val`
+  Usar ferramentas determinísticas do projeto (SonarQube,
+  ESLint, Checkstyle, etc.) para validar o código antes
+  de declarar a etapa concluída. Achados bloqueantes
+  devem ser corrigidos antes de prosseguir.
+
+#### dba
+
+#### sec
+
+#### qa
+
+#### rev
+
+#### curador-produto
+
+- **Checklist do Mapa** `prompt` `val`
+  Ao revisar, verificar: estrutura de diretórios, convenções
+  de nomenclatura, padrões de documentação definidos no Mapa.
+
+- **Atualiza Mapa diretamente** `prompt` `val`
+  Quando a funcionalidade implementada altera estrutura,
+  nomenclatura ou convenções do projeto, atualizar o Mapa
+  do Produto diretamente (sem delegar).
+
+- **Delega outros domínios** `prompt` `val`
+  Para ajustes em código, BD ou segurança detectados na
+  revisão, devolver instruções claras ao `orq` para
+  delegar ao agente correto.
 
 ## Fluxo — Diagrama de Sequência
 
@@ -251,6 +362,8 @@ sequenceDiagram
     %% ── INÍCIO ──────────────────────────────
     Humano ->> orq: Nova funcionalidade (requisitos)
     orq ->> orq: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
+
+    Note right of orq: Regra geral: após cada retorno<br/>de agente, orq verifica<br/>evidências de harness (P32)
 
     %% ── VALIDAÇÃO DE ENTRADA ────────────────────
     rect rgb(255, 250, 240)
@@ -505,57 +618,3 @@ chamados por outro agente podem interagir com o humano.
 **OpenCode**: subagentes podem interagir com o humano desde
 que configurados com o ferramental adequado (tool `ask`).
 Não há restrição de tipo de agente.
-
-## Harness por Agente
-
-Estratégias de contenção e direcionamento que podem ser
-ativadas como regras de prompt, ferramentas ou skills.
-Esta seção é referência para implementação — cada harness
-é avaliado e configurado conforme o projeto.
-
-### eng-software
-
-- **Smoke tests pós-construção** `prompt` `build`
-  Executar todos os testes ao final da etapa de construção.
-  Só prosseguir para a próxima fase se todos passarem.
-
-- **Testes existentes são intocáveis** `prompt` `build`
-  Se um teste que não estava previsto para modificação
-  falhar após alterações, não ajustá-lo. Registrar a
-  falha no arquivo e perguntar ao humano se o problema
-  é no código novo ou no teste.
-
-- **Regressão incremental** `prompt` `build`
-  Após cada modificação em código que já possui testes
-  sem previsão de alteração, executar esses testes para
-  verificar que o comportamento existente não foi afetado.
-
-- **Análise estática** `tool` `build · val`
-  Usar ferramentas determinísticas do projeto (SonarQube,
-  ESLint, Checkstyle, etc.) para validar o código antes
-  de declarar a etapa concluída. Achados bloqueantes
-  devem ser corrigidos antes de prosseguir.
-
-### dba
-
-### sec
-
-### qa
-
-### rev
-
-### curador-produto
-
-- **Checklist do Mapa** `prompt` `val`
-  Ao revisar, verificar: estrutura de diretórios, convenções
-  de nomenclatura, padrões de documentação definidos no Mapa.
-
-- **Atualiza Mapa diretamente** `prompt` `val`
-  Quando a funcionalidade implementada altera estrutura,
-  nomenclatura ou convenções do projeto, atualizar o Mapa
-  do Produto diretamente (sem delegar).
-
-- **Delega outros domínios** `prompt` `val`
-  Para ajustes em código, BD ou segurança detectados na
-  revisão, devolver instruções claras ao `orq` para
-  delegar ao agente correto.
