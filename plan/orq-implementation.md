@@ -200,20 +200,8 @@ O `vscode-sync.ps1` já converte `agents/*.md` → `*.agent.md`:
 
 ## 5. Renomeação: `analista-bd` → `dba`
 
-O `analista-bd` será renomeado para `dba` via `git mv`:
-
-```bash
-git mv agents/analista-bd.md agents/dba.md
-```
-
-**Impactos a atualizar:**
-- `AGENTS.md` — referência ao agente
-- `tests/opencode-int-test/agents-test.bats` — teste que busca
-  `analista-bd` passa a buscar `dba`
-- `vscode-sync.ps1` — sem mudança (processa `agents/*.md`
-  genericamente)
-- Conteúdo do `agents/dba.md` — atualizar identidade e
-  referências internas
+Renomeação já executada via `git mv agents/analista-bd.md
+agents/dba.md`. Conteúdo reescrito. Testes atualizados.
 
 ---
 

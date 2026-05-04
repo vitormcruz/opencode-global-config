@@ -187,8 +187,8 @@ load "../../helpers/test_helper"
 # Agentes — cada .md em agents/ deve ter frontmatter válido
 # ---------------------------------------------------------------------------
 
-@test "agents/analista-bd.md tem frontmatter" {
-  run grep -c "^---$" "$REPO_ROOT/agents/analista-bd.md"
+@test "agents/dba.md tem frontmatter" {
+  run grep -c "^---$" "$REPO_ROOT/agents/dba.md"
   assert_success
   [[ "$output" -ge 2 ]]
 }
