@@ -47,7 +47,7 @@ Seção no arquivo de contexto do agente (AGENTS.md,
 instructions.md ou equivalente) que define como a
 documentação do produto se organiza e como deve ser
 mantida. É o contrato de documentação do projeto.
-Premissas detalhadas: 19–22.
+Premissas detalhadas: 20–23.
 
 ### 2. Harness por Agente
 
@@ -55,15 +55,15 @@ Documento com as regras de contenção e direcionamento
 de cada agente — ativadas como regras de prompt,
 ferramentas ou skills. `curador-produto` é co-responsável
 por ajudar a confeccioná-lo e o Harness deve estar
-listado no Mapa do Produto. Premissas detalhadas: 30–32.
+listado no Mapa do Produto. Premissas detalhadas: 31–33.
 
 ### 3. Arquivo de Planejamento
 
 Arquivo temporário que serve de fonte de verdade durante
-o processamento do workflow. É a entrada e saída dos
-agentes — todo resultado é persistido nele, todo contexto
-é lido dele. Descartável ao fim do processo.
-Premissas detalhadas: 15–18.
+o processamento do workflow. É gerado pelos agentes e é 
+a entrada e saída de cada um deles — todo resultado é persistido 
+nele, todo contexto é lido dele. Descartável ao fim do processo.
+Premissas detalhadas: 16–19.
 
 ### 4. Verificação de Harness
 
@@ -71,7 +71,7 @@ Saída obrigatória dos agentes: lista de evidências de
 execução do harness apontando para logs ou artefatos que
 comprovem o cumprimento das regras. O `orq` é responsável
 por verificar essas evidências — **esta é a sua tarefa
-mais importante**. Premissas detalhadas: 30–32.
+mais importante**. Premissas detalhadas: 31–33.
 
 ## Premissas
 
@@ -82,7 +82,7 @@ mais importante**. Premissas detalhadas: 30–32.
    `Status`, spawna o agente adequado e recebe de volta
    apenas um resumo curto. `orq` **nunca executa** tarefas
    de domínio; suas funções são **rotear** e **verificar
-   evidências de harness** (ver premissa 32).
+   evidências de harness** (ver premissa 33).
 2. **Contrato de retorno: resultado no arquivo, resumo
    curto** — todo agente spawnado por `orq` persiste seu
    resultado no arquivo de planejamento e retorna apenas
@@ -102,22 +102,30 @@ mais importante**. Premissas detalhadas: 30–32.
    o impedimento no arquivo e retorna resumo ao `orq`,
    que consulta o humano para decidir: corrigir e
    retentar, ajustar escopo, ou pular com registro.
+6. **Agentes são agnósticos do workflow** — o prompt de
+   cada agente descreve **capacidades** (o que sabe
+   fazer), nunca fases ou sequência do workflow. Apenas
+   o `orq` conhece o workflow e decide quando chamar
+   cada agente. Os demais agentes funcionam tanto
+   sozinhos (chamados diretamente pelo humano) quanto
+   orquestrados (spawnados pelo `orq`), sem mudança
+   no prompt.
 
 ### Governança
 
-6. **Humano aprova o plano** antes da construção iniciar.
-7. **Humano controla re-revisões** — após ajustes, o humano
+7. **Humano aprova o plano** antes da construção iniciar.
+8. **Humano controla re-revisões** — após ajustes, o humano
    decide se resubmete para revisão ou segue adiante.
    Isso evita loops infinitos.
-8. **Pós-planejamento, tudo se baseia no plano aprovado** —
+9. **Pós-planejamento, tudo se baseia no plano aprovado** —
    falhas de teste são tratadas como bugs.
-9. **Planeje perguntando, execute com autonomia** — no
-   planejamento, `eng-software` deve consultar o humano
-   o máximo possível para alinhar escopo e expectativas.
-   Na construção, deve executar com máxima autonomia,
-   sem intervenções desnecessárias. A **única exceção**
-   é o gate de refatoração (ver premissa 27).
-10. **Granularidade sensível ao contexto** —
+10. **Planeje perguntando, execute com autonomia** — no
+    planejamento, `eng-software` deve consultar o humano
+    o máximo possível para alinhar escopo e expectativas.
+    Na construção, deve executar com máxima autonomia,
+    sem intervenções desnecessárias. A **única exceção**
+    é o gate de refatoração (ver premissa 30).
+11. **Granularidade sensível ao contexto** —
     `eng-software` deve avaliar o tamanho do plano em
     relação à capacidade de revisão do humano e ao
     contexto do agente. Se o plano for grande demais,
@@ -126,7 +134,7 @@ mais importante**. Premissas detalhadas: 30–32.
 
 ### Revisão
 
-11. **Revisão híbrida: especialistas + integrativa** —
+12. **Revisão híbrida: especialistas + integrativa** —
     revisores especializados (`dba`, `sec`, `qa`) revisam
     e corrigem artefatos da sua área, devolvendo resumo
     estruturado. `rev` atua como revisor integrativo:
@@ -134,7 +142,7 @@ mais importante**. Premissas detalhadas: 30–32.
     plano, mas **não corrige** — devolve relatório para
     `eng-software` aplicar diretamente (exceto correções
     complexas, delegadas ao especialista).
-12. **Revisores são sempre instâncias novas com contexto
+13. **Revisores são sempre instâncias novas com contexto
     limpo** — toda revisão é executada por uma instância
     nova do agente, sem histórico da conversa anterior.
     O agente que planejou ou construiu **nunca** revisa
@@ -143,30 +151,30 @@ mais importante**. Premissas detalhadas: 30–32.
     exceção e se aplica tanto aos revisores especializados
     (`dba`, `sec`, `qa`) quanto ao revisor integrativo
     (`rev`).**
-13. **Base de revisão** — revisores avaliam com base no
+14. **Base de revisão** — revisores avaliam com base no
     plano aprovado e nos insumos originais do humano
     (requisitos, critérios de aceitação, regras de
     negócio). O formato dos insumos não é prescrito
     pelo workflow.
-14. **Formato do resumo de revisão especializada:**
+15. **Formato do resumo de revisão especializada:**
     - **Achado**: o que estava errado
     - **Ação**: o que foi corrigido
     - **Severidade**: bloqueante ou melhoria
 
 ### Arquivo de planejamento
 
-15. **Arquivo como fonte de verdade temporária** — plano,
+16. **Arquivo como fonte de verdade temporária** — plano,
     revisões e status das etapas ficam persistidos.
     Permite retomada em caso de interrupção.
     **O arquivo é descartável**: ao fim do processo de
     implementação, `curador-produto` o exclui.
-16. **Campo `Status` obrigatório** — o arquivo deve conter
+17. **Campo `Status` obrigatório** — o arquivo deve conter
     um campo de status no topo (ex.:
     `Status: CONSTRUÇÃO — etapa 2/3`) que permite ao
     `orq` identificar a fase atual sem interpretar o
     conteúdo. O agente que conclui uma fase atualiza o
     status antes de retornar ao `orq`.
-17. **Regras de escrita do arquivo:**
+18. **Regras de escrita do arquivo:**
     - Na **construção**, `eng-software` apenas marca
       etapas como concluídas (checkbox). O conteúdo do
       plano não é alterado.
@@ -176,31 +184,31 @@ mais importante**. Premissas detalhadas: 30–32.
     - Modificações no plano só ocorrem na fase de
       **Revisão do Plano**, antes da aprovação do humano,
       **ou durante o gate de refatoração** na construção
-      (ver premissa 27).
+      (ver premissa 30).
     - Quando o plano é alterado durante a construção,
       o histórico da mudança (motivo, o que mudou, decisão
       do humano) deve ser registrado no arquivo para que
       todos os agentes tenham conhecimento e a retomada
       seja possível.
-18. **Contexto via arquivo** — agentes usam o arquivo de
+19. **Contexto via arquivo** — agentes usam o arquivo de
     planejamento como fonte de contexto, não o histórico
     acumulado da conversa.
 
 ### Mapa do Produto
 
-19. **O workflow exige um "Mapa do Produto"** — seção no
+20. **O workflow exige um "Mapa do Produto"** — seção no
     arquivo de contexto do agente (ex.: AGENTS.md,
     instructions.md) que define como a documentação do
     produto se organiza e como deve ser mantida. Funciona
     como contrato de documentação: permite ao
     `curador-produto` validar entradas e verificar
     consistência.
-20. **Conteúdo do Mapa é livre** — o workflow não prescreve
+21. **Conteúdo do Mapa é livre** — o workflow não prescreve
     formato nem conteúdo. Cada projeto preenche conforme
     sua realidade. O Mapa funciona como o hotspot do
     framework: a estrutura do workflow é fixa, o Mapa é
     o ponto de variação por projeto.
-21. **`curador-produto` é o guardião do Mapa** — se a seção
+22. **`curador-produto` é o guardião do Mapa** — se a seção
     não existir, `curador-produto` detecta a ausência e
     pode sugerir uma organização inicial ao humano ou
     aceitar o que o humano fornecer. O humano decide o
@@ -209,7 +217,7 @@ mais importante**. Premissas detalhadas: 30–32.
     diretamente o Mapa do Produto** — mantém a seção
     atualizada ao longo do workflow (validação, revisões
     e finalização).
-22. **Posicionamento recomendado** — o Mapa do Produto deve
+23. **Posicionamento recomendado** — o Mapa do Produto deve
     ficar no **início** do arquivo de contexto, logo após
     as regras globais de comportamento. LLMs têm viés de
     primazia e o Mapa é contexto fundacional: o agente
@@ -218,7 +226,7 @@ mais importante**. Premissas detalhadas: 30–32.
 
 ### Papéis específicos
 
-23. **`curador-produto` valida, não define** — verifica se
+24. **`curador-produto` valida, não define** — verifica se
     a entrada do humano é consistente com o Mapa do
     Produto. Não cria escopo nem requisitos. Participa
     dos loops de revisão verificando se documentação
@@ -229,26 +237,26 @@ mais importante**. Premissas detalhadas: 30–32.
     `orq`. Faz revisão final de documentação e
     estrutura. Ao fim do processo, exclui o arquivo de
     planejamento.
-24. **`sec` analisa após plano de código** — requisitos de
+25. **`sec` analisa após plano de código** — requisitos de
     segurança são avaliados com base no plano de
     implementação feito pelo `eng-software`.
-25. **`qa` não analisa código** — foca em execução de
+26. **`qa` não analisa código** — foca em execução de
     testes.
-26. **Testes de segurança são do `sec`**, não do `qa`.
+27. **Testes de segurança são do `sec`**, não do `qa`.
 
 ### Construção
 
-27. **Construção em três etapas (TDD):**
+28. **Construção em três etapas (TDD):**
     1. **Testes primeiro** — `eng-software` implementa os
        testes automatizados que devem falhar.
     2. **Código** — implementa o código que faz os testes
        passarem.
     3. **Análise de refatoração** — avalia como acomodar o
        código novo ao existente.
-28. **Na etapa de testes e código, `eng-software` executa
+29. **Na etapa de testes e código, `eng-software` executa
     com autonomia** — sem consultar o humano, seguindo o
     plano aprovado.
-29. **Gate de refatoração** — a análise de refatoração é
+30. **Gate de refatoração** — a análise de refatoração é
     um ponto sensível. Acomodar código novo ao existente
     **pode mudar o plano**. Quando `eng-software`
     identifica essa possibilidade, **deve sempre consultar
@@ -267,7 +275,7 @@ mais importante**. Premissas detalhadas: 30–32.
 
 ### Harness por Agente
 
-30. **Harness como artefato formal do projeto** — cada
+31. **Harness como artefato formal do projeto** — cada
     agente possui um conjunto de regras de contenção e
     direcionamento (harness) que podem ser ativadas como
     regras de prompt, ferramentas ou skills. O documento
@@ -275,13 +283,20 @@ mais importante**. Premissas detalhadas: 30–32.
     é co-responsável por ajudar a confeccioná-lo e deve
     registrá-lo no Mapa do Produto. Cada harness é
     avaliado e configurado conforme o projeto.
-31. **Evidência de execução do harness** — todo agente
+    **Preferência por ferramentas determinísticas** —
+    sempre que possível, regras de harness devem ser
+    implementadas via ferramentas determinísticas (linters,
+    análise estática, testes automatizados, validadores
+    de schema) em vez de depender apenas de instruções
+    de prompt. Ferramentas determinísticas produzem
+    resultados reproduzíveis e verificáveis.
+32. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, uma lista de evidências de cumprimento
     apontando para logs ou artefatos que comprovem a
     execução. Essa lista é persistida no arquivo de
     planejamento.
-32. **Verificação de harness pelo `orq`** — após receber
+33. **Verificação de harness pelo `orq`** — após receber
     o retorno de um agente, `orq` verifica se as
     evidências de harness foram produzidas. Se estiverem
     ausentes ou incompletas, `orq` rejeita o retorno e
@@ -324,8 +339,8 @@ mais importante**. Premissas detalhadas: 30–32.
 #### curador-produto
 
 - **Checklist do Mapa** `prompt` `val`
-  Ao revisar, verificar: estrutura de diretórios, convenções
-  de nomenclatura, padrões de documentação definidos no Mapa.
+  Ao revisar, verificar: confere se faltou atualizar alguma documentação com base no 
+  "Mapa do Produto".
 
 - **Atualiza Mapa diretamente** `prompt` `val`
   Quando a funcionalidade implementada altera estrutura,
@@ -363,7 +378,7 @@ sequenceDiagram
     Humano ->> orq: Nova funcionalidade (requisitos)
     orq ->> orq: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
 
-    Note right of orq: Regra geral: após cada retorno<br/>de agente, orq verifica<br/>evidências de harness (P32)
+    Note right of orq: Regra geral: após cada retorno<br/>de agente, orq verifica<br/>evidências de harness (P33)
 
     %% ── VALIDAÇÃO DE ENTRADA ────────────────────
     rect rgb(255, 250, 240)

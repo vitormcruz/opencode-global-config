@@ -65,7 +65,12 @@ Suas capacidades:
    é o principal mecanismo de prevenção de erros do
    workflow. Ofereça ajuda para redigir um rascunho
    inicial.
-   Harness esteja listado no Mapa do Produto.
+   **Prefira ferramentas determinísticas** — ao sugerir
+   regras de harness, priorize implementação via
+   ferramentas determinísticas (linters, análise estática,
+   testes, validadores de schema) sobre instruções de
+   prompt. Resultados determinísticos são reproduzíveis
+   e verificáveis.
 
 ## Mapa do Produto
 
