@@ -55,7 +55,7 @@ Documento com as regras de contenção e direcionamento
 de cada agente — ativadas como regras de prompt,
 ferramentas ou skills. `curador-produto` é co-responsável
 por ajudar a confeccioná-lo e o Harness deve estar
-listado no Mapa do Produto. Premissas detalhadas: 31–33.
+listado no Mapa do Produto. Premissas detalhadas: 31–34.
 
 ### 3. Arquivo de Planejamento
 
@@ -71,7 +71,7 @@ Saída obrigatória dos agentes: lista de evidências de
 execução do harness apontando para logs ou artefatos que
 comprovem o cumprimento das regras. O `orq` é responsável
 por verificar essas evidências — **esta é a sua tarefa
-mais importante**. Premissas detalhadas: 31–33.
+mais importante**. Premissas detalhadas: 31–34.
 
 ## Premissas
 
@@ -82,7 +82,7 @@ mais importante**. Premissas detalhadas: 31–33.
    `Status`, spawna o agente adequado e recebe de volta
    apenas um resumo curto. `orq` **nunca executa** tarefas
    de domínio; suas funções são **rotear** e **verificar
-   evidências de harness** (ver premissa 33).
+   evidências de harness** (ver premissa 34).
 2. **Contrato de retorno: resultado no arquivo, resumo
    curto** — todo agente spawnado por `orq` persiste seu
    resultado no arquivo de planejamento e retorna apenas
@@ -290,13 +290,20 @@ mais importante**. Premissas detalhadas: 31–33.
     de schema) em vez de depender apenas de instruções
     de prompt. Ferramentas determinísticas produzem
     resultados reproduzíveis e verificáveis.
-32. **Evidência de execução do harness** — todo agente
+32. **Agente localiza seu harness antes de executar** —
+    ao iniciar uma tarefa, o agente localiza o Mapa do
+    Produto no arquivo de contexto do projeto e verifica
+    se há harness configurado para ele. Se houver, segue
+    as regras definidas. Se não houver, recomenda ao
+    humano acionar `curador-produto` para confeccionar
+    o harness antes de prosseguir.
+33. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, uma lista de evidências de cumprimento
     apontando para logs ou artefatos que comprovem a
     execução. Essa lista é persistida no arquivo de
     planejamento.
-33. **Verificação de harness pelo `orq`** — após receber
+34. **Verificação de harness pelo `orq`** — após receber
     o retorno de um agente, `orq` verifica se as
     evidências de harness foram produzidas. Se estiverem
     ausentes ou incompletas, `orq` rejeita o retorno e
@@ -304,6 +311,10 @@ mais importante**. Premissas detalhadas: 31–33.
     a tarefa mais importante do `orq`** — garante que
     as regras de contenção estão sendo efetivamente
     seguidas, não apenas declaradas.
+
+> **Resumo da sequência harness:**
+> agente localiza harness (P32) → executa regras →
+> produz evidências (P33) → orq verifica (P34).
 
 #### eng-software
 

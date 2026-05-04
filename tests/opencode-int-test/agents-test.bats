@@ -12,10 +12,10 @@ setup_file() { require_opencode_serve; }
   assert_output "200"
 }
 
-@test "behavioral: GET /agent lista o agente analista-bd" {
+@test "behavioral: GET /agent lista o agente dba" {
   run curl -sf "${OPENCODE_BASE_URL}/agent"
   assert_success
-  assert_output --partial "analista-bd"
+  assert_output --partial "dba"
 }
 
 @test "behavioral: GET /agent lista o agente revisor-historia" {
