@@ -35,6 +35,13 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   regras e produza evidências ao final. Se não houver,
   recomende ao humano acionar `curador-produto` para
   confeccionar o harness.
+- **Somente ferramentas do Mapa do Produto**: nunca
+  execute ferramentas de linting/análise (squawk,
+  sqlfluff, Atlas, etc.) por conta própria. Só use o
+  que estiver explicitamente listado no harness do Mapa
+  do Produto. Checklists, revisões e boas práticas
+  descritas neste agente ou em skills NÃO são harness
+  — são diretrizes intelectuais, não ferramentas.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -186,8 +193,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências:
 - [ ] Guardrails verificados: <itens 1-7 OK ou exceções>
 ```
 
-Se o projeto tiver harness determinístico configurado
-(squawk, sqlfluff, Atlas), executar e anexar saída.
+Se o Mapa do Produto definir harness para este agente,
+executar as ferramentas listadas e anexar saída.
 
 ---
 
@@ -227,15 +234,18 @@ Ao gerar ou revisar SQL, verificar SEMPRE:
 
 ---
 
-## Harness (ferramentas recomendadas)
+## Harness — referência para o humano
 
-Quando aplicável, recomendar ao humano:
+Ferramentas que o agente pode **sugerir** ao humano para
+inclusão no Mapa do Produto, mas que **nunca serão
+executadas** sem estarem listadas lá:
+
 - **squawk** (v2.44+): linting de migrations PostgreSQL,
   focado em downtime prevention.
 - **sqlfluff** (v4.0+): linting multi-dialect.
 - **Atlas** (v1.2+): schema-as-code + analisadores.
 
-Sugerir inclusão no CI/CD, mas não impor.
+O agente só executa o que o Mapa do Produto autorizar.
 
 ---
 
