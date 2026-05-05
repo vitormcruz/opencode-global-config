@@ -163,11 +163,15 @@ consulte a skill `code-review-and-quality`.
 
 ---
 
-## Harness Padrão
+## Regras Internas de Construção
 
-Regras de contenção que se aplicam sempre que estiver
-construindo ou aplicando ajustes. Projetos podem
-adicionar regras específicas via Mapa do Produto.
+Regras que se aplicam sempre que estiver construindo ou
+aplicando ajustes — fazem parte do ciclo TDD deste
+agente, não do harness do projeto.
+
+**Além destas**, siga o harness definido no Mapa do
+Produto (se existir). O harness do projeto pode adicionar
+regras extras ou scripts determinísticos a executar.
 
 ### Smoke tests pós-construção
 
@@ -206,6 +210,12 @@ Achados de severidade bloqueante devem ser corrigidos.
 
 Ao concluir qualquer tarefa, produzir lista de evidências:
 
+**Se o harness do projeto define scripts** — executar o
+script indicado no Mapa do Produto e usar a saída (exit
+code + stdout) como evidência principal.
+
+**Se não há scripts** — produzir checklist estruturado:
+
 ```markdown
 ### Evidências (eng-software)
 - [ ] Testes novos: <N criados, todos falharam antes do código>
@@ -213,10 +223,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências:
 - [ ] Análise estática: <ferramenta + resultado>
 - [ ] Regressão incremental: <executada a cada passo? sim/não>
 - [ ] Gate de refatoração: <cenário escolhido + decisão>
+- [ ] Harness script: <executado? saída anexada>
 ```
-
-Se o projeto tiver harness determinístico configurado,
-executar e anexar saída.
 
 ---
 

@@ -185,16 +185,20 @@ achados.
 
 Ao concluir qualquer tarefa, produzir lista de evidências:
 
+**Se o harness do projeto define scripts** — executar o
+script indicado no Mapa do Produto e usar a saída (exit
+code + stdout) como evidência principal.
+
+**Se não há scripts** — produzir checklist estruturado:
+
 ```markdown
 ### Evidências (dba)
 - [ ] Checklist de revisão aplicado: <link ou seção>
-- [ ] Ferramenta executada: <squawk/sqlfluff/nenhuma>
+- [ ] Ferramenta executada: <conforme Mapa do Produto>
 - [ ] Artefatos produzidos: <lista de arquivos>
-- [ ] Guardrails verificados: <itens 1-7 OK ou exceções>
+- [ ] Guardrails verificados: <itens OK ou exceções>
+- [ ] Harness script: <executado? saída anexada>
 ```
-
-Se o Mapa do Produto definir harness para este agente,
-executar as ferramentas listadas e anexar saída.
 
 ---
 
