@@ -12,8 +12,10 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
   curto (≤ 5 linhas)
 - **Verificar harness**: após cada retorno de agente, verifica
   se as evidências de execução do harness foram produzidas.
-  **Esta é a tarefa mais importante do `orq`** (premissa 32)
+  **Esta é a tarefa mais importante do `orq`** (premissa 34)
 - Nunca executa tarefas de domínio
+- É o **único** agente que conhece o workflow e a sequência de
+  fases (premissa 6 — agentes são agnósticos do workflow)
 
 ---
 
@@ -21,15 +23,16 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 
 | # | Decisão | Resolução |
 |---|---------|-----------|
-| D1 | Mapeamento `analista-bd` ↔ `dba` | `analista-bd` será renomeado para `dba` (via `git mv`) |
-| D2 | Agentes inexistentes | `orq` será criado agora; agentes futuros serão conectados quando prontos |
-| D3 | Template do arquivo de planejamento | Não será definido agora |
+| D1 | Mapeamento `analista-bd` ↔ `dba` | Renomeação já executada via `git mv` |
+| D2 | Agentes inexistentes | `orq` criado agora; futuros conectados quando prontos |
+| D3 | Template do arquivo de planejamento | Não definido agora |
+| D4 | Skills do `orq` | Nenhuma skill atribuída — `orq` é router puro (ver seção 9) |
 
 ---
 
 ## 3. Comportamentos do `orq` extraídos do workflow
 
-### 3.1 Regras transversais (premissas 1, 2, 3, 5, 7, 16, 30–32)
+### 3.1 Regras transversais (premissas 1–6, 8, 17, 31–34)
 
 | # | Regra | Origem |
 |---|-------|--------|
@@ -37,25 +40,38 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 | P2 | Resultado no arquivo + resumo curto (≤ 5 linhas) de volta | Premissa 2 |
 | P3 | Instância nova a cada fase (obrigatório em voltas, recomendado geral) | Premissa 3 |
 | P5 | Falha de agente → registra impedimento → consulta humano | Premissa 5 |
-| P7 | Humano controla re-revisões (evitar loops infinitos) | Premissa 7 |
-| P16 | Campo `Status` no topo do arquivo | Premissa 16 |
-| P30 | Harness é artefato formal — `curador-produto` co-confecciona | Premissa 30 |
-| P31 | Agente produz lista de evidências de harness ao final | Premissa 31 |
-| P32 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 32 |
+| P6 | **Agentes são agnósticos do workflow** — só `orq` conhece fases e sequência | Premissa 6 |
+| P8 | Humano controla re-revisões (evitar loops infinitos) | Premissa 8 |
+| P17 | Campo `Status` obrigatório no topo do arquivo | Premissa 17 |
+| P31 | Harness definido no Mapa do Produto (não hardcoded) | Premissa 31 |
+| P32 | Agente localiza harness no Mapa antes de executar | Premissa 32 |
+| P33 | Agente produz evidências (script: exit code+stdout; prompt: declaração) | Premissa 33 |
+| P34 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 34 |
 
 ### 3.2 Verificação de harness (detalhamento)
 
-Após cada retorno de agente, `orq` deve:
+Sequência completa (workflow P31→P34):
+1. Agente localiza seu harness no Mapa do Produto (P32)
+2. Agente executa script ou segue regras de prompt
+3. Agente produz evidências e persiste no arquivo (P33)
+4. **`orq` verifica** presença e completude das evidências (P34)
+
+Protocolo do `orq` após cada retorno:
 1. Verificar se o resumo contém a lista de evidências de harness
 2. Validar que cada item do harness do agente tem evidência
-   correspondente (apontando para log ou artefato)
+   correspondente (exit code + stdout para scripts, declaração
+   estruturada para prompt-only)
 3. Se ausente ou incompleta → rejeitar retorno e solicitar
    que o agente complete a execução
 4. Só avançar para o próximo passo quando evidências estiverem OK
 
-O `orq` não avalia a **qualidade** das evidências (isso é
-domínio dos revisores) — verifica apenas a **presença** e
-**completude** da lista.
+O `orq` não avalia a **qualidade** das evidências (domínio dos
+revisores) — verifica apenas **presença** e **completude**.
+
+**Caso sem harness**: se o agente retorna informando que não
+encontrou harness no Mapa, `orq` registra e recomenda ao humano
+acionar `curador-produto` para confeccioná-lo. Pode prosseguir
+sem harness se o humano autorizar.
 
 ### 3.3 Ações por fase
 
@@ -88,7 +104,7 @@ domínio dos revisores) — verifica apenas a **presença** e
 - Spawna `rev` → revisão integrativa
 - ✓ Verifica evidências de harness
 - Se ajustes necessários: spawna `eng-software` (e/ou especialista)
-- Pergunta humano: "Resubmeter?" (P7)
+- Pergunta humano: "Resubmeter?" (P8)
 - Apresenta plano ao humano para aprovação
 - Atualiza `Status: CONSTRUÇÃO`
 
@@ -113,16 +129,16 @@ domínio dos revisores) — verifica apenas a **presença** e
 - Spawna `rev` → revisão integrativa
 - ✓ Verifica evidências de harness
 - Se ajustes: spawna `eng-software` (e/ou especialista)
-- Pergunta humano: "Resubmeter?" (P7)
+- Pergunta humano: "Resubmeter?" (P8)
 - Atualiza `Status: TESTES`
 
 #### TESTES
 - Spawna `qa` → executar testes automatizados + manuais
 - ✓ Verifica evidências de harness
-- Se falharam: spawna `eng-software` → corrigir → humano decide re-execução
+- Se falharam: spawna `eng-software` → corrigir → humano decide
 - Spawna `sec` → testes de segurança
 - ✓ Verifica evidências de harness
-- Se falharam: spawna `eng-software` → corrigir → humano decide re-execução
+- Se falharam: spawna `eng-software` → corrigir → humano decide
 - Atualiza `Status: FINALIZAÇÃO`
 
 #### FINALIZAÇÃO
@@ -143,7 +159,8 @@ description: >
   Lê o arquivo de planejamento, identifica a fase pelo campo Status,
   spawna o agente adequado e recebe resumo curto. Após cada retorno,
   verifica evidências de execução do harness — rejeita retornos
-  incompletos (premissa 32). Nunca executa tarefas de domínio.
+  incompletos (premissa 34). Nunca executa tarefas de domínio.
+  Único agente que conhece o workflow e a sequência de fases.
   Entrada: requisitos de nova funcionalidade ou retomada de workflow.
 mode: primary
 temperature: 0.1
@@ -166,7 +183,8 @@ permission:
 
 Seções do corpo do agente:
 
-1. **Identidade** — roteador stateless, PT-BR, nunca executa domínio
+1. **Identidade** — roteador stateless, PT-BR, nunca executa domínio,
+   único conhecedor do workflow (P6)
 2. **Duas funções** — rotear + verificar harness
 3. **Arquivo de planejamento** — formato esperado, campo Status,
    criação, leitura, atualização de Status
@@ -175,9 +193,12 @@ Seções do corpo do agente:
    cada fase
 5. **Verificação de harness** — protocolo de verificação:
    - Checar presença da lista de evidências no retorno
-   - Validar completude contra o harness do agente
+   - Para scripts: validar exit code + stdout
+   - Para prompt-only: validar declaração estruturada
+   - Caso agente não encontre harness no Mapa → registrar e
+     recomendar ao humano acionar `curador-produto`
    - Rejeitar e solicitar reenvio se incompleto
-   - Avançar somente com evidências OK
+   - Avançar somente com evidências OK (ou autorização do humano)
 6. **Tratamento de falha** — impedimento → consulta humano →
    3 opções (corrigir, ajustar escopo, pular com registro)
 7. **Fluxo por fase** — tabela de decisão:
@@ -213,7 +234,7 @@ agents/dba.md`. Conteúdo reescrito. Testes atualizados.
 | `curador-produto` | Não | Será criado depois |
 | `dba` | **Sim** | Após renomeação do `analista-bd` |
 | `sec` | Não | Será criado depois |
-| `qa` | Não | Será criado depois |
+| `qa` | **Sim** | Criado recentemente |
 | `rev` | Não | Será criado depois |
 
 O `orq` será implementado agora referenciando todos.
@@ -235,34 +256,48 @@ Agentes que ainda não existem serão conectados quando prontos.
 }
 ```
 
-**Alterar** (renomeação analista-bd → dba):
-
-```bats
-# DE:
-@test "behavioral: GET /agent lista o agente analista-bd" {
-  ...
-  assert_output --partial "analista-bd"
-}
-
-# PARA:
-@test "behavioral: GET /agent lista o agente dba" {
-  ...
-  assert_output --partial "dba"
-}
-```
-
 ### 7.2 Nenhum outro teste existente é afetado
 
 ---
 
 ## 8. Checklist de entrega
 
-- [ ] `git mv agents/analista-bd.md agents/dba.md`
-- [ ] Atualizar conteúdo de `agents/dba.md` (identidade)
+- [x] `git mv agents/analista-bd.md agents/dba.md`
+- [x] Atualizar conteúdo de `agents/dba.md` (identidade)
 - [ ] Criar `agents/orq.md` com frontmatter + corpo
-- [ ] Atualizar teste `analista-bd` → `dba` em `agents-test.bats`
+- [x] Atualizar teste `analista-bd` → `dba` em `agents-test.bats`
 - [ ] Adicionar teste do `orq` em `agents-test.bats`
-- [ ] Atualizar `AGENTS.md` (referências ao `dba` e novo `orq`)
+- [ ] Atualizar `AGENTS.md` (referência ao `orq`)
 - [ ] Rodar `make test`
-- [ ] Verificar que `vscode-sync.ps1` gera `orq.agent.md` e
-      `dba.agent.md` corretamente
+- [ ] Verificar que `vscode-sync.ps1` gera `orq.agent.md`
+
+---
+
+## 9. Análise de skills do repositório
+
+O `orq` é um **router puro** — não executa tarefas de domínio.
+Por premissa 6, ele é o único que conhece o workflow. Nenhuma
+skill do repo é atribuída diretamente ao `orq`.
+
+Análise das skills curadas do repo vs. relevância para `orq`:
+
+| Skill | Relevância para `orq` | Destinatário real |
+|-------|----------------------|-------------------|
+| planning-and-task-breakdown | Nenhuma — `orq` não planeja, roteia | `eng-software` |
+| spec-driven-development | Nenhuma — `orq` não escreve specs | `eng-software` |
+| code-review-and-quality | Nenhuma — `orq` não revisa código | `rev`, `eng-software` |
+| test-driven-development | Nenhuma | `eng-software`, `qa` |
+| debugging-and-error-recovery | Nenhuma | `eng-software` |
+| security-and-hardening | Nenhuma | `sec` |
+| documentation-and-adrs | Nenhuma | `curador-produto`, `rev` |
+| git-workflow-and-versioning | Nenhuma | `eng-software` |
+| api-and-interface-design | Nenhuma | `eng-software` |
+| code-simplification | Nenhuma | `eng-software` |
+| performance-optimization | Nenhuma | `eng-software` |
+| frontend-ui-engineering | Nenhuma | `eng-software` |
+| accessibility-audit | Nenhuma | `qa` (via harness) |
+
+**Conclusão**: o `orq` não recebe skills. Suas instruções são
+auto-contidas no prompt (workflow + protocolo de verificação).
+Skills serão atribuídas aos agentes executores conforme seus
+harnesses forem definidos no Mapa do Produto de cada projeto.
