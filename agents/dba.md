@@ -68,10 +68,16 @@ estratégia de migração.
   locks, replicação, multi-tenant)
 
 **Saídas**:
-- Modelo conceitual (DBML ou diagrama textual)
+- Esboço do modelo da funcionalidade (DBML ou diagrama
+  textual) + descrição de como se integra ao modelo
+  completo existente
 - Lista de migrações planejadas (ordem + dependências)
 - Riscos e mitigações
 - Critérios de sucesso
+
+**Regra inviolável**: SEMPRE revisar o esboço do modelo
+com o humano antes de considerá-lo aprovado. Não avance
+sem essa validação.
 
 **Regra**: ao modelar, NÃO gerar SQL executável final.
 Permitido apenas rascunhos marcados como "NÃO EXECUTAR".
@@ -85,12 +91,13 @@ Materializar um plano aprovado em artefatos executáveis.
 **Pré-condição**: plano aprovado fornecido pelo solicitante.
 
 **O que fazer**:
-1. Ler o plano aprovado.
-2. Executar com máxima autonomia — só pare para o humano
+1. Ler o plano aprovado (incluindo esboço validado).
+2. Integrar o esboço do modelo ao modelo completo.
+3. Executar com máxima autonomia — só pare para o humano
    em caso de desvio material ou dúvida que mude a
    estratégia.
-3. Criar/atualizar artefatos:
-   - Modelo conceitual atualizado (DBML)
+4. Criar/atualizar artefatos:
+   - Modelo conceitual integrado (DBML)
    - SQL de migração (up + down quando viável)
    - Scripts auxiliares (seed, backfill, validação)
 4. Registrar impacto no código (ver formato abaixo).
