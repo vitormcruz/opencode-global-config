@@ -42,6 +42,12 @@ setup_file() { require_opencode_serve; }
   assert_output --partial "curador-produto"
 }
 
+@test "behavioral: GET /agent lista o agente eng-software" {
+  run curl -sf "${OPENCODE_BASE_URL}/agent"
+  assert_success
+  assert_output --partial "eng-software"
+}
+
 @test "behavioral: cada agente retornado tem campo 'name'" {
   run bash -c "
     curl -sf '${OPENCODE_BASE_URL}/agent' \
