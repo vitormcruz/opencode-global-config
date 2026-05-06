@@ -101,6 +101,10 @@ nas descrições
 - Framework: BATS-core em `tests/` — rodar com `make test`.
 - **Execução sempre via WSL** — os testes usam Bash/BATS e devem
   ser executados de dentro do WSL: `wsl -e bash -c "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
+- **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
+  executados no WSL/Linux devem usar LF (`\n`), nunca CRLF (`\r\n`).
+  CRLF causa falhas silenciosas (ex: `grep "^---$"` não encontra `---\r`).
+  Ao criar esses arquivos no Windows, garantir conversão para LF antes do commit.
 - A estrutura de testes deve espelhar a estrutura do código.
 - Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `-test`.
 - Não criar testes para scripts cuja única função é executar ou orquestrar testes.

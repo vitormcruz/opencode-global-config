@@ -504,6 +504,16 @@ else
 fi
 say ""
 
+# --- Playwright (browser-testing) ---
+say "[playwright] Skill: browser-testing (via WSL)"
+if has_cmd playwright; then
+  status_ok "playwright"
+else
+  status_missing "playwright"
+  status_hint "Instalar: bash scripts/browser-test/install-playwright.sh --yes"
+fi
+say ""
+
 # --- OCR (opcional, melhora extracao de PDFs escaneados) ---
 say "[ocrmypdf + tesseract + ghostscript + qpdf] Opcional: OCR de PDFs"
 ocr_missing=()
