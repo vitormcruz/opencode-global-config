@@ -12,7 +12,7 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
   curto (≤ 5 linhas)
 - **Verificar harness**: após cada retorno de agente, verifica
   se as evidências de execução do harness foram produzidas.
-  **Esta é a tarefa mais importante do `orq`** (premissa 34)
+  **Esta é a tarefa mais importante do `orq`** (premissa 35)
 - Nunca executa tarefas de domínio
 - É o **único** agente que conhece o workflow e a sequência de
   fases (premissa 6 — agentes são agnósticos do workflow)
@@ -32,7 +32,7 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 
 ## 3. Comportamentos do `orq` extraídos do workflow
 
-### 3.1 Regras transversais (premissas 1–6, 8, 17, 31–34)
+### 3.1 Regras transversais (premissas 1–7, 9, 18, 32–35)
 
 | # | Regra | Origem |
 |---|-------|--------|
@@ -41,20 +41,21 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 | P3 | Instância nova a cada fase (obrigatório em voltas, recomendado geral) | Premissa 3 |
 | P5 | Falha de agente → registra impedimento → consulta humano | Premissa 5 |
 | P6 | **Agentes são agnósticos do workflow** — só `orq` conhece fases e sequência | Premissa 6 |
-| P8 | Humano controla re-revisões (evitar loops infinitos) | Premissa 8 |
-| P17 | Campo `Status` obrigatório no topo do arquivo | Premissa 17 |
-| P31 | Harness definido no Mapa do Produto (não hardcoded) | Premissa 31 |
-| P32 | Agente localiza harness no Mapa antes de executar | Premissa 32 |
-| P33 | Agente produz evidências (script: exit code+stdout; prompt: declaração) | Premissa 33 |
-| P34 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 34 |
+| P7 | **Seleção de modelo por fase** — pergunta via tool no início do workflow | Premissa 7 |
+| P9 | Humano controla re-revisões (evitar loops infinitos) | Premissa 9 |
+| P18 | Campo `Status` obrigatório no topo do arquivo | Premissa 18 |
+| P32 | Harness definido no Mapa do Produto (não hardcoded) | Premissa 32 |
+| P33 | Agente localiza harness no Mapa antes de executar | Premissa 33 |
+| P34 | Agente produz evidências (script: exit code+stdout; prompt: declaração) | Premissa 34 |
+| P35 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 35 |
 
 ### 3.2 Verificação de harness (detalhamento)
 
-Sequência completa (workflow P31→P34):
-1. Agente localiza seu harness no Mapa do Produto (P32)
+Sequência completa (workflow P32→P35):
+1. Agente localiza seu harness no Mapa do Produto (P33)
 2. Agente executa script ou segue regras de prompt
-3. Agente produz evidências e persiste no arquivo (P33)
-4. **`orq` verifica** presença e completude das evidências (P34)
+3. Agente produz evidências e persiste no arquivo (P34)
+4. **`orq` verifica** presença e completude das evidências (P35)
 
 Protocolo do `orq` após cada retorno:
 1. Verificar se o resumo contém a lista de evidências de harness
@@ -159,7 +160,7 @@ description: >
   Lê o arquivo de planejamento, identifica a fase pelo campo Status,
   spawna o agente adequado e recebe resumo curto. Após cada retorno,
   verifica evidências de execução do harness — rejeita retornos
-  incompletos (premissa 34). Nunca executa tarefas de domínio.
+  incompletos (premissa 35). Nunca executa tarefas de domínio.
   Único agente que conhece o workflow e a sequência de fases.
   Entrada: requisitos de nova funcionalidade ou retomada de workflow.
 mode: primary
@@ -207,6 +208,17 @@ Seções do corpo do agente:
    re-revisões; sem loops automáticos
 9. **Retomada** — se o arquivo já existe com Status preenchido,
    retomar a partir da fase indicada
+10. **Seleção de modelo por fase** — no início do workflow,
+    via tool `ask`/`question`, apresentar ao humano:
+    - Opção 1: "Usar o modelo atual para todas as fases"
+    - Opção 2: "Definir por fase" (resposta livre:
+      `<nº>. <modelo>`; fases omitidas = modelo atual)
+    Fases: 1-VALIDAÇÃO 2-PLANEJAMENTO 3-REVISÃO DO PLANO
+    4-CONSTRUÇÃO 5-REVISÃO DA CONSTRUÇÃO 6-TESTES
+    7-FINALIZAÇÃO.
+    Registrar mapa no arquivo de planejamento.
+    VS Code: passar `model` ao `runSubagent`.
+    OpenCode: parar antes de fase com modelo diferente.
 
 ### 4.3 Compatibilidade VS Code
 
