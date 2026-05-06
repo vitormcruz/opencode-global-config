@@ -91,6 +91,22 @@ bashrc_has_bats_lib_path() {
   [ -f "$bashrc_file" ] && grep -Eq '^[[:space:]]*export[[:space:]]+BATS_LIB_PATH="\$HOME/\.local/lib/bats"([[:space:]]*|[[:space:]]*#.*)$' "$bashrc_file"
 }
 
+bashrc_has_fnm_node_path() {
+  [ -f "$bashrc_file" ] && grep -q 'fnm/node-versions' "$bashrc_file"
+}
+
+# Resolve o path estático do node ativo no fnm (sem eval fnm env)
+fnm_active_node_bin() {
+  local fnm_dir="${FNM_DIR:-$HOME/.local/share/fnm}"
+  local versions_dir="$fnm_dir/node-versions"
+  [ -d "$versions_dir" ] || return 1
+  # Pega a versão mais recente instalada
+  local latest
+  latest=$(ls "$versions_dir" | sort -V | tail -1)
+  [ -n "$latest" ] || return 1
+  echo "$versions_dir/$latest/installation/bin"
+}
+
 setup_bashrc() {
   if ! bashrc_has_exa; then
     cat >>"$bashrc_file" <<'EOF'
@@ -113,6 +129,15 @@ EOF
 
 # opencode-config: bibliotecas do BATS
 export BATS_LIB_PATH="$HOME/.local/lib/bats"
+EOF
+  fi
+
+  local node_bin
+  if ! bashrc_has_fnm_node_path && node_bin=$(fnm_active_node_bin); then
+    cat >>"$bashrc_file" <<EOF
+
+# opencode-config: node (fnm) - path estatico para shells nao-interativos
+export PATH="$node_bin:\$PATH"
 EOF
   fi
 }
@@ -242,6 +267,13 @@ plan() {
   else
     say "ENV   $bashrc_file << BATS_LIB_PATH=\$HOME/.local/lib/bats"
   fi
+
+  local node_bin
+  if bashrc_has_fnm_node_path; then
+    say "OK    $bashrc_file PATH includes fnm node"
+  elif node_bin=$(fnm_active_node_bin); then
+    say "ENV   $bashrc_file << PATH=$node_bin:\$PATH"
+  fi
 }
 
 apply() {
@@ -316,7 +348,6 @@ main() {
   plan
   confirm
   apply
-  sync_skills
   warn_shannon
 }
 

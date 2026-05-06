@@ -88,6 +88,8 @@ Para padrões de teste, convenções de nomenclatura e
 anti-padrões, consulte a skill `test-driven-development`.
 Para decomposição de critérios de aceitação, consulte
 `planning-and-task-breakdown`.
+Para testes funcionais que requerem navegação em UI,
+consulte a skill `browser-testing`.
 
 ---
 
