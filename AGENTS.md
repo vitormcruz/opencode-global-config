@@ -100,7 +100,16 @@ nas descrições
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
 - Framework: BATS-core em `tests/` — rodar com `make test`.
 - **Execução sempre via WSL** — os testes usam Bash/BATS e devem
-  ser executados de dentro do WSL: `wsl -e bash -c "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
+  ser executados dentro do WSL.
+  - Se já estiver **dentro do WSL** (terminal Linux): execute diretamente
+    (`bash ./scripts/...`, `make test`, etc.)
+  - Se estiver **fora do WSL** (PowerShell/cmd): use `wsl -- bash -ic`
+    (shell interativo, carrega `~/.bashrc`) em vez de `wsl -e bash -c`
+    (não-interativo, não carrega `~/.bashrc`):
+    `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
+  - `wsl -e bash -c` só é adequado para comandos sem dependência de PATH
+    do usuário (ex: `python3`, `git`). Ferramentas como `node`, `fnm`,
+    `bats` instaladas via shell manager **não** estarão disponíveis.
 - **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
   executados no WSL/Linux devem usar LF (`\n`), nunca CRLF (`\r\n`).
   CRLF causa falhas silenciosas (ex: `grep "^---$"` não encontra `---\r`).
