@@ -88,8 +88,9 @@ instruções de ativação, deixar uma ativação no corpo da skill não a faz s
 nas descrições
 
 # Sincronização Workflow ↔ Agentes
-- Agentes implementados devem estar sincronizados com o
-  workflow definido em `docs/workflow-agentes.md`.
+- Agentes implementados devem estar sincronizados com os
+  workflows definidos em `docs/workflow-agentes-dev.md` e
+  `docs/workflow-curadoria.md`.
 - Qualquer mudança no workflow deve refletir nos agentes
   correspondentes, e vice-versa.
 - Mudanças no workflow **ou** nos agentes **sempre** passam
@@ -101,15 +102,14 @@ nas descrições
 - Framework: BATS-core em `tests/` — rodar com `make test`.
 - **Execução sempre via WSL** — os testes usam Bash/BATS e devem
   ser executados dentro do WSL.
-  - Se já estiver **dentro do WSL** (terminal Linux): execute diretamente
-    (`bash ./scripts/...`, `make test`, etc.)
-  - Se estiver **fora do WSL** (PowerShell/cmd): use `wsl -- bash -ic`
-    (shell interativo, carrega `~/.bashrc`) em vez de `wsl -e bash -c`
-    (não-interativo, não carrega `~/.bashrc`):
+  - **Regra**: sempre use `wsl -- bash -ic "COMANDO"` para executar
+    comandos no WSL a partir do PowerShell/cmd. Nunca use
+    `wsl -e bash -c` — esse modo não carrega `~/.bashrc` e
+    ferramentas como `node`, `fnm`, `bats` não estarão no PATH.
+  - Exemplo canônico:
     `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
-  - `wsl -e bash -c` só é adequado para comandos sem dependência de PATH
-    do usuário (ex: `python3`, `git`). Ferramentas como `node`, `fnm`,
-    `bats` instaladas via shell manager **não** estarão disponíveis.
+  - Se já estiver dentro do WSL (terminal Linux), execute
+    diretamente sem prefixo `wsl`.
 - **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
   executados no WSL/Linux devem usar LF (`\n`), nunca CRLF (`\r\n`).
   CRLF causa falhas silenciosas (ex: `grep "^---$"` não encontra `---\r`).

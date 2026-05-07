@@ -1,4 +1,4 @@
-# Workflow de Agentes — Desenvolvimento de Software
+# Workflow de Agentes — Desenvolvimento (`dev`)
 
 ## Objetivo
 
@@ -47,15 +47,16 @@ Seção no arquivo de contexto do agente (AGENTS.md,
 instructions.md ou equivalente) que define como a
 documentação do produto se organiza e como deve ser
 mantida. É o contrato de documentação do projeto.
-Premissas detalhadas: 21–24.
+Definição e criação: ver `docs/workflow-curadoria.md`.
+Premissa de consumo: 21.
 
 ### 2. Harness por Agente
 
-Documento com as regras de contenção e direcionamento
-de cada agente — ativadas como regras de prompt,
-ferramentas ou skills. `curador-produto` é co-responsável
-por ajudar a confeccioná-lo e o Harness deve estar
-listado no Mapa do Produto. Premissas detalhadas: 32–36.
+Regras de contenção e direcionamento de cada agente —
+ativadas como regras de prompt, ferramentas ou scripts.
+O Harness deve estar listado no Mapa do Produto.
+Definição e criação: ver `docs/workflow-curadoria.md`.
+Premissas de execução: 32–36.
 
 ### 3. Arquivo de Planejamento
 
@@ -214,33 +215,13 @@ mais importante**. Premissas detalhadas: 32–36.
 
 ### Mapa do Produto
 
-21. **O workflow exige um "Mapa do Produto"** — seção no
-    arquivo de contexto do agente (ex.: AGENTS.md,
-    instructions.md) que define como a documentação do
-    produto se organiza e como deve ser mantida. Funciona
-    como contrato de documentação: permite ao
-    `curador-produto` validar entradas e verificar
-    consistência.
-22. **Conteúdo do Mapa é livre** — o workflow não prescreve
-    formato nem conteúdo. Cada projeto preenche conforme
-    sua realidade. O Mapa funciona como o hotspot do
-    framework: a estrutura do workflow é fixa, o Mapa é
-    o ponto de variação por projeto.
-23. **`curador-produto` é o guardião do Mapa** — se a seção
-    não existir, `curador-produto` detecta a ausência e
-    pode sugerir uma organização inicial ao humano ou
-    aceitar o que o humano fornecer. O humano decide o
-    conteúdo; `curador-produto` orienta o processo se
-    solicitado. **É o único agente que atualiza
-    diretamente o Mapa do Produto** — mantém a seção
-    atualizada ao longo do workflow (validação, revisões
-    e finalização).
-24. **Posicionamento recomendado** — o Mapa do Produto deve
-    ficar no **início** do arquivo de contexto, logo após
-    as regras globais de comportamento. LLMs têm viés de
-    primazia e o Mapa é contexto fundacional: o agente
-    precisa entender o produto antes de interpretar
-    regras de workflow e executar tarefas.
+21. **O workflow exige um Mapa do Produto** — a definição,
+    criação e manutenção do Mapa são responsabilidade do
+    `curador-produto` conforme descrito em
+    `docs/workflow-curadoria.md`. O `curador-produto`
+    detecta ausência do Mapa na fase de VALIDAÇÃO e
+    executa o processo de curadoria inline antes de
+    devolver controle ao `orq`.
 
 ### Papéis específicos
 
@@ -293,48 +274,22 @@ mais importante**. Premissas detalhadas: 32–36.
 
 ### Harness por Agente
 
-32. **Harness é definido no Mapa do Produto** — o harness
-    de cada agente é um artefato do projeto, definido e
-    mantido no Mapa do Produto. Não é hardcoded no prompt
-    do agente. `curador-produto` é co-responsável por
-    orientar o humano na criação e registra o harness no
-    Mapa. Cada projeto define quais regras e ferramentas
-    compõem o harness de cada agente.
-    **Fonte única obrigatória** — nenhum agente assume
-    harness embutido por ferramenta. Toda ferramenta,
-    regra ou exceção de harness deve estar registrada no
-    Mapa do Produto.
-    **Registro obrigatório por agente** — no Mapa, cada
-    agente deve ter uma seção no bloco de harness com um
-    dos cenários abaixo:
-    - Se a seção tiver descrição de regras/ferramentas,
-      o harness está definido e deve ser executado.
-    - Se a seção não existir ou estiver vazia, o harness
-      não está definido para aquele agente.
-    - Se a seção contiver a frase literal
-      `SEM HARNESS A PEDIDO DO HUMANO`, considera-se
-      decisão explícita de não usar harness naquele caso.
-    **Preferência por ferramentas determinísticas** —
-    sempre que possível, regras de harness devem ser
-    implementadas via ferramentas determinísticas (linters,
-    análise estática, testes automatizados, validadores
-    de schema) em vez de depender apenas de instruções
-    de prompt. Ferramentas determinísticas produzem
-    resultados reproduzíveis e verificáveis.
-    **Implementação preferencial: scripts executáveis** —
-    a forma recomendada de implementar harness é via
-    scripts que encapsulam as verificações determinísticas.
-    Scripts produzem resultado binário (passa/falha),
-    geram evidência automaticamente e são versionáveis.
+32. **Harness é definido no Mapa do Produto** — a criação
+    e manutenção do harness são responsabilidade do
+    `curador-produto` conforme descrito em
+    `docs/workflow-curadoria.md`. Harness é **obrigatório
+    na construção e na revisão**, sempre que o agente
+    altera artefatos.
 33. **Agente localiza seu harness antes de executar** —
-    ao iniciar uma tarefa, o agente localiza o Mapa do
-    Produto no arquivo de contexto do projeto e verifica
-    se há harness configurado para ele. Se houver seção
-    com regras/ferramentas, executa o harness registrado
-    (script e/ou regras). Se a seção contiver
-    `SEM HARNESS A PEDIDO DO HUMANO`, segue sem harness.
-    Se a seção não existir ou estiver vazia, recomenda ao
-    humano acionar `curador-produto` para
+    ao iniciar uma tarefa na construção ou revisão, o
+    agente localiza o Mapa do Produto no arquivo de
+    contexto do projeto e verifica se há harness
+    configurado para ele. Se houver seção com
+    regras/ferramentas, executa as regras aplicáveis à
+    atividade atual (construção ou revisão). Se a seção
+    contiver `SEM HARNESS A PEDIDO DO HUMANO`, segue sem
+    harness. Se a seção não existir ou estiver vazia,
+    recomenda ao humano acionar `curador-produto` para
     confeccionar/registrar antes de prosseguir.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
@@ -354,183 +309,15 @@ mais importante**. Premissas detalhadas: 32–36.
     **Esta é a tarefa mais importante do `orq`** — garante
     que as regras de contenção estão sendo efetivamente
     seguidas, não apenas declaradas.
-
 36. **Instalação de harness durante execução** — quando um
-  agente com `bash: allow` identificar dependência de
-  harness faltante, pode executar o script de instalação
-  de harness do projeto para avançar com segurança. No
-  workflow padrão, `eng-software` pode executar esse
-  script quando necessário, sempre respeitando o que
-  está definido no Mapa e registrando evidências.
+    agente com `bash: allow` identificar dependência de
+    harness faltante, pode executar o script de instalação
+    de harness do projeto para avançar com segurança.
 
 > **Resumo da sequência harness:**
 > agente localiza seção de harness no Mapa (P33) →
-> executa quando houver regras → produz evidências (P34)
-> → orq verifica conforme conteúdo da seção (P35).
-
-#### Convenção recomendada de scripts
-
-A convenção abaixo é **recomendada** — o humano decide se
-a adota ou usa outra estrutura.
-
-```
-harness/<agente>/<fase>.sh
-```
-
-- **Interface**: recebe como `$1` o path do arquivo de
-  planejamento.
-- **Saída**: exit 0 (ok) / exit 1 (bloqueante). Achados em
-  stdout, uma linha por achado:
-  `SEVERITY | TOOL | MESSAGE`
-- **Versionamento**: scripts entram no git como artefatos
-  do projeto.
-- **Maturidade gradual**: projetos podem começar com
-  harness prompt-only e migrar para scripts à medida que
-  amadurecem. O `curador-produto` orienta essa migração.
-
-#### Catálogo de sugestões de harness por agente
-
-> **Nota importante:** as regras abaixo são um catálogo
-> de referência para o `curador-produto` usar ao orientar
-> o humano na criação de harness. **Não são regras
-> obrigatórias.** O harness efetivo de cada agente é
-> definido no Mapa do Produto de cada projeto.
-
-##### eng-software
-
-- **Instalação de deps de harness (quando necessário)** `tool` `build · val`
-  Se uma execução exigir ferramenta ausente de harness,
-  pode executar o script de instalação de harness do
-  projeto, respeitando o Mapa do Produto e registrando
-  evidências da instalação/verificação.
-
-- **Smoke tests pós-construção** `prompt` `build`
-  Executar todos os testes ao final da etapa de construção.
-  Só prosseguir para a próxima fase se todos passarem.
-
-- **Testes existentes são intocáveis** `prompt` `build`
-  Se um teste que não estava previsto para modificação
-  falhar após alterações, não ajustá-lo. Registrar a
-  falha no arquivo e perguntar ao humano se o problema
-  é no código novo ou no teste.
-
-- **Regressão incremental** `prompt` `build`
-  Após cada modificação em código que já possui testes
-  sem previsão de alteração, executar esses testes para
-  verificar que o comportamento existente não foi afetado.
-
-- **Análise estática** `tool` `build · val`
-  Usar ferramentas determinísticas do projeto (ESLint,
-  ruff, mypy, pyright, shellcheck, hadolint, etc.) para
-  validar o código antes de declarar a etapa concluída.
-  Achados bloqueantes devem ser corrigidos antes de
-  prosseguir.
-
-##### dba
-
-- **Validação de SQL** `tool` `build · val`
-  Executar SQLFluff (ou linter SQL do projeto) em toda
-  migration/DDL produzida. Achados de severidade error
-  são bloqueantes.
-
-- **Schema diff** `tool` `build`
-  Após gerar migration, comparar schema resultante com o
-  modelo "as code" (DBML/Prisma/etc.) usando diff
-  automatizado. Divergências bloqueiam avanço.
-
-- **IaC lint** `tool` `build · val`
-  Se há infra de BD (Terraform, CloudFormation), validar
-  com checkov/tflint antes de declarar concluído.
-
-- **Nomenclatura determinística** `prompt` `build · val`
-  Verificar se tabelas, colunas e índices seguem
-  convenção do projeto (definida no Mapa do Produto).
-  Divergências devem ser apontadas.
-
-##### sec
-
-> **Regra de precedência:** as ferramentas efetivas do
-> `sec` são as registradas no Mapa do Produto. Os itens
-> abaixo são catálogo de referência para o humano e o
-> `curador-produto`.
-
-- **SAST obrigatório** `tool` `build · val`
-  Executar Semgrep (ou SAST do projeto) no código
-  alterado. Findings de severidade high/critical são
-  bloqueantes.
-
-- **Secrets scan** `tool` `build`
-  Executar gitleaks/git-secrets no diff. Qualquer
-  segredo detectado é bloqueante.
-
-- **Dependency check** `tool` `val`
-  Verificar dependências com Snyk/npm audit/pip-audit.
-  Vulnerabilidades críticas são bloqueantes.
-
-- **OWASP Top 10 checklist** `prompt` `val`
-  Na revisão, verificar se o código exposto trata os
-  riscos OWASP aplicáveis. Registrar quais itens foram
-  verificados e quais não se aplicam.
-
-##### qa
-
-- **Cobertura mínima** `tool` `val`
-  Verificar se cobertura de testes não caiu em relação
-  ao baseline. Queda acima do threshold do projeto
-  bloqueia.
-
-- **Testes de aceitação** `tool` `val`
-  Executar specs de aceitação (BDD/Playwright/Cypress)
-  definidas no plano. Falhas são bloqueantes.
-
-- **Relatório estruturado** `prompt` `val`
-  Produzir relatório com: total executados, passaram,
-  falharam, skipped, cobertura delta. Persistir no
-  arquivo de planejamento.
-
-- **Acessibilidade (se aplicável)** `tool` `val`
-  Em projetos frontend, executar axe-core ou equivalente.
-  Violations de severidade critical são bloqueantes.
-
-##### rev
-
-- **Markdown lint** `tool` `val`
-  Executar markdownlint nos artefatos de documentação
-  produzidos. Erros de formatação devem ser reportados.
-
-- **Link check** `tool` `val`
-  Verificar links internos/externos em docs produzidas
-  (markdown-link-check). Links quebrados são reportados.
-
-- **Consistência cross-artefato** `prompt` `val`
-  Verificar que nomes, convenções e referências são
-  consistentes entre plano, código, testes e docs.
-  Inconsistências viram achados no relatório.
-
-- **Aderência ao plano** `prompt` `val`
-  Comparar o que foi construído com o que foi planejado.
-  Desvios não autorizados são achados bloqueantes.
-
-##### curador-produto
-
-- **Checklist do Mapa** `prompt` `val`
-  Ao revisar, verificar se faltou atualizar alguma
-  documentação com base no Mapa do Produto.
-
-- **Atualiza Mapa diretamente** `prompt` `val`
-  Quando a funcionalidade implementada altera estrutura,
-  nomenclatura ou convenções do projeto, atualizar o Mapa
-  do Produto diretamente (sem delegar).
-
-- **Valida existência de harness** `prompt` `val`
-  Verificar se todos os agentes que atuam no projeto
-  possuem harness registrado no Mapa. Se não, alertar
-  o humano.
-
-- **Delega outros domínios** `prompt` `val`
-  Para ajustes em código, BD ou segurança detectados na
-  revisão, devolver instruções claras ao `orq` para
-  delegar ao agente correto.
+> executa regras aplicáveis à atividade atual →
+> produz evidências (P34) → orq verifica (P35).
 
 ## Fluxo — Diagrama de Sequência
 
@@ -565,6 +352,13 @@ sequenceDiagram
     Note over Humano, rev: VALIDAÇÃO DE ENTRADA
 
     orq ->> prod: Validar entrada contra docs do produto
+
+    alt Mapa/Harness ausente
+        prod ->> prod: Executa fluxo de curadoria (inline)
+        prod ->> Humano: Interage para criar Mapa/Harness
+        prod -->> orq: Curadoria concluída (resumo curto)
+    end
+
     alt Documentação OK
         prod -->> orq: Entrada válida (resumo curto)
     else Documentação inconsistente
