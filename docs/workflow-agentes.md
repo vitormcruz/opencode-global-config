@@ -55,7 +55,7 @@ Documento com as regras de contenção e direcionamento
 de cada agente — ativadas como regras de prompt,
 ferramentas ou skills. `curador-produto` é co-responsável
 por ajudar a confeccioná-lo e o Harness deve estar
-listado no Mapa do Produto. Premissas detalhadas: 32–35.
+listado no Mapa do Produto. Premissas detalhadas: 32–36.
 
 ### 3. Arquivo de Planejamento
 
@@ -71,7 +71,7 @@ Saída obrigatória dos agentes: lista de evidências de
 execução do harness apontando para logs ou artefatos que
 comprovem o cumprimento das regras. O `orq` é responsável
 por verificar essas evidências — **esta é a sua tarefa
-mais importante**. Premissas detalhadas: 32–35.
+mais importante**. Premissas detalhadas: 32–36.
 
 ## Premissas
 
@@ -300,6 +300,20 @@ mais importante**. Premissas detalhadas: 32–35.
     orientar o humano na criação e registra o harness no
     Mapa. Cada projeto define quais regras e ferramentas
     compõem o harness de cada agente.
+    **Fonte única obrigatória** — nenhum agente assume
+    harness embutido por ferramenta. Toda ferramenta,
+    regra ou exceção de harness deve estar registrada no
+    Mapa do Produto.
+    **Registro obrigatório por agente** — no Mapa, cada
+    agente deve ter uma seção no bloco de harness com um
+    dos cenários abaixo:
+    - Se a seção tiver descrição de regras/ferramentas,
+      o harness está definido e deve ser executado.
+    - Se a seção não existir ou estiver vazia, o harness
+      não está definido para aquele agente.
+    - Se a seção contiver a frase literal
+      `SEM HARNESS A PEDIDO DO HUMANO`, considera-se
+      decisão explícita de não usar harness naquele caso.
     **Preferência por ferramentas determinísticas** —
     sempre que possível, regras de harness devem ser
     implementadas via ferramentas determinísticas (linters,
@@ -315,11 +329,13 @@ mais importante**. Premissas detalhadas: 32–35.
 33. **Agente localiza seu harness antes de executar** —
     ao iniciar uma tarefa, o agente localiza o Mapa do
     Produto no arquivo de contexto do projeto e verifica
-    se há harness configurado para ele. Se houver script,
-    executa-o. Se houver regras de prompt, segue-as. Se
-    não houver harness, recomenda ao humano acionar
-    `curador-produto` para confeccioná-lo antes de
-    prosseguir.
+    se há harness configurado para ele. Se houver seção
+    com regras/ferramentas, executa o harness registrado
+    (script e/ou regras). Se a seção contiver
+    `SEM HARNESS A PEDIDO DO HUMANO`, segue sem harness.
+    Se a seção não existir ou estiver vazia, recomenda ao
+    humano acionar `curador-produto` para
+    confeccionar/registrar antes de prosseguir.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, uma lista de evidências de cumprimento.
@@ -329,16 +345,28 @@ mais importante**. Premissas detalhadas: 32–35.
     planejamento.
 35. **Verificação de harness pelo `orq`** — após receber
     o retorno de um agente, `orq` verifica se as
-    evidências de harness foram produzidas. Se estiverem
-    ausentes ou incompletas, `orq` rejeita o retorno e
-    solicita ao agente que complete a execução. **Esta é
-    a tarefa mais importante do `orq`** — garante que
-    as regras de contenção estão sendo efetivamente
+    evidências de harness foram produzidas quando a seção
+    do agente no Mapa contiver regras/ferramentas. Se
+    estiverem ausentes ou incompletas, `orq` rejeita o
+    retorno e solicita ao agente que complete a execução.
+    Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
+    `orq` apenas valida que essa decisão foi respeitada.
+    **Esta é a tarefa mais importante do `orq`** — garante
+    que as regras de contenção estão sendo efetivamente
     seguidas, não apenas declaradas.
 
+36. **Instalação de harness durante execução** — quando um
+  agente com `bash: allow` identificar dependência de
+  harness faltante, pode executar o script de instalação
+  de harness do projeto para avançar com segurança. No
+  workflow padrão, `eng-software` pode executar esse
+  script quando necessário, sempre respeitando o que
+  está definido no Mapa e registrando evidências.
+
 > **Resumo da sequência harness:**
-> agente localiza harness no Mapa (P33) → executa script
-> ou regras → produz evidências (P34) → orq verifica (P35).
+> agente localiza seção de harness no Mapa (P33) →
+> executa quando houver regras → produz evidências (P34)
+> → orq verifica conforme conteúdo da seção (P35).
 
 #### Convenção recomendada de scripts
 
@@ -369,6 +397,12 @@ harness/<agente>/<fase>.sh
 > definido no Mapa do Produto de cada projeto.
 
 ##### eng-software
+
+- **Instalação de deps de harness (quando necessário)** `tool` `build · val`
+  Se uma execução exigir ferramenta ausente de harness,
+  pode executar o script de instalação de harness do
+  projeto, respeitando o Mapa do Produto e registrando
+  evidências da instalação/verificação.
 
 - **Smoke tests pós-construção** `prompt` `build`
   Executar todos os testes ao final da etapa de construção.
@@ -414,6 +448,11 @@ harness/<agente>/<fase>.sh
   Divergências devem ser apontadas.
 
 ##### sec
+
+> **Regra de precedência:** as ferramentas efetivas do
+> `sec` são as registradas no Mapa do Produto. Os itens
+> abaixo são catálogo de referência para o humano e o
+> `curador-produto`.
 
 - **SAST obrigatório** `tool` `build · val`
   Executar Semgrep (ou SAST do projeto) no código
