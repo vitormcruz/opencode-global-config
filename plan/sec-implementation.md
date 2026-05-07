@@ -185,7 +185,57 @@ O `vscode-sync.ps1` converterá `agents/sec.md` →
 
 ## 4. Harness (catálogo do workflow — P31–34)
 
-O workflow já define sugestões de harness para `sec`:
+### 4.0 Regra única: harness sempre no Mapa do Produto
+
+O `sec` **não usa harness embutido por ferramenta**.
+Toda regra, ferramenta e exceção de harness do `sec`
+deve estar registrada no Mapa do Produto.
+
+**Regra textual no Mapa para o `sec`**:
+- Se a seção do `sec` tiver descrição de
+  regras/ferramentas, o harness está ativo.
+- Se a seção do `sec` estiver ausente ou vazia, o
+  harness não está definido.
+- Se a seção do `sec` contiver
+  `SEM HARNESS A PEDIDO DO HUMANO`, considera-se decisão
+  explícita de não usar harness.
+
+**Comportamento do agente**:
+1. Lê a seção do `sec` no Mapa antes de executar.
+2. Se houver regras/ferramentas: executa apenas o que
+  estiver registrado no Mapa para o `sec`.
+3. Se houver `SEM HARNESS A PEDIDO DO HUMANO`: segue sem
+  executar harness específico.
+4. Se não houver seção do `sec` ou ela estiver vazia:
+  recomenda fortemente acionar `curador-produto` antes de
+  prosseguir.
+
+### 4.0.1 Fluxo curador-produto → instalação
+
+O `curador-produto` (capacidade 8) pode:
+- Redigir o documento de harness com as ferramentas
+- Registrar no Mapa do Produto
+- Gerar instruções de instalação para o humano
+- Indicar quais comandos precisam de `sudo`
+
+O `curador-produto` **não instala** (tem `bash: deny`).
+O fluxo é:
+1. `sec` detecta ausência de entrada do `sec` no Mapa
+2. `sec` sugere ao humano chamar `curador-produto`
+3. `curador-produto` co-confecciona o harness com o
+   humano, entregando instruções de instalação prontas
+4. Humano instala (ou script de bootstrap instala)
+5. Próxima execução do `sec` já usa o harness
+
+Isso é especialmente relevante para `sec` porque muitas
+ferramentas de segurança são externas ao projeto
+(Semgrep, trivy, ZAP, gitleaks) e precisam ser
+instaladas no ambiente (WSL/Docker).
+
+### 4.1 Catálogo de referência para o Mapa (sec)
+
+O workflow define sugestões de harness para o `sec`.
+Estas sugestões **só valem quando registradas no Mapa**:
 
 | Regra | Tipo | Fase sugerida | Descrição |
 |-------|------|---------------|-----------|
@@ -193,14 +243,28 @@ O workflow já define sugestões de harness para `sec`:
 | Secrets scan | `tool` | build | gitleaks/git-secrets no diff; qualquer segredo = bloqueante |
 | Dependency check | `tool` | val | Snyk/npm audit/pip-audit; vulns críticas = bloqueante |
 | OWASP Top 10 checklist | `prompt` | val | Na revisão, verificar riscos OWASP aplicáveis; registrar quais foram verificados |
-| DAST | `tool` | val | OWASP ZAP baseline/full scan quando app disponível; findings high/critical = bloqueante |
+| DAST | `tool` | val | OWASP ZAP baseline/full scan (ou ferramenta equivalente definida no Mapa) quando app disponível; findings high/critical = bloqueante |
 
-**Nota**: estes são sugestões de catálogo. O harness
-efetivo é definido no Mapa do Produto de cada projeto
-(P31). O agente deve ser capaz de executá-los quando
-configurados, mas não os hardcoda como obrigatórios.
+### 4.2 Exemplos de ferramentas por stack (para sugestão)
 
-### 4.1 Ferramentas de DAST
+Exemplos que o `sec` pode sugerir ao `curador-produto`
+conforme o stack:
+
+| Stack | Ferramenta | Tipo | Uso |
+|-------|------------|------|-----|
+| Node.js | Snyk | dep check | Registry privado, licenças |
+| Node.js | eslint-plugin-security | SAST | Complementa Semgrep |
+| Python | bandit | SAST | Padrões Python-específicos |
+| Python | safety/pip-audit | dep check | Vulns em deps |
+| Docker | trivy | image scan | Vulns em base images |
+| Java/.NET | SonarQube | SAST | Regras enterprise |
+| IaC | checkov/tflint | config scan | Terraform/CloudFormation |
+| Go | gosec | SAST | Padrões Go-específicos |
+
+**Nota**: o agente não hardcoda estas como obrigatórias.
+O `sec` executa apenas o que estiver registrado no Mapa.
+
+### 4.3 Ferramentas de DAST
 
 | Ferramenta | Tipo | Custo | Uso |
 |------------|------|-------|-----|
@@ -217,7 +281,7 @@ docker run --rm --network sec-pentest-net \
 > será agregado em iteração posterior
 > (ver `plan/sec-shannon-integration.md`).
 
-### 4.2 Contexto WSL + Isolamento de Rede
+### 4.4 Contexto WSL + Isolamento de Rede
 
 **Ambiente**: o projeto roda em WSL. Ferramentas de
 segurança ficam instaladas no WSL. A app alvo pode
@@ -244,7 +308,7 @@ docker network create --internal sec-pentest-net
 Isso garante que ferramentas de pen test não acessem
 a rede pública — apenas alvos locais/staging.
 
-**Bootstrap**: script `scripts/bootstrap_repo/opencode-install-sec-tools`
+**Bootstrap**: script `scripts/bootstrap_repo/harness-install.sh`
 instala no WSL:
 - Docker (se não disponível)
 - gitleaks, semgrep (via pip/brew)
@@ -274,8 +338,8 @@ Adicionar:
 
 - [ ] Criar `agents/sec.md` com frontmatter + corpo
 - [ ] Adicionar teste em `agents-test.bats`
-- [ ] Criar `scripts/bootstrap_repo/opencode-install-sec-tools`
-- [ ] Criar `tests/scripts/bootstrap_repo/opencode-install-sec-tools-test.bats`
+- [ ] Criar `scripts/bootstrap_repo/harness-install.sh`
+- [ ] Criar `tests/scripts/bootstrap_repo/harness-install-test.bats`
 - [ ] Atualizar `README.md` (seção dependências)
 - [ ] Atualizar `docs/workflow-agentes.md` (P27 + catálogo harness)
 - [ ] Rodar `make test` — validar tudo
