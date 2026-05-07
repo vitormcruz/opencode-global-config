@@ -218,13 +218,16 @@ O `curador-produto` (capacidade 8) pode:
 - Gerar instruções de instalação para o humano
 - Indicar quais comandos precisam de `sudo`
 
-O `curador-produto` **não instala** (tem `bash: deny`).
+O `curador-produto` pode executar scripts de harness e
+instalação (tem `bash: allow` restrito a `harness/`,
+`scripts/` e instalação de deps).
 O fluxo é:
 1. `sec` detecta ausência de entrada do `sec` no Mapa
 2. `sec` sugere ao humano chamar `curador-produto`
 3. `curador-produto` co-confecciona o harness com o
-   humano, entregando instruções de instalação prontas
-4. Humano instala (ou script de bootstrap instala)
+   humano, spawna especialistas se necessário
+4. `curador-produto` instala deps (entrega ao humano
+   o que exigir `sudo`)
 5. Próxima execução do `sec` já usa o harness
 
 Isso é especialmente relevante para `sec` porque muitas
@@ -290,7 +293,7 @@ projeto.
 
 **Detecção de ambiente pelo agente**: ao iniciar testes
 dinâmicos, verificar se está em Windows (VS Code via
-Windows). Se sim, invocar via `wsl -e bash -c "..."`.
+Windows). Se sim, invocar via `wsl -- bash -ic "..."`.
 
 **Isolamento de rede** (para pen testing):
 
@@ -341,7 +344,9 @@ Adicionar:
 - [ ] Criar `scripts/bootstrap_repo/harness-install.sh`
 - [ ] Criar `tests/scripts/bootstrap_repo/harness-install-test.bats`
 - [ ] Atualizar `README.md` (seção dependências)
-- [ ] Atualizar `docs/workflow-agentes.md` (P27 + catálogo harness)
+- [ ] Atualizar `docs/workflow-agentes-dev.md` (P27)
+- [ ] Atualizar `docs/workflow-curadoria.md` (catálogo harness sec: DAST)
+- [ ] Atualizar `agents/curador-produto.md` (catálogo condensado sec: DAST)
 - [ ] Rodar `make test` — validar tudo
 - [ ] Verificar que `vscode-sync.ps1` gera `sec.agent.md`
 - [ ] Confirmar que `AGENTS.md` já lista `sec` (ou atualizar)
@@ -358,14 +363,14 @@ Adicionar:
 | 4 | Pen testing no escopo | Sim — testes funcionais de segurança são do `sec` |
 | 5 | DAST | OWASP ZAP via Docker no WSL |
 | 6 | Pen testing (Shannon) | Segregado para iteração futura (`plan/sec-shannon-integration.md`) |
-| 7 | Ambiente | WSL; detectar Windows e invocar via `wsl -e bash -c` |
+| 7 | Ambiente | WSL; detectar Windows e invocar via `wsl -- bash -ic` |
 | 8 | Isolamento de rede | Docker `--internal` network; app pode estar em Docker ou WSL |
 
 ---
 
-## 8. Mudança necessária no workflow
+## 8. Mudanças necessárias nos workflows
 
-**Arquivo**: `docs/workflow-agentes.md`
+### 8.1 `docs/workflow-agentes-dev.md`
 
 **P27** — reformular de:
 > Testes de segurança são do `sec`, não do `qa`.
@@ -376,7 +381,15 @@ Para:
 > automatizado) — são testes funcionais especializados
 > em segurança, não testes de lógica de negócio.
 
-**Catálogo harness do `sec`** — adicionar:
+### 8.2 `docs/workflow-curadoria.md` (catálogo de harness)
+
+Adicionar item DAST na seção `### sec`:
 > - **DAST** `tool` `val`
 >   OWASP ZAP baseline quando app disponível.
 >   Findings de severidade high/critical são bloqueantes.
+
+### 8.3 `agents/curador-produto.md` (catálogo condensado)
+
+Adicionar na seção `### sec` do catálogo de referência:
+> - **DAST** `tool` `val`
+>   OWASP ZAP ou equivalente. high/critical = bloqueante.

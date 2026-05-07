@@ -45,13 +45,14 @@ faz revisão integrativa, ou propõe commit.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Harness**: ao iniciar, localize o Mapa do Produto no
-  arquivo de contexto do projeto (AGENTS.md,
-  instructions.md ou equivalente) e verifique se há
-  harness configurado para você. Se houver script,
-  execute-o. Se houver regras de prompt, siga-as. Se
-  não houver harness, recomende ao humano acionar
-  `curador-produto` para confeccioná-lo.
+- **Harness**: na construção e revisão, localize o Mapa
+  do Produto no arquivo de contexto do projeto e
+  verifique se há harness configurado para você.
+  Execute as regras aplicáveis à atividade atual
+  (`build` ou `val`) e produza evidências ao final.
+  Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
+  siga sem harness. Se não houver seção, recomende ao
+  humano acionar `curador-produto` para confeccioná-lo.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
