@@ -66,8 +66,6 @@ sabe fazer. O `orq` decide quando chamá-lo.
   - Secrets scan (gitleaks/git-secrets)
   - Dependency audit (npm audit, pip-audit, trivy)
   - DAST (OWASP ZAP baseline/full scan)
-  - Pen testing automatizado (Shannon CLI — code-aware,
-    com PoC; ou ferramentas Kali via Docker)
 - Ferramentas rodam via Docker no WSL, isoladas da rede
   pública (ver seção 4.2)
 - Reporta resultado com achados estruturados
@@ -195,23 +193,18 @@ O workflow já define sugestões de harness para `sec`:
 | Secrets scan | `tool` | build | gitleaks/git-secrets no diff; qualquer segredo = bloqueante |
 | Dependency check | `tool` | val | Snyk/npm audit/pip-audit; vulns críticas = bloqueante |
 | OWASP Top 10 checklist | `prompt` | val | Na revisão, verificar riscos OWASP aplicáveis; registrar quais foram verificados |
-| DAST / Pen testing | `tool` | val | OWASP ZAP baseline + Shannon quando app disponível; findings high/critical = bloqueante |
+| DAST | `tool` | val | OWASP ZAP baseline/full scan quando app disponível; findings high/critical = bloqueante |
 
 **Nota**: estes são sugestões de catálogo. O harness
 efetivo é definido no Mapa do Produto de cada projeto
 (P31). O agente deve ser capaz de executá-los quando
 configurados, mas não os hardcoda como obrigatórios.
 
-### 4.1 Ferramentas de DAST / Pen Testing
+### 4.1 Ferramentas de DAST
 
-| Ferramenta | Tipo | Custo LLM | Uso |
-|------------|------|-----------|-----|
+| Ferramenta | Tipo | Custo | Uso |
+|------------|------|-------|-----|
 | OWASP ZAP | DAST black-box | Zero | Scan rápido: headers, configs, vulns comuns |
-| Shannon CLI | AI pen test white-box | Zero extra (usa modelo do VS Code/OpenCode) | Scan profundo: code-aware, gera PoC exploits |
-
-**Uso combinado recomendado**: ZAP primeiro (rápido,
-gratuito, configs/headers), Shannon depois (profundo,
-code-aware, PoC).
 
 **ZAP via Docker (isolado)**:
 ```bash
@@ -220,12 +213,9 @@ docker run --rm --network sec-pentest-net \
   -t http://<target>:<port>
 ```
 
-**Shannon via npx (WSL)**:
-```bash
-npx @keygraph/shannon start \
-  -u http://<target>:<port> \
-  -r /path/to/repo
-```
+> **Futuro**: pen testing automatizado com Shannon CLI
+> será agregado em iteração posterior
+> (ver `plan/sec-shannon-integration.md`).
 
 ### 4.2 Contexto WSL + Isolamento de Rede
 
@@ -257,7 +247,6 @@ a rede pública — apenas alvos locais/staging.
 **Bootstrap**: script `scripts/bootstrap_repo/opencode-install-sec-tools`
 instala no WSL:
 - Docker (se não disponível)
-- Shannon CLI (`npm install -g @keygraph/shannon`)
 - gitleaks, semgrep (via pip/brew)
 - Cria a rede `sec-pentest-net`
 
@@ -303,8 +292,8 @@ Adicionar:
 | 2 | Nível de detalhe | Detalhado (mesma granularidade do `qa.md`) |
 | 3 | Harness | Genérico (ferramentas do projeto, sem comandos hardcoded) |
 | 4 | Pen testing no escopo | Sim — testes funcionais de segurança são do `sec` |
-| 5 | Shannon CLI | Usar via npx no WSL; custo zero de LLM extra |
-| 6 | ZAP + Shannon | Complementares, não duplicados |
+| 5 | DAST | OWASP ZAP via Docker no WSL |
+| 6 | Pen testing (Shannon) | Segregado para iteração futura (`plan/sec-shannon-integration.md`) |
 | 7 | Ambiente | WSL; detectar Windows e invocar via `wsl -e bash -c` |
 | 8 | Isolamento de rede | Docker `--internal` network; app pode estar em Docker ou WSL |
 
@@ -324,7 +313,6 @@ Para:
 > em segurança, não testes de lógica de negócio.
 
 **Catálogo harness do `sec`** — adicionar:
-> - **DAST / Pen testing** `tool` `val`
->   OWASP ZAP baseline + Shannon (ou equivalente)
->   quando app disponível. Findings de severidade
->   high/critical são bloqueantes.
+> - **DAST** `tool` `val`
+>   OWASP ZAP baseline quando app disponível.
+>   Findings de severidade high/critical são bloqueantes.
