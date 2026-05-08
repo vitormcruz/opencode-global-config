@@ -296,6 +296,10 @@ sequenceDiagram
   riscos OWASP aplicáveis. Registrar quais itens foram
   verificados e quais não se aplicam.
 
+- **DAST** `tool` `val`
+  OWASP ZAP baseline quando app disponível.
+  Findings de severidade high/critical são bloqueantes.
+
 ### qa
 
 - **Cobertura mínima** `tool` `val`
