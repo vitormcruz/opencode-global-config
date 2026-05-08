@@ -11,6 +11,7 @@ permission:
   websearch: deny
   task:
     eng-software: allow
+    front: allow
     dba: allow
     sec: allow
     qa: allow
@@ -62,7 +63,10 @@ Suas capacidades:
 
 7. **Excluir artefatos temporários** — quando solicitado,
    pode remover arquivos de planejamento ou intermediários
-   (sempre com confirmação explícita do humano).
+   (sempre com confirmação explícita do humano). Inclui:
+   - O arquivo de planejamento principal.
+   - Artefatos auxiliares gerados durante o planejamento
+     (ex.: protótipos de tela do `front` em `plan/ui/`).
 
 8. **Curadoria de Mapa e Harness** — processo completo
    de criação e manutenção do Mapa do Produto e dos
@@ -344,6 +348,25 @@ Não invente aprovações.
   Nomes, convenções e referências consistentes.
 
 - **Aderência ao plano** `prompt` `val`
+  Desvios não autorizados = bloqueante.
+
+### front
+
+- **Validação do humano (gate visual)** `prompt` `build`
+  Após gerar protótipos, apresentar ao humano para
+  aprovação. Sem aprovação, a construção não avança.
+
+- **Lint CSS/HTML** `tool` `build · val`
+  stylelint, htmlhint ou equivalente.
+
+- **Acessibilidade** `tool` `build · val`
+  axe-core, pa11y ou equivalente. Critical = bloqueante.
+
+- **Snapshot visual** `tool` `val`
+  Playwright/Cypress snapshot visual (se aplicável).
+
+- **Aderência à identidade visual** `prompt` `val`
+  Comparar implementação contra protótipos aprovados.
   Desvios não autorizados = bloqueante.
 
 ### curador-produto
