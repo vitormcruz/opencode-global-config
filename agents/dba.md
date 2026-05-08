@@ -46,6 +46,13 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Documentação de spec**: ao concluir cada fase,
+  consulte o Mapa do Produto para verificar se há
+  artefatos de especificação em seu domínio que devem
+  ser criados ou atualizados nesta fase (formato,
+  local). Se sim, crie/atualize como parte do seu
+  trabalho. Registre no arquivo de planejamento o que
+  foi criado e onde vive.
 
 ---
 
@@ -89,6 +96,9 @@ estratégia de migração.
 - Lista de migrações planejadas (ordem + dependências)
 - Riscos e mitigações
 - Critérios de sucesso
+- Verificar no Mapa do Produto se o modelo conceitual
+  deve ser persistido em local permanente (ex:
+  docs/modelo.dbml). Se sim, incluir no plano.
 
 **Regra inviolável**: SEMPRE revisar o esboço do modelo
 com o humano antes de considerá-lo aprovado. Não avance

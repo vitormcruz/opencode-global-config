@@ -61,6 +61,13 @@ de negócio, ou propõe commit.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Documentação de spec**: ao concluir cada fase,
+  consulte o Mapa do Produto para verificar se há
+  artefatos de especificação em seu domínio que devem
+  ser criados ou atualizados nesta fase (formato,
+  local). Se sim, crie/atualize como parte do seu
+  trabalho. Registre no arquivo de planejamento o que
+  foi criado e onde vive.
 
 ---
 
@@ -91,6 +98,10 @@ segurança e registrar requisitos.
 
 **Saídas**:
 - Lista de requisitos de segurança estruturados.
+- Riscos identificados com severidade.
+- Verificar no Mapa do Produto se requisitos de
+  segurança / threat model devem ser persistidos em
+  local permanente. Se sim, incluir no plano.
 - Riscos identificados com severidade.
 
 Para checklist OWASP e padrões de hardening, consulte

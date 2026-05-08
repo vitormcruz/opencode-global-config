@@ -58,6 +58,13 @@ faz revisão de si mesmo, ou propõe commit.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Documentação de spec**: ao concluir cada fase,
+  consulte o Mapa do Produto para verificar se há
+  artefatos de especificação em seu domínio que devem
+  ser criados ou atualizados nesta fase (formato,
+  local). Se sim, crie/atualize como parte do seu
+  trabalho. Registre no arquivo de planejamento o que
+  foi criado e onde vive.
 
 ---
 
@@ -85,6 +92,9 @@ Analisar requisitos e produzir um plano de codificação.
    possível definir (tamanhos, formatos, máscaras,
    limites numéricos). Campos ainda sem definição:
    marcar como `(a definir)`.
+6.1. Ler Mapa do Produto para identificar obrigações
+   de spec deste domínio (ex.: specs executáveis, ADRs)
+   e incluir criação desses artefatos no plano.
 7. Se identificar decisão arquitetural significativa,
    sugerir registro em ADR (ver skill
    `documentation-and-adrs`).
@@ -109,6 +119,10 @@ Implementar código seguindo o ciclo red-green-refactor.
 #### Etapa 1 — Testes primeiro
 
 1. Escrever testes automatizados da funcionalidade nova.
+   Se o Mapa do Produto exigir specs executáveis
+   (Concordion, BDD, etc.) como forma de documentar
+   critérios de aceitação, criá-las aqui como parte
+   dos testes.
 2. Executar — **todos devem falhar**.
 3. Se algum teste passar sem código produtivo, o teste
    está errado. Corrigir antes de prosseguir.

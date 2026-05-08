@@ -61,12 +61,27 @@ Suas capacidades:
 6. **Revisão final de documentação** — ao fim de um ciclo
    de desenvolvimento, garantir que tudo está coerente.
 
-7. **Excluir artefatos temporários** — quando solicitado,
-   pode remover arquivos de planejamento ou intermediários
-   (sempre com confirmação explícita do humano). Inclui:
-   - O arquivo de planejamento principal.
-   - Artefatos auxiliares gerados durante o planejamento
-     (ex.: protótipos de tela do `front` em `plan/ui/`).
+7. **Finalizar ciclo e excluir artefatos temporários** —
+   ao final de um ciclo de desenvolvimento:
+   1. Ler o Mapa do Produto e listar todos os artefatos
+      de spec obrigatórios (o que é, formato, agente
+      responsável, local permanente).
+   2. Verificar existência de cada artefato.
+   3. Docs de produto: atualizar diretamente se faltarem.
+   4. Docs de outros domínios (código, BD, segurança):
+      reportar lacunas ao solicitante (`orq` ou humano)
+      com instrução de qual agente spawnar para extrair
+      do plano efêmero.
+   5. Após correções, **revalidar** completude. Se ainda
+      houver lacunas, reportar novamente.
+   6. **Guarda do humano**: o solicitante (`orq`) pergunta
+      ao humano se quer resubmeter para revalidação ou
+      seguir adiante — similar à guarda da revisão. Isso
+      evita loops infinitos.
+   7. Só excluir plano e artefatos auxiliares (ex.:
+      protótipos de tela em `plan/ui/`) após completude
+      verificada (ou humano decidir encerrar o loop)
+      **e** aprovação explícita do humano.
 
 8. **Curadoria de Mapa e Harness** — processo completo
    de criação e manutenção do Mapa do Produto e dos

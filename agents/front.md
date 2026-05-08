@@ -64,6 +64,13 @@ commit.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Documentação de spec**: ao concluir cada fase,
+  consulte o Mapa do Produto para verificar se há
+  artefatos de especificação em seu domínio que devem
+  ser criados ou atualizados nesta fase (formato,
+  local). Se sim, crie/atualize como parte do seu
+  trabalho. Registre no arquivo de planejamento o que
+  foi criado e onde vive.
 
 ---
 
