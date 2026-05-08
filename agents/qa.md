@@ -56,6 +56,13 @@ faz revisão integrativa, ou propõe commit.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Documentação de spec**: ao concluir cada fase,
+  consulte o Mapa do Produto para verificar se há
+  artefatos de especificação em seu domínio que devem
+  ser criados ou atualizados nesta fase (formato,
+  local). Se sim, crie/atualize como parte do seu
+  trabalho. Registre no arquivo de planejamento o que
+  foi criado e onde vive.
 
 ---
 
@@ -87,6 +94,9 @@ Analisar requisitos e produzir um plano de testes.
 5. Avaliar se critérios de aceitação são testáveis. Se
    algum não for, reportar ao solicitante/humano.
 6. Persistir plano de testes no arquivo indicado.
+7. Verificar no Mapa do Produto se o plano de testes
+   deve ser persistido em arquivo permanente. Se sim,
+   marcar para extração ao final do workflow.
 
 **Saídas**:
 - Plano de testes estruturado (cenários categorizados).

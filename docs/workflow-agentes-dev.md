@@ -76,19 +76,33 @@ comprovem o cumprimento das regras. O `orq` é responsável
 por verificar essas evidências — **esta é a sua tarefa
 mais importante**. Premissas detalhadas: 32–36.
 
-### 5. Regras de Produto
+### 5. Elementos de Especificação
 
-Seção no arquivo de planejamento que reúne as restrições
-técnicas de domínio por campo: tamanho máximo, tipo/formato,
-máscara de exibição, limites numéricos e regras de validação.
-É o contrato de dados do domínio — garante que todos os
-agentes trabalhem com as mesmas definições.
-Quem cria: `eng-software` inicializa a seção ao planejar.
-Quem enriquece: qualquer agente que precisar de uma regra
-ausénte — consultar primeiro, perguntar ao humano se não
-estiver registrada e registrar antes de prosseguir.
+O Mapa do Produto define para cada elemento de
+especificação do software: (1) o que é,
+(2) formato/ferramenta, (3) qual agente cria, (4) em
+qual fase, (5) onde vive permanentemente.
+
+O padrão de preenchimento — inicializar, enriquecer
+incrementalmente, nunca re-perguntar o que já está
+registrado, curador valida — aplica-se a **todos** os
+elementos de spec mapeados, não apenas a um.
+
+**Exemplo: Regras de Produto** — seção no arquivo de
+planejamento que reúne restrições técnicas de domínio
+por campo (tamanho máximo, tipo/formato, máscara de
+exibição, limites numéricos, regras de validação). É o
+contrato de dados do domínio. `eng-software` inicializa
+a seção ao planejar; qualquer agente que precisar de uma
+regra ausente consulta a seção, pergunta ao humano se
+não estiver registrada e registra antes de prosseguir.
 Regras já registradas nunca são reperguntadas.
-Premissa detalhada: 21.1.
+
+Outros elementos de spec (requisitos, critérios de
+aceitação, plano de testes, modelo de dados, threat
+model, etc.) seguem o mesmo padrão — o Mapa define o
+que, quem, quando e onde para cada um.
+Premissas detalhadas: 21.1–21.3.
 
 ## Premissas
 
@@ -265,6 +279,38 @@ Premissa detalhada: 21.1.
     | nome  | 100      | texto        | —              | —               | —               |
     | valor | —        | decimal      | —              | 0–999.999,99    | 2 casas         |
 
+21.2. **Especificação evolutiva no planejamento** — a
+    especificação (requisitos, critérios de aceitação,
+    regras de produto) é dada como entrada, mas pode
+    mudar durante o **planejamento**. Qualquer agente
+    cuja pergunta ao humano resulte em mudança de spec
+    deve registrar a alteração no arquivo de
+    planejamento, na seção do elemento de spec
+    correspondente (conforme o Mapa do Produto).
+    **Distinção**: mudanças de "como" (arquitetura,
+    abordagem técnica) não alteram spec; mudanças de
+    "o quê" (escopo, requisitos, critérios de aceitação)
+    alteram. O `curador-produto`, ao revisar o plano,
+    verifica se mudanças de spec foram registradas e se
+    estão consistentes com o Mapa. Na **construção**,
+    a premissa 10 se mantém — tudo se baseia no plano
+    aprovado. Se algo inviabilizar um critério de
+    aceitação, o gate de refatoração (premissa 31) já
+    trata o retorno ao planejamento.
+21.3. **Documentação de spec por domínio** — o Mapa do
+    Produto define, por projeto, quais artefatos de
+    especificação cada agente deve criar ou atualizar,
+    em qual formato e onde vivem permanentemente.
+    Exemplos não-prescritivos: critérios de aceitação
+    como specs executáveis (eng-software cria no TDD),
+    plano de testes em arquivo permanente (qa extrai ao
+    final), modelo de dados em DBML (dba cria/atualiza),
+    threat model em docs/ (sec, se o Mapa definir).
+    Cada agente, ao concluir sua fase, consulta o Mapa
+    para verificar obrigações de documentação de spec em
+    seu domínio para essa fase. Se o Mapa não definir
+    obrigações para um agente/fase, nada a fazer.
+
 ### Papéis específicos
 
 25. **`curador-produto` valida, não define** — verifica se
@@ -276,9 +322,25 @@ Premissa detalhada: 21.1.
     produto; para artefatos de outros domínios (código,
     BD, segurança), devolve instruções de ajuste ao
     `orq`. Faz revisão final de documentação e
-    estrutura. Ao fim do processo, exclui o arquivo de
-    planejamento e artefatos auxiliares temporários
-    (ex.: protótipos de tela em `plan/ui/`).
+    estrutura.
+    **Finalização — verificação de spec e exclusão do
+    plano:** ao finalizar, `curador-produto` lê o Mapa
+    e lista todos os artefatos de spec obrigatórios.
+    Verifica existência de cada um. Para docs de
+    produto: atualiza diretamente. Para artefatos de
+    outros domínios: reporta lacunas ao `orq` com
+    instrução de qual agente spawnar para extrair do
+    plano efêmero. Após `orq` spawnar agentes e receber
+    retorno, `curador-produto` revalida a completude.
+    **Guarda do humano**: após cada rodada de correção,
+    `orq` pergunta ao humano se deseja resubmeter para
+    revalidação ou seguir adiante (similar à revisão,
+    premissa 9). Isso evita loops infinitos. Só confirma
+    conclusão (permitindo exclusão do plano e artefatos
+    auxiliares temporários, ex.: protótipos de tela em
+    `plan/ui/`) após verificar que toda documentação
+    obrigatória existe **ou** após o humano decidir
+    encerrar o loop.
 26. **`sec` analisa após plano de código** — requisitos de
     segurança são avaliados com base no plano de
     implementação feito pelo `eng-software`.
@@ -655,10 +717,35 @@ sequenceDiagram
     rect rgb(255, 255, 230)
     Note over Humano, rev: FINALIZAÇÃO
 
-    orq ->> prod: Revisão final de documentação e estrutura
-    prod -->> orq: Docs atualizados (resumo curto)
+    orq ->> prod: Revisão final — verificar artefatos de spec (Mapa)
+    prod ->> prod: Lê Mapa, verifica existência<br/>de cada artefato de spec
+    prod ->> prod: Atualiza docs de produto (se lacunas)
+    prod -->> orq: Relatório: lacunas de spec<br/>por domínio (resumo curto)
 
-    orq ->> Humano: Funcionalidade concluída
+    loop Revalidação (guarda do humano)
+        opt Lacunas em outros domínios
+            Note right of orq: orq spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme Mapa)
+            orq ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
+            eng -->> orq: Artefatos criados (resumo curto)
+        end
+        orq ->> prod: Revalidar completude
+        prod -->> orq: Relatório atualizado (resumo curto)
+        alt Tudo OK
+            Note right of orq: Sai do loop
+        else Ainda há lacunas
+            orq ->> Humano: Lacunas restantes. Resubmeter?
+            alt Humano: sim
+                Note right of orq: Continua loop
+            else Humano: não, seguir
+                Note right of orq: Sai do loop
+            end
+        end
+    end
+
+    orq ->> Humano: Funcionalidade concluída. Excluir plano?
+    Humano -->> orq: Aprovação
+    orq ->> prod: Excluir plano e artefatos auxiliares
+    prod -->> orq: Plano excluído
 
     end
 ```
