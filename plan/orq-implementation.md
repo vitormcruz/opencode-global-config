@@ -24,7 +24,7 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 | # | Decisão | Resolução |
 |---|---------|-----------|
 | D1 | Mapeamento `analista-bd` ↔ `dba` | Renomeação já executada via `git mv` |
-| D2 | Agentes inexistentes | `orq` criado agora; futuros conectados quando prontos |
+| D2 | Agentes inexistentes | Todos os agentes já existem |
 | D3 | Template do arquivo de planejamento | Não definido agora |
 | D4 | Skills do `orq` | Nenhuma skill atribuída — `orq` é router puro (ver seção 9) |
 
@@ -32,7 +32,7 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 
 ## 3. Comportamentos do `orq` extraídos do workflow
 
-### 3.1 Regras transversais (premissas 1–7, 9, 18, 32–35)
+### 3.1 Regras transversais (premissas 1–7, 9, 12.1, 18, 21.1–21.3, 32–36)
 
 | # | Regra | Origem |
 |---|-------|--------|
@@ -43,15 +43,20 @@ Criar `agents/orq.md` — roteador stateless com duas funções:
 | P6 | **Agentes são agnósticos do workflow** — só `orq` conhece fases e sequência | Premissa 6 |
 | P7 | **Seleção de modelo por fase** — pergunta via tool no início do workflow | Premissa 7 |
 | P9 | Humano controla re-revisões (evitar loops infinitos) | Premissa 9 |
+| P12.1 | **Identidade visual como contrato** — desvios requerem aprovação do humano | Premissa 12.1 |
 | P18 | Campo `Status` obrigatório no topo do arquivo | Premissa 18 |
+| P21.1 | **Regras de Produto — preenchimento incremental** — agentes consultam e registram | Premissa 21.1 |
+| P21.2 | **Especificação evolutiva** — mudanças de spec registradas no arquivo | Premissa 21.2 |
+| P21.3 | **Documentação de spec por domínio** — Mapa define obrigações por agente/fase | Premissa 21.3 |
 | P32 | Harness definido no Mapa do Produto (não hardcoded) | Premissa 32 |
 | P33 | Agente localiza harness no Mapa antes de executar | Premissa 33 |
 | P34 | Agente produz evidências (script: exit code+stdout; prompt: declaração) | Premissa 34 |
 | P35 | **`orq` verifica evidências de harness** — rejeita retorno incompleto | Premissa 35 |
+| P36 | **Instalação de harness durante execução** — agente com `bash: allow` pode instalar | Premissa 36 |
 
 ### 3.2 Verificação de harness (detalhamento)
 
-Sequência completa (workflow P32→P35):
+Sequência completa (workflow P32→P36):
 1. Agente localiza seu harness no Mapa do Produto (P33)
 2. Agente executa script ou segue regras de prompt
 3. Agente produz evidências e persiste no arquivo (P34)
@@ -85,6 +90,8 @@ sem harness se o humano autorizar.
 #### PLANEJAMENTO
 - Spawna `eng-software` → planejar implementação
 - ✓ Verifica evidências de harness
+- Spawna `front` → prototipar telas (se houver UI)
+- ✓ Verifica evidências de harness
 - Spawna `dba` → modelagem de dados
 - ✓ Verifica evidências de harness
 - Spawna `sec` → requisitos de segurança (pós-plano código)
@@ -102,15 +109,19 @@ sem harness se o humano autorizar.
 - ✓ Verifica evidências de harness
 - Spawna `curador-produto` → revisar documentação (Mapa)
 - ✓ Verifica evidências de harness
+- Spawna `front` (instância limpa) → revisar protótipos/UI
+- ✓ Verifica evidências de harness
 - Spawna `rev` → revisão integrativa
 - ✓ Verifica evidências de harness
 - Se ajustes necessários: spawna `eng-software` (e/ou especialista)
-- Pergunta humano: "Resubmeter?" (P8)
+- Pergunta humano: "Resubmeter?" (P9)
 - Apresenta plano ao humano para aprovação
 - Atualiza `Status: CONSTRUÇÃO`
 
 #### CONSTRUÇÃO
 - Spawna `dba` → criar/atualizar modelo e migrações
+- ✓ Verifica evidências de harness
+- Spawna `front` → implementar UI (se houver; usa protótipos aprovados)
 - ✓ Verifica evidências de harness
 - Spawna `eng-software` → TDD (testes → código → refatoração)
 - ✓ Verifica evidências de harness
@@ -127,10 +138,12 @@ sem harness se o humano autorizar.
 - ✓ Verifica evidências de harness
 - Spawna `curador-produto` → revisar documentação (Mapa)
 - ✓ Verifica evidências de harness
+- Spawna `front` (instância limpa) → revisar aderência visual
+- ✓ Verifica evidências de harness
 - Spawna `rev` → revisão integrativa
 - ✓ Verifica evidências de harness
 - Se ajustes: spawna `eng-software` (e/ou especialista)
-- Pergunta humano: "Resubmeter?" (P8)
+- Pergunta humano: "Resubmeter?" (P9)
 - Atualiza `Status: TESTES`
 
 #### TESTES
@@ -143,8 +156,19 @@ sem harness se o humano autorizar.
 - Atualiza `Status: FINALIZAÇÃO`
 
 #### FINALIZAÇÃO
-- Spawna `curador-produto` → revisão final (docs + estrutura)
+- Spawna `curador-produto` → revisão final:
+  - Lê Mapa, lista artefatos de spec obrigatórios
+  - Atualiza docs de produto diretamente
+  - Reporta lacunas de outros domínios ao `orq`
 - ✓ Verifica evidências de harness
+- Loop de revalidação (guarda do humano):
+  - Se lacunas em outros domínios → spawna especialista indicado
+  - ✓ Verifica evidências de harness do especialista
+  - Spawna `curador-produto` → revalidar completude
+  - Se OK → sai do loop
+  - Se lacunas restantes → pergunta humano: "Resubmeter?" (P9)
+- Pergunta humano: "Excluir plano e artefatos auxiliares?"
+- Spawna `curador-produto` → excluir plano + auxiliares (ex.: `plan/ui/`)
 - Informa humano: funcionalidade concluída
 
 ---
@@ -177,6 +201,7 @@ permission:
     sec: allow
     qa: allow
     rev: allow
+    front: allow
 ---
 ```
 
@@ -238,19 +263,19 @@ agents/dba.md`. Conteúdo reescrito. Testes atualizados.
 
 ---
 
-## 6. Agentes referenciados (ainda não existentes)
+## 6. Agentes referenciados
 
 | Agente | Existente? | Observação |
 |--------|-----------|-------------|
-| `eng-software` | Não | Será criado depois |
-| `curador-produto` | Não | Será criado depois |
+| `eng-software` | **Sim** | — |
+| `curador-produto` | **Sim** | — |
 | `dba` | **Sim** | Após renomeação do `analista-bd` |
-| `sec` | Não | Será criado depois |
-| `qa` | **Sim** | Criado recentemente |
-| `rev` | Não | Será criado depois |
+| `sec` | **Sim** | — |
+| `qa` | **Sim** | — |
+| `rev` | **Sim** | — |
+| `front` | **Sim** | Engenheiro Frontend |
 
-O `orq` será implementado agora referenciando todos.
-Agentes que ainda não existem serão conectados quando prontos.
+Todos os agentes referenciados pelo `orq` já existem.
 
 ---
 
@@ -306,7 +331,7 @@ Análise das skills curadas do repo vs. relevância para `orq`:
 | api-and-interface-design | Nenhuma | `eng-software` |
 | code-simplification | Nenhuma | `eng-software` |
 | performance-optimization | Nenhuma | `eng-software` |
-| frontend-ui-engineering | Nenhuma | `eng-software` |
+| frontend-ui-engineering | Nenhuma | `front` |
 | accessibility-audit | Nenhuma | `qa` (via harness) |
 
 **Conclusão**: o `orq` não recebe skills. Suas instruções são
