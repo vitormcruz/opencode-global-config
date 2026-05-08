@@ -75,7 +75,12 @@ segurança e registrar requisitos.
 1. Ler o plano de implementação via arquivo indicado.
 2. Avaliar:
    - Autenticação e autorização.
-   - Validação de entrada e sanitização.
+   - Validação de entrada e sanitização — consultar
+     `## Regras de Produto` no arquivo de planejamento:
+     os limites definidos são mitigadores de overflow,
+     injeção e enumeração. Campo sem limite registrado
+     = achado a reportar; pedir ao humano que defina
+     e registre antes de prosseguir.
    - Criptografia (dados em trânsito e em repouso).
    - Gerenciamento de segredos.
    - Superfície de ataque (endpoints expostos, integrações).

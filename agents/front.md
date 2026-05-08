@@ -86,20 +86,27 @@ gerar protótipos para validação do humano.
    do projeto.
 4. **Consultar o humano** para alinhar expectativas
    visuais: layout, paleta, tipografia, referências.
-5. Gerar protótipos:
+5. Consultar `## Regras de Produto` no arquivo de
+   planejamento antes de prototipar campos de entrada.
+   Para cada campo visível ao usuário (input, label,
+   placeholder): verificar máscara, formato de exibição
+   e limites. O que estiver como `(a definir)` ou
+   ausente: perguntar ao humano e registrar antes de
+   prosseguir.
+6. Gerar protótipos:
    - **HTML estático** para alta fidelidade (cores,
      tipografia, espaçamentos, interações visuais).
    - **SVG** para wireframes estruturais (layout, fluxo,
      hierarquia de informação).
    - O formato depende da necessidade — decidir com base
      no que o humano precisa validar.
-6. Persistir protótipos em pasta dedicada (ex.:
+7. Persistir protótipos em pasta dedicada (ex.:
    `plan/ui/`) com nomes descritivos.
-7. Registrar no arquivo de planejamento seção
+8. Registrar no arquivo de planejamento seção
    `## Protótipos de Tela` com links para os arquivos.
-8. Apresentar ao humano para aprovação visual.
-9. Iterar até aprovação.
-10. Registrar resultado:
+9. Apresentar ao humano para aprovação visual.
+10. Iterar até aprovação.
+11. Registrar resultado:
     `Identidade Visual: APROVADA` na seção de protótipos.
 
 **Identidade visual** inclui: paleta de cores, tipografia,

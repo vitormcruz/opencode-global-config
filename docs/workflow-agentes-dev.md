@@ -76,6 +76,20 @@ comprovem o cumprimento das regras. O `orq` é responsável
 por verificar essas evidências — **esta é a sua tarefa
 mais importante**. Premissas detalhadas: 32–36.
 
+### 5. Regras de Produto
+
+Seção no arquivo de planejamento que reúne as restrições
+técnicas de domínio por campo: tamanho máximo, tipo/formato,
+máscara de exibição, limites numéricos e regras de validação.
+É o contrato de dados do domínio — garante que todos os
+agentes trabalhem com as mesmas definições.
+Quem cria: `eng-software` inicializa a seção ao planejar.
+Quem enriquece: qualquer agente que precisar de uma regra
+ausénte — consultar primeiro, perguntar ao humano se não
+estiver registrada e registrar antes de prosseguir.
+Regras já registradas nunca são reperguntadas.
+Premissa detalhada: 21.1.
+
 ## Premissas
 
 ### Orquestração
@@ -235,6 +249,21 @@ mais importante**. Premissas detalhadas: 32–36.
     detecta ausência do Mapa na fase de VALIDAÇÃO e
     executa o processo de curadoria inline antes de
     devolver controle ao `orq`.
+21.1. **Regras de Produto — preenchimento incremental** —
+    a seção `## Regras de Produto` é inicializada por
+    `eng-software` na fase de Planejamento com o que já
+    for identificável dos requisitos. Campos sem definição
+    recebem `(a definir)`. Em todas as fases, cada agente
+    que precisar de uma regra ausente: (1) consulta a
+    seção, (2) se não encontrar, pergunta ao humano,
+    (3) registra antes de prosseguir. Nenhum agente
+    repergunta o que já está registrado.
+    Formato canônico da seção:
+
+    | Campo | Tam. máx | Tipo/Formato | Máscara        | Limite numérico | Observação      |
+    |-------|----------|--------------|----------------|-----------------|-----------------|
+    | nome  | 100      | texto        | —              | —               | —               |
+    | valor | —        | decimal      | —              | 0–999.999,99    | 2 casas         |
 
 ### Papéis específicos
 
