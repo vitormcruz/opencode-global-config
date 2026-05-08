@@ -17,6 +17,7 @@ otimizado para:
 |-------------------|------------------------|---------------------|--------------------------------------------------------------|
 | `orq`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
 | `eng-software`    | Engenheiro de Software | Executor            | Planejamento, Construção, Ajustes integrativos               |
+| `front`           | Engenheiro Frontend    | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
 | `curador-produto` | Curador de Produto     | Executor            | Validação, Revisão do Plano, Revisão da Construção, Finalização |
 | `dba`             | Analista de BD         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
 | `sec`             | Analista Cyber         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção, Testes |
@@ -33,6 +34,7 @@ otimizado para:
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
+| `front`            | Prototipar telas, validar identidade visual com humano | Implementar UI conforme identidade visual aprovada                                     | Revisa aderência à identidade visual aprovada                                             |
 | `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
 
 ## Contratos do Workflow
@@ -150,6 +152,15 @@ mais importante**. Premissas detalhadas: 32–36.
     contexto do agente. Se o plano for grande demais,
     sugere dividir. Se for pequeno demais, sugere agregar
     funcionalidades. A decisão final é do humano.
+12.1. **Identidade visual como contrato** — quando o
+    plano inclui protótipos de tela aprovados pelo
+    humano, a identidade visual (paleta de cores,
+    tipografia, layout estrutural, hierarquia visual,
+    espaçamentos) é tratada como contrato. Na construção,
+    `front` pode evoluir o código dos componentes, mas
+    desvios da identidade visual aprovada requerem nova
+    aprovação explícita do humano. O `rev` inclui
+    aderência visual no checklist integrativo.
 
 ### Revisão
 
@@ -186,7 +197,9 @@ mais importante**. Premissas detalhadas: 32–36.
     revisões e status das etapas ficam persistidos.
     Permite retomada em caso de interrupção.
     **O arquivo é descartável**: ao fim do processo de
-    implementação, `curador-produto` o exclui.
+    implementação, `curador-produto` o exclui, junto com
+    quaisquer artefatos auxiliares gerados durante o
+    planejamento (ex.: protótipos de tela em `plan/ui/`).
 18. **Campo `Status` obrigatório** — o arquivo deve conter
     um campo de status no topo (ex.:
     `Status: CONSTRUÇÃO — etapa 2/3`) que permite ao
@@ -235,7 +248,8 @@ mais importante**. Premissas detalhadas: 32–36.
     BD, segurança), devolve instruções de ajuste ao
     `orq`. Faz revisão final de documentação e
     estrutura. Ao fim do processo, exclui o arquivo de
-    planejamento.
+    planejamento e artefatos auxiliares temporários
+    (ex.: protótipos de tela em `plan/ui/`).
 26. **`sec` analisa após plano de código** — requisitos de
     segurança são avaliados com base no plano de
     implementação feito pelo `eng-software`.
@@ -338,6 +352,7 @@ sequenceDiagram
     actor Humano
     participant orq as orq
     participant eng as eng-software
+    participant front as front
     participant prod as curador-produto
     participant dba as dba
     participant sec as sec
@@ -389,6 +404,17 @@ sequenceDiagram
 
     eng -->> orq: Plano persistido no arquivo (resumo curto)
 
+    orq ->> front: Prototipar telas (se houver UI)
+    alt Sem componente visual
+        front -->> orq: Sem UI nesta funcionalidade (resumo curto)
+    else Com componente visual
+        front ->> front: Gera protótipos (HTML/SVG)
+        front ->> Humano: Apresenta protótipos para aprovação visual
+        Humano -->> front: Aprovação / ajustes visuais
+        front ->> front: Itera até aprovação
+        front -->> orq: Identidade visual aprovada (resumo curto)
+    end
+
     orq ->> dba: Analisar modelagem de dados
     dba -->> orq: Modelo persistido no arquivo (resumo curto)
 
@@ -426,6 +452,10 @@ sequenceDiagram
     prod ->> prod: Verifica aderência ao Mapa do Produto
     prod -->> orq: Resumo (achado · ação · severidade)
 
+    orq ->> front: Revisar protótipos/planejamento de UI
+    front ->> front: Revisa protótipos e<br/>registra resumo no arquivo
+    front -->> orq: Resumo (achado · ação · severidade)
+
     Note right of orq: Revisão integrativa
     orq ->> rev: Revisão integrativa do plano
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
@@ -461,6 +491,12 @@ sequenceDiagram
 
     orq ->> dba: Criar/atualizar modelo, scripts e migrações
     dba -->> orq: Artefatos de BD persistidos (resumo curto)
+
+    opt Funcionalidade envolve UI
+        orq ->> front: Implementar telas
+        Note right of front: Usa protótipos aprovados<br/>como referência visual
+        front -->> orq: UI implementada (resumo curto)
+    end
 
     orq ->> eng: Implementar (TDD)
     Note right of eng: Etapa 1 — Testes primeiro<br/>Etapa 2 — Código
@@ -514,6 +550,10 @@ sequenceDiagram
     prod ->> prod: Verifica aderência ao Mapa do Produto
     prod -->> orq: Resumo (achado · ação · severidade)
 
+    orq ->> front: Revisar aderência visual da implementação
+    front ->> front: Compara implementação contra<br/>identidade visual aprovada
+    front -->> orq: Resumo (achado · ação · severidade)
+
     Note right of orq: Revisão integrativa
     orq ->> rev: Revisão integrativa da construção
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
@@ -527,6 +567,8 @@ sequenceDiagram
             dba -->> orq: Ajustes aplicados (resumo curto)
             orq ->> sec: Ajustar segurança
             sec -->> orq: Ajustes aplicados (resumo curto)
+            orq ->> front: Ajustar UI
+            front -->> orq: Ajustes aplicados (resumo curto)
         end
     end
 

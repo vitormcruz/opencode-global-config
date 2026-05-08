@@ -81,6 +81,8 @@ diferentes e verificar integridade do conjunto.
      requisitos possuem testes correspondentes?
    - **Documentação ↔ Mapa do Produto** — docs
      produzidas/planejadas aderem ao padrão?
+   - **UI ↔ identidade visual aprovada** — telas
+     implementadas respeitam os protótipos aprovados?
    - **Aderência ao plano aprovado** — o que foi
      construído corresponde ao que foi planejado?
    - **Contradições ou lacunas** — há informações

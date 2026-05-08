@@ -134,7 +134,7 @@ fazer:
 
 2. **Harness por especialista** — para cada agente sem
    harness definido, spawna o especialista do domínio
-   (`eng-software`, `dba`, `sec`, `qa`) para obter
+   (`eng-software`, `front`, `dba`, `sec`, `qa`) para obter
    sugestões de regras/ferramentas. Consolida e
    apresenta ao humano. Humano aprova/refina. Curador
    registra no Mapa com tags `build`/`val`. Se o humano
@@ -338,6 +338,39 @@ sequenceDiagram
 - **Aderência ao plano** `prompt` `val`
   Comparar o que foi construído com o que foi planejado.
   Desvios não autorizados são achados bloqueantes.
+
+- **Aderência à identidade visual** `prompt` `val`
+  Quando houver protótipos de tela aprovados, verificar
+  se a implementação respeita a identidade visual
+  aprovada. Desvios não autorizados são bloqueantes.
+
+### front
+
+- **Validação do humano (gate visual)** `prompt` `build`
+  Após gerar protótipos, apresentar ao humano para
+  aprovação. Iterar até aprovação explícita. Sem
+  aprovação, a identidade visual não é considerada
+  contrato e a construção não avança.
+
+- **Lint CSS/HTML** `tool` `build · val`
+  Executar stylelint, htmlhint ou equivalente nos
+  componentes produzidos. Achados bloqueantes devem
+  ser corrigidos.
+
+- **Acessibilidade** `tool` `build · val`
+  Executar axe-core, pa11y ou equivalente nos
+  componentes produzidos. Violations de severidade
+  critical são bloqueantes.
+
+- **Snapshot visual** `tool` `val`
+  Se o projeto usar Playwright/Cypress, executar testes
+  de snapshot visual comparando implementação contra
+  referência aprovada. Divergências são reportadas.
+
+- **Aderência à identidade visual** `prompt` `val`
+  Na revisão, comparar telas implementadas contra
+  protótipos aprovados. Desvios não autorizados pelo
+  humano são bloqueantes.
 
 ### curador-produto
 
