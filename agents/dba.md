@@ -74,6 +74,13 @@ estratégia de migração.
 - Convenções de naming e versionamento
 - Restrições operacionais (janela, volume, zero-downtime,
   locks, replicação, multi-tenant)
+- **Regras de Produto** — consultar a seção
+  `## Regras de Produto` no arquivo de planejamento
+  antes de perguntar ao humano. O que faltar para o
+  modelo (tamanho de campo, precisão decimal, formato):
+  perguntar ao humano e registrar na seção antes de
+  prosseguir. Ao definir tipos no modelo conceitual,
+  verificar consistência com as regras já registradas.
 
 **Saídas**:
 - Esboço do modelo da funcionalidade (DBML ou diagrama

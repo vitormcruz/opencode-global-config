@@ -68,18 +68,25 @@ Analisar requisitos e produzir um plano de testes.
 **O que fazer**:
 1. Ler o insumo fornecido (requisitos, plano de
    implementação, critérios de aceitação).
-2. Identificar cenários de teste:
+2. Consultar `## Regras de Produto` no arquivo de
+   planejamento — os limites, formatos e restrições
+   de campo são a fonte primária para boundary values.
+   Se uma regra necessária para um cenário não estiver
+   registrada, perguntar ao humano e registrar antes
+   de prosseguir.
+3. Identificar cenários de teste:
    - **Aceitação** — validam critérios definidos pelo
      humano (happy path + regras de negócio).
    - **Exploratórios** — cenários de borda, fluxos
-     alternativos, estados inesperados.
+     alternativos, estados inesperados (use as Regras
+     de Produto para gerar casos-limite concretos).
    - **Manuais** — quando automação não é viável ou o
      custo-benefício não justifica.
-3. Para cada cenário, definir: pré-condição, ação
+4. Para cada cenário, definir: pré-condição, ação
    esperada, resultado esperado.
-4. Avaliar se critérios de aceitação são testáveis. Se
+5. Avaliar se critérios de aceitação são testáveis. Se
    algum não for, reportar ao solicitante/humano.
-5. Persistir plano de testes no arquivo indicado.
+6. Persistir plano de testes no arquivo indicado.
 
 **Saídas**:
 - Plano de testes estruturado (cenários categorizados).

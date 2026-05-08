@@ -80,13 +80,20 @@ Analisar requisitos e produzir um plano de codificação.
    - Plano pequeno demais → sugira agregar.
    - A decisão final é do humano.
 5. Produzir plano de codificação com etapas numeradas.
-6. Se identificar decisão arquitetural significativa,
+6. Inicializar seção `## Regras de Produto` no arquivo
+   de planejamento: extrair dos requisitos o que já for
+   possível definir (tamanhos, formatos, máscaras,
+   limites numéricos). Campos ainda sem definição:
+   marcar como `(a definir)`.
+7. Se identificar decisão arquitetural significativa,
    sugerir registro em ADR (ver skill
    `documentation-and-adrs`).
 
 **Saídas**:
 - Plano de codificação com etapas, complexidade estimada
   e dependências.
+- Seção `## Regras de Produto` inicializada no arquivo
+  de planejamento.
 - Sugestões de ADR (se aplicável).
 
 ---
