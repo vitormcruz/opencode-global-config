@@ -242,6 +242,9 @@ mais importante**. Premissas detalhadas: 32–36.
 27. **`qa` não analisa código** — foca em execução de
     testes.
 28. **Testes de segurança são do `sec`**, não do `qa`.
+    Isso inclui testes dinâmicos (DAST, pen testing
+    automatizado) — são testes funcionais especializados
+    em segurança, não testes de lógica de negócio.
 
 ### Construção
 

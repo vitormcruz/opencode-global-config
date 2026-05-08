@@ -315,6 +315,9 @@ Não invente aprovações.
 - **OWASP Top 10 checklist** `prompt` `val`
   Verificar riscos OWASP aplicáveis.
 
+- **DAST** `tool` `val`
+  OWASP ZAP ou equivalente. high/critical = bloqueante.
+
 ### qa
 
 - **Cobertura mínima** `tool` `val`
