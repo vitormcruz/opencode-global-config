@@ -130,6 +130,9 @@ adequadamente coberto por testes.
    - **Ação**: o que foi corrigido/adicionado
    - **Severidade**: bloqueante ou melhoria
 
+Para o princípio de testes como especificação e suas
+implicações em cobertura, consulte `tests-as-spec`.
+
 **Saídas**:
 - Testes criados/ajustados (se necessário).
 - Resumo no formato achado · ação · severidade.
