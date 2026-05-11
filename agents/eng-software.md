@@ -193,9 +193,11 @@ do Mapa do Produto, se existir.
 
 - **Smoke tests**: executar todos os testes ao final
   da construção. Falha = diagnosticar antes de concluir.
-- **Testes intocáveis**: teste não previsto para
-  alteração falhou → não ajustar; registrar no arquivo
-  e perguntar ao humano.
+- **Testes são spec**: testes aprovados no plano são
+  especificação — na construção, nunca altere um teste;
+  altere o código. Testes contraditórios → voltar ao
+  planejamento (gate de refatoração). Consulte a skill
+  `tests-as-spec`.
 - **Regressão incremental**: após cada modificação,
   executar testes existentes imediatamente.
 - **Análise estática**: usar ferramentas do projeto

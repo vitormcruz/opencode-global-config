@@ -360,6 +360,14 @@ Premissas detalhadas: 21.1–21.3.
        passarem.
     3. **Análise de refatoração** — avalia como acomodar o
        código novo ao existente.
+
+    **Testes são especificação** — testes implementados
+    conforme o plano são especificação executável do
+    sistema. Na construção, se um teste falha, o código
+    está errado — não o teste. Se testes se contradizem,
+    o plano precisa ser revisado (gate P31). Alteração
+    de testes existentes só ocorre no planejamento, como
+    mudança de spec. Ver skill `tests-as-spec`.
 30. **Na etapa de testes e código, `eng-software` executa
     com autonomia** — sem consultar o humano, seguindo o
     plano aprovado.
