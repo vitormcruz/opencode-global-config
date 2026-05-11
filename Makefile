@@ -16,6 +16,7 @@ test: test-unit test-tools test-opencode-integration
 ## Testes unitarios puros - sem dependencias externas
 test-unit:
 	$(BATS) \
+	        $(TESTS_DIR)/agents \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/opencode-link-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-state-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-structure-test.bats \

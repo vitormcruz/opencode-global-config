@@ -187,44 +187,20 @@ consulte a skill `code-review-and-quality`.
 
 ## Regras Internas de Construção
 
-Regras que se aplicam sempre que estiver construindo ou
-aplicando ajustes — fazem parte do ciclo TDD deste
-agente, não do harness do projeto.
+Regras internas do ciclo TDD deste agente (não são
+harness do projeto). **Além destas**, siga o harness
+do Mapa do Produto, se existir.
 
-**Além destas**, siga o harness definido no Mapa do
-Produto (se existir). O harness do projeto pode adicionar
-regras extras ou scripts determinísticos a executar.
-
-### Smoke tests pós-construção
-
-Executar **todos** os testes ao final da construção.
-Só prosseguir se todos passarem. Se algum falhar,
-diagnosticar e corrigir antes de declarar conclusão.
-Consulte `debugging-and-error-recovery` se necessário.
-
-### Testes existentes são intocáveis
-
-Se um teste que **não** estava previsto para modificação
-falhar após suas alterações:
-1. **Não ajuste o teste.**
-2. Registre a falha no arquivo de planejamento.
-3. Pergunte ao humano: o problema é no código novo ou
-   o teste estava frágil?
-4. Só prossiga com instrução explícita do humano.
-
-### Regressão incremental
-
-Após cada modificação em código que já possui testes
-sem previsão de alteração, execute esses testes
-imediatamente. Objetivo: detectar regressão cedo,
-não apenas no smoke test final.
-
-### Análise estática
-
-Usar ferramentas determinísticas do projeto (ESLint,
-SonarQube, Checkstyle, pylint, golangci-lint, etc.)
-para validar o código antes de declarar conclusão.
-Achados de severidade bloqueante devem ser corrigidos.
+- **Smoke tests**: executar todos os testes ao final
+  da construção. Falha = diagnosticar antes de concluir.
+- **Testes intocáveis**: teste não previsto para
+  alteração falhou → não ajustar; registrar no arquivo
+  e perguntar ao humano.
+- **Regressão incremental**: após cada modificação,
+  executar testes existentes imediatamente.
+- **Análise estática**: usar ferramentas do projeto
+  (ESLint, pylint, etc.) antes de concluir. Bloqueantes
+  devem ser corrigidos.
 
 ---
 
@@ -252,20 +228,9 @@ code + stdout) como evidência principal.
 
 ## Boas Práticas
 
-Diretrizes gerais que guiam toda implementação:
-
-- **Clean Code** — código legível, funções pequenas, nomes
-  descritivos, responsabilidade única.
-- **TDD** — red-green-refactor. Nunca código sem teste
-  primeiro (exceto getters/setters triviais e
-  estruturação de tela).
-- **12Factor** — para aplicações que rodam em ambientes
-  cloud/container.
-- **Pirâmide de Testes** — mais unitários, menos E2E.
-  Decidir proporção com base no contexto.
-- **ADRs** — quando identificar decisão arquitetural
-  significativa, sugerir registro. Consulte a skill
-  `documentation-and-adrs`.
+Para diretrizes de construção, consulte as skills
+`test-driven-development`, `code-simplification` e
+`documentation-and-adrs`.
 
 ---
 
