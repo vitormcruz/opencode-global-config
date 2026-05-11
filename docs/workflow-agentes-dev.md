@@ -23,12 +23,13 @@ otimizado para:
 | `sec`             | Analista Cyber         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção, Testes |
 | `rev`             | Revisor Integrativo    | Executor            | Revisão do Plano, Revisão da Construção                        |
 | `qa`              | Testador               | Executor            | Planejamento, Revisão do Plano, Revisão da Construção, Testes  |
+| `val-harness`     | Validador de Harness   | Executor            | Construção, Revisão da Construção |
 
 ### Especialidades
 
 | Agente             | No planejamento                                        | Na construção                                                                          | Na validação                                                                              |
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes, verifica evidências de harness                              |
+| `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
 | `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa; guardião do Mapa; revisa docs nos loops; co-confecciona harness; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
@@ -36,6 +37,7 @@ otimizado para:
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
 | `front`            | Prototipar telas, validar identidade visual com humano | Implementar UI conforme identidade visual aprovada                                     | Revisa aderência à identidade visual aprovada                                             |
 | `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
+| `val-harness`      | —                                                      | —                                                                                      | Valida evidências de harness dos agentes da fase (apenas após Construção e Revisão da Construção, se houve modificações); cruza com Mapa do Produto |
 
 ## Contratos do Workflow
 
@@ -72,9 +74,14 @@ Premissas detalhadas: 17–20.
 
 Saída obrigatória dos agentes: lista de evidências de
 execução do harness apontando para logs ou artefatos que
-comprovem o cumprimento das regras. O `orq` é responsável
-por verificar essas evidências — **esta é a sua tarefa
-mais importante**. Premissas detalhadas: 32–36.
+comprovem o cumprimento das regras. O `val-harness` é
+responsável por validar essas evidências em lote ao
+final das fases de **Construção** e **Revisão da
+Construção** (quando houve modificações) — **esta é a
+sua única função**.
+O `orq` recebe o relatório do `val-harness` e decide
+a ação (re-spawnar agente ou consultar humano).
+Premissas detalhadas: 32–36.
 
 ### 5. Elementos de Especificação
 
@@ -112,8 +119,13 @@ Premissas detalhadas: 21.1–21.3.
    planejamento, identifica a fase atual pelo campo
    `Status`, spawna o agente adequado e recebe de volta
    apenas um resumo curto. `orq` **nunca executa** tarefas
-   de domínio; suas funções são **rotear** e **verificar
-   evidências de harness** (ver premissa 35).
+   de domínio; sua função é **rotear** e
+   **contextualizar** os agentes. Ao final das fases de
+   **Construção** e **Revisão da Construção** (quando
+   houve modificações), spawna `val-harness` para
+   validação em lote das evidências de harness. Se o
+   `val-harness` reportar falhas, `orq` re-spawna o
+   agente faltante ou consulta o humano (ver premissa 35).
 2. **Contrato de retorno: resultado no arquivo, resumo
    curto** — todo agente spawnado por `orq` persiste seu
    resultado no arquivo de planejamento e retorna apenas
@@ -180,6 +192,11 @@ Premissas detalhadas: 21.1–21.3.
     contexto do agente. Se o plano for grande demais,
     sugere dividir. Se for pequeno demais, sugere agregar
     funcionalidades. A decisão final é do humano.
+    **Arquivo de planejamento grande = escopo grande
+    demais** — o arquivo é efêmero e deve permanecer
+    leve. Se o arquivo crescer a ponto de comprometer
+    o contexto dos agentes, `orq` deve alertar o humano
+    e sugerir divisão do escopo.
 12.1. **Identidade visual como contrato** — quando o
     plano inclui protótipos de tela aprovados pelo
     humano, a identidade visual (paleta de cores,
@@ -228,6 +245,16 @@ Premissas detalhadas: 21.1–21.3.
     implementação, `curador-produto` o exclui, junto com
     quaisquer artefatos auxiliares gerados durante o
     planejamento (ex.: protótipos de tela em `plan/ui/`).
+17.1. **Seção de evidências de harness** — o arquivo deve
+    conter uma seção `## Evidências de Harness — <fase>`
+    onde cada agente persiste suas evidências ao final
+    da execução. O `val-harness` lê apenas esta seção +
+    Mapa do Produto para realizar a validação em lote.
+17.2. **Arquivo grande = escopo grande** — o arquivo de
+    planejamento é efêmero e deve permanecer leve.
+    Quando o arquivo crescer a ponto de comprometer o
+    contexto dos agentes, o `orq` deve alertar o humano
+    e sugerir redução de escopo (conforme premissa 12).
 18. **Campo `Status` obrigatório** — o arquivo deve conter
     um campo de status no topo (ex.:
     `Status: CONSTRUÇÃO — etapa 2/3`) que permite ao
@@ -414,17 +441,21 @@ Premissas detalhadas: 21.1–21.3.
     evidência. Se é prompt-only: declaração estruturada
     com achados. A lista é persistida no arquivo de
     planejamento.
-35. **Verificação de harness pelo `orq`** — após receber
-    o retorno de um agente, `orq` verifica se as
-    evidências de harness foram produzidas quando a seção
-    do agente no Mapa contiver regras/ferramentas. Se
-    estiverem ausentes ou incompletas, `orq` rejeita o
-    retorno e solicita ao agente que complete a execução.
-    Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-    `orq` apenas valida que essa decisão foi respeitada.
-    **Esta é a tarefa mais importante do `orq`** — garante
-    que as regras de contenção estão sendo efetivamente
-    seguidas, não apenas declaradas.
+35. **Validação de harness pelo `val-harness`** — ao
+    final das fases de **Construção** e **Revisão da
+    Construção** (quando houve modificações), `orq`
+    spawna `val-harness`, que cruza a seção
+    `## Evidências de Harness — <fase>` do arquivo de
+    planejamento com o Mapa do Produto.
+    Para cada agente que atuou na fase:
+    - Se harness definido e evidência presente → OK.
+    - Se harness definido e evidência ausente/incompleta
+      → FALHA (lista o que falta).
+    - Se `SEM HARNESS A PEDIDO DO HUMANO` → OK.
+    - Se seção ausente no Mapa → LACUNA.
+    O `val-harness` **não spawna agentes** — apenas
+    reporta. O `orq` recebe o relatório e decide:
+    re-spawnar o agente faltante ou consultar o humano.
 36. **Instalação de harness durante execução** — quando um
     agente com `bash: allow` identificar dependência de
     harness faltante, pode executar o script de instalação
@@ -433,7 +464,10 @@ Premissas detalhadas: 21.1–21.3.
 > **Resumo da sequência harness:**
 > agente localiza seção de harness no Mapa (P33) →
 > executa regras aplicáveis à atividade atual →
-> produz evidências (P34) → orq verifica (P35).
+> produz evidências na seção dedicada do arquivo (P34)
+> → `val-harness` valida em lote ao final da Construção
+> e Revisão da Construção, se houve modificações (P35)
+> → `orq` decide ação sobre falhas.
 
 ## Fluxo — Diagrama de Sequência
 
@@ -457,12 +491,11 @@ sequenceDiagram
     participant sec as sec
     participant qa as qa
     participant rev as rev
+    participant val as val-harness
 
     %% ── INÍCIO ──────────────────────────────
     Humano ->> orq: Nova funcionalidade (requisitos)
     orq ->> orq: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
-
-    Note right of orq: Regra geral: após cada retorno<br/>de agente, orq verifica<br/>evidências de harness (P35)
 
     %% ── VALIDAÇÃO DE ENTRADA ────────────────────
     rect rgb(255, 250, 240)
@@ -625,6 +658,9 @@ sequenceDiagram
         end
     end
 
+    orq ->> val: Validar evidências da fase
+    val -->> orq: Relatório de harness (resumo curto)
+
     end
 
     %% ── REVISÃO DA CONSTRUÇÃO ─────────────────
@@ -657,6 +693,9 @@ sequenceDiagram
     orq ->> rev: Revisão integrativa da construção
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
     rev -->> orq: Relatório (achados integrativos)
+
+    orq ->> val: Validar evidências da fase
+    val -->> orq: Relatório de harness (resumo curto)
 
     opt Ajustes necessários (rev + curador-produto)
         orq ->> eng: Aplicar ajustes (integrativos + documentação)
