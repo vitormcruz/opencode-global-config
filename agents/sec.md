@@ -204,7 +204,9 @@ O que você **NÃO** faz:
 
 ## Evidências de Execução
 
-Ao concluir qualquer tarefa, produzir lista de evidências:
+Ao concluir qualquer tarefa, produzir lista de evidências.
+**Persistir na seção `## Evidências de Harness — <fase>`
+do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
 script indicado no Mapa do Produto e usar a saída (exit
