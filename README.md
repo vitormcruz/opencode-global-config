@@ -57,16 +57,14 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `bats`
 - `pipx`
 - `docling`
+- `playwright`
+- `graphifyy`
 - `bats-support`
 - `bats-assert`
 - `bats-file`
 
 As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
 bootstrap garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
-
-Playwright (skill `browser-testing`) e instalado pelo bootstrap via
-`scripts/browser-test/install-playwright.sh`. Requer Node.js >= 18 no WSL
-(instalado automaticamente via nvm se ausente).
 
 Pacotes que precisam de `sudo` no Ubuntu/WSL:
 

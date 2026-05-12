@@ -514,6 +514,35 @@ else
 fi
 say ""
 
+# --- graphify ---
+say "[graphify] Mapa de conhecimento para AI coding assistants"
+export PATH="$HOME/.local/bin:$PATH"
+if has_cmd graphify; then
+  status_ok "graphify $(graphify --version 2>/dev/null | head -1 || echo '(versao desconhecida)')"
+else
+  status_missing "graphify"
+  if has_cmd pipx; then
+    if confirm_action "  Instalar graphifyy via pipx agora?"; then
+      pipx install graphifyy
+      export PATH="$HOME/.local/bin:$PATH"
+      if has_cmd graphify; then
+        status_installed "graphify"
+        say "  -> Configurando para OpenCode e VS Code..."
+        graphify install --platform opencode 2>/dev/null || true
+        graphify vscode install 2>/dev/null || true
+      else
+        status_missing "graphify instalado mas nao encontrado no PATH"
+        status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+      fi
+    else
+      status_hint "Para instalar depois: bash scripts/graphify/install --yes"
+    fi
+  else
+    status_hint "Primeiro instale pipx, depois: bash scripts/graphify/install --yes"
+  fi
+fi
+say ""
+
 # --- OCR (opcional, melhora extracao de PDFs escaneados) ---
 say "[ocrmypdf + tesseract + ghostscript + qpdf] Opcional: OCR de PDFs"
 ocr_missing=()
