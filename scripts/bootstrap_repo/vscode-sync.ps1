@@ -4,8 +4,8 @@
     Sincroniza configuracoes do opencode-config para o VS Code (Windows).
 
 .DESCRIPTION
-    Copia e converte agents, skills, commands e AGENTS.md para os destinos
-    globais do VS Code, sem criar arquivos intermediarios no repositorio.
+    Copia e converte agents, skills, commands para os destinos globais do
+    VS Code, e cria symlink de .github\copilot-instructions.md para AGENTS.md.
 
 .PARAMETER Yes
     Executa sem pedir confirmacao.
@@ -54,7 +54,7 @@ O que e sincronizado:
   skills\*\         -> %USERPROFILE%\.copilot\skills\
   agents\*.md       -> %APPDATA%\Code\User\prompts\*.agent.md
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
-  AGENTS.md         -> %APPDATA%\Code\User\prompts\opencode-config.instructions.md
+  AGENTS.md         -> .github\copilot-instructions.md (copia)
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
 "@
 }
@@ -371,17 +371,15 @@ function Sync-Commands {
 function Sync-Instructions {
     Say ""
     Say "--- Instructions ---"
-    Ensure-Dir $PromptsDir
 
-    $dest    = Join-Path $PromptsDir "opencode-config.instructions.md"
+    $dest   = Join-Path $RepoRoot ".github\copilot-instructions.md"
+    $source = Join-Path $RepoRoot "AGENTS.md"
+
+    Ensure-Dir (Split-Path -Parent $dest)
     Backup-IfExists $dest
 
-    $raw      = Get-Content (Join-Path $RepoRoot "AGENTS.md") -Raw -Encoding UTF8
-    $filtered = Filter-AgentsMd $raw
-    $final    = "---`napplyTo: `"**`"`n---`n" + $filtered
-
-    Write-Utf8NoBom $dest $final
-    Say "OK    opencode-config.instructions.md"
+    Copy-Item -Path $source -Destination $dest -Force
+    Say "OK    .github\copilot-instructions.md (copia de AGENTS.md)"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -451,7 +449,7 @@ function Show-Plan {
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
     Say "  - Converter $nAgents agent(s) para .agent.md"
     Say "  - Copiar $nCommands command(s) para .prompt.md"
-    Say "  - Gerar opencode-config.instructions.md"
+    Say "  - Copiar AGENTS.md para .github\copilot-instructions.md"
     Say "  - Configurar MCPs (exa, crawl4ai) em mcp.json"
 }
 
