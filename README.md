@@ -58,6 +58,7 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `pipx`
 - `docling`
 - `playwright`
+- `graphifyy`
 - `bats-support`
 - `bats-assert`
 - `bats-file`
