@@ -58,7 +58,7 @@ campos, não inventa estrutura.
 
 | Elemento | Formato/Ferramenta | Origem | Destino |
 |----------|-------------------|--------|---------|
-| Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | specs/ |
+| Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | docs/specs/ |
 | Regras de Produto | Tabela | arquivo de planej. | nenhum |
 | Modelo de Dados | DBML | arquivo de planej. | docs/modelo.dbml |
 | Threat Model | Markdown | arquivo de planej. | docs/threat-model.md |
@@ -74,7 +74,24 @@ campos, não inventa estrutura.
 ### Regras de Documentação
 
 Subseções opcionais — só existem para elementos que o
-humano quis detalhar.
+humano quis detalhar. Elementos sem regras específicas
+não precisam de subseção.
+
+**Exemplo:**
+
+```markdown
+##### Critérios de Aceite + Requisitos
+Os critérios de aceite devem estar organizados por
+Funcionalidade levando-se em conta a coesão. Cada
+funcionalidade deve ter um arquivo Concordion
+separado. Os requisitos associados aos critérios
+de aceitação devem estar no mesmo arquivo, e os
+critérios devem referenciar os requisitos que
+estão sendo atendidos.
+```
+
+(demais elementos: só criar subseção se houver
+regra específica a registrar)
 
 ### Harness por Agente
 
@@ -133,13 +150,13 @@ após cada seção. Nunca avance sem aprovação da anterior.
    humano instalar e rodar Graphify como primeiro passo.
 2. Analisa o projeto (estrutura, ferramentas, docs).
 3. Apresenta ao humano o que encontrou (resumo).
-4. **§1A (Elementos de Spec):** propõe tabela inicial →
-   humano aprova/ajusta.
-5. **§1B (Regras de Documentação):** para cada elemento
-   aprovado em §1A, pergunta se o humano quer registrar
+4. **Elementos de Especificação:** propõe tabela inicial
+   → humano aprova/ajusta.
+5. **Regras de Documentação:** para cada elemento
+   aprovado, pergunta se o humano quer registrar
    regras específicas → humano decide.
-6. **§1C (Harness):** primeiro pergunta ao humano em
-   qual linguagem/tecnologia criar os scripts. Depois,
+6. **Harness por Agente:** primeiro pergunta ao humano
+   em qual linguagem/tecnologia criar os scripts. Depois,
    para cada agente, pergunta objetivamente: "quais
    ferramentas e/ou prompts devem compor o harness
    deste agente?". Se o humano não quiser harness para

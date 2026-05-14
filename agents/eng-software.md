@@ -55,7 +55,8 @@ faz revisão de si mesmo, ou propõe commit.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Harness**: na construção e revisão, localize o Mapa
+- **Harness**: na construção e na revisão da
+  construção, localize o Mapa
   do Produto no arquivo de contexto do projeto e
   verifique se há harness configurado para você.
   Execute o script indicado no Mapa e persista a saída
@@ -63,8 +64,8 @@ faz revisão de si mesmo, ou propõe commit.
   e re-execute. Se `pass`: leia o prompt e execute se
   houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção, recomende ao
-  humano acionar `editor-mapa-produto` para confeccioná-lo.
+  siga sem harness. Se não houver seção de harness no
+  Mapa, siga sem harness.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.

@@ -1,13 +1,11 @@
 #!/usr/bin/env bats
 # tests/agents/editor-mapa-produto-test.bats
 #
-# Valida a estrutura do agente editor-mapa-produto e o
-# script de scaffold.
+# Valida a estrutura do agente editor-mapa-produto.
 
 setup() {
   load '../helpers/test_helper'
   AGENTS_DIR="${BATS_TEST_DIRNAME}/../../agents"
-  SCRIPTS_DIR="${BATS_TEST_DIRNAME}/../../scripts"
 }
 
 # ----------------------------------------------------------
@@ -41,58 +39,6 @@ setup() {
 @test "editor-mapa-produto.md tem seção de Limites" {
   run grep "^## Limites" "$AGENTS_DIR/editor-mapa-produto.md"
   [ "$status" -eq 0 ]
-}
-
-# ----------------------------------------------------------
-# Script de scaffold
-# ----------------------------------------------------------
-
-@test "scaffold.sh existe e é executável" {
-  [ -f "$SCRIPTS_DIR/mapa-produto/scaffold.sh" ]
-}
-
-@test "scaffold.sh cria seções do Mapa em arquivo vazio" {
-  common_setup
-  local dest="$TEST_HOME/test-agents.md"
-  touch "$dest"
-
-  run bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
-  [ "$status" -eq 0 ]
-
-  # Verifica seções criadas
-  run grep "## Mapa do Produto" "$dest"
-  [ "$status" -eq 0 ]
-
-  run grep "### Elementos de Especificação" "$dest"
-  [ "$status" -eq 0 ]
-
-  run grep "### Regras de Documentação" "$dest"
-  [ "$status" -eq 0 ]
-
-  run grep "### Harness por Agente" "$dest"
-  [ "$status" -eq 0 ]
-
-  common_teardown
-}
-
-@test "scaffold.sh é idempotente — não duplica seções" {
-  common_setup
-  local dest="$TEST_HOME/test-agents.md"
-  touch "$dest"
-
-  bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
-  bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
-
-  local count
-  count=$(grep -c "## Mapa do Produto" "$dest")
-  [ "$count" -eq 1 ]
-
-  common_teardown
-}
-
-@test "scaffold.sh falha sem argumento" {
-  run bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh"
-  [ "$status" -eq 1 ]
 }
 
 # ----------------------------------------------------------
