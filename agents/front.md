@@ -56,11 +56,13 @@ commit.
 - **Harness**: na construção e revisão, localize o Mapa
   do Produto no arquivo de contexto do projeto e
   verifique se há harness configurado para você.
-  Execute as regras aplicáveis à atividade atual
-  (`build` ou `val`) e produza evidências ao final.
+  Execute o script indicado no Mapa e persista a saída
+  JSON como evidência. Se `fail`: resolva os findings
+  e re-execute. Se `pass`: leia o prompt e execute se
+  houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção, recomende ao
-  humano acionar `curador-produto` para confeccioná-lo.
+  humano acionar `editor-mapa-produto` para confeccioná-lo.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.

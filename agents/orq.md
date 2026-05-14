@@ -21,6 +21,7 @@ permission:
   task:
     eng-software: allow
     curador-produto: allow
+    editor-mapa-produto: allow
     dba: allow
     sec: allow
     qa: allow
@@ -149,12 +150,12 @@ Registre o mapa de modelos no arquivo de planejamento.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 1.1 | `curador-produto` | Validar entrada contra Mapa do Produto |
+| 1.1 | `curador-produto` | Verificar existência/completude do Mapa do Produto |
 | 1.2 | `orq` | Atualizar `Status: PLANEJAMENTO` |
 
-Se o Mapa ou Harness estiver ausente, `curador-produto`
-executa fluxo de curadoria inline e interage com o humano
-antes de devolver controle.
+Se o Mapa não existir, `curador-produto` para o fluxo e
+aciona `editor-mapa-produto` para criá-lo. Se incompleto,
+informa e delega atualização ao `editor-mapa-produto`.
 
 ### 2. PLANEJAMENTO
 

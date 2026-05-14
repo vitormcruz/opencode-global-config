@@ -5,9 +5,9 @@ description: >
   (eng-software, dba, sec, qa, rev, front, curador-produto).
   Use quando: criando ou atualizando harness de agentes,
   definindo regras de contenção para o Mapa do Produto,
-  configurando ferramentas determinísticas por fase
-  (build/val). Triggers: "harness", "catálogo de harness",
-  "sugestões de harness", "regras de contenção",
+  configurando ferramentas determinísticas para script
+  único por agente. Triggers: "harness", "catálogo de
+  harness", "sugestões de harness", "regras de contenção",
   "ferramentas de harness", "harness catalog",
   "criar harness", "definir harness".
 ---
@@ -19,6 +19,27 @@ description: >
 > **Não são regras obrigatórias.** O harness efetivo de
 > cada agente é definido no Mapa do Produto de cada
 > projeto.
+
+## Interface Padronizada
+
+Cada agente possui um **script único** (sem argumentos,
+idempotente) que retorna JSON:
+
+```json
+{
+  "status": "pass | fail",
+  "findings": [
+    {
+      "severity": "bloqueante | melhoria",
+      "tool": "nome-da-ferramenta",
+      "message": "descrição do problema"
+    }
+  ],
+  "prompt": "instrução adicional (opcional)"
+}
+```
+
+Exit code: 0 = pass, 1 = fail.
 
 ## eng-software
 

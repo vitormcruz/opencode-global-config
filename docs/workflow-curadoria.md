@@ -8,17 +8,17 @@ duráveis para o projeto:
 1. **Mapa do Produto** — contrato de documentação
 2. **Harnesses por agente** — regras de contenção
 
-O `curador-produto` é o agente que implementa este
-processo como **capacidade interna**. Ele executa a
-curadoria tanto quando chamado diretamente pelo humano
-quanto quando detecta ausência de Mapa/Harness durante
-o workflow de desenvolvimento.
+Dois agentes participam deste processo:
+- **`curador-produto`** — guardião. Detecta ausência ou
+  inconsistência do Mapa/Harness. Não edita.
+- **`editor-mapa-produto`** — executor. Cria e altera o
+  Mapa e os scripts de harness. Chamado pelo humano
+  diretamente ou pelo `curador-produto` quando detecta
+  necessidade.
 
-> **Nota sobre P6:** o `curador-produto` não conhece
-> workflows nem fases. Este documento é o design do
-> processo; o agente o implementa como capacidade
-> autônoma — da mesma forma que `eng-software`
-> implementa TDD sem conhecer a sequência de fases.
+> **Nota sobre P6:** os agentes não conhecem workflows
+> nem fases. Este documento é o design do processo;
+> cada agente o implementa como capacidade autônoma.
 
 ---
 
@@ -33,18 +33,65 @@ o workflow de desenvolvimento.
    como contrato de documentação: permite ao
    `curador-produto` validar entradas e verificar
    consistência.
-2. **Conteúdo do Mapa é livre** — o processo não prescreve
-   formato nem conteúdo. Cada projeto preenche conforme
-   sua realidade. O Mapa funciona como o hotspot do
-   framework: a estrutura é fixa, o Mapa é o ponto de
-   variação por projeto.
+2. **Conteúdo do Mapa segue template default, customizável**
+   — o processo oferece um template default com formato
+   tabular fechado (anti-alucinação). O humano pode
+   adicionar, remover ou alterar linhas. O template é
+   ponto de partida, não prescrição. O Mapa funciona
+   como o hotspot do framework: a estrutura é fixa, o
+   Mapa é o ponto de variação por projeto.
+
+   **Template Default:**
+
+   O Mapa do Produto é composto por três seções
+   obrigatórias:
+
+   #### Elementos de Especificação
+
+   | Elemento | Formato/Ferramenta | Origem | Destino |
+   |----------|-------------------|--------|---------|
+   | Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | specs/ |
+   | Regras de Produto | Tabela | arquivo de planej. | nenhum |
+   | Modelo de Dados | DBML | arquivo de planej. | docs/modelo.dbml |
+   | Threat Model | Markdown | arquivo de planej. | docs/threat-model.md |
+   | Plano de Testes | Markdown | arquivo de planej. | nenhum |
+   | Identidade Visual | Protótipo HTML/SVG | plan/ui/ | nenhum |
+   | Code as Doc | Graphify | graphify-out/ | graphify-out/ |
+   | ADR (Arquitetura) | Markdown | arquivo de planej. | docs/adr/ |
+
+   **Coluna "Destino":**
+   - Caminho = artefato extraído para local definitivo
+     antes de descartar o arquivo de planejamento
+   - `nenhum` = descartado ao final do ciclo junto com
+     o arquivo de planejamento
+
+   #### Regras de Documentação
+
+   Subseções opcionais — só existem para elementos que
+   o humano quis detalhar. Elementos sem regras
+   específicas não precisam de subseção.
+
+   #### Harness por Agente
+
+   | Agente | Comando de Execução | Descrição |
+   |--------|--------------------|-----------|
+   | eng-software | harness/eng-software.sh | Testes, análise estática, regressão |
+   | dba | harness/dba.sh | Validação de schema, migrações |
+   | sec | harness/sec.sh | OWASP checks, secrets scan |
+   | qa | harness/qa.sh | Cobertura, testes de aceitação |
+   | front | harness/front.sh | Linting, a11y, aderência visual |
+   | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+   | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+   | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 3. **`curador-produto` é o guardião do Mapa** — se a seção
    não existir, `curador-produto` detecta a ausência e
-   pode sugerir uma organização inicial ao humano ou
-   aceitar o que o humano fornecer. O humano decide o
-   conteúdo; `curador-produto` orienta o processo se
-   solicitado. **É o único agente que atualiza
-   diretamente o Mapa do Produto.**
+   chama `editor-mapa-produto` para criá-lo.
+   `curador-produto` valida e detecta, mas **não edita**
+   o Mapa diretamente — delega ao `editor-mapa-produto`.
+   O humano decide o conteúdo; `editor-mapa-produto`
+   orienta o processo. **`editor-mapa-produto` é o
+   único agente que altera diretamente o Mapa do
+   Produto.**
 4. **Posicionamento recomendado** — o Mapa do Produto deve
    ficar no **início** do arquivo de contexto, logo após
    as regras globais de comportamento. LLMs têm viés de
@@ -57,24 +104,21 @@ o workflow de desenvolvimento.
 5. **Harness é definido no Mapa do Produto** — o harness
    de cada agente é um artefato do projeto, definido e
    mantido no Mapa do Produto. Não é hardcoded no prompt
-   do agente. `curador-produto` é co-responsável por
-   orientar o humano na criação e registra o harness no
-   Mapa. Cada projeto define quais regras e ferramentas
-   compõem o harness de cada agente.
+   do agente. O `editor-mapa-produto` cria e mantém os
+   scripts de harness. Cada projeto define quais regras e
+   ferramentas compõem o harness de cada agente.
    **Fonte única obrigatória** — nenhum agente assume
    harness embutido por ferramenta. Toda ferramenta,
    regra ou exceção de harness deve estar registrada no
    Mapa do Produto.
    **Registro obrigatório por agente** — no Mapa, cada
-   agente deve ter uma seção no bloco de harness com um
-   dos cenários abaixo:
-   - Se a seção tiver descrição de regras/ferramentas,
-     o harness está definido e deve ser executado.
-   - Se a seção não existir ou estiver vazia, o harness
-     não está definido para aquele agente.
-   - Se a seção contiver a frase literal
+   agente deve ter uma entrada na tabela de harness com
+   um dos cenários abaixo:
+   - Se houver comando de execução, o harness está
+     definido e o script deve existir.
+   - Se contiver `(sem harness)` com descrição
      `SEM HARNESS A PEDIDO DO HUMANO`, considera-se
-     decisão explícita de não usar harness naquele caso.
+     decisão explícita de não usar harness.
    **Preferência por ferramentas determinísticas** —
    sempre que possível, regras de harness devem ser
    implementadas via ferramentas determinísticas (linters,
@@ -82,22 +126,71 @@ o workflow de desenvolvimento.
    de schema) em vez de depender apenas de instruções
    de prompt. Ferramentas determinísticas produzem
    resultados reproduzíveis e verificáveis.
-   **Implementação preferencial: scripts executáveis** —
-   a forma recomendada de implementar harness é via
-   scripts que encapsulam as verificações determinísticas.
-   Scripts produzem resultado binário (passa/falha),
-   geram evidência automaticamente e são versionáveis.
+   **Script único por agente** — cada agente tem um
+   único script executável que encapsula todas as
+   verificações. O script segue a interface padronizada
+   (sem argumentos, JSON stdout, exit code).
 
-6. **Fase de aplicação obrigatória** — o Mapa do Produto
-   deve registrar para cada regra de harness quando ela
-   se aplica: `build` (construção), `val` (revisão) ou
-   ambos. Harness é **obrigatório na construção e na
-   revisão**, sempre que o agente altera artefatos.
+6. **Execução obrigatória na construção e revisão** — o
+   agente sempre executa o comando do Mapa ao final da
+   sua atividade, sem distinção de fase. O script é
+   idempotente.
 
-### Convenção recomendada de scripts
+### Pré-requisito: `editor-mapa-produto`
 
-A convenção abaixo é **recomendada** — o humano decide se
-a adota ou usa outra estrutura.
+7. **`editor-mapa-produto` cria e altera o Mapa e os
+   scripts de harness** — é o único agente que edita
+   esses artefatos. O `curador-produto` detecta
+   ausência e delega ao `editor-mapa-produto`.
+
+### Convenção: Interface Padronizada de Harness
+
+- **Chamada**: comando livre registrado no Mapa
+  (bash, python, node, qualquer coisa)
+- **Script único por agente** — sem argumentos, sem
+  parâmetro de fase. Paths de diretórios, configs e
+  ferramentas ficam definidos internamente no script.
+- **Saída stdout**: JSON com schema fixo:
+
+  ```json
+  {
+    "status": "pass | fail",
+    "findings": [
+      {
+        "severity": "bloqueante | melhoria",
+        "tool": "eslint | ruff | manual | ...",
+        "message": "descrição do problema"
+      }
+    ],
+    "prompt": "instrução adicional para o agente (opcional)"
+  }
+  ```
+
+- **Exit code**: 0 = pass, 1 = fail.
+- **Versionamento**: scripts entram no git como artefatos
+  do projeto.
+- **Idempotente**: o mesmo script roda em construção e
+  revisão. Sem separação por fase.
+
+**Comportamento do agente:**
+1. Ao final da execução (construção ou revisão),
+   roda o comando do Mapa
+2. `fail` → lê `findings`, tenta resolver, roda
+   harness novamente
+3. `pass` → lê `prompt`, executa se houver
+4. Persiste saída JSON na seção
+   `## Evidências de Harness` do arquivo de planejamento
+
+**O script sempre existe.** O `editor-mapa-produto` cria
+um script para **todos** os agentes ao montar o Mapa.
+Se o humano não definiu ferramentas ou regras para um
+agente, o script retorna `{ "status": "pass" }` sem
+verificações (pass-through). Assim o agente **sempre
+chama** o script sem se preocupar se há algo
+configurado ou não.
+
+**Portabilidade:** linguagem livre por projeto;
+contrato é a interface (sem argumento + JSON + exit code).
 
 ```
 harness/<agente>/<fase>.sh
@@ -118,39 +211,39 @@ harness/<agente>/<fase>.sh
 
 ## Fluxo do Processo de Curadoria
 
-O processo inicia quando o `curador-produto` já
-identificou (durante o workflow dev ou por chamada
-direta do humano) que faltam Mapa do Produto e/ou
-harness. Não há fase de diagnóstico — a detecção
-já ocorreu.
+O processo inicia quando o `editor-mapa-produto` é
+acionado (pelo humano diretamente ou pelo
+`curador-produto` durante o workflow dev quando detecta
+ausência de Mapa/Harness).
 
-O curador analisa o contexto e decide o que precisa
-fazer:
+O `editor-mapa-produto` analisa o contexto e segue o
+fluxo seção por seção com aprovação do humano:
 
-1. **Mapa do Produto** — se não existir ou estiver
-   incompleto, propõe estrutura inicial ao humano.
-   Humano aprova/refina. Curador cria/atualiza a
-   seção no arquivo de contexto.
+1. **Sugere indexação do código** — se não houver
+   grafo de conhecimento (ex.: `graphify-out/`),
+   sugere ao humano instalar e rodar uma ferramenta
+   de indexação (ex.: Graphify) como primeiro passo.
 
-2. **Harness por especialista** — para cada agente sem
-   harness definido, spawna o especialista do domínio
-   (`eng-software`, `front`, `dba`, `sec`, `qa`) para obter
-   sugestões de regras/ferramentas. Consolida e
-   apresenta ao humano. Humano aprova/refina. Curador
-   registra no Mapa com tags `build`/`val`. Se o humano
-   decidir não usar harness para um agente, registrar:
-   `SEM HARNESS A PEDIDO DO HUMANO`.
+2. **Mapa do Produto** — analisa o projeto, apresenta
+   resumo ao humano, propõe tabela de Elementos de
+   Spec (§1A). Humano aprova/refina. Pergunta sobre
+   Regras de Documentação (§1B). Humano decide.
 
-3. **Instalação de dependências** — quando todos os
+3. **Harness por Agente** — pergunta ao humano em qual
+   linguagem/tecnologia criar os scripts. Para cada
+   agente, pergunta quais ferramentas e/ou prompts
+   compõem o harness. Cria scripts para todos os
+   agentes (inclusive pass-through para os sem regras).
+
+4. **Instalação de dependências** — quando todos os
    harnesses estiverem definidos, identifica deps
    necessárias. Se houver comandos com `sudo`, entrega
    ao humano em bloco de código. Executa o restante e
-   valida (`tool --version`). A instalação bem-sucedida
-   é a validação — não há fase separada.
+   valida (`tool --version`).
 
 **Interrupção a qualquer momento** — o humano pode
 interromper o processo em qualquer etapa. Nesse caso o
-curador:
+`editor-mapa-produto`:
 - Confirma com o humano se realmente deseja encerrar.
 - Atualiza o Mapa do Produto com o que já foi decidido.
 - Para cada agente cujo harness não foi definido,
@@ -175,36 +268,41 @@ curador:
 sequenceDiagram
     actor Humano
     participant cur as curador-produto
-    participant esp as especialista(s)
+    participant edit as editor-mapa-produto
 
     rect rgb(255, 250, 240)
-    Note over Humano, esp: MAPA DO PRODUTO
-    cur ->> Humano: Propõe estrutura do Mapa
-    Humano -->> cur: Aprovação / ajustes
-    cur ->> cur: Cria/atualiza Mapa
+    Note over Humano, edit: DETECÇÃO
+    cur ->> cur: Detecta ausência de Mapa/Harness
+    cur ->> edit: Delega criação/atualização
     end
 
     rect rgb(230, 245, 255)
-    Note over Humano, esp: HARNESS
-    loop Para cada agente sem harness
-        cur ->> esp: Quais regras/ferramentas sugerir?
-        esp -->> cur: Sugestões do domínio
-        cur ->> Humano: Apresenta harness proposto
-        Humano -->> cur: Aprovação / ajustes
-        cur ->> cur: Registra no Mapa
+    Note over Humano, edit: MAPA DO PRODUTO (seção por seção)
+    edit ->> Humano: Sugere indexação (se sem grafo)
+    edit ->> edit: Analisa projeto (estrutura, tools)
+    edit ->> Humano: Propõe §1A (Elementos de Spec)
+    Humano -->> edit: Aprovação / ajustes
+    edit ->> Humano: Pergunta §1B (Regras de Doc)
+    Humano -->> edit: Aprovação / ajustes
+    edit ->> Humano: Pergunta §1C (Harness — linguagem?)
+    Humano -->> edit: Linguagem definida
+    loop Para cada agente
+        edit ->> Humano: Quais ferramentas/prompts?
+        Humano -->> edit: Resposta
     end
+    edit ->> edit: Cria scripts (todos, inclusive pass-through)
     end
 
     rect rgb(240, 255, 240)
-    Note over Humano, esp: INSTALAÇÃO
-    cur ->> cur: Identifica deps necessárias
+    Note over Humano, edit: INSTALAÇÃO
+    edit ->> edit: Identifica deps necessárias
     opt Comandos com sudo
-        cur ->> Humano: Comandos para executar (bloco)
-        Humano -->> cur: Executado
+        edit ->> Humano: Comandos para executar (bloco)
+        Humano -->> edit: Executado
     end
-    cur ->> cur: Executa script de instalação
-    cur ->> cur: Valida instalação (tool --version)
-    cur -->> Humano: Curadoria concluída
+    edit ->> edit: Executa script de instalação
+    edit ->> edit: Valida instalação (tool --version)
+    edit -->> Humano: Mapa e Harness concluídos
     end
 ```
 

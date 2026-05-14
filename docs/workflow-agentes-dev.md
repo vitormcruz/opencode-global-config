@@ -1,4 +1,4 @@
-# Workflow de Agentes — Desenvolvimento (`dev`)
+﻿# Workflow de Agentes — Desenvolvimento (`dev`)
 
 ## Objetivo
 
@@ -31,7 +31,7 @@ otimizado para:
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Valida entrada contra Mapa; guardião do Mapa; revisa docs nos loops; co-confecciona harness; revisão final |
+| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao Mapa; guardião do Mapa (não edita — delega ao editor-mapa-produto); revisa docs nos loops; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
@@ -285,11 +285,11 @@ Premissas detalhadas: 21.1–21.3.
 
 21. **O workflow exige um Mapa do Produto** — a definição,
     criação e manutenção do Mapa são responsabilidade do
-    `curador-produto` conforme descrito em
+    `editor-mapa-produto` conforme descrito em
     `docs/workflow-curadoria.md`. O `curador-produto`
     detecta ausência do Mapa na fase de VALIDAÇÃO e
-    executa o processo de curadoria inline antes de
-    devolver controle ao `orq`.
+    aciona `editor-mapa-produto` para criá-lo. Se o Mapa
+    não existir, o fluxo para até que seja criado.
 21.1. **Regras de Produto — preenchimento incremental** —
     a seção `## Regras de Produto` é inicializada por
     `eng-software` na fase de Planejamento com o que já
@@ -340,25 +340,26 @@ Premissas detalhadas: 21.1–21.3.
 
 ### Papéis específicos
 
-25. **`curador-produto` valida, não define** — verifica se
-    a entrada do humano é consistente com o Mapa do
-    Produto. Não cria escopo nem requisitos. Participa
-    dos loops de revisão verificando se documentação
-    planejada/produzida está conforme o Mapa. **Atualiza
-    diretamente** o Mapa do Produto e documentação de
-    produto; para artefatos de outros domínios (código,
-    BD, segurança), devolve instruções de ajuste ao
-    `orq`. Faz revisão final de documentação e
-    estrutura.
+25. **`curador-produto` valida aderência ao Mapa, não
+    requisitos** — verifica se artefatos produzidos estão
+    em conformidade com o Mapa do Produto. Não cria
+    escopo nem requisitos. Participa dos loops de revisão
+    verificando se documentação planejada/produzida está
+    conforme o Mapa. **Não altera** o Mapa do Produto
+    nem harness diretamente — delega ao
+    `editor-mapa-produto`. Para artefatos de outros
+    domínios (código, BD, segurança), devolve instruções
+    de ajuste ao `orq`. Faz revisão final de
+    documentação e estrutura.
     **Finalização — verificação de spec e exclusão do
     plano:** ao finalizar, `curador-produto` lê o Mapa
     e lista todos os artefatos de spec obrigatórios.
-    Verifica existência de cada um. Para docs de
-    produto: atualiza diretamente. Para artefatos de
-    outros domínios: reporta lacunas ao `orq` com
-    instrução de qual agente spawnar para extrair do
-    plano efêmero. Após `orq` spawnar agentes e receber
-    retorno, `curador-produto` revalida a completude.
+    Para artefatos com Destino definido (caminho):
+    verifica existência no local definitivo. Para
+    artefatos com Destino `nenhum`: ignora (descartados
+    com o plano). Reporta lacunas ao `orq` com instrução
+    de qual agente spawnar. Após `orq` spawnar agentes e
+    receber retorno, `curador-produto` revalida.
     **Guarda do humano**: após cada rodada de correção,
     `orq` pergunta ao humano se deseja resubmeter para
     revalidação ou seguir adiante (similar à revisão,
@@ -419,28 +420,30 @@ Premissas detalhadas: 21.1–21.3.
 
 32. **Harness é definido no Mapa do Produto** — a criação
     e manutenção do harness são responsabilidade do
-    `curador-produto` conforme descrito em
+    `editor-mapa-produto` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
     na construção e na revisão**, sempre que o agente
-    altera artefatos.
+    altera artefatos. Implementado como **script único
+    por agente** — sem argumentos, sem parâmetro de fase,
+    idempotente.
 33. **Agente localiza seu harness antes de executar** —
     ao iniciar uma tarefa na construção ou revisão, o
     agente localiza o Mapa do Produto no arquivo de
     contexto do projeto e verifica se há harness
-    configurado para ele. Se houver seção com
-    regras/ferramentas, executa as regras aplicáveis à
-    atividade atual (construção ou revisão). Se a seção
-    contiver `SEM HARNESS A PEDIDO DO HUMANO`, segue sem
-    harness. Se a seção não existir ou estiver vazia,
-    recomenda ao humano acionar `curador-produto` para
+    configurado para ele. Se houver comando registrado,
+    executa o script. Se a seção contiver
+    `SEM HARNESS A PEDIDO DO HUMANO`, segue sem harness.
+    Se a seção não existir ou estiver vazia, recomenda ao
+    humano acionar `editor-mapa-produto` para
     confeccionar/registrar antes de prosseguir.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
-    execução, uma lista de evidências de cumprimento.
-    Se o harness é um script: exit code + stdout são a
-    evidência. Se é prompt-only: declaração estruturada
-    com achados. A lista é persistida no arquivo de
-    planejamento.
+    execução, a saída JSON do script como evidência.
+    O JSON contém `status`, `findings` e `prompt`.
+    A saída é persistida no arquivo de planejamento.
+    Se `fail`: o agente lê `findings`, tenta resolver e
+    roda o harness novamente. Se `pass`: lê `prompt` e
+    executa se houver.
 35. **Validação de harness pelo `val-harness`** — ao
     final das fases de **Construção** e **Revisão da
     Construção** (quando houve modificações), `orq`
@@ -462,9 +465,11 @@ Premissas detalhadas: 21.1–21.3.
     de harness do projeto para avançar com segurança.
 
 > **Resumo da sequência harness:**
-> agente localiza seção de harness no Mapa (P33) →
-> executa regras aplicáveis à atividade atual →
-> produz evidências na seção dedicada do arquivo (P34)
+> agente localiza comando de harness no Mapa (P33) →
+> executa script (sem argumentos, idempotente) →
+> se `fail`: resolve findings e re-executa →
+> se `pass`: lê prompt e executa se houver →
+> persiste saída JSON na seção dedicada do arquivo (P34)
 > → `val-harness` valida em lote ao final da Construção
 > e Revisão da Construção, se houve modificações (P35)
 > → `orq` decide ação sobre falhas.
@@ -499,23 +504,22 @@ sequenceDiagram
 
     %% ── VALIDAÇÃO DE ENTRADA ────────────────────
     rect rgb(255, 250, 240)
-    Note over Humano, rev: VALIDAÇÃO DE ENTRADA
+    Note over Humano, rev: VALIDAÇÃO
 
-    orq ->> prod: Validar entrada contra docs do produto
+    orq ->> prod: Verificar existência/completude do Mapa
 
-    alt Mapa/Harness ausente
-        prod ->> prod: Executa fluxo de curadoria (inline)
-        prod ->> Humano: Interage para criar Mapa/Harness
-        prod -->> orq: Curadoria concluída (resumo curto)
+    alt Mapa ausente
+        prod ->> prod: Detecta ausência
+        prod ->> prod: Aciona editor-mapa-produto
+        Note right of prod: editor-mapa-produto cria Mapa<br/>com aprovação do humano
+        prod -->> orq: Mapa criado (resumo curto)
     end
 
-    alt Documentação OK
-        prod -->> orq: Entrada válida (resumo curto)
-    else Documentação inconsistente
-        prod ->> Humano: Reporta inconsistências
-        Humano -->> prod: Requisitos ajustados
-        prod ->> prod: Revalida
-        prod -->> orq: Entrada válida (resumo curto)
+    alt Mapa OK
+        prod -->> orq: Mapa completo (resumo curto)
+    else Mapa incompleto
+        prod ->> prod: Aciona editor-mapa-produto
+        prod -->> orq: Mapa atualizado (resumo curto)
     end
 
     orq ->> orq: Atualiza Status: PLANEJAMENTO
