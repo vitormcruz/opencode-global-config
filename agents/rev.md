@@ -49,7 +49,7 @@ spawna outros agentes, ou propõe commit.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas.
-- **Harness**: na revisão, localize o Mapa do Produto
+- **Harness**: na revisão da construção, localize o Mapa do Produto
   no arquivo de contexto do projeto e verifique se há
   harness configurado para você. Execute o script
   indicado no Mapa e persista a saída JSON como
@@ -57,8 +57,8 @@ spawna outros agentes, ou propõe commit.
   re-execute. Se `pass`: leia o prompt e execute se
   houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção, recomende ao
-  humano acionar `editor-mapa-produto` para confeccioná-lo.
+  siga sem harness. Se não houver seção de harness no
+  Mapa, siga sem harness.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.

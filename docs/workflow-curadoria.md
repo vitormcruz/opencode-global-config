@@ -50,7 +50,7 @@ Dois agentes participam deste processo:
 
    | Elemento | Formato/Ferramenta | Origem | Destino |
    |----------|-------------------|--------|---------|
-   | Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | specs/ |
+   | Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | docs/specs/ |
    | Regras de Produto | Tabela | arquivo de planej. | nenhum |
    | Modelo de Dados | DBML | arquivo de planej. | docs/modelo.dbml |
    | Threat Model | Markdown | arquivo de planej. | docs/threat-model.md |
@@ -70,6 +70,22 @@ Dois agentes participam deste processo:
    Subseções opcionais — só existem para elementos que
    o humano quis detalhar. Elementos sem regras
    específicas não precisam de subseção.
+
+   **Exemplo:**
+
+   ```markdown
+   ##### Critérios de Aceite + Requisitos
+   Os critérios de aceite devem estar organizados por
+   Funcionalidade levando-se em conta a coesão. Cada
+   funcionalidade deve ter um arquivo Concordion
+   separado. Os requisitos associados aos critérios
+   de aceitação devem estar no mesmo arquivo, e os
+   critérios devem referenciar os requisitos que
+   estão sendo atendidos.
+   ```
+
+   (demais elementos: só criar subseção se houver
+   regra específica a registrar)
 
    #### Harness por Agente
 
@@ -131,10 +147,10 @@ Dois agentes participam deste processo:
    verificações. O script segue a interface padronizada
    (sem argumentos, JSON stdout, exit code).
 
-6. **Execução obrigatória na construção e revisão** — o
-   agente sempre executa o comando do Mapa ao final da
-   sua atividade, sem distinção de fase. O script é
-   idempotente.
+6. **Execução obrigatória na construção e revisão da
+   construção** — o agente sempre executa o comando do
+   Mapa ao final da sua atividade nessas fases. O script
+   é idempotente.
 
 ### Pré-requisito: `editor-mapa-produto`
 
@@ -226,8 +242,8 @@ fluxo seção por seção com aprovação do humano:
 
 2. **Mapa do Produto** — analisa o projeto, apresenta
    resumo ao humano, propõe tabela de Elementos de
-   Spec (§1A). Humano aprova/refina. Pergunta sobre
-   Regras de Documentação (§1B). Humano decide.
+   Especificação. Humano aprova/refina. Pergunta sobre
+   Regras de Documentação. Humano decide.
 
 3. **Harness por Agente** — pergunta ao humano em qual
    linguagem/tecnologia criar os scripts. Para cada
@@ -280,11 +296,11 @@ sequenceDiagram
     Note over Humano, edit: MAPA DO PRODUTO (seção por seção)
     edit ->> Humano: Sugere indexação (se sem grafo)
     edit ->> edit: Analisa projeto (estrutura, tools)
-    edit ->> Humano: Propõe §1A (Elementos de Spec)
+    edit ->> Humano: Propõe tabela Elementos de Especificação
     Humano -->> edit: Aprovação / ajustes
-    edit ->> Humano: Pergunta §1B (Regras de Doc)
+    edit ->> Humano: Pergunta Regras de Documentação
     Humano -->> edit: Aprovação / ajustes
-    edit ->> Humano: Pergunta §1C (Harness — linguagem?)
+    edit ->> Humano: Pergunta Harness por Agente (linguagem?)
     Humano -->> edit: Linguagem definida
     loop Para cada agente
         edit ->> Humano: Quais ferramentas/prompts?
@@ -476,15 +492,17 @@ sequenceDiagram
   Ao revisar, verificar se faltou atualizar alguma
   documentação com base no Mapa do Produto.
 
-- **Atualiza Mapa diretamente** `prompt` `val`
+- **Delega atualização do Mapa** `prompt` `val`
   Quando a funcionalidade implementada altera estrutura,
-  nomenclatura ou convenções do projeto, atualizar o Mapa
-  do Produto diretamente (sem delegar).
+  nomenclatura ou convenções do projeto, delegar ao
+  `editor-mapa-produto` a atualização do Mapa.
 
 - **Valida existência de harness** `prompt` `val`
-  Verificar se todos os agentes que atuam no projeto
-  possuem harness registrado no Mapa. Se não, alertar
-  o humano.
+  Verificar se os agentes executores (`eng-software`,
+  `dba`, `sec`, `qa`, `front`) possuem harness
+  registrado no Mapa. Agentes sem harness por design
+  (`val-harness`, `curador-produto`, `rev`) não
+  precisam de verificação.
 
 - **Delega outros domínios** `prompt` `val`
   Para ajustes em código, BD ou segurança detectados na

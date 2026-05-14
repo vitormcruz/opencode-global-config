@@ -22,7 +22,8 @@ test-unit:
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-structure-test.bats \
 	        $(TESTS_DIR)/scripts/skills \
 	        $(TESTS_DIR)/scripts/browser-test \
-	        $(TESTS_DIR)/scripts/graphify/install-test.bats
+	        $(TESTS_DIR)/scripts/graphify/install-test.bats \
+	        $(TESTS_DIR)/scripts/mapa-produto
 
 ## Testes que requerem ferramentas instaladas no WSL
 test-tools:

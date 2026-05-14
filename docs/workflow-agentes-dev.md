@@ -39,6 +39,11 @@ otimizado para:
 | `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
 | `val-harness`      | —                                                      | —                                                                                      | Valida evidências de harness dos agentes da fase (apenas após Construção e Revisão da Construção, se houve modificações); cruza com Mapa do Produto |
 
+> **Nota de sequenciamento (P26):** `sec` analisa
+> requisitos de segurança com base no plano de
+> implementação do `eng-software` — por isso é spawnado
+> após o engenheiro no planejamento.
+
 ## Contratos do Workflow
 
 O workflow se apoia em quatro contratos formais. Cada um
@@ -235,6 +240,12 @@ Premissas detalhadas: 21.1–21.3.
     - **Achado**: o que estava errado
     - **Ação**: o que foi corrigido
     - **Severidade**: bloqueante ou melhoria
+27. **`qa` não analisa código** — foca em execução de
+    testes.
+28. **Testes de segurança são do `sec`**, não do `qa`.
+    Isso inclui testes dinâmicos (DAST, pen testing
+    automatizado) — são testes funcionais especializados
+    em segurança, não testes de lógica de negócio.
 
 ### Arquivo de planejamento
 
@@ -337,9 +348,6 @@ Premissas detalhadas: 21.1–21.3.
     para verificar obrigações de documentação de spec em
     seu domínio para essa fase. Se o Mapa não definir
     obrigações para um agente/fase, nada a fazer.
-
-### Papéis específicos
-
 25. **`curador-produto` valida aderência ao Mapa, não
     requisitos** — verifica se artefatos produzidos estão
     em conformidade com o Mapa do Produto. Não cria
@@ -369,15 +377,6 @@ Premissas detalhadas: 21.1–21.3.
     `plan/ui/`) após verificar que toda documentação
     obrigatória existe **ou** após o humano decidir
     encerrar o loop.
-26. **`sec` analisa após plano de código** — requisitos de
-    segurança são avaliados com base no plano de
-    implementação feito pelo `eng-software`.
-27. **`qa` não analisa código** — foca em execução de
-    testes.
-28. **Testes de segurança são do `sec`**, não do `qa`.
-    Isso inclui testes dinâmicos (DAST, pen testing
-    automatizado) — são testes funcionais especializados
-    em segurança, não testes de lógica de negócio.
 
 ### Construção
 
@@ -422,20 +421,20 @@ Premissas detalhadas: 21.1–21.3.
     e manutenção do harness são responsabilidade do
     `editor-mapa-produto` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
-    na construção e na revisão**, sempre que o agente
-    altera artefatos. Implementado como **script único
-    por agente** — sem argumentos, sem parâmetro de fase,
-    idempotente.
+    na construção e na revisão da construção**, sempre
+    que o agente altera artefatos. Implementado como
+    **script único por agente** — sem argumentos, sem
+    parâmetro de fase, idempotente.
 33. **Agente localiza seu harness antes de executar** —
-    ao iniciar uma tarefa na construção ou revisão, o
-    agente localiza o Mapa do Produto no arquivo de
+    ao iniciar uma tarefa na construção ou revisão da
+    construção, o agente localiza o Mapa do Produto no
+    arquivo de
     contexto do projeto e verifica se há harness
     configurado para ele. Se houver comando registrado,
     executa o script. Se a seção contiver
     `SEM HARNESS A PEDIDO DO HUMANO`, segue sem harness.
-    Se a seção não existir ou estiver vazia, recomenda ao
-    humano acionar `editor-mapa-produto` para
-    confeccionar/registrar antes de prosseguir.
+    Se a seção não existir ou estiver vazia, segue sem
+    harness.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, a saída JSON do script como evidência.
@@ -507,20 +506,8 @@ sequenceDiagram
     Note over Humano, rev: VALIDAÇÃO
 
     orq ->> prod: Verificar existência/completude do Mapa
-
-    alt Mapa ausente
-        prod ->> prod: Detecta ausência
-        prod ->> prod: Aciona editor-mapa-produto
-        Note right of prod: editor-mapa-produto cria Mapa<br/>com aprovação do humano
-        prod -->> orq: Mapa criado (resumo curto)
-    end
-
-    alt Mapa OK
-        prod -->> orq: Mapa completo (resumo curto)
-    else Mapa incompleto
-        prod ->> prod: Aciona editor-mapa-produto
-        prod -->> orq: Mapa atualizado (resumo curto)
-    end
+    Note right of prod: Se ausente/incompleto: aciona<br/>editor-mapa-produto<br/>(ver workflow-curadoria.md)
+    prod -->> orq: Mapa verificado (resumo curto)
 
     orq ->> orq: Atualiza Status: PLANEJAMENTO
 
