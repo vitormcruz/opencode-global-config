@@ -54,640 +54,805 @@
   },
   "nodes": [
     {
+      "label": "AGENTS.md",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L1",
+      "id": "agents_md",
+      "community": 2,
+      "norm_label": "agents.md"
+    },
+    {
+      "label": "Regras Globais",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L1",
+      "id": "opencode_config_agents_regras_globais",
+      "community": 2,
+      "norm_label": "regras globais"
+    },
+    {
+      "label": "graphify \u2014 Gate Obrigat\u00f3rio",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L3",
+      "id": "opencode_config_agents_graphify_gate_obrigat\u00f3rio",
+      "community": 2,
+      "norm_label": "graphify \u2014 gate obrigatorio"
+    },
+    {
+      "label": "Idioma",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L20",
+      "id": "opencode_config_agents_idioma",
+      "community": 2,
+      "norm_label": "idioma"
+    },
+    {
+      "label": "Atalho: \"configure este repo\"",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L24",
+      "id": "opencode_config_agents_atalho_configure_este_repo",
+      "community": 2,
+      "norm_label": "atalho: \"configure este repo\""
+    },
+    {
+      "label": "code:bash (bash ./scripts/bootstrap_repo/opencode-link --yes)",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L29",
+      "id": "opencode_config_agents_codeblock_1",
+      "community": 2,
+      "norm_label": "code:bash (bash ./scripts/bootstrap_repo/opencode-link --yes)"
+    },
+    {
+      "label": "Configuracao Global via Links Simbolicos",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L35",
+      "id": "opencode_config_agents_configuracao_global_via_links_simbolicos",
+      "community": 2,
+      "norm_label": "configuracao global via links simbolicos"
+    },
+    {
+      "label": "code:bash (mkdir -p ~/.config/opencode)",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L42",
+      "id": "opencode_config_agents_codeblock_2",
+      "community": 2,
+      "norm_label": "code:bash (mkdir -p ~/.config/opencode)"
+    },
+    {
+      "label": "Concisao",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L63",
+      "id": "opencode_config_agents_concisao",
+      "community": 2,
+      "norm_label": "concisao"
+    },
+    {
+      "label": "Gera\u00e7\u00e3o de arquivos MD",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L76",
+      "id": "opencode_config_agents_gera\u00e7\u00e3o_de_arquivos_md",
+      "community": 2,
+      "norm_label": "geracao de arquivos md"
+    },
+    {
+      "label": "Exibi\u00e7\u00e3o de Texto copie e cola",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L79",
+      "id": "opencode_config_agents_exibi\u00e7\u00e3o_de_texto_copie_e_cola",
+      "community": 2,
+      "norm_label": "exibicao de texto copie e cola"
+    },
+    {
+      "label": "Acao",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L83",
+      "id": "opencode_config_agents_acao",
+      "community": 2,
+      "norm_label": "acao"
+    },
+    {
+      "label": "COMMITS",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L87",
+      "id": "opencode_config_agents_commits",
+      "community": 2,
+      "norm_label": "commits"
+    },
+    {
+      "label": "Cria\u00e7\u00e3o de Skills",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L101",
+      "id": "opencode_config_agents_cria\u00e7\u00e3o_de_skills",
+      "community": 2,
+      "norm_label": "criacao de skills"
+    },
+    {
+      "label": "Sincroniza\u00e7\u00e3o Workflow \u2194 Agentes",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L107",
+      "id": "opencode_config_agents_sincroniza\u00e7\u00e3o_workflow_agentes",
+      "community": 2,
+      "norm_label": "sincronizacao workflow \u2194 agentes"
+    },
+    {
+      "label": "Regras Obrigat\u00f3rias Pora Testes",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L116",
+      "id": "opencode_config_agents_regras_obrigat\u00f3rias_pora_testes",
+      "community": 2,
+      "norm_label": "regras obrigatorias pora testes"
+    },
+    {
+      "label": "README",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L147",
+      "id": "opencode_config_agents_readme",
+      "community": 2,
+      "norm_label": "readme"
+    },
+    {
+      "label": "Upstream de Skills Externas",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L151",
+      "id": "opencode_config_agents_upstream_de_skills_externas",
+      "community": 5,
+      "norm_label": "upstream de skills externas"
+    },
+    {
+      "label": "Manutencao de Upstream \u2014 Padrao do Repo",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L157",
+      "id": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "community": 5,
+      "norm_label": "manutencao de upstream \u2014 padrao do repo"
+    },
+    {
+      "label": "Estrutura obrigatoria por skill externa",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L159",
+      "id": "opencode_config_agents_estrutura_obrigatoria_por_skill_externa",
+      "community": 5,
+      "norm_label": "estrutura obrigatoria por skill externa"
+    },
+    {
+      "label": "code:block3 (skills/<nome>/)",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L161",
+      "id": "opencode_config_agents_codeblock_3",
+      "community": 5,
+      "norm_label": "code:block3 (skills/<nome>/)"
+    },
+    {
+      "label": "O que o UPSTREAM.md deve conter",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L168",
+      "id": "opencode_config_agents_o_que_o_upstream_md_deve_conter",
+      "community": 5,
+      "norm_label": "o que o upstream.md deve conter"
+    },
+    {
+      "label": "Lingua da description de skills externas",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L179",
+      "id": "opencode_config_agents_lingua_da_description_de_skills_externas",
+      "community": 5,
+      "norm_label": "lingua da description de skills externas"
+    },
+    {
+      "label": "code:block4 (description_lang: en)",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L184",
+      "id": "opencode_config_agents_codeblock_4",
+      "community": 5,
+      "norm_label": "code:block4 (description_lang: en)"
+    },
+    {
+      "label": "Regra de ouro do sync",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L196",
+      "id": "opencode_config_agents_regra_de_ouro_do_sync",
+      "community": 5,
+      "norm_label": "regra de ouro do sync"
+    },
+    {
+      "label": "Checklist pos-sync",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L201",
+      "id": "opencode_config_agents_checklist_pos_sync",
+      "community": 5,
+      "norm_label": "checklist pos-sync"
+    },
+    {
+      "label": "Scripts de sync disponiveis",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": "L209",
+      "id": "opencode_config_agents_scripts_de_sync_disponiveis",
+      "community": 5,
+      "norm_label": "scripts de sync disponiveis"
+    },
+    {
       "label": "vscode-sync.ps1",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L1",
-      "id": "scripts_bootstrap_repo_vscode_sync_ps1",
       "community": 1,
-      "norm_label": "vscode-sync.ps1"
+      "norm_label": "vscode-sync.ps1",
+      "id": "scripts_bootstrap_repo_vscode_sync_ps1"
     },
     {
       "label": "Show-Usage()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L40",
-      "id": "bootstrap_repo_vscode_sync_show_usage",
       "community": 1,
-      "norm_label": "show-usage()"
+      "norm_label": "show-usage()",
+      "id": "bootstrap_repo_vscode_sync_show_usage"
     },
     {
       "label": "Say()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L93",
-      "id": "bootstrap_repo_vscode_sync_say",
       "community": 1,
-      "norm_label": "say()"
+      "norm_label": "say()",
+      "id": "bootstrap_repo_vscode_sync_say"
     },
     {
       "label": "Write-Utf8NoBom()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L97",
-      "id": "bootstrap_repo_vscode_sync_write_utf8nobom",
       "community": 1,
-      "norm_label": "write-utf8nobom()"
+      "norm_label": "write-utf8nobom()",
+      "id": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "label": "Ensure-Dir()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L101",
-      "id": "bootstrap_repo_vscode_sync_ensure_dir",
       "community": 1,
-      "norm_label": "ensure-dir()"
+      "norm_label": "ensure-dir()",
+      "id": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "label": "Backup-IfExists()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L107",
-      "id": "bootstrap_repo_vscode_sync_backup_ifexists",
       "community": 1,
-      "norm_label": "backup-ifexists()"
+      "norm_label": "backup-ifexists()",
+      "id": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "label": "ConvertTo-WslPath()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L120",
-      "id": "bootstrap_repo_vscode_sync_convertto_wslpath",
       "community": 1,
-      "norm_label": "convertto-wslpath()"
+      "norm_label": "convertto-wslpath()",
+      "id": "bootstrap_repo_vscode_sync_convertto_wslpath"
     },
     {
       "label": "Confirm-Action()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L128",
-      "id": "bootstrap_repo_vscode_sync_confirm_action",
       "community": 1,
-      "norm_label": "confirm-action()"
+      "norm_label": "confirm-action()",
+      "id": "bootstrap_repo_vscode_sync_confirm_action"
     },
     {
       "label": "Strip-AgentFrontmatter()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L142",
-      "id": "bootstrap_repo_vscode_sync_strip_agentfrontmatter",
       "community": 1,
-      "norm_label": "strip-agentfrontmatter()"
+      "norm_label": "strip-agentfrontmatter()",
+      "id": "bootstrap_repo_vscode_sync_strip_agentfrontmatter"
     },
     {
       "label": "Filter-AgentsMd()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L178",
-      "id": "bootstrap_repo_vscode_sync_filter_agentsmd",
       "community": 1,
-      "norm_label": "filter-agentsmd()"
+      "norm_label": "filter-agentsmd()",
+      "id": "bootstrap_repo_vscode_sync_filter_agentsmd"
     },
     {
       "label": "Rewrite-ScriptRefs()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L227",
-      "id": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
       "community": 1,
-      "norm_label": "rewrite-scriptrefs()"
+      "norm_label": "rewrite-scriptrefs()",
+      "id": "bootstrap_repo_vscode_sync_rewrite_scriptrefs"
     },
     {
       "label": "Adapt-SkillForVSCode()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L276",
-      "id": "bootstrap_repo_vscode_sync_adapt_skillforvscode",
       "community": 1,
-      "norm_label": "adapt-skillforvscode()"
+      "norm_label": "adapt-skillforvscode()",
+      "id": "bootstrap_repo_vscode_sync_adapt_skillforvscode"
     },
     {
       "label": "Sync-Skills()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L295",
-      "id": "bootstrap_repo_vscode_sync_sync_skills",
       "community": 1,
-      "norm_label": "sync-skills()"
+      "norm_label": "sync-skills()",
+      "id": "bootstrap_repo_vscode_sync_sync_skills"
     },
     {
       "label": "Sync-Agents()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L323",
-      "id": "bootstrap_repo_vscode_sync_sync_agents",
       "community": 1,
-      "norm_label": "sync-agents()"
+      "norm_label": "sync-agents()",
+      "id": "bootstrap_repo_vscode_sync_sync_agents"
     },
     {
       "label": "Sync-Commands()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L349",
-      "id": "bootstrap_repo_vscode_sync_sync_commands",
       "community": 1,
-      "norm_label": "sync-commands()"
+      "norm_label": "sync-commands()",
+      "id": "bootstrap_repo_vscode_sync_sync_commands"
     },
     {
       "label": "Sync-Instructions()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L371",
-      "id": "bootstrap_repo_vscode_sync_sync_instructions",
       "community": 1,
-      "norm_label": "sync-instructions()"
+      "norm_label": "sync-instructions()",
+      "id": "bootstrap_repo_vscode_sync_sync_instructions"
     },
     {
       "label": "Sync-Mcp()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L391",
-      "id": "bootstrap_repo_vscode_sync_sync_mcp",
       "community": 1,
-      "norm_label": "sync-mcp()"
+      "norm_label": "sync-mcp()",
+      "id": "bootstrap_repo_vscode_sync_sync_mcp"
     },
     {
       "label": "Show-Plan()",
       "file_type": "code",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L439",
-      "id": "bootstrap_repo_vscode_sync_show_plan",
       "community": 1,
-      "norm_label": "show-plan()"
+      "norm_label": "show-plan()",
+      "id": "bootstrap_repo_vscode_sync_show_plan"
     },
     {
       "label": "sanitize_mcp.py",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L1",
-      "id": "scripts_crawl4ai_docker_sanitize_mcp_py",
       "community": 4,
-      "norm_label": "sanitize_mcp.py"
+      "norm_label": "sanitize_mcp.py",
+      "id": "scripts_crawl4ai_docker_sanitize_mcp_py"
     },
     {
       "label": "resolve_refs()",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L40",
-      "id": "docker_sanitize_mcp_resolve_refs",
       "community": 4,
-      "norm_label": "resolve_refs()"
+      "norm_label": "resolve_refs()",
+      "id": "docker_sanitize_mcp_resolve_refs"
     },
     {
       "label": "clean_schema()",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L89",
-      "id": "docker_sanitize_mcp_clean_schema",
       "community": 4,
-      "norm_label": "clean_schema()"
+      "norm_label": "clean_schema()",
+      "id": "docker_sanitize_mcp_clean_schema"
     },
     {
       "label": "_patch_getdoc()",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L105",
-      "id": "docker_sanitize_mcp_patch_getdoc",
       "community": 4,
-      "norm_label": "_patch_getdoc()"
+      "norm_label": "_patch_getdoc()",
+      "id": "docker_sanitize_mcp_patch_getdoc"
     },
     {
       "label": "_patch_pydantic_schemas()",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L134",
-      "id": "docker_sanitize_mcp_patch_pydantic_schemas",
       "community": 4,
-      "norm_label": "_patch_pydantic_schemas()"
+      "norm_label": "_patch_pydantic_schemas()",
+      "id": "docker_sanitize_mcp_patch_pydantic_schemas"
     },
     {
       "label": "apply()",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L167",
-      "id": "docker_sanitize_mcp_apply",
       "community": 4,
-      "norm_label": "apply()"
+      "norm_label": "apply()",
+      "id": "docker_sanitize_mcp_apply"
     },
     {
       "label": "sanitize_mcp.py - Monkey-patch para sanitizar metadados MCP do Crawl4AI.  Proble",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L1",
-      "id": "docker_sanitize_mcp_rationale_1",
       "community": 4,
-      "norm_label": "sanitize_mcp.py - monkey-patch para sanitizar metadados mcp do crawl4ai.  proble"
+      "norm_label": "sanitize_mcp.py - monkey-patch para sanitizar metadados mcp do crawl4ai.  proble",
+      "id": "docker_sanitize_mcp_rationale_1"
     },
     {
       "label": "Resolve todas as ocorrencias de $ref apontando para #/$defs/...     substituindo",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L41",
-      "id": "docker_sanitize_mcp_rationale_41",
       "community": 4,
-      "norm_label": "resolve todas as ocorrencias de $ref apontando para #/$defs/...     substituindo"
+      "norm_label": "resolve todas as ocorrencias de $ref apontando para #/$defs/...     substituindo",
+      "id": "docker_sanitize_mcp_rationale_41"
     },
     {
       "label": "Remove title de nivel raiz e de properties (nao padrao MCP).",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L90",
-      "id": "docker_sanitize_mcp_rationale_90",
       "community": 4,
-      "norm_label": "remove title de nivel raiz e de properties (nao padrao mcp)."
+      "norm_label": "remove title de nivel raiz e de properties (nao padrao mcp).",
+      "id": "docker_sanitize_mcp_rationale_90"
     },
     {
       "label": "Patcha inspect.getdoc para retornar descriptions default quando a     funcao dec",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L106",
-      "id": "docker_sanitize_mcp_rationale_106",
       "community": 4,
-      "norm_label": "patcha inspect.getdoc para retornar descriptions default quando a     funcao dec"
+      "norm_label": "patcha inspect.getdoc para retornar descriptions default quando a     funcao dec",
+      "id": "docker_sanitize_mcp_rationale_106"
     },
     {
       "label": "Patcha model_json_schema das classes Pydantic usadas como input     dos endpoint",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L135",
-      "id": "docker_sanitize_mcp_rationale_135",
       "community": 4,
-      "norm_label": "patcha model_json_schema das classes pydantic usadas como input     dos endpoint"
+      "norm_label": "patcha model_json_schema das classes pydantic usadas como input     dos endpoint",
+      "id": "docker_sanitize_mcp_rationale_135"
     },
     {
       "label": "Aplica todos os monkey-patches. Chamado via sitecustomize.py.",
       "file_type": "rationale",
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L168",
-      "id": "docker_sanitize_mcp_rationale_168",
       "community": 4,
-      "norm_label": "aplica todos os monkey-patches. chamado via sitecustomize.py."
+      "norm_label": "aplica todos os monkey-patches. chamado via sitecustomize.py.",
+      "id": "docker_sanitize_mcp_rationale_168"
     },
     {
       "label": "sitecustomize.py",
       "file_type": "code",
       "source_file": "scripts/crawl4ai/docker/sitecustomize.py",
       "source_location": "L1",
-      "id": "scripts_crawl4ai_docker_sitecustomize_py",
-      "community": 10,
-      "norm_label": "sitecustomize.py"
+      "community": 13,
+      "norm_label": "sitecustomize.py",
+      "id": "scripts_crawl4ai_docker_sitecustomize_py"
     },
     {
       "label": "framework_analyzer.py",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L1",
-      "id": "skills_prompt_improver_scripts_framework_analyzer_py",
       "community": 6,
-      "norm_label": "framework_analyzer.py"
+      "norm_label": "framework_analyzer.py",
+      "id": "skills_prompt_improver_scripts_framework_analyzer_py"
     },
     {
       "label": "detect_intent()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L439",
-      "id": "scripts_framework_analyzer_detect_intent",
       "community": 6,
-      "norm_label": "detect_intent()"
+      "norm_label": "detect_intent()",
+      "id": "scripts_framework_analyzer_detect_intent"
     },
     {
       "label": "analyze_use_case()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L468",
-      "id": "scripts_framework_analyzer_analyze_use_case",
       "community": 6,
-      "norm_label": "analyze_use_case()"
+      "norm_label": "analyze_use_case()",
+      "id": "scripts_framework_analyzer_analyze_use_case"
     },
     {
       "label": "get_framework_questions()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L605",
-      "id": "scripts_framework_analyzer_get_framework_questions",
       "community": 6,
-      "norm_label": "get_framework_questions()"
+      "norm_label": "get_framework_questions()",
+      "id": "scripts_framework_analyzer_get_framework_questions"
     },
     {
       "label": "Framework Analyzer - Recommends appropriate prompting frameworks Uses intent-bas",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L1",
-      "id": "scripts_framework_analyzer_rationale_1",
       "community": 6,
-      "norm_label": "framework analyzer - recommends appropriate prompting frameworks uses intent-bas"
+      "norm_label": "framework analyzer - recommends appropriate prompting frameworks uses intent-bas",
+      "id": "scripts_framework_analyzer_rationale_1"
     },
     {
       "label": "Detect the primary intent category from a prompt.     Returns intent category an",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L440",
-      "id": "scripts_framework_analyzer_rationale_440",
       "community": 6,
-      "norm_label": "detect the primary intent category from a prompt.     returns intent category an"
+      "norm_label": "detect the primary intent category from a prompt.     returns intent category an",
+      "id": "scripts_framework_analyzer_rationale_440"
     },
     {
       "label": "Analyze a prompt and recommend appropriate frameworks.     Uses intent-based sel",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L469",
-      "id": "scripts_framework_analyzer_rationale_469",
       "community": 6,
-      "norm_label": "analyze a prompt and recommend appropriate frameworks.     uses intent-based sel"
+      "norm_label": "analyze a prompt and recommend appropriate frameworks.     uses intent-based sel",
+      "id": "scripts_framework_analyzer_rationale_469"
     },
     {
       "label": "Get clarifying questions for a specific framework.      Args:         framework_",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L606",
-      "id": "scripts_framework_analyzer_rationale_606",
       "community": 6,
-      "norm_label": "get clarifying questions for a specific framework.      args:         framework_"
+      "norm_label": "get clarifying questions for a specific framework.      args:         framework_",
+      "id": "scripts_framework_analyzer_rationale_606"
     },
     {
       "label": "prompt_evaluator.py",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L1",
-      "id": "skills_prompt_improver_scripts_prompt_evaluator_py",
       "community": 3,
-      "norm_label": "prompt_evaluator.py"
+      "norm_label": "prompt_evaluator.py",
+      "id": "skills_prompt_improver_scripts_prompt_evaluator_py"
     },
     {
       "label": "evaluate_prompt()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L5",
-      "id": "scripts_prompt_evaluator_evaluate_prompt",
       "community": 3,
-      "norm_label": "evaluate_prompt()"
+      "norm_label": "evaluate_prompt()",
+      "id": "scripts_prompt_evaluator_evaluate_prompt"
     },
     {
       "label": "evaluate_clarity()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L28",
-      "id": "scripts_prompt_evaluator_evaluate_clarity",
       "community": 3,
-      "norm_label": "evaluate_clarity()"
+      "norm_label": "evaluate_clarity()",
+      "id": "scripts_prompt_evaluator_evaluate_clarity"
     },
     {
       "label": "evaluate_specificity()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L66",
-      "id": "scripts_prompt_evaluator_evaluate_specificity",
       "community": 3,
-      "norm_label": "evaluate_specificity()"
+      "norm_label": "evaluate_specificity()",
+      "id": "scripts_prompt_evaluator_evaluate_specificity"
     },
     {
       "label": "evaluate_context()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L112",
-      "id": "scripts_prompt_evaluator_evaluate_context",
       "community": 3,
-      "norm_label": "evaluate_context()"
+      "norm_label": "evaluate_context()",
+      "id": "scripts_prompt_evaluator_evaluate_context"
     },
     {
       "label": "evaluate_completeness()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L153",
-      "id": "scripts_prompt_evaluator_evaluate_completeness",
       "community": 3,
-      "norm_label": "evaluate_completeness()"
+      "norm_label": "evaluate_completeness()",
+      "id": "scripts_prompt_evaluator_evaluate_completeness"
     },
     {
       "label": "evaluate_structure()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L198",
-      "id": "scripts_prompt_evaluator_evaluate_structure",
       "community": 3,
-      "norm_label": "evaluate_structure()"
+      "norm_label": "evaluate_structure()",
+      "id": "scripts_prompt_evaluator_evaluate_structure"
     },
     {
       "label": "generate_improvement_suggestions()",
       "file_type": "code",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L246",
-      "id": "scripts_prompt_evaluator_generate_improvement_suggestions",
       "community": 3,
-      "norm_label": "generate_improvement_suggestions()"
+      "norm_label": "generate_improvement_suggestions()",
+      "id": "scripts_prompt_evaluator_generate_improvement_suggestions"
     },
     {
       "label": "Prompt Evaluator - Scores prompts across quality dimensions",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L1",
-      "id": "scripts_prompt_evaluator_rationale_1",
       "community": 3,
-      "norm_label": "prompt evaluator - scores prompts across quality dimensions"
+      "norm_label": "prompt evaluator - scores prompts across quality dimensions",
+      "id": "scripts_prompt_evaluator_rationale_1"
     },
     {
       "label": "Evaluate a prompt across multiple quality dimensions.      Args:         prompt_",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L6",
-      "id": "scripts_prompt_evaluator_rationale_6",
       "community": 3,
-      "norm_label": "evaluate a prompt across multiple quality dimensions.      args:         prompt_"
+      "norm_label": "evaluate a prompt across multiple quality dimensions.      args:         prompt_",
+      "id": "scripts_prompt_evaluator_rationale_6"
     },
     {
       "label": "Evaluate how clear and unambiguous the prompt is.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L29",
-      "id": "scripts_prompt_evaluator_rationale_29",
       "community": 3,
-      "norm_label": "evaluate how clear and unambiguous the prompt is."
+      "norm_label": "evaluate how clear and unambiguous the prompt is.",
+      "id": "scripts_prompt_evaluator_rationale_29"
     },
     {
       "label": "Evaluate how specific and detailed the prompt is.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L67",
-      "id": "scripts_prompt_evaluator_rationale_67",
       "community": 3,
-      "norm_label": "evaluate how specific and detailed the prompt is."
+      "norm_label": "evaluate how specific and detailed the prompt is.",
+      "id": "scripts_prompt_evaluator_rationale_67"
     },
     {
       "label": "Evaluate whether sufficient context is provided.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L113",
-      "id": "scripts_prompt_evaluator_rationale_113",
       "community": 3,
-      "norm_label": "evaluate whether sufficient context is provided."
+      "norm_label": "evaluate whether sufficient context is provided.",
+      "id": "scripts_prompt_evaluator_rationale_113"
     },
     {
       "label": "Evaluate whether all necessary information seems present.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L154",
-      "id": "scripts_prompt_evaluator_rationale_154",
       "community": 3,
-      "norm_label": "evaluate whether all necessary information seems present."
+      "norm_label": "evaluate whether all necessary information seems present.",
+      "id": "scripts_prompt_evaluator_rationale_154"
     },
     {
       "label": "Evaluate how well-structured the prompt is.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L199",
-      "id": "scripts_prompt_evaluator_rationale_199",
       "community": 3,
-      "norm_label": "evaluate how well-structured the prompt is."
+      "norm_label": "evaluate how well-structured the prompt is.",
+      "id": "scripts_prompt_evaluator_rationale_199"
     },
     {
       "label": "Generate specific improvement suggestions based on evaluation.",
       "file_type": "rationale",
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L247",
-      "id": "scripts_prompt_evaluator_rationale_247",
       "community": 3,
-      "norm_label": "generate specific improvement suggestions based on evaluation."
+      "norm_label": "generate specific improvement suggestions based on evaluation.",
+      "id": "scripts_prompt_evaluator_rationale_247"
     },
     {
       "label": "server.js",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L1",
-      "id": "tests_opencode_int_test_mcp_mock_server_js",
-      "community": 7,
-      "norm_label": "server.js"
+      "community": 8,
+      "norm_label": "server.js",
+      "id": "tests_opencode_int_test_mcp_mock_server_js"
     },
     {
       "label": "app",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L7",
-      "id": "mcp_mock_server_app",
-      "community": 7,
-      "norm_label": "app"
+      "community": 8,
+      "norm_label": "app",
+      "id": "mcp_mock_server_app"
     },
     {
       "label": "server",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L8",
-      "id": "mcp_mock_server_server",
-      "community": 7,
-      "norm_label": "server"
+      "community": 8,
+      "norm_label": "server",
+      "id": "mcp_mock_server_server"
     },
     {
       "label": "sessions",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L9",
-      "id": "mcp_mock_server_sessions",
-      "community": 7,
-      "norm_label": "sessions"
+      "community": 8,
+      "norm_label": "sessions",
+      "id": "mcp_mock_server_sessions"
     },
     {
       "label": "transport",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L43",
-      "id": "mcp_mock_server_transport",
-      "community": 7,
-      "norm_label": "transport"
+      "community": 8,
+      "norm_label": "transport",
+      "id": "mcp_mock_server_transport"
     },
     {
       "label": "sessionId",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L55",
-      "id": "mcp_mock_server_sessionid",
-      "community": 7,
-      "norm_label": "sessionid"
+      "community": 8,
+      "norm_label": "sessionid",
+      "id": "mcp_mock_server_sessionid"
     },
     {
       "label": "port",
       "file_type": "code",
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L64",
-      "id": "mcp_mock_server_port",
-      "community": 7,
-      "norm_label": "port"
-    },
-    {
-      "label": "Regras Globais (AGENTS.md)",
-      "file_type": "document",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_global_rules",
-      "community": 2,
-      "norm_label": "regras globais (agents.md)"
-    },
-    {
-      "label": "Se\u00e7\u00e3o Graphify (AGENTS.md)",
-      "file_type": "document",
-      "source_file": "AGENTS.md",
-      "source_location": "L202",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_graphify_section",
-      "community": 2,
-      "norm_label": "secao graphify (agents.md)"
-    },
-    {
-      "label": "Regra Sincroniza\u00e7\u00e3o Workflow\u2194Agentes",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_workflow_sync",
-      "community": 2,
-      "norm_label": "regra sincronizacao workflow\u2194agentes"
-    },
-    {
-      "label": "Regras de Commit",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_commit_rules",
-      "community": 2,
-      "norm_label": "regras de commit"
-    },
-    {
-      "label": "Padr\u00e3o Upstream Skills Externas",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_upstream_pattern",
-      "community": 2,
-      "norm_label": "padrao upstream skills externas"
-    },
-    {
-      "label": "Regras Obrigat\u00f3rias de Testes",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "agents_md_test_rules",
-      "community": 2,
-      "norm_label": "regras obrigatorias de testes"
+      "community": 8,
+      "norm_label": "port",
+      "id": "mcp_mock_server_port"
     },
     {
       "label": "Workflow de Agentes \u2014 Desenvolvimento",
@@ -698,9 +863,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_dev_doc",
       "community": 0,
-      "norm_label": "workflow de agentes \u2014 desenvolvimento"
+      "norm_label": "workflow de agentes \u2014 desenvolvimento",
+      "id": "workflow_dev_doc"
     },
     {
       "label": "Contratos do Workflow (4)",
@@ -711,9 +876,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_dev_contratos",
       "community": 0,
-      "norm_label": "contratos do workflow (4)"
+      "norm_label": "contratos do workflow (4)",
+      "id": "workflow_dev_contratos"
     },
     {
       "label": "Fases do Workflow Dev",
@@ -724,9 +889,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_dev_fases",
       "community": 0,
-      "norm_label": "fases do workflow dev"
+      "norm_label": "fases do workflow dev",
+      "id": "workflow_dev_fases"
     },
     {
       "label": "Contrato: Mapa do Produto",
@@ -737,9 +902,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "contrato_mapa_produto",
       "community": 0,
-      "norm_label": "contrato: mapa do produto"
+      "norm_label": "contrato: mapa do produto",
+      "id": "contrato_mapa_produto"
     },
     {
       "label": "Contrato: Harness por Agente",
@@ -750,9 +915,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "contrato_harness",
       "community": 0,
-      "norm_label": "contrato: harness por agente"
+      "norm_label": "contrato: harness por agente",
+      "id": "contrato_harness"
     },
     {
       "label": "Contrato: Arquivo de Planejamento",
@@ -763,9 +928,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "contrato_arquivo_planejamento",
       "community": 0,
-      "norm_label": "contrato: arquivo de planejamento"
+      "norm_label": "contrato: arquivo de planejamento",
+      "id": "contrato_arquivo_planejamento"
     },
     {
       "label": "Contrato: Verifica\u00e7\u00e3o de Harness",
@@ -776,9 +941,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "contrato_verificacao_harness",
       "community": 0,
-      "norm_label": "contrato: verificacao de harness"
+      "norm_label": "contrato: verificacao de harness",
+      "id": "contrato_verificacao_harness"
     },
     {
       "label": "Workflow de Curadoria",
@@ -789,9 +954,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_curadoria_doc",
       "community": 0,
-      "norm_label": "workflow de curadoria"
+      "norm_label": "workflow de curadoria",
+      "id": "workflow_curadoria_doc"
     },
     {
       "label": "Premissas de Curadoria",
@@ -802,9 +967,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "workflow_curadoria_premissas",
-      "community": 11,
-      "norm_label": "premissas de curadoria"
+      "community": 14,
+      "norm_label": "premissas de curadoria",
+      "id": "workflow_curadoria_premissas"
     },
     {
       "label": "Agente: Orquestrador (orq)",
@@ -815,9 +980,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_orq",
       "community": 0,
-      "norm_label": "agente: orquestrador (orq)"
+      "norm_label": "agente: orquestrador (orq)",
+      "id": "agent_orq"
     },
     {
       "label": "Agente: Engenheiro de Software (eng-software)",
@@ -828,9 +993,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_eng_software",
       "community": 0,
-      "norm_label": "agente: engenheiro de software (eng-software)"
+      "norm_label": "agente: engenheiro de software (eng-software)",
+      "id": "agent_eng_software"
     },
     {
       "label": "Agente: Curador de Produto (curador-produto)",
@@ -841,9 +1006,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_curador_produto",
       "community": 0,
-      "norm_label": "agente: curador de produto (curador-produto)"
+      "norm_label": "agente: curador de produto (curador-produto)",
+      "id": "agent_curador_produto"
     },
     {
       "label": "Agente: DBA (dba)",
@@ -854,9 +1019,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_dba",
       "community": 0,
-      "norm_label": "agente: dba (dba)"
+      "norm_label": "agente: dba (dba)",
+      "id": "agent_dba"
     },
     {
       "label": "Agente: Analista Cyber (sec)",
@@ -867,9 +1032,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_sec",
       "community": 0,
-      "norm_label": "agente: analista cyber (sec)"
+      "norm_label": "agente: analista cyber (sec)",
+      "id": "agent_sec"
     },
     {
       "label": "Agente: Testador (qa)",
@@ -880,9 +1045,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_qa",
       "community": 0,
-      "norm_label": "agente: testador (qa)"
+      "norm_label": "agente: testador (qa)",
+      "id": "agent_qa"
     },
     {
       "label": "Agente: Engenheiro Frontend (front)",
@@ -893,9 +1058,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_front",
       "community": 0,
-      "norm_label": "agente: engenheiro frontend (front)"
+      "norm_label": "agente: engenheiro frontend (front)",
+      "id": "agent_front"
     },
     {
       "label": "Agente: Revisor Integrativo (rev)",
@@ -906,9 +1071,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_rev",
       "community": 0,
-      "norm_label": "agente: revisor integrativo (rev)"
+      "norm_label": "agente: revisor integrativo (rev)",
+      "id": "agent_rev"
     },
     {
       "label": "Agente: Validador de Harness (val-harness)",
@@ -919,9 +1084,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_val_harness",
       "community": 0,
-      "norm_label": "agente: validador de harness (val-harness)"
+      "norm_label": "agente: validador de harness (val-harness)",
+      "id": "agent_val_harness"
     },
     {
       "label": "Agente: Analista de Backlog (analista)",
@@ -932,9 +1097,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_analista",
-      "community": 9,
-      "norm_label": "agente: analista de backlog (analista)"
+      "community": 10,
+      "norm_label": "agente: analista de backlog (analista)",
+      "id": "agent_analista"
     },
     {
       "label": "Agente: Revisor de Hist\u00f3rias (revisor-historia)",
@@ -945,9 +1110,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_revisor_historia",
-      "community": 9,
-      "norm_label": "agente: revisor de historias (revisor-historia)"
+      "community": 10,
+      "norm_label": "agente: revisor de historias (revisor-historia)",
+      "id": "agent_revisor_historia"
     },
     {
       "label": "Agente: AWS Analista (aws-analista)",
@@ -958,9 +1123,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_aws_analista",
-      "community": 5,
-      "norm_label": "agente: aws analista (aws-analista)"
+      "community": 7,
+      "norm_label": "agente: aws analista (aws-analista)",
+      "id": "agent_aws_analista"
     },
     {
       "label": "Configura\u00e7\u00e3o OpenCode (opencode.json)",
@@ -971,9 +1136,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "opencode_json",
-      "community": 5,
-      "norm_label": "configuracao opencode (opencode.json)"
+      "community": 7,
+      "norm_label": "configuracao opencode (opencode.json)",
+      "id": "opencode_json"
     },
     {
       "label": "Plugin Graphify (OpenCode)",
@@ -984,9 +1149,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "opencode_graphify_plugin",
-      "community": 5,
-      "norm_label": "plugin graphify (opencode)"
+      "community": 7,
+      "norm_label": "plugin graphify (opencode)",
+      "id": "opencode_graphify_plugin"
     },
     {
       "label": "Compaction Config (auto=false)",
@@ -997,9 +1162,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "opencode_compaction",
-      "community": 5,
-      "norm_label": "compaction config (auto=false)"
+      "community": 7,
+      "norm_label": "compaction config (auto=false)",
+      "id": "opencode_compaction"
     },
     {
       "label": "MCP: crawl4ai (SSE)",
@@ -1010,9 +1175,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "mcp_crawl4ai",
-      "community": 5,
-      "norm_label": "mcp: crawl4ai (sse)"
+      "community": 7,
+      "norm_label": "mcp: crawl4ai (sse)",
+      "id": "mcp_crawl4ai"
     },
     {
       "label": "Skill: Graphify (Knowledge Graph)",
@@ -1023,9 +1188,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_graphify",
-      "community": 2,
-      "norm_label": "skill: graphify (knowledge graph)"
+      "community": 9,
+      "norm_label": "skill: graphify (knowledge graph)",
+      "id": "skill_graphify"
     },
     {
       "label": "Artefato: GRAPH_REPORT.md",
@@ -1036,9 +1201,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "graphify_graph_report",
-      "community": 2,
-      "norm_label": "artefato: graph_report.md"
+      "community": 9,
+      "norm_label": "artefato: graph_report.md",
+      "id": "graphify_graph_report"
     },
     {
       "label": "Artefato: graph.json",
@@ -1049,9 +1214,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "graphify_graph_json",
-      "community": 2,
-      "norm_label": "artefato: graph.json"
+      "community": 9,
+      "norm_label": "artefato: graph.json",
+      "id": "graphify_graph_json"
     },
     {
       "label": "Script: graphify/install",
@@ -1062,9 +1227,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "script_graphify_install",
-      "community": 5,
-      "norm_label": "script: graphify/install"
+      "community": 7,
+      "norm_label": "script: graphify/install",
+      "id": "script_graphify_install"
     },
     {
       "label": "Script: vscode-sync.ps1",
@@ -1075,9 +1240,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "script_vscode_sync",
-      "community": 2,
-      "norm_label": "script: vscode-sync.ps1"
+      "community": 12,
+      "norm_label": "script: vscode-sync.ps1",
+      "id": "script_vscode_sync"
     },
     {
       "label": "Script: opencode-link (bootstrap)",
@@ -1088,9 +1253,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "script_opencode_link",
-      "community": 8,
-      "norm_label": "script: opencode-link (bootstrap)"
+      "community": 15,
+      "norm_label": "script: opencode-link (bootstrap)",
+      "id": "script_opencode_link"
     },
     {
       "label": "Script: opencode-install-deps",
@@ -1101,9 +1266,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "script_opencode_install_deps",
-      "community": 5,
-      "norm_label": "script: opencode-install-deps"
+      "community": 7,
+      "norm_label": "script: opencode-install-deps",
+      "id": "script_opencode_install_deps"
     },
     {
       "label": "Command: sync-upstream-skills",
@@ -1114,9 +1279,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "command_sync_upstream",
-      "community": 2,
-      "norm_label": "command: sync-upstream-skills"
+      "community": 16,
+      "norm_label": "command: sync-upstream-skills",
+      "id": "command_sync_upstream"
     },
     {
       "label": "Make target: test-unit",
@@ -1127,9 +1292,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "makefile_test_unit",
-      "community": 5,
-      "norm_label": "make target: test-unit"
+      "community": 11,
+      "norm_label": "make target: test-unit",
+      "id": "makefile_test_unit"
     },
     {
       "label": "Make target: test-tools",
@@ -1140,9 +1305,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "makefile_test_tools",
-      "community": 2,
-      "norm_label": "make target: test-tools"
+      "community": 9,
+      "norm_label": "make target: test-tools",
+      "id": "makefile_test_tools"
     },
     {
       "label": "Make target: test-opencode-integration",
@@ -1153,22 +1318,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "makefile_test_integration",
-      "community": 12,
-      "norm_label": "make target: test-opencode-integration"
-    },
-    {
-      "label": "Padr\u00e3o: UPSTREAM.md por Skill",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "skill_upstream_pattern",
-      "community": 13,
-      "norm_label": "padrao: upstream.md por skill"
+      "community": 17,
+      "norm_label": "make target: test-opencode-integration",
+      "id": "makefile_test_integration"
     },
     {
       "label": "Skill: doc-extract (Docling)",
@@ -1179,9 +1331,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_doc_extract",
-      "community": 14,
-      "norm_label": "skill: doc-extract (docling)"
+      "community": 18,
+      "norm_label": "skill: doc-extract (docling)",
+      "id": "skill_doc_extract"
     },
     {
       "label": "Skill: web-research-exa-crawl4ai",
@@ -1192,9 +1344,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_web_research",
-      "community": 5,
-      "norm_label": "skill: web-research-exa-crawl4ai"
+      "community": 7,
+      "norm_label": "skill: web-research-exa-crawl4ai",
+      "id": "skill_web_research"
     },
     {
       "label": "Skill: prompt-improver",
@@ -1205,9 +1357,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_prompt_improver",
-      "community": 15,
-      "norm_label": "skill: prompt-improver"
+      "community": 19,
+      "norm_label": "skill: prompt-improver",
+      "id": "skill_prompt_improver"
     },
     {
       "label": "Skill: test-driven-development",
@@ -1218,9 +1370,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_tdd",
       "community": 0,
-      "norm_label": "skill: test-driven-development"
+      "norm_label": "skill: test-driven-development",
+      "id": "skill_tdd"
     },
     {
       "label": "Skill: security-and-hardening",
@@ -1231,9 +1383,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_security",
       "community": 0,
-      "norm_label": "skill: security-and-hardening"
+      "norm_label": "skill: security-and-hardening",
+      "id": "skill_security"
     },
     {
       "label": "Skill: harness-catalog",
@@ -1244,9 +1396,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "skill_harness_catalog",
       "community": 0,
-      "norm_label": "skill: harness-catalog"
+      "norm_label": "skill: harness-catalog",
+      "id": "skill_harness_catalog"
     },
     {
       "label": "Plano: Teste Comparativo Graphify",
@@ -1257,9 +1409,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "plan_graphify_context_test",
-      "community": 2,
-      "norm_label": "plano: teste comparativo graphify"
+      "community": 9,
+      "norm_label": "plano: teste comparativo graphify",
+      "id": "plan_graphify_context_test"
     },
     {
       "label": "Plano: Implementa\u00e7\u00e3o Orq",
@@ -1270,9 +1422,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "plan_orq_implementation",
-      "community": 16,
-      "norm_label": "plano: implementacao orq"
+      "community": 20,
+      "norm_label": "plano: implementacao orq",
+      "id": "plan_orq_implementation"
     },
     {
       "label": "Plano: WSL Skill e Test Split",
@@ -1283,35 +1435,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "plan_wsl_skill_split",
-      "community": 17,
-      "norm_label": "plano: wsl skill e test split"
-    },
-    {
-      "label": "Framework: BATS-core (testes)",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_bats_framework",
-      "community": 2,
-      "norm_label": "framework: bats-core (testes)"
-    },
-    {
-      "label": "Teste: graphify/install-test.bats",
-      "file_type": "code",
-      "source_file": "tests/scripts/graphify/install-test.bats",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_graphify_install",
-      "community": 5,
-      "norm_label": "teste: graphify/install-test.bats"
+      "community": 21,
+      "norm_label": "plano: wsl skill e test split",
+      "id": "plan_wsl_skill_split"
     },
     {
       "label": "Teste: graphify-installed-test.bats",
@@ -1322,9 +1448,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "test_graphify_installed",
-      "community": 2,
-      "norm_label": "teste: graphify-installed-test.bats"
+      "community": 9,
+      "norm_label": "teste: graphify-installed-test.bats",
+      "id": "test_graphify_installed"
     },
     {
       "label": "Teste: boilerplate-consistency-test.bats",
@@ -1335,35 +1461,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "test_agents_boilerplate",
-      "community": 5,
-      "norm_label": "teste: boilerplate-consistency-test.bats"
-    },
-    {
-      "label": "Conven\u00e7\u00e3o: Execu\u00e7\u00e3o WSL (bash -ic)",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "wsl_convention",
-      "community": 2,
-      "norm_label": "convencao: execucao wsl (bash -ic)"
-    },
-    {
-      "label": "Repo: opencode-config (fonte da verdade)",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "opencode_config_repo",
-      "community": 8,
-      "norm_label": "repo: opencode-config (fonte da verdade)"
+      "community": 11,
+      "norm_label": "teste: boilerplate-consistency-test.bats",
+      "id": "test_agents_boilerplate"
     },
     {
       "label": "VS Code: opencode-config.instructions.md",
@@ -1374,34 +1474,281 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "vscode_instructions_md",
-      "community": 2,
-      "norm_label": "vs code: opencode-config.instructions.md"
-    },
-    {
-      "label": "Symlinks ~/.config/opencode/",
-      "file_type": "rationale",
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "symlink_opencode_global",
-      "community": 8,
-      "norm_label": "symlinks ~/.config/opencode/"
+      "community": 12,
+      "norm_label": "vs code: opencode-config.instructions.md",
+      "id": "vscode_instructions_md"
     }
   ],
   "links": [
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_regras_globais",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_gera\u00e7\u00e3o_de_arquivos_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_exibi\u00e7\u00e3o_de_texto_copie_e_cola",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_cria\u00e7\u00e3o_de_skills",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_sincroniza\u00e7\u00e3o_workflow_agentes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_regras_obrigat\u00f3rias_pora_testes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_readme",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "agents_md",
+      "target": "opencode_config_agents_upstream_de_skills_externas",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "opencode_config_agents_regras_globais",
+      "target": "opencode_config_agents_graphify_gate_obrigat\u00f3rio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "opencode_config_agents_regras_globais",
+      "target": "opencode_config_agents_idioma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "opencode_config_agents_regras_globais",
+      "target": "opencode_config_agents_configuracao_global_via_links_simbolicos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "opencode_config_agents_regras_globais",
+      "target": "opencode_config_agents_concisao",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "opencode_config_agents_idioma",
+      "target": "opencode_config_agents_atalho_configure_este_repo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "opencode_config_agents_atalho_configure_este_repo",
+      "target": "opencode_config_agents_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "opencode_config_agents_configuracao_global_via_links_simbolicos",
+      "target": "opencode_config_agents_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "opencode_config_agents_exibi\u00e7\u00e3o_de_texto_copie_e_cola",
+      "target": "opencode_config_agents_acao",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "opencode_config_agents_exibi\u00e7\u00e3o_de_texto_copie_e_cola",
+      "target": "opencode_config_agents_commits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L157",
+      "weight": 1.0,
+      "source": "opencode_config_agents_upstream_de_skills_externas",
+      "target": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L159",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_estrutura_obrigatoria_por_skill_externa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L168",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_o_que_o_upstream_md_deve_conter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L179",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_lingua_da_description_de_skills_externas",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L196",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_regra_de_ouro_do_sync",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L201",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_checklist_pos_sync",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "opencode_config_agents_manutencao_de_upstream_padrao_do_repo",
+      "target": "opencode_config_agents_scripts_de_sync_disponiveis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L161",
+      "weight": 1.0,
+      "source": "opencode_config_agents_estrutura_obrigatoria_por_skill_externa",
+      "target": "opencode_config_agents_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L184",
+      "weight": 1.0,
+      "source": "opencode_config_agents_lingua_da_description_de_skills_externas",
+      "target": "opencode_config_agents_codeblock_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_show_usage",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_show_usage"
     },
     {
       "relation": "contains",
@@ -1409,9 +1756,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "contains",
@@ -1419,9 +1766,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_write_utf8nobom",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "relation": "contains",
@@ -1429,9 +1776,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "contains",
@@ -1439,9 +1786,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L107",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "relation": "contains",
@@ -1449,9 +1796,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_convertto_wslpath",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_convertto_wslpath"
     },
     {
       "relation": "contains",
@@ -1459,9 +1806,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_confirm_action",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_confirm_action"
     },
     {
       "relation": "contains",
@@ -1469,9 +1816,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L142",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_strip_agentfrontmatter",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_strip_agentfrontmatter"
     },
     {
       "relation": "contains",
@@ -1479,9 +1826,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L178",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_filter_agentsmd",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_filter_agentsmd"
     },
     {
       "relation": "contains",
@@ -1489,9 +1836,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_rewrite_scriptrefs"
     },
     {
       "relation": "contains",
@@ -1499,9 +1846,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L276",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_adapt_skillforvscode",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_adapt_skillforvscode"
     },
     {
       "relation": "contains",
@@ -1509,9 +1856,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L295",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_sync_skills",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_sync_skills"
     },
     {
       "relation": "contains",
@@ -1519,9 +1866,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L323",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_sync_agents",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_sync_agents"
     },
     {
       "relation": "contains",
@@ -1529,9 +1876,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L349",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_sync_commands",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_sync_commands"
     },
     {
       "relation": "contains",
@@ -1539,9 +1886,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L371",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_sync_instructions",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_sync_instructions"
     },
     {
       "relation": "contains",
@@ -1549,9 +1896,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L391",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_sync_mcp",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_sync_mcp"
     },
     {
       "relation": "contains",
@@ -1559,9 +1906,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L439",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_bootstrap_repo_vscode_sync_ps1",
-      "target": "bootstrap_repo_vscode_sync_show_plan",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_show_plan"
     },
     {
       "relation": "calls",
@@ -1569,9 +1916,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L132",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_confirm_action",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1579,9 +1926,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L296",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_skills",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1589,9 +1936,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L324",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_agents",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1599,9 +1946,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L350",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_commands",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1609,9 +1956,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L372",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_instructions",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1619,9 +1966,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L392",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_mcp",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1629,9 +1976,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L445",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_show_plan",
-      "target": "bootstrap_repo_vscode_sync_say",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_say"
     },
     {
       "relation": "calls",
@@ -1639,9 +1986,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
-      "target": "bootstrap_repo_vscode_sync_write_utf8nobom",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "relation": "calls",
@@ -1649,9 +1996,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L291",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_adapt_skillforvscode",
-      "target": "bootstrap_repo_vscode_sync_write_utf8nobom",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "relation": "calls",
@@ -1659,9 +2006,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L336",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_agents",
-      "target": "bootstrap_repo_vscode_sync_write_utf8nobom",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "relation": "calls",
@@ -1669,9 +2016,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L383",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_instructions",
-      "target": "bootstrap_repo_vscode_sync_write_utf8nobom",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_write_utf8nobom"
     },
     {
       "relation": "calls",
@@ -1679,9 +2026,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1689,9 +2036,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1699,9 +2046,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L298",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_skills",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1709,9 +2056,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L326",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_agents",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1719,9 +2066,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L352",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_commands",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1729,9 +2076,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L374",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_instructions",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1739,9 +2086,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L394",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_mcp",
-      "target": "bootstrap_repo_vscode_sync_ensure_dir",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_ensure_dir"
     },
     {
       "relation": "calls",
@@ -1749,9 +2096,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L306",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_skills",
-      "target": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "relation": "calls",
@@ -1759,9 +2106,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L332",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_agents",
-      "target": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "relation": "calls",
@@ -1769,9 +2116,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L358",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_commands",
-      "target": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "relation": "calls",
@@ -1779,9 +2126,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L377",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_instructions",
-      "target": "bootstrap_repo_vscode_sync_backup_ifexists",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_backup_ifexists"
     },
     {
       "relation": "calls",
@@ -1789,9 +2136,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L234",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
-      "target": "bootstrap_repo_vscode_sync_convertto_wslpath",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_convertto_wslpath"
     },
     {
       "relation": "calls",
@@ -1799,9 +2146,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L335",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_agents",
-      "target": "bootstrap_repo_vscode_sync_strip_agentfrontmatter",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_strip_agentfrontmatter"
     },
     {
       "relation": "calls",
@@ -1809,9 +2156,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L380",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_instructions",
-      "target": "bootstrap_repo_vscode_sync_filter_agentsmd",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_filter_agentsmd"
     },
     {
       "relation": "calls",
@@ -1819,9 +2166,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L310",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_skills",
-      "target": "bootstrap_repo_vscode_sync_rewrite_scriptrefs",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_rewrite_scriptrefs"
     },
     {
       "relation": "calls",
@@ -1829,9 +2176,9 @@
       "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
       "source_location": "L311",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "bootstrap_repo_vscode_sync_sync_skills",
-      "target": "bootstrap_repo_vscode_sync_adapt_skillforvscode",
-      "confidence_score": 1.0
+      "target": "bootstrap_repo_vscode_sync_adapt_skillforvscode"
     },
     {
       "relation": "contains",
@@ -1839,9 +2186,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "target": "docker_sanitize_mcp_resolve_refs",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_resolve_refs"
     },
     {
       "relation": "contains",
@@ -1849,9 +2196,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "target": "docker_sanitize_mcp_clean_schema",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_clean_schema"
     },
     {
       "relation": "contains",
@@ -1859,9 +2206,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L105",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "target": "docker_sanitize_mcp_patch_getdoc",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_getdoc"
     },
     {
       "relation": "contains",
@@ -1869,9 +2216,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "target": "docker_sanitize_mcp_patch_pydantic_schemas",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_pydantic_schemas"
     },
     {
       "relation": "contains",
@@ -1879,9 +2226,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "target": "docker_sanitize_mcp_apply",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_apply"
     },
     {
       "relation": "rationale_for",
@@ -1889,9 +2236,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_1",
-      "target": "scripts_crawl4ai_docker_sanitize_mcp_py",
-      "confidence_score": 1.0
+      "target": "scripts_crawl4ai_docker_sanitize_mcp_py"
     },
     {
       "relation": "rationale_for",
@@ -1899,9 +2246,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_41",
-      "target": "docker_sanitize_mcp_resolve_refs",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_resolve_refs"
     },
     {
       "relation": "rationale_for",
@@ -1909,9 +2256,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_90",
-      "target": "docker_sanitize_mcp_clean_schema",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_clean_schema"
     },
     {
       "relation": "calls",
@@ -1920,9 +2267,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_apply",
-      "target": "docker_sanitize_mcp_patch_getdoc",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_getdoc"
     },
     {
       "relation": "rationale_for",
@@ -1930,9 +2277,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_106",
-      "target": "docker_sanitize_mcp_patch_getdoc",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_getdoc"
     },
     {
       "relation": "calls",
@@ -1941,9 +2288,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_apply",
-      "target": "docker_sanitize_mcp_patch_pydantic_schemas",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_pydantic_schemas"
     },
     {
       "relation": "rationale_for",
@@ -1951,9 +2298,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_135",
-      "target": "docker_sanitize_mcp_patch_pydantic_schemas",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_patch_pydantic_schemas"
     },
     {
       "relation": "rationale_for",
@@ -1961,9 +2308,9 @@
       "source_file": "scripts/crawl4ai/docker/sanitize_mcp.py",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docker_sanitize_mcp_rationale_168",
-      "target": "docker_sanitize_mcp_apply",
-      "confidence_score": 1.0
+      "target": "docker_sanitize_mcp_apply"
     },
     {
       "relation": "contains",
@@ -1971,9 +2318,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L439",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_framework_analyzer_py",
-      "target": "scripts_framework_analyzer_detect_intent",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_detect_intent"
     },
     {
       "relation": "contains",
@@ -1981,9 +2328,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L468",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_framework_analyzer_py",
-      "target": "scripts_framework_analyzer_analyze_use_case",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_analyze_use_case"
     },
     {
       "relation": "contains",
@@ -1991,9 +2338,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L605",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_framework_analyzer_py",
-      "target": "scripts_framework_analyzer_get_framework_questions",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_get_framework_questions"
     },
     {
       "relation": "rationale_for",
@@ -2001,9 +2348,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_framework_analyzer_rationale_1",
-      "target": "skills_prompt_improver_scripts_framework_analyzer_py",
-      "confidence_score": 1.0
+      "target": "skills_prompt_improver_scripts_framework_analyzer_py"
     },
     {
       "relation": "calls",
@@ -2012,9 +2359,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L483",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_framework_analyzer_analyze_use_case",
-      "target": "scripts_framework_analyzer_detect_intent",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_detect_intent"
     },
     {
       "relation": "rationale_for",
@@ -2022,9 +2369,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L440",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_framework_analyzer_rationale_440",
-      "target": "scripts_framework_analyzer_detect_intent",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_detect_intent"
     },
     {
       "relation": "rationale_for",
@@ -2032,9 +2379,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_framework_analyzer_rationale_469",
-      "target": "scripts_framework_analyzer_analyze_use_case",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_analyze_use_case"
     },
     {
       "relation": "rationale_for",
@@ -2042,9 +2389,9 @@
       "source_file": "skills/prompt-improver/scripts/framework_analyzer.py",
       "source_location": "L606",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_framework_analyzer_rationale_606",
-      "target": "scripts_framework_analyzer_get_framework_questions",
-      "confidence_score": 1.0
+      "target": "scripts_framework_analyzer_get_framework_questions"
     },
     {
       "relation": "contains",
@@ -2052,9 +2399,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_prompt",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_prompt"
     },
     {
       "relation": "contains",
@@ -2062,9 +2409,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_clarity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_clarity"
     },
     {
       "relation": "contains",
@@ -2072,9 +2419,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_specificity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_specificity"
     },
     {
       "relation": "contains",
@@ -2082,9 +2429,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_context",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_context"
     },
     {
       "relation": "contains",
@@ -2092,9 +2439,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_completeness",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_completeness"
     },
     {
       "relation": "contains",
@@ -2102,9 +2449,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L198",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_evaluate_structure",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_structure"
     },
     {
       "relation": "contains",
@@ -2112,9 +2459,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L246",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "target": "scripts_prompt_evaluator_generate_improvement_suggestions",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_generate_improvement_suggestions"
     },
     {
       "relation": "rationale_for",
@@ -2122,9 +2469,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_1",
-      "target": "skills_prompt_improver_scripts_prompt_evaluator_py",
-      "confidence_score": 1.0
+      "target": "skills_prompt_improver_scripts_prompt_evaluator_py"
     },
     {
       "relation": "calls",
@@ -2133,9 +2480,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_evaluate_prompt",
-      "target": "scripts_prompt_evaluator_evaluate_clarity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_clarity"
     },
     {
       "relation": "calls",
@@ -2144,9 +2491,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_evaluate_prompt",
-      "target": "scripts_prompt_evaluator_evaluate_specificity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_specificity"
     },
     {
       "relation": "calls",
@@ -2155,9 +2502,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_evaluate_prompt",
-      "target": "scripts_prompt_evaluator_evaluate_context",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_context"
     },
     {
       "relation": "calls",
@@ -2166,9 +2513,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_evaluate_prompt",
-      "target": "scripts_prompt_evaluator_evaluate_completeness",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_completeness"
     },
     {
       "relation": "calls",
@@ -2177,9 +2524,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_evaluate_prompt",
-      "target": "scripts_prompt_evaluator_evaluate_structure",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_structure"
     },
     {
       "relation": "rationale_for",
@@ -2187,9 +2534,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_6",
-      "target": "scripts_prompt_evaluator_evaluate_prompt",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_prompt"
     },
     {
       "relation": "rationale_for",
@@ -2197,9 +2544,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_29",
-      "target": "scripts_prompt_evaluator_evaluate_clarity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_clarity"
     },
     {
       "relation": "rationale_for",
@@ -2207,9 +2554,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_67",
-      "target": "scripts_prompt_evaluator_evaluate_specificity",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_specificity"
     },
     {
       "relation": "rationale_for",
@@ -2217,9 +2564,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_113",
-      "target": "scripts_prompt_evaluator_evaluate_context",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_context"
     },
     {
       "relation": "rationale_for",
@@ -2227,9 +2574,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_154",
-      "target": "scripts_prompt_evaluator_evaluate_completeness",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_completeness"
     },
     {
       "relation": "rationale_for",
@@ -2237,9 +2584,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L199",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_199",
-      "target": "scripts_prompt_evaluator_evaluate_structure",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_evaluate_structure"
     },
     {
       "relation": "rationale_for",
@@ -2247,9 +2594,9 @@
       "source_file": "skills/prompt-improver/scripts/prompt_evaluator.py",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_prompt_evaluator_rationale_247",
-      "target": "scripts_prompt_evaluator_generate_improvement_suggestions",
-      "confidence_score": 1.0
+      "target": "scripts_prompt_evaluator_generate_improvement_suggestions"
     },
     {
       "relation": "contains",
@@ -2257,9 +2604,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_app",
-      "confidence_score": 1.0
+      "target": "mcp_mock_server_app"
     },
     {
       "relation": "contains",
@@ -2267,9 +2614,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_server",
-      "confidence_score": 1.0
+      "target": "mcp_mock_server_server"
     },
     {
       "relation": "contains",
@@ -2277,9 +2624,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_sessions",
-      "confidence_score": 1.0
+      "target": "mcp_mock_server_sessions"
     },
     {
       "relation": "contains",
@@ -2287,9 +2634,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_transport",
-      "confidence_score": 1.0
+      "target": "mcp_mock_server_transport"
     },
     {
       "relation": "contains",
@@ -2297,9 +2644,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_sessionid",
-      "confidence_score": 1.0
+      "target": "mcp_mock_server_sessionid"
     },
     {
       "relation": "contains",
@@ -2307,129 +2654,9 @@
       "source_file": "tests/opencode-int-test/mcp-mock/server.js",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_opencode_int_test_mcp_mock_server_js",
-      "target": "mcp_mock_server_port",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "scripts/bootstrap_repo/vscode-sync.ps1",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "script_vscode_sync",
-      "target": "agents_md_global_rules"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_global_rules",
-      "target": "agents_md_workflow_sync"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_global_rules",
-      "target": "agents_md_test_rules"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_global_rules",
-      "target": "agents_md_commit_rules"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_global_rules",
-      "target": "agents_md_upstream_pattern"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_global_rules",
-      "target": "agents_md_graphify_section"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_graphify_section",
-      "target": "graphify_graph_report"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_workflow_sync",
-      "target": "workflow_dev_doc"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_workflow_sync",
-      "target": "workflow_curadoria_doc"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "commands/sync-upstream-skills.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "command_sync_upstream",
-      "target": "agents_md_upstream_pattern"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_test_rules",
-      "target": "test_bats_framework"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_md_test_rules",
-      "target": "wsl_convention"
+      "target": "mcp_mock_server_port"
     },
     {
       "relation": "defines_role_of",
@@ -2905,16 +3132,6 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "tests/scripts/graphify/install-test.bats",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "test_graphify_install",
-      "target": "script_graphify_install"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "scripts/bootstrap_repo/opencode-install-deps",
       "source_location": null,
       "weight": 1.0,
@@ -2930,36 +3147,6 @@
       "weight": 1.0,
       "source": "script_vscode_sync",
       "target": "vscode_instructions_md"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "scripts/bootstrap_repo/opencode-link",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "script_opencode_link",
-      "target": "symlink_opencode_global"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "opencode_config_repo",
-      "target": "script_opencode_link"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Makefile",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "makefile_test_unit",
-      "target": "test_graphify_install"
     },
     {
       "relation": "calls",
@@ -2980,16 +3167,6 @@
       "weight": 1.0,
       "source": "makefile_test_tools",
       "target": "test_graphify_installed"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "opencode_config_repo",
-      "target": "symlink_opencode_global"
     }
   ],
   "hyperedges": [
@@ -3041,5 +3218,5 @@
       "source_file": "scripts/bootstrap_repo/opencode-install-deps"
     }
   ],
-  "built_at_commit": "9841a70ad7f23d085d4426dd74c4d45256ddc8a6"
+  "built_at_commit": "3a66f3b0846a39d9176bc42d9e20a9935a15b0d0"
 }
