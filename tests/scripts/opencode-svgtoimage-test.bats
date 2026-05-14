@@ -38,70 +38,46 @@ teardown() { common_teardown; }
 }
 
 # ---------------------------------------------------------------------------
-# SVG via stdin com resvg → JSON com imagePath, PNG existe
+# Helper: garante que ao menos um conversor está disponível no PATH.
+# O script escolhe qual usar — o teste não precisa saber qual é.
 # ---------------------------------------------------------------------------
 
-@test "svgtoimage com resvg gera PNG e retorna imagePath" {
-  local fake_bin
-  fake_bin="$(mktemp -d)"
-
-  # Mock de resvg: copia o arquivo de entrada para o de saída (simula conversão)
-  cat > "$fake_bin/resvg" <<'MOCK'
-#!/usr/bin/env bash
-# resvg <entrada.svg> <saida.png>
-cp "$1" "$2"
-MOCK
-  chmod +x "$fake_bin/resvg"
-
-  run env PATH="$fake_bin:$PATH" SVG2PNG_BIN=resvg bash -c "cat '$FIXTURE_SVG' | bash '$SCRIPT'"
-  assert_success
-  assert_output --partial '"imagePath"'
-
-  local img_path
-  img_path="$(echo "$output" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['imagePath'])")"
-  assert_file_exist "$img_path"
-
-  rm -rf "$fake_bin"
-}
-
-@test "svgtoimage com rsvg-convert gera PNG e retorna imagePath (requer rsvg-convert)" {
-  if ! command -v rsvg-convert >/dev/null 2>&1; then
-    skip "rsvg-convert não disponível neste ambiente"
-  fi
-
-  run bash -c "cat '$FIXTURE_SVG' | SVG2PNG_BIN=rsvg-convert bash '$SCRIPT'"
-  assert_success
-  assert_output --partial '"imagePath"'
-
-  local img_path
-  img_path="$(echo "$output" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['imagePath'])")"
-  assert_file_exist "$img_path"
-}
-
-# ---------------------------------------------------------------------------
-# Saída contém campo markdown
-# ---------------------------------------------------------------------------
-
-@test "svgtoimage retorna campo markdown com conversor disponível" {
+_require_converter() {
   if ! command -v resvg >/dev/null 2>&1 && ! command -v rsvg-convert >/dev/null 2>&1; then
-    skip "nenhum conversor SVG disponível neste ambiente"
+    fail "nenhum conversor SVG disponível (resvg ou rsvg-convert) — instale um deles para executar este teste"
   fi
+}
+
+# ---------------------------------------------------------------------------
+# Comportamento do script com conversor disponível
+# ---------------------------------------------------------------------------
+
+@test "svgtoimage gera PNG e retorna imagePath" {
+  _require_converter
+
+  run bash -c "cat '$FIXTURE_SVG' | bash '$SCRIPT'"
+  assert_success
+  assert_output --partial '"imagePath"'
+
+  local img_path
+  img_path="$(echo "$output" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['imagePath'])")"
+  assert_file_exist "$img_path"
+}
+
+@test "svgtoimage retorna campo markdown" {
+  _require_converter
 
   run bash -c "cat '$FIXTURE_SVG' | bash '$SCRIPT'"
   assert_success
   assert_output --partial '"markdown"'
 }
 
-# ---------------------------------------------------------------------------
-# Modo automático detecta conversor
-# ---------------------------------------------------------------------------
-
-@test "svgtoimage em modo auto detecta conversor disponível" {
-  if ! command -v resvg >/dev/null 2>&1 && ! command -v rsvg-convert >/dev/null 2>&1; then
-    skip "nenhum conversor SVG disponível neste ambiente"
-  fi
+@test "svgtoimage saída é JSON válido" {
+  _require_converter
 
   run bash -c "cat '$FIXTURE_SVG' | bash '$SCRIPT'"
   assert_success
-  assert_output --partial '"imagePath"'
+  run python3 -c "import sys,json; json.loads('$output')" <<< "$output" || \
+  run bash -c "echo '$output' | python3 -c 'import sys,json; json.load(sys.stdin)'"
+  assert_success
 }

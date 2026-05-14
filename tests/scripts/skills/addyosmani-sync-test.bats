@@ -36,7 +36,7 @@ SCRIPT="$REPO_ROOT/scripts/addyosmani/sync"
 # ---------------------------------------------------------------------------
 
 @test "addyosmani/sync --check-only requer git disponível" {
-  command -v git >/dev/null 2>&1 || skip "git não disponível"
+  command -v git >/dev/null 2>&1 || fail "git não disponível — instale git para executar este teste"
   # check-only tenta clonar; esperamos falha de rede ou sucesso —
   # o importante é que exit code seja 0 ou 1 (não 2 = argumento inválido)
   run timeout 30 bash "$SCRIPT" --check-only 2>/dev/null || true

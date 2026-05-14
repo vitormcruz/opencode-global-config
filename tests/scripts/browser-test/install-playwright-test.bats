@@ -57,10 +57,10 @@ teardown() { common_teardown; }
 @test "install-playwright --check-only com node e playwright reporta OK" {
   # bats test_tags=requires:playwright
   if ! command -v node >/dev/null 2>&1; then
-    skip "node nao disponivel no PATH"
+    fail "node nao disponivel no PATH — instale node para executar este teste"
   fi
   if ! command -v playwright >/dev/null 2>&1; then
-    skip "playwright nao instalado"
+    fail "playwright nao instalado — instale playwright para executar este teste"
   fi
 
   run bash "$SCRIPT" --check-only

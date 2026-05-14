@@ -36,7 +36,7 @@ SCRIPT="$REPO_ROOT/scripts/accessibility-audit/sync"
 # ---------------------------------------------------------------------------
 
 @test "accessibility-audit/sync --check-only não retorna exit 2" {
-  command -v git >/dev/null 2>&1 || skip "git não disponível"
+  command -v git >/dev/null 2>&1 || fail "git não disponível — instale git para executar este teste"
   run timeout 30 bash "$SCRIPT" --check-only 2>/dev/null || true
   [ "$status" -ne 2 ]
 }

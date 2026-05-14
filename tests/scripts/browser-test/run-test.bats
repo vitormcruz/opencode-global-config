@@ -95,10 +95,10 @@ teardown() { common_teardown; }
 @test "run deleta script .js apos execucao bem-sucedida" {
   # bats test_tags=requires:playwright
   if ! command -v node >/dev/null 2>&1; then
-    skip "node nao instalado"
+    fail "node nao instalado — instale node para executar este teste"
   fi
   if ! command -v playwright >/dev/null 2>&1; then
-    skip "playwright nao instalado"
+    fail "playwright nao instalado — instale playwright para executar este teste"
   fi
 
   local tmp_script
@@ -116,10 +116,10 @@ SCRIPT
 @test "run deleta script .js mesmo em caso de erro do node" {
   # bats test_tags=requires:playwright
   if ! command -v node >/dev/null 2>&1; then
-    skip "node nao instalado"
+    fail "node nao instalado — instale node para executar este teste"
   fi
   if ! command -v playwright >/dev/null 2>&1; then
-    skip "playwright nao instalado"
+    fail "playwright nao instalado — instale playwright para executar este teste"
   fi
 
   local tmp_script

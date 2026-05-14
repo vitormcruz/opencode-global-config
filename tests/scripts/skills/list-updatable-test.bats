@@ -80,7 +80,7 @@ SCRIPT="$REPO_ROOT/scripts/skills/list-updatable"
   assert_success
 
   if [ -z "$output" ]; then
-    skip "nenhuma skill atualizável encontrada"
+    fail "nenhuma skill atualizável encontrada — o script deve listar skills com UPSTREAM.md"
   fi
 
   local sorted

@@ -8,7 +8,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: prompt que menciona doc-extract recebe resposta coerente" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" \
     "Existe uma skill chamada doc-extract? Responda apenas sim ou nao."
@@ -20,7 +20,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: prompt que menciona md-export recebe resposta coerente" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" \
     "Existe uma skill chamada md-export? Responda apenas sim ou nao."
@@ -32,7 +32,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: skill svg-to-image é mencionável sem erro" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" \
     "Existe uma skill chamada svg-to-image? Responda sim ou não."
@@ -45,7 +45,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: skill test-driven-development tem trigger TDD" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" \
     "Existe uma skill chamada test-driven-development? Responda apenas sim ou nao."
@@ -57,7 +57,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: skill accessibility-audit é mencionável" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" \
     "Existe uma skill chamada accessibility-audit? Responda apenas sim ou nao."

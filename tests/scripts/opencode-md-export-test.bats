@@ -107,7 +107,7 @@ teardown() { common_teardown; }
 
 @test "md-export não sobrescreve arquivo existente sem --overwrite" {
   if ! command -v pandoc >/dev/null 2>&1; then
-    skip "pandoc não disponível neste ambiente"
+    fail "pandoc não disponível neste ambiente — instale pandoc para executar este teste"
   fi
 
   local out_dir
@@ -134,7 +134,7 @@ teardown() { common_teardown; }
 
 @test "md-export com MD válido gera DOCX (requer pandoc)" {
   if ! command -v pandoc >/dev/null 2>&1; then
-    skip "pandoc não disponível neste ambiente"
+    fail "pandoc não disponível neste ambiente — instale pandoc para executar este teste"
   fi
 
   local out_dir
@@ -152,7 +152,7 @@ teardown() { common_teardown; }
 
 @test "md-export artifact gerado existe no disco (requer pandoc)" {
   if ! command -v pandoc >/dev/null 2>&1; then
-    skip "pandoc não disponível neste ambiente"
+    fail "pandoc não disponível neste ambiente — instale pandoc para executar este teste"
   fi
 
   local out_dir
