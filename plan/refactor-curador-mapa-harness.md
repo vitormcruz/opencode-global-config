@@ -17,8 +17,9 @@ principais:
    formato fechado (anti-alucinação)
 4. Harness vira **um script único por agente** com
    interface padronizada e linguagem livre
-5. Novo agente `editor-mapa-produto` dedicado a **entender
-   o projeto** e ajudar a criar o Mapa inicial
+5. Novo agente `editor-mapa-produto` dedicado a **editar**
+   o Mapa do Produto e o harness — chamado pelo humano
+   ou pelo curador durante o workflow
 
 ---
 
@@ -49,6 +50,7 @@ fixo.
 | Plano de Testes                   | Markdown           | arquivo de planej.          | nenhum               |
 | Identidade Visual                 | Protótipo HTML/SVG | plan/ui/                    | nenhum               |
 | Code as Doc                       | Graphify           | graphify-out/               | graphify-out/        |
+| ADR (Arquitetura)                 | Markdown           | arquivo de planej.          | docs/adr/            |
 ```
 
 **Coluna "Destino":**
@@ -175,18 +177,29 @@ contrato é a interface (argumento + JSON + exit code).
 
 ### Definição
 
-Agente dedicado a entender o projeto e ajudar a criar
-o Mapa do Produto para projetos que ainda não têm.
+Agente dedicado a **editar** o Mapa do Produto e o
+harness. É o único que altera esses artefatos. O
+`curador-produto` é apenas guardião (valida/detecta),
+o `editor-mapa-produto` é quem executa as mudanças.
+
+**Acionamento:**
+- Pelo humano diretamente
+- Pelo `curador-produto` durante o workflow (quando
+  detecta ausência ou necessidade de atualização)
 
 **Capacidades:**
 - Analisar estrutura do repositório (dirs, linguagens,
   frameworks)
 - Identificar padrões de documentação existentes
 - Identificar ferramentas de build/test/lint
-- Propor template do Mapa preenchido
-- Propor harness inicial baseado nas ferramentas
+- Criar e atualizar o Mapa do Produto
+- Criar e atualizar harness (regras + scripts)
 - Gerar scaffold inicial dos scripts de harness
   baseado nas ferramentas encontradas
+- Conhece os formatos: template do Mapa (§1A-C) e
+  interface padronizada de harness (§2)
+- Usa script de scaffold para criar seções
+  deterministicamente (ver §3.1)
 
 **Fluxo obrigatório — seção por seção com aprovação:**
 
@@ -227,20 +240,80 @@ o humano quiser pular uma seção, registrar como
 `(não definido)` e seguir.
 
 **Quando usar:**
-- Curador detecta ausência de Mapa → para o fluxo →
-  pede ao humano usar `editor-mapa-produto`
-- O humano roda, aprova o Mapa, volta ao fluxo dev
+- Humano chama diretamente para criar/editar Mapa ou
+  harness
+- Curador detecta ausência ou necessidade de alteração →
+  chama `editor-mapa-produto` durante o workflow
 
 **Limites:**
 - Não executa código de produção
 - Não cria requisitos — apenas entende o projeto
 - Propõe, não decide — o humano aprova
 
+### §3.1 — Script de Scaffold do Mapa
+
+**Problema:** sem scaffold determinístico, o agente
+pode gerar formatos inconsistentes ou alucinar
+estruturas.
+
+**Solução:** um script em bash que cria as seções
+vazias (template) no arquivo indicado pelo humano
+(AGENTS.md, instructions.md, etc.). Após o scaffold,
+o editor discute com o humano o que preencher.
+
+**Implementação:**
+- Script canônico: `scripts/mapa-produto/scaffold.sh`
+- Recebe como argumento o path do arquivo destino
+- Cria deterministicamente as 3 seções (§1A, §1B, §1C)
+  com formato tabular exato, sem conteúdo de projeto
+- Idempotente: se seções já existem, não duplica
+- O editor-mapa-produto deve detectar o SO do
+  desenvolvedor e, se necessário, gerar um wrapper
+  equivalente (PowerShell no Windows, etc.) para
+  garantir execução no ambiente do humano
+
+**Interface:**
+```bash
+# Uso
+scripts/mapa-produto/scaffold.sh <arquivo-destino>
+
+# Exemplo
+scripts/mapa-produto/scaffold.sh docs/AGENTS.md
+```
+
+**Saída no arquivo destino:**
+```markdown
+## Mapa do Produto
+
+### Elementos de Especificação
+
+| Elemento | Formato/Ferramenta | Origem | Destino |
+|----------|-------------------|--------|---------|
+| (preencher) | | | |
+
+### Regras de Documentação
+
+(seções por elemento — preencher conforme necessidade)
+
+### Harness por Agente
+
+| Agente | Comando de Execução | Descrição |
+|--------|--------------------|-----------|
+| (preencher) | | |
+```
+
+**Fluxo do editor:**
+1. Pergunta ao humano qual arquivo usar como destino
+2. Detecta SO → executa scaffold.sh ou gera wrapper
+3. Scaffold cria seções vazias no arquivo
+4. Editor inicia discussão seção por seção (§1A → §1B → §1C)
+
 ### Arquivos afetados
 
 | Arquivo | O que muda |
 |---------|------------|
 | `agents/editor-mapa-produto.md` | **(novo)** — prompt do agente |
+| `scripts/mapa-produto/scaffold.sh` | **(novo)** — script de scaffold |
 
 ---
 
@@ -248,8 +321,9 @@ o humano quiser pular uma seção, registrar como
 
 ### Definição
 
-Remover validação de requisitos, focar exclusivamente
-no Mapa do Produto.
+Remover validação de requisitos e remoção da
+capacidade de alterar Mapa/harness. Curador passa a
+ser **apenas guardião** — detecta e informa, não edita.
 
 **Remover:**
 - Capacidade 1: "Validar requisitos antes de iniciar
@@ -257,20 +331,24 @@ no Mapa do Produto.
 - Toda menção a "validar entrada/requisitos"
 - Trecho "verifica se a entrada (requisitos, histórias,
   pedidos) é consistente com a documentação existente"
+- Capacidade de **alterar** Mapa/harness diretamente
 
 **Alterar:**
 - Capacidade principal: guardião do Mapa do Produto
-  (especificações, documentação, harness)
-- Na validação: verifica existência do Mapa; se ausente,
-  para o fluxo e pede `editor-mapa-produto`
+  — valida existência e aderência, não edita
+- Se Mapa/harness não existe → informa e chama
+  `editor-mapa-produto`
+- Se agente não seguiu o Mapa → informa para ser
+  resolvido (pelo humano ou editor-mapa-produto)
 - Na revisão: verifica aderência ao Mapa (elementos
   de spec preenchidos), não valida requisitos
 - Limites: adicionar "Não valida requisitos — valida
-  aderência ao Mapa"
+  aderência ao Mapa" e "Não altera Mapa/harness —
+  delega ao editor-mapa-produto"
 
 **Manter:**
-- Guardião do Mapa (criar, atualizar, sincronizar)
-- Co-confecção de harness com especialistas
+- Guardião do Mapa (detectar ausência, verificar
+  aderência)
 - Revisão de documentação nos loops
 - Finalização (verificar artefatos com Destino)
 - Exclusão do plano ao final
@@ -377,6 +455,13 @@ comportamento antigo do curador.
 **`eng-software.md`:** adicionar responsabilidade de
 levantar requisitos se ausentes na entrada
 
+**`eng-software.md`:** adicionar responsabilidade de
+verificar a arquitetura (ADR) — garantir que ADRs
+existentes são respeitados durante a construção,
+propor atualizações quando decisões arquiteturais
+mudam, e criar novos ADRs quando decisões relevantes
+são tomadas
+
 ### Arquivos afetados
 
 | Arquivo | O que muda |
@@ -431,6 +516,10 @@ Criar ou atualizar testes para as mudanças.
   ferramenta de indexação (ex.: Graphify) como
   primeiro passo, para reduzir tokens e dar
   visibilidade ao humano e aos agentes
+- [x] Separação de responsabilidades: curador é guardião
+  (valida/detecta), editor-mapa-produto é quem altera
+- [x] ADR (Arquitetura) como elemento default do Mapa
+  com destino `docs/adr/`
 
 ---
 
