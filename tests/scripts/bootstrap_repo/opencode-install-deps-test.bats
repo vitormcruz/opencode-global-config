@@ -140,7 +140,7 @@ teardown() {
 
 @test "opencode-install-deps exibe OK para pandoc quando presente" {
   if ! command -v pandoc >/dev/null 2>&1; then
-    skip "pandoc não disponível neste ambiente"
+    fail "pandoc não disponível neste ambiente — instale pandoc para executar este teste"
   fi
   run bash "$SCRIPT" --yes
   assert_success

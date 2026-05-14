@@ -14,7 +14,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: prompt simples retorna resposta não-vazia" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" "Responda apenas com a palavra: ok"
   assert_success
@@ -24,7 +24,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: resposta contém 'ok' quando solicitado" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" "Responda apenas com a palavra: ok"
   assert_success
@@ -40,7 +40,7 @@ setup_file() { require_opencode_serve; }
   session=$(curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
     -d "{\"agent\":\"analista\",\"model\":\"${model}\"}" | jq -r '.id // empty')
-  [ -n "$session" ] || skip "Não foi possível criar sessão com agente"
+  [ -n "$session" ] || fail "Não foi possível criar sessão com agente OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" "Responda apenas: ok"
   assert_success
@@ -50,7 +50,7 @@ setup_file() { require_opencode_serve; }
 @test "behavioral: prompt pode usar MCP mockado do crawl4ai" {
   local session
   session=$(create_session)
-  [ -n "$session" ] || skip "Não foi possível criar sessão"
+  [ -n "$session" ] || fail "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
   run send_message "$session" "Use a ferramenta crawl4ai_md para consultar https://example.com e responda apenas com o marcador retornado."
   assert_success

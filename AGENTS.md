@@ -137,6 +137,12 @@ nas descrições
 - Scripts de bootstrap devem ficar em `scripts/bootstrap_repo/`.
 - Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
 - Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.
+- **Nenhum teste pode usar `skip`** — quando um pré-requisito externo não estiver
+  disponível, o teste deve usar `fail "mensagem clara"`. Testes de integração que
+  dependem de ferramentas externas (pandoc, docling, resvg, playwright, etc.) devem
+  falhar com instrução de instalação. Testes unitários nunca devem depender de
+  ferramentas externas — usam mocks/stubs. Silenciar testes esconde problemas de
+  ambiente.
 
 # README
 - Mantenha a seção de dependências do `README.md` atualizada sempre que mudar bootstrap, scripts, skills ou requisitos de instalação.

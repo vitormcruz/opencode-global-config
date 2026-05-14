@@ -90,7 +90,7 @@ teardown() { common_teardown; }
 
 @test "doc-extract com PDF válido retorna ok:true (requer docling)" {
   if ! command -v docling >/dev/null 2>&1; then
-    skip "docling não disponível neste ambiente"
+    fail "docling não disponível neste ambiente — instale docling para executar este teste"
   fi
 
   local out_dir
@@ -107,7 +107,7 @@ teardown() { common_teardown; }
 
 @test "doc-extract com PDF válido gera artifact (requer docling)" {
   if ! command -v docling >/dev/null 2>&1; then
-    skip "docling não disponível neste ambiente"
+    fail "docling não disponível neste ambiente — instale docling para executar este teste"
   fi
 
   local out_dir

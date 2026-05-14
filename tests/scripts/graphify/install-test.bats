@@ -54,7 +54,7 @@ teardown() { common_teardown; }
 
 @test "install --check-only com graphify reporta OK" {
   if ! command -v graphify >/dev/null 2>&1; then
-    skip "graphify nao instalado"
+    fail "graphify nao instalado — instale graphify para executar este teste"
   fi
 
   run bash "$SCRIPT" --check-only

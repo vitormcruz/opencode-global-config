@@ -9,7 +9,7 @@ teardown() { common_teardown; }
 require_crawl4ai_real() {
   if ! curl -sf --max-time 5 --connect-timeout 3 \
        http://127.0.0.1:11235/health >/dev/null 2>&1; then
-    skip "Crawl4AI real não está disponível em http://127.0.0.1:11235"
+    fail "Crawl4AI real não está disponível em http://127.0.0.1:11235 — inicie o serviço antes de executar este teste"
   fi
 }
 
