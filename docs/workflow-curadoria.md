@@ -22,6 +22,46 @@ Dois agentes participam deste processo:
 
 ---
 
+## Filosofia
+
+A curadoria opera com mentalidade ágil: **documentação
+de mais é tão ruim quanto documentação de menos**. Os
+princípios abaixo orientam toda decisão sobre o que
+documentar e como manter:
+
+1. **Código é documentação** — é o design da aplicação.
+   Ferramentas que extraem conhecimento do código
+   (grafos, ASTs, schemas) são preferíveis a docs
+   manuais que repetem o que o código já diz.
+2. **Doc derivável não se armazena** — se pode ser
+   gerada a partir do código, gere sob demanda.
+3. **Doc é complementar ao código, não substituta** —
+   o dev prefere código. Doc separada só vale quando
+   contextualiza agentes, comunica com stakeholders ou
+   agrega abstração que o código não expressa.
+4. **Transformação justifica doc** — só manter doc
+   separada se houver mudança de formato
+   (texto→diagrama), abstração (código→visão
+   condensada) ou sumarização (decisões dispersas→visão
+   consolidada).
+5. **Docs devem ser executáveis** — preferir
+   especificações testáveis. Decisões arquiteturais
+   viram fitness functions; critérios de aceitação
+   viram specs executáveis.
+6. **Brownfield é pragmático** — pode não comportar
+   técnicas avançadas. Grafos de conhecimento
+   (não-intrusivos) ajudam muito. Sugerir gradualismo.
+7. **Doc atualizada ou nenhuma** — doc desatualizada é
+   pior que ausência.
+
+> Estes princípios também vivem no agente
+> [`curador-produto`](../agents/curador-produto.md) e
+> orientam o `editor-mapa-produto` ao propor o Mapa.
+> O Mapa do Produto não é catálogo exaustivo: é o
+> mínimo necessário de doc complementar ao código.
+
+---
+
 ## Premissas
 
 ### Mapa do Produto
