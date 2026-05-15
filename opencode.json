@@ -29,7 +29,9 @@
   },
   "permission": {
     "skill": {
-      "aws-*": "deny"
+      "aws-*": "deny",
+      "caveman": "deny",
+      "grill-me": "deny"
     }
   },
   "provider": {
