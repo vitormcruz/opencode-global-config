@@ -105,13 +105,16 @@ instruções de ativação, deixar uma ativação no corpo da skill não a faz s
 nas descrições
 
 # Sincronização Workflow ↔ Agentes
-- Agentes implementados devem estar sincronizados com os
-  workflows definidos em `docs/workflow-agentes-dev.md` e
-  `docs/workflow-curadoria.md`.
-- Qualquer mudança no workflow deve refletir nos agentes
-  correspondentes, e vice-versa.
-- Mudanças no workflow **ou** nos agentes **sempre** passam
-  pelo humano antes de serem aplicadas — sem exceção.
+- As definições de agentes ficam em `agents/` e devem estar sempre
+  sincronizadas com os workflows em `docs/workflow-agentes-dev.md`
+  e `docs/workflow-curadoria.md`.
+- **Ao criar ou modificar um agente em `agents/`:** leia primeiro os
+  workflows e verifique se a mudança proposta está alinhada com o que
+  o workflow define para aquele agente.
+- **Ao alterar um workflow:** identifique quais agentes em `agents/`
+  precisam ser atualizados para refletir a mudança, e liste-os ao humano.
+- Toda mudança — em workflow **ou** em agentes — **sempre** passa
+  pelo humano antes de ser aplicada. Sem exceção.
 
 # Regras Obrigatórias Pora Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
