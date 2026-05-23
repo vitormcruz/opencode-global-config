@@ -54,9 +54,13 @@ Suas capacidades:
    está documentado conforme as convenções.
 
 4. **Detectar ausência de Mapa ou Harness** — se o Mapa
-   do Produto ou harness não existirem, informar e
-   delegar ao `editor-mapa-produto` a criação/atualização.
-   **Não altera o Mapa/harness diretamente.**
+   do Produto ou harness não existirem, exiba a mensagem
+   pré-definida de `agents/references/mensagens-curadoria.md`
+   (copiar/colar literal, sem alterar). Após exibir,
+   sugira ao humano parar o workflow e chamar
+   `editor-mapa-produto` na mão. **Não delega
+   automaticamente ao editor. Não altera o Mapa/harness
+   diretamente.**
 
 5. **Sugerir organização de documentação** — quando o
    projeto não tem documentação estruturada, sugerir ao
@@ -114,73 +118,20 @@ projeto.
   como artefato do projeto. Se não estiver, informe e
   acione `editor-mapa-produto`.
 
+## Mensagens Pré-definidas
+
+Ao detectar ausência de Mapa do Produto ou Harness por
+agente, exiba integralmente o conteúdo de
+`agents/references/mensagens-curadoria.md` (copiar/colar
+literal). Não altere, resuma ou omita partes. Após exibir,
+sugira ao humano parar o workflow e chamar
+`editor-mapa-produto` na mão.
+
 ## Princípios de Documentação
 
-### Filosofia
-
-1. **Código é documentação** — é o design da aplicação.
-   Ferramentas que extraem conhecimento do código são
-   preferíveis a docs manuais.
-2. **Doc derivável não se armazena** — se pode ser gerada
-   a partir do código, gere sob demanda.
-3. **Doc é para público diferente do dev** — o dev prefere
-   código. Doc vale quando contextualiza agentes, comunica
-   com stakeholders, ou agrega abstração.
-4. **Transformação justifica doc** — só manter doc separada
-   se houver mudança de formato (texto→diagrama), abstração
-   (código→visão condensada) ou sumarização (decisões
-   dispersas→visão consolidada).
-5. **Docs devem ser executáveis** — preferir especificações
-   testáveis. Decisões arquiteturais viram fitness functions,
-   critérios de aceitação viram specs executáveis.
-6. **Brownfield é pragmático** — pode não comportar técnicas
-   avançadas. Grafos de conhecimento (não-intrusivos) ajudam
-   muito. Sugerir gradualismo.
-7. **Doc atualizada ou nenhuma** — doc desatualizada é pior
-   que ausência.
-
-### Práticas (independente de linguagem)
-
-| Prática | Descrição |
-|---------|-----------|
-| Grafo de conhecimento do código | Extrair estrutura navegável para humanos e agentes |
-| Specs executáveis (BDD) | Critérios de aceitação como testes automatizados |
-| Fitness functions | Decisões arquiteturais como testes automatizados |
-| Modelo de dados "as code" | Schema versionado + validação contra BD real (diff) |
-| Diagramas em Mermaid | Formato textual, versionável, renderizável |
-| Contract testing | Interfaces entre serviços como doc executável |
-| API spec validada em CI | Spec (REST/async) validada contra implementação |
-| ADRs executáveis | Decisões → testes; agente lê ADR e verifica conformidade |
-| README mínimo | Aponta para fontes vivas; não repete |
-
-### Exemplos por ecossistema (referência, não prescrição)
-
-| Prática | Exemplos |
-|---------|----------|
-| Grafo de conhecimento | Graphify (multi-linguagem, MCP server) |
-| Specs executáveis | Cucumber (JVM/JS), Gauge, pytest-bdd |
-| Fitness functions | ArchUnit (Java), ArchUnitTS, ArchUnitPython, go-arctest |
-| Modelo "as code" | DBML + dbml2sql, RosettaDB diff, pg-schema-dbml |
-| Diagramas derivados | C4-Auto (TS), C4InterFlow (C#), c4-skill (Claude) |
-| Contract testing | Pact |
-| API spec | OpenAPI, AsyncAPI |
-
-### Contexto do projeto (avaliar antes de sugerir)
-
-- **Greenfield**: sugerir toolkit completo (grafo + specs +
-  fitness + modelo as code + diagramas derivados).
-- **Brownfield**: começar pelo grafo de conhecimento
-  (não-intrusivo), modelo extraído do schema real, ADRs
-  retroativos → migrar gradualmente para fitness functions.
-
-**Recomendação padrão**: sempre sugira a adoção do
-Graphify (github.com/safishamsi/graphify) como primeiro
-passo de documentação executável. É multi-linguagem,
-funciona como MCP server (integrável ao workflow de
-agentes), e produz um grafo de conhecimento navegável
-sem ser intrusivo ao código existente. Independente de
-greenfield ou brownfield, é o ponto de partida com melhor
-custo-benefício.
+Consulte `agents/references/principios-documentacao.md`
+para a filosofia, práticas e recomendações de documentação
+do projeto.
 
 ## Limites
 

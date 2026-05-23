@@ -62,6 +62,8 @@ spawna outros agentes, ou propõe commit.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
+- **Princípios de documentação**: ao escrever ou revisar
+  documentação, consulte `agents/references/principios-documentacao.md`.
 
 ---
 

@@ -54,9 +54,10 @@ documentar e como manter:
 7. **Doc atualizada ou nenhuma** — doc desatualizada é
    pior que ausência.
 
-> Estes princípios também vivem no agente
-> [`curador-produto`](../agents/curador-produto.md) e
-> orientam o `editor-mapa-produto` ao propor o Mapa.
+> Estes princípios vivem em
+> [`agents/references/principios-documentacao.md`](../agents/references/principios-documentacao.md)
+> e orientam tanto o `curador-produto` quanto o
+> `editor-mapa-produto` ao propor e validar o Mapa.
 > O Mapa do Produto não é catálogo exaustivo: é o
 > mínimo necessário de doc complementar ao código.
 
@@ -267,10 +268,25 @@ harness/<agente>/<fase>.sh
 
 ## Fluxo do Processo de Curadoria
 
-O processo inicia quando o `editor-mapa-produto` é
-acionado (pelo humano diretamente ou pelo
-`curador-produto` durante o workflow dev quando detecta
-ausência de Mapa/Harness).
+### Detecção de Ausência
+
+Quando o `curador-produto` detecta que o Mapa do Produto
+e/ou o Harness não existem:
+
+1. Exibe a mensagem pré-definida de
+   `agents/references/mensagens-curadoria.md` (copiar/colar
+   literal, sem alterar).
+2. Sugere ao humano parar o workflow e chamar
+   `editor-mapa-produto` na mão.
+3. **Não delega automaticamente** ao editor — o humano
+   decide se prossegue.
+
+### Criação do Mapa e Harness
+
+O processo de criação inicia quando o `editor-mapa-produto`
+é acionado pelo humano diretamente (após o preâmbulo do
+curador) ou pelo `curador-produto` em cenários de Mapa
+desatualizado.
 
 O `editor-mapa-produto` analisa o contexto e segue o
 fluxo seção por seção com aprovação do humano:
@@ -329,7 +345,9 @@ sequenceDiagram
     rect rgb(255, 250, 240)
     Note over Humano, edit: DETECÇÃO
     cur ->> cur: Detecta ausência de Mapa/Harness
-    cur ->> edit: Delega criação/atualização
+    cur ->> Humano: Exibe mensagem pré-definida (literal)
+    cur ->> Humano: Sugere parar e chamar editor na mão
+    Humano -->> edit: Chama editor-mapa-produto (decisão humana)
     end
 
     rect rgb(230, 245, 255)

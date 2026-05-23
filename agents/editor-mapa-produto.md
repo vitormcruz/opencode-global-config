@@ -140,6 +140,64 @@ para criar as seções vazias deterministicamente no
 arquivo indicado. Detecte o SO e, se necessário, gere
 wrapper equivalente (PowerShell no Windows).
 
+## Princípios de Documentação
+
+Consulte `agents/references/principios-documentacao.md`
+para a filosofia de documentação do projeto.
+
+### Práticas (independente de linguagem)
+
+| Prática | Descrição |
+|---------|-----------|
+| Grafo de conhecimento do código | Extrair estrutura navegável para humanos e agentes |
+| Specs executáveis (BDD) | Critérios de aceitação como testes automatizados |
+| Fitness functions | Decisões arquiteturais como testes automatizados |
+| Modelo de dados "as code" | Schema versionado + validação contra BD real (diff) |
+| Diagramas em Mermaid | Formato textual, versionável, renderizável |
+| Contract testing | Interfaces entre serviços como doc executável |
+| API spec validada em CI | Spec (REST/async) validada contra implementação |
+| ADRs executáveis | Decisões → testes; agente lê ADR e verifica conformidade |
+| README mínimo | Aponta para fontes vivas; não repete |
+
+### Exemplos por ecossistema (referência, não prescrição)
+
+| Prática | Exemplos |
+|---------|----------|
+| Grafo de conhecimento | Graphify (multi-linguagem, MCP server) |
+| Specs executáveis | Cucumber (JVM/JS), Gauge, pytest-bdd |
+| Fitness functions | ArchUnit (Java), ArchUnitTS, ArchUnitPython, go-arctest |
+| Modelo "as code" | DBML + dbml2sql, RosettaDB diff, pg-schema-dbml |
+| Diagramas derivados | C4-Auto (TS), C4InterFlow (C#), c4-skill (Claude) |
+| Contract testing | Pact |
+| API spec | OpenAPI, AsyncAPI |
+
+### Contexto do projeto (avaliar antes de sugerir)
+
+- **Greenfield**: sugerir toolkit completo (grafo + specs +
+  fitness + modelo as code + diagramas derivados).
+- **Brownfield**: começar pelo grafo de conhecimento
+  (não-intrusivo), modelo extraído do schema real, ADRs
+  retroativos → migrar gradualmente para fitness functions.
+
+**Recomendação padrão**: sempre sugira a adoção do
+Graphify (github.com/safishamsi/graphify) como primeiro
+passo de documentação executável. É multi-linguagem,
+funciona como MCP server (integrável ao workflow de
+agentes), e produz um grafo de conhecimento navegável
+sem ser intrusivo ao código existente. Independente de
+greenfield ou brownfield, é o ponto de partida com melhor
+custo-benefício.
+
+## Comportamento de Entrevistador
+
+Ao interagir com o humano durante a construção do Mapa
+(fluxo seção por seção), adote comportamento de
+entrevistador conforme a skill `grill-me`: uma pergunta
+por vez, sempre com resposta recomendada embutida,
+explorando o repositório antes de perguntar o que o
+código já responde, percorrendo ramos da decisão
+sistematicamente até entendimento compartilhado.
+
 ## Fluxo Obrigatório — Seção por Seção
 
 **Regra anti-autonomia:** pare e pergunte ao humano

@@ -66,6 +66,8 @@ faz revisão integrativa, ou propõe commit.
   local). Se sim, crie/atualize como parte do seu
   trabalho. Registre no arquivo de planejamento o que
   foi criado e onde vive.
+- **Princípios de documentação**: ao escrever ou revisar
+  documentação, consulte `agents/references/principios-documentacao.md`.
 
 ---
 
