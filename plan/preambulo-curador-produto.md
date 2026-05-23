@@ -52,17 +52,49 @@ processo seção por seção com sua aprovação a cada etapa.
 ### 3. Atualizar workflow-curadoria.md
 - No fluxo e no diagrama Mermaid, inserir etapa de preâmbulo entre DETECÇÃO e delegação: curador exibe mensagem → sugere parar → humano decide
 - Documentar a existência do arquivo de mensagens e a regra de exibição integral
+- Atualizar a nota da seção "Filosofia" para apontar para
+  `agents/references/principios-documentacao.md` em vez de
+  referenciar o `curador-produto.md`
 
-### 4. Revisar editor-mapa-produto.md
-- Verificar se precisa ajuste (provavelmente não — já suporta chamada direta pelo humano)
+### 4. Criar arquivo de referência de princípios de documentação
+- Criar `agents/references/principios-documentacao.md` com o conteúdo
+  da seção `## Princípios de Documentação` do `curador-produto.md`
+  (Filosofia, Práticas, Exemplos por ecossistema, Contexto do projeto
+  e Recomendação padrão) — fonte única, autossuficiente
+- No `curador-produto.md`: substituir o conteúdo embutido por instrução
+  de consultar `agents/references/principios-documentacao.md`
+- No `editor-mapa-produto.md`: adicionar instrução de consultar
+  `agents/references/principios-documentacao.md`; declarar que ao
+  interagir com o humano durante a construção do Mapa (fluxo seção
+  por seção), o agente adota comportamento de entrevistador conforme
+  a skill `grill-me`
+- Nos agentes que produzem documentação como parte do trabalho
+  (`eng-software`, `dba`, `front`, `qa`, `sec`, `rev`): adicionar
+  instrução de consultar `agents/references/principios-documentacao.md`
+  ao escrever ou revisar documentação
 
 ---
 
 ## Arquivos relevantes
 - `agents/references/mensagens-curadoria.md` — **CRIAR**
-- `agents/curador-produto.md` — **MODIFICAR** (item 4, nova seção, permissões)
+- `agents/references/principios-documentacao.md` — **CRIAR**
+- `agents/curador-produto.md` — **MODIFICAR** (item 4, nova seção,
+  permissões, substituir princípios embutidos por referência ao arquivo)
 - `docs/workflow-curadoria.md` — **MODIFICAR** (fluxo + diagrama)
-- `agents/editor-mapa-produto.md` — **REVISAR** (provavelmente sem mudança)
+- `agents/editor-mapa-produto.md` — **MODIFICAR** (adicionar referência
+  ao arquivo de princípios)
+- `agents/eng-software.md` — **MODIFICAR** (adicionar referência ao
+  arquivo de princípios)
+- `agents/dba.md` — **MODIFICAR** (adicionar referência ao arquivo de
+  princípios)
+- `agents/front.md` — **MODIFICAR** (adicionar referência ao arquivo de
+  princípios)
+- `agents/qa.md` — **MODIFICAR** (adicionar referência ao arquivo de
+  princípios)
+- `agents/sec.md` — **MODIFICAR** (adicionar referência ao arquivo de
+  princípios)
+- `agents/rev.md` — **MODIFICAR** (adicionar referência ao arquivo de
+  princípios)
 
 ## Verificação
 - Confirmar instrução de copiar/colar literal no curador
@@ -71,12 +103,3 @@ processo seção por seção com sua aprovação a cada etapa.
 
 ## Consideração
 Permissão task do curador→editor: recomendo **manter** — o curador pode precisar delegar em cenários de Mapa *desatualizado*. Apenas na detecção de **ausência** total o comportamento muda para preâmbulo + sugestão manual.
-
-
-
----- 
-
-# Mais notas para serem tratadas, não ncessariamente neste plano.
-
-
-Adicione ao plano que o  editor deveria ter em sua descrição a mesma Filosofia que tem no curador sobre documentação.
