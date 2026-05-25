@@ -327,11 +327,30 @@ install_pipx_userspace() {
 }
 
 # --------------------------------------------------------------------------
+# Encontrar Python >= 3.9 disponivel no PATH
+# --------------------------------------------------------------------------
+find_python39_plus() {
+  for py in python3.12 python3.11 python3.10 python3.9; do
+    if has_cmd "$py"; then
+      echo "$py"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# --------------------------------------------------------------------------
 # Instalar docling via pipx
 # --------------------------------------------------------------------------
 install_docling_pipx() {
-  say "  -> Instalando docling via pipx..."
-  pipx install docling 2>&1 | while IFS= read -r line; do
+  local python_bin="${1:-}"
+  local extra_args=""
+  if [ -n "$python_bin" ]; then
+    extra_args="--python $python_bin"
+  fi
+  say "  -> Instalando docling via pipx${python_bin:+ (usando $python_bin)}..."
+  # shellcheck disable=SC2086
+  pipx install docling $extra_args 2>&1 | while IFS= read -r line; do
     say "     $line"
   done
   # Garantir que pipx ensurepath foi executado
@@ -460,9 +479,24 @@ if has_cmd docling; then
   status_ok "docling $(docling --version 2>/dev/null | head -1 | awk '{print $NF}' || echo '(versao desconhecida)')"
 else
   status_missing "docling"
+  DOCLING_PYTHON=""
   if has_cmd pipx; then
-    if confirm_action "  Instalar docling via pipx agora?"; then
-      install_docling_pipx
+    DOCLING_PYTHON="$(find_python39_plus || true)"
+    if [ -z "$DOCLING_PYTHON" ]; then
+      status_missing "Python >= 3.9 (sistema tem $(python3 --version 2>/dev/null || echo 'desconhecido'))"
+      status_hint "docling requer Python >= 3.9"
+      case "$OS" in
+        wsl|linux)
+          status_hint "Instalar: sudo apt-get install -y python3.9 python3.9-venv"
+          need_sudo_pkg "python3.9"
+          need_sudo_pkg "python3.9-venv"
+          ;;
+        macos)
+          status_hint "Instalar: brew install python@3.9"
+          ;;
+      esac
+    elif confirm_action "  Instalar docling via pipx agora?"; then
+      install_docling_pipx "$DOCLING_PYTHON"
       export PATH="$HOME/.local/bin:$PATH"
       if has_cmd docling; then
         status_installed "docling"
@@ -472,7 +506,7 @@ else
         status_hint "Ou adicione ao ~/.bashrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
       fi
     else
-      status_hint "Para instalar depois: pipx install docling"
+      status_hint "Para instalar depois: pipx install docling --python $DOCLING_PYTHON"
     fi
   else
     status_hint "Primeiro instale pipx, depois: pipx install docling"
@@ -522,8 +556,12 @@ if has_cmd graphify; then
 else
   status_missing "graphify"
   if has_cmd pipx; then
-    if confirm_action "  Instalar graphifyy via pipx agora?"; then
-      pipx install graphifyy
+    GRAPHIFY_PYTHON="$(find_python39_plus || true)"
+    if [ -z "$GRAPHIFY_PYTHON" ]; then
+      status_missing "Python >= 3.9 necessario para graphify"
+      status_hint "Instale python3.9+ e rode novamente: bash scripts/graphify/install --yes"
+    elif confirm_action "  Instalar graphifyy via pipx agora?"; then
+      pipx install graphifyy --python "$GRAPHIFY_PYTHON"
       export PATH="$HOME/.local/bin:$PATH"
       if has_cmd graphify; then
         status_installed "graphify"

@@ -214,3 +214,115 @@ teardown() {
   assert_success
   assert_output --partial "Concluido"
 }
+
+# ---------------------------------------------------------------------------
+# find_python39_plus — função auxiliar
+# ---------------------------------------------------------------------------
+
+@test "find_python39_plus retorna python3.9 quando disponível no PATH" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+  printf '#!/bin/sh\necho "Python 3.9.0"\n' > "$fake_bin/python3.9"
+  chmod +x "$fake_bin/python3.9"
+
+  run env PATH="$fake_bin" /usr/bin/bash -c '
+    has_cmd() { command -v "$1" >/dev/null 2>&1; }
+    find_python39_plus() {
+      for py in python3.12 python3.11 python3.10 python3.9; do
+        if has_cmd "$py"; then echo "$py"; return 0; fi
+      done
+      return 1
+    }
+    find_python39_plus
+  '
+  assert_success
+  assert_output "python3.9"
+
+  rm -rf "$fake_bin"
+}
+
+@test "find_python39_plus prefere python3.12 sobre python3.9" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+  printf '#!/bin/sh\necho "Python 3.12.0"\n' > "$fake_bin/python3.12"
+  printf '#!/bin/sh\necho "Python 3.9.0"\n'  > "$fake_bin/python3.9"
+  chmod +x "$fake_bin/python3.12" "$fake_bin/python3.9"
+
+  run env PATH="$fake_bin" /usr/bin/bash -c '
+    has_cmd() { command -v "$1" >/dev/null 2>&1; }
+    find_python39_plus() {
+      for py in python3.12 python3.11 python3.10 python3.9; do
+        if has_cmd "$py"; then echo "$py"; return 0; fi
+      done
+      return 1
+    }
+    find_python39_plus
+  '
+  assert_success
+  assert_output "python3.12"
+
+  rm -rf "$fake_bin"
+}
+
+@test "find_python39_plus falha quando nenhum Python >= 3.9 no PATH" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  run env PATH="$fake_bin" /usr/bin/bash -c '
+    has_cmd() { command -v "$1" >/dev/null 2>&1; }
+    find_python39_plus() {
+      for py in python3.12 python3.11 python3.10 python3.9; do
+        if has_cmd "$py"; then echo "$py"; return 0; fi
+      done
+      return 1
+    }
+    find_python39_plus
+  '
+  assert_failure
+
+  rm -rf "$fake_bin"
+}
+
+# ---------------------------------------------------------------------------
+# docling — verificação de Python >= 3.9
+# ---------------------------------------------------------------------------
+
+@test "opencode-install-deps exibe MISSING Python >= 3.9 para docling quando ausente" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in grep uname head awk; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+  printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/pipx"
+  chmod +x "$fake_bin/pipx"
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "Python >= 3.9"
+  assert_output --partial "python3.9 python3.9-venv"
+
+  rm -rf "$fake_bin"
+}
+
+@test "opencode-install-deps inclui python3.9 no bloco sudo quando Python >= 3.9 ausente" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in grep uname head awk; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+  printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/pipx"
+  chmod +x "$fake_bin/pipx"
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "sudo apt-get install -y"
+  assert_output --partial "python3.9"
+
+  rm -rf "$fake_bin"
+}
