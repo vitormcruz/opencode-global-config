@@ -327,33 +327,26 @@ install_pipx_userspace() {
 }
 
 # --------------------------------------------------------------------------
-# Encontrar Python >= 3.9 disponivel no PATH
+# Verificar se python3 atende versao minima (3.10+)
+# Retorna 0 se ok, 1 se ausente ou versao menor que 3.10
 # --------------------------------------------------------------------------
-find_python39_plus() {
-  for py in python3.12 python3.11 python3.10 python3.9; do
-    if has_cmd "$py"; then
-      echo "$py"
-      return 0
-    fi
-  done
-  return 1
+PYTHON3_VERSION=""
+check_python3_version() {
+  if ! has_cmd python3; then return 1; fi
+  PYTHON3_VERSION="$(python3 --version 2>/dev/null | awk '{print $2}')"
+  local minor
+  minor="$(echo "$PYTHON3_VERSION" | cut -d. -f2)"
+  [ -n "$minor" ] && [ "$minor" -ge 10 ] 2>/dev/null
 }
 
 # --------------------------------------------------------------------------
 # Instalar docling via pipx
 # --------------------------------------------------------------------------
 install_docling_pipx() {
-  local python_bin="${1:-}"
-  local extra_args=""
-  if [ -n "$python_bin" ]; then
-    extra_args="--python $python_bin"
-  fi
-  say "  -> Instalando docling via pipx${python_bin:+ (usando $python_bin)}..."
-  # shellcheck disable=SC2086
-  pipx install docling $extra_args 2>&1 | while IFS= read -r line; do
+  say "  -> Instalando docling via pipx..."
+  pipx install docling 2>&1 | while IFS= read -r line; do
     say "     $line"
   done
-  # Garantir que pipx ensurepath foi executado
   pipx ensurepath 2>/dev/null || true
 }
 
@@ -473,44 +466,38 @@ else
 fi
 say ""
 
+# --- Python 3.10+ ---
+say "[python3] Requerido >= 3.10 para docling e graphify"
+if check_python3_version; then
+  status_ok "python3 $PYTHON3_VERSION"
+else
+  status_missing "Python >= 3.10 (sistema tem ${PYTHON3_VERSION:-nenhum})"
+  status_hint "Requer Ubuntu 22.04+ ou equivalente com Python 3.10+"
+  status_hint "WSL: wsl --install -d Ubuntu-24.04"
+fi
+say ""
+
 # --- docling ---
 say "[docling] Skill: doc-extract"
 if has_cmd docling; then
   status_ok "docling $(docling --version 2>/dev/null | head -1 | awk '{print $NF}' || echo '(versao desconhecida)')"
+elif ! check_python3_version; then
+  status_missing "docling (requer Python >= 3.10)"
+elif ! has_cmd pipx; then
+  status_missing "docling"
+  status_hint "Primeiro instale pipx, depois: pipx install docling"
+elif confirm_action "  Instalar docling via pipx agora?"; then
+  install_docling_pipx
+  export PATH="$HOME/.local/bin:$PATH"
+  if has_cmd docling; then
+    status_installed "docling"
+  else
+    status_missing "docling instalado mas nao encontrado no PATH"
+    status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+  fi
 else
   status_missing "docling"
-  DOCLING_PYTHON=""
-  if has_cmd pipx; then
-    DOCLING_PYTHON="$(find_python39_plus || true)"
-    if [ -z "$DOCLING_PYTHON" ]; then
-      status_missing "Python >= 3.9 (sistema tem $(python3 --version 2>/dev/null || echo 'desconhecido'))"
-      status_hint "docling requer Python >= 3.9"
-      case "$OS" in
-        wsl|linux)
-          status_hint "Instalar: sudo apt-get install -y python3.9 python3.9-venv"
-          need_sudo_pkg "python3.9"
-          need_sudo_pkg "python3.9-venv"
-          ;;
-        macos)
-          status_hint "Instalar: brew install python@3.9"
-          ;;
-      esac
-    elif confirm_action "  Instalar docling via pipx agora?"; then
-      install_docling_pipx "$DOCLING_PYTHON"
-      export PATH="$HOME/.local/bin:$PATH"
-      if has_cmd docling; then
-        status_installed "docling"
-      else
-        status_missing "docling instalado mas nao encontrado no PATH"
-        status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
-        status_hint "Ou adicione ao ~/.bashrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
-      fi
-    else
-      status_hint "Para instalar depois: pipx install docling --python $DOCLING_PYTHON"
-    fi
-  else
-    status_hint "Primeiro instale pipx, depois: pipx install docling"
-  fi
+  status_hint "Para instalar depois: pipx install docling"
 fi
 say ""
 
@@ -553,31 +540,26 @@ say "[graphify] Mapa de conhecimento para AI coding assistants"
 export PATH="$HOME/.local/bin:$PATH"
 if has_cmd graphify; then
   status_ok "graphify $(graphify --version 2>/dev/null | head -1 || echo '(versao desconhecida)')"
+elif ! check_python3_version; then
+  status_missing "graphify (requer Python >= 3.10)"
+elif ! has_cmd pipx; then
+  status_missing "graphify"
+  status_hint "Primeiro instale pipx, depois: pipx install graphifyy"
+elif confirm_action "  Instalar graphifyy via pipx agora?"; then
+  pipx install graphifyy
+  export PATH="$HOME/.local/bin:$PATH"
+  if has_cmd graphify; then
+    status_installed "graphify"
+    say "  -> Configurando para OpenCode e VS Code..."
+    graphify install --platform opencode 2>/dev/null || true
+    graphify vscode install 2>/dev/null || true
+  else
+    status_missing "graphify instalado mas nao encontrado no PATH"
+    status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+  fi
 else
   status_missing "graphify"
-  if has_cmd pipx; then
-    GRAPHIFY_PYTHON="$(find_python39_plus || true)"
-    if [ -z "$GRAPHIFY_PYTHON" ]; then
-      status_missing "Python >= 3.9 necessario para graphify"
-      status_hint "Instale python3.9+ e rode novamente: bash scripts/graphify/install --yes"
-    elif confirm_action "  Instalar graphifyy via pipx agora?"; then
-      pipx install graphifyy --python "$GRAPHIFY_PYTHON"
-      export PATH="$HOME/.local/bin:$PATH"
-      if has_cmd graphify; then
-        status_installed "graphify"
-        say "  -> Configurando para OpenCode e VS Code..."
-        graphify install --platform opencode 2>/dev/null || true
-        graphify vscode install 2>/dev/null || true
-      else
-        status_missing "graphify instalado mas nao encontrado no PATH"
-        status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
-      fi
-    else
-      status_hint "Para instalar depois: bash scripts/graphify/install --yes"
-    fi
-  else
-    status_hint "Primeiro instale pipx, depois: bash scripts/graphify/install --yes"
-  fi
+  status_hint "Para instalar depois: pipx install graphifyy"
 fi
 say ""
 

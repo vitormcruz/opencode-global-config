@@ -72,6 +72,14 @@ common_setup_deps() {
   export BATS_ASSERT_URL="$(make_fake_bats_library_archive bats-assert)"
   export BATS_FILE_URL="$(make_fake_bats_library_archive bats-file)"
   export BATS_CORE_URL="$(make_fake_bats_core_archive)"
+
+  # Fake docling e graphify: evita instalacao real nos testes de script completo.
+  # Testes que verificam MISSING usam fake_bin proprio com PATH controlado.
+  mkdir -p "$TEST_HOME/.local/bin"
+  printf '#!/bin/sh\necho "docling 1.0.0"\n'   > "$TEST_HOME/.local/bin/docling"
+  printf '#!/bin/sh\necho "graphify 1.0.0"\n'  > "$TEST_HOME/.local/bin/graphify"
+  chmod +x "$TEST_HOME/.local/bin/docling" "$TEST_HOME/.local/bin/graphify"
+  export PATH="$TEST_HOME/.local/bin:$PATH"
 }
 
 common_teardown_deps() {

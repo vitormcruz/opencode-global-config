@@ -216,113 +216,101 @@ teardown() {
 }
 
 # ---------------------------------------------------------------------------
-# find_python39_plus — função auxiliar
+# check_python3_version — verificação de Python >= 3.10
 # ---------------------------------------------------------------------------
 
-@test "find_python39_plus retorna python3.9 quando disponível no PATH" {
+CHECK_PYTHON3_FN='
+  has_cmd() { command -v "$1" >/dev/null 2>&1; }
+  PYTHON3_VERSION=""
+  check_python3_version() {
+    if ! has_cmd python3; then return 1; fi
+    PYTHON3_VERSION="$(python3 --version 2>/dev/null | awk '"'"'{print $2}'"'"')"
+    local minor
+    minor="$(echo "$PYTHON3_VERSION" | cut -d. -f2)"
+    [ -n "$minor" ] && [ "$minor" -ge 10 ] 2>/dev/null
+  }
+'
+
+@test "check_python3_version aceita Python 3.12" {
   local fake_bin
   fake_bin="$(mktemp -d)"
-  printf '#!/bin/sh\necho "Python 3.9.0"\n' > "$fake_bin/python3.9"
-  chmod +x "$fake_bin/python3.9"
+  printf '#!/bin/sh\necho "Python 3.12.4"\n' > "$fake_bin/python3"
+  chmod +x "$fake_bin/python3"
+  for cmd in awk cut; do
+    ln -sf "$(command -v "$cmd")" "$fake_bin/$cmd"
+  done
 
-  run env PATH="$fake_bin" /usr/bin/bash -c '
-    has_cmd() { command -v "$1" >/dev/null 2>&1; }
-    find_python39_plus() {
-      for py in python3.12 python3.11 python3.10 python3.9; do
-        if has_cmd "$py"; then echo "$py"; return 0; fi
-      done
-      return 1
-    }
-    find_python39_plus
-  '
+  run env PATH="$fake_bin" /usr/bin/bash -c "$CHECK_PYTHON3_FN"'check_python3_version'
   assert_success
-  assert_output "python3.9"
 
   rm -rf "$fake_bin"
 }
 
-@test "find_python39_plus prefere python3.12 sobre python3.9" {
+@test "check_python3_version rejeita Python 3.8" {
   local fake_bin
   fake_bin="$(mktemp -d)"
-  printf '#!/bin/sh\necho "Python 3.12.0"\n' > "$fake_bin/python3.12"
-  printf '#!/bin/sh\necho "Python 3.9.0"\n'  > "$fake_bin/python3.9"
-  chmod +x "$fake_bin/python3.12" "$fake_bin/python3.9"
+  printf '#!/bin/sh\necho "Python 3.8.10"\n' > "$fake_bin/python3"
+  chmod +x "$fake_bin/python3"
+  for cmd in awk cut; do
+    ln -sf "$(command -v "$cmd")" "$fake_bin/$cmd"
+  done
 
-  run env PATH="$fake_bin" /usr/bin/bash -c '
-    has_cmd() { command -v "$1" >/dev/null 2>&1; }
-    find_python39_plus() {
-      for py in python3.12 python3.11 python3.10 python3.9; do
-        if has_cmd "$py"; then echo "$py"; return 0; fi
-      done
-      return 1
-    }
-    find_python39_plus
-  '
-  assert_success
-  assert_output "python3.12"
+  run env PATH="$fake_bin" /usr/bin/bash -c "$CHECK_PYTHON3_FN"'check_python3_version'
+  assert_failure
 
   rm -rf "$fake_bin"
 }
 
-@test "find_python39_plus falha quando nenhum Python >= 3.9 no PATH" {
+@test "check_python3_version falha quando python3 ausente" {
   local fake_bin
   fake_bin="$(mktemp -d)"
 
-  run env PATH="$fake_bin" /usr/bin/bash -c '
-    has_cmd() { command -v "$1" >/dev/null 2>&1; }
-    find_python39_plus() {
-      for py in python3.12 python3.11 python3.10 python3.9; do
-        if has_cmd "$py"; then echo "$py"; return 0; fi
-      done
-      return 1
-    }
-    find_python39_plus
-  '
+  run env PATH="$fake_bin" /usr/bin/bash -c "$CHECK_PYTHON3_FN"'check_python3_version'
   assert_failure
 
   rm -rf "$fake_bin"
 }
 
 # ---------------------------------------------------------------------------
-# docling — verificação de Python >= 3.9
+# docling/graphify — mensagens quando Python < 3.10
 # ---------------------------------------------------------------------------
 
-@test "opencode-install-deps exibe MISSING Python >= 3.9 para docling quando ausente" {
+@test "opencode-install-deps exibe MISSING Python >= 3.10 quando ausente" {
   local fake_bin
   fake_bin="$(mktemp -d)"
 
-  for cmd in grep uname head awk; do
+  for cmd in grep uname head awk cut; do
     local p
     p="$(command -v "$cmd" 2>/dev/null)" || continue
     ln -sf "$p" "$fake_bin/$cmd"
   done
+  printf '#!/bin/sh\necho "Python 3.8.10"\n' > "$fake_bin/python3"
   printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/pipx"
-  chmod +x "$fake_bin/pipx"
+  chmod +x "$fake_bin/python3" "$fake_bin/pipx"
 
   run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
   assert_success
-  assert_output --partial "Python >= 3.9"
-  assert_output --partial "python3.9 python3.9-venv"
+  assert_output --partial "Python >= 3.10"
 
   rm -rf "$fake_bin"
 }
 
-@test "opencode-install-deps inclui python3.9 no bloco sudo quando Python >= 3.9 ausente" {
+@test "opencode-install-deps exibe hint de Ubuntu 22.04 quando Python < 3.10" {
   local fake_bin
   fake_bin="$(mktemp -d)"
 
-  for cmd in grep uname head awk; do
+  for cmd in grep uname head awk cut; do
     local p
     p="$(command -v "$cmd" 2>/dev/null)" || continue
     ln -sf "$p" "$fake_bin/$cmd"
   done
+  printf '#!/bin/sh\necho "Python 3.8.10"\n' > "$fake_bin/python3"
   printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/pipx"
-  chmod +x "$fake_bin/pipx"
+  chmod +x "$fake_bin/python3" "$fake_bin/pipx"
 
   run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
   assert_success
-  assert_output --partial "sudo apt-get install -y"
-  assert_output --partial "python3.9"
+  assert_output --partial "Ubuntu 22.04"
 
   rm -rf "$fake_bin"
 }
