@@ -70,8 +70,13 @@ Pacotes que precisam de `sudo` no Ubuntu/WSL:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y \
-  make bats pandoc pipx tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
+  make bats pandoc pipx python3.9 python3.9-venv \
+  tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
 ```
+
+> **Python >= 3.9 obrigatorio** para `docling` e `graphify`.
+> Ubuntu 20.04 vem com Python 3.8 por padrao — instale `python3.9`
+> via deadsnakes PPA (ja configurado pelo bootstrap).
 
 Dependencia externa fora desse comando:
 
