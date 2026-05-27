@@ -118,7 +118,7 @@ EOF
 
 select_model_if_needed() {
   if [[ -n "${OPENCODE_TEST_MODEL:-}" ]]; then
-    log "Modelo já configurado: ${OPENCODE_TEST_MODEL}"
+    log "Modelo configurado: ${OPENCODE_TEST_MODEL}"
     printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
     return 0
   fi
@@ -143,46 +143,24 @@ select_model_if_needed() {
     fi
   fi
 
-  log "Detectando modelos disponíveis..."
-  local models preferred_count preferred_model
-  models="$(list_models)"
-  if [[ -z "$models" ]]; then
-    die "Não foi possível listar os modelos disponíveis."
-  fi
+  # Falha se não há modelo configurado
+  die "OPENCODE_TEST_MODEL não definido.
 
-  preferred_count="$(printf '%s\n' "$models" | grep -ic 'big[- ]pickle' || true)"
-  if [[ "$preferred_count" -ge 1 ]]; then
-    preferred_model="$(printf '%s\n' "$models" | grep -i 'big[- ]pickle' | head -1)"
-    warn "================================================================"
-    warn "ATENÇÃO: O modelo '${preferred_model}' (Big Pickle) é um modelo"
-    warn "externo que COLETA DADOS enviados a ele. Não envie informações"
-    warn "sensíveis ou corporativas durante os testes."
-    warn "================================================================"
-    local confirm=""
-    while :; do
-      read -rp "Deseja usar '${preferred_model}'? (sim/não): " confirm >&2
-      case "$confirm" in
-        sim|s|S|Sim|SIM)
-          export OPENCODE_TEST_MODEL="$preferred_model"
-          log "Modelo confirmado: ${OPENCODE_TEST_MODEL}"
-          printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
-          return 0
-          ;;
-        não|nao|n|N|Não|NAO|NÃO)
-          log "Modelo recusado. Escolha outro da lista:"
-          break
-          ;;
-        *)
-          printf '%s\n' "Responda 'sim' ou 'não'." >&2
-          ;;
-      esac
-    done
-  fi
+Para executar testes de integração, você DEVE definir explicitamente o modelo:
 
-  OPENCODE_TEST_MODEL="$(choose_model_interactively "$models")"
-  export OPENCODE_TEST_MODEL
-  log "Modelo selecionado: ${OPENCODE_TEST_MODEL}"
-  printf '%s' "$OPENCODE_TEST_MODEL" > "$MODEL_FILE"
+  export OPENCODE_TEST_MODEL='seu-modelo-aqui'
+  make test-opencode-integration
+
+Exemplos:
+  - OpenAI:      export OPENCODE_TEST_MODEL='openai/gpt-4'
+  - Anthropic:   export OPENCODE_TEST_MODEL='anthropic/claude-3-5-sonnet'
+  - Local (Ollama): export OPENCODE_TEST_MODEL='ollama/llama3.1'
+
+Para listar modelos disponíveis no seu ambiente:
+  docker run --rm opencode-config-test:latest /root/.opencode/bin/opencode --pure models
+
+IMPORTANTE: Em ambientes corporativos/sensíveis, NÃO use modelos que coletam dados
+externamente (ex: opencode/big-pickle). Use apenas modelos aprovados pela sua organização."
 }
 
 # ---------------------------------------------------------------------------

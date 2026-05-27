@@ -143,7 +143,7 @@ fi
 
 # Status Playwright
 if check_playwright; then
-  echo "  OK       playwright $(npx playwright --version 2>/dev/null)"
+  echo "  OK       playwright $(playwright --version 2>/dev/null)"
   pw_ok=1
 else
   echo "  MISSING  @playwright/test"

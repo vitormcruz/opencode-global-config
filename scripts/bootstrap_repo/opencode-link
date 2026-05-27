@@ -303,9 +303,17 @@ apply() {
     say "AVISO: $install_deps_script nao encontrado ou nao executavel."
   fi
 
-  if [ -f "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh" ]; then
+  if [ "${OPENCODE_SKIP_CRAWL4AI:-0}" = "1" ]; then
+    say "SKIP  crawl4ai MCP (OPENCODE_SKIP_CRAWL4AI=1)"
+  elif [ -f "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh" ]; then
     say "Executando install-crawl4ai-mcp.sh..."
-    bash "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh"
+    if ! bash "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh"; then
+      say ""
+      say "AVISO: crawl4ai MCP nao foi configurado."
+      say "       Docker nao esta instalado ou nao esta em execucao."
+      say "       Apos instalar o Docker, execute:"
+      say "         bash scripts/crawl4ai/install-crawl4ai-mcp.sh"
+    fi
   fi
 
   say "Pronto."
