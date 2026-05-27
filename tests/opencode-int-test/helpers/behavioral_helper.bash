@@ -19,6 +19,8 @@ require_opencode_serve() {
 
 # Cria uma sessão e retorna o ID
 # Exige OPENCODE_TEST_MODEL definido — sem fallback
+# Nota: a API POST /session so aceita parentID/title; o modelo usado e o
+# configurado no opencode.json do servidor (substituido pelo entrypoint).
 create_session() {
   if [[ -z "${OPENCODE_TEST_MODEL:-}" ]]; then
     echo "ERRO: OPENCODE_TEST_MODEL não definido. Defina o modelo antes de rodar testes." >&2
@@ -26,18 +28,42 @@ create_session() {
   fi
   curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d "{\"model\":\"${OPENCODE_TEST_MODEL}\"}" \
+    -d '{}' \
     | jq -r '.id // empty'
 }
 
 # Envia mensagem e retorna o texto da resposta (parts[].text onde type=="text")
+# Se model for informado (formato "provider/model"), envia como objeto
+# {providerID, modelID} no body. Senao, omite e o servidor usa o config.
 send_message() {
+  set -o pipefail
   local session_id="$1"
   local text="$2"
-  curl -sf -X POST \
+  local model="${3:-}"
+  local agent="${4:-}"
+  local model_json=""
+  if [[ -n "$model" ]]; then
+    local provider_id="${model%%/*}"
+    local model_id="${model#*/}"
+    model_json=",\"model\":{\"providerID\":\"${provider_id}\",\"modelID\":\"${model_id}\"}"
+  fi
+  local agent_json=""
+  if [[ -n "$agent" ]]; then
+    agent_json=",\"agent\":\"${agent}\""
+  fi
+  local response
+  response=$(curl -sf -X POST \
     "${OPENCODE_BASE_URL}/session/${session_id}/message" \
     -H "Content-Type: application/json" \
-    -d "{\"parts\":[{\"type\":\"text\",\"text\":\"${text}\"}]}" \
-    | jq -r '.parts[] | select(.type=="text") | .text // empty' \
-    | tr -d '\n'
+    -d "{\"parts\":[{\"type\":\"text\",\"text\":\"${text}\"}]${model_json}${agent_json}}") || {
+    echo "ERRO: curl falhou ao enviar mensagem para sessao ${session_id}" >&2
+    return 1
+  }
+
+  if echo "$response" | jq -e 'has("_tag") or has("error")' >/dev/null 2>&1; then
+    echo "ERRO: ${response}" >&2
+    return 1
+  fi
+
+  echo "$response" | jq -r '.parts[] | select(.type=="text") | .text // empty' | tr -d '\n'
 }
