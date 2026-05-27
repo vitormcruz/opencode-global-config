@@ -22,6 +22,8 @@ export BATS_LIB_PATH
 ## Todos os testes (unit + tools + integracao Docker)
 test: test-unit test-tools test-opencode-integration
 
+test-default-model:  test-unit test-tools test-opencode-integration-default-model
+
 ## Testes unitarios puros - sem dependencias externas
 test-unit:
 	$(BATS) \
