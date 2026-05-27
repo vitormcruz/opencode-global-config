@@ -5,17 +5,19 @@ BATS_LOCAL    := $(HOME)/.local/bin/bats
 BATS          ?= $(shell test -x "$(BATS_LOCAL)" && echo "$(BATS_LOCAL)" || echo bats)
 TESTS_DIR     := tests
 
-# Atalho: MODEL=default-open-model define OPENCODE_TEST_MODEL com o modelo aberto padrao
+# Atalho: DEFAULT_OPEN_MODEL=1 define OPENCODE_TEST_MODEL com o modelo aberto padrao
 # Atualmente mapeia para opencode/big-pickle (modelo externo que COLETA DADOS)
 # AVISO: Nao use em ambientes sensiveis. Use apenas para testes pessoais/demonstracao.
-ifeq ($(MODEL),default-open-model)
+ifeq ($(DEFAULT_OPEN_MODEL),1)
   export OPENCODE_TEST_MODEL := opencode/big-pickle
 endif
 
 export BATS_LIB_PATH
 
 .PHONY: test test-unit test-tools \
-        test-opencode-integration test-opencode-integration-rebuild help
+        test-opencode-integration test-opencode-integration-rebuild \
+        test-opencode-integration-default-model test-opencode-integration-rebuild-default-model \
+        help
 
 ## Todos os testes (unit + tools + integracao Docker)
 test: test-unit test-tools test-opencode-integration
@@ -57,7 +59,7 @@ test-opencode-integration:
 	    echo "  1. export OPENCODE_TEST_MODEL=seu-modelo"; \
 	    echo "     Exemplo: export OPENCODE_TEST_MODEL=openai/gpt-4"; \
 	    echo ""; \
-	    echo "  2. make test-opencode-integration MODEL=default-open-model"; \
+	    echo "  2. make test-opencode-integration-default-model"; \
 	    echo "     (usa modelo aberto padrão — ATENÇÃO: coleta dados externos)"; \
 	    exit 1; \
 	  fi; \
@@ -75,13 +77,21 @@ test-opencode-integration-rebuild:
 	    echo "  1. export OPENCODE_TEST_MODEL=seu-modelo"; \
 	    echo "     Exemplo: export OPENCODE_TEST_MODEL=openai/gpt-4"; \
 	    echo ""; \
-	    echo "  2. make test-opencode-integration-rebuild MODEL=default-open-model"; \
+	    echo "  2. make test-opencode-integration-rebuild-default-model"; \
 	    echo "     (usa modelo aberto padrão — ATENÇÃO: coleta dados externos)"; \
 	    exit 1; \
 	  fi; \
 	  trap "bash tests/opencode-int-test/docker/container-test-opencode.sh --down" EXIT; \
 	  bash tests/opencode-int-test/docker/container-test-opencode.sh --rebuild; \
 	  $(BATS) $(TESTS_DIR)/opencode-int-test'
+
+## OpenCode com modelo aberto padrão (reusa container)
+test-opencode-integration-default-model:
+	$(MAKE) test-opencode-integration OPENCODE_TEST_MODEL=opencode/big-pickle
+
+## OpenCode com modelo aberto padrão (forca rebuild)
+test-opencode-integration-rebuild-default-model:
+	$(MAKE) test-opencode-integration-rebuild OPENCODE_TEST_MODEL=opencode/big-pickle
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

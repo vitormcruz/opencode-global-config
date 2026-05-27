@@ -123,23 +123,22 @@ Alvos disponiveis:
 ```bash
 make help
 make test
-make test-scripts
-make test-bootstrap-repo
+make test-unit
+make test-tools
 make test-opencode-integration
 ```
 
 Resumo dos alvos:
 
-- `make test`: roda a Camada 1 — todos os testes em `tests/scripts/` (sem Docker)
-- `make test-scripts`: idem (alias explicito para `tests/scripts/`)
-- `make test-bootstrap-repo`: so os testes de bootstrap do repo
-- `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
+- `make test`: roda todos os testes (unit + tools + integracao)
+- `make test-unit`: testes unitarios puros — sem dependencias externas
+- `make test-tools`: testes que requerem ferramentas instaladas no WSL
+- `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode (requer Docker)
 
 ### Testes de integração (Camada 2)
 
-Os testes de integração exigem um modelo configurado explicitamente via variável
-`OPENCODE_TEST_MODEL`. Por segurança, **não há modelo padrão** — você deve
-escolher conscientemente qual modelo usar.
+Os testes de integração exigem um modelo configurado explicitamente. Por segurança,
+**não há modelo padrão** — você deve escolher conscientemente qual modelo usar.
 
 **Opção 1: modelo próprio (recomendado)**
 
@@ -151,7 +150,7 @@ make test-opencode-integration
 **Opção 2: atalho para modelo aberto padrão (apenas ambientes não-sensíveis)**
 
 ```bash
-make test-opencode-integration MODEL=default-open-model
+make test-opencode-integration-default-model
 ```
 
 > **AVISO**: O modelo aberto padrão (`opencode/big-pickle`) é um modelo externo
@@ -163,9 +162,6 @@ make test-opencode-integration MODEL=default-open-model
 ```bash
 export OPENCODE_TEST_MODEL='openai/gpt-4'
 make test
-
-# ou com modelo aberto padrão (ambientes não-sensíveis):
-make test MODEL=default-open-model
 ```
 
 ### Controle manual do container
