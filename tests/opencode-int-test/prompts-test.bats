@@ -35,14 +35,13 @@ setup_file() { require_opencode_serve; }
   [[ -n "${OPENCODE_TEST_MODEL:-}" ]] || {
     echo "ERRO: OPENCODE_TEST_MODEL não definido." >&2; return 1;
   }
-  local session model
-  model="${OPENCODE_TEST_MODEL}"
+  local session
   session=$(curl -sf -X POST "${OPENCODE_BASE_URL}/session" \
     -H "Content-Type: application/json" \
-    -d "{\"agent\":\"analista\",\"model\":\"${model}\"}" | jq -r '.id // empty')
+    -d '{}' | jq -r '.id // empty')
   [ -n "$session" ] || fail "Não foi possível criar sessão com agente OpenCode — verifique se o serviço está ativo"
 
-  run send_message "$session" "Responda apenas: ok"
+  run send_message "$session" "Responda apenas: ok" "${OPENCODE_TEST_MODEL}" "analista"
   assert_success
   assert_output --partial "ok"
 }
