@@ -16,6 +16,7 @@ Thumbs.db
 
 
 **/node_modules/**
+tests/opencode-int-test/mcp-mock/package-lock.json
 #./out/
 
 graphify-out/manifest.json    # mtime-based, breaks after git clone

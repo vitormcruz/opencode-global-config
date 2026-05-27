@@ -135,7 +135,40 @@ Resumo dos alvos:
 - `make test-bootstrap-repo`: so os testes de bootstrap do repo
 - `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
 
-Controle manual do container de testes:
+### Testes de integração (Camada 2)
+
+Os testes de integração exigem um modelo configurado explicitamente via variável
+`OPENCODE_TEST_MODEL`. Por segurança, **não há modelo padrão** — você deve
+escolher conscientemente qual modelo usar.
+
+**Opção 1: modelo próprio (recomendado)**
+
+```bash
+export OPENCODE_TEST_MODEL='openai/gpt-4'
+make test-opencode-integration
+```
+
+**Opção 2: atalho para modelo aberto padrão (apenas ambientes não-sensíveis)**
+
+```bash
+make test-opencode-integration MODEL=default-open-model
+```
+
+> **AVISO**: O modelo aberto padrão (`opencode/big-pickle`) é um modelo externo
+> que **COLETA DADOS** enviados a ele. **Nunca use em ambientes corporativos ou
+> com dados sensíveis.** Use apenas para testes pessoais ou de demonstração.
+
+**Opção 3: rodar tudo (unit + tools + integração)**
+
+```bash
+export OPENCODE_TEST_MODEL='openai/gpt-4'
+make test
+
+# ou com modelo aberto padrão (ambientes não-sensíveis):
+make test MODEL=default-open-model
+```
+
+### Controle manual do container
 
 ```bash
 bash tests/opencode-int-test/docker/container-test-opencode.sh --up
@@ -150,5 +183,6 @@ Documentação do framework: [BATS-core](https://bats-core.readthedocs.io/)
 Pre-requisitos:
 
 - `make`
+- `jq` (para testes de integração)
 - dependencias externas conforme o alvo escolhido
 - Docker para a Camada 2 (`make test-opencode-integration`)

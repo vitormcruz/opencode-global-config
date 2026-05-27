@@ -52,6 +52,7 @@ output_dir="$(read_json outputDir)"
 ocr="$(read_json ocr)"
 tables="$(read_json tables)"
 image_export_mode="$(read_json imageExportMode)"
+device="$(read_json device)"
 extra_args_json="$(read_json extraArgs)"
 
 # --------------------------------------------------------------------------
@@ -120,6 +121,12 @@ fi
 if [ -n "$image_export_mode" ]; then
   args+=("--image-export-mode" "$image_export_mode")
 fi
+
+# Device (default: cpu para compatibilidade)
+if [ -z "$device" ]; then
+  device="cpu"
+fi
+args+=("--device" "$device")
 
 # Extra args
 if [ -n "$extra_args_json" ]; then
