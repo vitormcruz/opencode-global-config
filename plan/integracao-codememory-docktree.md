@@ -44,7 +44,7 @@
 
 ## PARTE B — Adicionar codebase-memory + doctree
 
-### B1. `opencode.json` — adicionar MCPs
+### B1. `opencode.json` — adicionar MCPs como stdio
 
 Na seção `mcp`, após a entrada `crawl4ai`:
 
@@ -75,9 +75,9 @@ Inserir após onde estava o bloco `[graphify]`, antes do sumário sudo.
 - Ausente: `confirm_action` → `curl -fsSL https://bun.sh/install | bash`
 - Sem sudo
 
-**Bloco `[codebase-memory-mcp]`** — binário estático:
+**Bloco `[codebase-memory-mcp]`** — binário via npm:
 - `has_cmd codebase-memory-mcp` → OK
-- Ausente: `confirm_action` → instala via installer oficial
+- Ausente: `confirm_action` → `npm install -g codebase-memory-mcp`
 - **Não** roda `codebase-memory-mcp install` após (evita sobrescrever
   `opencode.json` gerenciado por este repo)
 
@@ -88,34 +88,40 @@ Inserir após onde estava o bloco `[graphify]`, antes do sumário sudo.
 - `[codebase-memory-mcp]` reporta OK quando binário está disponível
 - `[codebase-memory-mcp]` reporta MISSING quando binário está ausente
 
-### B4. `vscode-sync.ps1` — estender Sync-Mcp
+### B4. Criar `commands/index-codebase.md`
 
-No hashtable `$newServers`, adicionar após `crawl4ai`:
+Comando `/index-codebase`. Prompt que instrui o agente a:
 
-```powershell
-"codebase-memory" = [ordered]@{
-    "command" = "codebase-memory-mcp"
-    "args"    = @()
-}
-"doctree" = [ordered]@{
-    "command" = "bunx"
-    "args"    = @("doctree-mcp")
-    "env"     = [ordered]@{
-        "DOCS_ROOT" = "${workspaceFolder}"
-    }
-}
-```
+1. **Indexar repo no codebase-memory**:
+   `codebase-memory-mcp cli index_repository '{"repo_path": "."}'`
+2. **Configurar doctree**:
+   - Verificar se pasta `docs/` existe no repo
+   - Se existir, configurar `DOCS_ROOT=./docs` e indexar
+   - Se não existir, avisar o usuário e pular
+3. **Instalar git hook `post-commit`**:
+   - Criar `.git/hooks/post-commit` executável
+   - Hook roda `codebase-memory-mcp cli index_repository` automaticamente
+   - Re-indexa o codebase-memory a cada commit
+   - Se hook já existe, perguntar antes de sobrescrever
+4. **Reportar status**:
+   - Exibir resultado da indexação
+   - Confirmar se doctree foi configurado
+   - Confirmar se hook foi instalado
 
-### B5. Criar `commands/codememory_docktree.md`
-
-Invocado como `/codememory_docktree` no OpenCode.
-Sincronizado automaticamente como `codememory_docktree.prompt.md` no
+Sincroniza automaticamente como `index-codebase.prompt.md` no
 VS Code via `vscode-sync.ps1`.
 
-Conteúdo: guia o agente a:
-1. Chamar `index_repository` no projeto atual
-2. Verificar doctree com `search_documents`
-3. Reportar status e exibir cheatsheet dos tools
+### B5. Testes de integração dos MCPs (padrão crawl4ai)
+
+Criar pastas de testes seguindo o padrão de `tests/scripts/crawl4ai/`:
+
+**`tests/scripts/codebase-memory/`**:
+- `install-codebase-memory-test.bats` — testes do script de instalação
+- `codebase-memory-real-test.bats` — testes do MCP real (se disponível)
+
+**`tests/scripts/doctree/`**:
+- `install-doctree-test.bats` — testes do script de instalação
+- `doctree-real-test.bats` — testes do MCP real (se disponível)
 
 ---
 
@@ -147,7 +153,7 @@ Conteúdo: guia o agente a:
 | `plan/codememory_docktree-integracao-repo.md` | Plano original — substituído |
 | `plan/integracao-codememory-docktree.md` | Este plano — auto-destruir |
 
-### Modificações (5 arquivos)
+### Modificações (4 arquivos)
 
 | Arquivo | Mudança |
 |---|---|
@@ -156,13 +162,18 @@ Conteúdo: guia o agente a:
 | `opencode.json` | Adicionar MCPs codebase-memory + doctree |
 | `scripts/bootstrap_repo/opencode-install-deps` | Remover graphify, adicionar bun + codebase-memory |
 | `tests/scripts/bootstrap_repo/opencode-install-deps-test.bats` | Atualizar comentário, adicionar 4 testes |
-| `scripts/bootstrap_repo/vscode-sync.ps1` | Adicionar MCPs codebase-memory + doctree |
 
-### Criações (1 arquivo)
+### Criações (5 arquivos + 2 pastas)
 
 | Arquivo | Conteúdo |
 |---|---|
-| `commands/codememory_docktree.md` | Command /codememory_docktree |
+| `commands/index-codebase.md` | Comando /index-codebase (prompt) |
+| `tests/scripts/codebase-memory/` | Pasta de testes |
+| `tests/scripts/codebase-memory/install-codebase-memory-test.bats` | Testes de instalação |
+| `tests/scripts/codebase-memory/codebase-memory-real-test.bats` | Testes do MCP real |
+| `tests/scripts/doctree/` | Pasta de testes |
+| `tests/scripts/doctree/install-doctree-test.bats` | Testes de instalação |
+| `tests/scripts/doctree/doctree-real-test.bats` | Testes do MCP real |
 
 ---
 
