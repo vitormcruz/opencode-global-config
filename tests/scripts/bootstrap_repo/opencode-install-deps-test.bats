@@ -272,7 +272,7 @@ CHECK_PYTHON3_FN='
 }
 
 # ---------------------------------------------------------------------------
-# docling/graphify — mensagens quando Python < 3.10
+# docling — mensagens quando Python < 3.10
 # ---------------------------------------------------------------------------
 
 @test "opencode-install-deps exibe MISSING Python >= 3.10 quando ausente" {
@@ -311,6 +311,84 @@ CHECK_PYTHON3_FN='
   run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
   assert_success
   assert_output --partial "Ubuntu 22.04"
+
+  rm -rf "$fake_bin"
+}
+
+# ---------------------------------------------------------------------------
+# [doctree] — verificacao de disponibilidade do doctree-mcp
+# ---------------------------------------------------------------------------
+
+@test "opencode-install-deps exibe OK para doctree quando bun e cache disponiveis" {
+  local fake_bin fake_home
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/bun"
+  chmod +x "$fake_bin/bun"
+  mkdir -p "$fake_home/.bun/install/cache/doctree-mcp"
+
+  run env HOME="$fake_home" PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[doctree]"
+  assert_output --partial "OK"
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "opencode-install-deps exibe MISSING para doctree quando bun ausente" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in bash grep uname head awk; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[doctree]"
+  assert_output --partial "MISSING   doctree"
+  assert_output --partial "scripts/doctree/install"
+
+  rm -rf "$fake_bin"
+}
+
+# ---------------------------------------------------------------------------
+# [codebase-memory-mcp] — verificação de disponibilidade
+# ---------------------------------------------------------------------------
+
+@test "opencode-install-deps exibe OK para codebase-memory-mcp quando disponível" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "codebase-memory-mcp 1.0.0"\n' > "$fake_bin/codebase-memory-mcp"
+  chmod +x "$fake_bin/codebase-memory-mcp"
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[codebase-memory-mcp]"
+  assert_output --partial "OK"
+
+  rm -rf "$fake_bin"
+}
+
+@test "opencode-install-deps exibe MISSING para codebase-memory-mcp quando ausente do PATH" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in bash grep uname head awk; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[codebase-memory-mcp]"
+  assert_output --partial "MISSING   codebase-memory-mcp"
+  assert_output --partial "scripts/codebase-memory/install"
 
   rm -rf "$fake_bin"
 }

@@ -316,6 +316,30 @@ apply() {
     fi
   fi
 
+  if [ "${OPENCODE_SKIP_CODEBASE_MEMORY:-0}" = "1" ]; then
+    say "SKIP  codebase-memory MCP (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
+  elif [ -f "$repo_root/scripts/codebase-memory/install" ]; then
+    say "Executando codebase-memory/install..."
+    if ! bash "$repo_root/scripts/codebase-memory/install" --yes; then
+      say ""
+      say "AVISO: codebase-memory MCP nao foi configurado."
+      say "       Verifique npm e conectividade, depois execute:"
+      say "         bash scripts/codebase-memory/install --yes"
+    fi
+  fi
+
+  if [ "${OPENCODE_SKIP_DOCTREE:-0}" = "1" ]; then
+    say "SKIP  doctree MCP (OPENCODE_SKIP_DOCTREE=1)"
+  elif [ -f "$repo_root/scripts/doctree/install" ]; then
+    say "Executando doctree/install..."
+    if ! bash "$repo_root/scripts/doctree/install" --yes; then
+      say ""
+      say "AVISO: doctree MCP nao foi configurado."
+      say "       Verifique npm e conectividade, depois execute:"
+      say "         bash scripts/doctree/install --yes"
+    fi
+  fi
+
   say "Pronto."
 }
 
