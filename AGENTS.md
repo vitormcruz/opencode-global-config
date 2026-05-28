@@ -1,22 +1,5 @@
 # Regras Globais
 
-## graphify — Gate Obrigatório
-
-Este projeto tem um grafo de conhecimento em `graphify-out/`.
-
-**NUNCA responda perguntas sobre o codebase, abra arquivos fonte, execute
-grep/glob ou tome decisões de implementação sem antes ler
-`graphify-out/GRAPH_REPORT.md`. Pular esse passo invalida a resposta.**
-
-- Se `graphify-out/wiki/index.md` existir, navegue por ele em vez de ler
-  arquivos brutos.
-- Para perguntas de relacionamento entre módulos, prefira
-  `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou
-  `graphify explain "<conceito>"` em vez de grep — esses comandos
-  atravessam as arestas EXTRACTED + INFERRED do grafo.
-- Após modificar código, rode `graphify update .` para manter o grafo
-  atualizado (apenas AST, sem custo de API).
-
 ## Idioma
 - PT-BR (ASCII ok).
 - REGRA IMPORTANTE: sempre use acentuação quando estiver escrevendo texto em PT-BR.

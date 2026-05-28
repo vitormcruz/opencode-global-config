@@ -58,7 +58,8 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `pipx`
 - `docling`
 - `playwright`
-- `graphifyy`
+- `bun`
+- `codebase-memory-mcp`
 - `bats-support`
 - `bats-assert`
 - `bats-file`

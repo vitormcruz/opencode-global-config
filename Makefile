@@ -33,7 +33,6 @@ test-unit:
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-structure-test.bats \
 	        $(TESTS_DIR)/scripts/skills \
 	        $(TESTS_DIR)/scripts/browser-test \
-	        $(TESTS_DIR)/scripts/graphify/install-test.bats \
 	        $(TESTS_DIR)/scripts/mapa-produto
 
 ## Testes que requerem ferramentas instaladas no WSL
@@ -49,7 +48,8 @@ test-tools:
 	        $(TESTS_DIR)/scripts/opencode-svgtoimage-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/opencode-install-deps-test.bats \
 	        $(TESTS_DIR)/scripts/crawl4ai \
-	        $(TESTS_DIR)/scripts/graphify/graphify-installed-test.bats
+	        $(TESTS_DIR)/scripts/codebase-memory \
+	        $(TESTS_DIR)/scripts/doctree
 
 ## OpenCode via container Docker (reusa container existente)
 test-opencode-integration:

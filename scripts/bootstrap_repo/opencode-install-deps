@@ -467,7 +467,7 @@ fi
 say ""
 
 # --- Python 3.10+ ---
-say "[python3] Requerido >= 3.10 para docling e graphify"
+say "[python3] Requerido >= 3.10 para docling"
 if check_python3_version; then
   status_ok "python3 $PYTHON3_VERSION"
 else
@@ -535,31 +535,38 @@ else
 fi
 say ""
 
-# --- graphify ---
-say "[graphify] Mapa de conhecimento para AI coding assistants"
-export PATH="$HOME/.local/bin:$PATH"
-if has_cmd graphify; then
-  status_ok "graphify $(graphify --version 2>/dev/null | head -1 || echo '(versao desconhecida)')"
-elif ! check_python3_version; then
-  status_missing "graphify (requer Python >= 3.10)"
-elif ! has_cmd pipx; then
-  status_missing "graphify"
-  status_hint "Primeiro instale pipx, depois: pipx install graphifyy"
-elif confirm_action "  Instalar graphifyy via pipx agora?"; then
-  pipx install graphifyy
-  export PATH="$HOME/.local/bin:$PATH"
-  if has_cmd graphify; then
-    status_installed "graphify"
-    say "  -> Configurando para OpenCode e VS Code..."
-    graphify install --platform opencode 2>/dev/null || true
-    graphify vscode install 2>/dev/null || true
+# --- doctree ---
+say "[doctree] MCP de navegacao de documentacao"
+export PATH="$HOME/.bun/bin:$PATH"
+if has_cmd bun && [ -d "$HOME/.bun/install/cache/doctree-mcp" ]; then
+  status_ok "doctree-mcp (bun $(bun --version 2>/dev/null | head -1))"
+elif has_cmd bun; then
+  say "  -> Baixando doctree-mcp..."
+  doctree_tmp="$(mktemp -d)"
+  mkdir -p "$doctree_tmp/docs"
+  if timeout 10 env DOCS_ROOT="$doctree_tmp/docs" bunx doctree-mcp --help </dev/null &>/dev/null; then
+    status_installed "doctree-mcp"
+  elif [ -d "$HOME/.bun/install/cache/doctree-mcp" ]; then
+    status_installed "doctree-mcp"
   else
-    status_missing "graphify instalado mas nao encontrado no PATH"
-    status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+    status_missing "doctree"
+    status_hint "Instalar: bash scripts/doctree/install --yes"
   fi
+  rm -rf "$doctree_tmp"
 else
-  status_missing "graphify"
-  status_hint "Para instalar depois: pipx install graphifyy"
+  status_missing "doctree"
+  status_hint "Instalar: bash scripts/doctree/install --yes"
+fi
+say ""
+
+# --- codebase-memory-mcp ---
+say "[codebase-memory-mcp] MCP de memoria do codebase"
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+if has_cmd codebase-memory-mcp; then
+  status_ok "codebase-memory-mcp ($(codebase-memory-mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida'))"
+else
+  status_missing "codebase-memory-mcp"
+  status_hint "Instalar: bash scripts/codebase-memory/install --yes"
 fi
 say ""
 

@@ -1,78 +1,93 @@
 {
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": [
-    "@slkiser/opencode-quota"
-  ],
-  //, "chat-mermaid@latest"],
-  //"instructions": ["~/.config/opencode/AGENTS.md"],
-
-  "compaction": {
-    "auto": false,
-    "prune": true,
-    "reserved": 10000
-  },
-  "mcp": {
-    "crawl4ai": {
-      "type": "remote",
-      "url": "http://localhost:11235/mcp/sse",
-      "enabled": true
-    }
-  },
-  "agent": {
-    "plan": {
-      "permission": {
-        "write": { "*": "deny" },
-        "edit": { "*": "deny" },
-        "bash": {
-          "*": "ask",
-          "date": "allow",
-          "git status": "allow",
-          "git status *": "allow",
-          "git diff": "allow",
-          "git diff *": "allow",
-          "git log": "allow",
-          "git log *": "allow",
-          "ls": "allow",
-          "ls -la": "allow",
-          "pwd": "allow",
-          "cat *": "allow",
-          "head *": "allow",
-          "tail *": "allow",
-          "echo": "allow"
-        },
-        "task": "ask",
-        "skill": "allow",
-        "question": "allow",
-        "webfetch": "allow",
-        "websearch": "allow"
-      }
+    "$schema": "https://opencode.ai/config.json",
+    "plugin": [
+        "@slkiser/opencode-quota"
+    ],
+    "compaction": {
+        "auto": false,
+        "prune": true,
+        "reserved": 10000
     },
-    "aws-analista": {
-      "permission": {
+    "mcp": {
+        "crawl4ai": {
+            "type": "remote",
+            "url": "http://localhost:11235/mcp/sse",
+            "enabled": true
+        },
+        "codebase-memory": {
+            "type": "stdio",
+            "command": "codebase-memory-mcp",
+            "args": [],
+            "enabled": true
+        },
+        "doctree": {
+            "type": "stdio",
+            "command": "bunx",
+            "args": [
+                "doctree-mcp"
+            ],
+            "enabled": true
+        }
+    },
+    "agent": {
+        "plan": {
+            "permission": {
+                "write": {
+                    "*": "deny"
+                },
+                "edit": {
+                    "*": "deny"
+                },
+                "bash": {
+                    "*": "ask",
+                    "date": "allow",
+                    "git status": "allow",
+                    "git status *": "allow",
+                    "git diff": "allow",
+                    "git diff *": "allow",
+                    "git log": "allow",
+                    "git log *": "allow",
+                    "ls": "allow",
+                    "ls -la": "allow",
+                    "pwd": "allow",
+                    "cat *": "allow",
+                    "head *": "allow",
+                    "tail *": "allow",
+                    "echo": "allow"
+                },
+                "task": "ask",
+                "skill": "allow",
+                "question": "allow",
+                "webfetch": "allow",
+                "websearch": "allow"
+            }
+        },
+        "aws-analista": {
+            "permission": {
+                "skill": {
+                    "aws-*": "allow"
+                }
+            }
+        }
+    },
+    "permission": {
         "skill": {
-          "aws-*": "allow"
+            "aws-*": "deny",
+            "caveman": "deny",
+            "grill-me": "deny"
         }
-      }
-    }
-  },
-  "permission": {
-    "skill": {
-      "aws-*": "deny",
-      "caveman": "deny",
-      "grill-me": "deny"
-    }
-  },
-  "provider": {
-    "github-copilot": {
-      "models": {
-        "gpt-5.4": {
-          "options": {
-            "reasoningEffort": "medium",
-            "textVerbosity": "low",
-            "reasoningSummary": "auto"
-          }
+    },
+    "provider": {
+        "github-copilot": {
+            "models": {
+                "gpt-5.4": {
+                    "options": {
+                        "reasoningEffort": "medium",
+                        "textVerbosity": "low",
+                        "reasoningSummary": "auto"
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }

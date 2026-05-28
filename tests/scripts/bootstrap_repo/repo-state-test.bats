@@ -9,6 +9,8 @@ setup_file() {
   export OPENCODE_SKIP_DEPS=1
   export OPENCODE_SKIP_SKILL_SYNC=1
   export OPENCODE_SKIP_CRAWL4AI=1
+  export OPENCODE_SKIP_CODEBASE_MEMORY=1
+  export OPENCODE_SKIP_DOCTREE=1
   bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
 }
 
