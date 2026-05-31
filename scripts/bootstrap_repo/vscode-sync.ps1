@@ -54,7 +54,8 @@ O que e sincronizado:
   skills\*\         -> %USERPROFILE%\.copilot\skills\
   agents\*.md       -> %APPDATA%\Code\User\prompts\*.agent.md
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
-  AGENTS.md         -> .github\copilot-instructions.md (copia)
+  wrapper MCP       -> %LOCALAPPDATA%\bin\mcp.exe (avelino/mcp)
+  copilot-instrs    -> %APPDATA%\Code\User\prompts\opencode-config.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
 "@
 }
@@ -368,18 +369,90 @@ function Sync-Commands {
 # Sync-Instructions
 # ──────────────────────────────────────────────────────────────
 
+# ──────────────────────────────────────────────────────────────
+# Install-McpWrapper
+# Instala o wrapper CLI mcp (avelino) para chamar ferramentas
+# MCP via linha de comando a partir do Copilot Chat.
+# ──────────────────────────────────────────────────────────────
+
+function Install-McpWrapper {
+    Say ""
+    Say "--- MCP Wrapper (avelino/mcp) ---"
+
+    $mcpExe  = Join-Path $env:LOCALAPPDATA "bin\mcp.exe"
+    $binDir  = Split-Path -Parent $mcpExe
+
+    # Verifica se ja esta no PATH
+    $found = $false
+    try {
+        $null = Get-Command mcp -ErrorAction Stop
+        Say "OK    mcp (avelino) ja esta no PATH"
+        $found = $true
+    } catch {}
+
+    if (-not $found) {
+        Ensure-Dir $binDir
+        $url = "https://github.com/avelino/mcp/releases/latest/download/mcp-windows-amd64.exe"
+        Say "BAIX  $url"
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $url -OutFile $mcpExe -UseBasicParsing
+            Say "OK    $mcpExe"
+        } catch {
+            Say "ERRO  Falha ao baixar mcp (avelino): $_"
+            Say "      Instale manualmente: github.com/avelino/mcp/releases"
+            return
+        }
+
+        # Garante que o diretorio bin esta no PATH do usuario
+        $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath -notlike "*$binDir*") {
+            [Environment]::SetEnvironmentVariable(
+                "Path", "$userPath;$binDir", "User")
+            $env:Path = "$env:Path;$binDir"
+            Say "OK    $binDir adicionado ao PATH do usuario"
+        }
+    }
+
+    # Registra servidores MCP no wrapper
+    Say "CFG   Registrando servidores MCP..."
+    try {
+        & $mcpExe add exa npx -y exa-mcp-server 2>$null
+        & $mcpExe add --url http://localhost:11235/mcp/sse crawl4ai 2>$null
+        Say "OK    Servidores exa e crawl4ai registrados"
+    } catch {
+        Say "AVISO Nao foi possivel registrar servidores no wrapper"
+    }
+
+    # Verifica estado final
+    try {
+        Say "VER   mcp --list"
+        & $mcpExe --list 2>&1 | ForEach-Object { Say "      $_" }
+    } catch {
+        Say "AVISO mcp --list falhou — verifique a instalacao manualmente"
+    }
+}
+
+# ──────────────────────────────────────────────────────────────
+# Sync-Instructions
+# ──────────────────────────────────────────────────────────────
+
 function Sync-Instructions {
     Say ""
     Say "--- Instructions ---"
 
-    $dest   = Join-Path $RepoRoot ".github\copilot-instructions.md"
-    $source = Join-Path $RepoRoot "AGENTS.md"
+    $source = Join-Path $RepoRoot ".github\copilot-instructions.md"
+    $dest   = Join-Path $PromptsDir "opencode-config.instructions.md"
 
-    Ensure-Dir (Split-Path -Parent $dest)
+    if (-not (Test-Path $source)) {
+        Say "AVISO .github/copilot-instructions.md nao encontrado"
+        return
+    }
+
+    Ensure-Dir $PromptsDir
     Backup-IfExists $dest
-
     Copy-Item -Path $source -Destination $dest -Force
-    Say "OK    .github\copilot-instructions.md (copia de AGENTS.md)"
+    Say "OK    opencode-config.instructions.md (MCP via CLI)"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -449,7 +522,8 @@ function Show-Plan {
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
     Say "  - Converter $nAgents agent(s) para .agent.md"
     Say "  - Copiar $nCommands command(s) para .prompt.md"
-    Say "  - Copiar AGENTS.md para .github\copilot-instructions.md"
+    Say "  - Instalar wrapper MCP (avelino/mcp)"
+    Say "  - Copiar .github/copilot-instructions.md (MCP via CLI)"
     Say "  - Configurar MCPs (exa, crawl4ai) em mcp.json"
 }
 
@@ -458,6 +532,7 @@ Confirm-Action
 Sync-Skills
 Sync-Agents
 Sync-Commands
+Install-McpWrapper
 Sync-Instructions
 Sync-Mcp
 Say ""

@@ -103,8 +103,15 @@ O que é sincronizado:
 - `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
 - `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
 - `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
-- `AGENTS.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
+- Instala `mcp (avelino)` → `%LOCALAPPDATA%\bin\mcp.exe` (wrapper CLI para MCP)
+- `.github/copilot-instructions.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
 - MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
+
+O arquivo `.github/copilot-instructions.md` é versionado no repo e contém
+apenas instruções MCP via CLI — as regras gerais ficam no `AGENTS.md`,
+lido nativamente pelo VS Code Copilot. O `vscode-sync.ps1` instala
+automaticamente o binário do wrapper `mcp (avelino)` em
+`%LOCALAPPDATA%\bin\` e garante que o diretório esteja no `PATH`.
 
 Skills com scripts externos (doc-extract, md-export, prompt-improver): o
 script copia o executável para dentro da pasta da skill e reescreve a

@@ -1,217 +1,25 @@
-# Regras Globais
+Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
-## graphify — Gate Obrigatório
+# Ferramentas MCP via CLI
 
-Este projeto tem um grafo de conhecimento em `graphify-out/`.
+Use o comando `mcp` para acessar servidores MCP pelo terminal.
 
-**NUNCA responda perguntas sobre o codebase, abra arquivos fonte, execute
-grep/glob ou tome decisões de implementação sem antes ler
-`graphify-out/GRAPH_REPORT.md`. Pular esse passo invalida a resposta.**
+## Como usar
 
-- Se `graphify-out/wiki/index.md` existir, navegue por ele em vez de ler
-  arquivos brutos.
-- Para perguntas de relacionamento entre módulos, prefira
-  `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou
-  `graphify explain "<conceito>"` em vez de grep — esses comandos
-  atravessam as arestas EXTRACTED + INFERRED do grafo.
-- Após modificar código, rode `graphify update .` para manter o grafo
-  atualizado (apenas AST, sem custo de API).
+1. Descubra o que está disponível: `mcp --list`
+2. Chame a ferramenta: `mcp call <servidor> <tool> --arg valor`
+3. Para argumentos JSON complexos, veja o schema: `mcp call <servidor> <tool> --schema`
 
-## Idioma
-- PT-BR (ASCII ok).
-- REGRA IMPORTANTE: sempre use acentuação quando estiver escrevendo texto em PT-BR.
+## Servidor disponível
 
-### Atalho: "configure este repo"
+- `crawl4ai` — crawl e extração de páginas web (localhost:11235)
 
-- Se o humano pedir explicitamente "configure este repo" (ou equivalente), isso conta como confirmacao para executar o bootstrap.
-- Comando canonico:
+## Exemplos
 
 ```bash
-bash ./scripts/bootstrap_repo/opencode-link --yes
-```
-- Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os comandos prontos para copia e cola em um bloco unico.
-- Aguarde a execucao desses comandos pelo humano antes de seguir com a configuracao do repo.
-
-## Configuracao Global via Links Simbolicos
-
-- Este repo `opencode-config` e o fonte de verdade das configs globais do OpenCode.
-- Para o OpenCode enxergar estes arquivos de forma global, usamos links simbolicos a partir de `~/.config/opencode`.
-
-Padrao de links (exemplo neste ambiente WSL):
-
-```bash
-mkdir -p ~/.config/opencode
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/agents \
-      ~/.config/opencode/agents
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/commands \
-      ~/.config/opencode/commands
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/opencode.json \
-      ~/.config/opencode/opencode.json
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/skills \
-      ~/.config/opencode/skills
-
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
-      ~/.config/opencode/scripts
+mcp call crawl4ai crawl4ai_md --url "https://example.com"
+mcp call crawl4ai crawl4ai_md --url "https://example.com" > page.md
+mcp call crawl4ai crawl4ai_md --url "https://example.com" | jq '.markdown'
 ```
 
-- Assim voce mantem estas configs versionadas em um repo Git separado (`opencode-config`), mas o OpenCode continua lendo tudo a partir de `~/.config/opencode`.
-
-## Concisao
-- Responda de forma curta por padrao.
-- Detalhe apenas quando o humano pedir explicitamente ou quando houver risco de ambiguidade/erro.
-- Prefira listas curtas a textos longos.
-- Textos de resposta com mais de 20 linhas são supeitos. Humanos não gostam de ler muita coisa, então respostas muito
-  longas não são eficientes e deixam de ser lidas
-- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique muito clara a importância dele ou se o humano
-- pedir explicitamente.
-- Ao invés de dar uma resposta muito longa, resuma em até 20 ~30 linhas (no máximo) e pergunte se o humano quer se
-- aprofundar mais em algum outro detalhe ou mesmo que dê uma explicação bem mais detalhada.
-- Você pode criar mais linhas desde que a resposta estreja estruturada mais em bullets e seja menos densa, de modo que
-- a densidade normal de palavras em 20~30 linhas também não seja ultrapassada
-
-# Geração de arquivos MD
-- Nunca ultrapasse mais de 120 colunas, de texto, faça word-wrap para garantir essa regra
-
-# Exibição de Texto copie e cola
-- Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e colar, faça isso em um bloco de código 
-único para facilitar a cópia.
-
-## Acao
-- Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
-- Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
-
-## COMMITS
-
-- Proponha mensagens de commit sempre que o humano pedir
-- Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre.
-- O humano sempre que validar tudo antes do commit, então **não** realize o commit antes do humano validar e dar ok.
-- Mostre a mensagem de commit, mas SEMPRE espere confirmação do humano para realizar o commit
-- NUNCA realize o commit independentemente.
-- SEMPRE pergunte ao humano antes de realizar o commit.
-- SÓ realize o commit quando o humano autorizar
-- NUNCA simular rename ou move como delete + create.
-- Sempre usar `git mv` para mover ou renomear arquivos versionados, preservando histórico.
-- Se um arquivo versionado precisar ser movido e editado, primeiro fazer o `git mv` e só depois editar.
-- Essa regra não tem exceção.
-
-# Criação de Skills
-- Ao criar novas skills, para serem acionadas corretamente, as descrições das skills precisam possuir todas as 
-instruções de ativação, deixar uma ativação no corpo da skill não a faz ser ativada.
-- Ao criar novas skills, **não descreva** formas de ativação da skill em seu corpo sem que isso tenha sido descrito 
-nas descrições
-
-# Sincronização Workflow ↔ Agentes
-- Agentes implementados devem estar sincronizados com os
-  workflows definidos em `docs/workflow-agentes-dev.md` e
-  `docs/workflow-curadoria.md`.
-- Qualquer mudança no workflow deve refletir nos agentes
-  correspondentes, e vice-versa.
-- Mudanças no workflow **ou** nos agentes **sempre** passam
-  pelo humano antes de serem aplicadas — sem exceção.
-
-# Regras Obrigatórias Pora Testes
-- Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
-- Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
-- Framework: BATS-core em `tests/` — rodar com `make test`.
-- **Execução sempre via WSL** — os testes usam Bash/BATS e devem
-  ser executados dentro do WSL.
-  - **Regra**: sempre use `wsl -- bash -ic "COMANDO"` para executar
-    comandos no WSL a partir do PowerShell/cmd. Nunca use
-    `wsl -e bash -c` — esse modo não carrega `~/.bashrc` e
-    ferramentas como `node`, `fnm`, `bats` não estarão no PATH.
-  - Exemplo canônico:
-    `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
-  - Se já estiver dentro do WSL (terminal Linux), execute
-    diretamente sem prefixo `wsl`.
-- **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
-  executados no WSL/Linux devem usar LF (`\n`), nunca CRLF (`\r\n`).
-  CRLF causa falhas silenciosas (ex: `grep "^---$"` não encontra `---\r`).
-  Ao criar esses arquivos no Windows, garantir conversão para LF antes do commit.
-- A estrutura de testes deve espelhar a estrutura do código.
-- Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `-test`.
-- Não criar testes para scripts cuja única função é executar ou orquestrar testes.
-- Scripts de bootstrap devem ficar em `scripts/bootstrap_repo/`.
-- Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
-- Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.
-- **Nenhum teste pode usar `skip`** — quando um pré-requisito externo não estiver
-  disponível, o teste deve usar `fail "mensagem clara"`. Testes de integração que
-  dependem de ferramentas externas (pandoc, docling, resvg, playwright, etc.) devem
-  falhar com instrução de instalação. Testes unitários nunca devem depender de
-  ferramentas externas — usam mocks/stubs. Silenciar testes esconde problemas de
-  ambiente.
-
-# README
-- Mantenha a seção de dependências do `README.md` atualizada sempre que mudar bootstrap, scripts, skills ou requisitos de instalação.
-- A seção deve ser enxuta e voltada ao humano: listar claramente o que é instalado automaticamente e quais comandos com `sudo` o humano precisa executar.
-
-# Upstream de Skills Externas
-- Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:
-  - Criar `UPSTREAM.md` na pasta da skill com a origem e instruções de sync.
-  - Registrar a skill em `skills/list-updatable` para permitir atualização futura.
-  - Usar `skills/update-upstream-skill` para sincronizar.
-
-## Manutencao de Upstream — Padrao do Repo
-
-### Estrutura obrigatoria por skill externa
-
-```
-skills/<nome>/
-  SKILL.md        # adaptado localmente — NUNCA sobrescrito pelo sync
-  UPSTREAM.md     # metadados de sync (SHA, data, origem, licenca)
-  references/     # arquivos de referencia copiados do upstream (se houver)
-```
-
-### O que o UPSTREAM.md deve conter
-
-- URL do repositorio + branch
-- Commit SHA + data do commit upstream
-- Data do ultimo sync
-- Lista de arquivos sincronizados (o que muda a cada sync)
-- Lista do que NAO e sincronizado (SKILL.md adaptado)
-- Instrucoes de como rodar o sync
-- Licenca do upstream
-- `description_lang` + `description_note` (lingua e decisao de adaptacao)
-
-### Lingua da description de skills externas
-
-- Ao importar uma skill externa, **perguntar ao humano**: manter lingua de
-  origem ou converter para PT-BR?
-- Registrar a decisao no `UPSTREAM.md` da skill:
-  ```
-  description_lang: en
-  description_note: >
-    Kept in English (source language). Triggers extracted from
-    "When to Use" section to improve activation.
-  ```
-- Padrao recomendado: manter lingua de origem — LLMs entendem associacoes
-  semanticas cross-language e isso preserva proximidade com o upstream.
-- A description **deve ser enriquecida** com triggers explícitos extraídos
-  do corpo da skill (secao "When to Use"), pois o OpenCode ativa a skill
-  com base exclusivamente na description.
-
-### Regra de ouro do sync
-
-O script de sync **nunca sobrescreve** `SKILL.md`. Ele so copia na criacao
-inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
-
-### Checklist pos-sync
-
-1. Revisar diff do conteudo copiado (references, assets, etc.)
-2. Verificar se mudancas upstream afetam o `SKILL.md` local
-3. Atualizar `SKILL.md` manualmente se necessario
-4. Atualizar `UPSTREAM.md` com novo SHA (feito automaticamente pelo script)
-5. Rodar `make test` para garantir que nada quebrou
-
-### Scripts de sync disponiveis
-
-| Skill(s) | Script |
-|---|---|
-| prompt-improver | `scripts/prompt-improver/sync` |
-| 12 skills addyosmani | `scripts/addyosmani/sync` |
-| accessibility-audit | `scripts/accessibility-audit/sync` |
-
-Todos suportam `--yes` e `--check-only`.
+Prefira pipes com `jq` para filtrar saída JSON.

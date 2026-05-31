@@ -86,6 +86,10 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 
 ## COMMITS
 
+- Use Conventional Commits. Formato: `tipo(escopo): descricao curta`
+  Tipos: feat, fix, docs, style, refactor, test, chore, ci, build, perf.
+- Mensagem de commit sempre no modo caveman (skill skills/caveman):
+  terse, sem filler, sem artigos, so substancia.
 - Proponha mensagens de commit sempre que o humano pedir
 - Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre.
 - O humano sempre que validar tudo antes do commit, então **não** realize o commit antes do humano validar e dar ok.
