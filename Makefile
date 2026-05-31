@@ -40,7 +40,7 @@ test-tools:
 	@printf '\n'
 	@printf '=== test-tools: requer ferramentas configuradas no WSL ===\n'
 	@printf '    Se algum falhar, rode primeiro:\n'
-	@printf '    ./scripts/bootstrap_repo/opencode-install-deps\n'
+	@printf '    ./scripts/bootstrap_repo/opencode-install-deps.sh\n'
 	@printf '\n'
 	$(BATS) \
 	        $(TESTS_DIR)/scripts/opencode-doc-extract-test.bats \

@@ -3,7 +3,7 @@
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps"
+SCRIPT="$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps.sh"
 
 setup() {
   common_setup

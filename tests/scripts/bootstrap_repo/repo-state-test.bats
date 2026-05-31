@@ -11,7 +11,7 @@ setup_file() {
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DOCTREE=1
-  bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link.sh" --yes
 }
 
 teardown_file() { common_teardown; }
@@ -21,7 +21,7 @@ teardown_file() { common_teardown; }
 # ---------------------------------------------------------------------------
 
 @test "repo-state: opencode-link --yes executa com sucesso" {
-  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link" --yes
+  run bash "$REPO_ROOT/scripts/bootstrap_repo/opencode-link.sh" --yes
   assert_success
 }
 

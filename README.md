@@ -13,7 +13,7 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 Depois de clonar este repo, rode:
 
 ```bash
-./scripts/bootstrap_repo/opencode-link
+./scripts/bootstrap_repo/opencode-link.sh
 ```
 
 No ambiente WSL deste repo, o script faz duas coisas:
@@ -29,7 +29,7 @@ source ~/.bashrc
 
 ## O que o script faz
 
-O `scripts/bootstrap_repo/opencode-link` conecta estes caminhos:
+O `scripts/bootstrap_repo/opencode-link.sh` conecta estes caminhos:
 
 - `~/.config/opencode/agents` -> `agents`
 - `~/.config/opencode/commands` -> `commands`
@@ -49,8 +49,8 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 ## Dependencias das skills
 
-O bootstrap (`opencode-link`) chama automaticamente
-`scripts/bootstrap_repo/opencode-install-deps`.
+O bootstrap (`opencode-link.sh`) chama automaticamente
+`scripts/bootstrap_repo/opencode-install-deps.sh`.
 
 Instaladas automaticamente pelo bootstrap (quando possivel):
 
@@ -60,6 +60,7 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `playwright`
 - `bun`
 - `codebase-memory-mcp`
+- `doctree`
 - `bats-support`
 - `bats-assert`
 - `bats-file`
@@ -84,7 +85,7 @@ Dependencia externa fora desse comando:
 Para rodar so a verificação de dependências:
 
 ```bash
-./scripts/bootstrap_repo/opencode-install-deps
+./scripts/bootstrap_repo/opencode-install-deps.sh
 ```
 
 ## Configuração VS Code

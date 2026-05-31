@@ -254,12 +254,12 @@ console.log('valid');
 # Permissões — scripts em scripts/ devem ser executáveis
 # ---------------------------------------------------------------------------
 
-@test "scripts/bootstrap_repo/opencode-link é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-link"
+@test "scripts/bootstrap_repo/opencode-link.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-link.sh"
 }
 
-@test "scripts/bootstrap_repo/opencode-install-deps é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps"
+@test "scripts/bootstrap_repo/opencode-install-deps.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps.sh"
 }
 
 @test "scripts/addyosmani/sync é executável" {

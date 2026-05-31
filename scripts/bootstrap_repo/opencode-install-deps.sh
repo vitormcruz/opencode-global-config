@@ -5,7 +5,7 @@
 # - Dependencias user-space (pipx, docling): instala automaticamente se possivel.
 # - Dependencias que precisam de sudo (make, pandoc, ocrmypdf etc.): sugere o comando.
 #
-# Uso: ./scripts/bootstrap_repo/opencode-install-deps [--yes] [--quiet]
+# Uso: ./scripts/bootstrap_repo/opencode-install-deps.sh [--yes] [--quiet]
 
 set -euo pipefail
 
@@ -36,7 +36,7 @@ opencode-install-deps
 Verifica e instala dependencias das skills do opencode-config.
 
 Uso:
-  ./scripts/bootstrap_repo/opencode-install-deps [--yes] [--quiet]
+  ./scripts/bootstrap_repo/opencode-install-deps.sh [--yes] [--quiet]
 
 Opcoes:
   --yes      Instala sem pedir confirmacao

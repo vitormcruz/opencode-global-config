@@ -8,7 +8,7 @@ opencode-link
 Cria links simbolicos em ~/.config/opencode apontando para este repo.
 
 Uso:
-  ./scripts/bootstrap_repo/opencode-link [--yes]
+  ./scripts/bootstrap_repo/opencode-link.sh [--yes]
 
 Opcoes:
   --yes      Nao pergunta confirmacao
@@ -290,7 +290,7 @@ apply() {
 
   say ""
   say "--- Verificando dependencias das skills ---"
-  local install_deps_script="${script_dir}/opencode-install-deps"
+  local install_deps_script="${script_dir}/opencode-install-deps.sh"
   if [ "${OPENCODE_SKIP_DEPS:-0}" = "1" ]; then
     say "SKIP  verificacao de dependencias (OPENCODE_SKIP_DEPS=1)"
   elif [ -x "$install_deps_script" ]; then

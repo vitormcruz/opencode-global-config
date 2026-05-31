@@ -18,7 +18,7 @@
 #   - Não cria scripts em ~/.config/opencode/scripts/
 #
 # A configuração do MCP (opencode.json) e os symlinks são gerenciados
-# pelo script scripts/bootstrap_repo/opencode-link, que é o fonte de verdade
+# pelo script scripts/bootstrap_repo/opencode-link.sh, que é o fonte de verdade
 # para o setup global.
 
 set -e
