@@ -451,6 +451,7 @@ function Sync-Instructions {
 
     Ensure-Dir $PromptsDir
     Backup-IfExists $dest
+
     Copy-Item -Path $source -Destination $dest -Force
     Say "OK    opencode-config.instructions.md (MCP via CLI)"
 }

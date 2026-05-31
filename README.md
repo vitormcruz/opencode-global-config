@@ -58,7 +58,8 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `pipx`
 - `docling`
 - `playwright`
-- `graphifyy`
+- `bun`
+- `codebase-memory-mcp`
 - `bats-support`
 - `bats-assert`
 - `bats-file`
@@ -103,6 +104,7 @@ O que é sincronizado:
 - `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
 - `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
 - `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
+- `AGENTS.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
 - Instala `mcp (avelino)` → `%LOCALAPPDATA%\bin\mcp.exe` (wrapper CLI para MCP)
 - `.github/copilot-instructions.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
 - MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)

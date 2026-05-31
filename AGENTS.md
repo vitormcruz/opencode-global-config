@@ -91,6 +91,7 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 - Mensagem de commit sempre no modo caveman (skill skills/caveman):
   terse, sem filler, sem artigos, so substancia.
 - Proponha mensagens de commit sempre que o humano pedir
+- **Use a skill `cave-man`** para definir o formato das mensagens de commit.
 - Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre.
 - O humano sempre que validar tudo antes do commit, então **não** realize o commit antes do humano validar e dar ok.
 - Mostre a mensagem de commit, mas SEMPRE espere confirmação do humano para realizar o commit
