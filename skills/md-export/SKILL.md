@@ -25,7 +25,7 @@ Converter arquivos `.md` para `docx`, `pptx` ou `xlsx` usando o Pandoc como back
 
 ## Ferramenta
 
-Script: `~/.config/opencode/scripts/opencode-md-export`
+Script: `~/.config/opencode/scripts/opencode-md-export.sh`
 
 ## Entrada (stdin, JSON)
 

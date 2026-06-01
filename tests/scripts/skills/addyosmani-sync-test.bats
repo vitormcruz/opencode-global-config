@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# tests/scripts/skills/addyosmani-sync-test.bats — testa scripts/addyosmani/sync
+# tests/scripts/skills/addyosmani-sync-test.bats — testa scripts/addyosmani/sync.sh
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/addyosmani/sync"
+SCRIPT="$REPO_ROOT/scripts/addyosmani/sync.sh"
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções

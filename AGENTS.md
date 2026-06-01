@@ -201,8 +201,8 @@ inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
 
 | Skill(s) | Script |
 |---|---|
-| prompt-improver | `scripts/prompt-improver/sync` |
-| 12 skills addyosmani | `scripts/addyosmani/sync` |
-| accessibility-audit | `scripts/accessibility-audit/sync` |
+| prompt-improver | `scripts/prompt-improver/sync.sh` |
+| 12 skills addyosmani | `scripts/addyosmani/sync.sh` |
+| accessibility-audit | `scripts/accessibility-audit/sync.sh` |
 
 Todos suportam `--yes` e `--check-only`.

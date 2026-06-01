@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # sync - Importa/atualiza a skill accessibility-audit do upstream
 # Upstream: sickn33/antigravity-awesome-skills
-# Uso: ./scripts/accessibility-audit/sync [--yes] [--check-only]
+# Uso: ./scripts/accessibility-audit/sync.sh [--yes] [--check-only]
 set -euo pipefail
 
 LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd -P)/sync-common.sh"
@@ -21,7 +21,7 @@ usage() {
 sync - Sincroniza skill accessibility-audit com o upstream
 
 Uso:
-  ./scripts/accessibility-audit/sync [--yes] [--check-only]
+  ./scripts/accessibility-audit/sync.sh [--yes] [--check-only]
 
 Opcoes:
   --yes          Nao pede confirmacao
@@ -46,7 +46,7 @@ SKILL.md existente NAO sera sobrescrito."
 sync_clone_upstream "$UPSTREAM_REPO" "$UPSTREAM_BRANCH"
 sync_validate_mit_license "$UPSTREAM_DIR"
 sync_capture_metadata "$UPSTREAM_DIR"
-sync_exit_if_check_only "scripts/accessibility-audit/sync"
+sync_exit_if_check_only "scripts/accessibility-audit/sync.sh"
 
 UPSTREAM_SKILL="$UPSTREAM_DIR/$UPSTREAM_SKILL_PATH"
 [ -d "$UPSTREAM_SKILL" ] || die "Path upstream nao encontrado: $UPSTREAM_SKILL_PATH"
@@ -86,11 +86,11 @@ path_upstream: ${UPSTREAM_SKILL_PATH}/
 
 Execute a partir da raiz do repo:
 
-    bash scripts/accessibility-audit/sync
+    bash scripts/accessibility-audit/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/accessibility-audit/sync --check-only
+    bash scripts/accessibility-audit/sync.sh --check-only
 
 ## Licenca
 

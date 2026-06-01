@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# scripts/doctree/install
+# scripts/doctree/install.sh
 # Instala bun via npm e verifica doctree-mcp.
 #
-# Uso: ./scripts/doctree/install [--yes] [--check-only] [--help]
+# Uso: ./scripts/doctree/install.sh [--yes] [--check-only] [--help]
 
 set -euo pipefail
 
@@ -26,12 +26,12 @@ while [ $# -gt 0 ]; do
         --check-only) check_only=1 ;;
         --help|-h)
             cat <<'EOF'
-doctree/install
+doctree/install.sh
 
 Instala bun (necessario para bunx doctree-mcp) via npm.
 
 Uso:
-  ./scripts/doctree/install [--yes] [--check-only]
+  ./scripts/doctree/install.sh [--yes] [--check-only]
 
 Opcoes:
   --yes         Instala sem pedir confirmacao

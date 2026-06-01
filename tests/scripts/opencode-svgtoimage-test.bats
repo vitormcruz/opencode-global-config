@@ -3,7 +3,7 @@
 
 load "../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/opencode-svgtoimage"
+SCRIPT="$REPO_ROOT/scripts/opencode-svgtoimage.sh"
 FIXTURE_SVG="$REPO_ROOT/tests/test-resources/sample.svg"
 
 setup()    { common_setup; }

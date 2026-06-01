@@ -4,7 +4,7 @@
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/codebase-memory/install"
+SCRIPT="$REPO_ROOT/scripts/codebase-memory/install.sh"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# tests/skills/list-updatable.bats — testa scripts/skills/list-updatable
+# tests/scripts/skills/list-updatable-test.bats — testa scripts/skills/list-updatable.sh
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/skills/list-updatable"
+SCRIPT="$REPO_ROOT/scripts/skills/list-updatable.sh"
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções

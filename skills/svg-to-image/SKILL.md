@@ -11,7 +11,7 @@ Entrada:
 - SVG completo via stdin.
 
 Execucao:
-- Script: ~/.config/opencode/scripts/opencode-svgtoimage
+- Script: ~/.config/opencode/scripts/opencode-svgtoimage.sh
 
 Saida em stdout (uma unica linha JSON):
 

@@ -8,7 +8,7 @@ list-updatable
 Lista, em ordem alfabetica, as skills atualizaveis deste repo.
 
 Uso:
-  ./scripts/skills/list-updatable
+  ./scripts/skills/list-updatable.sh
 
 Criterio:
   - considera apenas skills com `skills/<nome>/UPSTREAM.md`

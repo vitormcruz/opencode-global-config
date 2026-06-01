@@ -550,12 +550,12 @@ elif has_cmd bun; then
     status_installed "doctree-mcp"
   else
     status_missing "doctree"
-    status_hint "Instalar: bash scripts/doctree/install --yes"
+    status_hint "Instalar: bash scripts/doctree/install.sh --yes"
   fi
   rm -rf "$doctree_tmp"
 else
   status_missing "doctree"
-  status_hint "Instalar: bash scripts/doctree/install --yes"
+  status_hint "Instalar: bash scripts/doctree/install.sh --yes"
 fi
 say ""
 
@@ -566,7 +566,7 @@ if has_cmd codebase-memory-mcp; then
   status_ok "codebase-memory-mcp ($(codebase-memory-mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida'))"
 else
   status_missing "codebase-memory-mcp"
-  status_hint "Instalar: bash scripts/codebase-memory/install --yes"
+  status_hint "Instalar: bash scripts/codebase-memory/install.sh --yes"
 fi
 say ""
 

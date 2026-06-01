@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# tests/skills/update-upstream-skill.bats — testa scripts/skills/update-upstream-skill
+# tests/scripts/skills/update-upstream-skill-test.bats — testa scripts/skills/update-upstream-skill.sh
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/skills/update-upstream-skill"
+SCRIPT="$REPO_ROOT/scripts/skills/update-upstream-skill.sh"
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções

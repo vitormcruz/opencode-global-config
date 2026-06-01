@@ -1,10 +1,10 @@
 #!/usr/bin/env bats
 # tests/scripts/skills/accessibility-audit-sync-test.bats
-# testa scripts/accessibility-audit/sync
+# testa scripts/accessibility-audit/sync.sh
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/accessibility-audit/sync"
+SCRIPT="$REPO_ROOT/scripts/accessibility-audit/sync.sh"
 
 # ---------------------------------------------------------------------------
 # Ajuda e opções

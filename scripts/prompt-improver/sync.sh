@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sync - Importa/atualiza arquivos do upstream ckelsoe/prompt-architect
-# Uso: ./scripts/prompt-improver/sync [--yes] [--check-only]
+# Uso: ./scripts/prompt-improver/sync.sh [--yes] [--check-only]
 set -euo pipefail
 
 LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd -P)/sync-common.sh"
@@ -22,7 +22,7 @@ usage() {
 sync - Sincroniza skill prompt-improver com o upstream
 
 Uso:
-  ./scripts/prompt-improver/sync [--yes] [--check-only]
+  ./scripts/prompt-improver/sync.sh [--yes] [--check-only]
 
 Opcoes:
   --yes          Nao pede confirmacao
@@ -158,11 +158,11 @@ sincronizado_em: $SYNC_DATE
 
 Execute a partir da raiz do repo:
 
-    bash scripts/prompt-improver/sync
+    bash scripts/prompt-improver/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/prompt-improver/sync --check-only
+    bash scripts/prompt-improver/sync.sh --check-only
 
 ## Licenca
 

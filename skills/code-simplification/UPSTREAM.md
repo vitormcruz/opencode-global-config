@@ -18,11 +18,11 @@ sincronizado_em: 2026-04-13 22:35 UTC
 
 Execute a partir da raiz do repo:
 
-    bash scripts/addyosmani/sync
+    bash scripts/addyosmani/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/addyosmani/sync --check-only
+    bash scripts/addyosmani/sync.sh --check-only
 
 ## Licenca
 

@@ -262,22 +262,22 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-install-deps.sh"
 }
 
-@test "scripts/addyosmani/sync é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/addyosmani/sync"
+@test "scripts/addyosmani/sync.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/addyosmani/sync.sh"
 }
 
-@test "scripts/accessibility-audit/sync é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/accessibility-audit/sync"
+@test "scripts/accessibility-audit/sync.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/accessibility-audit/sync.sh"
 }
 
-@test "scripts/opencode-doc-extract é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/opencode-doc-extract"
+@test "scripts/opencode-doc-extract.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/opencode-doc-extract.sh"
 }
 
-@test "scripts/opencode-md-export é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/opencode-md-export"
+@test "scripts/opencode-md-export.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/opencode-md-export.sh"
 }
 
-@test "scripts/opencode-svgtoimage é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/opencode-svgtoimage"
+@test "scripts/opencode-svgtoimage.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/opencode-svgtoimage.sh"
 }

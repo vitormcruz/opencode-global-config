@@ -19,11 +19,11 @@ path_upstream: skills/accessibility-compliance-accessibility-audit/
 
 Execute a partir da raiz do repo:
 
-    bash scripts/accessibility-audit/sync
+    bash scripts/accessibility-audit/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/accessibility-audit/sync --check-only
+    bash scripts/accessibility-audit/sync.sh --check-only
 
 ## Licenca
 

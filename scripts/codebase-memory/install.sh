@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# scripts/codebase-memory/install
+# scripts/codebase-memory/install.sh
 # Instala codebase-memory-mcp via npm (gerenciador de pacotes).
 #
-# Uso: ./scripts/codebase-memory/install [--yes] [--check-only] [--help]
+# Uso: ./scripts/codebase-memory/install.sh [--yes] [--check-only] [--help]
 
 set -euo pipefail
 
@@ -28,12 +28,12 @@ while [ $# -gt 0 ]; do
         --check-only) check_only=1 ;;
         --help|-h)
             cat <<'EOF'
-codebase-memory/install
+codebase-memory/install.sh
 
 Instala codebase-memory-mcp via npm.
 
 Uso:
-  ./scripts/codebase-memory/install [--yes] [--check-only]
+  ./scripts/codebase-memory/install.sh [--yes] [--check-only]
 
 Opcoes:
   --yes         Instala sem pedir confirmacao

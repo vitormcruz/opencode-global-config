@@ -350,7 +350,7 @@ CHECK_PYTHON3_FN='
   assert_success
   assert_output --partial "[doctree]"
   assert_output --partial "MISSING   doctree"
-  assert_output --partial "scripts/doctree/install"
+  assert_output --partial "scripts/doctree/install.sh"
 
   rm -rf "$fake_bin"
 }
@@ -388,7 +388,7 @@ CHECK_PYTHON3_FN='
   assert_success
   assert_output --partial "[codebase-memory-mcp]"
   assert_output --partial "MISSING   codebase-memory-mcp"
-  assert_output --partial "scripts/codebase-memory/install"
+  assert_output --partial "scripts/codebase-memory/install.sh"
 
   rm -rf "$fake_bin"
 }

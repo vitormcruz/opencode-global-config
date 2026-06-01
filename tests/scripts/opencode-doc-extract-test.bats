@@ -3,7 +3,7 @@
 
 load "../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/opencode-doc-extract"
+SCRIPT="$REPO_ROOT/scripts/opencode-doc-extract.sh"
 FIXTURE_PDF="$REPO_ROOT/tests/test-resources/sample.pdf"
 
 setup()    { common_setup; }

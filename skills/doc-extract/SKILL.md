@@ -33,7 +33,7 @@ para `md`, `json`, `text` ou `html`, facilitando que a IA leia e processe o cont
 
 ## Ferramenta
 
-Script: `~/.config/opencode/scripts/opencode-doc-extract`
+Script: `~/.config/opencode/scripts/opencode-doc-extract.sh`
 
 ## Formatos de entrada suportados (via Docling)
 

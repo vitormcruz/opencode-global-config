@@ -6,11 +6,11 @@ Atualize as skills atualizaveis deste repositorio uma por vez.
 
 Siga este fluxo estritamente:
 
-1. Descubra as skills atualizaveis executando `bash scripts/skills/list-updatable`.
+1. Descubra as skills atualizaveis executando `bash scripts/skills/list-updatable.sh`.
 2. Se nao houver nenhuma skill, informe claramente que nao existem skills atualizaveis e encerre.
 3. Processe as skills exatamente na ordem retornada pelo helper.
 4. Para cada skill:
-   - execute `bash scripts/skills/update-upstream-skill "<skill>"`
+   - execute `bash scripts/skills/update-upstream-skill.sh "<skill>"`
    - atualize somente essa skill antes de qualquer pergunta sobre a proxima
    - produza um resumo curto com `Skill`, `Resultado` e `Detalhe`
 5. Depois de concluir cada skill, se ainda houver outra pendente, pergunte ao humano usando `functions.question` se deseja continuar.

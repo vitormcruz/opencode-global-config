@@ -22,11 +22,11 @@ sincronizado_em: 2026-04-07 15:11 UTC
 
 Execute a partir da raiz do repo:
 
-    bash scripts/prompt-improver/sync
+    bash scripts/prompt-improver/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/prompt-improver/sync --check-only
+    bash scripts/prompt-improver/sync.sh --check-only
 
 ## Licenca
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sync - Importa/atualiza as 12 skills do addyosmani/agent-skills
-# Uso: ./scripts/addyosmani/sync [--yes] [--check-only]
+# Uso: ./scripts/addyosmani/sync.sh [--yes] [--check-only]
 set -euo pipefail
 
 LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd -P)/sync-common.sh"
@@ -43,7 +43,7 @@ usage() {
 sync - Sincroniza 12 skills addyosmani com o upstream
 
 Uso:
-  ./scripts/addyosmani/sync [--yes] [--check-only]
+  ./scripts/addyosmani/sync.sh [--yes] [--check-only]
 
 Opcoes:
   --yes          Nao pede confirmacao
@@ -70,7 +70,7 @@ SKILL.md existentes NAO serao sobrescritos."
 sync_clone_upstream "$UPSTREAM_REPO" "$UPSTREAM_BRANCH"
 sync_validate_mit_license "$UPSTREAM_DIR"
 sync_capture_metadata "$UPSTREAM_DIR"
-sync_exit_if_check_only "scripts/addyosmani/sync"
+sync_exit_if_check_only "scripts/addyosmani/sync.sh"
 
 # --- Sincroniza cada skill ---
 for skill in "${SKILLS[@]}"; do
@@ -127,11 +127,11 @@ UPSTREAMEOF
 
 Execute a partir da raiz do repo:
 
-    bash scripts/addyosmani/sync
+    bash scripts/addyosmani/sync.sh
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/addyosmani/sync --check-only
+    bash scripts/addyosmani/sync.sh --check-only
 
 ## Licenca
 

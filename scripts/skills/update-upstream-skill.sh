@@ -8,7 +8,7 @@ update-upstream-skill
 Atualiza exatamente uma skill atualizavel com base no `UPSTREAM.md`.
 
 Uso:
-  ./scripts/skills/update-upstream-skill <skill>
+  ./scripts/skills/update-upstream-skill.sh <skill>
 
 Status possiveis:
   - success

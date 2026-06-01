@@ -4,7 +4,7 @@
 
 load "../../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/doctree/install"
+SCRIPT="$REPO_ROOT/scripts/doctree/install.sh"
 
 setup()    { common_setup; }
 teardown() { common_teardown; }

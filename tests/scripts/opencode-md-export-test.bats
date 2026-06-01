@@ -3,7 +3,7 @@
 
 load "../helpers/test_helper"
 
-SCRIPT="$REPO_ROOT/scripts/opencode-md-export"
+SCRIPT="$REPO_ROOT/scripts/opencode-md-export.sh"
 FIXTURE_MD="$REPO_ROOT/tests/test-resources/sample.md"
 
 setup()    { common_setup; }
