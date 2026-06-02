@@ -104,14 +104,14 @@ O script requer PowerShell 5.1+ (nativo no Windows 10/11).
 O que é sincronizado:
 
 - `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
-- `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
-- `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
-- `.github/copilot-instructions.md` → `%APPDATA%\Code\User\prompts\opencode-config.instructions.md`
-- MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
+- `agents/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.agent.md`
+- `commands/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.prompt.md`
+- `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/copilot-specific.instructions.md`
+- MCPs `exa` e `crawl4ai` → `%APPDATA%\\Code\\User\\mcp.json` (merge, sem sobrescrever)
 
-O arquivo `.github/copilot-instructions.md` é versionado no repo e contém
-apenas instruções MCP via CLI — as regras gerais ficam no `AGENTS.md`,
-lido nativamente pelo VS Code Copilot.
+O arquivo `.github/copilot-specific.instructions.md` é versionado no repo,
+contém as instruções MCP via CLI e é sincronizado como instrução global de
+usuário do VS Code com `applyTo: "**"`.
 
 Skills com scripts externos (doc-extract, md-export, prompt-improver): o
 script copia o executável para dentro da pasta da skill e reescreve a

@@ -535,143 +535,76 @@ else
 fi
 say ""
 
-# --- doctree ---
+# --- doctree MCP (requer bun via npm) ---
 say "[doctree] MCP de navegacao de documentacao"
 export PATH="$HOME/.bun/bin:$PATH"
-if has_cmd bun && [ -d "$HOME/.bun/install/cache/doctree-mcp" ]; then
+doctree_installed=0
+
+if has_cmd bun && bunx doctree-mcp --help &>/dev/null 2>&1; then
   status_ok "doctree-mcp (bun $(bun --version 2>/dev/null | head -1))"
-elif has_cmd bun; then
-  say "  -> Baixando doctree-mcp..."
-  doctree_tmp="$(mktemp -d)"
-  mkdir -p "$doctree_tmp/docs"
-  if timeout 10 env DOCS_ROOT="$doctree_tmp/docs" bunx doctree-mcp --help </dev/null &>/dev/null; then
-    status_installed "doctree-mcp"
-  elif [ -d "$HOME/.bun/install/cache/doctree-mcp" ]; then
-    status_installed "doctree-mcp"
+  doctree_installed=1
+fi
+
+if [ "$doctree_installed" -eq 0 ]; then
+  if ! has_cmd npm; then
+    status_missing "doctree (requer npm/bun)"
+    status_hint "Instale Node.js (npm) e rode o bootstrap novamente"
+    need_sudo_pkg "nodejs"  # npm vem com node
   else
-    status_missing "doctree"
-    status_hint "Instalar: bash scripts/doctree/install.sh --yes"
+    say "  -> Instalando bun via npm..."
+    npm config set prefix "$HOME/.local" 2>/dev/null || true
+    export PATH="$HOME/.local/bin:$PATH"
+
+    if [ "$assume_yes" -eq 0 ] && [ -t 0 ] && [ -t 1 ]; then
+      printf '  Instalar bun agora? [y/N] '
+      read -r ans || true
+      case "$ans" in y|Y|yes|YES) ;; *) status_hint "Instalar manualmente: npm install -g bun"; say ""; exit 0 ;; esac
+    fi
+
+    if npm install -g bun 2>&1 | while IFS= read -r line; do say "     $line"; done; then
+      export PATH="$HOME/.bun/bin:$PATH"
+      if has_cmd bun; then
+        status_installed "bun $(bun --version 2>/dev/null | head -1)"
+        say "  -> Verificando doctree-mcp via bunx..."
+        if timeout 10 bunx doctree-mcp --help &>/dev/null 2>&1; then
+          status_installed "doctree-mcp"
+          doctree_installed=1
+        else
+          status_missing "doctree"
+          status_hint "Bun instalado, mas doctree-mcp nao respondeu. Teste: bunx doctree-mcp --help"
+        fi
+      else
+        status_missing "bun (instalado mas nao encontrado no PATH)"
+        status_hint "Execute: export PATH=\"\$HOME/.bun/bin:\$PATH\""
+      fi
+    else
+      status_missing "doctree"
+      status_hint "Falha ao instalar bun. Instale manualmente: npm install -g bun"
+    fi
   fi
-  rm -rf "$doctree_tmp"
-else
-  status_missing "doctree"
-  status_hint "Instalar: bash scripts/doctree/install.sh --yes"
 fi
 say ""
 
 # --- codebase-memory-mcp ---
 say "[codebase-memory-mcp] MCP de memoria do codebase"
-export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 if has_cmd codebase-memory-mcp; then
-  status_ok "codebase-memory-mcp ($(codebase-memory-mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida'))"
+  if codebase-memory-mcp --version &>/dev/null; then
+    status_ok "codebase-memory-mcp ($(codebase-memory-mcp --version 2>&1 | head -1 || echo ok))"
+  else
+    # Binario incompativel — npm reinstall NAO resolve (binario pre-compilado)
+    error_output="$(codebase-memory-mcp --version 2>&1 || true)"
+    status_missing "codebase-memory-mcp (binario pre-compilado incompativel)"
+    say "     Erro: $error_output"
+    say ""
+    say "     Este binario foi compilado com glibc >= 2.38"
+    say "     Seu glibc: $(ldd --version 2>&1 | head -1)"
+    say ""
+    say "     REQUER Ubuntu 24.04+ (WSL). npm reinstall NAO resolve."
+  fi
 else
   status_missing "codebase-memory-mcp"
-  status_hint "Instalar: bash scripts/codebase-memory/install.sh --yes"
-fi
-say ""
-
-# --- mcp (avelino) — CLI wrapper para servidores MCP ---
-say "[mcp (avelino)] CLI wrapper para servidores MCP"
-export PATH="$HOME/.local/bin:$PATH"
-mcp_expected_sha="${MCP_EXPECTED_SHA:-1820c6f48ce02a13f8176dd4f30d41614b29525216a50a83ddef17ba79fc11dd}"
-mcp_install_dir="$HOME/.local/bin"
-mcp_bin="$mcp_install_dir/mcp"
-
-if has_cmd mcp; then
-  status_ok "mcp (avelino) $(mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida')"
-else
-  status_missing "mcp (avelino)"
-  status_hint "Instalar: MCP_EXPECTED_SHA=<sha> ./scripts/bootstrap_repo/opencode-install-deps.sh --yes"
-
-  if ! has_cmd curl; then
-    status_hint "Instale curl: sudo apt-get install -y curl (ou brew install curl)"
-  fi
-
-  if has_cmd curl; then
-    say "  -> Baixando do repositorio https://github.com/avelino/mcp..."
-    local_tmp="$(mktemp -d)"
-    local_archive="$local_tmp/mcp-bin"
-
-    local_arch="$(uname -m)"
-    local_dl_url=""
-    case "$local_arch" in
-      x86_64)      local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu" ;;
-      aarch64|arm64) local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-aarch64-unknown-linux-gnu" ;;
-      *)
-        status_hint "Arquitetura $local_arch nao suportada diretamente. Instale manualmente."
-        local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu"
-        say "  -> Fallback para x86_64..."
-        ;;
-    esac
-
-    if curl -fsSL "$local_dl_url" -o "$local_archive"; then
-      chmod +x "$local_archive"
-      mkdir -p "$mcp_install_dir"
-      mv "$local_archive" "$mcp_bin"
-      chmod +x "$mcp_bin"
-
-      say "  -> Validando integridade (SHA-256)..."
-      local_actual_sha="$(sha256sum "$mcp_bin" | awk '{print $1}')"
-      say "  -> SHA do repo esperado: $mcp_expected_sha"
-      say "  -> SHA do arquivo:       $local_actual_sha"
-
-      if [ "$local_actual_sha" = "$mcp_expected_sha" ]; then
-        status_installed "mcp (avelino)"
-      else
-        say ""
-        say "[SHA mismatch]"
-        say "  SHA esperado no repo:  $mcp_expected_sha"
-        say "  SHA real do arquivo:   $local_actual_sha"
-        say ""
-        say "O upstream mudou o binario. Atualize MCP_EXPECTED_SHA."
-        say ""
-        say "Para atualizar agora (temporario):"
-        say "  MCP_EXPECTED_SHA=\"$local_actual_sha\" ./scripts/bootstrap_repo/opencode-install-deps.sh --yes"
-        say ""
-        say "Para atualizar permanentemente, edite a variavel MCP_EXPECTED_SHA"
-        say "em scripts/bootstrap_repo/opencode-install-deps.sh"
-        say ""
-        rm -f "$mcp_bin"
-        rm -rf "$local_tmp"
-        exit 1
-      fi
-    else
-      status_missing "mcp (avelino)"
-      status_hint "Falha ao baixar. Instale manualmente ou tente novamente."
-    fi
-    rm -rf "$local_tmp"
-  fi
-fi
-say ""
-
-# --- OCR (opcional, melhora extracao de PDFs escaneados) ---
-say "[ocrmypdf + tesseract + ghostscript + qpdf] Opcional: OCR de PDFs"
-ocr_missing=()
-has_cmd ocrmypdf   || ocr_missing+=("ocrmypdf")
-has_cmd tesseract  || ocr_missing+=("tesseract-ocr")
-has_cmd gs         || ocr_missing+=("ghostscript")
-has_cmd qpdf       || ocr_missing+=("qpdf")
-
-if [ ${#ocr_missing[@]} -eq 0 ]; then
-  status_ok "ocrmypdf, tesseract, ghostscript, qpdf"
-else
-  for pkg in "${ocr_missing[@]}"; do
-    status_missing "$pkg"
-  done
-  case "$OS" in
-    wsl|linux)
-      status_hint "Instalar: sudo apt-get install -y ${ocr_missing[*]}"
-      for pkg in "${ocr_missing[@]}"; do
-        need_sudo_pkg "$pkg"
-      done
-      ;;
-    macos)
-      status_hint "Instalar: brew install ${ocr_missing[*]}"
-      ;;
-    *)
-      status_hint "Consulte: https://ocrmypdf.readthedocs.io/en/latest/installation.html"
-      ;;
-  esac
+  status_hint "Instalar: npm install -g codebase-memory-mcp (requer npm)"
 fi
 say ""
 

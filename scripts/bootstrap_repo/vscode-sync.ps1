@@ -5,7 +5,8 @@
 
 .DESCRIPTION
     Copia e converte agents, skills, commands para os destinos globais do
-    VS Code, e cria symlink de .github\copilot-instructions.md para AGENTS.md.
+    VS Code, e sincroniza .github\copilot-specific.instructions.md para as
+    instructions globais em .copilot\instructions.
 
 .PARAMETER Yes
     Executa sem pedir confirmacao.
@@ -17,6 +18,7 @@
     Substitui o diretorio raiz de destino (usado em testes automatizados).
     Quando definido, os destinos passam a ser:
       $DestRoot\.copilot\skills\
+      $DestRoot\.copilot\instructions\
       $DestRoot\AppData\Roaming\Code\User\prompts\
       $DestRoot\AppData\Roaming\Code\User\mcp.json
 
@@ -54,7 +56,7 @@ O que e sincronizado:
   skills\*\         -> %USERPROFILE%\.copilot\skills\
   agents\*.md       -> %APPDATA%\Code\User\prompts\*.agent.md
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
-  copilot-instrs    -> %APPDATA%\Code\User\prompts\opencode-config.instructions.md
+  copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
 "@
 }
@@ -72,15 +74,17 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $RepoRoot  = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 
 if ($DestRoot) {
-    $SkillsDir  = Join-Path $DestRoot ".copilot\skills"
-    $PromptsDir = Join-Path $DestRoot "AppData\Roaming\Code\User\prompts"
-    $McpJson    = Join-Path $DestRoot "AppData\Roaming\Code\User\mcp.json"
-    $BackupRoot = Join-Path $DestRoot "vscode-backup"
+    $SkillsDir       = Join-Path $DestRoot ".copilot\skills"
+    $InstructionsDir = Join-Path $DestRoot ".copilot\instructions"
+    $PromptsDir      = Join-Path $DestRoot "AppData\Roaming\Code\User\prompts"
+    $McpJson         = Join-Path $DestRoot "AppData\Roaming\Code\User\mcp.json"
+    $BackupRoot      = Join-Path $DestRoot "vscode-backup"
 } else {
-    $SkillsDir  = Join-Path $env:USERPROFILE ".copilot\skills"
-    $PromptsDir = Join-Path $env:APPDATA "Code\User\prompts"
-    $McpJson    = Join-Path $env:APPDATA "Code\User\mcp.json"
-    $BackupRoot = Join-Path $env:USERPROFILE ".config\vscode-backup"
+    $SkillsDir       = Join-Path $env:USERPROFILE ".copilot\skills"
+    $InstructionsDir = Join-Path $env:USERPROFILE ".copilot\instructions"
+    $PromptsDir      = Join-Path $env:APPDATA "Code\User\prompts"
+    $McpJson         = Join-Path $env:APPDATA "Code\User\mcp.json"
+    $BackupRoot      = Join-Path $env:USERPROFILE ".config\vscode-backup"
 }
 
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -368,27 +372,24 @@ function Sync-Commands {
 # Sync-Instructions
 # ──────────────────────────────────────────────────────────────
 
-# ──────────────────────────────────────────────────────────────
-# Sync-Instructions
-# ──────────────────────────────────────────────────────────────
-
 function Sync-Instructions {
     Say ""
     Say "--- Instructions ---"
 
-    $source = Join-Path $RepoRoot ".github\copilot-instructions.md"
-    $dest   = Join-Path $PromptsDir "opencode-config.instructions.md"
+    $source = Join-Path $RepoRoot ".github\copilot-specific.instructions.md"
 
     if (-not (Test-Path $source)) {
-        Say "AVISO .github/copilot-instructions.md nao encontrado"
+        Say "AVISO .github/copilot-specific.instructions.md nao encontrado"
         return
     }
 
-    Ensure-Dir $PromptsDir
+    $dest = Join-Path $InstructionsDir "copilot-specific.instructions.md"
+
+    Ensure-Dir (Split-Path -Parent $dest)
     Backup-IfExists $dest
 
     Copy-Item -Path $source -Destination $dest -Force
-    Say "OK    opencode-config.instructions.md (MCP via CLI)"
+    Say "OK    copilot-specific.instructions.md (user global)"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -449,17 +450,17 @@ function Show-Plan {
     $nAgents   = @(Get-ChildItem -Path (Join-Path $RepoRoot "agents") -Filter "*.md").Count
     $nCommands = @(Get-ChildItem -Path (Join-Path $RepoRoot "commands") -Filter "*.md").Count
 
-    Say "Repo:    $RepoRoot"
-    Say "Skills:  $SkillsDir"
-    Say "Prompts: $PromptsDir"
-    Say "MCP:     $McpJson"
+    Say "Repo:         $RepoRoot"
+    Say "Skills:       $SkillsDir"
+    Say "Instructions: $InstructionsDir"
+    Say "Prompts:      $PromptsDir"
+    Say "MCP:          $McpJson"
     Say ""
     Say "Plano:"
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
     Say "  - Converter $nAgents agent(s) para .agent.md"
     Say "  - Copiar $nCommands command(s) para .prompt.md"
-
-    Say "  - Copiar .github/copilot-instructions.md (MCP via CLI)"
+    Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
     Say "  - Configurar MCPs (exa, crawl4ai) em mcp.json"
 }
 

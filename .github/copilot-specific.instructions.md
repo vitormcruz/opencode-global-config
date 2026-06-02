@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
 # Ferramentas MCP via CLI
