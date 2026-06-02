@@ -42,9 +42,56 @@ teardown() {
 # ---------------------------------------------------------------------------
 
 @test "opencode-install-deps --quiet suprime saída de progresso" {
-  run bash "$SCRIPT" --yes --quiet
+  # Usa fake_bin com todos os comandos essenciais + npm/bun mockados para
+  # evitar chamadas de rede ao artifactory (npm install -g bun seria lento/503)
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in bash sh grep sed cat chmod mkdir touch cp rm mktemp tar gzip \
+             head awk tr uname curl wget python3 pipx pandoc rsvg-convert \
+             playwright docling; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  # Mock npm: simula instalação bem-sucedida sem rede
+  cat > "$fake_bin/npm" << 'MOCK'
+#!/bin/bash
+case "$*" in
+  "config set"*) exit 0 ;;
+  "install -g bun") echo "added 1 package" ; exit 0 ;;
+  *) exit 0 ;;
+esac
+MOCK
+  chmod +x "$fake_bin/npm"
+
+  # Mock bun: reporta versão sem travar em bunx
+  cat > "$fake_bin/bun" << 'MOCK'
+#!/bin/bash
+case "$1" in
+  --version) echo "1.0.0" ; exit 0 ;;
+  x) exit 1 ;;   # bunx doctree-mcp --help falhará → MISSING (ok)
+  *) exit 0 ;;
+esac
+MOCK
+  chmod +x "$fake_bin/bun"
+
+  # bunx é symlink para bun
+  ln -sf "$fake_bin/bun" "$fake_bin/bunx"
+
+  # codebase-memory-mcp mockado
+  cat > "$fake_bin/codebase-memory-mcp" << 'MOCK'
+#!/bin/bash
+echo "0.7.0" ; exit 0
+MOCK
+  chmod +x "$fake_bin/codebase-memory-mcp"
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes --quiet
   assert_success
   refute_output --partial "=== opencode-install-deps ==="
+
+  rm -rf "$fake_bin"
 }
 
 # ---------------------------------------------------------------------------
@@ -328,6 +375,12 @@ CHECK_PYTHON3_FN='
   chmod +x "$fake_bin/bun"
   mkdir -p "$fake_home/.bun/install/cache/doctree-mcp"
 
+  for cmd in bash grep uname head awk ls; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
   run env HOME="$fake_home" PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
   assert_success
   assert_output --partial "[doctree]"
@@ -350,7 +403,7 @@ CHECK_PYTHON3_FN='
   assert_success
   assert_output --partial "[doctree]"
   assert_output --partial "MISSING   doctree"
-  assert_output --partial "scripts/doctree/install.sh"
+  assert_output --partial "Instale Node.js (npm) e rode o bootstrap novamente"
 
   rm -rf "$fake_bin"
 }
@@ -375,8 +428,9 @@ CHECK_PYTHON3_FN='
 }
 
 @test "opencode-install-deps exibe MISSING para codebase-memory-mcp quando ausente do PATH" {
-  local fake_bin
+  local fake_bin fake_home
   fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
 
   for cmd in bash grep uname head awk; do
     local p
@@ -384,13 +438,13 @@ CHECK_PYTHON3_FN='
     ln -sf "$p" "$fake_bin/$cmd"
   done
 
-  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  run env HOME="$fake_home" PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
   assert_success
   assert_output --partial "[codebase-memory-mcp]"
   assert_output --partial "MISSING   codebase-memory-mcp"
-  assert_output --partial "scripts/codebase-memory/install.sh"
+  assert_output --partial "npm install -g codebase-memory-mcp"
 
-  rm -rf "$fake_bin"
+  rm -rf "$fake_bin" "$fake_home"
 }
 
 # ---------------------------------------------------------------------------

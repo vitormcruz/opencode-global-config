@@ -540,7 +540,7 @@ say "[doctree] MCP de navegacao de documentacao"
 export PATH="$HOME/.bun/bin:$PATH"
 doctree_installed=0
 
-if has_cmd bun && bunx doctree-mcp --help &>/dev/null 2>&1; then
+if has_cmd bun && ls "$HOME/.bun/install/cache/doctree-mcp" &>/dev/null 2>&1; then
   status_ok "doctree-mcp (bun $(bun --version 2>/dev/null | head -1))"
   doctree_installed=1
 fi
@@ -565,13 +565,14 @@ if [ "$doctree_installed" -eq 0 ]; then
       export PATH="$HOME/.bun/bin:$PATH"
       if has_cmd bun; then
         status_installed "bun $(bun --version 2>/dev/null | head -1)"
-        say "  -> Verificando doctree-mcp via bunx..."
-        if timeout 10 bunx doctree-mcp --help &>/dev/null 2>&1; then
+        say "  -> Verificando doctree-mcp no cache do bun..."
+        if ls "$HOME/.bun/install/cache/doctree-mcp" &>/dev/null 2>&1; then
           status_installed "doctree-mcp"
           doctree_installed=1
         else
           status_missing "doctree"
-          status_hint "Bun instalado, mas doctree-mcp nao respondeu. Teste: bunx doctree-mcp --help"
+          status_hint "Bun instalado, mas doctree-mcp nao encontrado no cache."
+          status_hint "Acesse a internet publica e rode: bunx doctree-mcp --help"
         fi
       else
         status_missing "bun (instalado mas nao encontrado no PATH)"
@@ -605,6 +606,44 @@ if has_cmd codebase-memory-mcp; then
 else
   status_missing "codebase-memory-mcp"
   status_hint "Instalar: npm install -g codebase-memory-mcp (requer npm)"
+fi
+say ""
+
+# --- mcp (avelino) ---
+say "[mcp (avelino)] MCP CLI"
+MCP_INSTALL_DIR="${HOME}/.local/bin"
+MCP_URL="${MCP_URL:-https://github.com/avelino/mcp/releases/latest/download/mcp-linux-amd64}"
+MCP_EXPECTED_SHA="${MCP_EXPECTED_SHA:-}"
+
+if has_cmd mcp; then
+  status_ok "mcp ($(mcp --version 2>/dev/null | head -1 || echo ok))"
+else
+  if ! has_cmd curl; then
+    status_missing "mcp"
+    status_hint "Instale curl para baixar o mcp automaticamente"
+  else
+    _mcp_tmp="$(mktemp)"
+    if curl -fsSL "$MCP_URL" -o "$_mcp_tmp" 2>/dev/null; then
+      _mcp_sha="$(sha256sum "$_mcp_tmp" | awk '{print $1}')"
+      say "            SHA do arquivo: $_mcp_sha"
+      if [ -n "$MCP_EXPECTED_SHA" ] && [ "$_mcp_sha" != "$MCP_EXPECTED_SHA" ]; then
+        say "  ERROR: SHA mismatch ao instalar mcp"
+        say "         SHA esperado no repo: $MCP_EXPECTED_SHA"
+        say "         SHA real do arquivo:  $_mcp_sha"
+        say "         Para atualizar: MCP_EXPECTED_SHA=<novo valor>"
+        rm -f "$_mcp_tmp"
+        exit 1
+      fi
+      mkdir -p "$MCP_INSTALL_DIR"
+      mv "$_mcp_tmp" "$MCP_INSTALL_DIR/mcp"
+      chmod +x "$MCP_INSTALL_DIR/mcp"
+      status_installed "mcp"
+    else
+      rm -f "$_mcp_tmp"
+      status_missing "mcp"
+      status_hint "Falha ao baixar mcp. Tente manualmente: $MCP_URL"
+    fi
+  fi
 fi
 say ""
 

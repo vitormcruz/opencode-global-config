@@ -23,12 +23,21 @@ require_doctree_real() {
   rm -rf "$tmpdir"
 }
 
-@test "doctree real: bunx doctree-mcp responde a --version" {
+@test "doctree real: bunx doctree-mcp responde a tools/list via protocolo MCP" {
   require_doctree_real
   local tmpdir
   tmpdir="$(mktemp -d)"
   mkdir -p "$tmpdir/docs"
-  run env DOCS_ROOT="$tmpdir/docs" bunx doctree-mcp --version </dev/null
+  echo "# Test Doc" > "$tmpdir/docs/test.md"
+
+  # MCP stdio requer handshake: initialize primeiro, depois tools/list
+  run bash -c "printf '%s\n%s\n' \
+    '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"0\"}}}' \
+    '{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{}}' \
+    | env DOCS_ROOT='$tmpdir/docs' timeout 10 bunx doctree-mcp 2>/dev/null"
+
   assert_success
+  assert_output --partial '"tools"'
+  assert_output --partial 'list_documents'
   rm -rf "$tmpdir"
 }

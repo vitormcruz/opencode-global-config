@@ -16,7 +16,7 @@ teardown() { common_teardown; }
 _make_fake_bin_no_docker() {
   local fake_bin="$1"
   # Copia comandos essenciais (sem docker)
-  for cmd in bash sh grep sed cat chmod mkdir touch; do
+  for cmd in bash sh grep sed cat chmod mkdir touch cd dirname pwd; do
     local p
     p="$(command -v "$cmd" 2>/dev/null)" || continue
     ln -sf "$p" "$fake_bin/$cmd"
