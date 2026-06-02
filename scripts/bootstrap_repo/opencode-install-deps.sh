@@ -570,6 +570,80 @@ else
 fi
 say ""
 
+# --- mcp (avelino) — CLI wrapper para servidores MCP ---
+say "[mcp (avelino)] CLI wrapper para servidores MCP"
+export PATH="$HOME/.local/bin:$PATH"
+mcp_expected_sha="${MCP_EXPECTED_SHA:-1820c6f48ce02a13f8176dd4f30d41614b29525216a50a83ddef17ba79fc11dd}"
+mcp_install_dir="$HOME/.local/bin"
+mcp_bin="$mcp_install_dir/mcp"
+
+if has_cmd mcp; then
+  status_ok "mcp (avelino) $(mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida')"
+else
+  status_missing "mcp (avelino)"
+  status_hint "Instalar: MCP_EXPECTED_SHA=<sha> ./scripts/bootstrap_repo/opencode-install-deps.sh --yes"
+
+  if ! has_cmd curl; then
+    status_hint "Instale curl: sudo apt-get install -y curl (ou brew install curl)"
+  fi
+
+  if has_cmd curl; then
+    say "  -> Baixando do repositorio https://github.com/avelino/mcp..."
+    local_tmp="$(mktemp -d)"
+    local_archive="$local_tmp/mcp-bin"
+
+    local_arch="$(uname -m)"
+    local_dl_url=""
+    case "$local_arch" in
+      x86_64)      local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu" ;;
+      aarch64|arm64) local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-aarch64-unknown-linux-gnu" ;;
+      *)
+        status_hint "Arquitetura $local_arch nao suportada diretamente. Instale manualmente."
+        local_dl_url="https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu"
+        say "  -> Fallback para x86_64..."
+        ;;
+    esac
+
+    if curl -fsSL "$local_dl_url" -o "$local_archive"; then
+      chmod +x "$local_archive"
+      mkdir -p "$mcp_install_dir"
+      mv "$local_archive" "$mcp_bin"
+      chmod +x "$mcp_bin"
+
+      say "  -> Validando integridade (SHA-256)..."
+      local_actual_sha="$(sha256sum "$mcp_bin" | awk '{print $1}')"
+      say "  -> SHA do repo esperado: $mcp_expected_sha"
+      say "  -> SHA do arquivo:       $local_actual_sha"
+
+      if [ "$local_actual_sha" = "$mcp_expected_sha" ]; then
+        status_installed "mcp (avelino)"
+      else
+        say ""
+        say "[SHA mismatch]"
+        say "  SHA esperado no repo:  $mcp_expected_sha"
+        say "  SHA real do arquivo:   $local_actual_sha"
+        say ""
+        say "O upstream mudou o binario. Atualize MCP_EXPECTED_SHA."
+        say ""
+        say "Para atualizar agora (temporario):"
+        say "  MCP_EXPECTED_SHA=\"$local_actual_sha\" ./scripts/bootstrap_repo/opencode-install-deps.sh --yes"
+        say ""
+        say "Para atualizar permanentemente, edite a variavel MCP_EXPECTED_SHA"
+        say "em scripts/bootstrap_repo/opencode-install-deps.sh"
+        say ""
+        rm -f "$mcp_bin"
+        rm -rf "$local_tmp"
+        exit 1
+      fi
+    else
+      status_missing "mcp (avelino)"
+      status_hint "Falha ao baixar. Instale manualmente ou tente novamente."
+    fi
+    rm -rf "$local_tmp"
+  fi
+fi
+say ""
+
 # --- OCR (opcional, melhora extracao de PDFs escaneados) ---
 say "[ocrmypdf + tesseract + ghostscript + qpdf] Opcional: OCR de PDFs"
 ocr_missing=()

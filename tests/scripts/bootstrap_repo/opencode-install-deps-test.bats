@@ -392,3 +392,206 @@ CHECK_PYTHON3_FN='
 
   rm -rf "$fake_bin"
 }
+
+# ---------------------------------------------------------------------------
+# [mcp (avelino)] — verificacao e instalacao
+# ---------------------------------------------------------------------------
+
+@test "mcp-avelino: mcp ja no PATH -> status_ok e pula instalacao" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp"
+  chmod +x "$fake_bin/mcp"
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[mcp (avelino)]"
+  assert_output --partial "OK"
+
+  rm -rf "$fake_bin"
+}
+
+@test "mcp-avelino: mcp ausente e curl ausente -> MISSING com hint de curl" {
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+
+  for cmd in bash grep uname head awk sha256sum; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[mcp (avelino)]"
+  assert_output --partial "MISSING"
+  assert_output --partial "curl"
+
+  rm -rf "$fake_bin"
+}
+
+@test "mcp-avelino: SHA correto -> instala em ~/.local/bin/mcp" {
+  local fake_bin fake_home expected_sha
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  # Cria binario mock
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+  expected_sha="$(sha256sum "$fake_bin/mcp_payload" | awk '{print $1}')"
+
+  # Mock curl que copia o payload
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv mktemp cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env HOME="$fake_home" PATH="$fake_bin" MCP_EXPECTED_SHA="$expected_sha" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "[mcp (avelino)]"
+  assert [ -f "$fake_home/.local/bin/mcp" ]
+  assert [ -x "$fake_home/.local/bin/mcp" ]
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "mcp-avelino: SHA incorreto -> aborta e exibe ambos SHAs e guidance" {
+  local fake_bin fake_home
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+
+  # Mock curl que copia o payload
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv rm mktemp cp; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env HOME="$fake_home" PATH="$fake_bin" \
+      MCP_EXPECTED_SHA="0000000000000000000000000000000000000000000000000000000000000000" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_failure
+  assert_output --partial "SHA mismatch"
+  assert_output --partial "SHA esperado no repo"
+  assert_output --partial "SHA real do arquivo"
+  assert_output --partial "MCP_EXPECTED_SHA"
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "mcp-avelino: MCP_EXPECTED_SHA sobrescrito via env var e respeitado" {
+  local fake_bin fake_home custom_sha
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+  custom_sha="$(sha256sum "$fake_bin/mcp_payload" | awk '{print $1}')"
+
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv mktemp cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env HOME="$fake_home" PATH="$fake_bin" MCP_EXPECTED_SHA="$custom_sha" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "INSTALLED"
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "mcp-avelino: SHA calculado e exibido no output (transparencia)" {
+  local fake_bin fake_home expected_sha
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+  expected_sha="$(sha256sum "$fake_bin/mcp_payload" | awk '{print $1}')"
+
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv mktemp cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env HOME="$fake_home" PATH="$fake_bin" MCP_EXPECTED_SHA="$expected_sha" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "SHA do arquivo:"
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "mcp-avelino: funciona sem jq (usa latest/download direto)" {
+  local fake_bin fake_home expected_sha
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+  expected_sha="$(sha256sum "$fake_bin/mcp_payload" | awk '{print $1}')"
+
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv mktemp cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+  # Sem jq no fake_bin
+
+  run env HOME="$fake_home" PATH="$fake_bin" MCP_EXPECTED_SHA="$expected_sha" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "INSTALLED"
+
+  rm -rf "$fake_bin" "$fake_home"
+}
+
+@test "mcp-avelino: binario instalado e executavel" {
+  local fake_bin fake_home expected_sha
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  printf '#!/bin/sh\necho "mcp 1.0.0"\n' > "$fake_bin/mcp_payload"
+  chmod +x "$fake_bin/mcp_payload"
+  expected_sha="$(sha256sum "$fake_bin/mcp_payload" | awk '{print $1}')"
+
+  printf '#!/bin/sh\ncp "%s" "$4"\n' "$fake_bin/mcp_payload" > "$fake_bin/curl"
+  chmod +x "$fake_bin/curl"
+
+  for cmd in bash grep uname head awk sha256sum mkdir chmod mv mktemp cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  run env HOME="$fake_home" PATH="$fake_bin" MCP_EXPECTED_SHA="$expected_sha" \
+      /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert [ -x "$fake_home/.local/bin/mcp" ]
+
+  rm -rf "$fake_bin" "$fake_home"
+}

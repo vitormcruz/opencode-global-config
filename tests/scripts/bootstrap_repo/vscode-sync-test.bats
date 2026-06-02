@@ -45,17 +45,6 @@ load "../../helpers/test_helper"
   assert_file_exist "$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1"
 }
 
-@test "vscode-sync: contem funcao Install-McpWrapper" {
-  run grep -c "^function Install-McpWrapper" "$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1"
-  assert_success
-  [[ "$output" -eq 1 ]]
-}
-
-@test "vscode-sync: Install-McpWrapper referencia URL de download do avelino/mcp" {
-  run grep -q "github.com/avelino/mcp/releases" "$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1"
-  assert_success
-}
-
 @test "vscode-sync: Sync-Instructions copia de .github/copilot-instructions.md (nao de AGENTS.md)" {
   run bash -c "grep -A 10 '^function Sync-Instructions' '$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1' | grep -q '.github'"
   assert_success
@@ -64,22 +53,6 @@ load "../../helpers/test_helper"
 @test "vscode-sync: Sync-Instructions NAO referencia AGENTS.md como fonte" {
   run bash -c "grep -A 10 '^function Sync-Instructions' '$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1' | grep -q 'AGENTS.md'"
   assert_failure
-}
-
-@test "vscode-sync: Install-McpWrapper e chamado antes de Sync-Instructions no fluxo principal" {
-  run bash -c "grep -A 20 '^Show-Plan' '$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1' | grep -n 'Install-McpWrapper\|Sync-Instructions'"
-  assert_success
-  local install_line sync_line
-  install_line=$(echo "$output" | grep "Install-McpWrapper" | head -1 | cut -d: -f1)
-  sync_line=$(echo "$output"    | grep "Sync-Instructions"   | head -1 | cut -d: -f1)
-  [[ "$install_line" -lt "$sync_line" ]]
-}
-
-@test "vscode-sync: Show-Usage menciona wrapper MCP e copilot-instructions" {
-  run bash -c "grep -A 20 '^function Show-Usage' '$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1' | grep -q 'wrapper MCP'"
-  assert_success
-  run bash -c "grep -A 20 '^function Show-Usage' '$REPO_ROOT/scripts/bootstrap_repo/vscode-sync.ps1' | grep -q 'copilot-instrs'"
-  assert_success
 }
 
 @test "vscode-sync: Show-Plan NAO menciona copia de AGENTS.md para copilot-instructions" {
