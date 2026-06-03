@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # tests/scripts/mapa-produto/scaffold-test.bats
 #
-# Valida o script de scaffold do Mapa do Produto e a
+# Valida o script de scaffold do /doc/README.md e a
 # consistência do template entre fontes.
 
 setup() {
@@ -19,24 +19,24 @@ setup() {
   [ -f "$SCRIPTS_DIR/mapa-produto/scaffold.sh" ]
 }
 
-@test "scaffold.sh cria seções do Mapa em arquivo vazio" {
+@test "scaffold.sh cria seções do /doc/README.md em arquivo vazio" {
   common_setup
-  local dest="$TEST_HOME/test-agents.md"
+  local dest="$TEST_HOME/test-doc.md"
   touch "$dest"
 
   run bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
   [ "$status" -eq 0 ]
 
-  run grep "## Mapa do Produto" "$dest"
+  run grep "## Definição de Escopo" "$dest"
   [ "$status" -eq 0 ]
 
-  run grep "### Elementos de Especificação" "$dest"
+  run grep "## Elementos de Especificação" "$dest"
   [ "$status" -eq 0 ]
 
-  run grep "### Regras de Documentação" "$dest"
+  run grep "## Regras de Documentação" "$dest"
   [ "$status" -eq 0 ]
 
-  run grep "### Harness por Agente" "$dest"
+  run grep "## Estratégias de Indexação de Código" "$dest"
   [ "$status" -eq 0 ]
 
   common_teardown
@@ -44,14 +44,14 @@ setup() {
 
 @test "scaffold.sh é idempotente — não duplica seções" {
   common_setup
-  local dest="$TEST_HOME/test-agents.md"
+  local dest="$TEST_HOME/test-doc.md"
   touch "$dest"
 
   bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
   bash "$SCRIPTS_DIR/mapa-produto/scaffold.sh" "$dest"
 
   local count
-  count=$(grep -c "## Mapa do Produto" "$dest")
+  count=$(grep -c "## Definição de Escopo" "$dest")
   [ "$count" -eq 1 ]
 
   common_teardown
@@ -63,40 +63,39 @@ setup() {
 }
 
 # ----------------------------------------------------------
-# Template do Mapa — consistência entre fontes
+# Template do /doc/README.md — consistência entre fontes
 # ----------------------------------------------------------
 
 @test "workflow-curadoria.md contém as 3 seções do template" {
   local f="$DOCS_DIR/workflow-curadoria.md"
+  run grep "Definição de Escopo" "$f"
+  [ "$status" -eq 0 ]
+
   run grep "Elementos de Especificação" "$f"
   [ "$status" -eq 0 ]
 
-  run grep "Regras de Documentação" "$f"
-  [ "$status" -eq 0 ]
-
-  run grep "Harness por Agente" "$f"
+  run grep "Estratégias de Indexação de Código" "$f"
   [ "$status" -eq 0 ]
 }
 
-@test "editor-mapa-produto.md contém as 3 seções do template" {
-  local f="$AGENTS_DIR/editor-mapa-produto.md"
+@test "curador-produto-editor.md contém as 3 seções do template" {
+  local f="$AGENTS_DIR/curador-produto-editor.md"
+  run grep "Definição de Escopo" "$f"
+  [ "$status" -eq 0 ]
+
   run grep "Elementos de Especificação" "$f"
   [ "$status" -eq 0 ]
 
-  run grep "Regras de Documentação" "$f"
-  [ "$status" -eq 0 ]
-
-  run grep "Harness por Agente" "$f"
+  run grep "Estratégias de Indexação de Código" "$f"
   [ "$status" -eq 0 ]
 }
 
 @test "template do editor lista os mesmos elementos do workflow" {
   local workflow="$DOCS_DIR/workflow-curadoria.md"
-  local editor="$AGENTS_DIR/editor-mapa-produto.md"
+  local editor="$AGENTS_DIR/curador-produto-editor.md"
 
-  # Elementos obrigatórios do template default
   for elemento in "Modelo de Dados" "Threat Model" \
-                   "Plano de Testes" "Code as Doc" \
+                   "Plano de Testes" \
                    "ADR (Arquitetura)"; do
     run grep "$elemento" "$workflow"
     [ "$status" -eq 0 ]
@@ -106,7 +105,7 @@ setup() {
 }
 
 @test "template do editor contém destino docs/specs/" {
-  run grep "docs/specs/" "$AGENTS_DIR/editor-mapa-produto.md"
+  run grep "docs/specs/" "$AGENTS_DIR/curador-produto-editor.md"
   [ "$status" -eq 0 ]
 }
 
@@ -116,7 +115,7 @@ setup() {
 }
 
 @test "tabela de harness lista agentes obrigatórios" {
-  local f="$AGENTS_DIR/editor-mapa-produto.md"
+  local f="$AGENTS_DIR/curador-produto-editor.md"
   for agente in eng-software dba sec qa front rev \
                 val-harness curador-produto; do
     run grep "| $agente" "$f"

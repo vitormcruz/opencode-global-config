@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/mapa-produto/scaffold.sh
-# Cria as seções vazias do Mapa do Produto no arquivo destino.
+# Cria as seções vazias do /doc/README.md no arquivo destino.
 # Uso: scripts/mapa-produto/scaffold.sh <arquivo-destino>
 # Idempotente: se seções já existem, não duplica.
 
@@ -20,30 +20,36 @@ mkdir -p "$(dirname "$DEST")"
 touch "$DEST"
 
 # Verifica se seção já existe
-if grep -q "^## Mapa do Produto" "$DEST" 2>/dev/null; then
-  echo "Seção '## Mapa do Produto' já existe em $DEST. Nada a fazer."
+if grep -q "^## Definição de Escopo" "$DEST" 2>/dev/null; then
+  echo "Seção '## Definição de Escopo' já existe em $DEST. Nada a fazer."
   exit 0
 fi
 
 cat >> "$DEST" << 'EOF'
 
-## Mapa do Produto
+## Definição de Escopo
 
-### Elementos de Especificação
+O analista deve elicitar:
+- Requisitos funcionais e não funcionais
+- Critérios de aceitação por exemplos
+- Organizados por histórias de usuário
+- Critérios devem referenciar requisitos funcionais
+- Nenhum requisito pode ficar sem critério
+Skill recomendada: (opcional — humano define)
 
-| Elemento | Formato/Ferramenta | Origem | Destino |
-|----------|-------------------|--------|---------|
+## Elementos de Especificação
+
+| Elemento | Formato/Ferramenta | Agente Responsável | Destino |
+|----------|-------------------|-------------------|---------|
 | (preencher) | | | |
 
-### Regras de Documentação
+## Regras de Documentação
 
 (seções por elemento — preencher conforme necessidade)
 
-### Harness por Agente
+## Estratégias de Indexação de Código
 
-| Agente | Comando de Execução | Descrição |
-|--------|--------------------|-----------|
-| (preencher) | | |
+- (preencher com ferramentas selecionadas)
 EOF
 
-echo "Scaffold do Mapa do Produto criado em: $DEST"
+echo "Scaffold do /doc/README.md criado em: $DEST"

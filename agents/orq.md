@@ -21,7 +21,7 @@ permission:
   task:
     eng-software: allow
     curador-produto: allow
-    editor-mapa-produto: allow
+     curador-produto-editor: allow
     dba: allow
     sec: allow
     qa: allow
@@ -150,12 +150,12 @@ Registre o mapa de modelos no arquivo de planejamento.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 1.1 | `curador-produto` | Verificar existência/completude do Mapa do Produto |
+| 1.1 | `curador-produto` | Verificar existência/completude do /doc/README.md |
 | 1.2 | `orq` | Atualizar `Status: PLANEJAMENTO` |
 
-Se o Mapa não existir, `curador-produto` para o fluxo e
-aciona `editor-mapa-produto` para criá-lo. Se incompleto,
-informa e delega atualização ao `editor-mapa-produto`.
+Se o /doc/README.md não existir, `curador-produto` para o fluxo e
+ aciona `curador-produto-editor` para criá-lo. Se incompleto,
+ informa e delega atualização ao `curador-produto-editor`.
 
 ### 2. PLANEJAMENTO
 
@@ -178,7 +178,7 @@ histórico da conversa anterior.
 | 3.1 | `dba` | Revisar modelagem |
 | 3.2 | `sec` | Revisar segurança |
 | 3.3 | `qa` | Revisar testabilidade |
-| 3.4 | `curador-produto` | Revisar documentação (Mapa) |
+| 3.4 | `curador-produto` | Revisar documentação (/doc/README.md) |
 | 3.5 | `front` | Revisar protótipos/UI |
 | 3.6 | `rev` | Revisão integrativa |
 
@@ -215,7 +215,7 @@ Instâncias limpas — revisam e corrigem.
 | 5.1 | `dba` | Revisar artefatos de BD |
 | 5.2 | `sec` | Revisar segurança |
 | 5.3 | `qa` | Revisar cobertura de testes |
-| 5.4 | `curador-produto` | Revisar documentação (Mapa) |
+| 5.4 | `curador-produto` | Revisar documentação (/doc/README.md) |
 | 5.5 | `front` | Revisar aderência visual |
 | 5.6 | `rev` | Revisão integrativa |
 | 5.7 | `val-harness` | Validar evidências da fase |
@@ -247,12 +247,12 @@ Instâncias limpas — revisam e corrigem.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 7.1 | `curador-produto` | Revisão final: verificar artefatos de spec (Mapa) |
+| 7.1 | `curador-produto` | Revisão final: verificar artefatos de spec (/doc/README.md) |
 
 **Loop de revalidação (guarda do humano):**
 1. Se lacunas em outros domínios → spawnar especialista
    indicado pelo `curador-produto` (eng, dba, sec, qa,
-   front — conforme Mapa).
+    front — conforme /doc/README.md).
 2. Spawnar `curador-produto` → revalidar completude.
 3. Se OK → sai do loop.
 4. Se lacunas restantes → perguntar ao humano:

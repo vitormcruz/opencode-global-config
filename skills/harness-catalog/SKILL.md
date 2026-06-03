@@ -4,7 +4,7 @@ description: >
   Catálogo de referência com sugestões de harness por agente
   (eng-software, dba, sec, qa, rev, front, curador-produto).
   Use quando: criando ou atualizando harness de agentes,
-  definindo regras de contenção para o Mapa do Produto,
+  definindo regras de contenção para o /doc/README.md,
   configurando ferramentas determinísticas para script
   único por agente. Triggers: "harness", "catálogo de
   harness", "sugestões de harness", "regras de contenção",
@@ -17,7 +17,7 @@ description: >
 > **Nota importante:** as regras abaixo são referência de
 > domínio para orientar o humano na criação de harness.
 > **Não são regras obrigatórias.** O harness efetivo de
-> cada agente é definido no Mapa do Produto de cada
+> cada agente é definido no /doc/README.md de cada
 > projeto.
 
 ## Interface Padronizada
@@ -76,7 +76,7 @@ Exit code: 0 = pass, 1 = fail.
 
 ## sec
 
-> Ferramentas efetivas: as do Mapa do Produto. Abaixo
+> Ferramentas efetivas: as do /doc/README.md. Abaixo
 > é catálogo de referência.
 
 - **SAST obrigatório** `tool` `build · val`
@@ -143,11 +143,11 @@ Exit code: 0 = pass, 1 = fail.
 
 ## curador-produto
 
-- **Checklist do Mapa** `prompt` `val`
+- **Checklist do /doc/README.md** `prompt` `val`
   Verificar se faltou atualizar documentação.
 
-- **Atualiza Mapa diretamente** `prompt` `val`
-  Alterou estrutura/convenções → atualizar Mapa.
+- **Atualiza /doc/README.md diretamente** `prompt` `val`
+  Alterou estrutura/convenções → atualizar /doc/README.md.
 
 - **Valida existência de harness** `prompt` `val`
   Todos os agentes devem ter harness registrado.

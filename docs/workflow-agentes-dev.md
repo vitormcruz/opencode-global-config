@@ -11,6 +11,13 @@ otimizado para:
 - **higiene de contexto** — cada fase roda em instância
   nova, usando o arquivo de planejamento como handoff.
 
+> **Nota:** este workflow começa em PLANEJAMENTO. A fase
+> de VALIDAÇÃO (verificação de /doc/README.md e Harness)
+> e a ELICITAÇÃO de escopo foram transferidas para o
+> **workflow de Definição de Escopo**
+> (`docs/workflow-definicao-escopo.md`), que roda antes
+> deste.
+
 ## Agentes
 
 | Sigla             | Nome completo          | Tipo               | Fases onde atua                                              |
@@ -18,7 +25,7 @@ otimizado para:
 | `orq`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
 | `eng-software`    | Engenheiro de Software | Executor            | Planejamento, Construção, Ajustes integrativos               |
 | `front`           | Engenheiro Frontend    | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
-| `curador-produto` | Curador de Produto     | Executor            | Validação, Revisão do Plano, Revisão da Construção, Finalização |
+| `curador-produto` | Curador de Produto     | Executor            | Revisão do Plano, Revisão da Construção, Finalização |
 | `dba`             | Analista de BD         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
 | `sec`             | Analista Cyber         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção, Testes |
 | `rev`             | Revisor Integrativo    | Executor            | Revisão do Plano, Revisão da Construção                        |
@@ -31,13 +38,13 @@ otimizado para:
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao Mapa; guardião do Mapa (não edita — delega ao editor-mapa-produto); revisa docs nos loops; revisão final |
+| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao /doc/README.md; guardião do /doc/README.md (não edita — delega ao curador-produto-editor); revisa docs nos loops; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
 | `front`            | Prototipar telas, validar identidade visual com humano | Implementar UI conforme identidade visual aprovada                                     | Revisa aderência à identidade visual aprovada                                             |
 | `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
-| `val-harness`      | —                                                      | —                                                                                      | Valida evidências de harness dos agentes da fase (apenas após Construção e Revisão da Construção, se houve modificações); cruza com Mapa do Produto |
+| `val-harness`      | —                                                      | —                                                                                      | Valida evidências de harness dos agentes da fase (apenas após Construção e Revisão da Construção, se houve modificações); cruza com AGENTS.md |
 
 > **Nota de sequenciamento (P26):** `sec` analisa
 > requisitos de segurança com base no plano de
@@ -50,12 +57,13 @@ O workflow se apoia em quatro contratos formais. Cada um
 é um artefato do projeto — deve existir, ser mantido e
 ser verificável.
 
-### 1. Mapa do Produto
+### 1. /doc/README.md
 
-Seção no arquivo de contexto do agente (AGENTS.md,
-instructions.md ou equivalente) que define como a
-documentação do produto se organiza e como deve ser
-mantida. É o contrato de documentação do projeto.
+Arquivo que define como a documentação do produto se
+organiza e como deve ser mantida. Contém 3 seções:
+Definição de Escopo, Elementos de Especificação e
+Estratégias de Indexação de Código. É o contrato de
+documentação do projeto.
 Definição e criação: ver `docs/workflow-curadoria.md`.
 Premissa de consumo: 21.
 
@@ -63,7 +71,7 @@ Premissa de consumo: 21.
 
 Regras de contenção e direcionamento de cada agente —
 ativadas como regras de prompt, ferramentas ou scripts.
-O Harness deve estar listado no Mapa do Produto.
+O Harness deve estar listado no AGENTS.md do projeto.
 Definição e criação: ver `docs/workflow-curadoria.md`.
 Premissas de execução: 32–36.
 
@@ -90,7 +98,7 @@ Premissas detalhadas: 32–36.
 
 ### 5. Elementos de Especificação
 
-O Mapa do Produto define para cada elemento de
+O /doc/README.md define para cada elemento de
 especificação do software: (1) o que é,
 (2) formato/ferramenta, (3) qual agente cria, (4) em
 qual fase, (5) onde vive permanentemente.
@@ -112,7 +120,7 @@ Regras já registradas nunca são reperguntadas.
 
 Outros elementos de spec (requisitos, critérios de
 aceitação, plano de testes, modelo de dados, threat
-model, etc.) seguem o mesmo padrão — o Mapa define o
+ model, etc.) seguem o mesmo padrão — o /doc/README.md define o
 que, quem, quando e onde para cada um.
 Premissas detalhadas: 21.1–21.3.
 
@@ -165,11 +173,11 @@ Premissas detalhadas: 21.1–21.3.
      parada adicional entre fases.
    - **Definir por fase** — o humano lista no formato
      `<nº>. <modelo>` (fases omitidas usam modelo atual):
-     ```
-     1-VALIDAÇÃO  2-PLANEJAMENTO  3-REVISÃO DO PLANO
-     4-CONSTRUÇÃO  5-REVISÃO DA CONSTRUÇÃO  6-TESTES
-     7-FINALIZAÇÃO
-     ```
+      ```
+      1-PLANEJAMENTO  2-REVISÃO DO PLANO
+      3-CONSTRUÇÃO  4-REVISÃO DA CONSTRUÇÃO  5-TESTES
+      6-FINALIZAÇÃO
+      ```
    O mapa de modelos é registrado no arquivo de
    planejamento. Aplicação por plataforma:
    - **VS Code**: `orq` passa `model` ao `runSubagent`.
@@ -260,7 +268,7 @@ Premissas detalhadas: 21.1–21.3.
     conter uma seção `## Evidências de Harness — <fase>`
     onde cada agente persiste suas evidências ao final
     da execução. O `val-harness` lê apenas esta seção +
-    Mapa do Produto para realizar a validação em lote.
+    AGENTS.md para realizar a validação em lote.
 17.2. **Arquivo grande = escopo grande** — o arquivo de
     planejamento é efêmero e deve permanecer leve.
     Quando o arquivo crescer a ponto de comprometer o
@@ -292,15 +300,17 @@ Premissas detalhadas: 21.1–21.3.
     planejamento como fonte de contexto, não o histórico
     acumulado da conversa.
 
-### Mapa do Produto
+### /doc/README.md
 
-21. **O workflow exige um Mapa do Produto** — a definição,
-    criação e manutenção do Mapa são responsabilidade do
-    `editor-mapa-produto` conforme descrito em
-    `docs/workflow-curadoria.md`. O `curador-produto`
-    detecta ausência do Mapa na fase de VALIDAÇÃO e
-    aciona `editor-mapa-produto` para criá-lo. Se o Mapa
-    não existir, o fluxo para até que seja criado.
+21. **O workflow exige um /doc/README.md** — a definição,
+    criação e manutenção do /doc/README.md são
+    responsabilidade do `curador-produto-editor` conforme
+    descrito em `docs/workflow-curadoria.md`. O
+    `curador-produto` detecta ausência do /doc/README.md
+    na fase de Validação (workflow de Definição de Escopo)
+    e aciona `curador-produto-editor` para criá-lo. Se o
+    /doc/README.md não existir, o fluxo para até que seja
+    criado.
 21.1. **Regras de Produto — preenchimento incremental** —
     a seção `## Regras de Produto` é inicializada por
     `eng-software` na fase de Planejamento com o que já
@@ -324,44 +334,46 @@ Premissas detalhadas: 21.1–21.3.
     cuja pergunta ao humano resulte em mudança de spec
     deve registrar a alteração no arquivo de
     planejamento, na seção do elemento de spec
-    correspondente (conforme o Mapa do Produto).
+    correspondente (conforme o /doc/README.md).
     **Distinção**: mudanças de "como" (arquitetura,
     abordagem técnica) não alteram spec; mudanças de
     "o quê" (escopo, requisitos, critérios de aceitação)
     alteram. O `curador-produto`, ao revisar o plano,
     verifica se mudanças de spec foram registradas e se
-    estão consistentes com o Mapa. Na **construção**,
+    estão consistentes com o /doc/README.md. Na **construção**,
     a premissa 10 se mantém — tudo se baseia no plano
     aprovado. Se algo inviabilizar um critério de
     aceitação, o gate de refatoração (premissa 31) já
     trata o retorno ao planejamento.
-21.3. **Documentação de spec por domínio** — o Mapa do
-    Produto define, por projeto, quais artefatos de
+21.3. **Documentação de spec por domínio** — o /doc/README.md
+    define, por projeto, quais artefatos de
     especificação cada agente deve criar ou atualizar,
     em qual formato e onde vivem permanentemente.
     Exemplos não-prescritivos: critérios de aceitação
     como specs executáveis (eng-software cria no TDD),
     plano de testes em arquivo permanente (qa extrai ao
     final), modelo de dados em DBML (dba cria/atualiza),
-    threat model em docs/ (sec, se o Mapa definir).
-    Cada agente, ao concluir sua fase, consulta o Mapa
-    para verificar obrigações de documentação de spec em
-    seu domínio para essa fase. Se o Mapa não definir
-    obrigações para um agente/fase, nada a fazer.
-25. **`curador-produto` valida aderência ao Mapa, não
-    requisitos** — verifica se artefatos produzidos estão
-    em conformidade com o Mapa do Produto. Não cria
+     threat model em docs/ (sec, se o /doc/README.md definir).
+    Cada agente, ao concluir sua fase, consulta o
+    /doc/README.md para verificar obrigações de
+    documentação de spec em seu domínio para essa fase.
+    Se o /doc/README.md não definir obrigações para um
+    agente/fase, nada a fazer.
+25. **`curador-produto` valida aderência ao /doc/README.md,
+    não requisitos** — verifica se artefatos produzidos
+    estão em conformidade com o /doc/README.md. Não cria
     escopo nem requisitos. Participa dos loops de revisão
     verificando se documentação planejada/produzida está
-    conforme o Mapa. **Não altera** o Mapa do Produto
-    nem harness diretamente — delega ao
-    `editor-mapa-produto`. Para artefatos de outros
+    conforme o /doc/README.md. **Não altera** o
+    /doc/README.md nem harness diretamente — delega ao
+    `curador-produto-editor`. Para artefatos de outros
     domínios (código, BD, segurança), devolve instruções
     de ajuste ao `orq`. Faz revisão final de
     documentação e estrutura.
     **Finalização — verificação de spec e exclusão do
-    plano:** ao finalizar, `curador-produto` lê o Mapa
-    e lista todos os artefatos de spec obrigatórios.
+    plano:** ao finalizar, `curador-produto` lê o
+    /doc/README.md e lista todos os artefatos de spec
+    obrigatórios.
     Para artefatos com Destino definido (caminho):
     verifica existência no local definitivo. Para
     artefatos com Destino `nenhum`: ignora (descartados
@@ -417,9 +429,9 @@ Premissas detalhadas: 21.1–21.3.
 
 ### Harness por Agente
 
-32. **Harness é definido no Mapa do Produto** — a criação
-    e manutenção do harness são responsabilidade do
-    `editor-mapa-produto` conforme descrito em
+32. **Harness é definido no AGENTS.md** — a criação e
+    manutenção do harness são responsabilidade do
+    `curador-produto-editor` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
     na construção e na revisão da construção**, sempre
     que o agente altera artefatos. Implementado como
@@ -427,14 +439,12 @@ Premissas detalhadas: 21.1–21.3.
     parâmetro de fase, idempotente.
 33. **Agente localiza seu harness antes de executar** —
     ao iniciar uma tarefa na construção ou revisão da
-    construção, o agente localiza o Mapa do Produto no
-    arquivo de
-    contexto do projeto e verifica se há harness
-    configurado para ele. Se houver comando registrado,
-    executa o script. Se a seção contiver
-    `SEM HARNESS A PEDIDO DO HUMANO`, segue sem harness.
-    Se a seção não existir ou estiver vazia, segue sem
-    harness.
+    construção, o agente localiza o Harness no AGENTS.md
+    do projeto e verifica se há harness configurado para
+    ele. Se houver comando registrado, executa o script.
+    Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
+    segue sem harness. Se a seção não existir ou estiver
+    vazia, segue sem harness.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, a saída JSON do script como evidência.
@@ -448,13 +458,13 @@ Premissas detalhadas: 21.1–21.3.
     Construção** (quando houve modificações), `orq`
     spawna `val-harness`, que cruza a seção
     `## Evidências de Harness — <fase>` do arquivo de
-    planejamento com o Mapa do Produto.
+    planejamento com o AGENTS.md do projeto.
     Para cada agente que atuou na fase:
     - Se harness definido e evidência presente → OK.
     - Se harness definido e evidência ausente/incompleta
       → FALHA (lista o que falta).
     - Se `SEM HARNESS A PEDIDO DO HUMANO` → OK.
-    - Se seção ausente no Mapa → LACUNA.
+    - Se seção ausente no AGENTS.md → LACUNA.
     O `val-harness` **não spawna agentes** — apenas
     reporta. O `orq` recebe o relatório e decide:
     re-spawnar o agente faltante ou consultar o humano.
@@ -464,7 +474,7 @@ Premissas detalhadas: 21.1–21.3.
     de harness do projeto para avançar com segurança.
 
 > **Resumo da sequência harness:**
-> agente localiza comando de harness no Mapa (P33) →
+> agente localiza comando de harness no AGENTS.md (P33) →
 > executa script (sem argumentos, idempotente) →
 > se `fail`: resolve findings e re-executa →
 > se `pass`: lê prompt e executa se houver →
@@ -499,19 +509,8 @@ sequenceDiagram
 
     %% ── INÍCIO ──────────────────────────────
     Humano ->> orq: Nova funcionalidade (requisitos)
-    orq ->> orq: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
-
-    %% ── VALIDAÇÃO DE ENTRADA ────────────────────
-    rect rgb(255, 250, 240)
-    Note over Humano, rev: VALIDAÇÃO
-
-    orq ->> prod: Verificar existência/completude do Mapa
-    Note right of prod: Se ausente/incompleto: aciona<br/>editor-mapa-produto<br/>(ver workflow-curadoria.md)
-    prod -->> orq: Mapa verificado (resumo curto)
-
-    orq ->> orq: Atualiza Status: PLANEJAMENTO
-
-    end
+    Note right of orq: Workflow de Definição de Escopo<br/>(ver workflow-definicao-escopo.md)<br/>Validação + Elicitação
+    orq ->> orq: Cria arquivo de planejamento<br/>Status: PLANEJAMENTO
 
     %% ── PLANEJAMENTO ──────────────────────────
     rect rgb(230, 245, 255)
@@ -571,8 +570,8 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> orq: Resumo (achado · ação · severidade)
 
-    orq ->> prod: Revisar documentação planejada (Mapa)
-    prod ->> prod: Verifica aderência ao Mapa do Produto
+    orq ->> prod: Revisar documentação planejada (/doc/README.md)
+    prod ->> prod: Verifica aderência ao /doc/README.md
     prod -->> orq: Resumo (achado · ação · severidade)
 
     orq ->> front: Revisar protótipos/planejamento de UI
@@ -672,8 +671,8 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> orq: Resumo (achado · ação · severidade)
 
-    orq ->> prod: Revisar documentação produzida (Mapa)
-    prod ->> prod: Verifica aderência ao Mapa do Produto
+    orq ->> prod: Revisar documentação produzida (/doc/README.md)
+    prod ->> prod: Verifica aderência ao /doc/README.md
     prod -->> orq: Resumo (achado · ação · severidade)
 
     orq ->> front: Revisar aderência visual da implementação
@@ -755,14 +754,14 @@ sequenceDiagram
     rect rgb(255, 255, 230)
     Note over Humano, rev: FINALIZAÇÃO
 
-    orq ->> prod: Revisão final — verificar artefatos de spec (Mapa)
-    prod ->> prod: Lê Mapa, verifica existência<br/>de cada artefato de spec
+    orq ->> prod: Revisão final — verificar artefatos de spec (/doc/README.md)
+     prod ->> prod: Lê /doc/README.md, verifica existência<br/>de cada artefato de spec
     prod ->> prod: Atualiza docs de produto (se lacunas)
     prod -->> orq: Relatório: lacunas de spec<br/>por domínio (resumo curto)
 
     loop Revalidação (guarda do humano)
         opt Lacunas em outros domínios
-            Note right of orq: orq spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme Mapa)
+            Note right of orq: orq spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme /doc/README.md)
             orq ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
             eng -->> orq: Artefatos criados (resumo curto)
         end

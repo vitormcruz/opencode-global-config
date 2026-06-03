@@ -1,20 +1,21 @@
-# Workflow de Curadoria — Mapa do Produto e Harness
+# Workflow de Curadoria — /doc/README.md e Harness
 
 ## Objetivo
 
 Processo de curadoria que produz e mantém dois artefatos
 duráveis para o projeto:
 
-1. **Mapa do Produto** — contrato de documentação
-2. **Harnesses por agente** — regras de contenção
+1. **/doc/README.md** — contrato de documentação (3 seções)
+2. **Harnesses por agente** — regras de contenção no
+   `AGENTS.md`
 
 Dois agentes participam deste processo:
 - **`curador-produto`** — guardião. Detecta ausência ou
-  inconsistência do Mapa/Harness. Não edita.
-- **`editor-mapa-produto`** — executor. Cria e altera o
-  Mapa e os scripts de harness. Chamado pelo humano
-  diretamente ou pelo `curador-produto` quando detecta
-  necessidade.
+  inconsistência do /doc/README.md/Harness. Não edita.
+- **`curador-produto-editor`** — executor. Cria e altera o
+  /doc/README.md e os scripts de harness. Chamado pelo
+  humano diretamente ou pelo `curador-produto` quando
+  detecta necessidade.
 
 > **Nota sobre P6:** os agentes não conhecem workflows
 > nem fases. Este documento é o design do processo;
@@ -57,48 +58,62 @@ documentar e como manter:
 > Estes princípios vivem em
 > [`agents/references/principios-documentacao.md`](../agents/references/principios-documentacao.md)
 > e orientam tanto o `curador-produto` quanto o
-> `editor-mapa-produto` ao propor e validar o Mapa.
-> O Mapa do Produto não é catálogo exaustivo: é o
+> `curador-produto-editor` ao propor e validar o
+> /doc/README.md.
+> O /doc/README.md não é catálogo exaustivo: é o
 > mínimo necessário de doc complementar ao código.
 
 ---
 
 ## Premissas
 
-### Mapa do Produto
+### /doc/README.md
 
-1. **O projeto precisa de um "Mapa do Produto"** — seção
-   no arquivo de contexto do agente (ex.: AGENTS.md,
-   instructions.md) que define como a documentação do
-   produto se organiza e como deve ser mantida. Funciona
-   como contrato de documentação: permite ao
-   `curador-produto` validar entradas e verificar
-   consistência.
-2. **Conteúdo do Mapa segue template default, customizável**
-   — o processo oferece um template default com formato
-   tabular fechado (anti-alucinação). O humano pode
-   adicionar, remover ou alterar linhas. O template é
-   ponto de partida, não prescrição. O Mapa funciona
-   como o hotspot do framework: a estrutura é fixa, o
-   Mapa é o ponto de variação por projeto.
-
-   **Template Default:**
-
-   O Mapa do Produto é composto por três seções
+1. **O projeto precisa de um /doc/README.md** — arquivo
+   que define como a documentação do produto se organiza
+   e como deve ser mantida. Funciona como contrato de
+   documentação: permite ao `curador-produto` validar
+   entradas e verificar consistência. Contém 3 seções
    obrigatórias:
+
+   #### Definição de Escopo
+
+   Define a estrutura do que o `analista` deve elicitar.
+   O `curador-produto-editor` entrevista o humano para
+   definir esta seção **antes** do analista atuar.
+
+   **Padrão sugerido:**
+
+   ```markdown
+   ## Definição de Escopo
+   O analista deve elicitar:
+   - Requisitos funcionais e não funcionais
+   - Critérios de aceitação por exemplos
+   - Organizados por histórias de usuário
+   - Critérios devem referenciar requisitos funcionais
+   - Nenhum requisito pode ficar sem critério
+   Skill recomendada: (opcional — humano define)
+   ```
+
+   O humano pode customizar. Editor entrevista para
+   definir a estrutura, analista elicita o conteúdo.
+
+   **Skill para o analista**: editor pergunta ao humano
+   se quer que o analista use alguma skill específica
+   (ex: `grill-me`, `spec-driven-development`). Se sim,
+   registra na seção. Analista lê e usa.
 
    #### Elementos de Especificação
 
-   | Elemento | Formato/Ferramenta | Origem | Destino |
-   |----------|-------------------|--------|---------|
-   | Critérios de Aceite + Requisitos | Concordion | História de Usuário em MD | docs/specs/ |
-   | Regras de Produto | Tabela | arquivo de planej. | nenhum |
-   | Modelo de Dados | DBML | arquivo de planej. | docs/modelo.dbml |
-   | Threat Model | Markdown | arquivo de planej. | docs/threat-model.md |
-   | Plano de Testes | Markdown | arquivo de planej. | nenhum |
-   | Identidade Visual | Protótipo HTML/SVG | plan/ui/ | nenhum |
-   | Code as Doc | Graphify | graphify-out/ | graphify-out/ |
-   | ADR (Arquitetura) | Markdown | arquivo de planej. | docs/adr/ |
+   | Elemento | Formato/Ferramenta | Agente Responsável | Destino |
+   |----------|-------------------|-------------------|---------|
+   | Critérios de Aceite + Requisitos | Concordion | eng-software | docs/specs/ |
+   | Regras de Produto | Tabela | eng-software | nenhum |
+   | Modelo de Dados | DBML | dba | docs/modelo.dbml |
+   | Threat Model | Markdown | sec | docs/threat-model.md |
+   | Plano de Testes | Markdown | qa | nenhum |
+   | Identidade Visual | Protótipo HTML/SVG | front | plan/ui/ |
+   | ADR (Arquitetura) | Markdown | eng-software | docs/adr/ |
 
    **Coluna "Destino":**
    - Caminho = artefato extraído para local definitivo
@@ -106,11 +121,20 @@ documentar e como manter:
    - `nenhum` = descartado ao final do ciclo junto com
      o arquivo de planejamento
 
+   **Todos os elementos são obrigatórios** — ou fornecidos
+   pelo humano, ou criados durante o workflow. Outros
+   agentes podem sugerir modificações em qualquer
+   especificação.
+
+   Recomenda `/doc/` como padrão, respeita convenções
+   existentes do projeto.
+
    #### Regras de Documentação
 
-   Subseções opcionais — só existem para elementos que
-   o humano quis detalhar. Elementos sem regras
-   específicas não precisam de subseção.
+   Subseções opcionais dentro do `/doc/README.md` — só
+   existem para elementos que o humano quis detalhar.
+   Elementos sem regras específicas não precisam de
+   subseção.
 
    **Exemplo:**
 
@@ -128,49 +152,48 @@ documentar e como manter:
    (demais elementos: só criar subseção se houver
    regra específica a registrar)
 
-   #### Harness por Agente
+   #### Estratégias de Indexação de Código
 
-   | Agente | Comando de Execução | Descrição |
-   |--------|--------------------|-----------|
-   | eng-software | harness/eng-software.sh | Testes, análise estática, regressão |
-   | dba | harness/dba.sh | Validação de schema, migrações |
-   | sec | harness/sec.sh | OWASP checks, secrets scan |
-   | qa | harness/qa.sh | Cobertura, testes de aceitação |
-   | front | harness/front.sh | Linting, a11y, aderência visual |
-   | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-   | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-   | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-3. **`curador-produto` é o guardião do Mapa** — se a seção
-   não existir, `curador-produto` detecta a ausência e
-   chama `editor-mapa-produto` para criá-lo.
+   Seção no final do `/doc/README.md` com técnicas para
+   ajudar agentes IA a encontrar informação rapidamente
+   e consumir menos tokens.
+
+   **Ferramentas padrão sugeridas:**
+   - codebase-memory
+   - doctree
+
+   O curador ou editor orientam o humano a instalar as
+   ferramentas selecionadas.
+
+2. **`curador-produto` é o guardião do /doc/README.md** —
+   se o arquivo não existir, `curador-produto` detecta a
+   ausência e chama `curador-produto-editor` para criá-lo.
    `curador-produto` valida e detecta, mas **não edita**
-   o Mapa diretamente — delega ao `editor-mapa-produto`.
-   O humano decide o conteúdo; `editor-mapa-produto`
-   orienta o processo. **`editor-mapa-produto` é o
-   único agente que altera diretamente o Mapa do
-   Produto.**
-4. **Posicionamento recomendado** — o Mapa do Produto deve
-   ficar no **início** do arquivo de contexto, logo após
-   as regras globais de comportamento. LLMs têm viés de
-   primazia e o Mapa é contexto fundacional: o agente
-   precisa entender o produto antes de interpretar
-   regras e executar tarefas.
+   o /doc/README.md diretamente — delega ao
+   `curador-produto-editor`. O humano decide o conteúdo;
+   `curador-produto-editor` orienta o processo.
+   **`curador-produto-editor` é o único agente que altera
+   diretamente o /doc/README.md.**
+
+3. **Posicionamento recomendado** — o /doc/README.md deve
+   ficar em `/doc/README.md` na raiz do projeto.
 
 ### Harness por Agente
 
-5. **Harness é definido no Mapa do Produto** — o harness
-   de cada agente é um artefato do projeto, definido e
-   mantido no Mapa do Produto. Não é hardcoded no prompt
-   do agente. O `editor-mapa-produto` cria e mantém os
-   scripts de harness. Cada projeto define quais regras e
-   ferramentas compõem o harness de cada agente.
+4. **Harness é definido no AGENTS.md** — o harness de
+   cada agente fica em uma tabela no **topo do AGENTS.md**
+   do projeto. Não é hardcoded no prompt do agente. O
+   `curador-produto-editor` cria e mantém os scripts de
+   harness e registra a tabela no AGENTS.md. Cada projeto
+   define quais regras e ferramentas compõem o harness de
+   cada agente.
    **Fonte única obrigatória** — nenhum agente assume
    harness embutido por ferramenta. Toda ferramenta,
    regra ou exceção de harness deve estar registrada no
-   Mapa do Produto.
-   **Registro obrigatório por agente** — no Mapa, cada
-   agente deve ter uma entrada na tabela de harness com
-   um dos cenários abaixo:
+   AGENTS.md.
+   **Registro obrigatório por agente** — no AGENTS.md,
+   cada agente deve ter uma entrada na tabela de harness
+   com um dos cenários abaixo:
    - Se houver comando de execução, o harness está
      definido e o script deve existir.
    - Se contiver `(sem harness)` com descrição
@@ -188,21 +211,21 @@ documentar e como manter:
    verificações. O script segue a interface padronizada
    (sem argumentos, JSON stdout, exit code).
 
-6. **Execução obrigatória na construção e revisão da
+5. **Execução obrigatória na construção e revisão da
    construção** — o agente sempre executa o comando do
-   Mapa ao final da sua atividade nessas fases. O script
-   é idempotente.
+   AGENTS.md ao final da sua atividade nessas fases. O
+   script é idempotente.
 
-### Pré-requisito: `editor-mapa-produto`
+### Pré-requisito: `curador-produto-editor`
 
-7. **`editor-mapa-produto` cria e altera o Mapa e os
-   scripts de harness** — é o único agente que edita
-   esses artefatos. O `curador-produto` detecta
-   ausência e delega ao `editor-mapa-produto`.
+6. **`curador-produto-editor` cria e altera o
+   /doc/README.md e os scripts de harness** — é o único
+   agente que edita esses artefatos. O `curador-produto`
+   detecta ausência e delega ao `curador-produto-editor`.
 
 ### Convenção: Interface Padronizada de Harness
 
-- **Chamada**: comando livre registrado no Mapa
+- **Chamada**: comando livre registrado no AGENTS.md
   (bash, python, node, qualquer coisa)
 - **Script único por agente** — sem argumentos, sem
   parâmetro de fase. Paths de diretórios, configs e
@@ -231,20 +254,20 @@ documentar e como manter:
 
 **Comportamento do agente:**
 1. Ao final da execução (construção ou revisão),
-   roda o comando do Mapa
+    roda o comando do AGENTS.md
 2. `fail` → lê `findings`, tenta resolver, roda
    harness novamente
 3. `pass` → lê `prompt`, executa se houver
 4. Persiste saída JSON na seção
    `## Evidências de Harness` do arquivo de planejamento
 
-**O script sempre existe.** O `editor-mapa-produto` cria
-um script para **todos** os agentes ao montar o Mapa.
-Se o humano não definiu ferramentas ou regras para um
-agente, o script retorna `{ "status": "pass" }` sem
-verificações (pass-through). Assim o agente **sempre
-chama** o script sem se preocupar se há algo
-configurado ou não.
+**O script sempre existe.** O `curador-produto-editor`
+cria um script para **todos** os agentes ao montar o
+projeto. Se o humano não definiu ferramentas ou regras
+para um agente, o script retorna `{ "status": "pass" }`
+sem verificações (pass-through). Assim o agente **sempre
+chama** o script sem se preocupar se há algo configurado
+ou não.
 
 **Portabilidade:** linguagem livre por projeto;
 contrato é a interface (sem argumento + JSON + exit code).
@@ -270,42 +293,52 @@ harness/<agente>/<fase>.sh
 
 ### Detecção de Ausência
 
-Quando o `curador-produto` detecta que o Mapa do Produto
+Quando o `curador-produto` detecta que o /doc/README.md
 e/ou o Harness não existem:
 
 1. Exibe a mensagem pré-definida de
    `agents/references/mensagens-curadoria.md` (copiar/colar
    literal, sem alterar).
 2. Sugere ao humano parar o workflow e chamar
-   `editor-mapa-produto` na mão.
+   `curador-produto-editor` na mão.
 3. **Não delega automaticamente** ao editor — o humano
    decide se prossegue.
 
-### Criação do Mapa e Harness
+### Criação do /doc/README.md e Harness
 
-O processo de criação inicia quando o `editor-mapa-produto`
-é acionado pelo humano diretamente (após o preâmbulo do
-curador) ou pelo `curador-produto` em cenários de Mapa
+O processo de criação inicia quando o
+`curador-produto-editor` é acionado pelo humano
+diretamente (após o preâmbulo do curador) ou pelo
+`curador-produto` em cenários de /doc/README.md
 desatualizado.
 
-O `editor-mapa-produto` analisa o contexto e segue o
+O `curador-produto-editor` analisa o contexto e segue o
 fluxo seção por seção com aprovação do humano:
 
 1. **Sugere indexação do código** — se não houver
-   grafo de conhecimento (ex.: `graphify-out/`),
-   sugere ao humano instalar e rodar uma ferramenta
-   de indexação (ex.: Graphify) como primeiro passo.
+   ferramentas de indexação configuradas, sugira ao
+   humano instalar (codebase-memory, doctree ou
+   equivalente).
 
-2. **Mapa do Produto** — analisa o projeto, apresenta
-   resumo ao humano, propõe tabela de Elementos de
-   Especificação. Humano aprova/refina. Pergunta sobre
-   Regras de Documentação. Humano decide.
+2. **/doc/README.md** — analisa o projeto, apresenta
+   resumo ao humano:
+   - **Definição de Escopo:** entrevista o humano para
+     definir a estrutura do que o analista deve elicitar.
+     Propõe padrão sugerido → humano aprova/ajusta.
+     Pergunta sobre skill para o analista.
+   - **Elementos de Especificação:** propõe tabela
+     inicial → humano aprova/ajusta.
+   - **Regras de Documentação:** pergunta se o humano
+     quer registrar regras específicas → humano decide.
+   - **Estratégias de Indexação de Código:** propõe
+     ferramentas → humano aprova/ajusta.
 
-3. **Harness por Agente** — pergunta ao humano em qual
-   linguagem/tecnologia criar os scripts. Para cada
-   agente, pergunta quais ferramentas e/ou prompts
-   compõem o harness. Cria scripts para todos os
-   agentes (inclusive pass-through para os sem regras).
+3. **Harness por Agente:** primeiro pergunta ao humano em
+   qual linguagem/tecnologia criar os scripts. Para cada
+   agente, pergunta quais ferramentas e/ou prompts compõem
+   o harness. Cria scripts para todos os agentes (inclusive
+   pass-through para os sem regras). Registra tabela no
+   topo do `AGENTS.md`.
 
 4. **Instalação de dependências** — quando todos os
    harnesses estiverem definidos, identifica deps
@@ -315,9 +348,9 @@ fluxo seção por seção com aprovação do humano:
 
 **Interrupção a qualquer momento** — o humano pode
 interromper o processo em qualquer etapa. Nesse caso o
-`editor-mapa-produto`:
+`curador-produto-editor`:
 - Confirma com o humano se realmente deseja encerrar.
-- Atualiza o Mapa do Produto com o que já foi decidido.
+- Atualiza o /doc/README.md com o que já foi decidido.
 - Para cada agente cujo harness não foi definido,
   registra `SEM HARNESS A PEDIDO DO HUMANO`.
 - Isso garante que o workflow dev prossiga sem
@@ -340,23 +373,29 @@ interromper o processo em qualquer etapa. Nesse caso o
 sequenceDiagram
     actor Humano
     participant cur as curador-produto
-    participant edit as editor-mapa-produto
+    participant edit as curador-produto-editor
 
     rect rgb(255, 250, 240)
     Note over Humano, edit: DETECÇÃO
-    cur ->> cur: Detecta ausência de Mapa/Harness
+    cur ->> cur: Detecta ausência de /doc/README.md/Harness
     cur ->> Humano: Exibe mensagem pré-definida (literal)
     cur ->> Humano: Sugere parar e chamar editor na mão
-    Humano -->> edit: Chama editor-mapa-produto (decisão humana)
+    Humano -->> edit: Chama curador-produto-editor (decisão humana)
     end
 
     rect rgb(230, 245, 255)
-    Note over Humano, edit: MAPA DO PRODUTO (seção por seção)
-    edit ->> Humano: Sugere indexação (se sem grafo)
+    Note over Humano, edit: /doc/README.md (seção por seção)
+    edit ->> Humano: Sugere indexação (se sem ferramentas)
     edit ->> edit: Analisa projeto (estrutura, tools)
+    edit ->> Humano: Propõe Definição de Escopo
+    Humano -->> edit: Aprovação / ajustes
+    edit ->> Humano: Pergunta skill para analista
+    Humano -->> edit: Decisão
     edit ->> Humano: Propõe tabela Elementos de Especificação
     Humano -->> edit: Aprovação / ajustes
     edit ->> Humano: Pergunta Regras de Documentação
+    Humano -->> edit: Aprovação / ajustes
+    edit ->> Humano: Propõe Estratégias de Indexação
     Humano -->> edit: Aprovação / ajustes
     edit ->> Humano: Pergunta Harness por Agente (linguagem?)
     Humano -->> edit: Linguagem definida
@@ -365,6 +404,7 @@ sequenceDiagram
         Humano -->> edit: Resposta
     end
     edit ->> edit: Cria scripts (todos, inclusive pass-through)
+    edit ->> edit: Registra Harness no AGENTS.md
     end
 
     rect rgb(240, 255, 240)
@@ -376,7 +416,7 @@ sequenceDiagram
     end
     edit ->> edit: Executa script de instalação
     edit ->> edit: Valida instalação (tool --version)
-    edit -->> Humano: Mapa e Harness concluídos
+    edit -->> Humano: /doc/README.md e Harness concluídos
     end
 ```
 
@@ -388,14 +428,14 @@ sequenceDiagram
 > de referência para o `curador-produto` usar ao orientar
 > o humano na criação de harness. **Não são regras
 > obrigatórias.** O harness efetivo de cada agente é
-> definido no Mapa do Produto de cada projeto.
+> definido no AGENTS.md de cada projeto.
 
 ### eng-software
 
 - **Instalação de deps de harness** `tool` `build · val`
   Se uma execução exigir ferramenta ausente de harness,
   pode executar o script de instalação de harness do
-  projeto, respeitando o Mapa do Produto e registrando
+  projeto, respeitando o /doc/README.md e registrando
   evidências da instalação/verificação.
 
 - **Smoke tests pós-construção** `prompt` `build`
@@ -440,13 +480,13 @@ sequenceDiagram
 
 - **Nomenclatura determinística** `prompt` `build · val`
   Verificar se tabelas, colunas e índices seguem
-  convenção do projeto (definida no Mapa do Produto).
+  convenção do projeto (definida no /doc/README.md).
   Divergências devem ser apontadas.
 
 ### sec
 
 > **Regra de precedência:** as ferramentas efetivas do
-> `sec` são as registradas no Mapa do Produto. Os itens
+> `sec` são as registradas no AGENTS.md. Os itens
 > abaixo são catálogo de referência para o humano e o
 > `curador-produto`.
 
@@ -546,19 +586,19 @@ sequenceDiagram
 
 ### curador-produto
 
-- **Checklist do Mapa** `prompt` `val`
+- **Checklist do /doc/README.md** `prompt` `val`
   Ao revisar, verificar se faltou atualizar alguma
-  documentação com base no Mapa do Produto.
+  documentação com base no /doc/README.md.
 
-- **Delega atualização do Mapa** `prompt` `val`
+- **Delega atualização do /doc/README.md** `prompt` `val`
   Quando a funcionalidade implementada altera estrutura,
   nomenclatura ou convenções do projeto, delegar ao
-  `editor-mapa-produto` a atualização do Mapa.
+   `curador-produto-editor` a atualização do /doc/README.md.
 
 - **Valida existência de harness** `prompt` `val`
   Verificar se os agentes executores (`eng-software`,
   `dba`, `sec`, `qa`, `front`) possuem harness
-  registrado no Mapa. Agentes sem harness por design
+   registrado no AGENTS.md. Agentes sem harness por design
   (`val-harness`, `curador-produto`, `rev`) não
   precisam de verificação.
 

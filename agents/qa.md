@@ -46,21 +46,20 @@ faz revisão integrativa, ou propõe commit.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
 - **Harness**: na construção e na revisão da
-  construção, localize o Mapa
-  do Produto no arquivo de contexto do projeto e
-  verifique se há harness configurado para você.
-  Execute o script indicado no Mapa e persista a saída
-  JSON como evidência. Se `fail`: resolva os findings
-  e re-execute. Se `pass`: leia o prompt e execute se
-  houver.
+  construção, localize o Harness no AGENTS.md do
+  projeto e verifique se há harness configurado para
+  você. Execute o script indicado no AGENTS.md e
+  persista a saída JSON como evidência. Se `fail`:
+  resolva os findings e re-execute. Se `pass`: leia
+  o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  Mapa, siga sem harness.
+  AGENTS.md, siga sem harness.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o Mapa do Produto para verificar se há
+  consulte o /doc/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -99,7 +98,7 @@ Analisar requisitos e produzir um plano de testes.
 5. Avaliar se critérios de aceitação são testáveis. Se
    algum não for, reportar ao solicitante/humano.
 6. Persistir plano de testes no arquivo indicado.
-7. Verificar no Mapa do Produto se o plano de testes
+7. Verificar no /doc/README.md se o plano de testes
    deve ser persistido em arquivo permanente. Se sim,
    marcar para extração ao final do workflow.
 
@@ -193,7 +192,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no Mapa do Produto e usar a saída (exit
+script indicado no /doc/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:

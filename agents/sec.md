@@ -51,21 +51,20 @@ de negócio, ou propõe commit.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
 - **Harness**: na construção e na revisão da
-  construção, localize o Mapa
-  do Produto no arquivo de contexto do projeto e
-  verifique se há harness configurado para você.
-  Execute o script indicado no Mapa e persista a saída
-  JSON como evidência. Se `fail`: resolva os findings
-  e re-execute. Se `pass`: leia o prompt e execute se
-  houver.
+  construção, localize o Harness no AGENTS.md do
+  projeto e verifique se há harness configurado para
+  você. Execute o script indicado no AGENTS.md e
+  persista a saída JSON como evidência. Se `fail`:
+  resolva os findings e re-execute. Se `pass`: leia
+  o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  Mapa, siga sem harness.
+  AGENTS.md, siga sem harness.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o Mapa do Produto para verificar se há
+  consulte o /doc/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -104,7 +103,7 @@ segurança e registrar requisitos.
 **Saídas**:
 - Lista de requisitos de segurança estruturados.
 - Riscos identificados com severidade.
-- Verificar no Mapa do Produto se requisitos de
+- Verificar no /doc/README.md se requisitos de
   segurança / threat model devem ser persistidos em
   local permanente. Se sim, incluir no plano.
 - Riscos identificados com severidade.
@@ -168,7 +167,7 @@ Planejar e executar testes de segurança com ferramentas
 apropriadas ao projeto.
 
 **O que fazer**:
-1. Identificar ferramentas configuradas no Mapa do
+1. Identificar ferramentas configuradas no AGENTS.md
    Produto (harness do `sec`).
 2. Executar conforme disponível:
    - **SAST** — Semgrep ou equivalente no código alterado.
@@ -183,7 +182,7 @@ apropriadas ao projeto.
 5. Persistir resultado no arquivo indicado.
 
 **Se ferramenta não disponível**: reportar ausência e
-recomendar ao humano acionar `editor-mapa-produto` para
+ recomendar ao humano acionar `curador-produto-editor` para
 definir o harness.
 
 Para diagnóstico de falhas inesperadas, consulte a skill
@@ -214,7 +213,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no Mapa do Produto e usar a saída (exit
+script indicado no /doc/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:

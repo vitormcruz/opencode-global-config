@@ -29,28 +29,27 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
 - **Harness**: na construção e na revisão da
-  construção, localize o Mapa
-  do Produto no arquivo de contexto do projeto e
-  verifique se há harness configurado para você.
-  Execute o script indicado no Mapa e persista a saída
-  JSON como evidência. Se `fail`: resolva os findings
-  e re-execute. Se `pass`: leia o prompt e execute se
-  houver.
+  construção, localize o Harness no AGENTS.md do
+  projeto e verifique se há harness configurado para
+  você. Execute o script indicado no AGENTS.md e
+  persista a saída JSON como evidência. Se `fail`:
+  resolva os findings e re-execute. Se `pass`: leia
+  o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  Mapa, siga sem harness.
-- **Somente ferramentas do Mapa do Produto**: nunca
+  AGENTS.md, siga sem harness.
+- **Somente ferramentas do AGENTS.md**: nunca
   execute ferramentas de linting/análise (squawk,
   sqlfluff, Atlas, etc.) por conta própria. Só use o
-  que estiver explicitamente listado no harness do Mapa
-  do Produto. Checklists, revisões e boas práticas
+  que estiver explicitamente listado no harness do
+  AGENTS.md. Checklists, revisões e boas práticas
   descritas neste agente ou em skills NÃO são harness
   — são diretrizes intelectuais, não ferramentas.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o Mapa do Produto para verificar se há
+  consulte o /doc/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -101,7 +100,7 @@ estratégia de migração.
 - Lista de migrações planejadas (ordem + dependências)
 - Riscos e mitigações
 - Critérios de sucesso
-- Verificar no Mapa do Produto se o modelo conceitual
+- Verificar no /doc/README.md se o modelo conceitual
   deve ser persistido em local permanente (ex:
   docs/modelo.dbml). Se sim, incluir no plano.
 
@@ -211,7 +210,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no Mapa do Produto e usar a saída (exit
+script indicado no /doc/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:
@@ -219,7 +218,7 @@ code + stdout) como evidência principal.
 ```markdown
 ### Evidências (dba)
 - [ ] Checklist de revisão aplicado: <link ou seção>
-- [ ] Ferramenta executada: <conforme Mapa do Produto>
+- [ ] Ferramenta executada: <conforme /doc/README.md>
 - [ ] Artefatos produzidos: <lista de arquivos>
 - [ ] Guardrails verificados: <itens OK ou exceções>
 - [ ] Harness script: <executado? saída anexada>
@@ -266,7 +265,7 @@ Ao gerar ou revisar SQL, verificar SEMPRE:
 ## Harness — referência para o humano
 
 Ferramentas que o agente pode **sugerir** ao humano para
-inclusão no Mapa do Produto, mas que **nunca serão
+inclusão no /doc/README.md, mas que **nunca serão
 executadas** sem estarem listadas lá:
 
 - **squawk** (v2.44+): linting de migrations PostgreSQL,
@@ -274,7 +273,7 @@ executadas** sem estarem listadas lá:
 - **sqlfluff** (v4.0+): linting multi-dialect.
 - **Atlas** (v1.2+): schema-as-code + analisadores.
 
-O agente só executa o que o Mapa do Produto autorizar.
+O agente só executa o que o /doc/README.md autorizar.
 
 ---
 
