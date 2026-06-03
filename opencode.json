@@ -15,17 +15,13 @@
             "enabled": true
         },
         "codebase-memory": {
-            "type": "stdio",
-            "command": "codebase-memory-mcp",
-            "args": [],
+            "type": "local",
+            "command": ["codebase-memory-mcp"],
             "enabled": true
         },
         "doctree": {
-            "type": "stdio",
-            "command": "bunx",
-            "args": [
-                "doctree-mcp"
-            ],
+            "type": "local",
+            "command": ["bunx", "doctree-mcp"],
             "enabled": true
         }
     },
