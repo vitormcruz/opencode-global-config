@@ -26,38 +26,6 @@
         }
     },
     "agent": {
-        "plan": {
-            "permission": {
-                "write": {
-                    "*": "deny"
-                },
-                "edit": {
-                    "*": "deny"
-                },
-                "bash": {
-                    "*": "ask",
-                    "date": "allow",
-                    "git status": "allow",
-                    "git status *": "allow",
-                    "git diff": "allow",
-                    "git diff *": "allow",
-                    "git log": "allow",
-                    "git log *": "allow",
-                    "ls": "allow",
-                    "ls -la": "allow",
-                    "pwd": "allow",
-                    "cat *": "allow",
-                    "head *": "allow",
-                    "tail *": "allow",
-                    "echo": "allow"
-                },
-                "task": "ask",
-                "skill": "allow",
-                "question": "allow",
-                "webfetch": "allow",
-                "websearch": "allow"
-            }
-        },
         "aws-analista": {
             "permission": {
                 "skill": {
