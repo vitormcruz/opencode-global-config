@@ -24,3 +24,16 @@ setup_file() { require_opencode_serve; }
   "
   assert_success
 }
+
+@test "behavioral: GET /command lista bench-indexing" {
+  run bash -c "curl -sf '${OPENCODE_BASE_URL}/command' | jq -e '[.[].name] | contains([\"bench-indexing\"])'"
+  assert_success
+}
+
+@test "behavioral: bench-indexing tem campo de descrição" {
+  run bash -c "
+    curl -sf '${OPENCODE_BASE_URL}/command' \
+      | jq -e '.[] | select(.name == \"bench-indexing\") | has(\"description\")'
+  "
+  assert_success
+}
