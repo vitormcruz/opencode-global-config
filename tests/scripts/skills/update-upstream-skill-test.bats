@@ -48,20 +48,34 @@ SCRIPT="$REPO_ROOT/scripts/skills/update-upstream-skill.sh"
 }
 
 # ---------------------------------------------------------------------------
-# Skill válida com UPSTREAM.md (prompt-improver)
+# Skill válida com UPSTREAM.md (prompt-improver) - modo --dry-run
 # ---------------------------------------------------------------------------
 
 @test "update-upstream-skill com prompt-improver reporta skill no output" {
-  run bash "$SCRIPT" prompt-improver
+  run bash "$SCRIPT" --dry-run prompt-improver
   assert_success
   assert_output --partial "skill: prompt-improver"
 }
 
-@test "update-upstream-skill com prompt-improver reporta status válido" {
-  run bash "$SCRIPT" prompt-improver
+@test "update-upstream-skill com prompt-improver reporta status dry-run" {
+  run bash "$SCRIPT" --dry-run prompt-improver
   assert_success
-  # Status deve ser um dos valores documentados
-  assert_output --partial "status:"
+  # Status deve ser dry-run em modo nao-destrutivo
+  assert_output --partial "status: dry-run"
+}
+
+@test "update-upstream-skill com prompt-improver --dry-run nao modifica arquivos" {
+  # Salva hash do UPSTREAM.md antes
+  local before_hash
+  before_hash=$(md5sum "$REPO_ROOT/skills/prompt-improver/UPSTREAM.md" | awk '{print $1}')
+  
+  run bash "$SCRIPT" --dry-run prompt-improver
+  assert_success
+  
+  # Verifica que o arquivo nao mudou
+  local after_hash
+  after_hash=$(md5sum "$REPO_ROOT/skills/prompt-improver/UPSTREAM.md" | awk '{print $1}')
+  [ "$before_hash" = "$after_hash" ]
 }
 
 # ---------------------------------------------------------------------------

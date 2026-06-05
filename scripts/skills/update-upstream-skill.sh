@@ -8,7 +8,10 @@ update-upstream-skill
 Atualiza exatamente uma skill atualizavel com base no `UPSTREAM.md`.
 
 Uso:
-  ./scripts/skills/update-upstream-skill.sh <skill>
+  ./scripts/skills/update-upstream-skill.sh [--dry-run] <skill>
+
+Opcoes:
+  --dry-run      Apenas verifica e reporta status, sem executar atualizacao
 
 Status possiveis:
   - success
@@ -104,18 +107,36 @@ run_captured() {
   return "$exit_code"
 }
 
-skill_name="${1:-}"
+skill_name=""
+dry_run=0
 
-case "$skill_name" in
-  --help|-h)
-    usage
-    exit 0
-    ;;
-  "")
-    usage >&2
-    exit 2
-    ;;
-esac
+# Parse de argumentos
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    -*)
+      usage >&2
+      exit 2
+      ;;
+    *)
+      skill_name="$1"
+      shift
+      ;;
+  esac
+done
+
+# Validação
+if [[ -z "$skill_name" ]]; then
+  usage >&2
+  exit 2
+fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "${script_dir}/../.." && pwd -P)"
@@ -273,6 +294,14 @@ else
 fi
 
 say "executed_command: ${executed_command}"
+
+# Modo dry-run: apenas reporta, nao executa
+if [ "$dry_run" -eq 1 ]; then
+  say "status: dry-run"
+  say "summary: modo dry-run - nenhuma atualizacao foi executada"
+  say "executed_command: (nao executado) ${executed_command}"
+  exit 0
+fi
 
 if run_captured "$executed_command" "$update_output"; then
   say "status: success"
