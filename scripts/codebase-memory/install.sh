@@ -110,8 +110,23 @@ fi
 # Corrigir path absoluto que o binario escreve no opencode.json
 # codebase-memory-mcp install grava o caminho completo do node_modules;
 # queremos apenas o nome do binario (resolve via PATH).
+# NOTA: resolvemos o symlink antes do sed -i porque sed quebra symlinks.
 OPENCODE_JSON="$HOME/.config/opencode/opencode.json"
 if [ -f "$OPENCODE_JSON" ]; then
-    sed -i 's|"/home/[^"]*/\.local/lib/node_modules/codebase-memory-mcp/bin/codebase-memory-mcp"|"codebase-memory-mcp"|g' "$OPENCODE_JSON"
+    # Se for symlink, resolve o target para nao quebrar o link
+    if [ -L "$OPENCODE_JSON" ]; then
+        OPENCODE_TARGET=$(readlink -f "$OPENCODE_JSON")
+    else
+        OPENCODE_TARGET="$OPENCODE_JSON"
+    fi
+    # Remove entrada duplicada "codebase-memory-mcp" que o binario adiciona
+    # (ja temos a entrada "codebase-memory" com o mesmo comando).
+    if command -v jq &>/dev/null; then
+        tmp_json="${OPENCODE_TARGET}.tmp.$$"
+        jq --indent 4 'del(.mcp["codebase-memory-mcp"])' "$OPENCODE_TARGET" > "$tmp_json" && mv "$tmp_json" "$OPENCODE_TARGET"
+        print_success "Entrada duplicada codebase-memory-mcp removida"
+    fi
+    # Corrige path absoluto para nome do binario (resolve via PATH)
+    sed -i 's|"/home/[^"]*/\.local/lib/node_modules/codebase-memory-mcp/bin/codebase-memory-mcp"|"codebase-memory-mcp"|g' "$OPENCODE_TARGET"
     print_success "Path do codebase-memory-mcp corrigido para agnostico (PATH)"
 fi
