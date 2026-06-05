@@ -56,3 +56,43 @@ teardown() { common_teardown; }
 
   rm -rf "$fake_bin"
 }
+
+@test "codebase-memory/install instala skills em ~/.config/opencode/skills/ e ~/.copilot/skills/" {
+  local fake_bin fake_home
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  for cmd in bash head mkdir basename grep cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  cat > "$fake_bin/codebase-memory-mcp" <<'SCRIPT'
+#!/bin/bash
+if [[ "$*" == *"install"* && "$*" == *"-y"* ]]; then
+  mkdir -p "$HOME/.config/opencode/skills"
+  for skill in exploring tracing quality reference; do
+    mkdir -p "$HOME/.config/opencode/skills/codebase-memory-$skill"
+    echo "# codebase-memory-$skill" > "$HOME/.config/opencode/skills/codebase-memory-$skill/SKILL.md"
+  done
+fi
+exit 0
+SCRIPT
+  chmod +x "$fake_bin/codebase-memory-mcp"
+
+  run env PATH="$fake_bin" HOME="$fake_home" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+
+  [ -f "$fake_home/.config/opencode/skills/codebase-memory-exploring/SKILL.md" ]
+  [ -f "$fake_home/.config/opencode/skills/codebase-memory-tracing/SKILL.md" ]
+  [ -f "$fake_home/.config/opencode/skills/codebase-memory-quality/SKILL.md" ]
+  [ -f "$fake_home/.config/opencode/skills/codebase-memory-reference/SKILL.md" ]
+
+  [ -f "$fake_home/.copilot/skills/codebase-memory-exploring/SKILL.md" ]
+  [ -f "$fake_home/.copilot/skills/codebase-memory-tracing/SKILL.md" ]
+  [ -f "$fake_home/.copilot/skills/codebase-memory-quality/SKILL.md" ]
+  [ -f "$fake_home/.copilot/skills/codebase-memory-reference/SKILL.md" ]
+
+  rm -rf "$fake_bin" "$fake_home"
+}

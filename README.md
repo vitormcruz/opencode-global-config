@@ -81,6 +81,10 @@ Instaladas automaticamente (quando possivel):
 - `bats-file`
 - `mcp (avelino)`
 
+O bootstrap tambem instala skills de codebase-memory (4 skills) e doctree
+(3 skills) em `~/.config/opencode/skills/` e `~/.copilot/skills/`,
+habilitando comandos `/` de indexacao e busca no OpenCode e VSCode Copilot.
+
 As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
 script garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
 

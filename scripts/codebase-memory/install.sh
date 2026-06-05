@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/codebase-memory/install.sh
-# Instala codebase-memory-mcp via npm (gerenciador de pacotes).
+# Instala codebase-memory-mcp via npm e skills para OpenCode + Copilot.
 #
 # Uso: ./scripts/codebase-memory/install.sh [--yes] [--check-only] [--help]
 
@@ -30,7 +30,8 @@ while [ $# -gt 0 ]; do
             cat <<'EOF'
 codebase-memory/install.sh
 
-Instala codebase-memory-mcp via npm.
+Instala codebase-memory-mcp via npm e skills em ~/.config/opencode/skills/
+e ~/.copilot/skills/.
 
 Uso:
   ./scripts/codebase-memory/install.sh [--yes] [--check-only]
@@ -50,16 +51,22 @@ done
 export PATH="$INSTALL_DIR:$PATH"
 
 # --- Verificar se ja esta instalado ---
+binary_installed=0
 if command -v codebase-memory-mcp &>/dev/null; then
     print_success "codebase-memory-mcp ja instalado: $(codebase-memory-mcp --version 2>/dev/null | head -1 || echo 'versao desconhecida')"
-    exit 0
+    binary_installed=1
 fi
 
 if [ "$check_only" -eq 1 ]; then
-    print_warning "codebase-memory-mcp nao encontrado no PATH"
-    print_info   "Execute sem --check-only para instalar"
+    if [ "$binary_installed" -eq 0 ]; then
+        print_warning "codebase-memory-mcp nao encontrado no PATH"
+        print_info   "Execute sem --check-only para instalar"
+    fi
     exit 0
 fi
+
+# --- Instalar binario (se necessario) ---
+if [ "$binary_installed" -eq 0 ]; then
 
 # --- Prerequisitos ---
 if ! command -v npm &>/dev/null; then
@@ -91,3 +98,24 @@ else
     print_info   "Verifique npm e conectividade"
     exit 1
 fi
+fi
+
+# --- Instalar skills (OpenCode + Copilot) ---
+print_info "Instalando skills do codebase-memory..."
+if codebase-memory-mcp install -y; then
+    print_success "Skills codebase-memory instaladas para OpenCode"
+else
+    print_warning "codebase-memory-mcp install -y retornou erro"
+    print_info   "Prosseguindo com copia para Copilot mesmo assim"
+fi
+
+COPILOT_SKILLS="$HOME/.copilot/skills"
+mkdir -p "$COPILOT_SKILLS"
+for skill_dir in "$HOME/.config/opencode/skills"/codebase-memory-*; do
+    if [ -d "$skill_dir" ]; then
+        skill_name=$(basename "$skill_dir")
+        rm -rf "$COPILOT_SKILLS/$skill_name"
+        cp -r "$skill_dir" "$COPILOT_SKILLS/$skill_name"
+        print_success "Skill copiada para Copilot: $skill_name"
+    fi
+done

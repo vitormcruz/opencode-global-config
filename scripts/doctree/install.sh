@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/doctree/install.sh
-# Instala bun via npm e verifica doctree-mcp.
+# Instala bun, verifica doctree-mcp e baixa skills para OpenCode + Copilot.
 #
 # Uso: ./scripts/doctree/install.sh [--yes] [--check-only] [--help]
 
@@ -28,7 +28,8 @@ while [ $# -gt 0 ]; do
             cat <<'EOF'
 doctree/install.sh
 
-Instala bun (necessario para bunx doctree-mcp) via npm.
+Instala bun (necessario para bunx doctree-mcp) e baixa skills do doctree
+para ~/.config/opencode/skills/ e ~/.copilot/skills/.
 
 Uso:
   ./scripts/doctree/install.sh [--yes] [--check-only]
@@ -57,7 +58,6 @@ fi
 
 if [ "$bun_ok" -eq 1 ] && [ "$doctree_ok" -eq 1 ]; then
     print_success "doctree-mcp disponivel (bun $(bun --version 2>/dev/null | head -1))"
-    exit 0
 fi
 
 if [ "$check_only" -eq 1 ]; then
@@ -114,3 +114,33 @@ if [ "$bun_ok" -eq 1 ]; then
         print_warning "doctree-mcp nao respondeu — verifique manualmente: bunx doctree-mcp --help"
     fi
 fi
+
+# --- Instalar skills do doctree (OpenCode + Copilot) ---
+OPENDIR="$HOME/.config/opencode/skills"
+COPILOT_SKILLS="$HOME/.copilot/skills"
+
+print_info "Baixando skills do doctree..."
+if ! command -v curl &>/dev/null; then
+    print_error "curl nao encontrado — necessario para baixar skills do doctree"
+    exit 1
+fi
+
+for skill in doc-read doc-write doc-lint; do
+    mkdir -p "$OPENDIR/$skill"
+    url="https://raw.githubusercontent.com/joesaby/doctree-mcp/main/.claude/skills/$skill/SKILL.md"
+    if curl -fsSL "$url" -o "$OPENDIR/$skill/SKILL.md"; then
+        print_success "Skill baixada: $skill"
+    else
+        print_warning "Falha ao baixar skill: $skill ($url)"
+    fi
+done
+
+mkdir -p "$COPILOT_SKILLS"
+for skill_dir in "$OPENDIR"/doc-*; do
+    if [ -d "$skill_dir" ]; then
+        skill_name=$(basename "$skill_dir")
+        rm -rf "$COPILOT_SKILLS/$skill_name"
+        cp -r "$skill_dir" "$COPILOT_SKILLS/$skill_name"
+        print_success "Skill copiada para Copilot: $skill_name"
+    fi
+done

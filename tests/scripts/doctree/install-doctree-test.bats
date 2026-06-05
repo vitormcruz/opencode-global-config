@@ -66,3 +66,52 @@ teardown() { common_teardown; }
 
   rm -rf "$fake_bin"
 }
+
+@test "doctree/install baixa skills do doctree para ambos sistemas" {
+  local fake_bin fake_home
+  fake_bin="$(mktemp -d)"
+  fake_home="$(mktemp -d)"
+
+  for cmd in bash head mkdir basename cp rm; do
+    local p
+    p="$(command -v "$cmd" 2>/dev/null)" || continue
+    ln -sf "$p" "$fake_bin/$cmd"
+  done
+
+  printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/bun"
+  chmod +x "$fake_bin/bun"
+  printf '#!/bin/sh\nexit 0\n' > "$fake_bin/bunx"
+  chmod +x "$fake_bin/bunx"
+
+  cat > "$fake_bin/curl" <<'SCRIPT'
+#!/bin/bash
+prev=""
+outfile=""
+for i in "$@"; do
+  if [ "$prev" = "-o" ]; then
+    outfile="$i"
+  fi
+  prev="$i"
+done
+if [ -n "$outfile" ]; then
+  outdir="${outfile%/*}"
+  mkdir -p "$outdir"
+  echo "# doctree skill" > "$outfile"
+fi
+exit 0
+SCRIPT
+  chmod +x "$fake_bin/curl"
+
+  run env PATH="$fake_bin" HOME="$fake_home" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+
+  [ -f "$fake_home/.config/opencode/skills/doc-read/SKILL.md" ]
+  [ -f "$fake_home/.config/opencode/skills/doc-write/SKILL.md" ]
+  [ -f "$fake_home/.config/opencode/skills/doc-lint/SKILL.md" ]
+
+  [ -f "$fake_home/.copilot/skills/doc-read/SKILL.md" ]
+  [ -f "$fake_home/.copilot/skills/doc-write/SKILL.md" ]
+  [ -f "$fake_home/.copilot/skills/doc-lint/SKILL.md" ]
+
+  rm -rf "$fake_bin" "$fake_home"
+}
