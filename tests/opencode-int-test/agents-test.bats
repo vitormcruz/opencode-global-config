@@ -54,10 +54,10 @@ setup_file() { require_opencode_serve; }
   assert_output --partial "sec"
 }
 
-@test "behavioral: GET /agent lista o agente orq" {
+@test "behavioral: GET /agent lista o agente devflow" {
   run curl -sf "${OPENCODE_BASE_URL}/agent"
   assert_success
-  assert_output --partial "orq"
+  assert_output --partial "devflow"
 }
 
 @test "behavioral: cada agente retornado tem campo 'name'" {

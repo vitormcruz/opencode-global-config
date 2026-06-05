@@ -99,6 +99,9 @@ segurança e registrar requisitos.
 3. Para cada requisito, definir: risco, mitigação
    recomendada, severidade (bloqueante ou melhoria).
 4. Persistir requisitos no arquivo indicado.
+   *Use a skill \`grill-me\`* para validar cada decisão
+   de segurança com o humano antes de persistir no
+   arquivo.
 
 **Saídas**:
 - Lista de requisitos de segurança estruturados.

@@ -92,9 +92,11 @@ Analisar requisitos e produzir um plano de codificação.
    antes de prosseguir. Não invente requisitos.
 2. Analisar o codebase atual — entender como acomodar a
    funcionalidade nova.
-3. **Consultar o humano** o máximo possível para alinhar
-   escopo e expectativas. Pergunte sobre ambiguidades,
-   prioridades e restrições.
+3. **Usar a skill \`grill-me\`** para validar cada decisão
+   não-trivial com o humano. Pergunte sobre ambiguidades,
+   prioridades e restrições. Decisões triviais (nome de
+   variável, formatação, ordem de passos sem impacto
+   funcional) não precisam de validação.
 4. Avaliar granularidade do plano em relação à capacidade
    de revisão do humano e ao contexto disponível:
    - Plano grande demais → sugira dividir.

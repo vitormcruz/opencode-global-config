@@ -12,7 +12,7 @@ para o workflow de desenvolvimento iniciar:
    Planejamento
 
 Este workflow **substitui** a antiga fase de VALIDAÇÃO
-do workflow de desenvolvimento. O `orq` agora inicia
+do workflow de desenvolvimento. O `devflow` agora inicia
 por aqui, que produz o Arquivo de Planejamento e só
 então transiciona para o workflow de desenvolvimento
 (que começa em PLANEJAMENTO).
@@ -21,14 +21,14 @@ então transiciona para o workflow de desenvolvimento
 
 | Sigla             | Nome completo          | Tipo               | Fases onde atua     |
 |-------------------|------------------------|---------------------|---------------------|
-| `orq`             | Orquestrador           | Roteador stateless  | todas (roteia)      |
+| `devflow`             | Orquestrador           | Roteador stateless  | todas (roteia)      |
 | `curador-produto` | Curador de Produto     | Executor            | Validação           |
 | `curador-produto-editor` | Editor de Produto | Executor         | Validação (se necessário) |
 | `analista`        | Analista de Backlog    | Executor            | Elicitação          |
 
 ## Premissas
 
-1. **`orq` como roteador stateless** — spawna agentes,
+1. **`devflow` como roteador stateless** — spawna agentes,
    não lê, não valida. Recebe resumo curto de volta.
 2. **Workflow de curadoria é autônomo** — o curador
    chama o workflow de curadoria internamente. Este
@@ -36,18 +36,18 @@ então transiciona para o workflow de desenvolvimento
 3. **`analista` nunca edita `/doc/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
-4. **Arquivo de Planejamento é criado aqui** — o `orq`
+4. **Arquivo de Planejamento é criado aqui** — o `devflow`
    cria o arquivo no início deste workflow (antes era
    criado no início do dev).
 5. **Transição para dev** — quando o analista conclui
-   a elicitação, `orq` transiciona para o workflow de
+   a elicitação, `devflow` transiciona para o workflow de
    desenvolvimento, que começa em PLANEJAMENTO.
 
 ## Fluxo
 
 ### Fase 1: Validação
 
-`orq` spawna `curador-produto`, que executa o workflow
+`devflow` spawna `curador-produto`, que executa o workflow
 de curadoria (autônomo):
 
 1. Verifica existência do `/doc/README.md` com 3 seções:
@@ -57,11 +57,11 @@ de curadoria (autônomo):
 2. Verifica existência do Harness no `AGENTS.md`
 3. Se faltar algo → spawna `curador-produto-editor`
    - Editor entrevista o humano, cria/atualiza
-4. Quando tudo OK → retorna resumo curto ao `orq`
+4. Quando tudo OK → retorna resumo curto ao `devflow`
 
 ### Fase 2: Elicitação
 
-`orq` spawna `analista`:
+`devflow` spawna `analista`:
 
 1. Analista lê `/doc/README.md` (seção Definição de
    Escopo) + o que o humano forneceu
@@ -69,11 +69,11 @@ de curadoria (autônomo):
 3. Se faltar → elicita com humano
 4. Grava no Arquivo de Planejamento
 5. Usa `revisor-historia` para revisar
-6. Quando OK → retorna resumo curto ao `orq`
+6. Quando OK → retorna resumo curto ao `devflow`
 
 ### Transição
 
-`orq` atualiza o `Status` do Arquivo de Planejamento
+`devflow` atualiza o `Status` do Arquivo de Planejamento
 para `PLANEJAMENTO` e inicia o workflow de
 desenvolvimento (`docs/workflow-agentes-dev.md`).
 
@@ -91,20 +91,20 @@ desenvolvimento (`docs/workflow-agentes-dev.md`).
 }}}%%
 sequenceDiagram
     actor Humano
-    participant orq as orq
+    participant devflow as devflow
     participant cur as curador-produto
     participant edit as curador-produto-editor
     participant ana as analista
 
     %% ── INÍCIO ──────────────────────────────
-    Humano ->> orq: Nova funcionalidade (requisitos)
-    orq ->> orq: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
+    Humano ->> devflow: Nova funcionalidade (requisitos)
+    devflow ->> devflow: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
 
     %% ── VALIDAÇÃO ────────────────────────────
     rect rgb(255, 250, 240)
     Note over Humano, edit: VALIDAÇÃO
 
-    orq ->> cur: Verificar /doc/README.md + Harness
+    devflow ->> cur: Verificar /doc/README.md + Harness
     Note right of cur: Workflow de curadoria<br/>(autônomo)
 
     alt /doc/README.md ou Harness ausente/incompleto
@@ -114,9 +114,9 @@ sequenceDiagram
         edit -->> cur: Artefatos criados (resumo curto)
     end
 
-    cur -->> orq: Validação OK (resumo curto)
+    cur -->> devflow: Validação OK (resumo curto)
 
-    orq ->> orq: Atualiza Status: ELICITAÇÃO
+    devflow ->> devflow: Atualiza Status: ELICITAÇÃO
 
     end
 
@@ -124,7 +124,7 @@ sequenceDiagram
     rect rgb(230, 245, 255)
     Note over Humano, ana: ELICITAÇÃO
 
-    orq ->> ana: Elicitar requisitos e critérios
+    devflow ->> ana: Elicitar requisitos e critérios
     Note right of ana: Lê /doc/README.md<br/>(seção Definição de Escopo)
 
     ana ->> ana: Compara com o que o humano forneceu
@@ -137,14 +137,14 @@ sequenceDiagram
     ana ->> ana: Grava no Arquivo de Planejamento
     ana ->> ana: Revisa com revisor-historia
 
-    ana -->> orq: Elicitação concluída (resumo curto)
+    ana -->> devflow: Elicitação concluída (resumo curto)
 
-    orq ->> orq: Atualiza Status: PLANEJAMENTO
+    devflow ->> devflow: Atualiza Status: PLANEJAMENTO
 
     end
 
     %% ── TRANSIÇÃO ────────────────────────────
-    Note over orq: Transiciona para<br/>workflow-agentes-dev.md<br/>(começa em PLANEJAMENTO)
+    Note over devflow: Transiciona para<br/>workflow-agentes-dev.md<br/>(começa em PLANEJAMENTO)
 ```
 
 ## Regras Críticas
@@ -154,5 +154,5 @@ sequenceDiagram
 - `analista` **nunca** edita `/doc/README.md`
 - `curador-produto-editor` cria a seção Definição de
   Escopo no `/doc/README.md` **antes** do analista atuar
-- `orq` é roteador stateless — só spawna, não lê, não
+- `devflow` é roteador stateless — só spawna, não lê, não
   valida

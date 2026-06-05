@@ -83,11 +83,11 @@ Suas capacidades:
    4. Para artefatos com Destino `nenhum`: ignorar
       (descartados com o plano).
    5. Docs de produto: reportar lacunas ao solicitante
-      (`orq` ou humano) com instrução de qual agente
+      (`devflow` ou humano) com instrução de qual agente
       spawnar para resolver.
    6. Após correções, **revalidar** completude. Se ainda
       houver lacunas, reportar novamente.
-   7. **Guarda do humano**: o solicitante (`orq`) pergunta
+   7. **Guarda do humano**: o solicitante (`devflow`) pergunta
       ao humano se quer resubmeter para revalidação ou
       seguir adiante — evita loops infinitos.
    8. Só excluir plano e artefatos auxiliares (ex.:

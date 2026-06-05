@@ -22,7 +22,7 @@ otimizado para:
 
 | Sigla             | Nome completo          | Tipo               | Fases onde atua                                              |
 |-------------------|------------------------|---------------------|--------------------------------------------------------------|
-| `orq`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
+| `devflow`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
 | `eng-software`    | Engenheiro de Software | Executor            | Planejamento, Construção, Ajustes integrativos               |
 | `front`           | Engenheiro Frontend    | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
 | `curador-produto` | Curador de Produto     | Executor            | Revisão do Plano, Revisão da Construção, Finalização |
@@ -36,7 +36,7 @@ otimizado para:
 
 | Agente             | No planejamento                                        | Na construção                                                                          | Na validação                                                                              |
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| `orq`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
+| `devflow`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
 | `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao /doc/README.md; guardião do /doc/README.md (não edita — delega ao curador-produto-editor); revisa docs nos loops; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
@@ -92,7 +92,7 @@ responsável por validar essas evidências em lote ao
 final das fases de **Construção** e **Revisão da
 Construção** (quando houve modificações) — **esta é a
 sua única função**.
-O `orq` recebe o relatório do `val-harness` e decide
+O `devflow` recebe o relatório do `val-harness` e decide
 a ação (re-spawnar agente ou consultar humano).
 Premissas detalhadas: 32–36.
 
@@ -128,24 +128,24 @@ Premissas detalhadas: 21.1–21.3.
 
 ### Orquestração
 
-1. **`orq` como roteador stateless** — lê o arquivo de
+1. **`devflow` como roteador stateless** — lê o arquivo de
    planejamento, identifica a fase atual pelo campo
    `Status`, spawna o agente adequado e recebe de volta
-   apenas um resumo curto. `orq` **nunca executa** tarefas
+   apenas um resumo curto. `devflow` **nunca executa** tarefas
    de domínio; sua função é **rotear** e
    **contextualizar** os agentes. Ao final das fases de
    **Construção** e **Revisão da Construção** (quando
    houve modificações), spawna `val-harness` para
    validação em lote das evidências de harness. Se o
-   `val-harness` reportar falhas, `orq` re-spawna o
+   `val-harness` reportar falhas, `devflow` re-spawna o
    agente faltante ou consulta o humano (ver premissa 35).
 2. **Contrato de retorno: resultado no arquivo, resumo
-   curto** — todo agente spawnado por `orq` persiste seu
+   curto** — todo agente spawnado por `devflow` persiste seu
    resultado no arquivo de planejamento e retorna apenas
    um resumo curto (≤ 5 linhas). Isso mantém o contexto
-   do `orq` leve ao longo de todo o workflow.
+   do `devflow` leve ao longo de todo o workflow.
 3. **Instância nova a cada fase** — quando uma fase
-   termina, `orq` spawna instância nova do agente para a
+   termina, `devflow` spawna instância nova do agente para a
    próxima fase. Nenhum agente executor carrega contexto
    de fases anteriores. Isso é **obrigatório** quando há
    volta a fases anteriores (gate de refatoração,
@@ -155,19 +155,19 @@ Premissas detalhadas: 21.1–21.3.
    momento para esclarecer dúvidas da sua especialidade.
 5. **Falha de agente** — se não consegue completar a
    tarefa (erro, incerteza, falta de informação), registra
-   o impedimento no arquivo e retorna resumo ao `orq`,
+   o impedimento no arquivo e retorna resumo ao `devflow`,
    que consulta o humano para decidir: corrigir e
    retentar, ajustar escopo, ou pular com registro.
 6. **Agentes são agnósticos do workflow** — o prompt de
    cada agente descreve **capacidades** (o que sabe
    fazer), nunca fases ou sequência do workflow. Apenas
-   o `orq` conhece o workflow e decide quando chamar
+   o `devflow` conhece o workflow e decide quando chamar
    cada agente. Os demais agentes funcionam tanto
    sozinhos (chamados diretamente pelo humano) quanto
-   orquestrados (spawnados pelo `orq`), sem mudança
+   orquestrados (spawnados pelo `devflow`), sem mudança
    no prompt.
 7. **Seleção de modelo por fase** — ao iniciar o workflow,
-   `orq` pergunta ao humano (via tool `ask`/`question`)
+   `devflow` pergunta ao humano (via tool `ask`/`question`)
    qual modelo usar. A pergunta oferece duas opções:
    - **Usar o modelo atual para todas as fases** — nenhuma
      parada adicional entre fases.
@@ -180,8 +180,8 @@ Premissas detalhadas: 21.1–21.3.
       ```
    O mapa de modelos é registrado no arquivo de
    planejamento. Aplicação por plataforma:
-   - **VS Code**: `orq` passa `model` ao `runSubagent`.
-   - **OpenCode**: `orq` para antes de fases com modelo
+   - **VS Code**: `devflow` passa `model` ao `runSubagent`.
+   - **OpenCode**: `devflow` para antes de fases com modelo
      diferente do anterior e solicita ao humano que
      troque o modelo antes de prosseguir.
 
@@ -194,8 +194,12 @@ Premissas detalhadas: 21.1–21.3.
 10. **Pós-planejamento, tudo se baseia no plano aprovado** —
     falhas de teste são tratadas como bugs.
 11. **Planeje perguntando, execute com autonomia** — no
-    planejamento, `eng-software` deve consultar o humano
-    o máximo possível para alinhar escopo e expectativas.
+    planejamento, todo agente deve validar cada decisão
+    não-trivial com o humano usando a skill `grill-me`.
+    Decisões triviais (nome de variável, formatação,
+    ordem de passos sem impacto funcional) não precisam
+    de validação. Tudo o que for persistido no arquivo
+    de planejamento deve ter passado pelo humano.
     Na construção, deve executar com máxima autonomia,
     sem intervenções desnecessárias. A **única exceção**
     é o gate de refatoração (ver premissa 31).
@@ -208,7 +212,7 @@ Premissas detalhadas: 21.1–21.3.
     **Arquivo de planejamento grande = escopo grande
     demais** — o arquivo é efêmero e deve permanecer
     leve. Se o arquivo crescer a ponto de comprometer
-    o contexto dos agentes, `orq` deve alertar o humano
+    o contexto dos agentes, `devflow` deve alertar o humano
     e sugerir divisão do escopo.
 12.1. **Identidade visual como contrato** — quando o
     plano inclui protótipos de tela aprovados pelo
@@ -272,14 +276,14 @@ Premissas detalhadas: 21.1–21.3.
 17.2. **Arquivo grande = escopo grande** — o arquivo de
     planejamento é efêmero e deve permanecer leve.
     Quando o arquivo crescer a ponto de comprometer o
-    contexto dos agentes, o `orq` deve alertar o humano
+    contexto dos agentes, o `devflow` deve alertar o humano
     e sugerir redução de escopo (conforme premissa 12).
 18. **Campo `Status` obrigatório** — o arquivo deve conter
     um campo de status no topo (ex.:
     `Status: CONSTRUÇÃO — etapa 2/3`) que permite ao
-    `orq` identificar a fase atual sem interpretar o
+    `devflow` identificar a fase atual sem interpretar o
     conteúdo. O agente que conclui uma fase atualiza o
-    status antes de retornar ao `orq`.
+    status antes de retornar ao `devflow`.
 19. **Regras de escrita do arquivo:**
     - Na **construção**, `eng-software` apenas marca
       etapas como concluídas (checkbox). O conteúdo do
@@ -368,7 +372,7 @@ Premissas detalhadas: 21.1–21.3.
     /doc/README.md nem harness diretamente — delega ao
     `curador-produto-editor`. Para artefatos de outros
     domínios (código, BD, segurança), devolve instruções
-    de ajuste ao `orq`. Faz revisão final de
+    de ajuste ao `devflow`. Faz revisão final de
     documentação e estrutura.
     **Finalização — verificação de spec e exclusão do
     plano:** ao finalizar, `curador-produto` lê o
@@ -377,11 +381,11 @@ Premissas detalhadas: 21.1–21.3.
     Para artefatos com Destino definido (caminho):
     verifica existência no local definitivo. Para
     artefatos com Destino `nenhum`: ignora (descartados
-    com o plano). Reporta lacunas ao `orq` com instrução
-    de qual agente spawnar. Após `orq` spawnar agentes e
+    com o plano). Reporta lacunas ao `devflow` com instrução
+    de qual agente spawnar. Após `devflow` spawnar agentes e
     receber retorno, `curador-produto` revalida.
     **Guarda do humano**: após cada rodada de correção,
-    `orq` pergunta ao humano se deseja resubmeter para
+    `devflow` pergunta ao humano se deseja resubmeter para
     revalidação ou seguir adiante (similar à revisão,
     premissa 9). Isso evita loops infinitos. Só confirma
     conclusão (permitindo exclusão do plano e artefatos
@@ -421,7 +425,7 @@ Premissas detalhadas: 21.1–21.3.
     - Mudança significativa → `eng-software` registra o
       estado no arquivo, atualiza o `Status` para
       `GATE-REFATORAÇÃO — volta ao planejamento` e
-      retorna ao `orq`. O `orq` spawna nova instância
+      retorna ao `devflow`. O `devflow` spawna nova instância
       para a fase de Revisão do Plano.
     Independente do cenário, a decisão e o motivo devem
     ser registrados no arquivo de planejamento para
@@ -434,7 +438,9 @@ Premissas detalhadas: 21.1–21.3.
     `curador-produto-editor` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
     na construção e na revisão da construção**, sempre
-    que o agente altera artefatos. Implementado como
+    que o agente altera artefatos. **Harness não se
+    aplica ao planejamento nem à revisão do plano.**
+    Implementado como
     **script único por agente** — sem argumentos, sem
     parâmetro de fase, idempotente.
 33. **Agente localiza seu harness antes de executar** —
@@ -455,7 +461,7 @@ Premissas detalhadas: 21.1–21.3.
     executa se houver.
 35. **Validação de harness pelo `val-harness`** — ao
     final das fases de **Construção** e **Revisão da
-    Construção** (quando houve modificações), `orq`
+    Construção** (quando houve modificações), `devflow`
     spawna `val-harness`, que cruza a seção
     `## Evidências de Harness — <fase>` do arquivo de
     planejamento com o AGENTS.md do projeto.
@@ -466,7 +472,7 @@ Premissas detalhadas: 21.1–21.3.
     - Se `SEM HARNESS A PEDIDO DO HUMANO` → OK.
     - Se seção ausente no AGENTS.md → LACUNA.
     O `val-harness` **não spawna agentes** — apenas
-    reporta. O `orq` recebe o relatório e decide:
+    reporta. O `devflow` recebe o relatório e decide:
     re-spawnar o agente faltante ou consultar o humano.
 36. **Instalação de harness durante execução** — quando um
     agente com `bash: allow` identificar dependência de
@@ -481,7 +487,7 @@ Premissas detalhadas: 21.1–21.3.
 > persiste saída JSON na seção dedicada do arquivo (P34)
 > → `val-harness` valida em lote ao final da Construção
 > e Revisão da Construção, se houve modificações (P35)
-> → `orq` decide ação sobre falhas.
+> → `devflow` decide ação sobre falhas.
 
 ## Fluxo — Diagrama de Sequência
 
@@ -497,7 +503,7 @@ Premissas detalhadas: 21.1–21.3.
 }}}%%
 sequenceDiagram
     actor Humano
-    participant orq as orq
+    participant devflow as devflow
     participant eng as eng-software
     participant front as front
     participant prod as curador-produto
@@ -508,15 +514,15 @@ sequenceDiagram
     participant val as val-harness
 
     %% ── INÍCIO ──────────────────────────────
-    Humano ->> orq: Nova funcionalidade (requisitos)
-    Note right of orq: Workflow de Definição de Escopo<br/>(ver workflow-definicao-escopo.md)<br/>Validação + Elicitação
-    orq ->> orq: Cria arquivo de planejamento<br/>Status: PLANEJAMENTO
+    Humano ->> devflow: Nova funcionalidade (requisitos)
+    Note right of devflow: Workflow de Definição de Escopo<br/>(ver workflow-definicao-escopo.md)<br/>Validação + Elicitação
+    devflow ->> devflow: Cria arquivo de planejamento<br/>Status: PLANEJAMENTO
 
     %% ── PLANEJAMENTO ──────────────────────────
     rect rgb(230, 245, 255)
     Note over Humano, rev: PLANEJAMENTO
 
-    orq ->> eng: Planejar implementação
+    devflow ->> eng: Planejar implementação
     Note right of eng: eng-software consulta humano<br/>diretamente para alinhar escopo
 
     eng ->> Humano: Perguntas de escopo/requisitos
@@ -524,31 +530,31 @@ sequenceDiagram
 
     eng ->> eng: Elabora plano de código
 
-    eng -->> orq: Plano persistido no arquivo (resumo curto)
+    eng -->> devflow: Plano persistido no arquivo (resumo curto)
 
-    orq ->> front: Prototipar telas (se houver UI)
+    devflow ->> front: Prototipar telas (se houver UI)
     alt Sem componente visual
-        front -->> orq: Sem UI nesta funcionalidade (resumo curto)
+        front -->> devflow: Sem UI nesta funcionalidade (resumo curto)
     else Com componente visual
         front ->> front: Gera protótipos (HTML/SVG)
         front ->> Humano: Apresenta protótipos para aprovação visual
         Humano -->> front: Aprovação / ajustes visuais
         front ->> front: Itera até aprovação
-        front -->> orq: Identidade visual aprovada (resumo curto)
+        front -->> devflow: Identidade visual aprovada (resumo curto)
     end
 
-    orq ->> dba: Analisar modelagem de dados
-    dba -->> orq: Modelo persistido no arquivo (resumo curto)
+    devflow ->> dba: Analisar modelagem de dados
+    dba -->> devflow: Modelo persistido no arquivo (resumo curto)
 
-    orq ->> sec: Analisar requisitos de segurança
+    devflow ->> sec: Analisar requisitos de segurança
     Note right of sec: Recebe plano via arquivo
-    sec -->> orq: Requisitos persistidos no arquivo (resumo curto)
+    sec -->> devflow: Requisitos persistidos no arquivo (resumo curto)
 
-    orq ->> qa: Planejar testes
+    devflow ->> qa: Planejar testes
     Note right of qa: Recebe plano via arquivo
-    qa -->> orq: Plano de testes persistido (resumo curto)
+    qa -->> devflow: Plano de testes persistido (resumo curto)
 
-    orq ->> orq: Atualiza Status: REVISÃO DO PLANO
+    devflow ->> devflow: Atualiza Status: REVISÃO DO PLANO
 
     end
 
@@ -556,54 +562,54 @@ sequenceDiagram
     rect rgb(255, 245, 230)
     Note over Humano, rev: REVISÃO DO PLANO
 
-    Note right of orq: Instâncias limpas —<br/>revisam e corrigem
+    Note right of devflow: Instâncias limpas —<br/>revisam e corrigem
 
-    orq ->> dba: Revisar modelagem do plano
+    devflow ->> dba: Revisar modelagem do plano
     dba ->> dba: Revisa, corrige e<br/>registra resumo no arquivo
-    dba -->> orq: Resumo (achado · ação · severidade)
+    dba -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> sec: Revisar segurança do plano
+    devflow ->> sec: Revisar segurança do plano
     sec ->> sec: Revisa, corrige e<br/>registra resumo no arquivo
-    sec -->> orq: Resumo (achado · ação · severidade)
+    sec -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> qa: Revisar testabilidade do plano
+    devflow ->> qa: Revisar testabilidade do plano
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
-    qa -->> orq: Resumo (achado · ação · severidade)
+    qa -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> prod: Revisar documentação planejada (/doc/README.md)
+    devflow ->> prod: Revisar documentação planejada (/doc/README.md)
     prod ->> prod: Verifica aderência ao /doc/README.md
-    prod -->> orq: Resumo (achado · ação · severidade)
+    prod -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> front: Revisar protótipos/planejamento de UI
+    devflow ->> front: Revisar protótipos/planejamento de UI
     front ->> front: Revisa protótipos e<br/>registra resumo no arquivo
-    front -->> orq: Resumo (achado · ação · severidade)
+    front -->> devflow: Resumo (achado · ação · severidade)
 
-    Note right of orq: Revisão integrativa
-    orq ->> rev: Revisão integrativa do plano
+    Note right of devflow: Revisão integrativa
+    devflow ->> rev: Revisão integrativa do plano
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
-    rev -->> orq: Relatório (achados integrativos)
+    rev -->> devflow: Relatório (achados integrativos)
 
     opt Ajustes necessários (rev + curador-produto)
-        orq ->> eng: Aplicar ajustes (integrativos + documentação)
-        eng -->> orq: Ajustes aplicados (resumo curto)
+        devflow ->> eng: Aplicar ajustes (integrativos + documentação)
+        eng -->> devflow: Ajustes aplicados (resumo curto)
         opt Ajuste complexo demais para eng-software
-            orq ->> dba: Ajustar modelagem
-            dba -->> orq: Modelo ajustado (resumo curto)
+            devflow ->> dba: Ajustar modelagem
+            dba -->> devflow: Modelo ajustado (resumo curto)
         end
     end
 
-    orq ->> Humano: Plano revisado. Resubmeter?
+    devflow ->> Humano: Plano revisado. Resubmeter?
     alt Humano: sim
-        orq ->> rev: Resubmete plano
-        rev -->> orq: Feedback
+        devflow ->> rev: Resubmete plano
+        rev -->> devflow: Feedback
     else Humano: não, seguir
-        Note right of orq: Segue para aprovação
+        Note right of devflow: Segue para aprovação
     end
 
-    orq ->> Humano: Apresenta plano para aprovação
-    Humano -->> orq: Aprovação / ajustes
+    devflow ->> Humano: Apresenta plano para aprovação
+    Humano -->> devflow: Aprovação / ajustes
 
-    orq ->> orq: Atualiza Status: CONSTRUÇÃO
+    devflow ->> devflow: Atualiza Status: CONSTRUÇÃO
 
     end
 
@@ -611,16 +617,16 @@ sequenceDiagram
     rect rgb(230, 255, 230)
     Note over Humano, rev: CONSTRUÇÃO
 
-    orq ->> dba: Criar/atualizar modelo, scripts e migrações
-    dba -->> orq: Artefatos de BD persistidos (resumo curto)
+    devflow ->> dba: Criar/atualizar modelo, scripts e migrações
+    dba -->> devflow: Artefatos de BD persistidos (resumo curto)
 
     opt Funcionalidade envolve UI
-        orq ->> front: Implementar telas
+        devflow ->> front: Implementar telas
         Note right of front: Usa protótipos aprovados<br/>como referência visual
-        front -->> orq: UI implementada (resumo curto)
+        front -->> devflow: UI implementada (resumo curto)
     end
 
-    orq ->> eng: Implementar (TDD)
+    devflow ->> eng: Implementar (TDD)
     Note right of eng: Etapa 1 — Testes primeiro<br/>Etapa 2 — Código
 
     Note right of eng: Etapa 3 — Gate de refatoração
@@ -628,28 +634,28 @@ sequenceDiagram
 
     alt Refatoração não afeta o plano
         eng ->> eng: Aplica refatoração e segue
-        eng -->> orq: Construção concluída (resumo curto)
-        orq ->> orq: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
+        eng -->> devflow: Construção concluída (resumo curto)
+        devflow ->> devflow: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
     else Refatoração pode mudar o plano
         eng ->> Humano: Propõe ajustes ao plano
         alt Humano: ajuste mínimo
             eng ->> eng: Atualiza plano no arquivo<br/>(registra motivo e decisão)
-            eng -->> orq: Construção concluída (resumo curto)
-            orq ->> orq: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
+            eng -->> devflow: Construção concluída (resumo curto)
+            devflow ->> devflow: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
         else Humano: mudança significativa
             eng ->> eng: Registra pausa no arquivo
-            eng -->> orq: Gate disparado —<br/>volta ao planejamento
-            orq ->> orq: Atualiza Status:<br/>REVISÃO DO PLANO
-            Note right of orq: Spawna nova instância<br/>de eng-software
+            eng -->> devflow: Gate disparado —<br/>volta ao planejamento
+            devflow ->> devflow: Atualiza Status:<br/>REVISÃO DO PLANO
+            Note right of devflow: Spawna nova instância<br/>de eng-software
         else Humano: nada muda
             eng ->> eng: Registra decisão e segue
-            eng -->> orq: Construção concluída (resumo curto)
-            orq ->> orq: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
+            eng -->> devflow: Construção concluída (resumo curto)
+            devflow ->> devflow: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
         end
     end
 
-    orq ->> val: Validar evidências da fase
-    val -->> orq: Relatório de harness (resumo curto)
+    devflow ->> val: Validar evidências da fase
+    val -->> devflow: Relatório de harness (resumo curto)
 
     end
 
@@ -657,58 +663,58 @@ sequenceDiagram
     rect rgb(255, 245, 230)
     Note over Humano, rev: REVISÃO DA CONSTRUÇÃO
 
-    Note right of orq: Instâncias limpas —<br/>revisam e corrigem
+    Note right of devflow: Instâncias limpas —<br/>revisam e corrigem
 
-    orq ->> dba: Revisar artefatos de BD
+    devflow ->> dba: Revisar artefatos de BD
     dba ->> dba: Revisa, corrige e<br/>registra resumo no arquivo
-    dba -->> orq: Resumo (achado · ação · severidade)
+    dba -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> sec: Revisar segurança da implementação
+    devflow ->> sec: Revisar segurança da implementação
     sec ->> sec: Revisa, corrige e<br/>registra resumo no arquivo
-    sec -->> orq: Resumo (achado · ação · severidade)
+    sec -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> qa: Revisar cobertura de testes
+    devflow ->> qa: Revisar cobertura de testes
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
-    qa -->> orq: Resumo (achado · ação · severidade)
+    qa -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> prod: Revisar documentação produzida (/doc/README.md)
+    devflow ->> prod: Revisar documentação produzida (/doc/README.md)
     prod ->> prod: Verifica aderência ao /doc/README.md
-    prod -->> orq: Resumo (achado · ação · severidade)
+    prod -->> devflow: Resumo (achado · ação · severidade)
 
-    orq ->> front: Revisar aderência visual da implementação
+    devflow ->> front: Revisar aderência visual da implementação
     front ->> front: Compara implementação contra<br/>identidade visual aprovada
-    front -->> orq: Resumo (achado · ação · severidade)
+    front -->> devflow: Resumo (achado · ação · severidade)
 
-    Note right of orq: Revisão integrativa
-    orq ->> rev: Revisão integrativa da construção
+    Note right of devflow: Revisão integrativa
+    devflow ->> rev: Revisão integrativa da construção
     rev ->> rev: Verifica consistência entre partes<br/>e aderência ao plano
-    rev -->> orq: Relatório (achados integrativos)
+    rev -->> devflow: Relatório (achados integrativos)
 
-    orq ->> val: Validar evidências da fase
-    val -->> orq: Relatório de harness (resumo curto)
+    devflow ->> val: Validar evidências da fase
+    val -->> devflow: Relatório de harness (resumo curto)
 
     opt Ajustes necessários (rev + curador-produto)
-        orq ->> eng: Aplicar ajustes (integrativos + documentação)
-        eng -->> orq: Ajustes aplicados (resumo curto)
+        devflow ->> eng: Aplicar ajustes (integrativos + documentação)
+        eng -->> devflow: Ajustes aplicados (resumo curto)
         opt Ajuste complexo demais para eng-software
-            orq ->> dba: Ajustar artefatos de BD
-            dba -->> orq: Ajustes aplicados (resumo curto)
-            orq ->> sec: Ajustar segurança
-            sec -->> orq: Ajustes aplicados (resumo curto)
-            orq ->> front: Ajustar UI
-            front -->> orq: Ajustes aplicados (resumo curto)
+            devflow ->> dba: Ajustar artefatos de BD
+            dba -->> devflow: Ajustes aplicados (resumo curto)
+            devflow ->> sec: Ajustar segurança
+            sec -->> devflow: Ajustes aplicados (resumo curto)
+            devflow ->> front: Ajustar UI
+            front -->> devflow: Ajustes aplicados (resumo curto)
         end
     end
 
-    orq ->> Humano: Revisão concluída. Resubmeter?
+    devflow ->> Humano: Revisão concluída. Resubmeter?
     alt Humano: sim
-        orq ->> rev: Resubmete construção
-        rev -->> orq: Feedback
+        devflow ->> rev: Resubmete construção
+        rev -->> devflow: Feedback
     else Humano: não, seguir
-        Note right of orq: Segue para testes
+        Note right of devflow: Segue para testes
     end
 
-    orq ->> orq: Atualiza Status: TESTES
+    devflow ->> devflow: Atualiza Status: TESTES
 
     end
 
@@ -716,37 +722,37 @@ sequenceDiagram
     rect rgb(245, 230, 255)
     Note over Humano, rev: TESTES
 
-    orq ->> qa: Executar testes automatizados + manuais
-    qa -->> orq: Resultado dos testes (resumo curto)
+    devflow ->> qa: Executar testes automatizados + manuais
+    qa -->> devflow: Resultado dos testes (resumo curto)
 
     opt Testes falharam
-        orq ->> eng: Corrigir com base no feedback
-        eng -->> orq: Correções aplicadas (resumo curto)
-        orq ->> Humano: Ajustes feitos. Re-executar testes?
+        devflow ->> eng: Corrigir com base no feedback
+        eng -->> devflow: Correções aplicadas (resumo curto)
+        devflow ->> Humano: Ajustes feitos. Re-executar testes?
         alt Humano: sim
-            orq ->> qa: Re-executar testes
-            qa -->> orq: Resultado (resumo curto)
+            devflow ->> qa: Re-executar testes
+            qa -->> devflow: Resultado (resumo curto)
         else Humano: não, seguir
-            Note right of orq: Segue para testes de segurança
+            Note right of devflow: Segue para testes de segurança
         end
     end
 
-    orq ->> sec: Executar testes de segurança
-    sec -->> orq: Resultado (resumo curto)
+    devflow ->> sec: Executar testes de segurança
+    sec -->> devflow: Resultado (resumo curto)
 
     opt Testes de segurança falharam
-        orq ->> eng: Corrigir com base no feedback
-        eng -->> orq: Correções aplicadas (resumo curto)
-        orq ->> Humano: Ajustes feitos. Re-executar testes?
+        devflow ->> eng: Corrigir com base no feedback
+        eng -->> devflow: Correções aplicadas (resumo curto)
+        devflow ->> Humano: Ajustes feitos. Re-executar testes?
         alt Humano: sim
-            orq ->> sec: Re-executar testes de segurança
-            sec -->> orq: Resultado (resumo curto)
+            devflow ->> sec: Re-executar testes de segurança
+            sec -->> devflow: Resultado (resumo curto)
         else Humano: não, seguir
-            Note right of orq: Segue para finalização
+            Note right of devflow: Segue para finalização
         end
     end
 
-    orq ->> orq: Atualiza Status: FINALIZAÇÃO
+    devflow ->> devflow: Atualiza Status: FINALIZAÇÃO
 
     end
 
@@ -754,35 +760,35 @@ sequenceDiagram
     rect rgb(255, 255, 230)
     Note over Humano, rev: FINALIZAÇÃO
 
-    orq ->> prod: Revisão final — verificar artefatos de spec (/doc/README.md)
+    devflow ->> prod: Revisão final — verificar artefatos de spec (/doc/README.md)
      prod ->> prod: Lê /doc/README.md, verifica existência<br/>de cada artefato de spec
     prod ->> prod: Atualiza docs de produto (se lacunas)
-    prod -->> orq: Relatório: lacunas de spec<br/>por domínio (resumo curto)
+    prod -->> devflow: Relatório: lacunas de spec<br/>por domínio (resumo curto)
 
     loop Revalidação (guarda do humano)
         opt Lacunas em outros domínios
-            Note right of orq: orq spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme /doc/README.md)
-            orq ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
-            eng -->> orq: Artefatos criados (resumo curto)
+            Note right of devflow: devflow spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme /doc/README.md)
+            devflow ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
+            eng -->> devflow: Artefatos criados (resumo curto)
         end
-        orq ->> prod: Revalidar completude
-        prod -->> orq: Relatório atualizado (resumo curto)
+        devflow ->> prod: Revalidar completude
+        prod -->> devflow: Relatório atualizado (resumo curto)
         alt Tudo OK
-            Note right of orq: Sai do loop
+            Note right of devflow: Sai do loop
         else Ainda há lacunas
-            orq ->> Humano: Lacunas restantes. Resubmeter?
+            devflow ->> Humano: Lacunas restantes. Resubmeter?
             alt Humano: sim
-                Note right of orq: Continua loop
+                Note right of devflow: Continua loop
             else Humano: não, seguir
-                Note right of orq: Sai do loop
+                Note right of devflow: Sai do loop
             end
         end
     end
 
-    orq ->> Humano: Funcionalidade concluída. Excluir plano?
-    Humano -->> orq: Aprovação
-    orq ->> prod: Excluir plano e artefatos auxiliares
-    prod -->> orq: Plano excluído
+    devflow ->> Humano: Funcionalidade concluída. Excluir plano?
+    Humano -->> devflow: Aprovação
+    devflow ->> prod: Excluir plano e artefatos auxiliares
+    prod -->> devflow: Plano excluído
 
     end
 ```
@@ -791,12 +797,12 @@ sequenceDiagram
 
 ### Interação agente–humano por plataforma
 
-| Plataforma | Como `orq` spawna agentes            | Quem pode interagir com o humano                  |
+| Plataforma | Como `devflow` spawna agentes            | Quem pode interagir com o humano                  |
 |------------|---------------------------------------|----------------------------------------------------|
 | **VS Code**    | `runSubagent` com agentes primários   | Apenas agentes primários (`.agent.md`)             |
 | **OpenCode**   | Subagentes                            | Qualquer agente configurado com a tool `ask`       |
 
-**VS Code**: para que agentes spawnados pelo `orq` consigam
+**VS Code**: para que agentes spawnados pelo `devflow` consigam
 consultar o humano diretamente (premissa 4), eles precisam
 ser configurados como **agentes primários** (`.agent.md`).
 Esta é uma restrição da plataforma — apenas agentes primários

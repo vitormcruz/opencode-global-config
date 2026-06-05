@@ -72,6 +72,9 @@ estratégia de migração.
 2. Localizar artefatos existentes de BD no repositório
    (DBML, migrations/, schemas, ORM models).
 3. Consultar o humano se houver ambiguidade.
+   *Use a skill \`grill-me\`* para validar cada decisão
+   de modelagem com o humano antes de persistir no
+   arquivo.
 4. Produzir:
    - Modelo conceitual (entidades, relacionamentos,
      cardinalidade, regras de negócio).

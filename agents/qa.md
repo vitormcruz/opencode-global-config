@@ -97,8 +97,10 @@ Analisar requisitos e produzir um plano de testes.
    esperada, resultado esperado.
 5. Avaliar se critérios de aceitação são testáveis. Se
    algum não for, reportar ao solicitante/humano.
-6. Persistir plano de testes no arquivo indicado.
-7. Verificar no /doc/README.md se o plano de testes
+6. *Use a skill \`grill-me\`* para validar cada decisão
+   de testes com o humano antes de persistir no arquivo.
+7. Persistir plano de testes no arquivo indicado.
+8. Verificar no /doc/README.md se o plano de testes
    deve ser persistido em arquivo permanente. Se sim,
    marcar para extração ao final do workflow.
 

@@ -26,7 +26,7 @@ Conduzir o levantamento de escopo de forma iterativa:
 5. Repetir até não haver mais histórias ou o humano encerrar.
 
 **Destino da escrita:**
-- **Em workflow** (`orq`): Arquivo de Planejamento.
+- **Em workflow** (`devflow`): Arquivo de Planejamento.
 - **Fora de workflow** (humano direto): pergunta ao humano
   como quer organizar (`BACKLOG.md`, outro arquivo, etc.).
 

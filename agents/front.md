@@ -95,8 +95,10 @@ gerar protótipos para validação do humano.
 3. Analisar o codebase existente — entender design
    system, componentes reutilizáveis, padrões visuais
    do projeto.
-4. **Consultar o humano** para alinhar expectativas
-   visuais: layout, paleta, tipografia, referências.
+4. **Usar a skill \`grill-me\`** para validar cada decisão
+   visual com o humano: layout, paleta, tipografia,
+   referências. Decisões triviais não precisam de
+   validação.
 5. Consultar `## Regras de Produto` no arquivo de
    planejamento antes de prototipar campos de entrada.
    Para cada campo visível ao usuário (input, label,
@@ -276,7 +278,7 @@ O que você **NÃO** faz:
   responsabilidade do `sec`.
 - **Não faz revisão integrativa** — responsabilidade
   do `rev`.
-- **Não orquestra fases** — responsabilidade do `orq`.
+- **Não orquestra fases** — responsabilidade do `devflow`.
 - **Não spawna outros agentes.**
 - **Não propõe commit** — o humano decide.
 
