@@ -40,13 +40,13 @@ test-tools:
 	@printf '\n'
 	@printf '=== test-tools: requer ferramentas configuradas no WSL ===\n'
 	@printf '    Se algum falhar, rode primeiro:\n'
-	@printf '    ./scripts/bootstrap_repo/opencode-install-deps.sh\n'
+	@printf '    ./scripts/bootstrap_repo/configurar-repo.sh\n'
 	@printf '\n'
 	$(BATS) \
 	        $(TESTS_DIR)/scripts/opencode-doc-extract-test.bats \
 	        $(TESTS_DIR)/scripts/opencode-md-export-test.bats \
 	        $(TESTS_DIR)/scripts/opencode-svgtoimage-test.bats \
-	        $(TESTS_DIR)/scripts/bootstrap_repo/opencode-install-deps-test.bats \
+	        $(TESTS_DIR)/scripts/bootstrap_repo/wsl-install-deps-test.bats \
 	        $(TESTS_DIR)/scripts/crawl4ai \
 	        $(TESTS_DIR)/scripts/codebase-memory \
 	        $(TESTS_DIR)/scripts/doctree

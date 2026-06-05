@@ -10,7 +10,7 @@
 - Comando canonico:
 
 ```bash
-bash ./scripts/bootstrap_repo/opencode-link.sh --yes
+bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 - Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os comandos prontos para copia e cola em um bloco unico.
 - Aguarde a execucao desses comandos pelo humano antes de seguir com a configuracao do repo.

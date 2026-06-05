@@ -13,7 +13,23 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 Depois de clonar este repo, rode:
 
 ```bash
-./scripts/bootstrap_repo/opencode-link.sh
+./scripts/bootstrap_repo/configurar-repo.sh --yes
+```
+
+O script executa tres fases:
+1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
+2. **Configura VS Code Server WSL** (`scripts/bootstrap_repo/wsl-vscode-sync.sh`)
+3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
+
+Cada parte pode ser pulada via variaveis de ambiente:
+- `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
+- `OPENCODE_SKIP_VSCODE_SYNC=1` — pula sincronizacao VS Code Server
+- `OPENCODE_SKIP_LINKS=1` — pula criacao de links
+
+Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
+
+```bash
+source ~/.bashrc
 ```
 
 No ambiente WSL deste repo, o script faz duas coisas:
@@ -29,7 +45,7 @@ source ~/.bashrc
 
 ## O que o script faz
 
-O `scripts/bootstrap_repo/opencode-link.sh` conecta estes caminhos:
+O `configurar-repo.sh` cria links simbolicos em `~/.config/opencode`:
 
 - `~/.config/opencode/agents` -> `agents`
 - `~/.config/opencode/commands` -> `commands`
@@ -49,10 +65,9 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 ## Dependencias das skills
 
-O bootstrap (`opencode-link.sh`) chama automaticamente
-`scripts/bootstrap_repo/opencode-install-deps.sh`.
+Sincronizadas automaticamente pelo bootstrap (`configurar-repo.sh -> wsl-install-deps.sh`).
 
-Instaladas automaticamente pelo bootstrap (quando possivel):
+Instaladas automaticamente (quando possivel):
 
 - `bats`
 - `pipx`
@@ -67,7 +82,7 @@ Instaladas automaticamente pelo bootstrap (quando possivel):
 - `mcp (avelino)`
 
 As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
-bootstrap garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
+script garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
 
 Requer **Ubuntu 22.04+** (ou equivalente com Python >= 3.10).
 
@@ -83,17 +98,31 @@ Dependencia externa fora desse comando:
 
 - AWS CLI v2 para `aws-sso-login` e `aws-add-account-sso`
 
-Para rodar so a verificação de dependências:
+Para rodar so a verificacao de dependencias:
 
 ```bash
-./scripts/bootstrap_repo/opencode-install-deps.sh
+./scripts/bootstrap_repo/wsl-install-deps.sh
 ```
 
-## Configuração VS Code
+## Configuracao VS Code
 
-Depois de rodar o bootstrap do OpenCode, rode o script de sincronização para
-configurar o VS Code Copilot com os mesmos agents, skills, commands e
-instructions deste repo:
+### VS Code Server (WSL) — executado automaticamente
+
+O bootstrap (`configurar-repo.sh`) sincroniza automaticamente para
+`~/.vscode-server/data/User/`:
+- `prompts/`, `agents/`, `commands/`, `skills/` → links simbolicos
+- `mcp.json` → copiado (nao linkado)
+
+Para rodar apenas esta parte:
+
+```bash
+./scripts/bootstrap_repo/wsl-vscode-sync.sh --yes
+```
+
+### VS Code Windows — opcional
+
+Para configurar o VS Code Copilot Windows com os mesmos agents, skills,
+commands e instructions (
 
 ```powershell
 .\scripts\bootstrap_repo\vscode-sync.ps1
@@ -101,23 +130,15 @@ instructions deste repo:
 
 O script requer PowerShell 5.1+ (nativo no Windows 10/11).
 
-O que é sincronizado:
+O que e sincronizado para VS Code Windows:
 
-- `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
-- `agents/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.agent.md`
-- `commands/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.prompt.md`
+- `skills/*/` → `~/.copilot/skills/` (padrao agentskills.io — sem conversao)
+- `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
+- `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
 - `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/copilot-specific.instructions.md`
-- MCPs `exa` e `crawl4ai` → `%APPDATA%\\Code\\User\\mcp.json` (merge, sem sobrescrever)
+- MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
 
-O arquivo `.github/copilot-specific.instructions.md` é versionado no repo,
-contém as instruções MCP via CLI e é sincronizado como instrução global de
-usuário do VS Code com `applyTo: "**"`.
-
-Skills com scripts externos (doc-extract, md-export, prompt-improver): o
-script copia o executável para dentro da pasta da skill e reescreve a
-referência no `SKILL.md` para usar `wsl bash` ou `wsl python`.
-
-Para aplicar sem confirmação interativa:
+Para aplicar sem confirmacao interativa:
 
 ```powershell
 .\scripts\bootstrap_repo\vscode-sync.ps1 -Yes

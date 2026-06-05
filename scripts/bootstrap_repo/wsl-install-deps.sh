@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# opencode-install-deps
+# wsl-install-deps.sh
 # Instala/verifica dependencias do repo e das skills do opencode-config.
 #
 # - Dependencias user-space (pipx, docling): instala automaticamente se possivel.
 # - Dependencias que precisam de sudo (make, pandoc, ocrmypdf etc.): sugere o comando.
 #
-# Uso: ./scripts/bootstrap_repo/opencode-install-deps.sh [--yes] [--quiet]
+# Uso: ./scripts/bootstrap_repo/wsl-install-deps.sh [--yes] [--quiet]
 
 set -euo pipefail
 
@@ -31,12 +31,12 @@ while [ $# -gt 0 ]; do
     --quiet) quiet=1 ;;
     --help|-h)
       cat <<'EOF'
-opencode-install-deps
+wsl-install-deps
 
 Verifica e instala dependencias das skills do opencode-config.
 
 Uso:
-  ./scripts/bootstrap_repo/opencode-install-deps.sh [--yes] [--quiet]
+  ./scripts/bootstrap_repo/wsl-install-deps.sh [--yes] [--quiet]
 
 Opcoes:
   --yes      Instala sem pedir confirmacao

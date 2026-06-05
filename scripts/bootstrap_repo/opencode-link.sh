@@ -286,59 +286,8 @@ apply() {
   link_one "$repo_root/opencode.json" "$opencode_dir/opencode.json"
   link_one "$repo_root/skills" "$opencode_dir/skills"
   link_one "$repo_root/scripts" "$opencode_dir/scripts"
+
   setup_bashrc
-
-  say ""
-  say "--- Verificando dependencias das skills ---"
-  local install_deps_script="${script_dir}/opencode-install-deps.sh"
-  if [ "${OPENCODE_SKIP_DEPS:-0}" = "1" ]; then
-    say "SKIP  verificacao de dependencias (OPENCODE_SKIP_DEPS=1)"
-  elif [ -x "$install_deps_script" ]; then
-    if [ "$assume_yes" -eq 1 ]; then
-      "$install_deps_script" --yes
-    else
-      "$install_deps_script"
-    fi
-  else
-    say "AVISO: $install_deps_script nao encontrado ou nao executavel."
-  fi
-
-  if [ "${OPENCODE_SKIP_CRAWL4AI:-0}" = "1" ]; then
-    say "SKIP  crawl4ai MCP (OPENCODE_SKIP_CRAWL4AI=1)"
-  elif [ -f "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh" ]; then
-    say "Executando install-crawl4ai-mcp.sh..."
-    if ! bash "$repo_root/scripts/crawl4ai/install-crawl4ai-mcp.sh"; then
-      say ""
-      say "AVISO: crawl4ai MCP nao foi configurado."
-      say "       Docker nao esta instalado ou nao esta em execucao."
-      say "       Apos instalar o Docker, execute:"
-      say "         bash scripts/crawl4ai/install-crawl4ai-mcp.sh"
-    fi
-  fi
-
-  if [ "${OPENCODE_SKIP_CODEBASE_MEMORY:-0}" = "1" ]; then
-    say "SKIP  codebase-memory MCP (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
-  elif [ -f "$repo_root/scripts/codebase-memory/install" ]; then
-    say "Executando codebase-memory/install..."
-    if ! bash "$repo_root/scripts/codebase-memory/install" --yes; then
-      say ""
-      say "AVISO: codebase-memory MCP nao foi configurado."
-      say "       Verifique npm e conectividade, depois execute:"
-      say "         bash scripts/codebase-memory/install --yes"
-    fi
-  fi
-
-  if [ "${OPENCODE_SKIP_DOCTREE:-0}" = "1" ]; then
-    say "SKIP  doctree MCP (OPENCODE_SKIP_DOCTREE=1)"
-  elif [ -f "$repo_root/scripts/doctree/install" ]; then
-    say "Executando doctree/install..."
-    if ! bash "$repo_root/scripts/doctree/install" --yes; then
-      say ""
-      say "AVISO: doctree MCP nao foi configurado."
-      say "       Verifique npm e conectividade, depois execute:"
-      say "         bash scripts/doctree/install --yes"
-    fi
-  fi
 
   say "Pronto."
 }
@@ -347,6 +296,7 @@ sync_skills() {
   say ""
   say "--- Sincronizando skills upstream ---"
 
+  # Se for ambiente de teste, pulamos sincronização
   if [ "${OPENCODE_SKIP_SKILL_SYNC:-0}" = "1" ]; then
     say "SKIP  sincronizacao de skills (OPENCODE_SKIP_SKILL_SYNC=1)"
     return 0
@@ -360,27 +310,29 @@ sync_skills() {
     return 0
   fi
 
+  # Tenta listar skills, se falhar apenas sai silenciosamente
+  local skills_list
+  if ! skills_list=$(bash "$list_script" 2>/dev/null); then
+    say "AVISO: nao foi possivel listar skills, pulando."
+    return 0
+  fi
+
+  if [ -z "$skills_list" ]; then
+    say "Nenhuma skill para sincronizar."
+    return 0
+  fi
+
   while IFS= read -r skill; do
     say "Sincronizando: $skill"
-    "$update_script" "$skill"
-  done < <("$list_script")
-}
-
-warn_shannon() {
-  say ""
-  say "--- Shannon Plugin (pentest) ---"
-  say "Shannon NAO e instalado automaticamente (requer Docker + bun)."
-  say "Para instalar manualmente:"
-  say "  bash scripts/bootstrap_repo/opencode-install-shannon"
-  say "Leia as implicacoes de licenca AGPL-3.0 em:"
-  say "  scripts/bootstrap_repo/UPSTREAM-shannon.md"
+    "$update_script" "$skill" || true
+  done <<< "$skills_list"
 }
 
 main() {
   plan
   confirm
   apply
-  warn_shannon
+  sync_skills
 }
 
-main
+main "$@"

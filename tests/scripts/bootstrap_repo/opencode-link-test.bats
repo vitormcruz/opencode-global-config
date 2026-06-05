@@ -4,16 +4,20 @@
 load "../../helpers/test_helper"
 
 setup() {
-  common_setup
-  export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_SKILL_SYNC=1
-  export OPENCODE_SKIP_CRAWL4AI=1
-  export OPENCODE_SKIP_CODEBASE_MEMORY=1
-  export OPENCODE_SKIP_DOCTREE=1
+  # Define REPO_ROOT se não estiver definido
+  [ -z "$REPO_ROOT" ] && REPO_ROOT=/mnt/c/Users/ur5y/Projetos/opencode-config
+
+  # Configura HOME temporário para testes
+  TEST_HOME=$(mktemp -d)
+  mkdir -p "$TEST_HOME/.config"
+  export HOME="$TEST_HOME"
+  TEST_CONFIG_DIR="$TEST_HOME/.config/opencode"
+  TEST_BASHRC="$TEST_HOME/.bashrc"
 }
 
 teardown() {
-  common_teardown
+  # Limpar diretório temporário
+  rm -rf "$TEST_HOME"
 }
 
 # ---------------------------------------------------------------------------
