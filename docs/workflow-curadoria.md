@@ -273,14 +273,13 @@ ou não.
 contrato é a interface (sem argumento + JSON + exit code).
 
 ```
-harness/<agente>/<fase>.sh
+harness/<agente>.sh
 ```
 
-- **Interface**: recebe como `$1` o path do arquivo de
-  planejamento.
-- **Saída**: exit 0 (ok) / exit 1 (bloqueante). Achados em
-  stdout, uma linha por achado:
-  `SEVERITY | TOOL | MESSAGE`
+- **Interface**: sem argumentos. Saída JSON em stdout:
+  `{ "status": "pass | fail", "findings": [...], "prompt": "..." }`
+- **Exit code**: 0 = pass, 1 = fail.
+- **Idempotente**: mesmo script para construção e revisão.
 - **Versionamento**: scripts entram no git como artefatos
   do projeto.
 - **Maturidade gradual**: projetos podem começar com

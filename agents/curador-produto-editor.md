@@ -110,26 +110,34 @@ existentes do projeto.
 
 ### Regras de Documentação
 
-Subseções opcionais dentro do `/doc/README.md` — só
-existem para elementos que o humano quis detalhar.
-Elementos sem regras específicas não precisam de
-subseção.
+Subseção dentro de `## Elementos de Especificação`. O
+scaffold gera sugestões padrão para **Regras Gerais** e
+para cada elemento da tabela. O humano refina durante a
+entrevista — remove o que não se aplica, ajusta redação,
+adiciona regras específicas do projeto.
 
-**Exemplo:**
+**Regras Gerais (sempre presente):**
+
+```markdown
+#### Regras Gerais
+- Documentação complementa o código, não o repete
+- Doc derivável do código não se armazena — gere sob demanda
+- Doc desatualizada é pior que ausência de doc
+- Preferir formatos versionáveis (Markdown, Mermaid, DBML)
+```
+
+**Exemplo por elemento:**
 
 ```markdown
 ##### Critérios de Aceite + Requisitos
 Os critérios de aceite devem estar organizados por
 Funcionalidade levando-se em conta a coesão. Cada
 funcionalidade deve ter um arquivo Concordion
-separado. Os requisitos associados aos critérios
-de aceitação devem estar no mesmo arquivo, e os
-critérios devem referenciar os requisitos que
-estão sendo atendidos.
+separado. ...
 ```
 
-(demais elementos: só criar subseção se houver
-regra específica a registrar)
+Demais elementos seguem o mesmo padrão — o scaffold
+fornece sugestão padrão para cada um.
 
 ### Estratégias de Indexação de Código
 
@@ -191,9 +199,16 @@ sem verificações.
 
 ## Script de Scaffold
 
-Use `scripts/mapa-produto/scaffold.sh <arquivo-destino>`
-para criar as seções vazias deterministicamente no
-arquivo indicado. Detecte o SO e, se necessário, gere
+Use `scripts/mapa-produto/scaffold.sh` para criar
+scaffold deterministicamente:
+
+```bash
+scripts/mapa-produto/scaffold.sh --doc <arquivo-destino> --harness <agents-destino>
+```
+
+As flags `--doc` e `--harness` são opcionais — use apenas
+as que precisa. O script é idempotente (não duplica
+seções existentes). Detecte o SO e, se necessário, gere
 wrapper equivalente (PowerShell no Windows).
 
 ## Princípios de Documentação
