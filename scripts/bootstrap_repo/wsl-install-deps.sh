@@ -612,7 +612,7 @@ say ""
 # --- mcp (avelino) ---
 say "[mcp (avelino)] MCP CLI"
 MCP_INSTALL_DIR="${HOME}/.local/bin"
-MCP_URL="${MCP_URL:-https://github.com/avelino/mcp/releases/latest/download/mcp-linux-amd64}"
+MCP_URL="${MCP_URL:-https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu}"
 MCP_EXPECTED_SHA="${MCP_EXPECTED_SHA:-}"
 
 if has_cmd mcp; then

@@ -106,3 +106,12 @@ if codebase-memory-mcp install -y; then
 else
     print_warning "codebase-memory-mcp install -y retornou erro"
 fi
+
+# Corrigir path absoluto que o binario escreve no opencode.json
+# codebase-memory-mcp install grava o caminho completo do node_modules;
+# queremos apenas o nome do binario (resolve via PATH).
+OPENCODE_JSON="$HOME/.config/opencode/opencode.json"
+if [ -f "$OPENCODE_JSON" ]; then
+    sed -i 's|"/home/[^"]*/\.local/lib/node_modules/codebase-memory-mcp/bin/codebase-memory-mcp"|"codebase-memory-mcp"|g' "$OPENCODE_JSON"
+    print_success "Path do codebase-memory-mcp corrigido para agnostico (PATH)"
+fi

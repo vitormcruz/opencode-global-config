@@ -16,13 +16,25 @@
         },
         "codebase-memory": {
             "type": "local",
-            "command": ["codebase-memory-mcp"],
+            "command": [
+                "codebase-memory-mcp"
+            ],
             "enabled": true
         },
         "doctree": {
             "type": "local",
-            "command": ["bunx", "doctree-mcp"],
+            "command": [
+                "bunx",
+                "doctree-mcp"
+            ],
             "enabled": true
+        },
+        "codebase-memory-mcp": {
+            "enabled": true,
+            "type": "local",
+            "command": [
+                "codebase-memory-mcp"
+            ]
         }
     },
     "agent": {
