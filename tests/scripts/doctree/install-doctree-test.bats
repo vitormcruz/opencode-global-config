@@ -67,7 +67,7 @@ teardown() { common_teardown; }
   rm -rf "$fake_bin"
 }
 
-@test "doctree/install baixa skills do doctree para ambos sistemas" {
+@test "doctree/install baixa skills do doctree para OpenCode" {
   local fake_bin fake_home
   fake_bin="$(mktemp -d)"
   fake_home="$(mktemp -d)"
@@ -108,10 +108,6 @@ SCRIPT
   [ -f "$fake_home/.config/opencode/skills/doc-read/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/doc-write/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/doc-lint/SKILL.md" ]
-
-  [ -f "$fake_home/.copilot/skills/doc-read/SKILL.md" ]
-  [ -f "$fake_home/.copilot/skills/doc-write/SKILL.md" ]
-  [ -f "$fake_home/.copilot/skills/doc-lint/SKILL.md" ]
 
   rm -rf "$fake_bin" "$fake_home"
 }

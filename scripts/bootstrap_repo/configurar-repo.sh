@@ -8,6 +8,7 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd "${script_dir}/../.." && pwd -P)"
 
 assume_yes=${OPENCODE_ASSUME_YES:-0}
 quiet=0
@@ -24,6 +25,7 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Configura VS Code Server (prompts, agents, skills)
   3. Cria links simbolicos
+  4. Instala MCPs (crawl4ai, codebase-memory, doctree)
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]
@@ -56,6 +58,9 @@ warn() { printf '%s\n' "$*" >&2; }
 wsl_deps_script="${script_dir}/wsl-install-deps.sh"
 wsl_vscode_script="${script_dir}/wsl-vscode-sync.sh"
 links_script="${script_dir}/opencode-link.sh"
+crawl4ai_script="${repo_root}/scripts/crawl4ai/install-crawl4ai-mcp.sh"
+codebase_memory_script="${repo_root}/scripts/codebase-memory/install.sh"
+doctree_script="${repo_root}/scripts/doctree/install.sh"
 
 check_script() {
   local path="$1"
@@ -133,6 +138,56 @@ run_links() {
 }
 
 # ---------------------------------------------------------------------------
+# Fase 4: Instalar MCPs
+# ---------------------------------------------------------------------------
+run_crawl4ai() {
+  if [ "${OPENCODE_SKIP_CRAWL4AI:-0}" = "1" ]; then
+    say "SKIP: MCP crawl4ai (OPENCODE_SKIP_CRAWL4AI=1)"
+    return 0
+  fi
+
+  check_script "$crawl4ai_script" "install-crawl4ai-mcp" || return 1
+
+  section "Instalando MCP crawl4ai"
+
+  bash "$crawl4ai_script"
+}
+
+run_codebase_memory() {
+  if [ "${OPENCODE_SKIP_CODEBASE_MEMORY:-0}" = "1" ]; then
+    say "SKIP: MCP codebase-memory (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
+    return 0
+  fi
+
+  check_script "$codebase_memory_script" "codebase-memory/install" || return 1
+
+  section "Instalando MCP codebase-memory"
+
+  local args=()
+  [ "$assume_yes" -eq 1 ] && args+=("--yes")
+  [ "$quiet" -eq 1 ] && args+=("--quiet")
+
+  bash "$codebase_memory_script" "${args[@]}"
+}
+
+run_doctree() {
+  if [ "${OPENCODE_SKIP_DOCTREE:-0}" = "1" ]; then
+    say "SKIP: MCP doctree (OPENCODE_SKIP_DOCTREE=1)"
+    return 0
+  fi
+
+  check_script "$doctree_script" "doctree/install" || return 1
+
+  section "Instalando MCP doctree"
+
+  local args=()
+  [ "$assume_yes" -eq 1 ] && args+=("--yes")
+  [ "$quiet" -eq 1 ] && args+=("--quiet")
+
+  bash "$doctree_script" "${args[@]}"
+}
+
+# ---------------------------------------------------------------------------
 # Main: Orquestra as fases
 # ---------------------------------------------------------------------------
 main() {
@@ -145,6 +200,9 @@ main() {
   run_deps || warn "Falha na instalacao de dependencias (continuando...)"
   run_vscode_sync || warn "Falha na sincronizacao VS Code (continuando...)"
   run_links || warn "Falha na criacao de links (continuando...)"
+  run_crawl4ai || warn "Falha na instalacao do crawl4ai (continuando...)"
+  run_codebase_memory || warn "Falha na instalacao do codebase-memory (continuando...)"
+  run_doctree || warn "Falha na instalacao do doctree (continuando...)"
 
   section "Concluido"
   say "Repositorio configurado."

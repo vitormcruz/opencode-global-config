@@ -31,6 +31,7 @@ test-unit:
 	        $(TESTS_DIR)/scripts/bootstrap_repo/opencode-link-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-state-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-structure-test.bats \
+	        $(TESTS_DIR)/scripts/bootstrap_repo/configurar-repo-test.bats \
 	        $(TESTS_DIR)/scripts/skills \
 	        $(TESTS_DIR)/scripts/browser-test \
 	        $(TESTS_DIR)/scripts/mapa-produto

@@ -57,7 +57,7 @@ teardown() { common_teardown; }
   rm -rf "$fake_bin"
 }
 
-@test "codebase-memory/install instala skills em ~/.config/opencode/skills/ e ~/.copilot/skills/" {
+@test "codebase-memory/install instala skills em ~/.config/opencode/skills/" {
   local fake_bin fake_home
   fake_bin="$(mktemp -d)"
   fake_home="$(mktemp -d)"
@@ -88,11 +88,6 @@ SCRIPT
   [ -f "$fake_home/.config/opencode/skills/codebase-memory-tracing/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/codebase-memory-quality/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/codebase-memory-reference/SKILL.md" ]
-
-  [ -f "$fake_home/.copilot/skills/codebase-memory-exploring/SKILL.md" ]
-  [ -f "$fake_home/.copilot/skills/codebase-memory-tracing/SKILL.md" ]
-  [ -f "$fake_home/.copilot/skills/codebase-memory-quality/SKILL.md" ]
-  [ -f "$fake_home/.copilot/skills/codebase-memory-reference/SKILL.md" ]
 
   rm -rf "$fake_bin" "$fake_home"
 }

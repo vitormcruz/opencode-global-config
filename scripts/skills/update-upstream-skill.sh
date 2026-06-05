@@ -263,6 +263,14 @@ if [ "${#check_candidates[@]}" -gt 0 ]; then
   if run_captured "$documented_check_command" "$check_output"; then
     if grep -Fq 'Ja esta atualizado' "$check_output"; then
       check_summary="ja estava atualizada"
+      if [ "$dry_run" -eq 1 ]; then
+        say "status: dry-run"
+        say "summary: modo dry-run — check-only confirma que skill ja esta atualizada"
+        say "check_summary: ${check_summary}"
+        say "check_output:"
+        indent_file "$check_output"
+        exit 0
+      fi
       say "status: already-up-to-date"
       say "summary: nenhuma atualizacao necessaria; check-only informou que a skill ja estava atualizada"
       say "check_summary: ${check_summary}"

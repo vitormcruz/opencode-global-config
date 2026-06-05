@@ -29,13 +29,14 @@ teardown() {
   assert_success
   assert_output --partial "configurar-repo"
   assert_output --partial "Uso:"
-  assert_output --partial "wsl-install-deps"
-  assert_output --partial "wsl-vscode-sync"
-  assert_output --partial "opencode-link"
+  assert_output --partial "Instala dependencias WSL"
+  assert_output --partial "Configura VS Code Server"
+  assert_output --partial "Cria links simbolicos"
+  assert_output --partial "Instala MCPs"
 }
 
 @test "configurar-repo com opcao invalida retorna exit 2" {
-  run bash "$SCRIPT" --invalido" 
+  run bash "$SCRIPT" --flag-invalido
   assert_failure
   [ "$status" -eq 2 ]
 }
@@ -54,6 +55,9 @@ teardown() {
   export OPENCODE_SKIP_DEPS=1
   export OPENCODE_SKIP_VSCODE_SYNC=1
   export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_CRAWL4AI=1
+  export OPENCODE_SKIP_CODEBASE_MEMORY=1
+  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -62,6 +66,9 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_VSCODE_SYNC=1" {
   export OPENCODE_SKIP_VSCODE_SYNC=1
   export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_CRAWL4AI=1
+  export OPENCODE_SKIP_CODEBASE_MEMORY=1
+  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -69,7 +76,52 @@ teardown() {
 
 @test "configurar-repo respeita OPENCODE_SKIP_LINKS=1" {
   export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_CRAWL4AI=1
+  export OPENCODE_SKIP_CODEBASE_MEMORY=1
+  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
+}
+
+# ---------------------------------------------------------------------------
+# Variaveis de ambiente SKIP para MCPs
+# ---------------------------------------------------------------------------
+
+@test "configurar-repo respeita OPENCODE_SKIP_CRAWL4AI=1" {
+  export OPENCODE_SKIP_CRAWL4AI=1
+  export OPENCODE_SKIP_DEPS=1
+  export OPENCODE_SKIP_VSCODE_SYNC=1
+  export OPENCODE_SKIP_LINKS=1
+
+  run bash "$SCRIPT" --quiet
+  assert_success
+}
+
+@test "configurar-repo respeita OPENCODE_SKIP_CODEBASE_MEMORY=1" {
+  export OPENCODE_SKIP_CODEBASE_MEMORY=1
+  export OPENCODE_SKIP_DEPS=1
+  export OPENCODE_SKIP_VSCODE_SYNC=1
+  export OPENCODE_SKIP_LINKS=1
+
+  run bash "$SCRIPT" --quiet
+  assert_success
+}
+
+@test "configurar-repo respeita OPENCODE_SKIP_DOCTREE=1" {
+  export OPENCODE_SKIP_DOCTREE=1
+  export OPENCODE_SKIP_DEPS=1
+  export OPENCODE_SKIP_VSCODE_SYNC=1
+  export OPENCODE_SKIP_LINKS=1
+
+  run bash "$SCRIPT" --quiet
+  assert_success
+}
+
+@test "configurar-repo --help exibe informacao sobre MCPs" {
+  run bash "$SCRIPT" --help
+  assert_success
+  assert_output --partial "crawl4ai"
+  assert_output --partial "codebase-memory"
+  assert_output --partial "doctree"
 }

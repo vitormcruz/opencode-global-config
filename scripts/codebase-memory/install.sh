@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/codebase-memory/install.sh
-# Instala codebase-memory-mcp via npm e skills para OpenCode + Copilot.
+# Instala codebase-memory-mcp via npm e skills para OpenCode.
 #
 # Uso: ./scripts/codebase-memory/install.sh [--yes] [--check-only] [--help]
 
@@ -30,8 +30,7 @@ while [ $# -gt 0 ]; do
             cat <<'EOF'
 codebase-memory/install.sh
 
-Instala codebase-memory-mcp via npm e skills em ~/.config/opencode/skills/
-e ~/.copilot/skills/.
+Instala codebase-memory-mcp via npm e skills em ~/.config/opencode/skills/.
 
 Uso:
   ./scripts/codebase-memory/install.sh [--yes] [--check-only]
@@ -100,22 +99,10 @@ else
 fi
 fi
 
-# --- Instalar skills (OpenCode + Copilot) ---
+# --- Instalar skills (OpenCode) ---
 print_info "Instalando skills do codebase-memory..."
 if codebase-memory-mcp install -y; then
     print_success "Skills codebase-memory instaladas para OpenCode"
 else
     print_warning "codebase-memory-mcp install -y retornou erro"
-    print_info   "Prosseguindo com copia para Copilot mesmo assim"
 fi
-
-COPILOT_SKILLS="$HOME/.copilot/skills"
-mkdir -p "$COPILOT_SKILLS"
-for skill_dir in "$HOME/.config/opencode/skills"/codebase-memory-*; do
-    if [ -d "$skill_dir" ]; then
-        skill_name=$(basename "$skill_dir")
-        rm -rf "$COPILOT_SKILLS/$skill_name"
-        cp -r "$skill_dir" "$COPILOT_SKILLS/$skill_name"
-        print_success "Skill copiada para Copilot: $skill_name"
-    fi
-done

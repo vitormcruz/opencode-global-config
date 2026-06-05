@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/doctree/install.sh
-# Instala bun, verifica doctree-mcp e baixa skills para OpenCode + Copilot.
+# Instala bun, verifica doctree-mcp e baixa skills para OpenCode.
 #
 # Uso: ./scripts/doctree/install.sh [--yes] [--check-only] [--help]
 
@@ -29,7 +29,7 @@ while [ $# -gt 0 ]; do
 doctree/install.sh
 
 Instala bun (necessario para bunx doctree-mcp) e baixa skills do doctree
-para ~/.config/opencode/skills/ e ~/.copilot/skills/.
+para ~/.config/opencode/skills/.
 
 Uso:
   ./scripts/doctree/install.sh [--yes] [--check-only]
@@ -115,9 +115,8 @@ if [ "$bun_ok" -eq 1 ]; then
     fi
 fi
 
-# --- Instalar skills do doctree (OpenCode + Copilot) ---
+# --- Instalar skills do doctree (OpenCode) ---
 OPENDIR="$HOME/.config/opencode/skills"
-COPILOT_SKILLS="$HOME/.copilot/skills"
 
 print_info "Baixando skills do doctree..."
 if ! command -v curl &>/dev/null; then
@@ -132,15 +131,5 @@ for skill in doc-read doc-write doc-lint; do
         print_success "Skill baixada: $skill"
     else
         print_warning "Falha ao baixar skill: $skill ($url)"
-    fi
-done
-
-mkdir -p "$COPILOT_SKILLS"
-for skill_dir in "$OPENDIR"/doc-*; do
-    if [ -d "$skill_dir" ]; then
-        skill_name=$(basename "$skill_dir")
-        rm -rf "$COPILOT_SKILLS/$skill_name"
-        cp -r "$skill_dir" "$COPILOT_SKILLS/$skill_name"
-        print_success "Skill copiada para Copilot: $skill_name"
     fi
 done

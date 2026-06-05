@@ -16,15 +16,19 @@ Depois de clonar este repo, rode:
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O script executa tres fases:
+O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Configura VS Code Server WSL** (`scripts/bootstrap_repo/wsl-vscode-sync.sh`)
 3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
+4. **Instala MCPs** — crawl4ai, codebase-memory, doctree
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
 - `OPENCODE_SKIP_VSCODE_SYNC=1` — pula sincronizacao VS Code Server
 - `OPENCODE_SKIP_LINKS=1` — pula criacao de links
+- `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
+- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
+- `OPENCODE_SKIP_DOCTREE=1` — pula configuracao do MCP doctree
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 
@@ -82,8 +86,8 @@ Instaladas automaticamente (quando possivel):
 - `mcp (avelino)`
 
 O bootstrap tambem instala skills de codebase-memory (4 skills) e doctree
-(3 skills) em `~/.config/opencode/skills/` e `~/.copilot/skills/`,
-habilitando comandos `/` de indexacao e busca no OpenCode e VSCode Copilot.
+(3 skills) em `~/.config/opencode/skills/`,
+habilitando comandos `/` de indexacao e busca.
 
 As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
 script garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
