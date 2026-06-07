@@ -18,13 +18,13 @@ Depois de clonar este repo, rode:
 
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Configura VS Code Server WSL** (`scripts/bootstrap_repo/wsl-vscode-sync.sh`)
+2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
 3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
 4. **Instala MCPs** — crawl4ai, codebase-memory, doctree
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
-- `OPENCODE_SKIP_VSCODE_SYNC=1` — pula sincronizacao VS Code Server
+- `OPENCODE_SKIP_COPILOT_SYNC=1` — pula sincronizacao Copilot
 - `OPENCODE_SKIP_LINKS=1` — pula criacao de links
 - `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
 - `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
@@ -112,19 +112,19 @@ Para rodar so a verificacao de dependencias:
 ./scripts/bootstrap_repo/wsl-install-deps.sh
 ```
 
-## Configuracao VS Code
+## Configuracao GitHub Copilot
 
 ### VS Code Server (WSL) — executado automaticamente
 
 O bootstrap (`configurar-repo.sh`) sincroniza automaticamente para
-`~/.vscode-server/data/User/`:
+`~/.copilot/`:
 - `prompts/`, `agents/`, `commands/`, `skills/` → links simbolicos
 - `mcp.json` → copiado (nao linkado)
 
 Para rodar apenas esta parte:
 
 ```bash
-./scripts/bootstrap_repo/wsl-vscode-sync.sh --yes
+./scripts/bootstrap_repo/wsl-copilot-sync.sh --yes
 ```
 
 ### VS Code Windows — opcional
@@ -133,7 +133,7 @@ Para configurar o VS Code Copilot Windows com os mesmos agents, skills,
 commands e instructions (
 
 ```powershell
-.\scripts\bootstrap_repo\vscode-sync.ps1
+.\scripts\bootstrap_repo\copilot-sync.ps1
 ```
 
 O script requer PowerShell 5.1+ (nativo no Windows 10/11).
@@ -149,7 +149,7 @@ O que e sincronizado para VS Code Windows:
 Para aplicar sem confirmacao interativa:
 
 ```powershell
-.\scripts\bootstrap_repo\vscode-sync.ps1 -Yes
+.\scripts\bootstrap_repo\copilot-sync.ps1 -Yes
 ```
 
 ## Testes
@@ -158,18 +158,22 @@ Alvos disponiveis:
 
 ```bash
 make help
-make test
+make test-opencode
+make test-copilot
 make test-unit
 make test-tools
 make test-opencode-integration
+make test-copilot-integration
 ```
 
 Resumo dos alvos:
 
-- `make test`: roda todos os testes (unit + tools + integracao)
+- `make test-opencode`: roda todos os testes para OpenCode (unit + tools + integracao)
+- `make test-copilot`: roda todos os testes para Copilot (unit + tools + integracao)
 - `make test-unit`: testes unitarios puros — sem dependencias externas
 - `make test-tools`: testes que requerem ferramentas instaladas no WSL
 - `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode (requer Docker)
+- `make test-copilot-integration`: testes de integracao Copilot CLI (requer copilot e mcp no PATH)
 
 ### Testes de integração (Camada 2)
 
@@ -197,7 +201,7 @@ make test-opencode-integration-default-model
 
 ```bash
 export OPENCODE_TEST_MODEL='openai/gpt-4'
-make test
+make test-opencode
 ```
 
 ### Controle manual do container

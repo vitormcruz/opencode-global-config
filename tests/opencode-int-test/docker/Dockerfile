@@ -22,7 +22,7 @@ WORKDIR /opt/opencode-config
 RUN cp tests/opencode-int-test/config/opencode.test.json opencode.json
 
 # Executa bootstrap (cria symlinks em /root/.config/opencode)
-RUN bash ./scripts/bootstrap_repo/opencode-link --yes
+RUN bash ./scripts/bootstrap_repo/opencode-link.sh --yes
 
 RUN chmod +x tests/opencode-int-test/docker/entrypoint.sh
 

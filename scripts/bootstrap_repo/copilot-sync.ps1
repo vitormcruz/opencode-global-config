@@ -1,11 +1,11 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Sincroniza configuracoes do opencode-config para o VS Code (Windows).
+    Sincroniza configuracoes do opencode-config para o GitHub Copilot (Windows).
 
 .DESCRIPTION
     Copia e converte agents, skills, commands para os destinos globais do
-    VS Code, e sincroniza .github\copilot-specific.instructions.md para as
+    Copilot, e sincroniza .github\copilot-specific.instructions.md para as
     instructions globais em .copilot\instructions.
 
 .PARAMETER Yes
@@ -23,7 +23,7 @@
       $DestRoot\AppData\Roaming\Code\User\mcp.json
 
 .EXAMPLE
-    .\scripts\bootstrap_repo\vscode-sync.ps1 -Yes
+    .\scripts\bootstrap_repo\copilot-sync.ps1 -Yes
 #>
 [CmdletBinding()]
 param(
@@ -41,12 +41,12 @@ $ErrorActionPreference = 'Stop'
 
 function Show-Usage {
     Write-Host @"
-vscode-sync.ps1
+copilot-sync.ps1
 
-Copia e converte configuracoes do opencode-config para o VS Code (Windows).
+Copia e converte configuracoes do opencode-config para o GitHub Copilot (Windows).
 
 Uso:
-  .\scripts\bootstrap_repo\vscode-sync.ps1 [-Yes]
+  .\scripts\bootstrap_repo\copilot-sync.ps1 [-Yes]
 
 Opcoes:
   -Yes      Nao pergunta confirmacao
@@ -78,13 +78,13 @@ if ($DestRoot) {
     $InstructionsDir = Join-Path $DestRoot ".copilot\instructions"
     $PromptsDir      = Join-Path $DestRoot "AppData\Roaming\Code\User\prompts"
     $McpJson         = Join-Path $DestRoot "AppData\Roaming\Code\User\mcp.json"
-    $BackupRoot      = Join-Path $DestRoot "vscode-backup"
+    $BackupRoot      = Join-Path $DestRoot "copilot-backup"
 } else {
     $SkillsDir       = Join-Path $env:USERPROFILE ".copilot\skills"
     $InstructionsDir = Join-Path $env:USERPROFILE ".copilot\instructions"
     $PromptsDir      = Join-Path $env:APPDATA "Code\User\prompts"
     $McpJson         = Join-Path $env:APPDATA "Code\User\mcp.json"
-    $BackupRoot      = Join-Path $env:USERPROFILE ".config\vscode-backup"
+    $BackupRoot      = Join-Path $env:USERPROFILE ".config\copilot-backup"
 }
 
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -271,13 +271,13 @@ function Rewrite-ScriptRefs([string]$SkillName, [string]$SkillDest) {
 }
 
 # ──────────────────────────────────────────────────────────────
-# Adapt-SkillForVSCode
+# Adapt-SkillForCopilot
 # Aplica adaptacoes especificas por skill ao SKILL.md copiado.
 # Atualmente: web-research-exa-crawl4ai substitui 'websearch'
 # pela tool real do Exa MCP (web_search_exa).
 # ──────────────────────────────────────────────────────────────
 
-function Adapt-SkillForVSCode([string]$SkillName, [string]$SkillDest) {
+function Adapt-SkillForCopilot([string]$SkillName, [string]$SkillDest) {
     if ($SkillName -ne "web-research-exa-crawl4ai") { return }
 
     $skillMd = Join-Path $SkillDest "SKILL.md"
@@ -312,7 +312,7 @@ function Sync-Skills {
         Copy-Item -Path $skillSrc.FullName -Destination $dest -Recurse -Force
 
         Rewrite-ScriptRefs $skillSrc.Name $dest
-        Adapt-SkillForVSCode $skillSrc.Name $dest
+        Adapt-SkillForCopilot $skillSrc.Name $dest
         Say "OK    $($skillSrc.Name)"
         $count++
     }

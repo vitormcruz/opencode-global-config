@@ -14,15 +14,20 @@ endif
 
 export BATS_LIB_PATH
 
-.PHONY: test test-unit test-tools \
+.PHONY: test-unit test-tools \
+        test-opencode test-copilot \
         test-opencode-integration test-opencode-integration-rebuild \
         test-opencode-integration-default-model test-opencode-integration-rebuild-default-model \
+        test-copilot-integration \
         help
 
-## Todos os testes (unit + tools + integracao Docker)
-test: test-unit test-tools test-opencode-integration
+## OpenCode completo (unit + tools + integracao)
+test-opencode: test-unit test-tools test-opencode-integration
+	@printf '\n=== test-opencode: concluido ===\n'
 
-test-default-model:  test-unit test-tools test-opencode-integration-default-model
+## Copilot completo (unit + tools + integracao)
+test-copilot: test-unit test-tools test-copilot-integration
+	@printf '\n=== test-copilot: concluido ===\n'
 
 ## Testes unitarios puros - sem dependencias externas
 test-unit:
@@ -95,6 +100,26 @@ test-opencode-integration-default-model:
 ## OpenCode com modelo aberto padrão (forca rebuild)
 test-opencode-integration-rebuild-default-model:
 	$(MAKE) test-opencode-integration-rebuild OPENCODE_TEST_MODEL=opencode/big-pickle
+
+## Integracao Copilot CLI (requer copilot e mcp no PATH)
+test-copilot-integration:
+	@bash -c 'set -e; \
+	  if ! command -v copilot >/dev/null 2>&1; then \
+	    echo "ERRO: Copilot CLI nao encontrado no PATH"; \
+	    echo ""; \
+	    echo "Instale com:"; \
+	    echo "  npm install -g @github/copilot"; \
+	    echo "  copilot --login"; \
+	    exit 1; \
+	  fi; \
+	  if ! command -v mcp >/dev/null 2>&1; then \
+	    echo "ERRO: avelino/mcp nao encontrado no PATH"; \
+	    echo ""; \
+	    echo "Instale via bootstrap:"; \
+	    echo "  ./scripts/bootstrap_repo/configurar-repo.sh --yes"; \
+	    exit 1; \
+	  fi; \
+	  $(BATS) $(TESTS_DIR)/copilot-int-test'
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

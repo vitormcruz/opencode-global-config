@@ -107,7 +107,7 @@ nas descrições
 # Regras Obrigatórias Pora Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
-- Framework: BATS-core em `tests/` — rodar com `make test`.
+- Framework: BATS-core em `tests/` — rodar com `make test-opencode-opencode`.
 - **Execução sempre via WSL** — os testes usam Bash/BATS e devem
   ser executados dentro do WSL.
   - **Regra**: sempre use `wsl -- bash -ic "COMANDO"` para executar
@@ -115,7 +115,7 @@ nas descrições
     `wsl -e bash -c` — esse modo não carrega `~/.bashrc` e
     ferramentas como `node`, `fnm`, `bats` não estarão no PATH.
   - Exemplo canônico:
-    `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test"`
+    `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test-opencode"`
   - Se já estiver dentro do WSL (terminal Linux), execute
     diretamente sem prefixo `wsl`.
 - **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
@@ -195,7 +195,7 @@ inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
 2. Verificar se mudancas upstream afetam o `SKILL.md` local
 3. Atualizar `SKILL.md` manualmente se necessario
 4. Atualizar `UPSTREAM.md` com novo SHA (feito automaticamente pelo script)
-5. Rodar `make test` para garantir que nada quebrou
+5. Rodar `make test-opencode` para garantir que nada quebrou
 
 ### Scripts de sync disponiveis
 

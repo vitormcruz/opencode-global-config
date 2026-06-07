@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # configurar-repo.sh
 # Entrypoint principal para configurar o repo opencode-config.
-# Orquestra: deps (wsl), VS Code sync (wsl), e links simbolicos.
+# Orquestra: deps (wsl), Copilot sync (wsl), e links simbolicos.
 #
 # Uso: ./scripts/bootstrap_repo/configurar-repo.sh [--yes]
 
@@ -23,7 +23,7 @@ configurar-repo
 
 Configura o repositorio opencode-config:
   1. Instala dependencias WSL
-  2. Configura VS Code Server (prompts, agents, skills)
+  2. Configura GitHub Copilot (WSL) (prompts, agents, skills)
   3. Cria links simbolicos
   4. Instala MCPs (crawl4ai, codebase-memory, doctree)
 
@@ -37,7 +37,7 @@ Opcoes:
 
 Variaveis de ambiente:
   OPENCODE_SKIP_DEPS=1           Pula instalacao de dependencias
-  OPENCODE_SKIP_VSCODE_SYNC=1    Pula sincronizacao VS Code Server
+  OPENCODE_SKIP_COPILOT_SYNC=1    Pula sincronizacao Copilot
   OPENCODE_SKIP_LINKS=1          Pula criacao de links simbolicos
   OPENCODE_SKIP_SKILL_SYNC=1     Pula sincronizacao de skills upstream
   OPENCODE_SKIP_CRAWL4AI=1       Pula configuracao do MCP crawl4ai
@@ -56,7 +56,7 @@ warn() { printf '%s\n' "$*" >&2; }
 
 # Scripts auxiliares encontram-se no mesmo diretorio
 wsl_deps_script="${script_dir}/wsl-install-deps.sh"
-wsl_vscode_script="${script_dir}/wsl-vscode-sync.sh"
+wsl_copilot_script="${script_dir}/wsl-copilot-sync.sh"
 links_script="${script_dir}/opencode-link.sh"
 crawl4ai_script="${repo_root}/scripts/crawl4ai/install-crawl4ai-mcp.sh"
 codebase_memory_script="${repo_root}/scripts/codebase-memory/install.sh"
@@ -98,24 +98,24 @@ run_deps() {
 }
 
 # ---------------------------------------------------------------------------
-# Fase 2: Sincronizar VS Code Server WSL
+# Fase 2: Sincronizar GitHub Copilot (WSL)
 # ---------------------------------------------------------------------------
-run_vscode_sync() {
-  if [ "${OPENCODE_SKIP_VSCODE_SYNC:-0}" = "1" ]; then
-    say "SKIP: Sincronizacao VS Code Server (OPENCODE_SKIP_VSCODE_SYNC=1)"
+run_copilot_sync() {
+  if [ "${OPENCODE_SKIP_COPILOT_SYNC:-0}" = "1" ]; then
+    say "SKIP: Sincronizacao Copilot (OPENCODE_SKIP_COPILOT_SYNC=1)"
     return 0
   fi
 
-  check_script "$wsl_vscode_script" "wsl-vscode-sync.sh" || return 1
+  check_script "$wsl_copilot_script" "wsl-copilot-sync.sh" || return 1
 
-  section "Configurando VS Code Server (WSL)"
+  section "Configurando GitHub Copilot (WSL)"
 
-  say "Sincronizando prompts, agents, skills, mcp.json para ~/.vscode-server/data/User/"
+  say "Sincronizando prompts, agents, skills, mcp.json para ~/.copilot/"
 
   local args=()
   [ "$assume_yes" -eq 1 ] && args+=("--yes")
 
-  bash "$wsl_vscode_script" "${args[@]}"
+  bash "$wsl_copilot_script" "${args[@]}"
 }
 
 # ---------------------------------------------------------------------------
@@ -198,7 +198,7 @@ main() {
   say ""
 
   run_deps || warn "Falha na instalacao de dependencias (continuando...)"
-  run_vscode_sync || warn "Falha na sincronizacao VS Code (continuando...)"
+  run_copilot_sync || warn "Falha na sincronizacao Copilot (continuando...)"
   run_links || warn "Falha na criacao de links (continuando...)"
   run_crawl4ai || warn "Falha na instalacao do crawl4ai (continuando...)"
   run_codebase_memory || warn "Falha na instalacao do codebase-memory (continuando...)"
@@ -209,10 +209,10 @@ main() {
   say ""
   say "Verifique:"
   say "  ls -la ~/.config/opencode/"
-  say "  ls -la ~/.vscode-server/data/User/prompts/ 2>/dev/null || true"
+  say "  ls -la ~/.copilot/prompts/ 2>/dev/null || true"
   say ""
-  say "Para VS Code Windows (opcional):"
-  say "  ./scripts/bootstrap_repo/vscode-sync.ps1"
+  say "Para Copilot Windows (opcional):"
+  say "  ./scripts/bootstrap_repo/copilot-sync.ps1"
 }
 
 main

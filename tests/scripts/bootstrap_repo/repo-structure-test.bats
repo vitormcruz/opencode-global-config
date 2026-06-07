@@ -266,8 +266,8 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-install-deps.sh"
 }
 
-@test "scripts/bootstrap_repo/wsl-vscode-sync.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-vscode-sync.sh"
+@test "scripts/bootstrap_repo/wsl-copilot-sync.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh"
 }
 
 @test "scripts/opencode-doc-extract.sh é executável" {

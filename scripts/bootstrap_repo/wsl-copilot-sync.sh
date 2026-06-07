@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# wsl-vscode-sync.sh
-# Sincroniza prompts, agents, skills e mcp.json para VS Code Server (WSL).
+# wsl-copilot-sync.sh
+# Sincroniza prompts, agents, skills e mcp.json para GitHub Copilot (WSL).
 #
-# Uso: ./scripts/bootstrap_repo/wsl-vscode-sync.sh [--yes]
+# Uso: ./scripts/bootstrap_repo/wsl-copilot-sync.sh [--yes]
 
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "${script_dir}/../.." && pwd -P)"
 
-vscode_dir="${HOME}/.vscode-server/data/User"
+copilot_dir="${HOME}/.vscode-server/data/User"
 backup_dir="${HOME}/.vscode-server/data/User/.backups/$(date +%Y%m%d-%H%M%S)"
 
 assume_yes=0
@@ -23,12 +23,12 @@ while [ $# -gt 0 ]; do
     --quiet) quiet=1 ;;
     --help|-h)
       cat <<'EOF'
-wsl-vscode-sync
+wsl-copilot-sync
 
-Sincroniza prompts, agents, skills e mcp.json para VS Code Server WSL.
+Sincroniza prompts, agents, skills e mcp.json para GitHub Copilot (WSL).
 
 Uso:
-  ./scripts/bootstrap_repo/wsl-vscode-sync.sh [--yes] [--quiet]
+  ./scripts/bootstrap_repo/wsl-copilot-sync.sh [--yes] [--quiet]
 
 Opcoes:
   --yes      Nao pede confirmacao
@@ -36,7 +36,7 @@ Opcoes:
   --help     Mostra esta ajuda
 
 Destino:
-  ~/.vscode-server/data/User/
+  ~/.copilot/
     prompts/
     agents/
     skills/
@@ -148,7 +148,7 @@ confirm() {
     exit 2
   fi
 
-  printf 'Aplicar estas alteracoes em ~/.vscode-server/data/User/? [y/N] '
+  printf 'Aplicar estas alteracoes em ~/.copilot/? [y/N] '
   read -r ans || true
   case "$ans" in y|Y|yes|YES) return 0 ;; esac
   say "Cancelado."
@@ -157,18 +157,18 @@ confirm() {
 
 plan() {
   say "Repo:    $repo_root"
-  say "Destino: $vscode_dir"
+  say "Destino: $copilot_dir"
   say "Backup:  $backup_dir"
   say ""
   say "Plano:"
 
-  ensure_dir "$vscode_dir"
+  ensure_dir "$copilot_dir"
 
   # Criar links simbolicos
   local src dest
   for src in "$repo_root"/prompts "$repo_root"/agents "$repo_root"/skills "$repo_root"/commands; do
     if [ -e "$src" ]; then
-      dest="$vscode_dir/$(basename "$src")"
+      dest="$copilot_dir/$(basename "$src")"
       link_desc="LN  $dest -> $src"
 
       local abs cur
@@ -188,7 +188,7 @@ plan() {
 
   # mcp.json
   local mcp_src="$repo_root/mcp.json"
-  local mcp_dest="$vscode_dir/mcp.json"
+  local mcp_dest="$copilot_dir/mcp.json"
   if [ -f "$mcp_src" ]; then
     if [ -e "$mcp_dest" ] || [ -L "$mcp_dest" ]; then
         say "CP  $mcp_dest (sera backupeado e substituido)"
@@ -200,7 +200,7 @@ plan() {
 
 deploy_mcp_json() {
   local mcp_src="$repo_root/mcp.json"
-  local mcp_dest="$vscode_dir/mcp.json"
+  local mcp_dest="$copilot_dir/mcp.json"
 
   if [ ! -f "$mcp_src" ]; then
     return 0
@@ -231,13 +231,13 @@ apply() {
 
   deployed_any=0
 
-  ensure_dir "$vscode_dir"
+  ensure_dir "$copilot_dir"
 
   # Links simbolicos
   local src dest
   for src in "$repo_root"/prompts "$repo_root"/agents "$repo_root"/skills "$repo_root"/commands; do
     if [ -e "$src" ]; then
-      dest="$vscode_dir/$(basename "$src")"
+      dest="$copilot_dir/$(basename "$src")"
       link_one "$src" "$dest"
     fi
   done
@@ -247,7 +247,7 @@ apply() {
 
   if [ "$deployed_any" -eq 1 ]; then
     say ""
-    say "Reinicie o VS Code para aplicar as mudancas."
+    say "Reinicie o Copilot para aplicar as mudancas."
   else
     say ""
     say "Tudo ja estava sincronizado."

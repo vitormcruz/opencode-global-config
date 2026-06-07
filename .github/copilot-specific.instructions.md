@@ -4,6 +4,24 @@ applyTo: "**"
 
 Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
+## Arquitetura MCP no Copilot
+
+O GitHub Copilot suporta MCP nativamente, mas nao e possivel utiliza-lo no ambiente
+de uso. Para acessar os servidores MCP configurados neste repo, usamos o wrapper CLI
+`avelino/mcp` instalado em `~/.local/bin/mcp`.
+
+Fluxo de acesso:
+  1. Copilot recebe instrucao para usar uma tool MCP
+  2. Copilot executa `mcp --list` para descobrir servidores disponiveis
+  3. Copilot executa `mcp <servidor> <tool> --arg valor`
+  4. O wrapper `mcp` traduz a chamada CLI para protocolo MCP
+  5. O servidor MCP responde e o resultado e retornado ao Copilot
+
+Servidores acessiveis via `mcp`:
+  - crawl4ai (SSE, localhost:11235)
+  - codebase-memory (local process)
+  - doctree (local process via bunx)
+
 # Ferramentas MCP via CLI
 
 Use o comando `mcp` para acessar servidores MCP pelo terminal.
@@ -11,8 +29,8 @@ Use o comando `mcp` para acessar servidores MCP pelo terminal.
 ## Como usar
 
 1. Descubra o que está disponível: `mcp --list`
-2. Chame a ferramenta: `mcp call <servidor> <tool> --arg valor`
-3. Para argumentos JSON complexos, veja o schema: `mcp call <servidor> <tool> --schema`
+2. Chame a ferramenta: `mcp <servidor> <tool> --arg valor`
+3. Para argumentos JSON complexos: `mcp <servidor> <tool> --schema`
 
 ## Servidor disponível
 
@@ -21,9 +39,9 @@ Use o comando `mcp` para acessar servidores MCP pelo terminal.
 ## Exemplos
 
 ```bash
-mcp call crawl4ai crawl4ai_md --url "https://example.com"
-mcp call crawl4ai crawl4ai_md --url "https://example.com" > page.md
-mcp call crawl4ai crawl4ai_md --url "https://example.com" | jq '.markdown'
+mcp crawl4ai crawl4ai_md --url "https://example.com"
+mcp crawl4ai crawl4ai_md --url "https://example.com" > page.md
+mcp crawl4ai crawl4ai_md --url "https://example.com" | jq '.markdown'
 ```
 
 Prefira pipes com `jq` para filtrar saída JSON.
@@ -36,8 +54,8 @@ O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
 ### Como usar pelo Copilot
 
 1. Listar servidores disponíveis: `mcp --list`
-2. Chamar ferramenta: `mcp call <servidor> <tool> --arg valor`
-3. Para argumentos JSON complexos: `mcp call <servidor> <tool> --schema`
+2. Chamar ferramenta: `mcp <servidor> <tool> --arg valor`
+3. Para argumentos JSON complexos: `mcp <servidor> <tool> --schema`
 
 ### Servidores disponíveis
 
