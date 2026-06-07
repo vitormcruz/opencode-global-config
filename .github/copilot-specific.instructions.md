@@ -4,6 +4,48 @@ applyTo: "**"
 
 Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
+## Prioridade de Descoberta
+
+REGRA ABSOLUTA: use codebase-memory e doctree antes de grep/glob.
+NUNCA use ferramentas MCP nativas no Copilot — sempre o CLI `mcp`.
+
+### codebase-memory (CODIGO)
+
+Use para funcoes, classes, rotas, callers, data flow, arquitetura.
+
+```bash
+mcp codebase-memory search_graph --query "descricao"
+mcp codebase-memory trace_path --function_name "Foo"
+mcp codebase-memory get_code_snippet --qualified_name "pkg.Foo"
+mcp codebase-memory query_graph --query "MATCH ..."
+mcp codebase-memory get_architecture
+```
+
+### doctree (DOCUMENTACAO)
+
+Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
+
+```bash
+mcp doctree search_documents --query "termos"
+mcp doctree get_tree --doc_id "<id>"
+mcp doctree navigate_tree --doc_id "<id>" --node_id "<id>"
+mcp doctree get_node_content --doc_id "<id>" --node_ids '["<id>"]'
+```
+
+### grep/glob (FALLBACK)
+
+Use APENAS quando MCP nao resolve:
+- `grep` — strings literais, mensagens de erro, configs
+- `glob` — arquivos por nome/padrao
+
+### Wrapper doctree (opcional)
+
+O script `opencode-doctree-run` (disponivel no PATH) spawna doctree-mcp
+respeitando `.env-doctree` do projeto, permitindo indexar `agents/`,
+`skills/` e `plan/` alem de `docs/`. Para usa-lo, edite
+`~/.config/mcp/servers.json` e aponte `doctree.command` para
+`opencode-doctree-run` em vez de `bunx doctree-mcp`.
+
 ## Arquitetura MCP no Copilot
 
 O GitHub Copilot suporta MCP nativamente, mas nao e possivel utiliza-lo no ambiente
@@ -85,6 +127,7 @@ As seguintes skills estão disponíveis como comandos de barra no chat do Copilo
 - `/doc-read` — busca estruturada em documentos
 - `/doc-write` — escrita no wiki
 - `/doc-lint` — auditoria de documentação
+- `/code-explorer-priority` — tutorial de descoberta MCP-first
 
 Prefira usar as skills acima em vez de grep/glob para exploração de código e
 documentos — elas consomem menos tokens e retornam resultados estruturados.

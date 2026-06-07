@@ -1,5 +1,59 @@
 # Regras Globais
 
+## Descoberta de Codigo e Documentacao (LEIA ANTES DE BUSCAR)
+
+Use SEMPRE ferramentas MCP antes de grep/glob. Ferramentas MCP retornam
+resultados estruturados, consomem menos tokens e entendem a arquitetura
+do projeto.
+
+### codebase-memory (CODIGO)
+
+Use para funcoes, classes, rotas, callers, data flow, arquitetura.
+
+Ordem:
+  1. `search_graph` — encontrar funcoes, classes, rotas, variaveis
+  2. `trace_path` — quem chama / quem e chamado
+  3. `get_code_snippet` — ler fonte de simbolo especifico
+  4. `query_graph` — padroes complexos multi-entidade (Cypher)
+  5. `get_architecture` — visao geral do projeto
+
+### doctree (DOCUMENTACAO)
+
+Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
+
+Ordem:
+  1. `doctree_search_documents` — busca full-text
+  2. `doctree_get_tree` — outline do documento
+  3. `doctree_navigate_tree` — secao + subsecoes
+  4. `doctree_get_node_content` — secao especifica
+  5. `doctree_list_documents` — listar docs indexados
+
+### grep/glob (FALLBACK — apenas quando MCP nao resolve)
+
+  - `grep` — strings literais, mensagens de erro, valores de config
+  - `glob` — arquivos por nome/padrao
+
+### Recovery Obrigatorio
+
+`search_graph` retornar "project not found":
+  1. Chame `list_projects` para obter o nome exato do projeto indexado
+  2. Re-tente `search_graph` com o nome correto
+  3. So caia para grep/glob se o projeto nao estiver indexado
+
+`doctree_search_documents` retornar vazio:
+  1. Chame `doctree_list_documents` para verificar o que esta indexado
+  2. Se o documento esperado nao estiver indexado, use grep como fallback
+
+### Acesso MCP por Cliente
+
+| Cliente | codebase-memory | doctree |
+|---|---|---|
+| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... | Ferramentas nativas: `doctree_search_documents`... |
+| GitHub Copilot | CLI: `mcp codebase-memory <tool> --arg valor` | CLI: `mcp doctree <tool> --arg valor` |
+
+No Copilot, NUNCA tente usar ferramentas MCP nativas. Sempre use o wrapper
+CLI `mcp`. Consulte `.github/copilot-specific.instructions.md` para detalhes.
+
 ## Idioma
 - PT-BR (ASCII ok).
 - REGRA IMPORTANTE: sempre use acentuação quando estiver escrevendo texto em PT-BR.

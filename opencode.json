@@ -24,8 +24,7 @@
         "doctree": {
             "type": "local",
             "command": [
-                "bunx",
-                "doctree-mcp"
+                "opencode-doctree-run"
             ],
             "enabled": true
         }

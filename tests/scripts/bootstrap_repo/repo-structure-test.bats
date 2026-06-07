@@ -281,3 +281,59 @@ console.log('valid');
 @test "scripts/opencode-svgtoimage.sh é executável" {
   assert_file_executable "$REPO_ROOT/scripts/opencode-svgtoimage.sh"
 }
+
+@test "scripts/doctree/doctree-run.sh existe" {
+  assert_file_exist "$REPO_ROOT/scripts/doctree/doctree-run.sh"
+}
+
+@test "scripts/doctree/doctree-run.sh é executável" {
+  assert_file_executable "$REPO_ROOT/scripts/doctree/doctree-run.sh"
+}
+
+# ---------------------------------------------------------------------------
+# Nova skill code-explorer-priority
+# ---------------------------------------------------------------------------
+
+@test "skills/code-explorer-priority/SKILL.md existe" {
+  assert_file_exist "$REPO_ROOT/skills/code-explorer-priority/SKILL.md"
+}
+
+@test "skills/code-explorer-priority/SKILL.md tem frontmatter valido" {
+  run grep -c "^---$" "$REPO_ROOT/skills/code-explorer-priority/SKILL.md"
+  assert_success
+  [[ "$output" -ge 2 ]]
+}
+
+# ---------------------------------------------------------------------------
+# AGENTS.md — secao de descoberta MCP-first
+# ---------------------------------------------------------------------------
+
+@test "AGENTS.md contem secao 'Descoberta de Codigo e Documentacao'" {
+  run grep -c "Descoberta de Codigo e Documentacao" "$REPO_ROOT/AGENTS.md"
+  assert_success
+  [[ "$output" -ge 1 ]]
+}
+
+@test "AGENTS.md contem secao 'codebase-memory (CODIGO)'" {
+  run grep -c "codebase-memory (CODIGO)" "$REPO_ROOT/AGENTS.md"
+  assert_success
+  [[ "$output" -ge 1 ]]
+}
+
+@test "AGENTS.md contem secao 'doctree (DOCUMENTACAO)'" {
+  run grep -c "doctree (DOCUMENTACAO)" "$REPO_ROOT/AGENTS.md"
+  assert_success
+  [[ "$output" -ge 1 ]]
+}
+
+@test "AGENTS.md contem 'Acesso MCP por Cliente'" {
+  run grep -c "Acesso MCP por Cliente" "$REPO_ROOT/AGENTS.md"
+  assert_success
+  [[ "$output" -ge 1 ]]
+}
+
+@test "AGENTS.md contem Recovery Obrigatorio" {
+  run grep -c "Recovery Obrigatorio" "$REPO_ROOT/AGENTS.md"
+  assert_success
+  [[ "$output" -ge 1 ]]
+}

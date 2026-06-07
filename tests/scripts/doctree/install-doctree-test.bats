@@ -72,7 +72,7 @@ teardown() { common_teardown; }
   fake_bin="$(mktemp -d)"
   fake_home="$(mktemp -d)"
 
-  for cmd in bash head mkdir basename cp rm; do
+  for cmd in bash head mkdir basename cp rm dirname ln readlink; do
     local p
     p="$(command -v "$cmd" 2>/dev/null)" || continue
     ln -sf "$p" "$fake_bin/$cmd"
@@ -108,6 +108,9 @@ SCRIPT
   [ -f "$fake_home/.config/opencode/skills/doc-read/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/doc-write/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/doc-lint/SKILL.md" ]
+
+  # Verifica que o symlink opencode-doctree-run foi criado
+  assert_symlink_to "$REPO_ROOT/scripts/doctree/doctree-run.sh" "$fake_home/.local/bin/opencode-doctree-run"
 
   rm -rf "$fake_bin" "$fake_home"
 }

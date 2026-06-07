@@ -13,7 +13,7 @@ OPENCODE_BASE_URL="http://127.0.0.1:${OPENCODE_PORT}"
 # Verifica se o container está disponível antes de executar testes
 require_opencode_serve() {
   if ! curl -sf "${OPENCODE_BASE_URL}/" &>/dev/null; then
-    skip "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/opencode-int-test/docker/container-test-opencode.sh --up"
+    fail "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/opencode-int-test/docker/container-test-opencode.sh --up"
   fi
 }
 
