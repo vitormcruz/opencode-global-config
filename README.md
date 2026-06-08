@@ -118,8 +118,15 @@ Para rodar so a verificacao de dependencias:
 
 O bootstrap (`configurar-repo.sh`) sincroniza automaticamente para
 `~/.copilot/`:
-- `prompts/`, `agents/`, `commands/`, `skills/` → links simbolicos
-- `mcp.json` → copiado (nao linkado)
+- `prompts/`, `agents/`, `commands/`, `skills/` → sincronizados
+- `mcp.json` → `~/.vscode-server/data/User/mcp.json`
+- `servers.json` → `~/.config/mcp/servers.json`
+
+Importante:
+
+- o fluxo canônico deste repo usa o wrapper CLI `mcp` (`avelino/mcp`)
+- portanto, o arquivo crítico para MCPs no WSL é `~/.config/mcp/servers.json`
+- `~/.vscode-server/data/User/mcp.json` é mantido para compatibilidade do Copilot
 
 Para rodar apenas esta parte:
 
@@ -144,7 +151,8 @@ O que e sincronizado para VS Code Windows:
 - `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
 - `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
 - `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/copilot-specific.instructions.md`
-- MCPs `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
+- MCPs Copilot `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
+- MCPs CLI `crawl4ai`, `codebase-memory` e `doctree` → `%USERPROFILE%\.config\mcp\servers.json` (merge, sem sobrescrever)
 
 Para aplicar sem confirmacao interativa:
 

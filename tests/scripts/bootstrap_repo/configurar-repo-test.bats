@@ -33,6 +33,7 @@ teardown() {
   assert_output --partial "Configura GitHub Copilot (WSL)"
   assert_output --partial "Cria links simbolicos"
   assert_output --partial "Instala MCPs"
+  assert_output --partial "MCPs"
 }
 
 @test "configurar-repo com opcao invalida retorna exit 2" {
@@ -124,4 +125,9 @@ teardown() {
   assert_output --partial "crawl4ai"
   assert_output --partial "codebase-memory"
   assert_output --partial "doctree"
+}
+
+@test "configurar-repo referencia servers.json no resumo final" {
+  run grep -q 'servers.json' "$SCRIPT"
+  assert_success
 }

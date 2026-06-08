@@ -96,6 +96,61 @@ teardown() {
   assert_success
 }
 
+@test "wsl-copilot-sync configura servers.json do CLI mcp" {
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "$HOME/.config/mcp/servers.json" ]
+  run grep -q '"codebase-memory"' "$HOME/.config/mcp/servers.json"
+  assert_success
+  run grep -q '"doctree"' "$HOME/.config/mcp/servers.json"
+  assert_success
+  run grep -q '"crawl4ai"' "$HOME/.config/mcp/servers.json"
+  assert_success
+}
+
+@test "wsl-copilot-sync preserva entradas existentes em servers.json" {
+  mkdir -p "$HOME/.config/mcp"
+  cat > "$HOME/.config/mcp/servers.json" <<'EOF'
+{
+  "servers": {
+    "custom": {
+      "command": "custom-mcp",
+      "args": ["--stdio"]
+    }
+  }
+}
+EOF
+
+  run bash "$SCRIPT" --yes
+  assert_success
+  run grep -q '"custom"' "$HOME/.config/mcp/servers.json"
+  assert_success
+  run grep -q '"codebase-memory"' "$HOME/.config/mcp/servers.json"
+  assert_success
+}
+
+@test "wsl-copilot-sync atualiza definicao canonica em servers.json sem duplicar" {
+  mkdir -p "$HOME/.config/mcp"
+  cat > "$HOME/.config/mcp/servers.json" <<'EOF'
+{
+  "servers": {
+    "doctree": {
+      "command": "bunx",
+      "args": ["doctree-mcp"]
+    }
+  }
+}
+EOF
+
+  run bash "$SCRIPT" --yes
+  assert_success
+  run grep -c '"doctree"' "$HOME/.config/mcp/servers.json"
+  assert_success
+  [ "$output" -eq 1 ]
+  run grep -q '"opencode-doctree-run"' "$HOME/.config/mcp/servers.json"
+  assert_success
+}
+
 @test "wsl-copilot-sync: AGENTS define canonico compartilhado entre adaptadores" {
   run grep -q "wsl-copilot-sync.sh" "$REPO_ROOT/AGENTS.md"
   assert_success

@@ -58,6 +58,7 @@ O que e sincronizado:
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
+  MCPs CLI (crawl4ai,codebase-memory,doctree) -> %USERPROFILE%\.config\mcp\servers.json
 "@
 }
 
@@ -78,12 +79,14 @@ if ($DestRoot) {
     $InstructionsDir = Join-Path $DestRoot ".copilot\instructions"
     $PromptsDir      = Join-Path $DestRoot "AppData\Roaming\Code\User\prompts"
     $McpJson         = Join-Path $DestRoot "AppData\Roaming\Code\User\mcp.json"
+    $McpServersJson  = Join-Path $DestRoot ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $DestRoot "copilot-backup"
 } else {
     $SkillsDir       = Join-Path $env:USERPROFILE ".copilot\skills"
     $InstructionsDir = Join-Path $env:USERPROFILE ".copilot\instructions"
     $PromptsDir      = Join-Path $env:APPDATA "Code\User\prompts"
     $McpJson         = Join-Path $env:APPDATA "Code\User\mcp.json"
+    $McpServersJson  = Join-Path $env:USERPROFILE ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $env:USERPROFILE ".config\copilot-backup"
 }
 
@@ -400,6 +403,7 @@ function Sync-Mcp {
     Say ""
     Say "--- MCP ---"
     Ensure-Dir (Split-Path -Parent $McpJson)
+    Backup-IfExists $McpJson
 
     $newServers = @{
         "exa" = [ordered]@{
@@ -424,19 +428,84 @@ function Sync-Mcp {
     }
 
     $added = @()
+    $updated = @()
     foreach ($key in $newServers.Keys) {
-        if (-not @($data.servers.PSObject.Properties | Where-Object { $_.Name -eq $key }).Count) {
+        $existing = $data.servers.PSObject.Properties[$key]
+        if (-not $existing) {
             $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
             $added += $key
+        } else {
+            $currentJson = ($existing.Value | ConvertTo-Json -Depth 10 -Compress)
+            $expectedJson = ($newServers[$key] | ConvertTo-Json -Depth 10 -Compress)
+            if ($currentJson -ne $expectedJson) {
+                $data.servers.PSObject.Properties.Remove($key)
+                $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
+                $updated += $key
+            }
         }
     }
 
     $data | ConvertTo-Json -Depth 10 | Set-Content -Path $McpJson -Encoding UTF8
 
-    if ($added.Count -gt 0) {
-        Say "ADD   MCPs adicionados: $($added -join ', ')"
+    return [PSCustomObject]@{
+        Added = $added
+        Updated = $updated
+    }
+}
+
+function Sync-McpCli {
+    Ensure-Dir (Split-Path -Parent $McpServersJson)
+    Backup-IfExists $McpServersJson
+
+    $newServers = @{
+        "crawl4ai" = [ordered]@{
+            "type" = "sse"
+            "url"  = "http://localhost:11235/mcp/sse"
+        }
+        "codebase-memory" = [ordered]@{
+            "command" = "codebase-memory-mcp"
+            "args"    = @()
+        }
+        "doctree" = [ordered]@{
+            "command" = "opencode-doctree-run"
+            "args"    = @()
+        }
+    }
+
+    if (Test-Path $McpServersJson) {
+        try   { $data = Get-Content $McpServersJson -Raw | ConvertFrom-Json }
+        catch { $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} } }
     } else {
-        Say "OK    mcp.json (sem alteracoes necessarias)"
+        $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} }
+    }
+
+    if (-not @($data.PSObject.Properties | Where-Object { $_.Name -eq "servers" }).Count) {
+        $data | Add-Member -MemberType NoteProperty -Name "servers" -Value ([PSCustomObject]@{})
+    }
+
+    $added = @()
+    $updated = @()
+    foreach ($key in $newServers.Keys) {
+        $existing = $data.servers.PSObject.Properties[$key]
+        if (-not $existing) {
+            $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
+            $added += $key
+        } else {
+            $currentJson = ($existing.Value | ConvertTo-Json -Depth 10 -Compress)
+            $expectedJson = ($newServers[$key] | ConvertTo-Json -Depth 10 -Compress)
+            if ($currentJson -ne $expectedJson) {
+                $data.servers.PSObject.Properties.Remove($key)
+                $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
+                $updated += $key
+            }
+        }
+    }
+
+    $data | ConvertTo-Json -Depth 10 | Set-Content -Path $McpServersJson -Encoding UTF8
+
+    return [PSCustomObject]@{
+        Added = $added
+        Updated = $updated
     }
 }
 
@@ -455,13 +524,15 @@ function Show-Plan {
     Say "Instructions: $InstructionsDir"
     Say "Prompts:      $PromptsDir"
     Say "MCP:          $McpJson"
+    Say "MCP CLI:      $McpServersJson"
     Say ""
     Say "Plano:"
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
     Say "  - Converter $nAgents agent(s) para .agent.md"
     Say "  - Copiar $nCommands command(s) para .prompt.md"
     Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
-    Say "  - Configurar MCPs (exa, crawl4ai) em mcp.json"
+    Say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
+    Say "  - Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json"
 }
 
 Show-Plan
@@ -470,6 +541,17 @@ Sync-Skills
 Sync-Agents
 Sync-Commands
 Sync-Instructions
-Sync-Mcp
+$mcpResult = Sync-Mcp
+if ($mcpResult.Added.Count -gt 0 -or $mcpResult.Updated.Count -gt 0) {
+    Say "OK    mcp.json (add: $((@($mcpResult.Added) -join ', ') -replace '^$', 'nenhum'); update: $((@($mcpResult.Updated) -join ', ') -replace '^$', 'nenhum'))"
+} else {
+    Say "OK    mcp.json (sem alteracoes necessarias)"
+}
+$mcpCliResult = Sync-McpCli
+if ($mcpCliResult.Added.Count -gt 0 -or $mcpCliResult.Updated.Count -gt 0) {
+    Say "OK    servers.json (add: $((@($mcpCliResult.Added) -join ', ') -replace '^$', 'nenhum'); update: $((@($mcpCliResult.Updated) -join ', ') -replace '^$', 'nenhum'))"
+} else {
+    Say "OK    servers.json (sem alteracoes necessarias)"
+}
 Say ""
 Say "Pronto."

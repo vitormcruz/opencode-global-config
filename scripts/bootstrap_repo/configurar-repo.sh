@@ -23,7 +23,7 @@ configurar-repo
 
 Configura o repositorio opencode-config:
   1. Instala dependencias WSL
-  2. Configura GitHub Copilot (WSL) (prompts, agents, skills)
+  2. Configura GitHub Copilot (WSL) (prompts, agents, skills, MCPs)
   3. Cria links simbolicos
   4. Instala MCPs (crawl4ai, codebase-memory, doctree)
 
@@ -110,7 +110,7 @@ run_copilot_sync() {
 
   section "Configurando GitHub Copilot (WSL)"
 
-  say "Sincronizando skills para ~/.copilot/skills/, instructions para ~/.copilot/instructions/, prompts para ~/.vscode-server/data/User/prompts/ e mcp.json para ~/.vscode-server/data/User/mcp.json"
+  say "Sincronizando skills para ~/.copilot/skills/, instructions para ~/.copilot/instructions/, prompts para ~/.vscode-server/data/User/prompts/, mcp.json para ~/.vscode-server/data/User/mcp.json e servers.json para ~/.config/mcp/servers.json"
 
   local args=()
   [ "$assume_yes" -eq 1 ] && args+=("--yes")
@@ -213,6 +213,7 @@ main() {
   say "  ls -la ~/.copilot/instructions/ 2>/dev/null || true"
   say "  ls -la ~/.copilot/skills/ 2>/dev/null || true"
   say "  cat ~/.vscode-server/data/User/mcp.json 2>/dev/null || true"
+  say "  cat ~/.config/mcp/servers.json 2>/dev/null || true"
   say ""
   say "Para Copilot Windows (opcional):"
   say "  ./scripts/bootstrap_repo/copilot-sync.ps1"

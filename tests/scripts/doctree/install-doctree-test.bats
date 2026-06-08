@@ -28,10 +28,13 @@ teardown() { common_teardown; }
 
   printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/bun"
   chmod +x "$fake_bin/bun"
-  printf '#!/bin/sh\nexit 0\n' > "$fake_bin/bunx"
+  cat > "$fake_bin/bunx" <<'SCRIPT'
+#!/bin/sh
+while :; do :; done
+SCRIPT
   chmod +x "$fake_bin/bunx"
 
-  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --check-only
+  run env PATH="$fake_bin:/usr/bin:/bin" /usr/bin/bash "$SCRIPT" --check-only
   assert_success
   assert_output --partial "doctree-mcp disponivel"
 

@@ -16,6 +16,7 @@ windows_user_profile=""
 windows_prompts_dir=""
 windows_code_user_dir=""
 mcp_json="${HOME}/.vscode-server/data/User/mcp.json"
+mcp_servers_json="${HOME}/.config/mcp/servers.json"
 backup_dir="${HOME}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
 
 assume_yes=0
@@ -44,7 +45,8 @@ O que e sincronizado:
   agents/*.md       -> ~/.vscode-server/data/User/prompts/*.agent.md
   commands/*.md     -> ~/.vscode-server/data/User/prompts/*.prompt.md
   copilot-instrs    -> ~/.copilot/instructions/copilot-specific.instructions.md
-  MCPs (exa,crawl4ai) -> ~/.vscode-server/data/User/mcp.json
+  MCPs Copilot (exa,crawl4ai) -> ~/.vscode-server/data/User/mcp.json
+  MCPs CLI (crawl4ai,codebase-memory,doctree) -> ~/.config/mcp/servers.json
 EOF
       exit 0
       ;;
@@ -288,9 +290,10 @@ sync_agents() {
  }
 
  sync_mcp() {
-   say ""
-   say "--- MCP ---"
+   say "" >&2
+   say "--- MCP ---" >&2
    ensure_dir "$(dirname "$mcp_json")"
+   backup_if_exists "$mcp_json"
    python3 - <<'PY' "$mcp_json"
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
@@ -313,12 +316,59 @@ else:
     data = {'servers': {}}
 servers = data.setdefault('servers', {})
 added = []
+updated = []
 for key, value in new_servers.items():
     if key not in servers:
         servers[key] = value
         added.append(key)
+    elif servers[key] != value:
+        servers[key] = value
+        updated.append(key)
 path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-print(','.join(added))
+print(json.dumps({'added': added, 'updated': updated}))
+PY
+}
+
+sync_mcp_cli() {
+  say "--- MCP CLI ---" >&2
+  ensure_dir "$(dirname "$mcp_servers_json")"
+  backup_if_exists "$mcp_servers_json"
+  python3 - <<'PY' "$mcp_servers_json"
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+new_servers = {
+    'crawl4ai': {
+        'type': 'sse',
+        'url': 'http://localhost:11235/mcp/sse',
+    },
+    'codebase-memory': {
+        'command': 'codebase-memory-mcp',
+        'args': [],
+    },
+    'doctree': {
+        'command': 'opencode-doctree-run',
+        'args': [],
+    },
+}
+if path.exists():
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except Exception:
+        data = {'servers': {}}
+else:
+    data = {'servers': {}}
+servers = data.setdefault('servers', {})
+added = []
+updated = []
+for key, value in new_servers.items():
+    if key not in servers:
+        servers[key] = value
+        added.append(key)
+    elif servers[key] != value:
+        servers[key] = value
+        updated.append(key)
+path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+print(json.dumps({'added': added, 'updated': updated}))
 PY
 }
 
@@ -334,13 +384,15 @@ show_plan() {
   say "Instructions: $instructions_dir"
   say "Prompts:      $prompts_dir"
   say "MCP:          $mcp_json"
+  say "MCP CLI:      $mcp_servers_json"
   say ""
   say "Plano:"
   say "  - Copiar $n_skills skill(s) para ~/.copilot/skills/"
   say "  - Converter $n_agents agent(s) para .agent.md"
   say "  - Copiar $n_commands command(s) para .prompt.md"
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
-  say "  - Configurar MCPs (exa, crawl4ai) em mcp.json"
+  say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
+  say "  - Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json"
   if [[ -n "$windows_prompts_dir" ]]; then
     say "  - Espelhar prompts/agents/instructions em $windows_prompts_dir"
   else
@@ -368,15 +420,43 @@ main() {
   sync_agents
   sync_commands
   sync_instructions
-  sync_mcp >/tmp/wsl-copilot-sync.mcp.out
-  local added
-  added="$(tr -d '\n' </tmp/wsl-copilot-sync.mcp.out)"
-  if [[ -n "$added" ]]; then
-    say "ADD   MCPs adicionados: ${added//,/\, }"
+  local mcp_result mcp_cli_result added updated cli_added cli_updated
+  mcp_result="$(sync_mcp)"
+  mcp_cli_result="$(sync_mcp_cli)"
+  added="$(python3 - <<'PY' "$mcp_result"
+import json, sys
+payload = json.loads(sys.argv[1] or '{}')
+print(', '.join(payload.get('added', [])))
+PY
+)"
+  updated="$(python3 - <<'PY' "$mcp_result"
+import json, sys
+payload = json.loads(sys.argv[1] or '{}')
+print(', '.join(payload.get('updated', [])))
+PY
+)"
+  cli_added="$(python3 - <<'PY' "$mcp_cli_result"
+import json, sys
+payload = json.loads(sys.argv[1] or '{}')
+print(', '.join(payload.get('added', [])))
+PY
+)"
+  cli_updated="$(python3 - <<'PY' "$mcp_cli_result"
+import json, sys
+payload = json.loads(sys.argv[1] or '{}')
+print(', '.join(payload.get('updated', [])))
+PY
+)"
+  if [[ -n "$added" || -n "$updated" ]]; then
+    say "OK    mcp.json (add: ${added:-nenhum}; update: ${updated:-nenhum})"
   else
     say "OK    mcp.json (sem alteracoes necessarias)"
   fi
-  rm -f /tmp/wsl-copilot-sync.mcp.out
+  if [[ -n "$cli_added" || -n "$cli_updated" ]]; then
+    say "OK    servers.json (add: ${cli_added:-nenhum}; update: ${cli_updated:-nenhum})"
+  else
+    say "OK    servers.json (sem alteracoes necessarias)"
+  fi
   say ""
   say "Pronto."
 }

@@ -86,10 +86,18 @@ PY
 }
 
 @test "copilot-sync: Sync-Mcp configura exa e crawl4ai" {
-  run bash -c "grep -A 40 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'exa-mcp-server'"
+  run bash -c "grep -A 60 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'exa-mcp-server'"
   assert_success
 
-  run bash -c "grep -A 40 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'http://localhost:11235/mcp/sse'"
+  run bash -c "grep -A 60 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'http://localhost:11235/mcp/sse'"
+  assert_success
+}
+
+@test "copilot-sync: Sync-McpCli configura codebase-memory e doctree" {
+  run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'codebase-memory-mcp'"
+  assert_success
+
+  run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'opencode-doctree-run'"
   assert_success
 }
 
@@ -101,6 +109,8 @@ content = Path(os.environ["TARGET_FILE"]).read_text(encoding="utf-8", errors="re
 assert "Copiar $nSkills skill(s) para .copilot\\skills\\" in content
 assert "Converter $nAgents agent(s) para .agent.md" in content
 assert "Copiar $nCommands command(s) para .prompt.md" in content
+assert "Configurar MCPs Copilot (exa, crawl4ai) em mcp.json" in content
+assert "Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json" in content
 PY
   assert_success
 }
