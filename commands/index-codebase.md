@@ -6,16 +6,16 @@ Indexe o repositorio atual no codebase-memory e configure o doctree.
 
 Siga este fluxo estritamente:
 
-1. **Verificar se o projeto ja esta indexado no codebase-memory-mcp**:
-   - No **GitHub Copilot**, execute: `mcp codebase-memory-mcp list_projects`
+1. **Verificar se o projeto ja esta indexado no codebase-memory**:
+   - No **GitHub Copilot**, execute: `mcp codebase-memory list_projects`
    - No **OpenCode**, use o fluxo nativo equivalente para listar projetos.
    - Se o repositorio atual ja estiver indexado, informe isso ao usuario antes
      de reindexar.
 
-2. **Indexar repo no codebase-memory-mcp**:
-   - No **GitHub Copilot**, execute: `mcp codebase-memory-mcp index_repository --repo_path "."`
+2. **Indexar repo no codebase-memory**:
+   - No **GitHub Copilot**, execute: `mcp codebase-memory index_repository --repo_path "."`
    - No **OpenCode** ou em hooks/scripts locais, use:
-     `codebase-memory-mcp-mcp cli index_repository '{"repo_path": "."}'
+     `codebase-memory-mcp cli index_repository '{"repo_path": "."}'
    - Exiba o resultado da indexacao.
 
 3. **Configurar doctree (.env-doctree)**:
@@ -48,13 +48,13 @@ Siga este fluxo estritamente:
    - Se o arquivo nao existir, crie-o com:
      ```bash
      #!/usr/bin/env bash
-     # Auto-re-indexa codebase-memory-mcp a cada commit
+     # Auto-re-indexa codebase-memory a cada commit
      codebase-memory-mcp cli index_repository '{"repo_path": "."}'
      ```
    - Torne o arquivo executavel: `chmod +x .git/hooks/post-commit`
 
 5. **Reportar status**:
-   - Exiba o resultado da verificacao e da indexacao no codebase-memory-mcp.
+   - Exiba o resultado da verificacao e da indexacao no codebase-memory.
    - Confirme se `.env-doctree` ja existia, se foi criado, ou se foi pulado.
    - Confirme se o hook foi instalado, ja existia com a configuracao, ou se o
      usuario optou por nao modificar.
