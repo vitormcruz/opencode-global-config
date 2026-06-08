@@ -615,6 +615,16 @@ MCP_INSTALL_DIR="${HOME}/.local/bin"
 MCP_URL="${MCP_URL:-https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu}"
 MCP_EXPECTED_SHA="${MCP_EXPECTED_SHA:-}"
 
+fix_chrondb_lib() {
+  local chrondb_lib="${HOME}/.chrondb/lib"
+  local tmp_dir="${chrondb_lib}/.tmp-extract-runtime"
+  if [ -d "$tmp_dir" ] && [ -f "${tmp_dir}/libchrondb.so" ]; then
+    say "            Corrigindo estrutura do chrondb..."
+    mv "${tmp_dir}"/* "${chrondb_lib}/" 2>/dev/null
+    rmdir "$tmp_dir" 2>/dev/null
+  fi
+}
+
 if has_cmd mcp; then
   status_ok "mcp ($(mcp --version 2>/dev/null | head -1 || echo ok))"
 else
@@ -645,6 +655,8 @@ else
     fi
   fi
 fi
+
+fix_chrondb_lib
 say ""
 
 # --------------------------------------------------------------------------
