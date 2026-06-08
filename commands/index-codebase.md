@@ -6,45 +6,57 @@ Indexe o repositorio atual no codebase-memory e configure o doctree.
 
 Siga este fluxo estritamente:
 
-1. **Indexar repo no codebase-memory**:
-   Execute: `codebase-memory-mcp cli index_repository '{"repo_path": "."}'`
-   Exiba o resultado da indexacao.
+1. **Verificar se o projeto ja esta indexado no codebase-memory**:
+   - No **GitHub Copilot**, execute: `mcp codebase-memory list_projects`
+   - No **OpenCode**, use o fluxo nativo equivalente para listar projetos.
+   - Se o repositorio atual ja estiver indexado, informe isso ao usuario antes
+     de reindexar.
 
-2. **Configurar doctree (.env-doctree)**:
+2. **Indexar repo no codebase-memory**:
+   - No **GitHub Copilot**, execute: `mcp codebase-memory index_repository --repo_path "."`
+   - No **OpenCode** ou em hooks/scripts locais, use:
+     `codebase-memory-mcp cli index_repository '{"repo_path": "."}'
+   - Exiba o resultado da indexacao.
+
+3. **Configurar doctree (.env-doctree)**:
    - Verifique se o arquivo `.env-doctree` ja existe na raiz do repo.
-   - Se ja existir, exiba o conteudo e pule a criacao.
+   - Se ja existir, exiba o conteudo, trate-o como fonte de verdade do repo e
+     pule a criacao. Nao tente migrar automaticamente entre `DOCS_ROOT` e
+     `DOCS_ROOTS`, nem sobrescrever o arquivo sem confirmacao do usuario.
    - Se nao existir, liste as pastas detectadas na raiz e pergunte:
-     "Quais pastas indexar no doctree? [docs/agents/skills/plan — padrao: todas]"
-   - Crie `.env-doctree` com as pastas escolhidas (ou todas se o usuario
-     aceitar o padrao). Formato:
+     "Quais pastas indexar no doctree? [docs/agents/skills/plan — padrao: docs]"
+   - Se o usuario escolher **uma pasta**, crie `.env-doctree` com:
      ```bash
-     DOCS_ROOTS="./docs:1.0,./agents:0.9,./skills:0.7,./plan:0.5"
+     DOCS_ROOT="./docs"
      ```
-   - Explique: o wrapper `opencode-doctree-run` usa este arquivo. Para aplicar,
-     reinicie o doctree (reinicie o OpenCode ou `mcp doctree`).
-   - Se o usuario recusar todas as pastas, informe que o doctree usara
+     Ajuste o caminho conforme a pasta escolhida.
+   - Se o usuario quiser **multiplas pastas**, explique que `DOCS_ROOTS` pode
+     ser registrado no `.env-doctree`, mas preserve o que o repo ja adotar e
+     nao infira migracoes automaticamente.
+   - Explique: o wrapper `opencode-doctree-run` faz source de `.env-doctree`.
+   - Se o usuario recusar criar o arquivo, informe que o doctree usara
      fallback `./docs`.
 
- 3. **Instalar git hook post-commit (append, nunca sobrescrever)**:
-    - Verifique se `.git/hooks/post-commit` ja existe.
-    - Se existir, leia o conteudo e verifique se ja contem a linha:
-      `codebase-memory-mcp cli index_repository`
-    - Se ja contem, informe que o hook ja esta configurado e pule esta etapa.
-    - Se nao contem, mostre o conteudo atual ao usuario, explique que a linha
-      de reindex sera adicionada ao final, e peca confirmacao.
-    - Se confirmado, faça append da linha ao final do arquivo existente.
-    - Se o arquivo nao existir, crie-o com:
-      ```bash
-      #!/usr/bin/env bash
-      # Auto-re-indexa codebase-memory a cada commit
-      codebase-memory-mcp cli index_repository '{"repo_path": "."}'
-      ```
-    - Torne o arquivo executavel: `chmod +x .git/hooks/post-commit`
+4. **Instalar git hook post-commit (append, nunca sobrescrever)**:
+   - Verifique se `.git/hooks/post-commit` ja existe.
+   - Se existir, leia o conteudo e verifique se ja contem a linha:
+     `codebase-memory-mcp cli index_repository`
+   - Se ja contem, informe que o hook ja esta configurado e pule esta etapa.
+   - Se nao contem, mostre o conteudo atual ao usuario, explique que a linha
+     de reindex sera adicionada ao final, e peca confirmacao.
+   - Se confirmado, faca append da linha ao final do arquivo existente.
+   - Se o arquivo nao existir, crie-o com:
+     ```bash
+     #!/usr/bin/env bash
+     # Auto-re-indexa codebase-memory a cada commit
+     codebase-memory-mcp cli index_repository '{"repo_path": "."}'
+     ```
+   - Torne o arquivo executavel: `chmod +x .git/hooks/post-commit`
 
- 4. **Reportar status**:
-     - Exiba o resultado da indexacao no codebase-memory.
-     - Confirme se `.env-doctree` foi criado, se ja existia, ou se foi pulado.
-     - Confirme se o hook foi instalado, ja existia com a configuracao, ou se o
-       usuario optou por nao modificar.
+5. **Reportar status**:
+   - Exiba o resultado da verificacao e da indexacao no codebase-memory.
+   - Confirme se `.env-doctree` ja existia, se foi criado, ou se foi pulado.
+   - Confirme se o hook foi instalado, ja existia com a configuracao, ou se o
+     usuario optou por nao modificar.
 
 Nao execute passos destrutivos sem confirmacao do usuario.

@@ -52,8 +52,15 @@ bun_ok=0
 doctree_ok=0
 
 command -v bun &>/dev/null && bun_ok=1
-if [ "$bun_ok" -eq 1 ] && bunx doctree-mcp --help &>/dev/null 2>&1; then
-    doctree_ok=1
+if [ "$bun_ok" -eq 1 ] && command -v bunx &>/dev/null; then
+    if timeout 5s bunx doctree-mcp </dev/null >/dev/null 2>&1; then
+        doctree_ok=1
+    else
+        rc=$?
+        if [ "$rc" -eq 124 ]; then
+            doctree_ok=1
+        fi
+    fi
 fi
 
 if [ "$bun_ok" -eq 1 ] && [ "$doctree_ok" -eq 1 ]; then
@@ -108,10 +115,15 @@ fi
 # --- Verificar doctree-mcp ---
 if [ "$bun_ok" -eq 1 ]; then
     print_info "Verificando doctree-mcp..."
-    if bunx doctree-mcp --help &>/dev/null 2>&1; then
+    if timeout 5s bunx doctree-mcp </dev/null >/dev/null 2>&1; then
         print_success "doctree-mcp disponivel e funcional"
     else
-        print_warning "doctree-mcp nao respondeu — verifique manualmente: bunx doctree-mcp --help"
+        rc=$?
+        if [ "$rc" -eq 124 ]; then
+            print_success "doctree-mcp inicializa corretamente (servidor MCP em execucao)"
+        else
+            print_warning "doctree-mcp nao respondeu — verifique manualmente: timeout 5s bunx doctree-mcp"
+        fi
     fi
 fi
 

@@ -221,4 +221,3 @@ Pre-requisitos:
 - `make`
 - `jq` (para testes de integração)
 - dependencias externas conforme o alvo escolhido
-- Docker para a Camada 2 (`make test-opencode-integration`)

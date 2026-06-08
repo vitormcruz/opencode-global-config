@@ -110,7 +110,7 @@ run_copilot_sync() {
 
   section "Configurando GitHub Copilot (WSL)"
 
-  say "Sincronizando prompts, agents, skills, mcp.json para ~/.copilot/"
+  say "Sincronizando skills para ~/.copilot/skills/, instructions para ~/.copilot/instructions/, prompts para ~/.vscode-server/data/User/prompts/ e mcp.json para ~/.vscode-server/data/User/mcp.json"
 
   local args=()
   [ "$assume_yes" -eq 1 ] && args+=("--yes")
@@ -209,7 +209,10 @@ main() {
   say ""
   say "Verifique:"
   say "  ls -la ~/.config/opencode/"
-  say "  ls -la ~/.copilot/prompts/ 2>/dev/null || true"
+  say "  ls -la ~/.vscode-server/data/User/prompts/ 2>/dev/null || true"
+  say "  ls -la ~/.copilot/instructions/ 2>/dev/null || true"
+  say "  ls -la ~/.copilot/skills/ 2>/dev/null || true"
+  say "  cat ~/.vscode-server/data/User/mcp.json 2>/dev/null || true"
   say ""
   say "Para Copilot Windows (opcional):"
   say "  ./scripts/bootstrap_repo/copilot-sync.ps1"

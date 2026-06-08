@@ -50,13 +50,33 @@ load "../../helpers/test_helper"
   assert_file_exist "$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1"
 }
 
+@test "copilot-sync: Sync-Skills copia para .copilot/skills" {
+  run bash -c "grep -A 20 '^function Sync-Skills' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'Copy-Item -Path \$skillSrc.FullName -Destination \$dest -Recurse -Force'"
+  assert_success
+}
+
+@test "copilot-sync: Sync-Agents materializa prompts .agent.md" {
+  run bash -c "grep -A 20 '^function Sync-Agents' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q '\$baseName.agent.md'"
+  assert_success
+}
+
+@test "copilot-sync: Sync-Commands materializa prompts .prompt.md" {
+  run bash -c "grep -A 20 '^function Sync-Commands' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q '\$baseName.prompt.md'"
+  assert_success
+}
+
 @test "copilot-sync: Sync-Instructions copia de .github/copilot-specific.instructions.md" {
   run bash -c "grep -A 12 '^function Sync-Instructions' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'copilot-specific.instructions.md'"
   assert_success
 }
 
 @test "copilot-sync: Sync-Instructions copia para .copilot/instructions" {
-  run bash -c "grep -A 12 '^function Sync-Instructions' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q '\\.copilot\\\\instructions'"
+  run env TARGET_FILE="$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1" python3 - <<'PY'
+from pathlib import Path
+import os
+content = Path(os.environ["TARGET_FILE"]).read_text(encoding="utf-8", errors="replace")
+assert ".copilot\\instructions" in content
+PY
   assert_success
 }
 
@@ -65,7 +85,38 @@ load "../../helpers/test_helper"
   assert_failure
 }
 
+@test "copilot-sync: Sync-Mcp configura exa e crawl4ai" {
+  run bash -c "grep -A 40 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'exa-mcp-server'"
+  assert_success
+
+  run bash -c "grep -A 40 '^function Sync-Mcp' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'http://localhost:11235/mcp/sse'"
+  assert_success
+}
+
+@test "copilot-sync: Show-Plan descreve a mesma cobertura funcional" {
+  run env TARGET_FILE="$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1" python3 - <<'PY'
+from pathlib import Path
+import os
+content = Path(os.environ["TARGET_FILE"]).read_text(encoding="utf-8", errors="replace")
+assert "Copiar $nSkills skill(s) para .copilot\\skills\\" in content
+assert "Converter $nAgents agent(s) para .agent.md" in content
+assert "Copiar $nCommands command(s) para .prompt.md" in content
+PY
+  assert_success
+}
+
 @test "copilot-sync: Show-Plan NAO menciona copia de AGENTS.md para instructions" {
   run bash -c "grep -A 12 '^    Say \"Plano:\"' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'AGENTS.md'"
   assert_failure
+}
+
+@test "copilot-sync: AGENTS define que ambos adaptadores evoluem juntos" {
+  run grep -q "adaptadores do mesmo repo" "$REPO_ROOT/AGENTS.md"
+  assert_success
+
+  run bash -c 'tr "\n" " " < "$1" | grep -q "O comportamento canonico nao pertence a apenas um deles"' _ "$REPO_ROOT/AGENTS.md"
+  assert_success
+
+  run bash -c 'tr "\n" " " < "$1" | grep -Eq "devem ser alterados[[:space:]]+juntos|devem permanecer semanticamente sincronizados e devem ser alterados[[:space:]]+juntos"' _ "$REPO_ROOT/AGENTS.md"
+  assert_success
 }

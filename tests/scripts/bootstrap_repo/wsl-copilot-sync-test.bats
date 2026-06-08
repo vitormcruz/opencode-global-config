@@ -8,7 +8,8 @@ SCRIPT="$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh"
 setup() {
   common_setup
   export HOME="$(mktemp -d)/home"
-  mkdir -p "$HOME/.copilot"
+  export USER="ur5y"
+   mkdir -p "$HOME/.copilot" "$HOME/.vscode-server/data/User"
 }
 
 teardown() {
@@ -46,15 +47,65 @@ teardown() {
   assert_success
 }
 
-@test "wsl-copilot-sync cria diretório de backup" {
+@test "wsl-copilot-sync copia skills para ~/.copilot/skills" {
   run bash "$SCRIPT" --yes
   assert_success
-  # Verifica que ha backups criados
-  [ -d "$HOME/.copilot/.backups" ]
+  [ -d "$HOME/.copilot/skills" ]
+  [ -f "$HOME/.copilot/skills/browser-testing/SKILL.md" ]
 }
 
-@test "wsl-copilot-sync cria links simbolicos" {
+@test "wsl-copilot-sync materializa agents em prompts/*.agent.md" {
   run bash "$SCRIPT" --yes
   assert_success
-  [ -L "$HOME/.copilot/skills" ] || [ -e "$HOME/.copilot/skills" ]
+  [ -f "$HOME/.vscode-server/data/User/prompts/eng-software.agent.md" ]
+}
+
+@test "wsl-copilot-sync materializa commands em prompts/*.prompt.md" {
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "$HOME/.vscode-server/data/User/prompts/index-codebase.prompt.md" ]
+}
+
+@test "wsl-copilot-sync espelha prompts para Windows quando detectado" {
+  mkdir -p "/mnt/c/Users/$USER/AppData/Roaming/Code/User/prompts"
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "/mnt/c/Users/$USER/AppData/Roaming/Code/User/prompts/index-codebase.prompt.md" ]
+}
+
+@test "wsl-copilot-sync mantem opencode-config.instructions.md no destino Windows" {
+  mkdir -p "/mnt/c/Users/$USER/AppData/Roaming/Code/User/prompts"
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "/mnt/c/Users/$USER/AppData/Roaming/Code/User/prompts/opencode-config.instructions.md" ]
+}
+
+@test "wsl-copilot-sync copia instructions para ~/.copilot/instructions" {
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "$HOME/.copilot/instructions/copilot-specific.instructions.md" ]
+}
+
+@test "wsl-copilot-sync configura mcp.json no destino do VS Code" {
+  run bash "$SCRIPT" --yes
+  assert_success
+  [ -f "$HOME/.vscode-server/data/User/mcp.json" ]
+  run grep -q '"exa"' "$HOME/.vscode-server/data/User/mcp.json"
+  assert_success
+  run grep -q '"crawl4ai"' "$HOME/.vscode-server/data/User/mcp.json"
+  assert_success
+}
+
+@test "wsl-copilot-sync: AGENTS define canonico compartilhado entre adaptadores" {
+  run grep -q "wsl-copilot-sync.sh" "$REPO_ROOT/AGENTS.md"
+  assert_success
+
+  run grep -q "copilot-sync.ps1" "$REPO_ROOT/AGENTS.md"
+  assert_success
+
+  run bash -c 'tr "\n" " " < "$1" | grep -q "O comportamento canonico nao pertence a apenas um deles"' _ "$REPO_ROOT/AGENTS.md"
+  assert_success
+
+  run bash -c 'tr "\n" " " < "$1" | grep -Eq "devem ser alterados[[:space:]]+juntos|devem permanecer semanticamente sincronizados e devem ser alterados[[:space:]]+juntos"' _ "$REPO_ROOT/AGENTS.md"
+  assert_success
 }
