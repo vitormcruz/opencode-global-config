@@ -145,24 +145,3 @@ for skill in doc-read doc-write doc-lint; do
         print_warning "Falha ao baixar skill: $skill ($url)"
     fi
 done
-
-# --- Symlink do wrapper doctree-run em ~/.local/bin ---
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(cd "${script_dir}/../.." && pwd -P)"
-wrapper_src="${repo_root}/scripts/doctree/doctree-run.sh"
-wrapper_dst="${HOME}/.local/bin/doctree-run"
-
-mkdir -p "${HOME}/.local/bin"
-if [ -L "$wrapper_dst" ]; then
-    current="$(readlink "$wrapper_dst")"
-    if [ "$current" = "$wrapper_src" ]; then
-        print_success "doctree-run symlink OK"
-    else
-        rm -f "$wrapper_dst"
-        ln -s "$wrapper_src" "$wrapper_dst"
-        print_success "doctree-run symlink atualizado"
-    fi
-elif [ ! -e "$wrapper_dst" ]; then
-    ln -s "$wrapper_src" "$wrapper_dst"
-    print_success "doctree-run symlink criado"
-fi

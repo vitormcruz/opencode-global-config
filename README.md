@@ -28,7 +28,7 @@ Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_LINKS=1` — pula criacao de links
 - `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
 - `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
-- `OPENCODE_SKIP_DOCTREE=1` — pula configuracao do MCP doctree
+- `OPENCODE_SKIP_DOCTREE=1` — pula instalacao de ferramentas e skills do doctree
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 

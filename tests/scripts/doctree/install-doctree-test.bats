@@ -112,8 +112,5 @@ SCRIPT
   [ -f "$fake_home/.config/opencode/skills/doc-write/SKILL.md" ]
   [ -f "$fake_home/.config/opencode/skills/doc-lint/SKILL.md" ]
 
-  # Verifica que o symlink doctree-run foi criado
-  assert_symlink_to "$REPO_ROOT/scripts/doctree/doctree-run.sh" "$fake_home/.local/bin/doctree-run"
-
   rm -rf "$fake_bin" "$fake_home"
 }

@@ -282,14 +282,6 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/opencode-svgtoimage.sh"
 }
 
-@test "scripts/doctree/doctree-run.sh existe" {
-  assert_file_exist "$REPO_ROOT/scripts/doctree/doctree-run.sh"
-}
-
-@test "scripts/doctree/doctree-run.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/doctree/doctree-run.sh"
-}
-
 # ---------------------------------------------------------------------------
 # Nova skill code-explorer-priority
 # ---------------------------------------------------------------------------

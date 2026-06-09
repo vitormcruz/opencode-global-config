@@ -20,13 +20,6 @@
                 "codebase-memory-mcp"
             ],
             "enabled": true
-        },
-        "doctree": {
-            "type": "local",
-            "command": [
-                "doctree-run"
-            ],
-            "enabled": true
         }
     },
     "agent": {

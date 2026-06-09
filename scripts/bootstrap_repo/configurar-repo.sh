@@ -25,7 +25,7 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Configura GitHub Copilot (WSL) (prompts, agents, skills, MCPs)
   3. Cria links simbolicos
-  4. Instala MCPs (crawl4ai, codebase-memory, doctree)
+  4. Instala ferramentas globais (crawl4ai, codebase-memory, doctree)
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]
@@ -42,7 +42,7 @@ Variaveis de ambiente:
   OPENCODE_SKIP_SKILL_SYNC=1     Pula sincronizacao de skills upstream
   OPENCODE_SKIP_CRAWL4AI=1       Pula configuracao do MCP crawl4ai
   OPENCODE_SKIP_CODEBASE_MEMORY=1 Pula configuracao do MCP codebase-memory
-  OPENCODE_SKIP_DOCTREE=1        Pula configuracao do MCP doctree
+  OPENCODE_SKIP_DOCTREE=1        Pula instalacao das ferramentas do doctree
 EOF
       exit 0
       ;;
