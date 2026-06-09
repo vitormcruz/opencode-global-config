@@ -1,5 +1,5 @@
 ---
-description: Indexa o repositorio no codebase-memory, configura doctree e instala git hook post-commit
+description: Indexa o repositorio no codebase-memory, configura doctree por repo e instala git hook post-commit
 ---
 
 Indexe o repositorio atual no codebase-memory e configure o doctree.
@@ -13,7 +13,11 @@ Siga este fluxo estritamente:
      de reindexar.
 
 2. **Indexar repo no codebase-memory**:
-   - No **GitHub Copilot**, execute: `mcp codebase-memory index_repository --repo_path "."`
+   - No **GitHub Copilot**, execute com JSON posicional unico e `repo_path`
+     absoluto, por exemplo:
+     `mcp codebase-memory index_repository '{"repo_path":"/mnt/c/Users/ur5y/Projetos/opencode-config"}'`
+   - Nao use `--repo_path "."` no Copilot, pois essa sintaxe falha com o
+     wrapper `mcp` neste ambiente.
    - No **OpenCode** ou em hooks/scripts locais, use:
      `codebase-memory-mcp cli index_repository '{"repo_path": "."}'
    - Exiba o resultado da indexacao.
@@ -36,19 +40,51 @@ Siga este fluxo estritamente:
      ```
      Ajuste as pastas e pesos conforme escolha do usuario.
 
-4. **Executar indexacao do doctree**:
-   - Execute obrigatoriamente o script `scripts/doctree/doctree-run.sh` para
-     indexar os documentos no doctree-mcp.
-   - Na raiz do repo, execute:
-     ```bash
-     bash scripts/doctree/doctree-run.sh
+4. **Configurar doctree por repo**:
+   - Preserve a decisao tomada no passo 3 como fonte de verdade.
+   - Derive toda configuracao de Doctree a partir de `.env-doctree`.
+   - Se `.env-doctree` nao definir `DOCS_ROOT` nem `DOCS_ROOTS`, use fallback
+     generico para `./docs` e avise explicitamente o usuario.
+
+   **OpenCode**:
+   - Escreva a configuracao MCP do projeto dentro de `.opencode/`.
+   - Use configuracao local por repo com `env`.
+   - Se houver configuracao especifica em `.env-doctree`, replique os valores.
+   - Se nao houver, use configuracao generica apontando para `./docs`.
+
+   **GitHub Copilot via `avelino/mcp`**:
+   - Edite diretamente `~/.config/mcp/servers.json`.
+   - Use nome especifico por repo quando houver configuracao especifica:
+     `doctree-mcp-<basename-do-repo>`.
+   - Se o repo estiver no modo generico `./docs`, reutilize a entrada
+     generica `doctree-mcp`.
+   - Use `env` na entrada para carregar `DOCS_ROOT` ou `DOCS_ROOTS`.
+   - Gere `.github/copilot-doctree.instructions.md` com o nome resolvido do MCP
+     que deve ser usado naquele repo.
+   - O arquivo deve ser criado por este proprio fluxo, nunca por bootstrap,
+     sync global ou manutencao manual avulsa.
+   - Conteudo minimo esperado:
+     ```md
+     ---
+     applyTo: "**"
+     ---
+
+     ## Doctree por repo no Copilot
+
+     - Neste repo, nao use a entrada global antiga `doctree`.
+     - Use a entrada MCP materializada para este projeto em `~/.config/mcp/servers.json`.
+     - Nome preferencial deste repo: `doctree-mcp-<basename-do-repo>`.
+     - Se essa entrada nao existir e houver somente uma entrada generica `doctree-mcp`, use a generica.
      ```
-   - Este script faz source de `.env-doctree` e indexa todas as pastas
-     configuradas.
-   - Exiba o resultado da indexacao (numero de documentos indexados).
+
+5. **Executar indexacao do doctree**:
+   - Execute a indexacao usando a configuracao MCP por repo que acabou de ser
+     materializada.
+   - Nao use mais `scripts/doctree/doctree-run.sh`.
+   - Exiba o resultado da indexacao, incluindo numero de documentos indexados.
    - Se houver erros, reporte ao usuario.
 
-5. **Instalar git hook post-commit (append, nunca sobrescrever)**:
+6. **Instalar git hook post-commit (append, nunca sobrescrever)**:
    - Verifique se `.git/hooks/post-commit` ja existe.
    - Se existir, leia o conteudo e verifique se ja contem a linha:
      `codebase-memory-mcp cli index_repository`
@@ -64,9 +100,12 @@ Siga este fluxo estritamente:
      ```
    - Torne o arquivo executavel: `chmod +x .git/hooks/post-commit`
 
-6. **Reportar status**:
+7. **Reportar status**:
    - Exiba o resultado da verificacao e da indexacao no codebase-memory.
    - Confirme se `.env-doctree` ja existia, se foi criado, ou se foi pulado.
+   - Confirme se a configuracao Doctree do repo foi materializada para:
+     - OpenCode
+     - Copilot
    - Confirme se a indexacao do doctree foi executada com sucesso.
    - Confirme se o hook foi instalado, ja existia com a configuracao, ou se o
      usuario optou por nao modificar.

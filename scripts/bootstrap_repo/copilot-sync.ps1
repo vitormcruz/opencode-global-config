@@ -58,7 +58,7 @@ O que e sincronizado:
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
-  MCPs CLI (crawl4ai,codebase-memory,doctree) -> %USERPROFILE%\.config\mcp\servers.json
+  MCPs CLI globais (crawl4ai,codebase-memory) -> %USERPROFILE%\.config\mcp\servers.json
 "@
 }
 
@@ -466,10 +466,6 @@ function Sync-McpCli {
             "command" = "codebase-memory-mcp"
             "args"    = @()
         }
-        "doctree" = [ordered]@{
-            "command" = "doctree-run"
-            "args"    = @()
-        }
     }
 
     if (Test-Path $McpServersJson) {
@@ -532,7 +528,7 @@ function Show-Plan {
     Say "  - Copiar $nCommands command(s) para .prompt.md"
     Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
     Say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
-    Say "  - Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json"
+    Say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
 
 Show-Plan

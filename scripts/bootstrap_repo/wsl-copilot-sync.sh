@@ -46,7 +46,7 @@ O que e sincronizado:
   commands/*.md     -> ~/.vscode-server/data/User/prompts/*.prompt.md
   copilot-instrs    -> ~/.copilot/instructions/copilot-specific.instructions.md
   MCPs Copilot (exa,crawl4ai) -> ~/.vscode-server/data/User/mcp.json
-  MCPs CLI (crawl4ai,codebase-memory,doctree) -> ~/.config/mcp/servers.json
+  MCPs CLI globais (crawl4ai,codebase-memory) -> ~/.config/mcp/servers.json
 EOF
       exit 0
       ;;
@@ -347,11 +347,6 @@ new_servers = {
         'command': 'codebase-memory-mcp',
         'args': [],
     },
-    'doctree': {
-        # stdio server usa command + args
-        'command': 'doctree-run',
-        'args': [],
-    },
 }
 if path.exists():
     try:
@@ -360,7 +355,6 @@ if path.exists():
         data = {'mcpServers': {}}
 else:
     data = {'mcpServers': {}}
-# Usa 'mcpServers' conforme documentação do avelino/mcp
 servers = data.setdefault('mcpServers', {})
 added = []
 updated = []
@@ -396,7 +390,7 @@ show_plan() {
   say "  - Copiar $n_commands command(s) para .prompt.md"
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
   say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
-  say "  - Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json"
+  say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
   if [[ -n "$windows_prompts_dir" ]]; then
     say "  - Espelhar prompts/agents/instructions em $windows_prompts_dir"
   else

@@ -42,6 +42,10 @@ load "../../helpers/test_helper"
   assert_success
 }
 
+@test "copilot-sync: instruction dedicada de doctree por repo nao e artefato versionado" {
+  assert_not_exist "$REPO_ROOT/.github/copilot-doctree.instructions.md"
+}
+
 # ---------------------------------------------------------------------------
 # copilot-sync.ps1 — estrutura e funcoes
 # ---------------------------------------------------------------------------
@@ -93,12 +97,12 @@ PY
   assert_success
 }
 
-@test "copilot-sync: Sync-McpCli configura codebase-memory e doctree" {
+@test "copilot-sync: Sync-McpCli configura codebase-memory sem doctree global" {
   run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'codebase-memory-mcp'"
   assert_success
 
   run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'doctree-run'"
-  assert_success
+  assert_failure
 }
 
 @test "copilot-sync: Show-Plan descreve a mesma cobertura funcional" {
@@ -110,7 +114,7 @@ assert "Copiar $nSkills skill(s) para .copilot\\skills\\" in content
 assert "Converter $nAgents agent(s) para .agent.md" in content
 assert "Copiar $nCommands command(s) para .prompt.md" in content
 assert "Configurar MCPs Copilot (exa, crawl4ai) em mcp.json" in content
-assert "Configurar MCPs CLI (crawl4ai, codebase-memory, doctree) em servers.json" in content
+assert "Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json" in content
 PY
   assert_success
 }

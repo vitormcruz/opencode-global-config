@@ -70,6 +70,10 @@ teardown_file() { common_teardown; }
   assert_success
 }
 
+@test "repo-state: .github/copilot-doctree.instructions.md nao existe no repo base" {
+  assert_not_exist "$REPO_ROOT/.github/copilot-doctree.instructions.md"
+}
+
 # ---------------------------------------------------------------------------
 # opencode.json acessível via symlink e válido
 # ---------------------------------------------------------------------------

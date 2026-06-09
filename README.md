@@ -20,7 +20,7 @@ O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
 3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
-4. **Instala MCPs** — crawl4ai, codebase-memory, doctree
+4. **Instala MCPs globais** — crawl4ai e codebase-memory
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
@@ -127,6 +127,9 @@ Importante:
 - o fluxo canônico deste repo usa o wrapper CLI `mcp` (`avelino/mcp`)
 - portanto, o arquivo crítico para MCPs no WSL é `~/.config/mcp/servers.json`
 - `~/.vscode-server/data/User/mcp.json` é mantido para compatibilidade do Copilot
+- `doctree` nao e mais configurado globalmente no bootstrap/sync
+- o doctree agora e materializado por repo a partir de `.env-doctree`
+  durante o fluxo de `commands/index-codebase.md`
 
 Para rodar apenas esta parte:
 
@@ -148,11 +151,15 @@ O script requer PowerShell 5.1+ (nativo no Windows 10/11).
 O que e sincronizado para VS Code Windows:
 
 - `skills/*/` → `~/.copilot/skills/` (padrao agentskills.io — sem conversao)
-- `agents/*.md` → `%APPDATA%\Code\User\prompts\*.agent.md`
-- `commands/*.md` → `%APPDATA%\Code\User\prompts\*.prompt.md`
+- `agents/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.agent.md`
+- `commands/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.prompt.md`
 - `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/copilot-specific.instructions.md`
-- MCPs Copilot `exa` e `crawl4ai` → `%APPDATA%\Code\User\mcp.json` (merge, sem sobrescrever)
-- MCPs CLI `crawl4ai`, `codebase-memory` e `doctree` → `%USERPROFILE%\.config\mcp\servers.json` (merge, sem sobrescrever)
+- MCPs Copilot `exa` e `crawl4ai` → `%APPDATA%\\Code\\User\\mcp.json` (merge, sem sobrescrever)
+- MCPs CLI `crawl4ai` e `codebase-memory` → `%USERPROFILE%\\.config\\mcp\\servers.json` (merge, sem sobrescrever)
+
+O doctree do Copilot passa a ser configurado por repo no fluxo de
+`commands/index-codebase.md`, com instruction local gerada durante esse fluxo
+em `.github/copilot-doctree.instructions.md`.
 
 Para aplicar sem confirmacao interativa:
 

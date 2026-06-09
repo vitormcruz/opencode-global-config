@@ -102,10 +102,10 @@ teardown() {
   [ -f "$HOME/.config/mcp/servers.json" ]
   run grep -q '"codebase-memory"' "$HOME/.config/mcp/servers.json"
   assert_success
-  run grep -q '"doctree"' "$HOME/.config/mcp/servers.json"
-  assert_success
   run grep -q '"crawl4ai"' "$HOME/.config/mcp/servers.json"
   assert_success
+  run grep -q '"doctree"' "$HOME/.config/mcp/servers.json"
+  assert_failure
 }
 
 @test "wsl-copilot-sync preserva entradas existentes em servers.json" {
@@ -129,7 +129,7 @@ EOF
   assert_success
 }
 
-@test "wsl-copilot-sync atualiza definicao canonica em servers.json sem duplicar" {
+@test "wsl-copilot-sync nao reintroduz doctree global legado em servers.json" {
   mkdir -p "$HOME/.config/mcp"
   cat > "$HOME/.config/mcp/servers.json" <<'EOF'
 {
@@ -148,7 +148,7 @@ EOF
   assert_success
   [ "$output" -eq 1 ]
   run grep -q '"doctree-run"' "$HOME/.config/mcp/servers.json"
-  assert_success
+  assert_failure
 }
 
 @test "wsl-copilot-sync: AGENTS define canonico compartilhado entre adaptadores" {

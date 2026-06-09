@@ -13,23 +13,42 @@ NUNCA use ferramentas MCP nativas no Copilot — sempre o CLI `mcp`.
 
 Use para funcoes, classes, rotas, callers, data flow, arquitetura.
 
+No GitHub Copilot, para `codebase-memory`, prefira SEMPRE um unico argumento
+JSON posicional. Nao use sintaxe com flags como `--query`, `--function_name`,
+`--qualified_name`, `--repo_path` ou `--project`, pois ela falha neste
+ambiente com o wrapper `mcp`.
+
+Fluxo seguro:
+1. Rode `mcp codebase-memory list_projects`
+2. Copie o nome exato do projeto indexado
+3. Passe `{"project":"<nome>", ...}` nas tools que consultam o grafo
+4. Para indexacao, use `repo_path` absoluto
+5. Em `search_code`, use `pattern`, nao `query`
+
 ```bash
-mcp codebase-memory search_graph --query "descricao"
-mcp codebase-memory trace_path --function_name "Foo"
-mcp codebase-memory get_code_snippet --qualified_name "pkg.Foo"
-mcp codebase-memory query_graph --query "MATCH ..."
-mcp codebase-memory get_architecture
+mcp codebase-memory list_projects
+mcp codebase-memory index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'
+mcp codebase-memory search_graph '{"project":"<nome>","query":"descricao"}'
+mcp codebase-memory trace_path '{"project":"<nome>","function_name":"Foo"}'
+mcp codebase-memory get_code_snippet '{"project":"<nome>","qualified_name":"pkg.Foo"}'
+mcp codebase-memory query_graph '{"project":"<nome>","query":"MATCH ..."}'
+mcp codebase-memory search_code '{"project":"<nome>","pattern":"termo"}'
+mcp codebase-memory get_architecture '{"project":"<nome>"}'
 ```
 
 ### doctree (DOCUMENTACAO)
 
 Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
 
+Use a instruction local por repo em `.github/copilot-doctree.instructions.md`,
+gerada pelo fluxo `commands/index-codebase.md`, para descobrir o nome exato da
+entrada MCP deste projeto em `~/.config/mcp/servers.json`.
+
 ```bash
-mcp doctree search_documents --query "termos"
-mcp doctree get_tree --doc_id "<id>"
-mcp doctree navigate_tree --doc_id "<id>" --node_id "<id>"
-mcp doctree get_node_content --doc_id "<id>" --node_ids '["<id>"]'
+mcp <doctree-do-repo> search_documents --query "termos"
+mcp <doctree-do-repo> get_tree --doc_id "<id>"
+mcp <doctree-do-repo> navigate_tree --doc_id "<id>" --node_id "<id>"
+mcp <doctree-do-repo> get_node_content --doc_id "<id>" --node_ids '["<id>"]'
 ```
 
 ### grep/glob (FALLBACK)
@@ -37,16 +56,6 @@ mcp doctree get_node_content --doc_id "<id>" --node_ids '["<id>"]'
 Use APENAS quando MCP nao resolve:
 - `grep` — strings literais, mensagens de erro, configs
 - `glob` — arquivos por nome/padrao
-
-### Wrapper doctree
-
-O script `scripts/doctree/doctree-run.sh` e um wrapper que faz source de
-`.env-doctree` do projeto e executa `bunx doctree-mcp`. Ele permite indexar
-multiplas pastas (`docs/`, `agents/`, `skills/`, `plan/`) com pesos diferentes.
-
-Para usa-lo via MCP, use o comando `doctree-run` ou o caminho completo do
-script. Para configura-lo em `~/.config/mcp/servers.json`, aponte
-`doctree.command` para `doctree-run` em vez de `bunx doctree-mcp`.
 
 ## Arquitetura MCP no Copilot
 
@@ -57,14 +66,14 @@ de uso. Para acessar os servidores MCP configurados neste repo, usamos o wrapper
 Fluxo de acesso:
   1. Copilot recebe instrucao para usar uma tool MCP
   2. Copilot executa `mcp --list` para descobrir servidores disponiveis
-  3. Copilot executa `mcp <servidor> <tool> --arg valor`
+  3. Copilot executa `mcp <servidor> <tool> '<json>'`
   4. O wrapper `mcp` traduz a chamada CLI para protocolo MCP
   5. O servidor MCP responde e o resultado e retornado ao Copilot
 
 Servidores acessiveis via `mcp`:
   - crawl4ai (SSE, localhost:11235)
   - codebase-memory (local process)
-  - doctree (local process via bunx)
+  - doctree do repo atual (entrada materializada por repo em `servers.json`)
 
 # Ferramentas MCP via CLI
 
@@ -73,8 +82,8 @@ Use o comando `mcp` para acessar servidores MCP pelo terminal.
 ## Como usar
 
 1. Descubra o que está disponível: `mcp --list`
-2. Chame a ferramenta: `mcp <servidor> <tool> --arg valor`
-3. Para argumentos JSON complexos: `mcp <servidor> <tool> --schema`
+2. Para `codebase-memory`, use `mcp <servidor> <tool> '<json>'`
+3. Para `doctree` e `crawl4ai`, use a sintaxe suportada pelo servidor
 
 ## Servidor disponível
 
@@ -98,8 +107,8 @@ O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
 ### Como usar pelo Copilot
 
 1. Listar servidores disponíveis: `mcp --list`
-2. Chamar ferramenta: `mcp <servidor> <tool> --arg valor`
-3. Para argumentos JSON complexos: `mcp <servidor> <tool> --schema`
+2. Em `codebase-memory`, chamar a tool com JSON posicional único
+3. Em `doctree`, usar a sintaxe suportada pelo servidor
 
 ### Servidores disponíveis
 
@@ -117,6 +126,9 @@ O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
   - `get_tree` — retorna árvore de seções
   - `get_node_content` — lê conteúdo de seção
   - `navigate_tree` — navega seção + filhos
+
+A entrada concreta de `doctree` depende do repo atual e deve ser obtida na
+instruction local `.github/copilot-doctree.instructions.md`.
 
 ### Skills instaladas (comandos `/` no chat)
 
