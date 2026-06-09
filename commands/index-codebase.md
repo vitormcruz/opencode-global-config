@@ -6,6 +6,14 @@ Indexe o repositorio atual no codebase-memory e configure o doctree.
 
 Siga este fluxo estritamente:
 
+## Regra central sobre `.env-doctree`
+
+- A existencia de `.env-doctree` na raiz do repo indica **configuracao especifica por repositorio**.
+- Nessa situacao, **nao basta** manter ou usar o MCP generico `doctree-mcp`/`doctree`.
+- O fluxo **deve materializar** uma entrada MCP especifica por repo para que `DOCS_ROOT` ou `DOCS_ROOTS` sejam realmente aplicados.
+- Sem essa materializacao, a configuracao tende a cair no comportamento generico de `./docs`, o que e insuficiente quando o repo declarou multiplas raizes ou pesos.
+- Portanto, sempre trate `.env-doctree` como fonte de verdade e como sinal de especificidade do projeto.
+
 1. **Verificar se o projeto ja esta indexado no codebase-memory**:
    - No **GitHub Copilot**, execute: `mcp codebase-memory list_projects`
    - No **OpenCode**, use o fluxo nativo equivalente para listar projetos.
@@ -27,8 +35,12 @@ Siga este fluxo estritamente:
    - Se ja existir, exiba o conteudo, trate-o como fonte de verdade do repo e
      pule a criacao. Nao tente migrar automaticamente entre `DOCS_ROOT` e
      `DOCS_ROOTS`, nem sobrescrever o arquivo sem confirmacao do usuario.
-   - Se nao existir, liste as pastas detectadas na raiz e pergunte:
+   - Se nao existir, liste as pastas detectadas na raiz e pergunte primeiro se
+     o humano quer criar o `.env-doctree` para este repo.
+   - Somente se o humano confirmar a criacao, pergunte:
      "Quais pastas indexar no doctree? [docs/agents/skills/plan — padrao: docs]"
+   - Se o humano nao quiser criar o arquivo, nao crie `.env-doctree`; siga com
+     fallback generico para `./docs` e deixe isso explicito no status final.
    - Se o usuario escolher **uma pasta**, crie `.env-doctree` com:
      ```bash
      DOCS_ROOT="./docs"
@@ -45,6 +57,9 @@ Siga este fluxo estritamente:
    - Derive toda configuracao de Doctree a partir de `.env-doctree`.
    - Se `.env-doctree` nao definir `DOCS_ROOT` nem `DOCS_ROOTS`, use fallback
      generico para `./docs` e avise explicitamente o usuario.
+   - Se `.env-doctree` existir e definir `DOCS_ROOT` ou `DOCS_ROOTS`, considere
+     isso uma configuracao **especifica do repo** e materialize uma entrada MCP
+     dedicada para o projeto. Nao reutilize a entrada generica nesses casos.
 
    **OpenCode**:
    - Escreva a configuracao MCP do projeto dentro de `.opencode/`.
@@ -58,6 +73,9 @@ Siga este fluxo estritamente:
      `doctree-mcp-<basename-do-repo>`.
    - Se o repo estiver no modo generico `./docs`, reutilize a entrada
      generica `doctree-mcp`.
+   - A existencia de `.env-doctree` com `DOCS_ROOT` ou `DOCS_ROOTS` impede o uso
+     apenas da entrada generica, porque o MCP precisa ser materializado com `env`
+     derivado do repo para refletir a especificidade declarada.
    - Use `env` na entrada para carregar `DOCS_ROOT` ou `DOCS_ROOTS`.
    - Gere `.github/copilot-doctree.instructions.md` com o nome resolvido do MCP
      que deve ser usado naquele repo.
@@ -80,6 +98,9 @@ Siga este fluxo estritamente:
 5. **Executar indexacao do doctree**:
    - Execute a indexacao usando a configuracao MCP por repo que acabou de ser
      materializada.
+   - Se `.env-doctree` existir com `DOCS_ROOT` ou `DOCS_ROOTS`, a indexacao deve
+     usar obrigatoriamente a entrada especifica do repo, e nao apenas o MCP
+     generico.
    - Nao use mais `scripts/doctree/doctree-run.sh`.
    - Exiba o resultado da indexacao, incluindo numero de documentos indexados.
    - Se houver erros, reporte ao usuario.
@@ -103,9 +124,13 @@ Siga este fluxo estritamente:
 7. **Reportar status**:
    - Exiba o resultado da verificacao e da indexacao no codebase-memory.
    - Confirme se `.env-doctree` ja existia, se foi criado, ou se foi pulado.
+   - Se `.env-doctree` nao existia, deixe claro se o humano recusou a criacao
+     e se o fluxo seguiu em modo generico.
    - Confirme se a configuracao Doctree do repo foi materializada para:
      - OpenCode
      - Copilot
+   - Deixe explicito se o repo ficou em modo generico (`./docs`) ou em modo
+     especifico por repositorio (derivado de `.env-doctree`).
    - Confirme se a indexacao do doctree foi executada com sucesso.
    - Confirme se o hook foi instalado, ja existia com a configuracao, ou se o
      usuario optou por nao modificar.

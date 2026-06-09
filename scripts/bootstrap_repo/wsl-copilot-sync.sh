@@ -391,6 +391,10 @@ show_plan() {
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
   say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
   say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
+  say "  - Nao materializar doctree por repo neste bootstrap global"
+  say "  - Deixar doctree especifico para o fluxo commands/index-codebase.md"
+  say "  - Quando existir .env-doctree, o MCP dedicado do repo devera ser criado"
+  say "    pelo indexador, e nao pelo sync global"
   if [[ -n "$windows_prompts_dir" ]]; then
     say "  - Espelhar prompts/agents/instructions em $windows_prompts_dir"
   else

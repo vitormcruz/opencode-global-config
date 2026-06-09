@@ -2,6 +2,8 @@
 # configurar-repo.sh
 # Entrypoint principal para configurar o repo opencode-config.
 # Orquestra: deps (wsl), Copilot sync (wsl), e links simbolicos.
+# A materializacao do doctree especifico por repo nao ocorre aqui; quando
+# existir `.env-doctree`, ela pertence ao fluxo de indexacao do repo.
 #
 # Uso: ./scripts/bootstrap_repo/configurar-repo.sh [--yes]
 
@@ -25,7 +27,12 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Configura GitHub Copilot (WSL) (prompts, agents, skills, MCPs)
   3. Cria links simbolicos
-  4. Instala ferramentas globais (crawl4ai, codebase-memory, doctree)
+  4. Instala MCPs e ferramentas globais (crawl4ai, codebase-memory, doctree)
+
+Importante:
+  a instalacao do doctree nesta etapa e global.
+  Se um repo tiver `.env-doctree`, isso sinaliza configuracao especifica e a
+  entrada MCP dedicada deve ser criada depois, no fluxo de indexacao do repo.
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]

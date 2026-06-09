@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # scripts/doctree/install.sh
 # Instala bun, verifica doctree-mcp e baixa skills para OpenCode.
+# Nao materializa MCP especifico por repositorio; isso pertence ao fluxo
+# de indexacao por repo quando existir `.env-doctree`.
 #
 # Uso: ./scripts/doctree/install.sh [--yes] [--check-only] [--help]
 
@@ -30,6 +32,12 @@ doctree/install.sh
 
 Instala bun (necessario para bunx doctree-mcp) e baixa skills do doctree
 para ~/.config/opencode/skills/.
+
+Importante:
+  este script instala a ferramenta global do doctree, mas nao cria a entrada
+  MCP especifica de um repositorio.
+  Se existir `.env-doctree` na raiz do repo, isso indica configuracao
+  especifica e o MCP dedicado deve ser materializado pelo fluxo de indexacao.
 
 Uso:
   ./scripts/doctree/install.sh [--yes] [--check-only]
