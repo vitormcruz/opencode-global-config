@@ -49,10 +49,13 @@ Ordem:
 | Cliente | codebase-memory | doctree |
 |---|---|---|
 | OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... | Ferramentas nativas: `doctree_search_documents`... |
-| GitHub Copilot | CLI: `mcp codebase-memory <tool> --arg valor` | CLI: `mcp doctree <tool> --arg valor` |
+| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` | CLI: `mcp doctree <tool> --arg valor` |
 
 No Copilot, NUNCA tente usar ferramentas MCP nativas. Sempre use o wrapper
-CLI `mcp`. Consulte `.github/copilot-specific.instructions.md` para detalhes.
+CLI `mcp`. Para `codebase-memory`, prefira JSON posicional unico, use
+`repo_path` absoluto ao indexar e inclua `project` explicitamente nas
+consultas ao grafo. Consulte `.github/copilot-specific.instructions.md`
+para detalhes.
 
 ## Idioma
 - PT-BR (ASCII ok).

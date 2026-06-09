@@ -34,11 +34,16 @@ Ferramentas MCP sao nativas. Use `search_graph`, `trace_path`,
 `doctree_search_documents`, etc. diretamente.
 
 ### GitHub Copilot
-Ferramentas MCP NAO sao nativas. Use SEMPRE o CLI wrapper:
+Ferramentas MCP NAO sao nativas. Use SEMPRE o CLI wrapper.
+
+Para `codebase-memory`, no Copilot, prefira SEMPRE um unico JSON posicional e
+inclua `project` explicitamente nas consultas ao grafo. Nao use `--query`,
+`--function_name`, `--qualified_name`, `--repo_path` ou `--project`.
 
 ```bash
-mcp codebase-memory search_graph --query "termos"
-mcp codebase-memory trace_path --function_name "Foo"
+mcp codebase-memory list_projects
+mcp codebase-memory search_graph '{"project":"<nome>","query":"termos"}'
+mcp codebase-memory trace_path '{"project":"<nome>","function_name":"Foo"}'
 mcp doctree search_documents --query "termos"
 mcp doctree get_tree --doc_id "<id>"
 ```
@@ -51,7 +56,8 @@ ferramentas nativas no Copilot — elas nao existem nesse ambiente.
 OpenCode: `list_projects`
 Copilot: `mcp codebase-memory list_projects`
 
-Anote o nome exato. Se nao estiver indexado: `index_repository`.
+Anote o nome exato. Se nao estiver indexado:
+`mcp codebase-memory index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'`
 
 ## Passo 1: Classificar a busca
 
@@ -72,9 +78,10 @@ Anote o nome exato. Se nao estiver indexado: `index_repository`.
 
 1. `search_graph(project="<nome>", query="<descricao>")`
 2. "project not found"? → `list_projects` → retentar
-3. Vazio? → `semantic_query` com palavras-chave alternativas
-4. Ainda vazio? → `search_code` (grep aumentado com grafo)
-5. So entao → `grep`
+3. Vazio? → reformular termos da busca
+4. Ainda vazio? → `search_code`
+5. Em `search_code`, use `pattern`, nao `query`
+6. So entao → `grep`
 
 ### doctree (DOCUMENTACAO)
 
