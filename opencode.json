@@ -24,7 +24,7 @@
         "doctree": {
             "type": "local",
             "command": [
-                "opencode-doctree-run"
+                "doctree-run"
             ],
             "enabled": true
         }

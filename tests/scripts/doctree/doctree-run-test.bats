@@ -90,10 +90,10 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Simulacao do symlink opencode-doctree-run
+# Simulacao do symlink doctree-run
 # ---------------------------------------------------------------------------
 
 ## Teste de integracao (so roda com symlink real, ja coberto por opencode-link-test.bats)
-# @test "symlink opencode-doctree-run existe em ~/.local/bin" {
+# @test "symlink doctree-run existe em ~/.local/bin" {
 #   ...
 # }

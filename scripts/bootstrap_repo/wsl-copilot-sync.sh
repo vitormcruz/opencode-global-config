@@ -303,7 +303,7 @@ new_servers = {
         'args': ['-y', 'exa-mcp-server'],
     },
     'crawl4ai': {
-        'type': 'sse',
+        # SSE server usa url
         'url': 'http://localhost:11235/mcp/sse',
     },
 }
@@ -336,17 +336,20 @@ sync_mcp_cli() {
   python3 - <<'PY' "$mcp_servers_json"
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
+# Formato mcpServers para avelino/mcp CLI
 new_servers = {
     'crawl4ai': {
-        'type': 'sse',
+        # SSE server usa url
         'url': 'http://localhost:11235/mcp/sse',
     },
     'codebase-memory': {
+        # stdio server usa command + args
         'command': 'codebase-memory-mcp',
         'args': [],
     },
     'doctree': {
-        'command': 'opencode-doctree-run',
+        # stdio server usa command + args
+        'command': 'doctree-run',
         'args': [],
     },
 }
@@ -354,10 +357,11 @@ if path.exists():
     try:
         data = json.loads(path.read_text(encoding='utf-8'))
     except Exception:
-        data = {'servers': {}}
+        data = {'mcpServers': {}}
 else:
-    data = {'servers': {}}
-servers = data.setdefault('servers', {})
+    data = {'mcpServers': {}}
+# Usa 'mcpServers' conforme documentação do avelino/mcp
+servers = data.setdefault('mcpServers', {})
 added = []
 updated = []
 for key, value in new_servers.items():

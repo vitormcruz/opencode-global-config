@@ -38,13 +38,15 @@ Use APENAS quando MCP nao resolve:
 - `grep` — strings literais, mensagens de erro, configs
 - `glob` — arquivos por nome/padrao
 
-### Wrapper doctree (opcional)
+### Wrapper doctree
 
-O script `opencode-doctree-run` (disponivel no PATH) spawna doctree-mcp
-respeitando `.env-doctree` do projeto, permitindo indexar `agents/`,
-`skills/` e `plan/` alem de `docs/`. Para usa-lo, edite
-`~/.config/mcp/servers.json` e aponte `doctree.command` para
-`opencode-doctree-run` em vez de `bunx doctree-mcp`.
+O script `scripts/doctree/doctree-run.sh` e um wrapper que faz source de
+`.env-doctree` do projeto e executa `bunx doctree-mcp`. Ele permite indexar
+multiplas pastas (`docs/`, `agents/`, `skills/`, `plan/`) com pesos diferentes.
+
+Para usa-lo via MCP, use o comando `doctree-run` ou o caminho completo do
+script. Para configura-lo em `~/.config/mcp/servers.json`, aponte
+`doctree.command` para `doctree-run` em vez de `bunx doctree-mcp`.
 
 ## Arquitetura MCP no Copilot
 

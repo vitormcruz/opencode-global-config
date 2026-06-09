@@ -147,7 +147,7 @@ EOF
   run grep -c '"doctree"' "$HOME/.config/mcp/servers.json"
   assert_success
   [ "$output" -eq 1 ]
-  run grep -q '"opencode-doctree-run"' "$HOME/.config/mcp/servers.json"
+  run grep -q '"doctree-run"' "$HOME/.config/mcp/servers.json"
   assert_success
 }
 

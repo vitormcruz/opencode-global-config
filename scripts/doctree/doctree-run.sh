@@ -4,7 +4,7 @@
 # Descobre a raiz do projeto via .git walk-up, source .env-doctree se existir,
 # exec bunx doctree-mcp.
 #
-# Uso: opencode-doctree-run (symlink em ~/.local/bin)
+# Uso: doctree-run (symlink em ~/.local/bin)
 
 set -euo pipefail
 

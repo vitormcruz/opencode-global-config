@@ -467,7 +467,7 @@ function Sync-McpCli {
             "args"    = @()
         }
         "doctree" = [ordered]@{
-            "command" = "opencode-doctree-run"
+            "command" = "doctree-run"
             "args"    = @()
         }
     }

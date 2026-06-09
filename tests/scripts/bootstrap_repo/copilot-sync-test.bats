@@ -97,7 +97,7 @@ PY
   run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'codebase-memory-mcp'"
   assert_success
 
-  run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'opencode-doctree-run'"
+  run bash -c "grep -A 80 '^function Sync-McpCli' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'doctree-run'"
   assert_success
 }
 
