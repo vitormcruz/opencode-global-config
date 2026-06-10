@@ -20,7 +20,7 @@ O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
 3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
-4. **Instala MCPs globais** — crawl4ai e codebase-memory
+4. **Instala MCPs globais** — crawl4ai, codebase-memory, knowledge-rag
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
@@ -28,6 +28,7 @@ Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_LINKS=1` — pula criacao de links
 - `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
 - `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
+- `OPENCODE_SKIP_KNOWLEDGE_RAG=1` — pula instalacao do knowledge-rag
 - `OPENCODE_SKIP_DOCTREE=1` — pula instalacao de ferramentas e skills do doctree
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
@@ -79,13 +80,13 @@ Instaladas automaticamente (quando possivel):
 - `playwright`
 - `bun`
 - `codebase-memory-mcp`
-- `doctree`
+- `knowledge-rag` (via pipx)
 - `bats-support`
 - `bats-assert`
 - `bats-file`
 - `mcp (avelino)`
 
-O bootstrap tambem instala skills de codebase-memory (4 skills) e doctree
+O bootstrap tambem instala skills de codebase-memory (4 skills) e knowledge-rag
 (3 skills) em `~/.config/opencode/skills/`,
 habilitando comandos `/` de indexacao e busca.
 
@@ -128,14 +129,14 @@ Importante:
 - portanto, o arquivo crítico para MCPs no WSL é `~/.config/mcp/servers.json`
 - `~/.vscode-server/data/User/mcp.json` é mantido para compatibilidade do Copilot
 - `doctree` nao e mais configurado globalmente no bootstrap/sync
-- o doctree agora e materializado por repo a partir de `.env-doctree`
+- o knowledge-rag agora e materializado por repo a partir de `.env-knowledge-rag`
   durante o fluxo de `commands/index-codebase.md`
-- a existencia de `.env-doctree` significa que o repo declarou uma
+- a existencia de `.env-knowledge-rag` significa que o repo declarou uma
   configuracao propria de indexacao documental
 - nessas situacoes, o fluxo de indexacao deve criar um MCP especifico por repo
-  com `env` derivado de `.env-doctree`
+  com `env` derivado de `.env-knowledge-rag`
 - sem essa materializacao, uma entrada generica tende a usar apenas `./docs`,
-  o que nao respeita `DOCS_ROOTS` ou pesos especificos do projeto
+  o que nao respeita multiplas colecoes ou pesos especificos do projeto
 
 Para rodar apenas esta parte:
 
@@ -165,13 +166,13 @@ O que e sincronizado para VS Code Windows:
 
 O doctree do Copilot passa a ser configurado por repo no fluxo de
 `commands/index-codebase.md`, com instruction local gerada durante esse fluxo
-em `.github/copilot-doctree.instructions.md`.
+em `.github/copilot-knowledge-rag.instructions.md`.
 
 Expectativa do projeto:
 
-- se existir `.env-doctree`, trate isso como sinal de especificidade do repo
+- se existir `.env-knowledge-rag`, trate isso como sinal de especificidade do repo
 - o indexador deve materializar uma entrada dedicada, por exemplo
-  `doctree-mcp-opencode-config`, em vez de depender apenas da entrada generica
+  `knowledge-rag-opencode-config`, em vez de depender apenas da entrada generica
 - somente repos sem configuracao especifica podem reutilizar o modo generico
   baseado em `./docs`
 

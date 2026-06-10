@@ -1,11 +1,24 @@
 #!/usr/bin/env bash
 # wsl-install-deps.sh
-# Instala/verifica dependencias do repo e das skills do opencode-config.
+# Instala dependencias no WSL Ubuntu para o opencode-config.
+# Suporta: Ubuntu/Debian (WSL), macOS (parcial), e outros Linux.
+# Uso: bash scripts/bootstrap_repo/wsl-install-deps.sh [--yes] [--quiet]
 #
-# - Dependencias user-space (pipx, docling): instala automaticamente se possivel.
-# - Dependencias que precisam de sudo (make, pandoc, ocrmypdf etc.): sugere o comando.
-#
-# Uso: ./scripts/bootstrap_repo/wsl-install-deps.sh [--yes] [--quiet]
+# Ferramentas instaladas:
+#   - Bats Core (TAP testing framework)
+#   - bats-support, bats-assert, bats-file (bibliotecas auxiliares)
+#   - pandoc (conversao de Markdown para docx/pptx)
+#   - pipx (instalador de apps Python em isolamento)
+#   - docling (extracao de documentos via pipx)
+#   - resvg/rsvg-convert (conversao de SVG para PNG)
+#   - playwright (browser testing via WSL)
+#   - knowledge-rag (MCP de documentacao via pipx)
+
+# -------------------------------------------------------------------
+# Variaveis de ambiente que controlam comportamento
+# -------------------------------------------------------------------
+# OPENCODE_ASSUME_YES=1   -> nao pergunta, assume sim
+# OPENCODE_ASSUME_QUIET=1 -> modo silencioso
 
 set -euo pipefail
 
@@ -535,52 +548,55 @@ else
 fi
 say ""
 
-# --- doctree MCP (requer bun via npm) ---
-say "[doctree] MCP de navegacao de documentacao"
-export PATH="$HOME/.bun/bin:$PATH"
-doctree_installed=0
+# --- knowledge-rag MCP (requer Python 3.10+ e pipx) ---
+say "[knowledge-rag] MCP de navegacao de documentacao"
 
-if has_cmd bun && ls "$HOME/.bun/install/cache/doctree-mcp" &>/dev/null 2>&1; then
-  status_ok "doctree-mcp (bun $(bun --version 2>/dev/null | head -1))"
-  doctree_installed=1
-fi
+# Verificacao de skip: permite pular knowledge-rag se setado
+if [ "${OPENCODE_SKIP_KNOWLEDGE_RAG:-0}" = "1" ]; then
+  say "  SKIP: Verificacao do knowledge-rag (OPENCODE_SKIP_KNOWLEDGE_RAG=1)"
+  say ""
+else
+  export PATH="$HOME/.local/bin:$PATH"
+  knowledge_rag_installed=0
 
-if [ "$doctree_installed" -eq 0 ]; then
-  if ! has_cmd npm; then
-    status_missing "doctree (requer npm/bun)"
-    status_hint "Instale Node.js (npm) e rode o bootstrap novamente"
-    need_sudo_pkg "nodejs"  # npm vem com node
-  else
-    say "  -> Instalando bun via npm..."
-    npm config set prefix "$HOME/.local" 2>/dev/null || true
-    export PATH="$HOME/.local/bin:$PATH"
-
-    if [ "$assume_yes" -eq 0 ] && [ -t 0 ] && [ -t 1 ]; then
-      printf '  Instalar bun agora? [y/N] '
-      read -r ans || true
-      case "$ans" in y|Y|yes|YES) ;; *) status_hint "Instalar manualmente: npm install -g bun"; say ""; exit 0 ;; esac
-    fi
-
-    if npm install -g bun 2>&1 | while IFS= read -r line; do say "     $line"; done; then
-      export PATH="$HOME/.bun/bin:$PATH"
-      if has_cmd bun; then
-        status_installed "bun $(bun --version 2>/dev/null | head -1)"
-        say "  -> Verificando doctree-mcp no cache do bun..."
-        if ls "$HOME/.bun/install/cache/doctree-mcp" &>/dev/null 2>&1; then
-          status_installed "doctree-mcp"
-          doctree_installed=1
-        else
-          status_missing "doctree"
-          status_hint "Bun instalado, mas doctree-mcp nao encontrado no cache."
-          status_hint "Acesse a internet publica e rode: bunx doctree-mcp --help"
-        fi
+  # Verificacao CORRIGIDA: knowledge-rag inicia servidor MCP, nao use --help
+  # Verificamos apenas se o comando existe e o modulo pode ser importado
+  if has_cmd knowledge-rag; then
+    # Testa se o modulo pode ser importado (evita binario invalido)
+    # Usa o Python do ambiente pipx do knowledge-rag
+    knowledge_rag_python="$HOME/.local/share/pipx/venvs/knowledge-rag/bin/python"
+    if [ -f "$knowledge_rag_python" ]; then
+      if "$knowledge_rag_python" -c "from mcp_server.server import main" 2>/dev/null; then
+        status_ok "knowledge-rag"
+        knowledge_rag_installed=1
       else
-        status_missing "bun (instalado mas nao encontrado no PATH)"
-        status_hint "Execute: export PATH=\"\$HOME/.bun/bin:\$PATH\""
+        status_missing "knowledge-rag (modulo corrompido)"
       fi
     else
-      status_missing "doctree"
-      status_hint "Falha ao instalar bun. Instale manualmente: npm install -g bun"
+      status_missing "knowledge-rag (python nao encontrado)"
+    fi
+  fi
+
+  # Verificacao 2: knowledge-rag-guarded se existir
+  if [ "$knowledge_rag_installed" -eq 0 ] && has_cmd knowledge-rag-guarded; then
+    if timeout 5 knowledge-rag-guarded --help &>/dev/null; then
+      status_ok "knowledge-rag-guarded"
+      knowledge_rag_installed=1
+    fi
+  fi
+
+  if [ "$knowledge_rag_installed" -eq 0 ]; then
+    if ! check_python3_version; then
+      status_missing "knowledge-rag (requer Python >= 3.10)"
+      status_hint "Instale Python 3.10+ primeiro"
+    elif ! has_cmd pipx; then
+      status_missing "knowledge-rag (requer pipx)"
+      status_hint "Primeiro instale pipx (veja secao [pipx] acima)"
+    else
+      status_missing "knowledge-rag"
+      status_hint "Para instalar: pipx install knowledge-rag"
+      status_hint "NOTA: knowledge-rag e um servidor MCP que fica rodando em background"
+      status_hint "Use 'lsof -i :8080' ou similar para verificar se esta ativo"
     fi
   fi
 fi

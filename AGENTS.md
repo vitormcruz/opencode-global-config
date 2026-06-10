@@ -40,16 +40,16 @@ Ordem:
   2. Re-tente `search_graph` com o nome correto
   3. So caia para grep/glob se o projeto nao estiver indexado
 
-`doctree_search_documents` retornar vazio:
-  1. Chame `doctree_list_documents` para verificar o que esta indexado
+`knowledge_rag_list_documents` retornar vazio:
+  1. Chame `knowledge_rag_list_documents` para verificar o que esta indexado
   2. Se o documento esperado nao estiver indexado, use grep como fallback
 
 ### Acesso MCP por Cliente
 
-| Cliente | codebase-memory | doctree |
+| Cliente | codebase-memory | knowledge-rag |
 |---|---|---|
-| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... | Ferramentas nativas: `doctree_search_documents`... |
-| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` | CLI: `mcp doctree <tool> --arg valor` |
+| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... | Ferramentas nativas: `knowledge_rag_search_documents`... |
+| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` | CLI: `mcp knowledge-rag <tool> --arg valor` |
 
 No Copilot, NUNCA tente usar ferramentas MCP nativas. Sempre use o wrapper
 CLI `mcp`. Para `codebase-memory`, prefira JSON posicional unico, use

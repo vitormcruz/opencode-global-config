@@ -6,7 +6,7 @@ Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
 ## Prioridade de Descoberta
 
-REGRA ABSOLUTA: use codebase-memory e doctree antes de grep/glob.
+REGRA ABSOLUTA: use codebase-memory e knowledge-rag antes de grep/glob.
 NUNCA use ferramentas MCP nativas no Copilot — sempre o CLI `mcp`.
 
 ### codebase-memory (CODIGO)
@@ -36,19 +36,30 @@ mcp codebase-memory search_code '{"project":"<nome>","pattern":"termo"}'
 mcp codebase-memory get_architecture '{"project":"<nome>"}'
 ```
 
-### doctree (DOCUMENTACAO)
+### knowledge-rag (DOCUMENTACAO)
 
 Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
 
-Use a instruction local por repo em `.github/copilot-doctree.instructions.md`,
+Use a instruction local por repo em `.github/copilot-knowledge-rag.instructions.md`,
 gerada pelo fluxo `commands/index-codebase.md`, para descobrir o nome exato da
 entrada MCP deste projeto em `~/.config/mcp/servers.json`.
 
 ```bash
-mcp <doctree-do-repo> search_documents --query "termos"
-mcp <doctree-do-repo> get_tree --doc_id "<id>"
-mcp <doctree-do-repo> navigate_tree --doc_id "<id>" --node_id "<id>"
-mcp <doctree-do-repo> get_node_content --doc_id "<id>" --node_ids '["<id>"]'
+# Buscar documentos
+mcp <knowledge-rag-do-repo> search_knowledge '{"query": "termos", "max_results": 5}'
+
+# Obter documento completo
+mcp <knowledge-rag-do-repo> get_document '{"filepath": "docs/workflow.md"}'
+
+# Listar documentos
+mcp <knowledge-rag-do-repo> list_documents
+mcp <knowledge-rag-do-repo> list_documents '{"category": "docs"}'
+
+# Estatisticas
+mcp <knowledge-rag-do-repo> get_index_stats
+
+# Reindexar (após mudanças)
+mcp <knowledge-rag-do-repo> reindex_documents '{"force": true}'
 ```
 
 ### grep/glob (FALLBACK)
@@ -73,7 +84,7 @@ Fluxo de acesso:
 Servidores acessiveis via `mcp`:
   - crawl4ai (SSE, localhost:11235)
   - codebase-memory (local process)
-  - doctree do repo atual (entrada materializada por repo em `servers.json`)
+  - knowledge-rag do repo atual (entrada materializada por repo em `servers.json`)
 
 # Ferramentas MCP via CLI
 
@@ -101,14 +112,14 @@ Prefira pipes com `jq` para filtrar saída JSON.
 
 ## Ferramentas de Indexação
 
-Este projeto utiliza `codebase-memory-mcp` e `doctree-mcp` como servidores MCP.
+Este projeto utiliza `codebase-memory-mcp` e `knowledge-rag` como servidores MCP.
 O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
 
 ### Como usar pelo Copilot
 
 1. Listar servidores disponíveis: `mcp --list`
 2. Em `codebase-memory`, chamar a tool com JSON posicional único
-3. Em `doctree`, usar a sintaxe suportada pelo servidor
+3. Em `knowledge-rag`, usar a sintaxe suportada pelo servidor
 
 ### Servidores disponíveis
 
@@ -121,14 +132,22 @@ O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
   - `get_architecture` — visão de arquitetura
   - `detect_changes` — mapeia impacto de git diff
 
-- `doctree` — índice de documentos Markdown
-  - `search_documents` — busca full-text BM25
-  - `get_tree` — retorna árvore de seções
-  - `get_node_content` — lê conteúdo de seção
-  - `navigate_tree` — navega seção + filhos
+- `knowledge-rag` — índice de documentos Markdown
+  - `search_knowledge` — busca híbrida semântica + BM25 + reranking
+  - `get_document` — obtém documento completo por filepath
+  - `list_documents` — lista documentos indexados
+  - `list_categories` — lista categorias disponíveis
+  - `get_index_stats` — estatísticas do índice
+  - `reindex_documents` — reindexa documentos (force, full_rebuild)
+  - `add_document` — adiciona novo documento
+  - `update_document` — atualiza documento existente
+  - `remove_document` — remove documento
+  - `add_from_url` — adiciona documento de URL
+  - `search_similar` — busca documentos semanticamente similares
+  - `evaluate_retrieval` — avalia qualidade da busca
 
-A entrada concreta de `doctree` depende do repo atual e deve ser obtida na
-instruction local `.github/copilot-doctree.instructions.md`.
+A entrada concreta de `knowledge-rag` depende do repo atual e deve ser obtida na
+instruction local `.github/copilot-knowledge-rag.instructions.md`.
 
 ### Skills instaladas (comandos `/` no chat)
 

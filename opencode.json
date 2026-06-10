@@ -20,6 +20,15 @@
                 "codebase-memory-mcp"
             ],
             "enabled": true
+        },
+        "knowledge-rag": {
+            "type": "local",
+            "command": [
+                "python",
+                "-m",
+                "knowledge_rag.server"
+            ],
+            "enabled": true
         }
     },
     "agent": {
