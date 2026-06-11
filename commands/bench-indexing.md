@@ -5,9 +5,8 @@ description: Testa efetividade de ferramentas de indexacao comparando input toke
 ## Papel
 
 Agente de avaliacao. Sua funcao: medir se as ferramentas de indexacao
-do repositorio (ex: codebase-memory, docling, doctree, etc.) reduzem o
-consumo de tokens de entrada em comparacao com ferramentas de busca
-textual apenas (grep, glob, search, Read).
+(MCP como codebase-memory) reduzem o consumo de tokens de entrada em
+comparacao com busca textual apenas (grep, glob, search).
 
 ## Instrucoes
 

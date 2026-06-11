@@ -6,27 +6,24 @@ Use SEMPRE ferramentas MCP antes de grep/glob. Ferramentas MCP retornam
 resultados estruturados, consomem menos tokens e entendem a arquitetura
 do projeto.
 
-### codebase-memory (CODIGO)
+### codebase-memory (CODIGO + DOCUMENTACAO)
 
-Use para funcoes, classes, rotas, callers, data flow, arquitetura.
+Use para funcoes, classes, rotas, callers, data flow, arquitetura E secoes de
+documentos Markdown (arquivos .md sao indexados como nos do tipo Section).
+
+Para buscar em documentacao, use `query_graph` com Cypher para consultar
+nos do tipo `Section`:
+
+```cypher
+MATCH (s:Section) WHERE s.name CONTAINS "termo" RETURN s.name, s.file
+```
 
 Ordem:
-  1. `search_graph` — encontrar funcoes, classes, rotas, variaveis
+  1. `search_graph` — encontrar funcoes, classes, rotas, variaveis, secoes de doc
   2. `trace_path` — quem chama / quem e chamado
   3. `get_code_snippet` — ler fonte de simbolo especifico
-  4. `query_graph` — padroes complexos multi-entidade (Cypher)
+  4. `query_graph` — padroes complexos multi-entidade (Cypher), busca em docs
   5. `get_architecture` — visao geral do projeto
-
-### doctree (DOCUMENTACAO)
-
-Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
-
-Ordem:
-  1. `doctree_search_documents` — busca full-text
-  2. `doctree_get_tree` — outline do documento
-  3. `doctree_navigate_tree` — secao + subsecoes
-  4. `doctree_get_node_content` — secao especifica
-  5. `doctree_list_documents` — listar docs indexados
 
 ### grep/glob (FALLBACK — apenas quando MCP nao resolve)
 
@@ -40,16 +37,12 @@ Ordem:
   2. Re-tente `search_graph` com o nome correto
   3. So caia para grep/glob se o projeto nao estiver indexado
 
-`knowledge_rag_list_documents` retornar vazio:
-  1. Chame `knowledge_rag_list_documents` para verificar o que esta indexado
-  2. Se o documento esperado nao estiver indexado, use grep como fallback
-
 ### Acesso MCP por Cliente
 
-| Cliente | codebase-memory | knowledge-rag |
-|---|---|---|
-| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... | Ferramentas nativas: `knowledge_rag_search_documents`... |
-| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` | CLI: `mcp knowledge-rag <tool> --arg valor` |
+| Cliente | codebase-memory |
+|---|---|
+| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... |
+| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` |
 
 No Copilot, NUNCA tente usar ferramentas MCP nativas. Sempre use o wrapper
 CLI `mcp`. Para `codebase-memory`, prefira JSON posicional unico, use
@@ -99,6 +92,44 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
 ```
 
 - Assim voce mantem estas configs versionadas em um repo Git separado (`opencode-config`), mas o OpenCode continua lendo tudo a partir de `~/.config/opencode`.
+
+## Bootstrap
+
+Depois de clonar este repo, rode:
+
+```bash
+./scripts/bootstrap_repo/configurar-repo.sh --yes
+```
+
+O script executa quatro fases:
+1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
+2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
+3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
+4. **Instala MCPs globais** — crawl4ai, codebase-memory
+
+Cada parte pode ser pulada via variaveis de ambiente:
+- `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
+- `OPENCODE_SKIP_COPILOT_SYNC=1` — pula sincronizacao Copilot
+- `OPENCODE_SKIP_LINKS=1` — pula criacao de links
+- `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
+- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
+
+Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
+
+```bash
+source ~/.bashrc
+```
+
+No ambiente WSL deste repo, o script faz duas coisas:
+
+- cria/atualiza os links simbolicos em `~/.config/opencode`
+- garante `export OPENCODE_ENABLE_EXA=1` em `~/.bashrc`
+
+Para aplicar a variavel no shell atual depois do bootstrap:
+
+```bash
+source ~/.bashrc
+```
 
 ## Concisao
 - Responda de forma curta por padrao.
@@ -198,7 +229,7 @@ nas descrições
 
 # Upstream de Skills Externas
 - Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:
-  - Criar `UPSTREAM.md` na pasta da skill com a origem e instruções de sync.
+  - Criar `UPSTREAM.md` na pasta da skill com a origem e instrucoes de sync.
   - Registrar a skill em `skills/list-updatable` para permitir atualização futura.
   - Usar `skills/update-upstream-skill` para sincronizar.
 

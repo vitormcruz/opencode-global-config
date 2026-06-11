@@ -130,3 +130,22 @@ if [ -f "$OPENCODE_JSON" ]; then
     sed -i 's|"/home/[^"]*/\.local/lib/node_modules/codebase-memory-mcp/bin/codebase-memory-mcp"|"codebase-memory-mcp"|g' "$OPENCODE_TARGET"
     print_success "Path do codebase-memory-mcp corrigido para agnostico (PATH)"
 fi
+
+# --- Configurar auto-index ---
+print_info "Configurando auto-index..."
+if command -v codebase-memory-mcp &>/dev/null; then
+    # Habilita auto-index para indexar automaticamente em novas sessoes
+    if codebase-memory-mcp config set auto_index true 2>/dev/null; then
+        print_success "Auto-index habilitado (auto_index=true)"
+    else
+        print_warning "Nao foi possivel configurar auto-index"
+    fi
+    
+    # Mostra configuracao atual
+    print_info "Configuracao atual do codebase-memory:"
+    codebase-memory-mcp config list 2>/dev/null || true
+else
+    print_warning "codebase-memory-mcp nao encontrado para configurar auto-index"
+fi
+
+print_success "Instalacao do codebase-memory concluida"

@@ -12,7 +12,6 @@
 #   - docling (extracao de documentos via pipx)
 #   - resvg/rsvg-convert (conversao de SVG para PNG)
 #   - playwright (browser testing via WSL)
-#   - knowledge-rag (MCP de documentacao via pipx)
 
 # -------------------------------------------------------------------
 # Variaveis de ambiente que controlam comportamento
@@ -545,60 +544,6 @@ if has_cmd playwright; then
 else
   status_missing "playwright"
   status_hint "Instalar: bash scripts/browser-test/install-playwright.sh --yes"
-fi
-say ""
-
-# --- knowledge-rag MCP (requer Python 3.10+ e pipx) ---
-say "[knowledge-rag] MCP de navegacao de documentacao"
-
-# Verificacao de skip: permite pular knowledge-rag se setado
-if [ "${OPENCODE_SKIP_KNOWLEDGE_RAG:-0}" = "1" ]; then
-  say "  SKIP: Verificacao do knowledge-rag (OPENCODE_SKIP_KNOWLEDGE_RAG=1)"
-  say ""
-else
-  export PATH="$HOME/.local/bin:$PATH"
-  knowledge_rag_installed=0
-
-  # Verificacao CORRIGIDA: knowledge-rag inicia servidor MCP, nao use --help
-  # Verificamos apenas se o comando existe e o modulo pode ser importado
-  if has_cmd knowledge-rag; then
-    # Testa se o modulo pode ser importado (evita binario invalido)
-    # Usa o Python do ambiente pipx do knowledge-rag
-    knowledge_rag_python="$HOME/.local/share/pipx/venvs/knowledge-rag/bin/python"
-    if [ -f "$knowledge_rag_python" ]; then
-      if "$knowledge_rag_python" -c "from mcp_server.server import main" 2>/dev/null; then
-        status_ok "knowledge-rag"
-        knowledge_rag_installed=1
-      else
-        status_missing "knowledge-rag (modulo corrompido)"
-      fi
-    else
-      status_missing "knowledge-rag (python nao encontrado)"
-    fi
-  fi
-
-  # Verificacao 2: knowledge-rag-guarded se existir
-  if [ "$knowledge_rag_installed" -eq 0 ] && has_cmd knowledge-rag-guarded; then
-    if timeout 5 knowledge-rag-guarded --help &>/dev/null; then
-      status_ok "knowledge-rag-guarded"
-      knowledge_rag_installed=1
-    fi
-  fi
-
-  if [ "$knowledge_rag_installed" -eq 0 ]; then
-    if ! check_python3_version; then
-      status_missing "knowledge-rag (requer Python >= 3.10)"
-      status_hint "Instale Python 3.10+ primeiro"
-    elif ! has_cmd pipx; then
-      status_missing "knowledge-rag (requer pipx)"
-      status_hint "Primeiro instale pipx (veja secao [pipx] acima)"
-    else
-      status_missing "knowledge-rag"
-      status_hint "Para instalar: pipx install knowledge-rag"
-      status_hint "NOTA: knowledge-rag e um servidor MCP que fica rodando em background"
-      status_hint "Use 'lsof -i :8080' ou similar para verificar se esta ativo"
-    fi
-  fi
 fi
 say ""
 

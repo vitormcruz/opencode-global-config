@@ -2,8 +2,6 @@
 # configurar-repo.sh
 # Entrypoint principal para configurar o repo opencode-config.
 # Orquestra: deps (wsl), Copilot sync (wsl), e links simbolicos.
-# A materializacao do knowledge-rag especifico por repo nao ocorre aqui; quando
-# existir `.env-knowledge-rag`, ela pertence ao fluxo de indexacao do repo.
 #
 # Uso: ./scripts/bootstrap_repo/configurar-repo.sh [--yes]
 
@@ -27,12 +25,7 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Configura GitHub Copilot (WSL) (prompts, agents, skills, MCPs)
   3. Cria links simbolicos
-  4. Instala MCPs e ferramentas globais (crawl4ai, codebase-memory, knowledge-rag)
-
-Importante:
-  a instalacao do knowledge-rag nesta etapa e global.
-  Se um repo tiver `.env-knowledge-rag`, isso sinaliza configuracao especifica e a
-  entrada MCP dedicada deve ser criada depois, no fluxo de indexacao do repo.
+  4. Instala MCPs e ferramentas globais (crawl4ai, codebase-memory)
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]
@@ -49,7 +42,6 @@ Variaveis de ambiente:
   OPENCODE_SKIP_SKILL_SYNC=1     Pula sincronizacao de skills upstream
   OPENCODE_SKIP_CRAWL4AI=1       Pula configuracao do MCP crawl4ai
   OPENCODE_SKIP_CODEBASE_MEMORY=1 Pula configuracao do MCP codebase-memory
-  OPENCODE_SKIP_KNOWLEDGE_RAG=1  Pula instalacao das ferramentas do knowledge-rag
 EOF
       exit 0
       ;;
@@ -67,7 +59,6 @@ wsl_copilot_script="${script_dir}/wsl-copilot-sync.sh"
 links_script="${script_dir}/opencode-link.sh"
 crawl4ai_script="${repo_root}/scripts/crawl4ai/install-crawl4ai-mcp.sh"
 codebase_memory_script="${repo_root}/scripts/codebase-memory/install.sh"
-knowledge_rag_script="${repo_root}/scripts/knowledge-rag/install.sh"
 
 check_script() {
   local path="$1"
@@ -177,23 +168,6 @@ run_codebase_memory() {
   bash "$codebase_memory_script" "${args[@]}"
 }
 
-run_knowledge_rag() {
-  if [ "${OPENCODE_SKIP_KNOWLEDGE_RAG:-0}" = "1" ]; then
-    say "SKIP: MCP knowledge-rag (OPENCODE_SKIP_KNOWLEDGE_RAG=1)"
-    return 0
-  fi
-
-  check_script "$knowledge_rag_script" "knowledge-rag/install" || return 1
-
-  section "Instalando MCP knowledge-rag"
-
-  local args=()
-  [ "$assume_yes" -eq 1 ] && args+=("--yes")
-  [ "$quiet" -eq 1 ] && args+=("--quiet")
-
-  bash "$knowledge_rag_script" "${args[@]}"
-}
-
 # ---------------------------------------------------------------------------
 # Main: Orquestra as fases
 # ---------------------------------------------------------------------------
@@ -209,7 +183,6 @@ main() {
   run_links || warn "Falha na criacao de links (continuando...)"
   run_crawl4ai || warn "Falha na instalacao do crawl4ai (continuando...)"
   run_codebase_memory || warn "Falha na instalacao do codebase-memory (continuando...)"
-  run_knowledge_rag || warn "Falha na instalacao do knowledge-rag (continuando...)"
 
   section "Concluido"
   say "Repositorio configurado."

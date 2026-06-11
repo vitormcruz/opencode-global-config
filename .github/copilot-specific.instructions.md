@@ -6,12 +6,13 @@ Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
 ## Prioridade de Descoberta
 
-REGRA ABSOLUTA: use codebase-memory e knowledge-rag antes de grep/glob.
+REGRA ABSOLUTA: use codebase-memory antes de grep/glob.
 NUNCA use ferramentas MCP nativas no Copilot — sempre o CLI `mcp`.
 
-### codebase-memory (CODIGO)
+### codebase-memory (CODIGO + DOCUMENTACAO)
 
-Use para funcoes, classes, rotas, callers, data flow, arquitetura.
+Use para funcoes, classes, rotas, callers, data flow, arquitetura E secoes de
+documentos Markdown (arquivos .md sao indexados como nos do tipo Section).
 
 No GitHub Copilot, para `codebase-memory`, prefira SEMPRE um unico argumento
 JSON posicional. Nao use sintaxe com flags como `--query`, `--function_name`,
@@ -36,30 +37,23 @@ mcp codebase-memory search_code '{"project":"<nome>","pattern":"termo"}'
 mcp codebase-memory get_architecture '{"project":"<nome>"}'
 ```
 
-### knowledge-rag (DOCUMENTACAO)
+### Busca em Documentacao (Markdown)
 
-Use para workflows, specs, ADRs, agentes, skills, planos, docs Markdown.
-
-Use a instruction local por repo em `.github/copilot-knowledge-rag.instructions.md`,
-gerada pelo fluxo `commands/index-codebase.md`, para descobrir o nome exato da
-entrada MCP deste projeto em `~/.config/mcp/servers.json`.
+Para buscar em arquivos .md (workflows, specs, ADRs, skills), use `query_graph`
+com Cypher para consultar nos do tipo `Section`:
 
 ```bash
-# Buscar documentos
-mcp <knowledge-rag-do-repo> search_knowledge '{"query": "termos", "max_results": 5}'
+# Busca por titulos de secoes
+mcp codebase-memory query_graph '{
+  "project": "<nome>",
+  "query": "MATCH (s:Section) WHERE s.name CONTAINS \"termo\" RETURN s.name, s.file"
+}'
 
-# Obter documento completo
-mcp <knowledge-rag-do-repo> get_document '{"filepath": "docs/workflow.md"}'
-
-# Listar documentos
-mcp <knowledge-rag-do-repo> list_documents
-mcp <knowledge-rag-do-repo> list_documents '{"category": "docs"}'
-
-# Estatisticas
-mcp <knowledge-rag-do-repo> get_index_stats
-
-# Reindexar (após mudanças)
-mcp <knowledge-rag-do-repo> reindex_documents '{"force": true}'
+# Busca por conteudo de secoes
+mcp codebase-memory query_graph '{
+  "project": "<nome>",
+  "query": "MATCH (s:Section) WHERE s.content CONTAINS \"workflow\" RETURN s.name, s.file, s.content LIMIT 20"
+}'
 ```
 
 ### grep/glob (FALLBACK)
@@ -84,7 +78,6 @@ Fluxo de acesso:
 Servidores acessiveis via `mcp`:
   - crawl4ai (SSE, localhost:11235)
   - codebase-memory (local process)
-  - knowledge-rag do repo atual (entrada materializada por repo em `servers.json`)
 
 # Ferramentas MCP via CLI
 
@@ -92,13 +85,13 @@ Use o comando `mcp` para acessar servidores MCP pelo terminal.
 
 ## Como usar
 
-1. Descubra o que está disponível: `mcp --list`
+1. Descubra o que esta disponivel: `mcp --list`
 2. Para `codebase-memory`, use `mcp <servidor> <tool> '<json>'`
-3. Para `doctree` e `crawl4ai`, use a sintaxe suportada pelo servidor
+3. Para `crawl4ai`, use a sintaxe suportada pelo servidor
 
-## Servidor disponível
+## Servidor disponivel
 
-- `crawl4ai` — crawl e extração de páginas web (localhost:11235)
+- `crawl4ai` — crawl e extracao de paginas web (localhost:11235)
 
 ## Exemplos
 
@@ -108,59 +101,25 @@ mcp crawl4ai crawl4ai_md --url "https://example.com" > page.md
 mcp crawl4ai crawl4ai_md --url "https://example.com" | jq '.markdown'
 ```
 
-Prefira pipes com `jq` para filtrar saída JSON.
+Prefira pipes com `jq` para filtrar saida JSON.
 
-## Ferramentas de Indexação
+## Ferramentas de Indexacao
 
-Este projeto utiliza `codebase-memory-mcp` e `knowledge-rag` como servidores MCP.
-O acesso pelo Copilot é feito via CLI `mcp` (avelino/mcp), não por MCP nativo.
+Este projeto utiliza `codebase-memory-mcp` como servidor MCP.
+O acesso pelo Copilot e feito via CLI `mcp` (avelino/mcp), nao por MCP nativo.
 
 ### Como usar pelo Copilot
 
-1. Listar servidores disponíveis: `mcp --list`
-2. Em `codebase-memory`, chamar a tool com JSON posicional único
-3. Em `knowledge-rag`, usar a sintaxe suportada pelo servidor
+1. Listar servidores disponiveis: `mcp --list`
+2. Chamar a tool com JSON posicional unico
 
-### Servidores disponíveis
+### Servidor disponivel
 
-- `codebase-memory` — grafo de conhecimento do código-fonte
-  - `search_graph` — busca BM25 + semântica no grafo
+- `codebase-memory` — grafo de conhecimento do codigo-fonte e documentacao
+  - `search_graph` — busca BM25 + semantica no grafo
   - `search_code` — grep aumentado com grafo
-  - `trace_path` — rastreia chamadas e dependências
-  - `get_code_snippet` — lê fonte de função/classe
-  - `query_graph` — consultas Cypher
-  - `get_architecture` — visão de arquitetura
+  - `trace_path` — rastreia chamadas e dependencias
+  - `get_code_snippet` — le fonte de funcao/classe
+  - `query_graph` — consultas Cypher (incluindo secoes de .md)
+  - `get_architecture` — visao de arquitetura
   - `detect_changes` — mapeia impacto de git diff
-
-- `knowledge-rag` — índice de documentos Markdown
-  - `search_knowledge` — busca híbrida semântica + BM25 + reranking
-  - `get_document` — obtém documento completo por filepath
-  - `list_documents` — lista documentos indexados
-  - `list_categories` — lista categorias disponíveis
-  - `get_index_stats` — estatísticas do índice
-  - `reindex_documents` — reindexa documentos (force, full_rebuild)
-  - `add_document` — adiciona novo documento
-  - `update_document` — atualiza documento existente
-  - `remove_document` — remove documento
-  - `add_from_url` — adiciona documento de URL
-  - `search_similar` — busca documentos semanticamente similares
-  - `evaluate_retrieval` — avalia qualidade da busca
-
-A entrada concreta de `knowledge-rag` depende do repo atual e deve ser obtida na
-instruction local `.github/copilot-knowledge-rag.instructions.md`.
-
-### Skills instaladas (comandos `/` no chat)
-
-As seguintes skills estão disponíveis como comandos de barra no chat do Copilot:
-
-- `/codebase-memory-exploring` — orientação no codebase
-- `/codebase-memory-tracing` — cadeias de chamada, impacto
-- `/codebase-memory-quality` — dead code, refactor candidates
-- `/codebase-memory-reference` — sintaxe das tools, exemplos Cypher
-- `/doc-read` — busca estruturada em documentos
-- `/doc-write` — escrita no wiki
-- `/doc-lint` — auditoria de documentação
-- `/code-explorer-priority` — tutorial de descoberta MCP-first
-
-Prefira usar as skills acima em vez de grep/glob para exploração de código e
-documentos — elas consomem menos tokens e retornam resultados estruturados.
