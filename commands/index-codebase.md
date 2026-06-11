@@ -96,16 +96,17 @@ Siga este fluxo estritamente.
 **Objetivo:** criar arquivo de instrucoes para uso do codebase-memory neste repo.
 
 **Acoes permitidas nesta etapa:**
-- verificar se `.github/copilot-codebase-memory.instructions.md` existe
-- criar o arquivo com as instrucoes de uso do codebase-memory
+- verificar se `.github/copilot-specific.instructions.md` existe
+- verificar se as instrucoes de codebase-memory estao documentadas
 
 **Execucao:**
-- Verifique se o arquivo `.github/copilot-codebase-memory.instructions.md` ja existe.
-- Se nao existir, crie-o com o conteudo padrao documentando as ferramentas disponiveis.
+- Verifique se o arquivo `.github/copilot-specific.instructions.md` ja existe.
+- Este arquivo ja contem as instrucoes de uso do codebase-memory (consolidado).
+- Se nao existir, informe que o arquivo padrao deve ser criado.
 - Se o arquivo ja existir, verifique se precisa de atualizacao e pergunte ao humano.
 
 **Condicao de encerramento da etapa:**
-- as instrucoes locais foram criadas ou verificadas.
+- as instrucoes locais foram verificadas.
 
 ## Resumo final
 

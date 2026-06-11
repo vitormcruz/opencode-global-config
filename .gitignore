@@ -18,21 +18,3 @@ Thumbs.db
 **/node_modules/**
 tests/opencode-int-test/mcp-mock/package-lock.json
 #./out/
-
-# Skills baixadas pelo bootstrap — scripts/doctree/install.sh
-# Escreve em ~/.config/opencode/skills/ (symlink para skills/ no repo).
-# Nao versionar: sao baixadas do upstream a cada bootstrap.
-skills/doc-read/
-skills/doc-write/
-skills/doc-lint/
-
-graphify-out/manifest.json    # mtime-based, breaks after git clone
-graphify-out/cost.json        # local only
-graphify-out/.rebuild.lock    # PID do rebuild; removido automaticamente pelo graphify >=0.7.19
-# graphify-out/cache/         # optional: commit for speed, skip to keep repo small
-
-# Cache directories (MCP/knowledge-rag)
-# data/ - ChromaDB vector database (chroma.sqlite3, local storage)
-# models_cache/ - HuggingFace Hub cache (embedding models, ~500MB+)
-data/
-models_cache/
