@@ -6,7 +6,21 @@ Regras gerais de desenvolvimento estão no `AGENTS.md` (lido nativamente).
 
 ## Prioridade de Descoberta
 
-REGRA ABSOLUTA: use codebase-memory antes de grep/glob.
+### PROIBICOES ABSOLUTAS — Ferramentas Nativas do Copilot
+
+PROIBIDO usar qualquer uma das ferramentas abaixo para BUSCA ou LEITURA de
+arquivos do repositorio ANTES de esgotar as ferramentas MCP:
+
+- `list_dir` — PROIBIDO como primeiro passo de descoberta
+- `read_file` — PROIBIDO sem antes saber o caminho exato via MCP
+- `grep_search` — PROIBIDO antes de tentar `search_graph` ou `search_code`
+- `file_search` — PROIBIDO antes de tentar `search_graph`
+- `semantic_search` — PROIBIDO antes de tentar `search_graph`
+
+Essas ferramentas so podem ser usadas APOS o MCP falhar ou retornar projeto
+nao indexado. Usar qualquer uma delas diretamente e uma VIOLACAO desta regra.
+
+REGRA ABSOLUTA: use codebase-memory antes de qualquer ferramenta nativa.
 NUNCA use ferramentas MCP nativas no Copilot — sempre o CLI `mcp`.
 
 ### codebase-memory (CODIGO + DOCUMENTACAO)
@@ -56,11 +70,19 @@ mcp codebase-memory query_graph '{
 }'
 ```
 
-### grep/glob (FALLBACK)
+### Ferramentas Nativas (FALLBACK ESTRITO)
 
-Use APENAS quando MCP nao resolve:
-- `grep` — strings literais, mensagens de erro, configs
-- `glob` — arquivos por nome/padrao
+Use SOMENTE se o codebase-memory nao estiver disponivel apos tentativa de indexacao:
+1. `mcp codebase-memory list_projects` — projeto nao encontrado?
+2. `mcp codebase-memory index_repository '{"repo_path":"/caminho/absoluto"}'` — tente indexar
+3. So se a indexacao falhar ou o servidor nao responder, use:
+   - `grep_search` / `grep` — strings literais, mensagens de erro, configs
+   - `file_search` / `glob` — arquivos por nome/padrao
+   - `read_file` — apenas com caminho ja conhecido/confirmado
+   - `list_dir` — apenas para confirmar estrutura
+   - `semantic_search` — nunca como substituto de `search_graph`
+
+NUNCA inicie uma investigacao com ferramentas nativas sem antes tentar indexar.
 
 ## Arquitetura MCP no Copilot
 
