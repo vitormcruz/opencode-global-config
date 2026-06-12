@@ -27,13 +27,13 @@ Separar e reorganizar os workflows para que curadoria, definicao de escopo e des
 2. Revisar workflow-curadoria.md atual — verificar se precisa de complementacao
 3. Verificar agentes/curador-produto.md e agentes/curador-produto-editor.md para consistencia
 
-### Phase 1.5: Criar Templates Padrao (paralelo com Phase 1)
+### Phase 1.5: Criar Templates Padrao com Conteudo (paralelo com Phase 1)
 
-4. **Criar pasta `agents/default-artifacts/`**
+4. **Criar pasta `agents/default-artifacts/`** — PRE-REQUISITO BLOQUEANTE: workflow-curadoria.md ja referencia essa pasta na Premissa 1; sem ela o fluxo nao funciona
 5. **Criar `agents/default-artifacts/doc-readme.md`** — template com as 3 secoes (Definicao de Escopo, Elementos de Especificacao, Estrategias de Indexacao)
-6. **Criar `agents/default-artifacts/harness-section.md`** — template da tabela de harness por agente
+6. **Criar `agents/default-artifacts/harness-section.md`** — template da tabela de harness por agente. NOTA: caminhos de scripts (ex: `harness/eng-software.sh`) sao exemplos genericos que o `curador-produto-editor` adapta por projeto-alvo
 
-### Phase 1.6: Definir Conteudo dos Templates
+#### Conteudo dos Templates
 
 **Arquivo: `agents/default-artifacts/doc-readme.md`**
 
@@ -190,40 +190,42 @@ Estrutura híbrida: tabela + subseções detalhadas
 ### Phase 2: Refatoracao dos Workflows (depende das Phases 1 e 1.5)
 
 #### 2.1 — workflow-curadoria.md
-8. Garantir conteudo completo de validacao (README + AGENTS.md)
-9. Verificar fluxo com curador-produto → curador-produto-editor
-10. Definir criterios de saída ("curadoria OK" ou "necessario criar documentacao")
+1. Garantir conteudo completo de validacao (README + AGENTS.md)
+2. Verificar fluxo com curador-produto → curador-produto-editor
+3. Definir criterios de saída ("curadoria OK" ou "necessario criar documentacao")
+4. **RESOLVER CONTRADICAO:** alinhar texto "Deteccao de Ausencia" (diz "nao delega automaticamente") com diagrama de sequencia (mostra delegacao automatica `cur->>edit`). Definir comportamento canonico e atualizar o outro
 
 #### 2.2 — workflow-definicao-escopo.md (simplificado)
-11. Remover completamente a Fase 1 (Validacao) — agora fica em workflow-curadoria
-12. Atualizar a tabela de agentes — remover curador-produto e curador-produto-editor
-13. Simplificar fluxo para: ELICITACAO apenas (analista)
-14. Atualizar premissas — assumir que curadoria ja foi feita
-15. Atualizar diagrama de sequencia — remover bloco de validacao
+1. Remover completamente a Fase 1 (Validacao) — agora fica em workflow-curadoria
+2. Atualizar a tabela de agentes — remover curador-produto e curador-produto-editor, MANTER `revisor-historia` (usado pelo analista na Fase 2)
+3. Simplificar fluxo para: ELICITACAO apenas (analista + revisor-historia)
+4. Atualizar premissas — assumir que curadoria ja foi feita
+5. Atualizar diagrama de sequencia — remover bloco de validacao
 
 #### 2.3 — workflow-agentes-dev.md (orquestrador)
-16. Adicionar secao inicial descrevendo a sequencia dos workflows filhos
-17. Inserir link/referencia explicita: [`workflow-curadoria.md`](workflow-curadoria.md)
-18. Inserir link/referencia explicita: [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md)
-19. Atualizar diagrama para refletir: devflow → curadoria → escopo → dev
+1. Adicionar secao inicial descrevendo a sequencia dos workflows filhos
+2. Inserir link/referencia explicita: [`workflow-curadoria.md`](workflow-curadoria.md)
+3. Inserir link/referencia explicita: [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md)
+4. Atualizar diagrama para refletir: devflow → curadoria → escopo → dev
 
 ### Phase 2.4: Corrigir Caminho /doc/ → docs/
 
-20. Corrigir todas as referencias de `/doc/README.md` para `docs/README.md` em:
+1. Corrigir TODAS as referencias de `/doc/README.md` para `docs/README.md` em:
+    - `docs/workflow-agentes-dev.md` — **~15 ocorrencias** (maior concentracao)
+    - `docs/workflow-definicao-escopo.md`
+    - `docs/workflow-curadoria.md`
     - `agents/curador-produto.md`
     - `agents/curador-produto-editor.md`
-    - `docs/workflow-curadoria.md`
-    - `docs/workflow-definicao-escopo.md`
-    - `docs/workflow-agentes-dev.md`
 
 ### Phase 3: Sincronizacao e Validacao (depende da Phase 2)
 
-21. Atualizar `agents/curador-produto-editor.md`:
+1. Atualizar `agents/curador-produto-editor.md`:
     - Referenciar templates em `agents/default-artifacts/`
     - Fluxo: copiar templates → perguntar se quer modificar → se nao, sugerir commit → encerrar
-22. Verificar se agentes/curador-produto.md e agentes/curador-produto-editor.md precisam atualizacao
-23. Verificar consistencia entre docs/workflow-*.md (AGENTS.md menciona workflows)
-24. Rodar testes para garantir que links e referencias estao corretos
+2. Verificar se agentes/curador-produto.md e agentes/curador-produto-editor.md precisam atualizacao
+3. Verificar consistencia entre docs/workflow-*.md (AGENTS.md menciona workflows)
+4. **RESOLVER CONTRADICAO:** tabela de agentes em workflow-agentes-dev.md lista `val-harness` na fase "Curadoria", mas premissa 35 diz que atua apenas em "Construcao" e "Revisao da Construcao". Decidir e alinhar
+5. Rodar testes para garantir que links e referencias estao corretos
 
 ---
 
@@ -294,22 +296,34 @@ workflow-agentes-dev.md (orquestrador)
 │   ├── curador-produto (verifica)
 │   └── curador-produto-editor (copia templates, pergunta ao humano)
 ├── workflow-definicao-escopo.md (elicitar o que construir)
-│   └── analista (entrevista humano, gera Arquivo de Planejamento)
+│   ├── analista (entrevista humano, gera Arquivo de Planejamento)
+│   └── revisor-historia (revisa clareza das historias)
 └── [continua fluxo de desenvolvimento normal]
 ```
+
+---
+
+## Estado Atual (pre-refatoracao)
+
+> **ATENCAO:** o estado atual ja e inconsistente. O workflow-curadoria.md
+> ja contem a logica completa de validacao, mas workflow-definicao-escopo.md
+> ainda mantem uma Fase 1 de Validacao redundante. Ou seja, ha duplicacao
+> ativa que esta refatoracao resolve.
 
 ---
 
 ## Criterios de Aceitacao
 
 - [ ] workflow-curadoria.md contem toda a logica de validacao de documentacao
-- [ ] workflow-definicao-escopo.md contem apenas elicitacao (sem agentes de curadoria)
+- [ ] workflow-definicao-escopo.md contem apenas elicitacao (sem agentes de curadoria), com `revisor-historia` mantido
 - [ ] workflow-agentes-dev.md tem links explicitos para os dois workflows filhos
 - [ ] Diagramas de sequencia refletem o novo fluxo
 - [ ] Agentes atualizados consistentemente
 - [ ] Templates em agents/default-artifacts/ criados
-- [ ] **Testes automatizados passam** — executar `make test` antes de considerar concluido
-- [ ] **Testes de integracao passam** — workflows funcionam em sequencia completa
+- [ ] Contradicao delegacao auto/manual em workflow-curadoria resolvida
+- [ ] Contradicao val-harness na curadoria resolvida
+- [ ] Todas as referencias `/doc/README.md` corrigidas para `docs/README.md`
+- [ ] **Testes automatizados passam** — agente ajusta ate tudo passar antes de propor commit
 - [ ] **Sem regressoes** — testes existentes nao quebram
 
 ---
