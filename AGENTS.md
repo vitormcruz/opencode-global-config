@@ -6,7 +6,7 @@ Use SEMPRE ferramentas MCP antes de grep/glob. Ferramentas MCP retornam
 resultados estruturados, consomem menos tokens e entendem a arquitetura
 do projeto.
 
-### codebase-memory (CODIGO + DOCUMENTACAO)
+### codebase-memory (CODIGO)
 
 Use para funcoes, classes, rotas, callers, data flow, arquitetura E secoes de
 documentos Markdown (arquivos .md sao indexados como nos do tipo Section).

@@ -312,12 +312,6 @@ console.log('valid');
   [[ "$output" -ge 1 ]]
 }
 
-@test "AGENTS.md contem secao 'doctree (DOCUMENTACAO)'" {
-  run grep -c "doctree (DOCUMENTACAO)" "$REPO_ROOT/AGENTS.md"
-  assert_success
-  [[ "$output" -ge 1 ]]
-}
-
 @test "AGENTS.md contem 'Acesso MCP por Cliente'" {
   run grep -c "Acesso MCP por Cliente" "$REPO_ROOT/AGENTS.md"
   assert_success

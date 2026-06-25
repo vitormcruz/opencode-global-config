@@ -2,68 +2,50 @@
 
 ## Objetivo
 
-Workflow preparatório que garante as condições mínimas
-para o workflow de desenvolvimento iniciar:
+Workflow de elicitação que produz o Arquivo de
+Planejamento com requisitos e critérios definidos pelo
+humano.
 
-1. **Validação** — verifica existência e aderência ao
-   `/doc/README.md` (3 seções) e Harness no `AGENTS.md`
-2. **Elicitação** — analista elicita requisitos e
-   critérios com o humano, grava no Arquivo de
-   Planejamento
+**Premissa:** a curadoria já foi executada antes deste
+workflow (docs/README.md e Harness presentes e válidos).
+Ver [`workflow-curadoria.md`](workflow-curadoria.md).
 
-Este workflow **substitui** a antiga fase de VALIDAÇÃO
-do workflow de desenvolvimento. O `devflow` agora inicia
-por aqui, que produz o Arquivo de Planejamento e só
-então transiciona para o workflow de desenvolvimento
+O `devflow` executa este workflow após a curadoria e,
+ao final, transiciona para o workflow de desenvolvimento
 (que começa em PLANEJAMENTO).
 
 ## Agentes
 
-| Sigla             | Nome completo          | Tipo               | Fases onde atua     |
-|-------------------|------------------------|---------------------|---------------------|
-| `devflow`             | Orquestrador           | Roteador stateless  | todas (roteia)      |
-| `curador-produto` | Curador de Produto     | Executor            | Validação           |
-| `curador-produto-editor` | Editor de Produto | Executor         | Validação (se necessário) |
-| `analista`        | Analista de Backlog    | Executor            | Elicitação          |
+| Sigla | Nome completo | Tipo | Fases onde atua |
+|-------|--------------|------|----------------|
+| `devflow` | Orquestrador | Roteador stateless | todas (roteia) |
+| `analista` | Analista de Backlog | Executor | Elicitação |
+| `revisor-historia` | Revisor de Histórias | Executor | Elicitação |
 
 ## Premissas
 
 1. **`devflow` como roteador stateless** — spawna agentes,
    não lê, não valida. Recebe resumo curto de volta.
-2. **Workflow de curadoria é autônomo** — o curador
-   chama o workflow de curadoria internamente. Este
-   workflow **nunca** chama o `analista`.
-3. **`analista` nunca edita `/doc/README.md`** — apenas
+2. **Curadoria já foi concluída** — docs/README.md e
+   Harness existem e estão válidos. Este workflow assume
+   isso como pré-condição. A validação é feita pelo
+   `workflow-curadoria.md`, que rodou antes.
+3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
 4. **Arquivo de Planejamento é criado aqui** — o `devflow`
-   cria o arquivo no início deste workflow (antes era
-   criado no início do dev).
+   cria o arquivo no início deste workflow.
 5. **Transição para dev** — quando o analista conclui
    a elicitação, `devflow` transiciona para o workflow de
    desenvolvimento, que começa em PLANEJAMENTO.
 
 ## Fluxo
 
-### Fase 1: Validação
-
-`devflow` spawna `curador-produto`, que executa o workflow
-de curadoria (autônomo):
-
-1. Verifica existência do `/doc/README.md` com 3 seções:
-   - Definição de Escopo
-   - Elementos de Especificação
-   - Estratégias de Indexação de Código
-2. Verifica existência do Harness no `AGENTS.md`
-3. Se faltar algo → spawna `curador-produto-editor`
-   - Editor entrevista o humano, cria/atualiza
-4. Quando tudo OK → retorna resumo curto ao `devflow`
-
-### Fase 2: Elicitação
+### Elicitação
 
 `devflow` spawna `analista`:
 
-1. Analista lê `/doc/README.md` (seção Definição de
+1. Analista lê `docs/README.md` (seção Definição de
    Escopo) + o que o humano forneceu
 2. Compara: bate com o definido na seção?
 3. Se faltar → elicita com humano
@@ -92,40 +74,18 @@ desenvolvimento (`docs/workflow-agentes-dev.md`).
 sequenceDiagram
     actor Humano
     participant devflow as devflow
-    participant cur as curador-produto
-    participant edit as curador-produto-editor
     participant ana as analista
 
     %% ── INÍCIO ──────────────────────────────
     Humano ->> devflow: Nova funcionalidade (requisitos)
-    devflow ->> devflow: Cria arquivo de planejamento<br/>Status: VALIDAÇÃO
-
-    %% ── VALIDAÇÃO ────────────────────────────
-    rect rgb(255, 250, 240)
-    Note over Humano, edit: VALIDAÇÃO
-
-    devflow ->> cur: Verificar /doc/README.md + Harness
-    Note right of cur: Workflow de curadoria<br/>(autônomo)
-
-    alt /doc/README.md ou Harness ausente/incompleto
-        cur ->> edit: Criar/atualizar artefatos
-        edit ->> Humano: Entrevista (seção por seção)
-        Humano -->> edit: Aprovação / ajustes
-        edit -->> cur: Artefatos criados (resumo curto)
-    end
-
-    cur -->> devflow: Validação OK (resumo curto)
-
-    devflow ->> devflow: Atualiza Status: ELICITAÇÃO
-
-    end
+    devflow ->> devflow: Cria arquivo de planejamento<br/>Status: ELICITAÇÃO
 
     %% ── ELICITAÇÃO ───────────────────────────
     rect rgb(230, 245, 255)
     Note over Humano, ana: ELICITAÇÃO
 
     devflow ->> ana: Elicitar requisitos e critérios
-    Note right of ana: Lê /doc/README.md<br/>(seção Definição de Escopo)
+    Note right of ana: Lê docs/README.md<br/>(seção Definição de Escopo)
 
     ana ->> ana: Compara com o que o humano forneceu
 
@@ -149,10 +109,9 @@ sequenceDiagram
 
 ## Regras Críticas
 
-- `workflow-curadoria` **nunca** chama `analista` —
-  mantém autonomia
-- `analista` **nunca** edita `/doc/README.md`
+- `analista` **nunca** edita `docs/README.md`
 - `curador-produto-editor` cria a seção Definição de
-  Escopo no `/doc/README.md` **antes** do analista atuar
-- `devflow` é roteador stateless — só spawna, não lê, não
-  valida
+  Escopo no `docs/README.md` **antes** do analista atuar
+  (via workflow-curadoria.md)
+- `devflow` é roteador stateless — só spawna, não lê,
+  não valida

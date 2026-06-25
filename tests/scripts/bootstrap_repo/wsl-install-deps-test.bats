@@ -372,52 +372,6 @@ CHECK_PYTHON3_FN='
 }
 
 # ---------------------------------------------------------------------------
-# [doctree] — verificacao de disponibilidade do doctree-mcp
-# ---------------------------------------------------------------------------
-
-@test "wsl-install-deps exibe OK para doctree quando bun e cache disponiveis" {
-  local fake_bin fake_home
-  fake_bin="$(mktemp -d)"
-  fake_home="$(mktemp -d)"
-
-  printf '#!/bin/sh\necho "1.0.0"\n' > "$fake_bin/bun"
-  chmod +x "$fake_bin/bun"
-  mkdir -p "$fake_home/.bun/install/cache/doctree-mcp"
-
-  for cmd in bash grep uname head awk ls; do
-    local p
-    p="$(command -v "$cmd" 2>/dev/null)" || continue
-    ln -sf "$p" "$fake_bin/$cmd"
-  done
-
-  run env HOME="$fake_home" PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
-  assert_success
-  assert_output --partial "[doctree]"
-  assert_output --partial "OK"
-
-  rm -rf "$fake_bin" "$fake_home"
-}
-
-@test "wsl-install-deps exibe MISSING para doctree quando bun ausente" {
-  local fake_bin
-  fake_bin="$(mktemp -d)"
-
-  for cmd in bash grep uname head awk; do
-    local p
-    p="$(command -v "$cmd" 2>/dev/null)" || continue
-    ln -sf "$p" "$fake_bin/$cmd"
-  done
-
-  run env PATH="$fake_bin" /usr/bin/bash "$SCRIPT" --yes
-  assert_success
-  assert_output --partial "[doctree]"
-  assert_output --partial "MISSING   doctree"
-  assert_output --partial "Instale Node.js (npm) e rode o bootstrap novamente"
-
-  rm -rf "$fake_bin"
-}
-
-# ---------------------------------------------------------------------------
 # [codebase-memory-mcp] — verificação de disponibilidade
 # ---------------------------------------------------------------------------
 

@@ -124,7 +124,6 @@ teardown() {
   assert_success
   assert_output --partial "crawl4ai"
   assert_output --partial "codebase-memory"
-  assert_output --partial "doctree"
 }
 
 @test "configurar-repo referencia servers.json no resumo final" {

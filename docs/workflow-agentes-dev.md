@@ -12,11 +12,36 @@ otimizado para:
   nova, usando o arquivo de planejamento como handoff.
 
 > **Nota:** este workflow começa em PLANEJAMENTO. A fase
-> de VALIDAÇÃO (verificação de /doc/README.md e Harness)
+> de VALIDAÇÃO (verificação de docs/README.md e Harness)
 > e a ELICITAÇÃO de escopo foram transferidas para o
 > **workflow de Definição de Escopo**
 > (`docs/workflow-definicao-escopo.md`), que roda antes
 > deste.
+
+## Sequência de Workflows
+
+O `devflow` sempre executa os workflows na seguinte
+ordem:
+
+```
+devflow
+  └── workflow-curadoria.md        ← Valida docs/README.md e Harness
+        (curador-produto, curador-produto-editor)
+  └── workflow-definicao-escopo.md ← Elicita requisitos
+        (analista, revisor-historia)
+  └── workflow-agentes-dev.md      ← Desenvolvimento (este arquivo)
+        (começa em PLANEJAMENTO)
+```
+
+- [`workflow-curadoria.md`](workflow-curadoria.md) —
+  garante que docs/README.md e Harness existem e estão
+  válidos antes de qualquer elicitação ou desenvolvimento.
+- [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md) —
+  elicita requisitos e critérios com o humano, produz o
+  Arquivo de Planejamento.
+- Este workflow (`workflow-agentes-dev.md`) — executa o
+  ciclo completo de desenvolvimento a partir do
+  Arquivo de Planejamento já preenchido.
 
 ## Agentes
 
@@ -38,7 +63,7 @@ otimizado para:
 |--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | `devflow`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
 | `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao /doc/README.md; guardião do /doc/README.md (não edita — delega ao curador-produto-editor); revisa docs nos loops; revisão final |
+| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao docs/README.md; guardião do docs/README.md (não edita — delega ao curador-produto-editor); revisa docs nos loops; revisão final |
 | `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
 | `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
 | `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
@@ -57,7 +82,7 @@ O workflow se apoia em quatro contratos formais. Cada um
 é um artefato do projeto — deve existir, ser mantido e
 ser verificável.
 
-### 1. /doc/README.md
+### 1. docs/README.md
 
 Arquivo que define como a documentação do produto se
 organiza e como deve ser mantida. Contém 3 seções:
@@ -98,7 +123,7 @@ Premissas detalhadas: 32–36.
 
 ### 5. Elementos de Especificação
 
-O /doc/README.md define para cada elemento de
+O docs/README.md define para cada elemento de
 especificação do software: (1) o que é,
 (2) formato/ferramenta, (3) qual agente cria, (4) em
 qual fase, (5) onde vive permanentemente.
@@ -120,7 +145,7 @@ Regras já registradas nunca são reperguntadas.
 
 Outros elementos de spec (requisitos, critérios de
 aceitação, plano de testes, modelo de dados, threat
- model, etc.) seguem o mesmo padrão — o /doc/README.md define o
+ model, etc.) seguem o mesmo padrão — o docs/README.md define o
 que, quem, quando e onde para cada um.
 Premissas detalhadas: 21.1–21.3.
 
@@ -304,16 +329,16 @@ Premissas detalhadas: 21.1–21.3.
     planejamento como fonte de contexto, não o histórico
     acumulado da conversa.
 
-### /doc/README.md
+### docs/README.md
 
-21. **O workflow exige um /doc/README.md** — a definição,
-    criação e manutenção do /doc/README.md são
+21. **O workflow exige um docs/README.md** — a definição,
+    criação e manutenção do docs/README.md são
     responsabilidade do `curador-produto-editor` conforme
     descrito em `docs/workflow-curadoria.md`. O
-    `curador-produto` detecta ausência do /doc/README.md
+    `curador-produto` detecta ausência do docs/README.md
     na fase de Validação (workflow de Definição de Escopo)
     e aciona `curador-produto-editor` para criá-lo. Se o
-    /doc/README.md não existir, o fluxo para até que seja
+    docs/README.md não existir, o fluxo para até que seja
     criado.
 21.1. **Regras de Produto — preenchimento incremental** —
     a seção `## Regras de Produto` é inicializada por
@@ -338,18 +363,18 @@ Premissas detalhadas: 21.1–21.3.
     cuja pergunta ao humano resulte em mudança de spec
     deve registrar a alteração no arquivo de
     planejamento, na seção do elemento de spec
-    correspondente (conforme o /doc/README.md).
+    correspondente (conforme o docs/README.md).
     **Distinção**: mudanças de "como" (arquitetura,
     abordagem técnica) não alteram spec; mudanças de
     "o quê" (escopo, requisitos, critérios de aceitação)
     alteram. O `curador-produto`, ao revisar o plano,
     verifica se mudanças de spec foram registradas e se
-    estão consistentes com o /doc/README.md. Na **construção**,
+    estão consistentes com o docs/README.md. Na **construção**,
     a premissa 10 se mantém — tudo se baseia no plano
     aprovado. Se algo inviabilizar um critério de
     aceitação, o gate de refatoração (premissa 31) já
     trata o retorno ao planejamento.
-21.3. **Documentação de spec por domínio** — o /doc/README.md
+21.3. **Documentação de spec por domínio** — o docs/README.md
     define, por projeto, quais artefatos de
     especificação cada agente deve criar ou atualizar,
     em qual formato e onde vivem permanentemente.
@@ -357,26 +382,26 @@ Premissas detalhadas: 21.1–21.3.
     como specs executáveis (eng-software cria no TDD),
     plano de testes em arquivo permanente (qa extrai ao
     final), modelo de dados em DBML (dba cria/atualiza),
-     threat model em docs/ (sec, se o /doc/README.md definir).
+     threat model em docs/ (sec, se o docs/README.md definir).
     Cada agente, ao concluir sua fase, consulta o
-    /doc/README.md para verificar obrigações de
+    docs/README.md para verificar obrigações de
     documentação de spec em seu domínio para essa fase.
-    Se o /doc/README.md não definir obrigações para um
+    Se o docs/README.md não definir obrigações para um
     agente/fase, nada a fazer.
-25. **`curador-produto` valida aderência ao /doc/README.md,
+25. **`curador-produto` valida aderência ao docs/README.md,
     não requisitos** — verifica se artefatos produzidos
-    estão em conformidade com o /doc/README.md. Não cria
+    estão em conformidade com o docs/README.md. Não cria
     escopo nem requisitos. Participa dos loops de revisão
     verificando se documentação planejada/produzida está
-    conforme o /doc/README.md. **Não altera** o
-    /doc/README.md nem harness diretamente — delega ao
+    conforme o docs/README.md. **Não altera** o
+    docs/README.md nem harness diretamente — delega ao
     `curador-produto-editor`. Para artefatos de outros
     domínios (código, BD, segurança), devolve instruções
     de ajuste ao `devflow`. Faz revisão final de
     documentação e estrutura.
     **Finalização — verificação de spec e exclusão do
     plano:** ao finalizar, `curador-produto` lê o
-    /doc/README.md e lista todos os artefatos de spec
+    docs/README.md e lista todos os artefatos de spec
     obrigatórios.
     Para artefatos com Destino definido (caminho):
     verifica existência no local definitivo. Para
@@ -576,8 +601,8 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> devflow: Resumo (achado · ação · severidade)
 
-    devflow ->> prod: Revisar documentação planejada (/doc/README.md)
-    prod ->> prod: Verifica aderência ao /doc/README.md
+    devflow ->> prod: Revisar documentação planejada (docs/README.md)
+    prod ->> prod: Verifica aderência ao docs/README.md
     prod -->> devflow: Resumo (achado · ação · severidade)
 
     devflow ->> front: Revisar protótipos/planejamento de UI
@@ -677,8 +702,8 @@ sequenceDiagram
     qa ->> qa: Revisa, corrige e<br/>registra resumo no arquivo
     qa -->> devflow: Resumo (achado · ação · severidade)
 
-    devflow ->> prod: Revisar documentação produzida (/doc/README.md)
-    prod ->> prod: Verifica aderência ao /doc/README.md
+    devflow ->> prod: Revisar documentação produzida (docs/README.md)
+    prod ->> prod: Verifica aderência ao docs/README.md
     prod -->> devflow: Resumo (achado · ação · severidade)
 
     devflow ->> front: Revisar aderência visual da implementação
@@ -760,14 +785,14 @@ sequenceDiagram
     rect rgb(255, 255, 230)
     Note over Humano, rev: FINALIZAÇÃO
 
-    devflow ->> prod: Revisão final — verificar artefatos de spec (/doc/README.md)
-     prod ->> prod: Lê /doc/README.md, verifica existência<br/>de cada artefato de spec
+    devflow ->> prod: Revisão final — verificar artefatos de spec (docs/README.md)
+     prod ->> prod: Lê docs/README.md, verifica existência<br/>de cada artefato de spec
     prod ->> prod: Atualiza docs de produto (se lacunas)
     prod -->> devflow: Relatório: lacunas de spec<br/>por domínio (resumo curto)
 
     loop Revalidação (guarda do humano)
         opt Lacunas em outros domínios
-            Note right of devflow: devflow spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme /doc/README.md)
+            Note right of devflow: devflow spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme docs/README.md)
             devflow ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
             eng -->> devflow: Artefatos criados (resumo curto)
         end

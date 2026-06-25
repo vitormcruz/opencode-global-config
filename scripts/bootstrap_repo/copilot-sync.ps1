@@ -59,11 +59,6 @@ O que e sincronizado:
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
   MCPs CLI globais (crawl4ai,codebase-memory) -> %USERPROFILE%\.config\mcp\servers.json
-
-Importante:
-  o doctree especifico por repositorio nao e materializado por este sync global.
-  Se o repo tiver .env-doctree, isso sinaliza configuracao especifica e a entrada
-  MCP dedicada deve ser criada pelo fluxo commands/index-codebase.md.
 "@
 }
 

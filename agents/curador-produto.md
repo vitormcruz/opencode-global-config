@@ -105,7 +105,7 @@ O conteúdo segue template default, customizável por
 projeto.
 
 **Caminho**: definido pelo `curador-produto-editor`
-durante a criação. Default: `/doc/README.md`. O humano
+durante a criação. Default: `docs/README.md`. O humano
 pode escolher outro local — procure pelo arquivo que
 contém as 3 seções obrigatórias.
 

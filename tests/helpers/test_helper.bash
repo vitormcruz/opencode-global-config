@@ -79,14 +79,6 @@ common_setup_deps() {
   printf '#!/bin/sh\necho "docling 1.0.0"\n'   > "$TEST_HOME/.local/bin/docling"
   chmod +x "$TEST_HOME/.local/bin/docling"
 
-  # Fake bun/bunx: evita chamadas de rede ao instalar ou verificar doctree-mcp.
-  # O script verifica ~/.bun/install/cache/doctree-mcp — criamos o diretorio fake.
-  printf '#!/bin/sh\ncase "$1" in --version) echo "1.0.0" ;; *) exit 0 ;; esac\n' \
-    > "$TEST_HOME/.local/bin/bun"
-  chmod +x "$TEST_HOME/.local/bin/bun"
-  ln -sf "$TEST_HOME/.local/bin/bun" "$TEST_HOME/.local/bin/bunx"
-  mkdir -p "$TEST_HOME/.bun/install/cache/doctree-mcp"
-
   # Fake npm: evita instalacao real de bun via npm install -g bun.
   printf '#!/bin/sh\necho "npm mock ok" ; exit 0\n' > "$TEST_HOME/.local/bin/npm"
   chmod +x "$TEST_HOME/.local/bin/npm"
