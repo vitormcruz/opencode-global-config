@@ -262,17 +262,6 @@ sync_agents() {
    say "      $count command(s) sincronizado(s)"
  }
  
- sync_windows_prompt_instructions() {
-   [[ -n "$windows_prompts_dir" ]] || return 0
-   local source="$repo_root/.github/copilot-specific.instructions.md"
-   [[ -f "$source" ]] || return 0
-   ensure_dir "$windows_prompts_dir"
-   local dest="$windows_prompts_dir/opencode-config.instructions.md"
-   backup_if_exists "$dest"
-   cp "$source" "$dest"
-   say "OK    opencode-config.instructions.md (windows prompts)"
- }
- 
  sync_instructions() {
    say ""
    say "--- Instructions ---"
@@ -286,7 +275,6 @@ sync_agents() {
    backup_if_exists "$dest"
    cp "$source" "$dest"
    say "OK    copilot-specific.instructions.md (user global)"
-   sync_windows_prompt_instructions
  }
 
  sync_mcp() {
@@ -391,11 +379,6 @@ show_plan() {
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
   say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
   say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
-  if [[ -n "$windows_prompts_dir" ]]; then
-    say "  - Espelhar prompts/agents/instructions em $windows_prompts_dir"
-  else
-    say "  - Windows prompts nao detectado; espelho Windows sera pulado"
-  fi
 }
 
 confirm() {
