@@ -8,7 +8,7 @@ O analista deve elicitar:
 - Organizados por histórias de usuário
 - Critérios devem referenciar requisitos funcionais
 - Nenhum requisito pode ficar sem critério
-- **Skill recomendada:** `grill-me` (entrevista estruturada com humano)
+- **Skill recomendada:** `grill-me` (entrevista estruturada com humano)'
 
 ## Elementos de Especificação
 
