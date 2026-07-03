@@ -1,14 +1,20 @@
 # Metadados do Upstream
 
-repositorio: https://github.com/mattpocock/skills
+repositorio: https://github.com/JuliusBrussee/caveman
 branch: main
-commit: 62f43a18177be6ec82da242e59ffbc490a4c22ea
-data_commit: 2026-05-01
-sincronizado_em: 2026-05-15 UTC
+commit: e2c09c9a7e66d6bb30cadb5f955bd8a36b0e8d9a
+data_commit: 2026-07-03
+sincronizado_em: 2026-07-03 UTC
+
+## Historico
+
+Upstream original: https://github.com/mattpocock/skills (skills/productivity/caveman)
+Removido do upstream original em 2026-05-31.
+Novo upstream: https://github.com/JuliusBrussee/caveman
 
 ## Arquivos sincronizados
 
-- skills/productivity/caveman/SKILL.md  (corpo — copiado apenas na criacao inicial)
+- skills/caveman/SKILL.md  (corpo — copiado apenas na criacao inicial)
 
 ## Nao sincronizado
 
@@ -19,14 +25,14 @@ sincronizado_em: 2026-05-15 UTC
 Nao ha script automatico para este upstream ainda.
 Para sincronizar manualmente:
 
-    curl -sSL https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/caveman/SKILL.md \
+    curl -sSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/skills/caveman/SKILL.md \
       > /tmp/caveman-upstream.md
     diff /tmp/caveman-upstream.md skills/caveman/SKILL.md
 
 ## Licenca
 
-MIT License - Copyright (c) 2026 Matt Pocock
-https://github.com/mattpocock/skills/blob/main/LICENSE
+MIT License - Copyright (c) JuliusBrussee
+https://github.com/JuliusBrussee/caveman/blob/main/LICENSE
 
 ## Adaptacao da description
 

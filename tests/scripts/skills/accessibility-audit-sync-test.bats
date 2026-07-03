@@ -73,3 +73,13 @@ SCRIPT="$REPO_ROOT/scripts/accessibility-audit/sync.sh"
     "$REPO_ROOT/skills/accessibility-audit/SKILL.md"
   assert_success
 }
+
+# ---------------------------------------------------------------------------
+# Preservação de seções customizadas no UPSTREAM.md
+# ---------------------------------------------------------------------------
+
+@test "UPSTREAM.md de accessibility-audit preserva secao Adaptacao da description" {
+  run grep -q "Adaptacao da description" \
+    "$REPO_ROOT/skills/accessibility-audit/UPSTREAM.md"
+  assert_success
+}

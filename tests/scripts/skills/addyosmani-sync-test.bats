@@ -110,3 +110,32 @@ SCRIPT="$REPO_ROOT/scripts/addyosmani/sync.sh"
   assert_file_exist "$REPO_ROOT/skills/performance-optimization/references/performance-checklist.md"
   assert_file_exist "$REPO_ROOT/skills/frontend-ui-engineering/references/accessibility-checklist.md"
 }
+
+# ---------------------------------------------------------------------------
+# Preservação de seções customizadas no UPSTREAM.md
+# ---------------------------------------------------------------------------
+
+@test "UPSTREAM.md das skills addyosmani preserva secao Adaptacao da description" {
+  local skills=(
+    test-driven-development
+    code-review-and-quality
+    code-simplification
+    security-and-hardening
+    documentation-and-adrs
+    debugging-and-error-recovery
+    git-workflow-and-versioning
+    spec-driven-development
+    planning-and-task-breakdown
+    api-and-interface-design
+    performance-optimization
+    frontend-ui-engineering
+  )
+  local failed=0
+  for s in "${skills[@]}"; do
+    if ! grep -q "Adaptacao da description" "$REPO_ROOT/skills/$s/UPSTREAM.md" 2>/dev/null; then
+      echo "Secao ausente em: $s/UPSTREAM.md"
+      failed=1
+    fi
+  done
+  [[ $failed -eq 0 ]]
+}

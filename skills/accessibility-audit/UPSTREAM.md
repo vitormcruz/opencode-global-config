@@ -2,9 +2,9 @@
 
 repositorio: https://github.com/sickn33/antigravity-awesome-skills
 branch: main
-commit: 2138ff8fd03e70a03e116098923de0bdab3d2748
-data_commit: 2026-04-14 00:14:42 +0200
-sincronizado_em: 2026-04-13 22:35 UTC
+commit: 5e71bbadce5202e95c5427bcf966c122414bcb76
+data_commit: 2026-07-03 18:58:54 +0200
+sincronizado_em: 2026-07-03 17:27 UTC
 path_upstream: skills/accessibility-compliance-accessibility-audit/
 
 ## Arquivos sincronizados

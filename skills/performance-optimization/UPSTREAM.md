@@ -2,9 +2,9 @@
 
 repositorio: https://github.com/addyosmani/agent-skills
 branch: main
-commit: bf2fa6994407c9c888fc19a03fd54957991cfa0e
-data_commit: 2026-04-11 18:26:16 -0700
-sincronizado_em: 2026-04-13 22:35 UTC
+commit: 8c6530305396f341b5da7201cf1f7e390fdb863f
+data_commit: 2026-07-02 15:05:04 -0700
+sincronizado_em: 2026-07-03 16:44 UTC
 
 ## Arquivos sincronizados
 

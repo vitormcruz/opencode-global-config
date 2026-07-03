@@ -98,6 +98,12 @@ for skill in "${SKILLS[@]}"; do
     fi
   fi
 
+  # Preserva secao customizada antes de sobrescrever UPSTREAM.md
+  _adaptacao_section=""
+  if [ -f "$LOCAL_SKILL/UPSTREAM.md" ]; then
+    _adaptacao_section=$(awk '/^## Adaptacao da description/{found=1} found{print}' "$LOCAL_SKILL/UPSTREAM.md")
+  fi
+
   # Gera/atualiza UPSTREAM.md
   cat > "$LOCAL_SKILL/UPSTREAM.md" <<UPSTREAMEOF
 # Metadados do Upstream
@@ -138,6 +144,11 @@ Para verificar se ha atualizacoes sem sincronizar:
 MIT License - Copyright (c) Addy Osmani
 https://github.com/addyosmani/agent-skills/blob/main/LICENSE
 UPSTREAMEOF
+
+  # Restaura secao customizada preservada
+  if [ -n "$_adaptacao_section" ]; then
+    printf '\n%s\n' "$_adaptacao_section" >> "$LOCAL_SKILL/UPSTREAM.md"
+  fi
 
 done
 

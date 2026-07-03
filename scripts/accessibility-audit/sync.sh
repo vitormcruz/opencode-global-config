@@ -64,6 +64,12 @@ fi
 sync_copy_skill_md "$UPSTREAM_SKILL" "$LOCAL_SKILL"
 
 # --- Atualiza UPSTREAM.md ---
+# Preserva secao customizada antes de sobrescrever
+_adaptacao_section=""
+if [ -f "$LOCAL_SKILL/UPSTREAM.md" ]; then
+  _adaptacao_section=$(awk '/^## Adaptacao da description/{found=1} found{print}' "$LOCAL_SKILL/UPSTREAM.md")
+fi
+
 cat > "$LOCAL_SKILL/UPSTREAM.md" <<UPSTREAMEOF
 # Metadados do Upstream
 
@@ -99,6 +105,11 @@ MIT License + CC BY 4.0
 - CC BY 4.0 se aplica ao conteudo das skills
 - https://github.com/sickn33/antigravity-awesome-skills/blob/main/LICENSE
 UPSTREAMEOF
+
+# Restaura secao customizada preservada
+if [ -n "$_adaptacao_section" ]; then
+  printf '\n%s\n' "$_adaptacao_section" >> "$LOCAL_SKILL/UPSTREAM.md"
+fi
 
 info "Sincronizacao concluida!"
 info "  Commit upstream: $UPSTREAM_SHA"
