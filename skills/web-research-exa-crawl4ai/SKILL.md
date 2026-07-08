@@ -107,6 +107,26 @@ Use um texto neste formato:
 - Use JS apenas quando houver forte indicio de conteudo dinamico relevante.
 - Nao faca crawl de URLs claramente redundantes ou de baixa qualidade se ja houver cobertura suficiente.
 
+## Resiliencia a rate limits (429)
+O MCP pode retornar HTTP 429 quando o limite de requisicoes e atingido. Este erro e **sempre temporario e contornavel**.
+
+### Comportamento obrigatorio ao receber 429
+1. **NUNCA desista da pesquisa** por causa de 429. NUNCA reporte o erro como fatal ou retorne resposta incompleta.
+2. **Aplique backoff progressivo**:
+   - Espere 3-5 segundos e tente a mesma requisicao novamente.
+   - Se persistir, espere 10-15 segundos e tente mais uma vez.
+3. **Reduza a carga** se o limite persistir:
+   - Diminua o numero de URLs simultaneas. Processe URLs em sequencia em vez de paralelo.
+   - Reduza o numero de buscas (ex: de 2 para 1).
+   - Omita ferramentas secundarias (`crawl4ai_html`, `crawl4ai_screenshot`, `crawl4ai_pdf`) e foque apenas em `crawl4ai_md`.
+4. **Use fallback por ferramenta**:
+   - Se `crawl4ai_md` retornar 429, tente `webfetch` na mesma URL como alternativa leve.
+   - Se `websearch` retornar 429, faca a busca manualmente via `webfetch` em sites conhecidos, ou peca ao humano para confirmar uma URL especifica.
+5. **Ajuste o escopo da resposta**:
+   - Se for impossivel obter todas as fontes, use o que conseguiu e deixe explicito: "Atingi o limite de requisicoes temporario; consegui validar em X fontes. Posso aprofundar mais se necessario."
+6. **Chamadas paralelas vs sequenciais**:
+   - Quando houver sinal de quota apertada (um 429 ja ocorreu), passe a fazer chamadas **sequenciais** ao inves de paralelas.
+
 ## Fallback
 Se `websearch` nao estiver disponivel, informe isso brevemente e execute a melhor estrategia possivel
 apenas com `Crawl4AI`, deixando claro que a descoberta de fontes pode ficar menos eficiente.
