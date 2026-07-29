@@ -44,6 +44,7 @@ O que e sincronizado:
   skills/*/         -> ~/.copilot/skills/
   agents/*.md       -> ~/.vscode-server/data/User/prompts/*.agent.md
   commands/*.md     -> ~/.vscode-server/data/User/prompts/*.prompt.md
+  default-artifacts -> ~/.vscode-server/data/User/prompts/default-artifacts/
   copilot-instrs    -> ~/.copilot/instructions/copilot-specific.instructions.md
   MCPs Copilot (exa,crawl4ai) -> ~/.vscode-server/data/User/mcp.json
   MCPs CLI globais (crawl4ai,codebase-memory) -> ~/.config/mcp/servers.json
@@ -262,20 +263,45 @@ sync_agents() {
    say "      $count command(s) sincronizado(s)"
  }
  
- sync_instructions() {
-   say ""
-   say "--- Instructions ---"
-   local source="$repo_root/.github/copilot-specific.instructions.md"
-   [[ -f "$source" ]] || {
-     say "AVISO .github/copilot-specific.instructions.md nao encontrado"
-     return 0
-   }
-   ensure_dir "$instructions_dir"
-   local dest="$instructions_dir/copilot-specific.instructions.md"
-   backup_if_exists "$dest"
-   cp "$source" "$dest"
-   say "OK    copilot-specific.instructions.md (user global)"
- }
+sync_default_artifacts() {
+  say ""
+  say "--- Default Artifacts ---"
+  local src="$repo_root/agents/default-artifacts"
+  [[ -d "$src" ]] || {
+    say "AVISO agents/default-artifacts nao encontrado"
+    return 0
+  }
+  ensure_dir "$prompts_dir"
+  [[ -n "$windows_prompts_dir" ]] && ensure_dir "$windows_prompts_dir"
+  local dest="$prompts_dir/default-artifacts"
+  backup_if_exists "$dest"
+  rm -rf "$dest"
+  cp -a "$src" "$dest"
+  if [[ -n "$windows_prompts_dir" ]]; then
+    local win_dest="$windows_prompts_dir/default-artifacts"
+    backup_if_exists "$win_dest"
+    rm -rf "$win_dest"
+    cp -a "$src" "$win_dest"
+  fi
+  local n
+  n="$(find "$dest" -type f | wc -l)"
+  say "OK    default-artifacts ($n arquivo(s))"
+}
+
+sync_instructions() {
+  say ""
+  say "--- Instructions ---"
+  local source="$repo_root/.github/copilot-specific.instructions.md"
+  [[ -f "$source" ]] || {
+    say "AVISO .github/copilot-specific.instructions.md nao encontrado"
+    return 0
+  }
+  ensure_dir "$instructions_dir"
+  local dest="$instructions_dir/copilot-specific.instructions.md"
+  backup_if_exists "$dest"
+  cp "$source" "$dest"
+  say "OK    copilot-specific.instructions.md (user global)"
+}
 
  sync_mcp() {
    say "" >&2
@@ -376,6 +402,7 @@ show_plan() {
   say "  - Copiar $n_skills skill(s) para ~/.copilot/skills/"
   say "  - Converter $n_agents agent(s) para .agent.md"
   say "  - Copiar $n_commands command(s) para .prompt.md"
+  say "  - Copiar agents/default-artifacts/ para prompts/default-artifacts/"
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
   say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
   say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
@@ -400,6 +427,7 @@ main() {
   sync_skills
   sync_agents
   sync_commands
+  sync_default_artifacts
   sync_instructions
   local mcp_result mcp_cli_result added updated cli_added cli_updated
   mcp_result="$(sync_mcp)"

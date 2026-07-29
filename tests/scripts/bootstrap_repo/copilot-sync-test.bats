@@ -134,3 +134,46 @@ PY
   run bash -c 'tr "\n" " " < "$1" | grep -Eq "devem ser alterados[[:space:]]+juntos|devem permanecer semanticamente sincronizados e devem ser alterados[[:space:]]+juntos"' _ "$REPO_ROOT/AGENTS.md"
   assert_success
 }
+
+# ---------------------------------------------------------------------------
+# Sync-DefaultArtifacts — nova funcao
+# ---------------------------------------------------------------------------
+
+@test "copilot-sync: Sync-DefaultArtifacts existe no script" {
+  run bash -c "grep -q '^function Sync-DefaultArtifacts' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1'"
+  assert_success
+}
+
+@test "copilot-sync: Sync-DefaultArtifacts copia default-artifacts para prompts" {
+  run bash -c "grep -A 20 '^function Sync-DefaultArtifacts' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'default-artifacts'"
+  assert_success
+}
+
+@test "copilot-sync: Show-Plan menciona default-artifacts" {
+  run bash -c "grep -A 12 '^    Say \"Plano:\"' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1' | grep -q 'default-artifacts'"
+  assert_success
+}
+
+@test "copilot-sync: main invoca Sync-DefaultArtifacts" {
+  run bash -c "grep -q 'Sync-DefaultArtifacts' '$REPO_ROOT/scripts/bootstrap_repo/copilot-sync.ps1'"
+  assert_success
+}
+
+# ---------------------------------------------------------------------------
+# wsl-copilot-sync.sh — sync_default_artifacts
+# ---------------------------------------------------------------------------
+
+@test "copilot-sync: wsl-copilot-sync.sh contem sync_default_artifacts" {
+  run bash -c "grep -q 'sync_default_artifacts()' '$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh'"
+  assert_success
+}
+
+@test "copilot-sync: wsl-copilot-sync.sh main invoca sync_default_artifacts" {
+  run bash -c "grep -A 10 '^main()' '$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh' | grep -q 'sync_default_artifacts'"
+  assert_success
+}
+
+@test "copilot-sync: wsl show_plan menciona default-artifacts" {
+  run bash -c "grep -A 20 '^show_plan()' '$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh' | grep -q 'default-artifacts'"
+  assert_success
+}

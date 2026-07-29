@@ -262,7 +262,8 @@ compartilhado.
 
 ## Templates Padrão
 
-Os templates base estão em `agents/default-artifacts/`:
+Os templates base estão em `default-artifacts/` (mesmo
+diretório deste agente):
 
 - **`doc-readme.md`** — estrutura inicial do
   `docs/README.md` (3 seções + subseções detalhadas).
@@ -287,35 +288,65 @@ Os templates base estão em `agents/default-artifacts/`:
 **Regra anti-autonomia:** pare e pergunte ao humano
 após cada seção. Nunca avance sem aprovação da anterior.
 
-1. **Sugere indexação do código** — se não houver
-   ferramentas de indexação configuradas, sugira ao
-   humano instalar (codebase-memory ou
-   equivalente).
-2. Analisa o projeto (estrutura, ferramentas, docs).
-3. Apresenta ao humano o que encontrou (resumo).
-4. **Definição de Escopo:** entrevista o humano para
-   definir a estrutura do que o analista deve elicitar.
-   Propõe padrão sugerido → humano aprova/ajusta.
-   Pergunta sobre skill para o analista → humano decide.
-5. **Elementos de Especificação:** propõe tabela inicial
-   → humano aprova/ajusta.
-6. **Regras de Documentação:** para cada elemento
-   aprovado, pergunta se o humano quer registrar
-   regras específicas → humano decide.
-7. **Estratégias de Indexação de Código:** propõe
-   ferramentas → humano aprova/ajusta.
-8. **Harness por Agente:** primeiro pergunta ao humano
-   em qual linguagem/tecnologia criar os scripts. Depois,
-   para cada agente, pergunta objetivamente: "quais
-   ferramentas e/ou prompts devem compor o harness
-   deste agente?". Se o humano não quiser harness para
-   um agente, registra `SEM HARNESS A PEDIDO DO HUMANO`.
-9. **Cria os scripts** — para todos os agentes,
-   inclusive os sem regras (pass-through).
-10. **Registra Harness no `AGENTS.md`** — tabela de
-    comandos por agente no topo do arquivo.
-11. Só declara `docs/README.md` concluído após aprovação
-    explícita do humano em cada seção.
+### Fase 1 — Bootstrap (somente se os artefatos não existirem no projeto)
+
+- Sugere indexação do código — se não houver ferramentas
+  de indexação configuradas, sugira ao humano instalar
+  (codebase-memory ou equivalente).
+- Analisa o projeto (estrutura, ferramentas, docs).
+- Apresenta ao humano o que encontrou (resumo).
+- Lê `default-artifacts/doc-readme.md` (mesmo diretório
+  deste agente).
+- Copia seu conteúdo para `docs/README.md` do projeto,
+  sem editar.
+- Lê `default-artifacts/harness-section.md` (mesmo
+  diretório deste agente).
+- Copia seu conteúdo para o topo do `AGENTS.md` do
+  projeto, sem editar.
+- Informa ao humano o que foi copiado antes de avançar.
+
+### Fase 2 — Revisão do docs/README.md (item por item, sem exceção)
+
+- Mostra cada seção ao humano e aguarda aprovação ou
+  ajuste ANTES de editar.
+- Nunca avança para a próxima seção sem aprovação
+  explícita da anterior.
+- Nunca edita o arquivo em lote.
+- Seções a revisar:
+  - **Definição de Escopo** — entrevista o humano para
+    definir a estrutura do que o analista deve elicitar.
+    Propõe padrão sugerido → humano aprova/ajusta.
+    Pergunta sobre skill para o analista → humano decide.
+  - **Elementos de Especificação** — propõe tabela
+    inicial → humano aprova/ajusta.
+  - **Regras de Documentação** — para cada elemento
+    aprovado, pergunta se o humano quer registrar
+    regras específicas → humano decide.
+  - **Estratégias de Indexação de Código** — propõe
+    ferramentas → humano aprova/ajusta.
+
+### Fase 3 — Revisão do Harness (item por item, sem exceção)
+
+- Primeiro pergunta ao humano em qual linguagem/tecnologia
+  criar os scripts.
+- Lê `default-artifacts/harness-section.md`.
+- Mostra o conteúdo padrão de CADA entrada ao humano.
+- Aguarda aprovação ou ajuste de CADA entrada antes de
+  avançar.
+- Acumula todas as decisões sem criar nada.
+- Se o humano não quiser harness para um agente, registra
+  `SEM HARNESS A PEDIDO DO HUMANO`.
+- Somente após TODOS os itens aprovados, cria os scripts
+  de uma vez (inclusive pass-through para os sem regras).
+
+### Fase 4 — Implementação
+
+- Aplica edições no `docs/README.md` conforme aprovado
+  na Fase 2.
+- Cria os scripts de harness conforme aprovado na Fase 3.
+- Atualiza a tabela no `AGENTS.md`.
+- Só declara `docs/README.md` concluído após aprovação
+  explícita do humano em cada seção.
 
 ## Contrato Operacional
 
@@ -326,6 +357,16 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - **Pode consultar o humano** a qualquer momento.
 - **Falha**: se não conseguir completar, registre o
   impedimento e informe o solicitante.
+- **PROIBIDO** criar qualquer script de harness antes da
+  Fase 3 estar 100% concluída.
+- **PROIBIDO** editar `docs/README.md` em lote sem
+  passar item a item pelo humano.
+- **PROIBIDO** ignorar os default-artifacts — sempre ler
+  de `default-artifacts/` (mesmo diretório deste agente)
+  antes de criar qualquer conteúdo.
+- **PROIBIDO** usar file_search ou busca cega para
+  localizar default-artifacts — o caminho é conhecido:
+  mesmo diretório deste agente.
 
 ## Limites
 

@@ -69,3 +69,65 @@ setup() {
   run grep "Mapa do Produto" "$AGENTS_DIR/curador-produto.md"
   [ "$status" -ne 0 ]
 }
+
+# ----------------------------------------------------------
+# Fluxo em 4 fases
+# ----------------------------------------------------------
+
+@test "curador-produto-editor.md contém Fase 1 — Bootstrap" {
+  run grep "Fase 1.*Bootstrap" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md contém Fase 2 — Revisão do docs/README.md" {
+  run grep "Fase 2.*Revisão do docs/README.md" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md contém Fase 3 — Revisão do Harness" {
+  run grep "Fase 3.*Revisão do Harness" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md contém Fase 4 — Implementação" {
+  run grep "Fase 4.*Implementação" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+# ----------------------------------------------------------
+# Proibições explícitas
+# ----------------------------------------------------------
+
+@test "curador-produto-editor.md PROIBE criar scripts antes da Fase 3 concluída" {
+  run bash -c "tr '\n' ' ' < '$AGENTS_DIR/curador-produto-editor.md' | grep -qF 'PROIBIDO** criar qualquer script de harness antes da'"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md PROIBE editar docs/README.md em lote" {
+  run grep "PROIBIDO.*editar.*docs/README.md.*em lote" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md PROIBE ignorar default-artifacts" {
+  run grep "PROIBIDO.*ignorar os default-artifacts" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md PROIBE usar file_search para localizar default-artifacts" {
+  run grep "PROIBIDO.*usar file_search" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+# ----------------------------------------------------------
+# Caminho relativo para default-artifacts
+# ----------------------------------------------------------
+
+@test "curador-produto-editor.md referencia default-artifacts como caminho relativo" {
+  run grep "default-artifacts/.*mesmo diretório" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -eq 0 ]
+}
+
+@test "curador-produto-editor.md NÃO referencia agents/default-artifacts (caminho absoluto antigo)" {
+  run grep "agents/default-artifacts" "$AGENTS_DIR/curador-produto-editor.md"
+  [ "$status" -ne 0 ]
+}

@@ -56,6 +56,7 @@ O que e sincronizado:
   skills\*\         -> %USERPROFILE%\.copilot\skills\
   agents\*.md       -> %APPDATA%\Code\User\prompts\*.agent.md
   commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
+  default-artifacts -> %APPDATA%\Code\User\prompts\default-artifacts\
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
   MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
   MCPs CLI globais (crawl4ai,codebase-memory) -> %USERPROFILE%\.config\mcp\servers.json
@@ -375,6 +376,27 @@ function Sync-Commands {
 # Sync-Instructions
 # ──────────────────────────────────────────────────────────────
 
+function Sync-DefaultArtifacts {
+    Say ""
+    Say "--- Default Artifacts ---"
+
+    $src = Join-Path $RepoRoot "agents\default-artifacts"
+
+    if (-not (Test-Path $src)) {
+        Say "AVISO agents\default-artifacts nao encontrado"
+        return
+    }
+
+    Ensure-Dir $PromptsDir
+    $dest = Join-Path $PromptsDir "default-artifacts"
+    Backup-IfExists $dest
+    if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+    Copy-Item -Path $src -Destination $dest -Recurse -Force
+
+    $n = @(Get-ChildItem -Path $dest -File -Recurse).Count
+    Say "OK    default-artifacts ($n arquivo(s))"
+}
+
 function Sync-Instructions {
     Say ""
     Say "--- Instructions ---"
@@ -527,6 +549,7 @@ function Show-Plan {
     Say "  - Converter $nAgents agent(s) para .agent.md"
     Say "  - Copiar $nCommands command(s) para .prompt.md"
     Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
+    Say "  - Copiar agents\default-artifacts para prompts\default-artifacts"
     Say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
     Say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
@@ -536,6 +559,7 @@ Confirm-Action
 Sync-Skills
 Sync-Agents
 Sync-Commands
+Sync-DefaultArtifacts
 Sync-Instructions
 $mcpResult = Sync-Mcp
 if ($mcpResult.Added.Count -gt 0 -or $mcpResult.Updated.Count -gt 0) {
