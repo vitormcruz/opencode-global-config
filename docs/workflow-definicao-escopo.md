@@ -38,6 +38,10 @@ ao final, transiciona para o workflow de desenvolvimento
 5. **Transição para dev** — quando o analista conclui
    a elicitação, `devflow` transiciona para o workflow de
    desenvolvimento, que começa em PLANEJAMENTO.
+6. **Modo Debug** — se o humano ativou o modo debug
+   (`modo debug on`), o `devflow` captura notas e skills
+   durante a elicitação. Ver `agents/devflow.md`, seção
+   "Modo Debug".
 
 ## Fluxo
 

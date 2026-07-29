@@ -121,6 +121,17 @@ O `devflow` recebe o relatório do `val-harness` e decide
 a ação (re-spawnar agente ou consultar humano).
 Premissas detalhadas: 32–36.
 
+### 6. DevFlowNotes (Modo Debug)
+
+Arquivo opcional de observação ativado pelo humano
+(`modo debug on`). Registra notas contextuais quando o
+humano escreve `**[texto]**` e acumula skills utilizadas
+por agente/fase. Criado no root do projeto como
+`DevFlowNotes-YYYY-MM-DD.md`. Descartável ao fim do
+processo (junto com o arquivo de planejamento).
+Definição detalhada: ver `agents/devflow.md`, seção
+"Modo Debug".
+
 ### 5. Elementos de Especificação
 
 O docs/README.md define para cada elemento de
@@ -167,8 +178,10 @@ Premissas detalhadas: 21.1–21.3.
 2. **Contrato de retorno: resultado no arquivo, resumo
    curto** — todo agente spawnado por `devflow` persiste seu
    resultado no arquivo de planejamento e retorna apenas
-   um resumo curto (≤ 5 linhas). Isso mantém o contexto
-   do `devflow` leve ao longo de todo o workflow.
+   um resumo curto (≤ 5 linhas). A ultima linha do resumo
+   lista as skills utilizadas: `Skills: skill1, skill2` ou
+   `Skills: nenhuma`. Isso mantém o contexto do `devflow`
+   leve ao longo de todo o workflow.
 3. **Instância nova a cada fase** — quando uma fase
    termina, `devflow` spawna instância nova do agente para a
    próxima fase. Nenhum agente executor carrega contexto
@@ -209,6 +222,17 @@ Premissas detalhadas: 21.1–21.3.
    - **OpenCode**: `devflow` para antes de fases com modelo
      diferente do anterior e solicita ao humano que
      troque o modelo antes de prosseguir.
+
+7.1. **Modo Debug** — o humano pode ativar o modo debug
+     a qualquer momento (`modo debug on`). Quando ativo,
+     o `devflow` cria o arquivo `DevFlowNotes-YYYY-MM-DD.md`
+     no root do projeto e captura comentarios do humano no
+     formato `**[texto]**`, registrando contexto e nota.
+     Skills utilizadas por cada agente sao acumuladas no
+     final do arquivo. O modo debug se aplica a **todo o
+     workflow** (curadoria, definição de escopo e
+     desenvolvimento). Ver `agents/devflow.md`, seção
+     "Modo Debug".
 
 ### Governança
 

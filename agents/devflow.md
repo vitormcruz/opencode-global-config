@@ -107,6 +107,10 @@ Ao spawnar um agente, instrua-o a:
    de variável, formatação, ordem de passos sem
    impacto funcional) não precisam de validação.
 
+5. Listar todas as skills carregadas/utilizadas durante
+   o processamento, na ultima linha do resumo curto:
+   `Skills: skill1, skill2` ou `Skills: nenhuma`.
+
 ### Instância nova a cada fase
 
 Spawne **instância nova** do agente a cada chamada.
@@ -289,3 +293,88 @@ Instâncias limpas — revisam e corrigem.
   nova aprovação do humano.
 - **Qualquer agente pode consultar o humano** diretamente
   durante sua execução.
+
+---
+
+## Modo Debug
+
+Mecanismo de observação e registro de notas durante o
+workflow. **Desativado por padrão** — o humano ativa
+explicitamente.
+
+### Ativação
+
+- **Ativar:** humano diz `modo debug on` (ou equivalente)
+- **Desativar:** humano diz `modo debug off`
+- Ao ativar, crie o arquivo `DevFlowNotes-YYYY-MM-DD.md`
+  no root do projeto (se nao existir)
+- Ao desativar, pare de capturar notas mas **nao exclua**
+  o arquivo
+
+### Arquivo DevFlowNotes
+
+Formato do arquivo `DevFlowNotes-YYYY-MM-DD.md`:
+
+```markdown
+# DevFlow Notes — YYYY-MM-DD
+
+## Notas de Debug
+
+### [HH:MM] Fase: <FASE_ATUAL>
+**Humano:** [texto exato do comentario]
+**Contexto:** [resumo de 2-4 linhas do que aconteceu ate
+  aqui: ultima fase concluida, ultimo agente spawnado,
+  resultado resumido]
+
+---
+
+## Skills Utilizadas por Fase
+
+### <FASE>
+| Agente | Skills |
+|--------|--------|
+| <agente> | skill1, skill2 |
+```
+
+### Captura de notas
+
+Quando o modo debug esta ativo e o humano escreve
+`**[texto]**`:
+
+1. **Interrompa** o fluxo momentaneamente
+2. **Capture** o contexto atual:
+   - Fase atual (`Status` do planning file)
+   - Ultimo agente spawnado e resultado
+   - Ultima transicao de fase
+   - Impedimentos ou decisoes recentes
+3. **Escreva** a entrada no `DevFlowNotes-YYYY-MM-DD.md`
+4. **Confirme** ao humano (1 linha): `Nota registrada.`
+5. **Retome** o fluxo normal
+
+### Registro de skills
+
+Quando o modo debug esta ativo, ao receber o resumo curto
+de cada agente spawnado:
+
+1. Extraia a linha `Skills: ...` do resumo
+2. Adicione/atualize a entrada na secao
+   `## Skills Utilizadas por Fase` do DevFlowNotes
+3. Agrupe por fase e agente
+
+Quando o modo debug esta **desativado**, as skills sao
+reportadas no resumo curto mas **nao sao persistidas**.
+
+### Exemplo
+
+Humano escreve: `**[revisor esqueceu de revisar sec]**`
+
+Arquivo recebe:
+
+```markdown
+### [14:32] Fase: REVISÃO DO PLANO
+**Humano:** revisor esqueceu de revisar sec
+**Contexto:** Fase de Revisao do Plano em andamento.
+  Agentes dba (3.1) e sec (3.2) ja retornaram.
+  qa (3.3) retornou resumo. rev (3.6) pendente.
+  Plano de sec inclui CORS e rate limiting.
+```
