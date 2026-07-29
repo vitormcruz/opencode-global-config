@@ -1,12 +1,12 @@
 # Mensagens Pré-definidas — Curadoria
 
-## /doc/README.md ou Harness não encontrado(s)
+## docs/README.md ou Harness não encontrado(s)
 
-Este projeto ainda não possui **/doc/README.md** e/ou
+Este projeto ainda não possui **docs/README.md** e/ou
 **Harness por agente** — os dois artefatos que sustentam
 este workflow de desenvolvimento.
 
-O **/doc/README.md** é o contrato mínimo de especificação
+O **docs/README.md** é o contrato mínimo de especificação
 e documentação do projeto: define o quê deve existir, como é
 confeccionado e onde fica. Contém 3 seções obrigatórias:
 Definição de Escopo, Elementos de Especificação e

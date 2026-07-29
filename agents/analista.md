@@ -105,7 +105,7 @@ Ao iniciar, leia (se existirem):
 - Arquivo de documentação do produto — seção **Definição
   de Escopo** (estrutura do que elicitar; se houver skill
   recomendada, use-a). O caminho é definido pelo
-  `curador-produto-editor` (default: `/doc/README.md`).
+  `curador-produto-editor` (default: `docs/README.md`).
 - `BACKLOG.md` (histórias já existentes, para evitar duplicatas)
 
 Mantenha um "Contexto consolidado" mental com:

@@ -69,7 +69,7 @@ faz revisão de si mesmo, ou propõe commit.
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o /doc/README.md para verificar se há
+  consulte o docs/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -108,7 +108,7 @@ Analisar requisitos e produzir um plano de codificação.
    possível definir (tamanhos, formatos, máscaras,
    limites numéricos). Campos ainda sem definição:
    marcar como `(a definir)`.
-6.1. Ler /doc/README.md para identificar obrigações
+6.1. Ler docs/README.md para identificar obrigações
    de spec deste domínio (ex.: specs executáveis, ADRs)
    e incluir criação desses artefatos no plano.
 7. Se identificar decisão arquitetural significativa,
@@ -138,7 +138,7 @@ Implementar código seguindo o ciclo red-green-refactor.
 #### Etapa 1 — Testes primeiro
 
 1. Escrever testes automatizados da funcionalidade nova.
-   Se o /doc/README.md exigir specs executáveis
+   Se o docs/README.md exigir specs executáveis
    (Concordion, BDD, etc.) como forma de documentar
    critérios de aceitação, criá-las aqui como parte
    dos testes.
@@ -208,7 +208,7 @@ consulte a skill `code-review-and-quality`.
 
 Regras internas do ciclo TDD deste agente (não são
 harness do projeto). **Além destas**, siga o harness
-do /doc/README.md, se existir.
+do docs/README.md, se existir.
 
 - **Smoke tests**: executar todos os testes ao final
   da construção. Falha = diagnosticar antes de concluir.
@@ -232,7 +232,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no /doc/README.md e usar a saída (exit
+script indicado no docs/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:

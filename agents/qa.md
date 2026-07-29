@@ -59,7 +59,7 @@ faz revisão integrativa, ou propõe commit.
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o /doc/README.md para verificar se há
+  consulte o docs/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -100,7 +100,7 @@ Analisar requisitos e produzir um plano de testes.
 6. *Use a skill \`grill-me\`* para validar cada decisão
    de testes com o humano antes de persistir no arquivo.
 7. Persistir plano de testes no arquivo indicado.
-8. Verificar no /doc/README.md se o plano de testes
+8. Verificar no docs/README.md se o plano de testes
    deve ser persistido em arquivo permanente. Se sim,
    marcar para extração ao final do workflow.
 
@@ -194,7 +194,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no /doc/README.md e usar a saída (exit
+script indicado no docs/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:

@@ -49,7 +49,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o /doc/README.md para verificar se há
+  consulte o docs/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -103,7 +103,7 @@ estratégia de migração.
 - Lista de migrações planejadas (ordem + dependências)
 - Riscos e mitigações
 - Critérios de sucesso
-- Verificar no /doc/README.md se o modelo conceitual
+- Verificar no docs/README.md se o modelo conceitual
   deve ser persistido em local permanente (ex:
   docs/modelo.dbml). Se sim, incluir no plano.
 
@@ -213,7 +213,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no /doc/README.md e usar a saída (exit
+script indicado no docs/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:
@@ -221,7 +221,7 @@ code + stdout) como evidência principal.
 ```markdown
 ### Evidências (dba)
 - [ ] Checklist de revisão aplicado: <link ou seção>
-- [ ] Ferramenta executada: <conforme /doc/README.md>
+- [ ] Ferramenta executada: <conforme docs/README.md>
 - [ ] Artefatos produzidos: <lista de arquivos>
 - [ ] Guardrails verificados: <itens OK ou exceções>
 - [ ] Harness script: <executado? saída anexada>
@@ -268,7 +268,7 @@ Ao gerar ou revisar SQL, verificar SEMPRE:
 ## Harness — referência para o humano
 
 Ferramentas que o agente pode **sugerir** ao humano para
-inclusão no /doc/README.md, mas que **nunca serão
+inclusão no docs/README.md, mas que **nunca serão
 executadas** sem estarem listadas lá:
 
 - **squawk** (v2.44+): linting de migrations PostgreSQL,
@@ -276,7 +276,7 @@ executadas** sem estarem listadas lá:
 - **sqlfluff** (v4.0+): linting multi-dialect.
 - **Atlas** (v1.2+): schema-as-code + analisadores.
 
-O agente só executa o que o /doc/README.md autorizar.
+O agente só executa o que o docs/README.md autorizar.
 
 ---
 

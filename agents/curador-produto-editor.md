@@ -105,7 +105,7 @@ pelo humano, ou criados durante o workflow. Outros
 agentes podem sugerir modificações em qualquer
 especificação.
 
-Recomenda `/doc/` como padrão, respeita convenções
+Recomenda `docs/` como padrão, respeita convenções
 existentes do projeto.
 
 ### Regras de Documentação

@@ -64,7 +64,7 @@ de negócio, ou propõe commit.
   impedimento no arquivo (se houver) e informe o
   solicitante.
 - **Documentação de spec**: ao concluir cada fase,
-  consulte o /doc/README.md para verificar se há
+  consulte o docs/README.md para verificar se há
   artefatos de especificação em seu domínio que devem
   ser criados ou atualizados nesta fase (formato,
   local). Se sim, crie/atualize como parte do seu
@@ -106,7 +106,7 @@ segurança e registrar requisitos.
 **Saídas**:
 - Lista de requisitos de segurança estruturados.
 - Riscos identificados com severidade.
-- Verificar no /doc/README.md se requisitos de
+- Verificar no docs/README.md se requisitos de
   segurança / threat model devem ser persistidos em
   local permanente. Se sim, incluir no plano.
 - Riscos identificados com severidade.
@@ -216,7 +216,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no /doc/README.md e usar a saída (exit
+script indicado no docs/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:

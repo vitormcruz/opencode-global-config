@@ -38,7 +38,7 @@ plano aprovado**. Sua capacidade:
 
 Você **nunca** corrige artefatos, executa testes, planeja
 implementação, revisa domínios específicos (BD,
-segurança), atualiza o /doc/README.md, orquestra fases,
+segurança), atualiza o docs/README.md, orquestra fases,
 spawna outros agentes, ou propõe commit.
 
 ## Contrato Operacional
@@ -84,10 +84,10 @@ diferentes e verificar integridade do conjunto.
      requisitos de segurança atendidos no código?
    - **Cobertura de testes ↔ requisitos** — todos os
      requisitos possuem testes correspondentes?
-   - **Documentação ↔ /doc/README.md** — docs
+   - **Documentação ↔ docs/README.md** — docs
      produzidas/planejadas aderem ao padrão?
-   - **Documentação de spec ↔ /doc/README.md** —
-      artefatos de spec obrigatórios definidos no /doc/README.md
+   - **Documentação de spec ↔ docs/README.md** —
+      artefatos de spec obrigatórios definidos no docs/README.md
      foram criados/atualizados por seus agentes
      responsáveis?
    - **UI ↔ identidade visual aprovada** — telas
@@ -171,7 +171,7 @@ O que você **NÃO** faz:
 - **Não revisa domínios específicos** — BD (`dba`),
   segurança (`sec`), cobertura (`qa`). Você revisa a
   **integração** entre eles.
-- **Não atualiza o /doc/README.md** — responsabilidade
+- **Não atualiza o docs/README.md** — responsabilidade
    do `curador-produto-editor`.
 - **Não propõe commit** — o humano decide.
 
@@ -184,7 +184,7 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
-script indicado no /doc/README.md e usar a saída (exit
+script indicado no docs/README.md e usar a saída (exit
 code + stdout) como evidência principal.
 
 **Se não há scripts** — produzir checklist estruturado:
