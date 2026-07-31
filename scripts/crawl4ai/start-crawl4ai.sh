@@ -14,16 +14,52 @@
 CRAWL4AI_NAME="crawl4ai-mcp"
 CRAWL4AI_IMAGE="crawl4ai-sanitized:latest"
 CRAWL4AI_PORT="11235"
+CRAWL4AI_TOKEN="${CRAWL4AI_API_TOKEN:-opencode-local-crawl4ai}"
+
+crawl4ai-configured() {
+    docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$CRAWL4AI_NAME" 2>/dev/null \
+        | grep -Fxq "CRAWL4AI_API_TOKEN=${CRAWL4AI_TOKEN}"
+}
+
+crawl4ai-wait() {
+    local attempt
+    for attempt in {1..30}; do
+        if curl -sf --max-time 2 --connect-timeout 2 \
+            -H "Authorization: Bearer ${CRAWL4AI_TOKEN}" \
+            "http://127.0.0.1:${CRAWL4AI_PORT}/health" >/dev/null; then
+            return 0
+        fi
+        sleep 1
+    done
+    echo "Crawl4AI não respondeu em http://127.0.0.1:${CRAWL4AI_PORT}" >&2
+    return 1
+}
 
 crawl4ai-start() {
     if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
-        echo "Container $CRAWL4AI_NAME já está em execução"
-    else
+        if crawl4ai-configured; then
+            echo "Container $CRAWL4AI_NAME já está em execução"
+        else
+            echo "Container $CRAWL4AI_NAME usa configuração antiga; recriando..."
+            docker rm -f "$CRAWL4AI_NAME" >/dev/null
+        fi
+    fi
+
+    if ! docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
         echo "Iniciando container Crawl4AI MCP..."
         docker rm -f "$CRAWL4AI_NAME" 2>/dev/null || true
-        docker run -d --name "$CRAWL4AI_NAME" -p "${CRAWL4AI_PORT}:${CRAWL4AI_PORT}" "$CRAWL4AI_IMAGE"
+        docker run -d --name "$CRAWL4AI_NAME" \
+            -p "${CRAWL4AI_PORT}:${CRAWL4AI_PORT}" \
+            -e "CRAWL4AI_API_TOKEN=${CRAWL4AI_TOKEN}" \
+            "$CRAWL4AI_IMAGE"
         echo "Container Crawl4AI MCP iniciado na porta $CRAWL4AI_PORT"
     fi
+
+    if ! crawl4ai-wait; then
+        docker logs --tail 20 "$CRAWL4AI_NAME" >&2 || true
+        return 1
+    fi
+    echo "Crawl4AI MCP disponível em http://127.0.0.1:${CRAWL4AI_PORT}"
 }
 
 crawl4ai-stop() {

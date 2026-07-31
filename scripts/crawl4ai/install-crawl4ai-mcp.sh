@@ -106,10 +106,14 @@ _crawl4ai_autostart() {
     local name="crawl4ai-mcp"
     local image="crawl4ai-sanitized:latest"
     local port="11235"
+    local token="\${CRAWL4AI_API_TOKEN:-opencode-local-crawl4ai}"
     if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
-        if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^\${name}\$"; then
+        if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^\${name}\$" || \
+           ! docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "\$name" 2>/dev/null \
+             | grep -Fxq "CRAWL4AI_API_TOKEN=\${token}"; then
             docker rm -f "\$name" 2>/dev/null || true
-            docker run -d --name "\$name" -p "\${port}:\${port}" "\$image" \
+            docker run -d --name "\$name" -p "\${port}:\${port}" \
+                -e "CRAWL4AI_API_TOKEN=\${token}" "\$image" \
                 >/dev/null 2>&1 || true
         fi
     fi
@@ -127,9 +131,11 @@ print_info "Iniciando container Crawl4AI MCP..."
 
 CRAWL4AI_NAME="crawl4ai-mcp"
 CRAWL4AI_PORT="11235"
+CRAWL4AI_TOKEN="${CRAWL4AI_API_TOKEN:-opencode-local-crawl4ai}"
 
 docker rm -f "$CRAWL4AI_NAME" 2>/dev/null || true
 docker run -d --name "$CRAWL4AI_NAME" -p "${CRAWL4AI_PORT}:${CRAWL4AI_PORT}" \
+    -e "CRAWL4AI_API_TOKEN=${CRAWL4AI_TOKEN}" \
     crawl4ai-sanitized:latest
 
 if docker ps --format '{{.Names}}' | grep -q "^${CRAWL4AI_NAME}$"; then
