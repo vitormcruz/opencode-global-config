@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# tests/opencode-int-test/docker/container-test-opencode.sh — gerencia o container Docker dos testes do OpenCode
+# tests/integration/docker/container-test-opencode.sh — gerencia o container Docker dos testes do OpenCode
 #
 # Uso:
-#   bash tests/opencode-int-test/docker/container-test-opencode.sh --up
-#   bash tests/opencode-int-test/docker/container-test-opencode.sh --down
-#   bash tests/opencode-int-test/docker/container-test-opencode.sh --help
+#   bash tests/integration/docker/container-test-opencode.sh --up
+#   bash tests/integration/docker/container-test-opencode.sh --down
+#   bash tests/integration/docker/container-test-opencode.sh --help
 
 set -euo pipefail
 
@@ -169,7 +169,7 @@ externamente (ex: opencode/big-pickle). Use apenas modelos aprovados pela sua or
 
 prepare_mock_artifacts() {
   log "Preparando artefatos do mock MCP..."
-  npm --prefix "$REPO_ROOT/tests/opencode-int-test/mcp-mock" install
+  npm --prefix "$REPO_ROOT/tests/integration/mcp-mock" install
 }
 
 build_image() {
@@ -258,7 +258,7 @@ stop_container() {
 case "${1:-}" in
   --help|-h)
     cat <<'EOF'
-Uso: bash tests/opencode-int-test/docker/container-test-opencode.sh [opção]
+  Uso: bash tests/integration/docker/container-test-opencode.sh [opção]
 
 --up       Reusa container existente; se não houver, faz build e cria
 --rebuild  Força rebuild da imagem e recria o container do zero

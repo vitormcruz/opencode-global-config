@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/mcp-test.bats — valida MCPs registrados no OpenCode
+# tests/integration/mcp-test.bats — valida MCPs registrados no OpenCode
 
 load "helpers/behavioral_helper"
 

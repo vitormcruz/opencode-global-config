@@ -19,11 +19,10 @@
     Quando definido, os destinos passam a ser:
       $DestRoot\.copilot\skills\
       $DestRoot\.copilot\instructions\
-      $DestRoot\AppData\Roaming\Code\User\prompts\
-      $DestRoot\AppData\Roaming\Code\User\mcp.json
+      $DestRoot\.copilot\agents\
 
 .EXAMPLE
-    .\scripts\bootstrap_repo\copilot-sync.ps1 -Yes
+    .\adapters\copilot-cli\copilot-cli-adapter.ps1 -Yes
 #>
 [CmdletBinding()]
 param(
@@ -41,24 +40,23 @@ $ErrorActionPreference = 'Stop'
 
 function Show-Usage {
     Write-Host @"
-copilot-sync.ps1
+copilot-cli-adapter.ps1
 
 Copia e converte configuracoes do opencode-config para o GitHub Copilot (Windows).
 
 Uso:
-  .\scripts\bootstrap_repo\copilot-sync.ps1 [-Yes]
+  .\adapters\copilot-cli\copilot-cli-adapter.ps1 [-Yes]
 
 Opcoes:
   -Yes      Nao pergunta confirmacao
   -Help     Mostra esta ajuda
 
-O que e sincronizado:
-  skills\*\         -> %USERPROFILE%\.copilot\skills\
-  agents\*.md       -> %APPDATA%\Code\User\prompts\*.agent.md
-  commands\*.md     -> %APPDATA%\Code\User\prompts\*.prompt.md
-  default-artifacts -> %APPDATA%\Code\User\prompts\default-artifacts\
+  O que e sincronizado:
+   skills\*\         -> %USERPROFILE%\.copilot\skills\
+  agents\*.md       -> %USERPROFILE%\.copilot\agents\*.agent.md
+  commands\*.md     -> %USERPROFILE%\.copilot\skills\*\SKILL.md
+  default-artifacts -> %USERPROFILE%\.copilot\agents\default-artifacts\
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
-  MCPs (exa,crawl4ai) -> %APPDATA%\Code\User\mcp.json
   MCPs CLI globais (crawl4ai,codebase-memory) -> %USERPROFILE%\.config\mcp\servers.json
 "@
 }
@@ -78,15 +76,13 @@ $RepoRoot  = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 if ($DestRoot) {
     $SkillsDir       = Join-Path $DestRoot ".copilot\skills"
     $InstructionsDir = Join-Path $DestRoot ".copilot\instructions"
-    $PromptsDir      = Join-Path $DestRoot "AppData\Roaming\Code\User\prompts"
-    $McpJson         = Join-Path $DestRoot "AppData\Roaming\Code\User\mcp.json"
+    $AgentsDir       = Join-Path $DestRoot ".copilot\agents"
     $McpServersJson  = Join-Path $DestRoot ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $DestRoot "copilot-backup"
 } else {
     $SkillsDir       = Join-Path $env:USERPROFILE ".copilot\skills"
     $InstructionsDir = Join-Path $env:USERPROFILE ".copilot\instructions"
-    $PromptsDir      = Join-Path $env:APPDATA "Code\User\prompts"
-    $McpJson         = Join-Path $env:APPDATA "Code\User\mcp.json"
+    $AgentsDir       = Join-Path $env:USERPROFILE ".copilot\agents"
     $McpServersJson  = Join-Path $env:USERPROFILE ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $env:USERPROFILE ".config\copilot-backup"
 }
@@ -143,39 +139,66 @@ function Confirm-Action {
 }
 
 # ──────────────────────────────────────────────────────────────
-# Strip-AgentFrontmatter
-# Mantem apenas 'description' do frontmatter YAML.
+# Convert-AgentFrontmatter
+# Traduz o frontmatter OpenCode para o formato do Copilot CLI.
 # ──────────────────────────────────────────────────────────────
 
-function Strip-AgentFrontmatter([string]$Content) {
-    $lines   = $Content -split "`n"
-    $inFm    = $false
-    $fmDone  = $false
-    $desc    = ""
-    $cont    = ""
-    $body    = [System.Collections.Generic.List[string]]::new()
+function Convert-AgentFrontmatter([string]$Content) {
+    $lines = $Content -split "`n"
+    if ($lines.Count -lt 2 -or $lines[0].Trim() -ne '---') { return $Content }
+    $end = -1
+    for ($i = 1; $i -lt $lines.Count; $i++) {
+        if ($lines[$i].Trim() -eq '---') { $end = $i; break }
+    }
+    if ($end -lt 0) { return $Content }
 
-    foreach ($line in $lines) {
-        if ($line -match '^---\s*$') {
-            if (-not $fmDone) {
-                if (-not $inFm) { $inFm = $true; continue }
-                else            { $fmDone = $true; continue }
-            }
+    $descLines = [System.Collections.Generic.List[string]]::new()
+    $inDescription = $false
+    $permission = @{}
+    $currentPermission = ""
+    $mode = ""
+    for ($i = 1; $i -lt $end; $i++) {
+        $line = $lines[$i]
+        if ($line -match '^description:') {
+            $descLines.Add($line); $inDescription = $true; continue
         }
-        if ($inFm -and -not $fmDone) {
-            if ($line -match '^description:') {
-                $desc = $line; $cont = "desc"
-            } elseif ($line -match '^  ' -and $cont -eq "desc") {
-                $desc += "`n$line"
-            } else {
-                $cont = "other"
-            }
+        if ($inDescription -and ($line.StartsWith(' ') -or [string]::IsNullOrWhiteSpace($line))) {
+            $descLines.Add($line); continue
+        }
+        $inDescription = $false
+        if ($line -match '^mode:\s*(\S+)') { $mode = $Matches[1]; continue }
+        if ($line -match '^  (edit|bash|webfetch|websearch|task):\s*(.*)$') {
+            $currentPermission = $Matches[1]
+            $permission[$currentPermission] = $Matches[2].Trim().ToLowerInvariant()
             continue
         }
-        if ($fmDone) { $body.Add($line) }
+        if ($currentPermission -eq 'task' -and $line -match '^\s{4}') {
+            $permission['task'] = $line.Trim().ToLowerInvariant()
+        }
     }
 
-    return "---`n$desc`n---`n" + ($body -join "`n")
+    $tools = [System.Collections.Generic.List[string]]::new()
+    $tools.Add('read')
+    if ($permission['edit'] -eq 'allow') { $tools.Add('edit') }
+    if ($permission['bash'] -eq 'allow') { $tools.Add('execute') }
+    $tools.Add('search')
+    if ($permission['webfetch'] -eq 'allow' -or $permission['websearch'] -eq 'allow') {
+        $tools.Add('web')
+    }
+    if ($permission['task'] -like '*allow*') { $tools.Add('agent') }
+    if ($descLines.Count -eq 0) {
+        $descLines.Add('description: Agent OpenCode convertido para Copilot CLI')
+    }
+
+    $result = [System.Collections.Generic.List[string]]::new()
+    $result.Add('---')
+    foreach ($line in $descLines) { $result.Add($line) }
+    $quotedTools = ($tools | ForEach-Object { '"' + $_ + '"' }) -join ', '
+    $result.Add("tools: [$quotedTools]")
+    if ($mode -eq 'subagent') { $result.Add('user-invocable: false') }
+    $result.Add('---')
+    for ($i = $end + 1; $i -lt $lines.Count; $i++) { $result.Add($lines[$i]) }
+    return $result -join "`n"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -282,15 +305,50 @@ function Rewrite-ScriptRefs([string]$SkillName, [string]$SkillDest) {
 # ──────────────────────────────────────────────────────────────
 
 function Adapt-SkillForCopilot([string]$SkillName, [string]$SkillDest) {
-    if ($SkillName -ne "web-research-exa-crawl4ai") { return }
-
     $skillMd = Join-Path $SkillDest "SKILL.md"
     if (-not (Test-Path $skillMd)) { return }
 
     $original = Get-Content $skillMd -Raw -Encoding UTF8
+    $content = $original
+    $lines = $original -split "`r?`n"
+    if ($SkillName -notmatch '^[a-z0-9]+(?:-[a-z0-9]+)*$' -or $SkillName.Length -gt 64) {
+        throw "Nome de skill invalido: $SkillName"
+    }
+    if ($lines.Count -eq 0 -or $lines[0].Trim() -ne '---') {
+        $paragraph = [System.Collections.Generic.List[string]]::new()
+        $started = $false
+        foreach ($line in $lines) {
+            if ([string]::IsNullOrWhiteSpace($line)) {
+                if ($started) { break }
+                continue
+            }
+            if (-not $started -and $line.TrimStart().StartsWith('#')) { continue }
+            $started = $true
+            $paragraph.Add($line.Trim())
+        }
+        $description = (($paragraph -join ' ') -replace '\s+', ' ').Trim()
+        if ([string]::IsNullOrWhiteSpace($description)) { $description = "Skill $SkillName." }
+        if ($description.Length -gt 1024) { $description = $description.Substring(0, 1024) }
+        $content = "---`nname: $SkillName`ndescription: $description`n---`n`n" + $original.TrimEnd() + "`n"
+    } else {
+        $end = -1
+        for ($i = 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i].Trim() -eq '---') { $end = $i; break }
+        }
+        if ($end -lt 0) { throw "Frontmatter invalido: $skillMd" }
+        $nameLine = $lines | Where-Object { $_ -match '^name:\s*(\S+)\s*$' } | Select-Object -First 1
+        if ($nameLine) {
+            $existingName = ([regex]::Match($nameLine, '^name:\s*(\S+)\s*$')).Groups[1].Value
+            if ($existingName -ne $SkillName) { throw "name nao corresponde ao diretorio: $skillMd" }
+        } else {
+            $lines = @($lines[0], "name: $SkillName") + $lines[1..($lines.Count - 1)]
+            $content = $lines -join "`n"
+        }
+        if (-not $content) { $content = $original }
+    }
     # Substitui referencias a 'websearch' pela tool do Exa MCP.
     # 'websearch/Exa' -> 'web_search_exa' (remove o sufixo /Exa redundante)
-    $content  = $original -replace '`websearch/Exa`', '`web_search_exa`'
+    $content  = $content  -replace '`websearch/Exa`', '`web_search_exa`'
     $content  = $content  -replace 'websearch/Exa',   'web_search_exa'
     $content  = $content  -replace '`websearch`',     '`web_search_exa`'
     $content  = $content  -replace '\bwebsearch\b',   'web_search_exa'
@@ -331,16 +389,16 @@ function Sync-Skills {
 function Sync-Agents {
     Say ""
     Say "--- Agents ---"
-    Ensure-Dir $PromptsDir
+    Ensure-Dir $AgentsDir
     $count = 0
 
     foreach ($agentSrc in Get-ChildItem -Path (Join-Path $RepoRoot "agents") -Filter "*.md") {
         $baseName = [System.IO.Path]::GetFileNameWithoutExtension($agentSrc.Name)
-        $dest     = Join-Path $PromptsDir "$baseName.agent.md"
+        $dest     = Join-Path $AgentsDir "$baseName.agent.md"
         Backup-IfExists $dest
 
         $raw       = Get-Content $agentSrc.FullName -Raw -Encoding UTF8
-        $converted = Strip-AgentFrontmatter $raw
+        $converted = Convert-AgentFrontmatter $raw
         Write-Utf8NoBom $dest $converted
 
         Say "OK    $baseName.agent.md"
@@ -351,25 +409,39 @@ function Sync-Agents {
 }
 
 # ──────────────────────────────────────────────────────────────
-# Sync-Commands
+# Sync-CommandsAsSkills
 # ──────────────────────────────────────────────────────────────
 
-function Sync-Commands {
+function Sync-CommandsAsSkills {
     Say ""
     Say "--- Commands ---"
-    Ensure-Dir $PromptsDir
+    Ensure-Dir $SkillsDir
     $count = 0
 
     foreach ($cmdSrc in Get-ChildItem -Path (Join-Path $RepoRoot "commands") -Filter "*.md") {
         $baseName = [System.IO.Path]::GetFileNameWithoutExtension($cmdSrc.Name)
-        $dest     = Join-Path $PromptsDir "$baseName.prompt.md"
+        $dest     = Join-Path $SkillsDir $baseName
         Backup-IfExists $dest
-        Copy-Item -Path $cmdSrc.FullName -Destination $dest -Force
-        Say "OK    $baseName.prompt.md"
+        if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+        Ensure-Dir $dest
+        switch ($baseName) {
+            "index-codebase" { $description = "Indexa repo no codebase-memory. Ative quando humano pedir index codebase ou indexar repositorio." }
+            "bench-indexing" { $description = "Benchmark de indexacao codebase-memory. Ative quando humano pedir bench indexing." }
+            "sync-upstream-skills" { $description = "Sincroniza skills com upstream. Ative quando humano pedir sync upstream skills." }
+            default { $description = "Executa o comando $baseName." }
+        }
+        $raw = Get-Content $cmdSrc.FullName -Raw -Encoding UTF8
+        $body = $raw
+        if ($raw -match '^---\s*\r?\n') {
+            $body = $raw -replace '(?s)^---\s*\r?\n.*?\r?\n---\s*\r?\n', ''
+        }
+        $skillContent = "---`nname: $baseName`ndescription: $description`n---`n`n$($body.TrimEnd())`n"
+        Write-Utf8NoBom (Join-Path $dest "SKILL.md") $skillContent
+        Say "OK    $baseName/SKILL.md"
         $count++
     }
 
-    Say "      $count command(s) sincronizado(s)"
+    Say "      $count command(s) convertido(s) em skills"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -387,8 +459,8 @@ function Sync-DefaultArtifacts {
         return
     }
 
-    Ensure-Dir $PromptsDir
-    $dest = Join-Path $PromptsDir "default-artifacts"
+    Ensure-Dir $AgentsDir
+    $dest = Join-Path $AgentsDir "default-artifacts"
     Backup-IfExists $dest
     if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
     Copy-Item -Path $src -Destination $dest -Recurse -Force
@@ -415,64 +487,6 @@ function Sync-Instructions {
 
     Copy-Item -Path $source -Destination $dest -Force
     Say "OK    copilot-specific.instructions.md (user global)"
-}
-
-# ──────────────────────────────────────────────────────────────
-# Sync-Mcp
-# ──────────────────────────────────────────────────────────────
-
-function Sync-Mcp {
-    Say ""
-    Say "--- MCP ---"
-    Ensure-Dir (Split-Path -Parent $McpJson)
-    Backup-IfExists $McpJson
-
-    $newServers = @{
-        "exa" = [ordered]@{
-            "command" = "npx"
-            "args"    = @("-y", "exa-mcp-server")
-        }
-        "crawl4ai" = [ordered]@{
-            "type" = "sse"
-            "url"  = "http://localhost:11235/mcp/sse"
-        }
-    }
-
-    if (Test-Path $McpJson) {
-        try   { $data = Get-Content $McpJson -Raw | ConvertFrom-Json }
-        catch { $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} } }
-    } else {
-        $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} }
-    }
-
-    if (-not @($data.PSObject.Properties | Where-Object { $_.Name -eq "servers" }).Count) {
-        $data | Add-Member -MemberType NoteProperty -Name "servers" -Value ([PSCustomObject]@{})
-    }
-
-    $added = @()
-    $updated = @()
-    foreach ($key in $newServers.Keys) {
-        $existing = $data.servers.PSObject.Properties[$key]
-        if (-not $existing) {
-            $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
-            $added += $key
-        } else {
-            $currentJson = ($existing.Value | ConvertTo-Json -Depth 10 -Compress)
-            $expectedJson = ($newServers[$key] | ConvertTo-Json -Depth 10 -Compress)
-            if ($currentJson -ne $expectedJson) {
-                $data.servers.PSObject.Properties.Remove($key)
-                $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
-                $updated += $key
-            }
-        }
-    }
-
-    $data | ConvertTo-Json -Depth 10 | Set-Content -Path $McpJson -Encoding UTF8
-
-    return [PSCustomObject]@{
-        Added = $added
-        Updated = $updated
-    }
 }
 
 function Sync-McpCli {
@@ -540,17 +554,15 @@ function Show-Plan {
     Say "Repo:         $RepoRoot"
     Say "Skills:       $SkillsDir"
     Say "Instructions: $InstructionsDir"
-    Say "Prompts:      $PromptsDir"
-    Say "MCP:          $McpJson"
+    Say "Agents:       $AgentsDir"
     Say "MCP CLI:      $McpServersJson"
     Say ""
     Say "Plano:"
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
     Say "  - Converter $nAgents agent(s) para .agent.md"
-    Say "  - Copiar $nCommands command(s) para .prompt.md"
+    Say "  - Converter $nCommands command(s) em skills"
     Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
-    Say "  - Copiar agents\default-artifacts para prompts\default-artifacts"
-    Say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
+    Say "  - Copiar agents\default-artifacts para .copilot\agents\default-artifacts"
     Say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
 
@@ -558,15 +570,9 @@ Show-Plan
 Confirm-Action
 Sync-Skills
 Sync-Agents
-Sync-Commands
+Sync-CommandsAsSkills
 Sync-DefaultArtifacts
 Sync-Instructions
-$mcpResult = Sync-Mcp
-if ($mcpResult.Added.Count -gt 0 -or $mcpResult.Updated.Count -gt 0) {
-    Say "OK    mcp.json (add: $((@($mcpResult.Added) -join ', ') -replace '^$', 'nenhum'); update: $((@($mcpResult.Updated) -join ', ') -replace '^$', 'nenhum'))"
-} else {
-    Say "OK    mcp.json (sem alteracoes necessarias)"
-}
 $mcpCliResult = Sync-McpCli
 if ($mcpCliResult.Added.Count -gt 0 -or $mcpCliResult.Updated.Count -gt 0) {
     Say "OK    servers.json (add: $((@($mcpCliResult.Added) -join ', ') -replace '^$', 'nenhum'); update: $((@($mcpCliResult.Updated) -join ', ') -replace '^$', 'nenhum'))"

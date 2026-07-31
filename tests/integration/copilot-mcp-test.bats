@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/copilot-int-test/copilot-mcp-test.bats — smoke tests MCP via avelino/mcp
+# tests/integration/copilot-mcp-test.bats — smoke tests MCP via avelino/mcp
 
 load "../helpers/test_helper"
 

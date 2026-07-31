@@ -258,16 +258,16 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/configurar-repo.sh"
 }
 
-@test "scripts/bootstrap_repo/opencode-link.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/opencode-link.sh"
+@test "adapters/opencode/opencode-adapter.sh é executável" {
+  assert_file_executable "$REPO_ROOT/adapters/opencode/opencode-adapter.sh"
 }
 
 @test "scripts/bootstrap_repo/wsl-install-deps.sh é executável" {
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-install-deps.sh"
 }
 
-@test "scripts/bootstrap_repo/wsl-copilot-sync.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-copilot-sync.sh"
+@test "adapters/copilot-cli/copilot-cli-adapter.sh é executável" {
+  assert_file_executable "$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.sh"
 }
 
 @test "scripts/opencode-doc-extract.sh é executável" {

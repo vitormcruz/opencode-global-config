@@ -18,14 +18,14 @@ Depois de clonar este repo, rode:
 
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
-3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
+2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
+3. **Executa o adapter OpenCode** (`adapters/opencode/opencode-adapter.sh`)
 4. **Instala MCPs globais** — crawl4ai, codebase-memory
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
-- `OPENCODE_SKIP_COPILOT_SYNC=1` — pula sincronizacao Copilot
-- `OPENCODE_SKIP_LINKS=1` — pula criacao de links
+- `OPENCODE_SKIP_COPILOT_ADAPTER=1` — pula o adapter Copilot CLI
+- `OPENCODE_SKIP_OPENCODE_ADAPTER=1` — pula o adapter OpenCode
 - `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
 - `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
 
@@ -109,56 +109,40 @@ Para rodar so a verificacao de dependencias:
 ./scripts/bootstrap_repo/wsl-install-deps.sh
 ```
 
-## Configuracao GitHub Copilot
+## Adapters
 
-### VS Code Server (WSL) — executado automaticamente
+O repositório mantém uma fonte canônica e adapters por plataforma:
 
-O bootstrap (`configurar-repo.sh`) sincroniza automaticamente para
-`~/.copilot/`:
-- `prompts/`, `agents/`, `commands/`, `skills/` → sincronizados
-- `mcp.json` → `~/.vscode-server/data/User/mcp.json`
-- `servers.json` → `~/.config/mcp/servers.json`
+| Adapter | Entrada | Destino |
+|---|---|---|
+| `adapters/opencode/` | agents, skills, commands e configuração | links em `~/.config/opencode/` |
+| `adapters/copilot-cli/` | fonte canônica transformada | `~/.copilot/` |
 
-Importante:
+O adapter OpenCode cria links simbólicos. O adapter Copilot CLI converte
+frontmatter de agentes, transforma commands em skills, valida skills no padrão
+agentskills.io e copia artefatos auxiliares.
 
-- o fluxo canônico deste repo usa o wrapper CLI `mcp` (`avelino/mcp`)
-- portanto, o arquivo crítico para MCPs no WSL é `~/.config/mcp/servers.json`
-- `~/.vscode-server/data/User/mcp.json` é mantido para compatibilidade do Copilot
-
-Para rodar apenas esta parte:
+Use diretamente:
 
 ```bash
-./scripts/bootstrap_repo/wsl-copilot-sync.sh --yes
+./adapters/opencode/opencode-adapter.sh --yes
+./adapters/copilot-cli/copilot-cli-adapter.sh --yes
 ```
 
-### VS Code Windows — opcional
-
-Para configurar o VS Code Copilot Windows com os mesmos agents, skills,
-commands e instructions (
+No Windows, a versão PowerShell do adapter Copilot CLI é:
 
 ```powershell
-.\scripts\bootstrap_repo\copilot-sync.ps1
+.\adapters\copilot-cli\copilot-cli-adapter.ps1 -Yes
 ```
 
-O script requer PowerShell 5.1+ (nativo no Windows 10/11).
+Destinos sincronizados pelo Copilot CLI:
 
-O que é sincronizado para VS Code Windows:
-
-- `skills/*/` → `~/.copilot/skills/` (padrão agentskills.io — sem conversão)
-- `agents/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.agent.md`
-- `commands/*.md` → `%APPDATA%\\Code\\User\\prompts\\*.prompt.md`
-- `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/copilot-specific.instructions.md`
-- MCPs Copilot `exa` e `crawl4ai` → `%APPDATA%\\Code\\User\\mcp.json` (merge, sem sobrescrever)
-- MCPs CLI `crawl4ai` e `codebase-memory` → `%USERPROFILE%\\.config\\mcp\\servers.json` (merge, sem sobrescrever)
-
-Documentacao Markdown é acessada via `codebase-memory` usando consultas Cypher
-com nos do tipo `Section`.
-
-Para aplicar sem confirmacao interativa:
-
-```powershell
-.\scripts\bootstrap_repo\copilot-sync.ps1 -Yes
-```
+- `agents/*.md` → `~/.copilot/agents/*.agent.md`
+- `commands/*.md` → `~/.copilot/skills/*/SKILL.md`
+- `skills/*/` → `~/.copilot/skills/`
+- `agents/default-artifacts/` → `~/.copilot/agents/default-artifacts/`
+- `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/`
+- MCPs CLI → `~/.config/mcp/servers.json`
 
 ## Testes
 
@@ -215,8 +199,8 @@ make test-opencode
 ### Controle manual do container
 
 ```bash
-bash tests/opencode-int-test/docker/container-test-opencode.sh --up
-bash tests/opencode-int-test/docker/container-test-opencode.sh --down
+bash tests/integration/docker/container-test-opencode.sh --up
+bash tests/integration/docker/container-test-opencode.sh --down
 ```
 
 Os testes usam `bats` do PATH e bibliotecas auxiliares instaladas pelo

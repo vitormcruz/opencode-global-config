@@ -33,7 +33,9 @@ test-copilot: test-unit test-tools test-copilot-integration
 test-unit:
 	$(BATS) \
 	        $(TESTS_DIR)/agents \
-	        $(TESTS_DIR)/scripts/bootstrap_repo/opencode-link-test.bats \
+	        $(TESTS_DIR)/adapters/opencode/opencode-adapter-test.bats \
+	        $(TESTS_DIR)/adapters/copilot-cli/copilot-cli-adapter-test.bats \
+	        $(TESTS_DIR)/adapters/copilot-cli/copilot-cli-adapter-ps1-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-state-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/repo-structure-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/configurar-repo-test.bats \
@@ -70,9 +72,15 @@ test-opencode-integration:
 	    echo "     (usa modelo aberto padrão — ATENÇÃO: coleta dados externos)"; \
 	    exit 1; \
 	  fi; \
-	  trap "bash tests/opencode-int-test/docker/container-test-opencode.sh --down" EXIT; \
-	  bash tests/opencode-int-test/docker/container-test-opencode.sh --up; \
-	  $(BATS) $(TESTS_DIR)/opencode-int-test'
+	  trap "bash tests/integration/docker/container-test-opencode.sh --down" EXIT; \
+	  bash tests/integration/docker/container-test-opencode.sh --up; \
+	  $(BATS) \
+	    $(TESTS_DIR)/integration/agents-test.bats \
+	    $(TESTS_DIR)/integration/commands-test.bats \
+	    $(TESTS_DIR)/integration/mcp-test.bats \
+	    $(TESTS_DIR)/integration/prompts-test.bats \
+	    $(TESTS_DIR)/integration/skills-activation-test.bats \
+	    $(TESTS_DIR)/integration/docker/container-test-opencode-test.bats'
 
 ## OpenCode via container Docker (forca rebuild da imagem e recria container)
 test-opencode-integration-rebuild:
@@ -88,9 +96,15 @@ test-opencode-integration-rebuild:
 	    echo "     (usa modelo aberto padrão — ATENÇÃO: coleta dados externos)"; \
 	    exit 1; \
 	  fi; \
-	  trap "bash tests/opencode-int-test/docker/container-test-opencode.sh --down" EXIT; \
-	  bash tests/opencode-int-test/docker/container-test-opencode.sh --rebuild; \
-	  $(BATS) $(TESTS_DIR)/opencode-int-test'
+	  trap "bash tests/integration/docker/container-test-opencode.sh --down" EXIT; \
+	  bash tests/integration/docker/container-test-opencode.sh --rebuild; \
+	  $(BATS) \
+	    $(TESTS_DIR)/integration/agents-test.bats \
+	    $(TESTS_DIR)/integration/commands-test.bats \
+	    $(TESTS_DIR)/integration/mcp-test.bats \
+	    $(TESTS_DIR)/integration/prompts-test.bats \
+	    $(TESTS_DIR)/integration/skills-activation-test.bats \
+	    $(TESTS_DIR)/integration/docker/container-test-opencode-test.bats'
 
 ## OpenCode com modelo aberto padrão (reusa container)
 test-opencode-integration-default-model:
@@ -118,7 +132,9 @@ test-copilot-integration:
 	    echo "  ./scripts/bootstrap_repo/configurar-repo.sh --yes"; \
 	    exit 1; \
 	  fi; \
-	  $(BATS) $(TESTS_DIR)/copilot-int-test'
+	  $(BATS) \
+	    $(TESTS_DIR)/integration/copilot-cli-test.bats \
+	    $(TESTS_DIR)/integration/copilot-mcp-test.bats'
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

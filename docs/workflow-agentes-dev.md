@@ -218,10 +218,17 @@ Premissas detalhadas: 21.1–21.3.
       ```
    O mapa de modelos é registrado no arquivo de
    planejamento. Aplicação por plataforma:
-   - **VS Code**: `devflow` passa `model` ao `runSubagent`.
+    - **Copilot CLI**: `devflow` instrui o uso de `/model` ou define o modelo
+      na criação da sessão via SDK.
    - **OpenCode**: `devflow` para antes de fases com modelo
      diferente do anterior e solicita ao humano que
-     troque o modelo antes de prosseguir.
+      troque o modelo antes de prosseguir.
+
+    Política de sessão: dentro da fase, a sessão é retomada; entre fases,
+    uma sessão nova é criada. O identificador segue
+    `{workflowId}-{fase}-{agente}`. O Copilot CLI usa
+    `resumeSession(sessionId)` e `createSession(sessionId novo)`; o OpenCode
+    preserva `task_id` dentro da fase e cria instância nova entre fases.
 
 7.1. **Modo Debug** — o humano pode ativar o modo debug
      a qualquer momento (`modo debug on`). Quando ativo,
@@ -848,15 +855,11 @@ sequenceDiagram
 
 | Plataforma | Como `devflow` spawna agentes            | Quem pode interagir com o humano                  |
 |------------|---------------------------------------|----------------------------------------------------|
-| **VS Code**    | `runSubagent` com agentes primários   | Apenas agentes primários (`.agent.md`)             |
-| **OpenCode**   | Subagentes                            | Qualquer agente configurado com a tool `ask`       |
+| **Copilot CLI** | `task(agent_type=...)` ou `/fleet`   | `devflow` medeia toda interação agente-humano       |
+| **OpenCode**    | Subagentes                           | `devflow` medeia toda interação agente-humano       |
 
-**VS Code**: para que agentes spawnados pelo `devflow` consigam
-consultar o humano diretamente (premissa 4), eles precisam
-ser configurados como **agentes primários** (`.agent.md`).
-Esta é uma restrição da plataforma — apenas agentes primários
-chamados por outro agente podem interagir com o humano.
+**Copilot CLI**: subagentes são isolados do humano. Perguntas e decisões
+retornam ao `devflow`, que as apresenta ao humano e retoma a sessão correta.
 
-**OpenCode**: subagentes podem interagir com o humano desde
-que configurados com o ferramental adequado (tool `ask`).
-Não há restrição de tipo de agente.
+**OpenCode**: a mesma mediação é aplicada no modo orquestrado. A interação
+direta fora desse modo continua disponível conforme a configuração do agente.

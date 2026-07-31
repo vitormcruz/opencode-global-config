@@ -3,12 +3,12 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-opencode-link
+opencode-adapter
 
 Cria links simbolicos em ~/.config/opencode apontando para este repo.
 
 Uso:
-  ./scripts/bootstrap_repo/opencode-link.sh [--yes]
+  ./adapters/opencode/opencode-adapter.sh [--yes]
 
 Opcoes:
   --yes      Nao pergunta confirmacao

@@ -1,3 +1,9 @@
+---
+name: browser-testing
+description: Testes funcionais de UI com Playwright. Use quando validar fluxos web,
+  screenshots, navegacao em browser ou testes end-to-end.
+---
+
 # browser-testing
 
 Skill para testes funcionais de UI usando Playwright via WSL.

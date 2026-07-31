@@ -30,8 +30,8 @@ teardown() {
   assert_output --partial "configurar-repo"
   assert_output --partial "Uso:"
   assert_output --partial "Instala dependencias WSL"
-  assert_output --partial "Configura GitHub Copilot (WSL)"
-  assert_output --partial "Cria links simbolicos"
+  assert_output --partial "Executa o adapter Copilot CLI"
+  assert_output --partial "Executa o adapter OpenCode"
   assert_output --partial "Instala MCPs"
   assert_output --partial "MCPs"
 }
@@ -54,8 +54,8 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_DEPS=1" {
   # Quando pula deps, ainda tenta rodar as outras partes
   export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_SYNC=1
-  export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_COPILOT_ADAPTER=1
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DOCTREE=1
@@ -64,9 +64,9 @@ teardown() {
   assert_success
 }
 
-@test "configurar-repo respeita OPENCODE_SKIP_COPILOT_SYNC=1" {
-  export OPENCODE_SKIP_COPILOT_SYNC=1
-  export OPENCODE_SKIP_LINKS=1
+@test "configurar-repo respeita OPENCODE_SKIP_COPILOT_ADAPTER=1" {
+  export OPENCODE_SKIP_COPILOT_ADAPTER=1
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DOCTREE=1
@@ -75,8 +75,8 @@ teardown() {
   assert_success
 }
 
-@test "configurar-repo respeita OPENCODE_SKIP_LINKS=1" {
-  export OPENCODE_SKIP_LINKS=1
+@test "configurar-repo respeita OPENCODE_SKIP_OPENCODE_ADAPTER=1" {
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DOCTREE=1
@@ -92,8 +92,8 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_CRAWL4AI=1" {
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_SYNC=1
-  export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_COPILOT_ADAPTER=1
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -102,8 +102,8 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_CODEBASE_MEMORY=1" {
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_SYNC=1
-  export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_COPILOT_ADAPTER=1
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -112,8 +112,8 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_DOCTREE=1" {
   export OPENCODE_SKIP_DOCTREE=1
   export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_SYNC=1
-  export OPENCODE_SKIP_LINKS=1
+  export OPENCODE_SKIP_COPILOT_ADAPTER=1
+  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
 
   run bash "$SCRIPT" --quiet
   assert_success

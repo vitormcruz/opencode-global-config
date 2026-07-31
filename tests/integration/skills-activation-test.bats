@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/skills-activation-test.bats — valida ativação de skills via prompt
+# tests/integration/skills-activation-test.bats — valida ativação de skills via prompt
 
 load "helpers/behavioral_helper"
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/opencode-int-test/helpers/behavioral_helper.bash — helpers da integração do OpenCode
+# tests/integration/helpers/behavioral_helper.bash — helpers da integração do OpenCode
 
 BATS_LIB_PATH="${BATS_LIB_PATH:-$HOME/.local/lib/bats}"
 export BATS_LIB_PATH
@@ -13,7 +13,7 @@ OPENCODE_BASE_URL="http://127.0.0.1:${OPENCODE_PORT}"
 # Verifica se o container está disponível antes de executar testes
 require_opencode_serve() {
   if ! curl -sf "${OPENCODE_BASE_URL}/" &>/dev/null; then
-    fail "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/opencode-int-test/docker/container-test-opencode.sh --up"
+    fail "OpenCode serve não está disponível em ${OPENCODE_BASE_URL}. Execute: bash tests/integration/docker/container-test-opencode.sh --up"
   fi
 }
 

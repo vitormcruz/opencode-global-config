@@ -103,14 +103,14 @@ Depois de clonar este repo, rode:
 
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Configura GitHub Copilot (WSL)** (`scripts/bootstrap_repo/wsl-copilot-sync.sh`)
-3. **Cria links simbolicos** (`scripts/bootstrap_repo/opencode-link.sh`)
+2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
+3. **Executa o adapter OpenCode** (`adapters/opencode/opencode-adapter.sh`)
 4. **Instala MCPs globais** — crawl4ai, codebase-memory
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
-- `OPENCODE_SKIP_COPILOT_SYNC=1` — pula sincronizacao Copilot
-- `OPENCODE_SKIP_LINKS=1` — pula criacao de links
+- `OPENCODE_SKIP_COPILOT_ADAPTER=1` — pula o adapter Copilot CLI
+- `OPENCODE_SKIP_OPENCODE_ADAPTER=1` — pula o adapter OpenCode
 - `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
 - `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
 
@@ -295,10 +295,13 @@ inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
 
 Todos suportam `--yes` e `--check-only`.
 
-# Sincronizacao dos Adaptadores Copilot
-- Os scripts `scripts/bootstrap_repo/copilot-sync.ps1` e `scripts/bootstrap_repo/wsl-copilot-sync.sh`
+# Sincronizacao dos Adaptadores
+- A fonte canonica fica em `agents/`, `skills/`, `commands/` e `docs/`.
+- `adapters/opencode/` cria links simbolicos para a configuracao nativa.
+- `adapters/copilot-cli/` converte e copia artefatos para `~/.copilot/`.
+- Os scripts `adapters/copilot-cli/copilot-cli-adapter.ps1` e
+  `adapters/copilot-cli/copilot-cli-adapter.sh`
   sao adaptadores do mesmo repo para o GitHub Copilot em plataformas diferentes.
-- `copilot-sync.ps1` e o adaptador para Windows; `wsl-copilot-sync.sh` e o adaptador para WSL.
 - O comportamento canonico nao pertence a apenas um deles: o canonico e que ambos sao adaptadores
   deste repo para a estrutura de artefatos que o Copilot aceita em cada plataforma.
 - Regra obrigatoria: os dois devem permanecer semanticamente sincronizados e devem ser alterados

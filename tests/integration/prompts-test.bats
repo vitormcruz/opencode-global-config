@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/prompts-test.bats — valida respostas a prompts via API
+# tests/integration/prompts-test.bats — valida respostas a prompts via API
 
 load "helpers/behavioral_helper"
 

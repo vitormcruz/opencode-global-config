@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/docker/container-test-opencode-test.bats
+# tests/integration/docker/container-test-opencode-test.bats
 # Testa a função extract_models_from_config isoladamente (sem container)
 
 load "../../helpers/test_helper"
@@ -8,7 +8,7 @@ SCRIPT_UNDER_TEST=""
 
 setup() {
   common_setup
-  SCRIPT_UNDER_TEST="$REPO_ROOT/tests/opencode-int-test/docker/container-test-opencode.sh"
+  SCRIPT_UNDER_TEST="$REPO_ROOT/tests/integration/docker/container-test-opencode.sh"
 }
 
 teardown() {

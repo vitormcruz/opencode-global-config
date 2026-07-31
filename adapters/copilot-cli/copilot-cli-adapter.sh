@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
-# wsl-copilot-sync.sh
-# Sincroniza configuracoes do opencode-config para GitHub Copilot (WSL).
+# copilot-cli-adapter.sh
+# Sincroniza a fonte canonica com o Copilot CLI.
 #
-# Uso: ./scripts/bootstrap_repo/wsl-copilot-sync.sh [--yes] [--quiet]
+# Uso: ./adapters/copilot-cli/copilot-cli-adapter.sh [--yes] [--quiet]
 
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd "${script_dir}/../.." && pwd -P)"
+dest_root="${DestRoot:-${DEST_ROOT:-$HOME}}"
 
-skills_dir="${HOME}/.copilot/skills"
-instructions_dir="${HOME}/.copilot/instructions"
-prompts_dir="${HOME}/.vscode-server/data/User/prompts"
-windows_user_profile=""
-windows_prompts_dir=""
-windows_code_user_dir=""
-mcp_json="${HOME}/.vscode-server/data/User/mcp.json"
-mcp_servers_json="${HOME}/.config/mcp/servers.json"
-backup_dir="${HOME}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
+copilot_dir="${dest_root}/.copilot"
+skills_dir="${copilot_dir}/skills"
+instructions_dir="${copilot_dir}/instructions"
+agents_dir="${copilot_dir}/agents"
+mcp_servers_json="${dest_root}/.config/mcp/servers.json"
+backup_dir="${dest_root}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
 
 assume_yes=0
 quiet=0
@@ -25,28 +23,40 @@ quiet=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --yes) assume_yes=1 ;;
+    --dest-root)
+      [[ $# -ge 2 ]] || { echo "--dest-root requer um caminho" >&2; exit 2; }
+      dest_root="$2"
+      copilot_dir="${dest_root}/.copilot"
+      skills_dir="${copilot_dir}/skills"
+      instructions_dir="${copilot_dir}/instructions"
+      agents_dir="${copilot_dir}/agents"
+      mcp_servers_json="${dest_root}/.config/mcp/servers.json"
+      backup_dir="${dest_root}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
+      shift
+      ;;
     --quiet) quiet=1 ;;
     --help|-h)
       cat <<'EOF'
-wsl-copilot-sync
+copilot-cli-adapter
 
-Sincroniza configuracoes do opencode-config para GitHub Copilot (WSL).
+Sincroniza a fonte canonica deste repositorio com o Copilot CLI.
 
 Uso:
-  ./scripts/bootstrap_repo/wsl-copilot-sync.sh [--yes] [--quiet]
+  ./adapters/copilot-cli/copilot-cli-adapter.sh [--yes] [--quiet]
 
 Opcoes:
   --yes      Nao pede confirmacao
   --quiet    Suprime saidas detalhadas
+  --dest-root PATH
+             Substitui a raiz de destino (usado em testes)
   --help     Mostra esta ajuda
 
-O que e sincronizado:
-  skills/*/         -> ~/.copilot/skills/
-  agents/*.md       -> ~/.vscode-server/data/User/prompts/*.agent.md
-  commands/*.md     -> ~/.vscode-server/data/User/prompts/*.prompt.md
-  default-artifacts -> ~/.vscode-server/data/User/prompts/default-artifacts/
+  O que e sincronizado:
+   skills/*/         -> ~/.copilot/skills/
+  agents/*.md       -> ~/.copilot/agents/*.agent.md
+  commands/*.md     -> ~/.copilot/skills/*/SKILL.md
+  default-artifacts -> ~/.copilot/agents/default-artifacts/
   copilot-instrs    -> ~/.copilot/instructions/copilot-specific.instructions.md
-  MCPs Copilot (exa,crawl4ai) -> ~/.vscode-server/data/User/mcp.json
   MCPs CLI globais (crawl4ai,codebase-memory) -> ~/.config/mcp/servers.json
 EOF
       exit 0
@@ -86,25 +96,9 @@ write_utf8() {
   printf '%s' "$content" > "$path"
 }
 
-detect_windows_targets() {
-  local candidate current_home_name
-  current_home_name="$(basename "$HOME")"
-
-  for candidate in "/mnt/c/Users/$current_home_name" "/mnt/c/Users/${USER:-}"; do
-    [[ -n "$candidate" ]] || continue
-    [[ -d "$candidate/AppData/Roaming/Code/User" ]] || continue
-    windows_user_profile="$candidate"
-    windows_code_user_dir="$candidate/AppData/Roaming/Code/User"
-    windows_prompts_dir="$windows_code_user_dir/prompts"
-    return 0
-  done
-
-  return 1
-}
-
-strip_agent_frontmatter() {
+convert_agent_frontmatter() {
   python3 - <<'PY' "$1"
-import pathlib, sys
+import json, pathlib, re, sys
 path = pathlib.Path(sys.argv[1])
 content = path.read_text(encoding='utf-8')
 lines = content.splitlines()
@@ -112,31 +106,61 @@ if not lines or lines[0].strip() != '---':
     print(content, end='')
     raise SystemExit(0)
 
-i = 1
-desc = []
-in_desc = False
-while i < len(lines):
-    line = lines[i]
-    if line.strip() == '---':
-        i += 1
-        break
-    if line.startswith('description:'):
-        desc = [line]
-        in_desc = True
-    elif in_desc and line.startswith('  '):
-        desc.append(line)
-    else:
-        in_desc = False
-    i += 1
-body = '\n'.join(lines[i:])
-if desc:
-    print('---')
-    print('\n'.join(desc))
-    print('---')
-    if body:
-      print(body)
-else:
+end = next((i for i in range(1, len(lines)) if lines[i].strip() == '---'), None)
+if end is None:
     print(content, end='')
+    raise SystemExit(0)
+
+front = lines[1:end]
+body = '\n'.join(lines[end + 1:])
+description = []
+in_description = False
+permission = {}
+current_permission = None
+mode = None
+for line in front:
+    if re.match(r'^description:', line):
+        description = [line]
+        in_description = True
+        continue
+    if in_description and (line.startswith(' ') or not line.strip()):
+        description.append(line)
+        continue
+    in_description = False
+    match = re.match(r'^mode:\s*(\S+)', line)
+    if match:
+        mode = match.group(1)
+        continue
+    match = re.match(r'^  (edit|bash|webfetch|websearch|task):\s*(.*)$', line)
+    if match:
+        current_permission = match.group(1)
+        value = match.group(2).strip().lower()
+        permission[current_permission] = value
+        continue
+    if current_permission == 'task' and re.match(r'^\s{4}', line):
+        permission['task'] = line.strip().lower()
+
+tools = ['read']
+if permission.get('edit') == 'allow':
+    tools.append('edit')
+if permission.get('bash') == 'allow':
+    tools.append('execute')
+tools.append('search')
+if permission.get('webfetch') == 'allow' or permission.get('websearch') == 'allow':
+    tools.append('web')
+if permission.get('task') and 'allow' in permission['task']:
+    tools.append('agent')
+
+if not description:
+    description = ['description: Agent OpenCode convertido para Copilot CLI']
+print('---')
+print('\n'.join(description).rstrip())
+print('tools: ' + json.dumps(tools))
+if mode == 'subagent':
+    print('user-invocable: false')
+print('---')
+if body:
+    print(body)
 PY
 }
 
@@ -192,6 +216,50 @@ if content != original:
 PY
 }
 
+ensure_skill_frontmatter() {
+  local skill_name="$1"
+  local skill_dest="$2"
+  local skill_md="$skill_dest/SKILL.md"
+  python3 - <<'PY' "$skill_name" "$skill_md"
+import pathlib, re, sys
+skill_name = sys.argv[1]
+path = pathlib.Path(sys.argv[2])
+if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', skill_name) or len(skill_name) > 64:
+    raise SystemExit(f'invalid skill name: {skill_name}')
+content = path.read_text(encoding='utf-8')
+lines = content.splitlines()
+if lines and lines[0].strip() == '---':
+    end = next((i for i in range(1, len(lines)) if lines[i].strip() == '---'), None)
+    if end is None:
+        raise SystemExit(f'invalid frontmatter: {path}')
+    front = '\n'.join(lines[1:end])
+    name_match = re.search(r'^name:\s*(\S+)\s*$', front, re.MULTILINE)
+    if name_match and name_match.group(1) != skill_name:
+        raise SystemExit(f'skill name does not match directory: {path}')
+    if not name_match:
+        lines.insert(1, f'name: {skill_name}')
+        path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+else:
+    paragraph = []
+    started = False
+    for line in lines:
+        if not line.strip():
+            if started:
+                break
+            continue
+        if not started and line.lstrip().startswith('#'):
+            continue
+        started = True
+        paragraph.append(line.strip())
+    description = ' '.join(paragraph)[:1024] or f'Skill {skill_name}.'
+    body = content.rstrip('\n')
+    path.write_text(
+        f'---\nname: {skill_name}\ndescription: {description}\n---\n\n{body}\n',
+        encoding='utf-8',
+    )
+PY
+}
+
 sync_skills() {
   say ""
   say "--- Skills ---"
@@ -208,6 +276,7 @@ sync_skills() {
     rm -rf "$dest"
     cp -a "$skill_src" "$dest"
     rewrite_skill_script_refs "$skill_name" "$dest"
+    ensure_skill_frontmatter "$skill_name" "$dest"
     say "OK    $skill_name"
     count=$((count + 1))
   done
@@ -217,52 +286,69 @@ sync_skills() {
 sync_agents() {
   say ""
   say "--- Agents ---"
-  ensure_dir "$prompts_dir"
-  [[ -n "$windows_prompts_dir" ]] && ensure_dir "$windows_prompts_dir"
+  ensure_dir "$agents_dir"
   local count=0
   local agent_src base_name dest converted
-   for agent_src in "$repo_root"/agents/*.md; do
-     [[ -f "$agent_src" ]] || continue
-     base_name="$(basename "$agent_src" .md)"
-     dest="$prompts_dir/$base_name.agent.md"
-     backup_if_exists "$dest"
-     converted="$(strip_agent_frontmatter "$agent_src")"
-     write_utf8 "$dest" "$converted"
-    if [[ -n "$windows_prompts_dir" ]]; then
-      local win_dest="$windows_prompts_dir/$base_name.agent.md"
-      backup_if_exists "$win_dest"
-      write_utf8 "$win_dest" "$converted"
-    fi
-     say "OK    $base_name.agent.md"
-     count=$((count + 1))
-   done
-   say "      $count agent(s) sincronizado(s)"
- }
- 
- sync_commands() {
-   say ""
-   say "--- Commands ---"
-   ensure_dir "$prompts_dir"
-   [[ -n "$windows_prompts_dir" ]] && ensure_dir "$windows_prompts_dir"
-   local count=0
-   local cmd_src base_name dest
-   for cmd_src in "$repo_root"/commands/*.md; do
-     [[ -f "$cmd_src" ]] || continue
-     base_name="$(basename "$cmd_src" .md)"
-     dest="$prompts_dir/$base_name.prompt.md"
-     backup_if_exists "$dest"
-     cp "$cmd_src" "$dest"
-     if [[ -n "$windows_prompts_dir" ]]; then
-       local win_dest="$windows_prompts_dir/$base_name.prompt.md"
-       backup_if_exists "$win_dest"
-       cp "$cmd_src" "$win_dest"
-     fi
-     say "OK    $base_name.prompt.md"
-     count=$((count + 1))
-   done
-   say "      $count command(s) sincronizado(s)"
- }
- 
+  for agent_src in "$repo_root"/agents/*.md; do
+    [[ -f "$agent_src" ]] || continue
+    base_name="$(basename "$agent_src" .md)"
+    dest="$agents_dir/$base_name.agent.md"
+    backup_if_exists "$dest"
+    converted="$(convert_agent_frontmatter "$agent_src")"
+    write_utf8 "$dest" "$converted"
+    say "OK    $base_name.agent.md"
+    count=$((count + 1))
+  done
+  say "      $count agent(s) sincronizado(s)"
+}
+
+sync_commands_as_skills() {
+  say ""
+  say "--- Commands ---"
+  ensure_dir "$skills_dir"
+  local count=0
+  local cmd_src base_name dest description
+  for cmd_src in "$repo_root"/commands/*.md; do
+    [[ -f "$cmd_src" ]] || continue
+    base_name="$(basename "$cmd_src" .md)"
+    case "$base_name" in
+      index-codebase)
+        description="Indexa repo no codebase-memory. Ative quando humano pedir index codebase ou indexar repositorio." ;;
+      bench-indexing)
+        description="Benchmark de indexacao codebase-memory. Ative quando humano pedir bench indexing." ;;
+      sync-upstream-skills)
+        description="Sincroniza skills com upstream. Ative quando humano pedir sync upstream skills." ;;
+      *)
+        description="Executa o comando $base_name." ;;
+    esac
+    dest="$skills_dir/$base_name"
+    backup_if_exists "$dest"
+    rm -rf "$dest"
+    mkdir -p "$dest"
+    python3 - "$cmd_src" "$dest/SKILL.md" "$base_name" "$description" <<'PY'
+import pathlib, sys
+source = pathlib.Path(sys.argv[1])
+target = pathlib.Path(sys.argv[2])
+name = sys.argv[3]
+description = sys.argv[4]
+lines = source.read_text(encoding='utf-8').splitlines()
+if lines and lines[0].strip() == '---':
+    end = next((i for i in range(1, len(lines)) if lines[i].strip() == '---'), None)
+    body = lines[end + 1:] if end is not None else lines
+else:
+    body = lines
+target.write_text(
+    f'---\nname: {name}\ndescription: {description}\n---\n\n' +
+    '\n'.join(body).rstrip() + '\n',
+    encoding='utf-8',
+)
+PY
+    say "OK    $base_name/SKILL.md"
+    count=$((count + 1))
+  done
+  say "      $count command(s) convertido(s) em skills"
+}
+
 sync_default_artifacts() {
   say ""
   say "--- Default Artifacts ---"
@@ -271,18 +357,11 @@ sync_default_artifacts() {
     say "AVISO agents/default-artifacts nao encontrado"
     return 0
   }
-  ensure_dir "$prompts_dir"
-  [[ -n "$windows_prompts_dir" ]] && ensure_dir "$windows_prompts_dir"
-  local dest="$prompts_dir/default-artifacts"
+   ensure_dir "$agents_dir"
+   local dest="$agents_dir/default-artifacts"
   backup_if_exists "$dest"
   rm -rf "$dest"
   cp -a "$src" "$dest"
-  if [[ -n "$windows_prompts_dir" ]]; then
-    local win_dest="$windows_prompts_dir/default-artifacts"
-    backup_if_exists "$win_dest"
-    rm -rf "$win_dest"
-    cp -a "$src" "$win_dest"
-  fi
   local n
   n="$(find "$dest" -type f | wc -l)"
   say "OK    default-artifacts ($n arquivo(s))"
@@ -301,46 +380,6 @@ sync_instructions() {
   backup_if_exists "$dest"
   cp "$source" "$dest"
   say "OK    copilot-specific.instructions.md (user global)"
-}
-
- sync_mcp() {
-   say "" >&2
-   say "--- MCP ---" >&2
-   ensure_dir "$(dirname "$mcp_json")"
-   backup_if_exists "$mcp_json"
-   python3 - <<'PY' "$mcp_json"
-import json, pathlib, sys
-path = pathlib.Path(sys.argv[1])
-new_servers = {
-    'exa': {
-        'command': 'npx',
-        'args': ['-y', 'exa-mcp-server'],
-    },
-    'crawl4ai': {
-        # SSE server usa url
-        'url': 'http://localhost:11235/mcp/sse',
-    },
-}
-if path.exists():
-    try:
-        data = json.loads(path.read_text(encoding='utf-8'))
-    except Exception:
-        data = {'servers': {}}
-else:
-    data = {'servers': {}}
-servers = data.setdefault('servers', {})
-added = []
-updated = []
-for key, value in new_servers.items():
-    if key not in servers:
-        servers[key] = value
-        added.append(key)
-    elif servers[key] != value:
-        servers[key] = value
-        updated.append(key)
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-print(json.dumps({'added': added, 'updated': updated}))
-PY
 }
 
 sync_mcp_cli() {
@@ -385,7 +424,6 @@ PY
 }
 
 show_plan() {
-  detect_windows_targets || true
   local n_skills n_agents n_commands
   n_skills="$(find "$repo_root/skills" -mindepth 1 -maxdepth 1 -type d | while read -r d; do [[ -f "$d/SKILL.md" ]] && printf 'x\n'; done | wc -l)"
   n_agents="$(find "$repo_root/agents" -maxdepth 1 -type f -name '*.md' | wc -l)"
@@ -394,17 +432,15 @@ show_plan() {
   say "Repo:         $repo_root"
   say "Skills:       $skills_dir"
   say "Instructions: $instructions_dir"
-  say "Prompts:      $prompts_dir"
-  say "MCP:          $mcp_json"
+  say "Agents:       $agents_dir"
   say "MCP CLI:      $mcp_servers_json"
   say ""
   say "Plano:"
   say "  - Copiar $n_skills skill(s) para ~/.copilot/skills/"
   say "  - Converter $n_agents agent(s) para .agent.md"
-  say "  - Copiar $n_commands command(s) para .prompt.md"
-  say "  - Copiar agents/default-artifacts/ para prompts/default-artifacts/"
+  say "  - Converter $n_commands command(s) em skills"
+  say "  - Copiar agents/default-artifacts/ para ~/.copilot/agents/default-artifacts/"
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
-  say "  - Configurar MCPs Copilot (exa, crawl4ai) em mcp.json"
   say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
 
@@ -426,41 +462,23 @@ main() {
   confirm
   sync_skills
   sync_agents
-  sync_commands
+  sync_commands_as_skills
   sync_default_artifacts
   sync_instructions
-  local mcp_result mcp_cli_result added updated cli_added cli_updated
-  mcp_result="$(sync_mcp)"
+  local mcp_cli_result cli_added cli_updated
   mcp_cli_result="$(sync_mcp_cli)"
-  added="$(python3 - <<'PY' "$mcp_result"
-import json, sys
-payload = json.loads(sys.argv[1] or '{}')
-print(', '.join(payload.get('added', [])))
-PY
-)"
-  updated="$(python3 - <<'PY' "$mcp_result"
-import json, sys
-payload = json.loads(sys.argv[1] or '{}')
-print(', '.join(payload.get('updated', [])))
-PY
-)"
   cli_added="$(python3 - <<'PY' "$mcp_cli_result"
 import json, sys
 payload = json.loads(sys.argv[1] or '{}')
 print(', '.join(payload.get('added', [])))
 PY
-)"
+  )"
   cli_updated="$(python3 - <<'PY' "$mcp_cli_result"
 import json, sys
 payload = json.loads(sys.argv[1] or '{}')
 print(', '.join(payload.get('updated', [])))
 PY
-)"
-  if [[ -n "$added" || -n "$updated" ]]; then
-    say "OK    mcp.json (add: ${added:-nenhum}; update: ${updated:-nenhum})"
-  else
-    say "OK    mcp.json (sem alteracoes necessarias)"
-  fi
+  )"
   if [[ -n "$cli_added" || -n "$cli_updated" ]]; then
     say "OK    servers.json (add: ${cli_added:-nenhum}; update: ${cli_updated:-nenhum})"
   else

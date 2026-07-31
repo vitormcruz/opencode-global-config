@@ -151,9 +151,27 @@ opções:
 Registre o mapa de modelos no arquivo de planejamento.
 
 **Aplicação por plataforma:**
-- **VS Code**: passe `model` ao `runSubagent`.
+- **Copilot CLI**: use `/model` antes da fase ou defina `model` na
+  criação da sessão via SDK.
 - **OpenCode**: pare antes de fases com modelo diferente
   do anterior e solicite ao humano que troque o modelo.
+
+## Política de sessão por fase
+
+As sessões são estruturadas por fase do workflow. O identificador segue o
+formato `{workflowId}-{fase}-{agente}`.
+
+- Dentro da mesma fase, preserve a sessão ao retomar uma pergunta ou
+  re-spawnar o agente.
+- Ao mudar de fase, crie uma sessão nova, mesmo para o mesmo agente.
+- Em um gate de refatoração, crie uma sessão nova para a fase retomada.
+- No OpenCode, preserve o `task_id` durante a fase e crie uma instância nova
+  entre fases.
+- No Copilot CLI, use `resumeSession(sessionId)` dentro da fase e
+  `createSession(sessionId novo)` entre fases.
+
+Toda comunicação agente-humano em modo orquestrado deve retornar ao `devflow`
+para mediação. A decisão detalhada está deferida ao plano do mediador.
 
 ---
 

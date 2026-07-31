@@ -33,7 +33,7 @@ if [[ -n "${OPENCODE_CONFIG:-}" && -f "${OPENCODE_CONFIG}" ]]; then
   fi
 fi
 
-node /opt/opencode-config/tests/opencode-int-test/mcp-mock/server.js &
+node /opt/opencode-config/tests/integration/mcp-mock/server.js &
 MCP_MOCK_PID=$!
 
 for _ in $(seq 1 30); do

@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/copilot-int-test/copilot-cli-test.bats — smoke tests do Copilot CLI
+# tests/integration/copilot-cli-test.bats — smoke tests do Copilot CLI
 
 load "../helpers/test_helper"
 

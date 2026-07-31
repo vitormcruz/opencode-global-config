@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# tests/opencode-int-test/agents-test.bats — valida agentes carregados pelo OpenCode
+# tests/integration/agents-test.bats — valida agentes carregados pelo OpenCode
 
 load "helpers/behavioral_helper"
 
