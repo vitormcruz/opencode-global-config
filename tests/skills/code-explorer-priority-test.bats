@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # tests/skills/code-explorer-priority-test.bats — valida skill code-explorer-priority
 
-load "../../helpers/test_helper"
+load "../helpers/test_helper"
 
 @test "code-explorer-priority/SKILL.md existe" {
   assert_file_exist "$REPO_ROOT/skills/code-explorer-priority/SKILL.md"
