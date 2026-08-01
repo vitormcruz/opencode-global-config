@@ -55,34 +55,10 @@ teardown() {
   if ! command -v mcp >/dev/null 2>&1; then
     fail "mcp CLI nao encontrado. Instale via bootstrap: ./scripts/bootstrap_repo/configurar-repo.sh --yes"
   fi
-  run mcp --list
+  run timeout 30 mcp --list
   assert_success
   assert_output --partial ']'
-}
-
-@test "copilot-cli: mcp --list inclui crawl4ai" {
-  if ! command -v mcp >/dev/null 2>&1; then
-    fail "mcp CLI nao encontrado. Instale via bootstrap: ./scripts/bootstrap_repo/configurar-repo.sh --yes"
-  fi
-  run mcp --list
-  assert_success
   assert_output --partial "crawl4ai"
-}
-
-@test "copilot-cli: mcp --list inclui codebase-memory" {
-  if ! command -v mcp >/dev/null 2>&1; then
-    fail "mcp CLI nao encontrado. Instale via bootstrap: ./scripts/bootstrap_repo/configurar-repo.sh --yes"
-  fi
-  run mcp --list
-  assert_success
   assert_output --partial "codebase-memory"
-}
-
-@test "copilot-cli: mcp --list inclui doctree" {
-  if ! command -v mcp >/dev/null 2>&1; then
-    fail "mcp CLI nao encontrado. Instale via bootstrap: ./scripts/bootstrap_repo/configurar-repo.sh --yes"
-  fi
-  run mcp --list
-  assert_success
   assert_output --partial "doctree"
 }

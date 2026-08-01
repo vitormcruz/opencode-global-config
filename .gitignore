@@ -16,5 +16,5 @@ Thumbs.db
 
 
 **/node_modules/**
-tests/opencode-int-test/mcp-mock/package-lock.json
+tests/integration/mcp-mock/package-lock.json
 #./out/
