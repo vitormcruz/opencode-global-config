@@ -602,10 +602,10 @@ sequenceDiagram
     Note over Humano, rev: PLANEJAMENTO
 
     devflow ->> eng: Planejar implementação
-    Note right of eng: eng-software consulta humano<br/>diretamente para alinhar escopo
+    Note right of eng: Se tiver dúvidas, formula perguntas,<br/>salva progresso e retorna ao devflow
 
-    eng ->> Humano: Perguntas de escopo/requisitos
-    Humano -->> eng: Respostas
+    eng -->> devflow: Perguntas de escopo (se tiver dúvidas)
+    devflow ->> eng: Respostas do humano (mediação)
 
     eng ->> eng: Elabora plano de código
 
@@ -616,8 +616,8 @@ sequenceDiagram
         front -->> devflow: Sem UI nesta funcionalidade (resumo curto)
     else Com componente visual
         front ->> front: Gera protótipos (HTML/SVG)
-        front ->> Humano: Apresenta protótipos para aprovação visual
-        Humano -->> front: Aprovação / ajustes visuais
+        front -->> devflow: Perguntas sobre aprovação visual
+        devflow ->> front: Respostas do humano (mediação)
         front ->> front: Itera até aprovação
         front -->> devflow: Identidade visual aprovada (resumo curto)
     end
@@ -716,7 +716,7 @@ sequenceDiagram
         eng -->> devflow: Construção concluída (resumo curto)
         devflow ->> devflow: Atualiza Status:<br/>REVISÃO DA CONSTRUÇÃO
     else Refatoração pode mudar o plano
-        eng ->> Humano: Propõe ajustes ao plano
+        eng -->> devflow: Perguntas sobre ajustes ao plano
         alt Humano: ajuste mínimo
             eng ->> eng: Atualiza plano no arquivo<br/>(registra motivo e decisão)
             eng -->> devflow: Construção concluída (resumo curto)
