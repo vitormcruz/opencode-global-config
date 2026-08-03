@@ -155,6 +155,10 @@ source ~/.bashrc
 - Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
 - Perguntas do humano nao sao ordens de execucao; responda a pergunta e aguarde instrucao explicita para agir.
 
+## SmartPlanner — Restricao Comportamental
+- O agente `smart-planner` **nunca** edita codigo de aplicacao durante planejamento.
+- Apenas le arquivos para entender contexto. A unica escrita permitida e o arquivo de planejamento.
+
 ## COMMITS
 
 - Use Conventional Commits. Formato: `tipo(escopo): descricao curta`
