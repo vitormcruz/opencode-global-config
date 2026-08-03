@@ -189,8 +189,30 @@ Premissas detalhadas: 21.1–21.3.
    volta a fases anteriores (gate de refatoração,
    re-revisões) e **recomendado** para todas as
    transições.
-4. **Qualquer agente pode consultar o humano** a qualquer
-   momento para esclarecer dúvidas da sua especialidade.
+4. **Quando têm dúvidas que dependem de decisão, agentes
+   formulam perguntas, salvam progresso parcial e
+   retornam.** O Devflow media a comunicação agente-humano
+   em modo orquestrado (ver premissas 4.1 a 4.4).
+   4.1. **Checklist estrutural** — Devflow avalia cada
+        pergunta com: o que está sendo decidido está
+        explícito? Contexto presente? Opções com trade-offs?
+        Recomendação justificada? Pergunta autocontida?
+        Itens ausentes → orientação de reformulação. Máximo
+        2 rodadas; na 3ª, apresenta ao humano com nota:
+        "Agente não conseguiu detalhar mais."
+   4.2. **Grill-me sob demanda** — Devflow decide se usa
+        grill-me com base no contexto. Pergunta curta/objetiva
+        → apresenta direto. Elaborada/múltiplas/volumosa →
+        grill-me serializa uma por vez.
+   4.3. **Continuidade da mediação** — Devflow nunca encerra
+        a mediação por conta própria. Continua enquanto o
+        humano quiser prosseguir. Se humano não entender
+        após reformulações, oferece alternativas mas só para
+        quando humano decidir parar.
+   4.4. **Prompt-improver** — Devflow pode sugerir ao humano
+        melhorar seu input antes de rotear ao agente. Sempre
+        sugere, nunca aplica automaticamente. Se humano
+        recusar, segue normalmente.
 5. **Falha de agente** — se não consegue completar a
    tarefa (erro, incerteza, falta de informação), registra
    o impedimento no arquivo e retorna resumo ao `devflow`,
@@ -251,7 +273,8 @@ Premissas detalhadas: 21.1–21.3.
     falhas de teste são tratadas como bugs.
 11. **Planeje perguntando, execute com autonomia** — no
     planejamento, todo agente deve validar cada decisão
-    não-trivial com o humano usando a skill `grill-me`.
+    não-trivial com o humano, formulando perguntas e
+    retornando para mediação do Devflow (ver premissa 4).
     Decisões triviais (nome de variável, formatação,
     ordem de passos sem impacto funcional) não precisam
     de validação. Tudo o que for persistido no arquivo
@@ -853,13 +876,16 @@ sequenceDiagram
 
 ### Interação agente–humano por plataforma
 
-| Plataforma | Como `devflow` spawna agentes            | Quem pode interagir com o humano                  |
-|------------|---------------------------------------|----------------------------------------------------|
-| **Copilot CLI** | `task(agent_type=...)` ou `/fleet`   | `devflow` medeia toda interação agente-humano       |
-| **OpenCode**    | Subagentes                           | `devflow` medeia toda interação agente-humano       |
+| Plataforma | Como `devflow` spawna agentes | Comunicação com humano |
+|---|---|---|
+| **Copilot CLI** | `task(agent_type=...)` ou `/fleet` | Devflow media. Subagentes retornam perguntas; não precisam ser primários. |
+| **OpenCode** | Subagentes | Devflow media. Subagentes retornam perguntas; não precisam de tool `ask`. |
 
-**Copilot CLI**: subagentes são isolados do humano. Perguntas e decisões
-retornam ao `devflow`, que as apresenta ao humano e retoma a sessão correta.
+**Ambas as plataformas**: subagentes retornam perguntas ao invés de
+consultar o humano diretamente. O `devflow` avalia, reformula se necessário
+e apresenta ao humano. Subagentes não precisam de tool `ask` (OpenCode)
+nem ser primários (Copilot CLI).
 
-**OpenCode**: a mesma mediação é aplicada no modo orquestrado. A interação
-direta fora desse modo continua disponível conforme a configuração do agente.
+**Exceção**: agentes não mediados (ex: analista no workflow de definição
+de escopo) conversam direto com o humano. O `devflow` instrui o humano
+a trocar de agente quando necessário.
