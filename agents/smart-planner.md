@@ -158,16 +158,24 @@ durante execução:
 
 Ao atingir as stopping conditions, IMMEDIATELY:
 1. Carregue o skill `prompt-improver`
-2. Gere o prompt do executor com TODO o contexto
-   necessário
-3. Mostre o prompt ao humano para revisão
+2. Gere DOIS prompts:
+   a. **Prompt do executor**: com TODO o contexto
+      necessário para executar o plano
+   b. **Prompt do revisor**: deve instruir o revisor
+      a:
+      - Comparar plano aprovado vs resultado do
+        executor
+      - Se há problemas: gerar prompts de ajuste
+        para o executor (um por issue)
+      - Se está ok: apagar o arquivo de
+        planejamento, gerar mensagem de commit
+        (caveman), confirmar com o humano e
+        executar o commit
+3. Mostre ambos os prompts ao humano para revisão
 4. Não pergunte se quer fazer handoff — é automático
 
 O `prompt-improver` selecionará a melhor estrutura
 pelo contexto — não imponha estrutura fixa.
-
-O prompt deve conter tudo que o executor precisa
-para executar em outra sessão com modelo menor.
 
 ## Instrução de Escalonamento ao Executor
 
@@ -177,16 +185,6 @@ Inclua no prompt do executor esta instrução:
 plano, PARE e reporte ao planejador com: step que
 falhou, motivo do desvio/bloqueio, steps já
 completados."
-
-## Revisão do Executor
-
-Quando o humano trouxer o resultado do executor:
-
-1. Compare o plano aprovado com o resultado efetivo.
-2. Identifique desvios, omissões ou problemas.
-3. **Se há problemas**: gere prompt de correção
-   para o executor, especificando o que ajustar.
-4. **Se está ok**: confirme ao humano e finalize.
 
 ## Limites
 
