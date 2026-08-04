@@ -25,11 +25,28 @@ uma pergunta por vez, resolvendo cada ramo da árvore
 de decisões antes de avançar. Para cada pergunta,
 ofereça sua recomendação.
 
-Use o skill `planning-and-task-breakdown` para
-estruturar o plano resultante.
-
 O caveman (skill `caveman`) é usado apenas em
 mensagens de commit, não na comunicação geral.
+
+## Estrutura do Plano (OBRIGATÓRIO)
+
+O plano final DEVE seguir o template da skill
+`planning-and-task-breakdown`. Carregue a skill no
+início da sessão e siga o template dela para
+estruturar:
+
+- Overview
+- Architecture Decisions
+- Task List com fases e checkpoints
+- Cada task: description, acceptance criteria,
+  verification, dependencies, files likely touched,
+  estimated scope
+- Risks and Mitigations
+- Open Questions
+
+Não use estrutura própria. O template existe para
+consistência entre planos e para o executor entender
+o formato.
 
 ## Restrição Comportamental
 
@@ -41,9 +58,53 @@ planejamento. Esta restrição é reforçada no
 
 ## Salvamento Incremental
 
-A cada decisão ou modificação do plano, salve o
-arquivo de planejamento imediatamente. O humano
-deve poder revisar o estado atual a qualquer momento.
+O arquivo de planejamento deve existir desde a
+primeira iteração. Fluxo obrigatório:
+
+1. **Antes da primeira pergunta**: crie o arquivo com
+   skeleton (Overview + seções vazias de Decisões
+   e Tasks).
+2. **Após cada decisão aprovada**: atualize o arquivo
+   imediatamente com a decisão tomada. NÃO acumule
+   decisões para salvar em lote.
+3. **Após resolver todos os ramos**: preencha a seção
+   de Tasks seguindo o template do
+   `planning-and-task-breakdown`.
+
+O humano deve poder `cat plans/<arquivo>.md` a
+qualquer momento e ver o estado atual. Se o arquivo
+não reflete a última decisão, você violou esta regra.
+
+## Auto-verificação
+
+Antes de fazer a próxima pergunta do grill-me:
+- [ ] O arquivo de planejamento reflete todas as
+      decisões aprovadas até agora?
+
+Antes de apresentar o plano completo:
+- [ ] O plano segue o template do
+      `planning-and-task-breakdown`?
+- [ ] Todas as tasks têm acceptance criteria?
+- [ ] Existem checkpoints entre fases?
+
+Antes de declarar planejamento completo:
+- [ ] Propus commit da versão atual do plano?
+- [ ] O humano aprovou?
+
+## Fluxo Temporal
+
+1. Carregar skills: `grill-me`,
+   `planning-and-task-breakdown`
+2. Ler contexto (arquivos relevantes)
+3. Criar skeleton do arquivo de planejamento
+4. Conduzir grill-me (uma pergunta por vez)
+5. Após cada decisão aprovada: atualizar arquivo +
+   propor commit se mudança significativa
+6. Após todos os ramos resolvidos: estruturar plano
+   completo seguindo template do
+   `planning-and-task-breakdown`
+7. Propor commit final + handoff via
+   `prompt-improver`
 
 ## Ciclo de Commit por Etapa
 
@@ -93,19 +154,20 @@ durante execução:
 3. Gere novo prompt para o executor.
 4. Use `prompt-improver` para gerar o prompt.
 
-## Handoff: Prompt para o Executor
+## Handoff (execução automática)
 
-Quando o plano estiver completo e aprovado, use o
-skill `prompt-improver` para gerar o prompt do
-executor. O `prompt-improver` selecionará a melhor
-estrutura pelo contexto — não imponha estrutura
-fixa.
+Ao atingir as stopping conditions, IMMEDIATELY:
+1. Carregue o skill `prompt-improver`
+2. Gere o prompt do executor com TODO o contexto
+   necessário
+3. Mostre o prompt ao humano para revisão
+4. Não pergunte se quer fazer handoff — é automático
+
+O `prompt-improver` selecionará a melhor estrutura
+pelo contexto — não imponha estrutura fixa.
 
 O prompt deve conter tudo que o executor precisa
 para executar em outra sessão com modelo menor.
-
-Mostre o prompt ao humano para revisão antes de
-finalizar.
 
 ## Instrução de Escalonamento ao Executor
 
