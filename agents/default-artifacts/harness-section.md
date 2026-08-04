@@ -1,79 +1,89 @@
 ## Harness por Agente
 
-| Agente | Comando | Descrição | Detalhes |
-|--------|---------|-----------|----------|
-| eng-software | `harness/eng-software.sh` | Testes, análise estática | [Ver detalhes](#agente-eng-software) |
-| dba | `harness/dba.sh` | Validação de schema | [Ver detalhes](#agente-dba) |
-| sec | `harness/sec.sh` | OWASP checks, secrets | [Ver detalhes](#agente-sec) |
-| qa | `harness/qa.sh` | Cobertura, aceitação | [Ver detalhes](#agente-qa) |
-| front | `harness/front.sh` | Linting, a11y | [Ver detalhes](#agente-front) |
-| rev | — | SEM HARNESS | [Ver detalhes](#agente-rev) |
-| val-harness | — | SEM HARNESS | [Ver detalhes](#agente-val-harness) |
-| curador-produto | — | SEM HARNESS | [Ver detalhes](#agente-curador-produto) |
+| Agente | Comando de Execução | Descrição |
+|--------|--------------------|-----------|
+| eng-software | `harness/eng-software.sh` | Testes backend |
+| dba | `harness/dba.sh` | Validação de schema e modelo de dados |
+| sec | `harness/sec.sh` | Segurança — secrets, dependências, OWASP |
+| qa | `harness/qa.sh` | Cobertura de testes e acessibilidade |
+| front | `harness/front.sh` | Testes, lint, build e acessibilidade do frontend |
+| rev | `harness/rev.sh` | Revisão de documentação e consistência cross-artefato |
+| analista | (sem harness) | SEM HARNESS |
+| val-harness | (sem harness) | SEM HARNESS |
+| curador-produto | (sem harness) | SEM HARNESS |
 
-### Detalhes por Agente
+> Scripts shell. Interface: saída JSON `{ status, findings[], prompt }`, exit 0 = pass, exit 1 = fail.
 
-#### Agente: eng-software
+> **PROIBIDO/NAO PODE:** bypassar, comentar, remover ou condicionar qualquer verificação do harness. Ferramenta ausente NAO justifica remoção — o correto é reportar severidade `melhoria` com instrução de instalação. Todo finding `bloqueante` DEVE ser resolvido antes de avançar no workflow. O harness é inegociável.
+
+### eng-software
 
 **Arquivo:** `harness/eng-software.sh`
-**Descrição:** Testes, análise estática, cobertura
+**Descrição:** Testes backend
 **O que deve conter:**
-- Ferramentas de teste específicas do projeto
-- Analisadores estáticos (lint, typecheck)
-- Validação de cobertura mínima
+- Comandos de teste específicos do projeto (unitários + integração)
 - Critérios de harness: [a definir com humano]
 
-#### Agente: dba
+### dba
 
 **Arquivo:** `harness/dba.sh`
-**Descrição:** Validação de schema, migrações
+**Descrição:** Validação de schema e modelo de dados
 **O que deve conter:**
-- Validação de schema contra modelo DBML
-- Teste de migrações (up/down)
-- Checks de performance de queries
+- Validação de existência de documentos de especificação
+- Validação de sintaxe de modelo de dados (DBML ou equivalente)
+- Prompt instrucional: verificar se o modelo reflete o schema atual e se alterações passaram pela aprovação do dba
 - Critérios de harness: [a definir com humano]
 
-#### Agente: sec
+### sec
 
 **Arquivo:** `harness/sec.sh`
-**Descrição:** OWASP checks, secrets scanning
+**Descrição:** Segurança — secrets, dependências, OWASP
 **O que deve conter:**
-- Escaneamento de secrets
-- OWASP dependency check
-- SAST (análise estática de segurança)
+- Secrets scan no repositório
+- Auditoria de dependências
+- Verificação de vulnerabilidades conhecidas
+- Prompt instrucional: revisar OWASP Top 10 aplicável ao projeto
 - Critérios de harness: [a definir com humano]
 
-#### Agente: qa
+### qa
 
 **Arquivo:** `harness/qa.sh`
-**Descrição:** Cobertura de testes, aceitação
+**Descrição:** Cobertura de testes e acessibilidade
 **O que deve conter:**
-- Validação de critérios de aceite
-- Verificação de cobertura de testes
-- Testes exploratórios automatizados
+- Relatório de cobertura de testes
+- Verificação de acessibilidade
+- Prompt instrucional: revisar cobertura dos critérios de aceitação e resultado dos testes manuais
 - Critérios de harness: [a definir com humano]
 
-#### Agente: front
+### front
 
 **Arquivo:** `harness/front.sh`
-**Descrição:** Linting, acessibilidade
+**Descrição:** Testes, lint, build e acessibilidade do frontend
 **O que deve conter:**
-- Lint de CSS/HTML/JS
-- Validação de acessibilidade (a11y)
-- Lighthouse checks
+- Testes frontend
+- Lint
+- Build
+- Verificação de acessibilidade
+- Prompt instrucional: verificar aderência à identidade visual aprovada
 - Critérios de harness: [a definir com humano]
 
-#### Agente: rev
+### rev
 
-**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
-**Justificativa:** Revisor não executa harness, apenas revisa
+**Arquivo:** `harness/rev.sh`
+**Descrição:** Revisão de documentação e consistência cross-artefato
+**O que deve conter:**
+- Validação de sintaxe de documentação (markdownlint ou equivalente)
+- Prompt instrucional: verificar consistência entre artefatos (BD, código, segurança, testes, docs) e aderência ao plano aprovado
+- Critérios de harness: [a definir com humano]
 
-#### Agente: val-harness
+### analista
 
-**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
-**Justificativa:** Validador de harness não precisa de harness próprio
+**Status:** `SEM HARNESS`
 
-#### Agente: curador-produto
+### val-harness
 
-**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
-**Justificativa:** Curador não executa harness, apenas orquestra
+**Status:** `SEM HARNESS`
+
+### curador-produto
+
+**Status:** `SEM HARNESS`
