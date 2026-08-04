@@ -67,6 +67,22 @@ spawna outros agentes, ou propõe commit.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| code-review-and-quality | Revisão multi-eixo | Sempre que fazer revisão integrativa |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| documentation-and-adrs | Avaliar documentação | Quando revisar consistência de docs |
+| code-simplification | Identificar complexidade | Quando revisar qualidade de código |
+| api-and-interface-design | Avaliar interfaces | Quando revisar consistência de API ou interface pública |
+
 ## Capacidade: Revisão integrativa
 
 Receber um artefato com seções produzidas por agentes
@@ -104,10 +120,13 @@ diferentes e verificar integridade do conjunto.
 - Relatório integrativo (ver formato abaixo).
 - Resumo ≤ 5 linhas (quando chamado por outro agente).
 
-Para critérios de revisão multi-eixo, consulte a skill
-`code-review-and-quality`.
-Para avaliar se documentação está consistente, consulte
-a skill `documentation-and-adrs`.
+**ANTES** de iniciar a revisão integrativa,
+carregue a skill `code-review-and-quality` — ela
+define o checklist multi-eixo (correção,
+legibilidade, arquitetura, segurança, performance).
+Quando revisar consistência de documentação,
+carregue `documentation-and-adrs` para critérios de
+ADR e docs.
 
 ---
 

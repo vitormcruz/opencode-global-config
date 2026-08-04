@@ -70,6 +70,26 @@ faz revisão integrativa, ou propõe commit.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| test-driven-development | Planejar testes | Sempre que planejar ou revisar testes |
+| tests-as-spec | Proteger cobertura como spec | Na revisão de testabilidade e cobertura |
+| grill-me | Validar decisões | No planejamento de testes |
+| browser-testing | Testes funcionais de UI | Quando houver UI no escopo de testes |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| planning-and-task-breakdown | Decompor critérios | Quando decompor critérios de aceitação em cenários |
+| debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham inesperadamente |
+| accessibility-audit | Auditar acessibilidade | Quando há UI no escopo de testes |
+| performance-optimization | Testar performance | Quando há RNF de performance |
+
 ## Capacidades
 
 ### 1. Planejar testes
@@ -108,12 +128,14 @@ Analisar requisitos e produzir um plano de testes.
 - Plano de testes estruturado (cenários categorizados).
 - Lista de critérios não-testáveis (se houver).
 
-Para padrões de teste, convenções de nomenclatura e
-anti-padrões, consulte a skill `test-driven-development`.
-Para decomposição de critérios de aceitação, consulte
-`planning-and-task-breakdown`.
-Para testes funcionais que requerem navegação em UI,
-consulte a skill `browser-testing`.
+**ANTES** de planejar testes, carregue a skill
+`test-driven-development` — ela define padrões,
+nomenclatura e anti-padrões de teste.
+Para decompor critérios de aceitação em cenários,
+carregue `planning-and-task-breakdown`.
+Quando houver UI no escopo, carregue
+`browser-testing` para testes funcionais com
+Playwright.
 
 ---
 
@@ -136,8 +158,9 @@ adequadamente coberto por testes.
    - **Ação**: o que foi corrigido/adicionado
    - **Severidade**: bloqueante ou melhoria
 
-Para o princípio de testes como especificação e suas
-implicações em cobertura, consulte `tests-as-spec`.
+**ANTES** de revisar cobertura, carregue a skill
+`tests-as-spec` — ela define testes como
+especificação imutável e suas implicações.
 
 **Saídas**:
 - Testes criados/ajustados (se necessário).
@@ -167,8 +190,9 @@ Você **não** corrige código de produção — apenas reporta
 para que o responsável (normalmente `eng-software`)
 corrija. Você pode re-executar após correção.
 
-Para diagnóstico de falhas, consulte a skill
-`debugging-and-error-recovery`.
+**Se** testes falharem inesperadamente, carregue
+a skill `debugging-and-error-recovery` para
+diagnóstico sistemático antes de reportar.
 
 ---
 

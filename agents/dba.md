@@ -60,6 +60,22 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| grill-me | Validar decisões de modelagem | Na modelagem de dados |
+| planning-and-task-breakdown | Planejar migração | Na capacidade 1 (modelar dados) |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| security-and-hardening | Proteger dados | Na revisão de segurança de artefatos de BD |
+| debugging-and-error-recovery | Diagnosticar falhas | Quando migração falha ou lock inesperado |
+
 ## Capacidades
 
 ### 1. Modelar dados
@@ -176,7 +192,9 @@ achados.
 - [ ] Nomenclatura segue convenções do projeto
 - [ ] Relacionamentos/FKs refletem o modelo
 
-**Segurança** (ref: skill security-and-hardening):
+**Segurança** — **ANTES** de revisar segurança
+de artefatos de BD, carregue a skill
+`security-and-hardening`:
 - [ ] Sem SQL injection (prepared statements)
 - [ ] Dados sensíveis protegidos (PII, tokens)
 - [ ] Princípio do menor privilégio nos scripts

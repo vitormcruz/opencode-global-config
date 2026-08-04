@@ -18,6 +18,14 @@ Ajudar o humano a:
 - investigar recursos com foco em leitura
 - resumir evidencias, hipoteses e proximos checks
 
+## Skills
+
+### Transversais (úteis em qualquer capacidade)
+
+| Skill | Uso |
+|-------|-----|
+| debugging-and-error-recovery | Diagnosticar problemas em recursos AWS |
+
 ## Regras operacionais
 
 - Responda em PT-BR.

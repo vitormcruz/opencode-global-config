@@ -80,6 +80,34 @@ faz revisão de si mesmo, ou propõe commit.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| test-driven-development | Construir via TDD | Sempre que escrever código produtivo |
+| tests-as-spec | Proteger testes como spec | Sempre que houver testes existentes |
+| grill-me | Validar decisões | Em planejamento e gates |
+| planning-and-task-breakdown | Planejar implementação | Na capacidade 1 (planejar) |
+| documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| api-and-interface-design | Planejar implementação | Quando a tarefa envolver API ou interface pública |
+| code-simplification | Refatorar código | No gate de refatoração |
+| code-review-and-quality | Aplicar ajustes integrativos | Na capacidade 3 (ajustes de revisão) |
+| debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham ou build quebra |
+| performance-optimization | Otimizar performance | Quando há requisitos de performance |
+
+### Transversais (úteis em qualquer capacidade)
+
+| Skill | Uso |
+|-------|-----|
+| code-explorer-priority | Buscar código no repositório |
+
 ## Capacidades
 
 ### 1. Planejar implementação
@@ -112,8 +140,9 @@ Analisar requisitos e produzir um plano de codificação.
    de spec deste domínio (ex.: specs executáveis, ADRs)
    e incluir criação desses artefatos no plano.
 7. Se identificar decisão arquitetural significativa,
-   sugerir registro em ADR (ver skill
-   `documentation-and-adrs`).
+   sugerir registro em ADR. **ANTES** de criar o
+   ADR, carregue a skill `documentation-and-adrs` —
+   ela define o template e o processo de registro.
 8. Verificar ADRs existentes — garantir que o plano não
    contradiz decisões arquiteturais já registradas. Se
    houver conflito, propor atualização do ADR ao humano.
@@ -181,10 +210,12 @@ autonomia — sem consultar o humano. Siga o plano aprovado.
 Problemas pequenos: resolva sozinho. Problemas que
 desviam do plano: pare e pergunte.
 
-Para detalhes do ciclo TDD, padrões de teste e boas
-práticas, consulte a skill `test-driven-development`.
-Para critérios de simplificação na refatoração, consulte
-`code-simplification`.
+**ANTES** de escrever testes, carregue a skill
+`test-driven-development` — ela define o ciclo
+red-green-refactor e padrões de teste.
+No gate de refatoração, carregue
+`code-simplification` para critérios de
+simplificação.
 
 ---
 
@@ -199,8 +230,9 @@ Corrigir código com base em feedback de revisão.
    quebraram nada.
 4. Persistir resultado + resumo curto.
 
-Para referência de qualidade na aplicação dos ajustes,
-consulte a skill `code-review-and-quality`.
+**ANTES** de aplicar ajustes, carregue a skill
+`code-review-and-quality` — ela define o checklist
+multi-eixo de revisão.
 
 ---
 
@@ -215,8 +247,10 @@ do docs/README.md, se existir.
 - **Testes são spec**: testes aprovados no plano são
   especificação — na construção, nunca altere um teste;
   altere o código. Testes contraditórios → voltar ao
-  planejamento (gate de refatoração). Consulte a skill
-  `tests-as-spec`.
+   planejamento (gate de refatoração). **ANTES** de
+   modificar qualquer teste existente, carregue a skill
+   `tests-as-spec` — ela define a imutabilidade de
+   testes na construção.
 - **Regressão incremental**: após cada modificação,
   executar testes existentes imediatamente.
 - **Análise estática**: usar ferramentas do projeto
@@ -251,9 +285,10 @@ code + stdout) como evidência principal.
 
 ## Boas Práticas
 
-Para diretrizes de construção, consulte as skills
-`test-driven-development`, `code-simplification` e
-`documentation-and-adrs`.
+As skills obrigatórias e condicionais para este
+agente estão listadas na seção `## Skills` acima.
+Carregue-as conforme indicado antes de cada
+capacidade.
 
 ---
 

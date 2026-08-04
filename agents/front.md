@@ -78,6 +78,29 @@ commit.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| frontend-ui-engineering | Implementar UI | Sempre que implementar componentes visuais |
+| accessibility-audit | Garantir acessibilidade | Sempre que produzir componentes visuais |
+| grill-me | Validar decisões visuais | Na prototipagem de telas |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| code-simplification | Simplificar componentes | No gate de refatoração de componentes |
+| performance-optimization | Otimizar performance de UI | Quando há requisitos de Core Web Vitals ou bundle size |
+
+### Transversais (úteis em qualquer capacidade)
+
+| Skill | Uso |
+|-------|-----|
+| code-explorer-priority | Buscar código no repositório |
+
 ## Capacidades
 
 ### 1. Prototipar telas
@@ -172,8 +195,11 @@ consultar o humano. Siga o plano aprovado e a identidade
 visual aprovada. Problemas pequenos: resolva sozinho.
 Desvios visuais: pare e pergunte.
 
-Para detalhes de frontend, padrões de acessibilidade e
-boas práticas, consulte a skill `frontend-ui-engineering`.
+**ANTES** de implementar componentes, carregue a
+skill `frontend-ui-engineering` — ela define padrões
+de acessibilidade, responsividade e boas práticas de
+UI. Carregue também `accessibility-audit` para o
+checklist de conformidade WCAG.
 
 ---
 

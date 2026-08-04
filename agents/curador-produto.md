@@ -95,6 +95,20 @@ Suas capacidades:
       verificada (ou humano decidir encerrar o loop)
       **e** aprovação explícita do humano.
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| documentation-and-adrs | Avaliar documentação | Sempre que revisar docs ou detectar ausência |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| harness-catalog | Sugerir harness | Quando sugerir organização de harness por agente |
+
 ## Arquivo de Documentação do Produto
 
 O arquivo de documentação do produto define como a
@@ -198,5 +212,7 @@ onde solicitado.
 
 Não invente aprovações.
 
-Para sugestões de harness por agente, consulte a skill
-`harness-catalog`.
+**Quando** sugerir organização de harness por
+agente, carregue a skill `harness-catalog` — ela
+define o catálogo de referência de harness por
+agente.

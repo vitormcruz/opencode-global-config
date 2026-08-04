@@ -75,6 +75,22 @@ de negócio, ou propõe commit.
 
 ---
 
+## Skills
+
+### Obrigatórias (carregar ANTES da capacidade indicada)
+
+| Skill | Capacidade | Quando |
+|-------|-----------|--------|
+| security-and-hardening | Analisar segurança | Sempre que analisar ou revisar segurança |
+| grill-me | Validar decisões | Na análise de requisitos de segurança |
+
+### Condicionais (carregar quando a condição se aplicar)
+
+| Skill | Capacidade | Condição |
+|-------|-----------|----------|
+| code-review-and-quality | Revisar segurança | Na capacidade 3 (revisar e corrigir) |
+| debugging-and-error-recovery | Diagnosticar falhas | Quando ferramentas de segurança falham inesperadamente |
+
 ## Capacidades
 
 ### 1. Analisar requisitos de segurança
@@ -111,8 +127,9 @@ segurança e registrar requisitos.
   local permanente. Se sim, incluir no plano.
 - Riscos identificados com severidade.
 
-Para checklist OWASP e padrões de hardening, consulte
-a skill `security-and-hardening`.
+**ANTES** de avaliar requisitos de segurança,
+carregue a skill `security-and-hardening` — ela
+define o checklist OWASP e os padrões de hardening.
 
 ---
 
@@ -159,8 +176,9 @@ corrigir quando possível.
 - Correções aplicadas (se possível).
 - Resumo no formato achado · ação · severidade.
 
-Para eixo "security" de code review, consulte a skill
-`code-review-and-quality`.
+**ANTES** de revisar segurança do código,
+carregue a skill `code-review-and-quality` — ela
+define o eixo "security" da revisão multi-eixo.
 
 ---
 
@@ -188,8 +206,10 @@ apropriadas ao projeto.
  recomendar ao humano acionar `curador-produto-editor` para
 definir o harness.
 
-Para diagnóstico de falhas inesperadas, consulte a skill
-`debugging-and-error-recovery`.
+**Se** ferramentas de segurança falharem
+inesperadamente, carregue a skill
+`debugging-and-error-recovery` para diagnóstico
+sistemático.
 
 ---
 
