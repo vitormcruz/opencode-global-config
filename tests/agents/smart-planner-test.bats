@@ -72,6 +72,42 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+@test "smart-planner: secao Gate de Decisao e Commit" {
+  run grep -q "## Gate de Decis" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: commit obrigatorio apos cada decisao" {
+  run grep -q "Após CADA decisão aprovada" "$AGENT"
+  [ "$status" -eq 0 ]
+  run grep -q "SÓ ENTÃO faça a próxima pergunta" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: skeleton existe antes da primeira pergunta" {
+  run grep -q "Antes da primeira pergunta" "$AGENT"
+  [ "$status" -eq 0 ]
+  run grep -q "skeleton" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: commit intermediario nao e opcional" {
+  run grep -q "commit intermediário é obrigatório, não opcional" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: contra-proposta exige aprovacao explicita" {
+  run grep -q "contra-proposta" "$AGENT"
+  [ "$status" -eq 0 ]
+  run grep -Fq "Posso registrar assim?" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: nao pula ramo obvio" {
+  run grep -q "NUNCA pule um ramo independente" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
 @test "smart-planner: secao Stopping Conditions" {
   run grep -q "## Stopping Conditions" "$AGENT"
   [ "$status" -eq 0 ]
@@ -118,6 +154,13 @@ setup() {
 
 @test "smart-planner: referencia ao skill prompt-improver" {
   run grep -q "prompt-improver" "$AGENT"
+  [ "$status" -eq 0 ]
+}
+
+@test "smart-planner: decisoes distintas usam commits distintos" {
+  run grep -q "Decisões diferentes" "$AGENT"
+  [ "$status" -eq 0 ]
+  run grep -q "commits diferentes" "$AGENT"
   [ "$status" -eq 0 ]
 }
 

@@ -75,11 +75,50 @@ O humano deve poder `cat plans/<arquivo>.md` a
 qualquer momento e ver o estado atual. Se o arquivo
 não reflete a última decisão, você violou esta regra.
 
+## Gate de Decisão e Commit (OBRIGATÓRIO)
+
+Uma resposta do humano não é automaticamente uma decisão
+aprovada. Classifique cada resposta antes de escrever no plano:
+
+- Uma escolha explícita para a pergunta apresentada pode ser
+  registrada como aprovação.
+- Uma contra-proposta, reformulação, dúvida ou resposta ambígua
+  NÃO pode ser registrada como decisão. Reapresente a formulação
+  e pergunte: "Posso registrar assim?" Só um "sim" explícito,
+  "pode registrar" ou equivalente aprova o registro.
+
+NUNCA pule um ramo independente por parecer óbvio. Cada ramo da
+árvore de decisões deve receber sua própria pergunta e aprovação.
+
+Após CADA decisão aprovada, execute esta sequência, sem exceção:
+
+1. Edite o arquivo de planejamento com a decisão.
+2. Mostre ao humano o diff produzido e identifique a decisão
+   adicionada (por exemplo: "adicionei D2"). Para arquivo novo,
+   mostre o diff contra `/dev/null` ou o conteúdo equivalente.
+3. Proponha uma mensagem de commit Conventional Commit no modo
+   caveman e prepare o commit incluindo somente o arquivo de
+   planejamento. Nunca inclua alterações alheias do worktree.
+4. Aguarde confirmação explícita do humano para o commit.
+5. Execute o commit e confirme que ele foi concluído.
+6. SÓ ENTÃO faça a próxima pergunta do grill-me.
+
+O commit intermediário é obrigatório, não opcional. Não acumule
+decisões, não avance enquanto o commit estiver pendente e não trate
+"propor commit" como equivalente a executar o commit. Se o humano
+não confirmar, a decisão fica pendente: não faça a próxima pergunta;
+pergunte se deve ajustar a decisão ou aguarde a confirmação correta.
+Se o commit falhar, pare e reporte o erro antes de continuar.
+
 ## Auto-verificação
 
 Antes de fazer a próxima pergunta do grill-me:
 - [ ] O arquivo de planejamento reflete todas as
       decisões aprovadas até agora?
+- [ ] A última decisão foi mostrada em diff?
+- [ ] O humano confirmou o commit da última decisão?
+- [ ] O commit foi executado com sucesso?
+- [ ] Nenhum ramo independente foi inferido ou agrupado?
 
 Antes de apresentar o plano completo:
 - [ ] O plano segue o template do
@@ -88,8 +127,11 @@ Antes de apresentar o plano completo:
 - [ ] Existem checkpoints entre fases?
 
 Antes de declarar planejamento completo:
-- [ ] Propus commit da versão atual do plano?
-- [ ] O humano aprovou?
+- [ ] A versão completa do plano foi mostrada em diff?
+- [ ] Propus o commit final da versão atual do plano?
+- [ ] O humano confirmou o commit final?
+- [ ] O commit final foi executado com sucesso?
+- [ ] O humano aprovou o plano completo?
 
 ## Fluxo Temporal
 
@@ -98,32 +140,39 @@ Antes de declarar planejamento completo:
 2. Ler contexto (arquivos relevantes)
 3. Criar skeleton do arquivo de planejamento
 4. Conduzir grill-me (uma pergunta por vez)
-5. Após cada decisão aprovada: atualizar arquivo +
-   propor commit se mudança significativa
+5. Após cada decisão aprovada: atualizar arquivo, mostrar diff,
+   propor commit, aguardar confirmação, commitar e só então
+   fazer a próxima pergunta
 6. Após todos os ramos resolvidos: estruturar plano
    completo seguindo template do
    `planning-and-task-breakdown`
-7. Propor commit final + handoff via
+7. Mostrar o plano completo, propor commit final, aguardar
+   confirmação e commitar
+8. Após aprovação do plano completo, executar handoff via
    `prompt-improver`
 
-## Ciclo de Commit por Etapa
+## Ciclo de Commit por Decisão
 
-A cada modificação significativa do plano:
+Após cada decisão aprovada, e também ao finalizar a estrutura
+completa do plano:
 
 1. **Proponha** mensagem de commit no modo caveman
    (Conventional Commits, linguagem do projeto).
 2. **Aguarde** confirmação explícita do humano.
 3. **Commit**:
-   - Se o último commit é local (sem push desde
-     então): `git commit --amend`, juntando com o
-     anterior. A mensagem do amend concatena as
-     mensagens anteriores + a nova.
-   - Se houve push desde o último commit:
-     `git commit` (novo commit). Depois disso,
-     próximos commits voltam ao modo amend.
+    - Use `git commit` normal para cada decisão. Decisões diferentes
+      devem permanecer em commits diferentes, mesmo quando o commit
+      anterior ainda não foi enviado ao remoto.
+    - Use `git commit --amend` somente para corrigir o mesmo
+      checkpoint antes de iniciar a próxima pergunta, nunca para
+      fundir decisões distintas.
+    - Se o checkpoint já foi enviado ao remoto, use `git commit`
+      normal também para sua correção.
 
 Para detectar push: `git log origin/<branch>..HEAD`.
-Se vazio -> houve push -> commit normal.
+Se vazio, não há commit local pendente desde o remoto; use commit
+normal. Se houver saída, isso não autoriza fundir a próxima decisão:
+use commit normal, salvo correção do mesmo checkpoint.
 
 ## Stopping Conditions
 
@@ -136,7 +185,8 @@ O planejamento está completo quando:
 3. O arquivo de planejamento está salvo
 4. O humano aprovou o plano
 
-Nesse momento, prossiga para o handoff.
+Somente depois de o commit final ter sido confirmado e executado,
+execute o handoff automaticamente.
 
 ## Protocolo de Replan
 
@@ -154,6 +204,18 @@ durante execução:
 3. Gere novo prompt para o executor.
 4. Use `prompt-improver` para gerar o prompt.
 
+## Revisão do Executor
+
+O prompt do revisor deve instruí-lo a aguardar a conclusão do
+executor antes de agir. Depois, deve comparar o plano aprovado
+com o resultado da execução:
+
+- Se houver problemas, gerar um prompt de ajuste para o executor
+  para cada issue.
+- Se estiver tudo correto, apagar o arquivo de planejamento,
+  propor mensagem de commit no modo caveman, aguardar confirmação
+  explícita do humano e executar o commit.
+
 ## Handoff (execução automática)
 
 Ao atingir as stopping conditions, IMMEDIATELY:
@@ -162,7 +224,8 @@ Ao atingir as stopping conditions, IMMEDIATELY:
    a. **Prompt do executor**: com TODO o contexto
       necessário para executar o plano
    b. **Prompt do revisor**: deve instruir o revisor
-      a:
+      a AGUARDAR a conclusão do executor antes de
+      agir, e então:
       - Comparar plano aprovado vs resultado do
         executor
       - Se há problemas: gerar prompts de ajuste
@@ -182,7 +245,7 @@ pelo contexto — não imponha estrutura fixa.
 Inclua no prompt do executor esta instrução:
 
 "Se encontrar bloqueio ou desvio significativo do
-plano, PARE e reporte ao planejador com: step que
+plano, PARE e reporte ao humano com: step que
 falhou, motivo do desvio/bloqueio, steps já
 completados."
 
