@@ -1412,8 +1412,13 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 
 ## Open Questions
 
-Três das quatro questões levantadas foram resolvidas por investigação:
+As quatro questões levantadas foram resolvidas — três por investigação e a
+Q1 por confirmação do humano:
 
+- **Q1 — RESOLVIDA.** O humano confirmou ter acesso a uma máquina Windows sem
+  privilégio de administrador para executar a validação da Task 4.5. A fase 4
+  roda completa até o fim, sem bloqueio no último passo. São exatamente essas
+  máquinas que motivaram a estratégia zero-admin de AD-9.
 - **Q2 — RESOLVIDA.** `auto_index` é config do binário
   (`codebase-memory-mcp config list` → `auto_index=true`,
   `auto_index_limit=50000`), não do transporte MCP. Continua válido no modo
@@ -1431,12 +1436,7 @@ Três das quatro questões levantadas foram resolvidas por investigação:
   os dois arquivos na Task 1.5, respeitando a regra do `AGENTS.md` de manter
   agentes e workflows sincronizados.
 
-Resta uma questão para o humano:
-
-- **Q1:** A máquina Windows sem admin para a validação da Task 4.5 já está
-  disponível? Se não, a fase 4 fica bloqueada no último passo e as fases 5–6
-  seguem em paralelo no WSL — mas o objetivo "funcionar no Windows" só é
-  comprovado ao final.
+Todas as questões levantadas foram resolvidas:
 
 ## Varredura de Ferramentas Externas (concluída)
 
