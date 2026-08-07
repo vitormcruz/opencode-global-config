@@ -11,10 +11,9 @@ problemas de segurança conhecidos nos 29 artefatos instalados por este repo.
 | Categoria | Artefatos | Ferramenta Recomendada | Instalacao |
 |---|---|---|---|
 | **PyPI** (pipx) | docling | `pip-audit` | `pipx install pip-audit` |
-| **npm global** | @playwright/test, exa-mcp-server, @opencode-ai/plugin, @slkiser/opencode-quota | `npm audit` | nativo do Node.js |
-| **Docker Hub** | unclecode/crawl4ai:latest | `trivy image` | `apt install trivy` ou binario |
-| **Docker build local** | crawl4ai-sanitized:latest | `trivy image` + `grype` | `brew install trivy grype` |
-| **APT system** | make, pandoc, librsvg2-bin, ocrmypdf, tesseract-ocr, ghostscript, qpdf, jq | `debsecan` (Debian) / `trivy rootfs` (geral) | `apt install debsecan` |
+| **npm global** | Playwright, Exa e plugins OpenCode | `npm audit` | nativo do Node.js |
+| **PyPI** (pipx) | crawl4ai | `pip-audit` | `pipx install pip-audit` |
+| **APT system** | make, pandoc, librsvg2-bin e jq | `debsecan` / `trivy rootfs` | `apt install debsecan` |
 | **Tarballs GitHub** | bats-core, bats-support, bats-assert, bats-file | `trivy fs` / `grype .` | binario |
 | **Script remoto** | nvm install.sh (via `curl | bash`) | Auditoria manual + `gpg --verify` | N/A |
 | **Node.js via nvm** | Node.js 22 | `nvm audit` (Node.js --security-revert) + `npm audit` | nativo |
@@ -29,7 +28,7 @@ quase todas as categorias com um unico binario:
 
 ```
 trivy fs /caminho/para/projeto     # escaneia diretorio local
-trivy image unclecode/crawl4ai     # escaneia imagem Docker
+trivy image nome:tag               # escaneia uma imagem quando necessario
 trivy rootfs /                      # escaneia SO host (apt packages)
 trivy sbom sbom.json               # escaneia SBOM gerado
 ```
@@ -85,11 +84,10 @@ pip-audit --local --format markdown
 npm audit --omit dev
 ```
 
-### 3.3 Docker images
+### 3.3 Crawl4AI (PyPI)
 
 ```bash
-trivy image unclecode/crawl4ai:latest
-grype unclecode/crawl4ai:latest
+pip-audit --local --format markdown
 ```
 
 ### 3.4 APT system packages
@@ -132,15 +130,10 @@ npm audit
 install chromium` — a gravidade depende da versao do Playwright instalada.
 Urgente: verificar versao com `npx playwright --version` e atualizar.
 
-### 4.2 Crawl4AI Docker Image — CVE Corrigida
+### 4.2 Crawl4AI CLI
 
-| CVE | Descricao | Severidade | Fixado em |
-|---|---|---|---|
-| CVE-2025-49844 | Redis Lua use-after-free (RCE) | Critica (CVSS 10.0) | crawl4ai 0.8.5 |
-| CVE-2026-26216 | RCE via hooks parameter no `/crawl` | Critica | crawl4ai 0.7.5+ |
-
-**Status:** `unclecode/crawl4ai:latest` aponta para a versao 0.8.5+ que ja
-inclui ambas as correcoes. Verificar com `docker inspect unclecode/crawl4ai`.
+O `crawl4ai` e instalado via pipx e deve ser auditado como dependencia PyPI,
+nao como imagem ou servico local.
 
 ### 4.3 NVM — CVE Corrigida
 
@@ -203,7 +196,6 @@ nvm --version 2>/dev/null || echo "nvm not found"
 | **Sem reachability** | Trivy/Grype reportam CVEs mesmo se o codigo vulneravel nao for executado |
 | **Tarballs sem lockfile** | BATS tarballs nao tem SBOM — Trivy escaneia apenas arquivos extraidos |
 | **Scripts remotos (`curl | bash`)** | Nenhum scanner automatico cobre isso; requer auditoria manual |
-| **Docker build local** | `crawl4ai-sanitized:latest` herda CVEs da imagem base + camadas |
 | **Dependencias transitivas** | APT e npm tem dependencias que nao sao escaneadas recursivamente |
 | **Falsos positivos** | `debsecan` no Ubuntu reporta CVEs Debian que nao se aplicam (uso limitado a Debian puro) |
 | **Node.js versao movel** | `nvm install 22` instala a versao mais recente do minor — muda sem aviso |
@@ -219,5 +211,4 @@ nvm --version 2>/dev/null || echo "nvm not found"
 | **Alta** | Atualizar nvm de v0.40.1 para v0.40.4 | nvm |
 | **Media** | Adicionar `scripts/security-scan` ao repo | Pipeline |
 | **Media** | Fixar versao do Node.js (ex: `nvm install 22.14.0`) em vez de `22` | Node.js |
-| **Baixa** | Validar imagem crawl4ai:latest contem correcoes de Redis e hooks | Docker |
 | **Baixa** | Avaliar switch de `debsecan` para `trivy rootfs` (portavel entre distros) | APT scan |

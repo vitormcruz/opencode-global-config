@@ -25,7 +25,7 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Executa o adapter Copilot CLI
   3. Executa o adapter OpenCode
-  4. Instala ferramentas globais (codebase-memory)
+  4. Instala ferramentas globais (codebase-memory CLI)
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]
@@ -40,7 +40,7 @@ Variaveis de ambiente:
   OPENCODE_SKIP_COPILOT_ADAPTER=1 Pula o adapter Copilot CLI
   OPENCODE_SKIP_OPENCODE_ADAPTER=1 Pula o adapter OpenCode
   OPENCODE_SKIP_SKILL_SYNC=1     Pula sincronizacao de skills upstream
-  OPENCODE_SKIP_CODEBASE_MEMORY=1 Pula configuracao do MCP codebase-memory
+  OPENCODE_SKIP_CODEBASE_MEMORY=1 Pula configuracao do codebase-memory CLI
 EOF
       exit 0
       ;;
@@ -150,13 +150,13 @@ run_opencode_adapter() {
 # ---------------------------------------------------------------------------
 run_codebase_memory() {
   if [ "${OPENCODE_SKIP_CODEBASE_MEMORY:-0}" = "1" ]; then
-    say "SKIP: MCP codebase-memory (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
+    say "SKIP: codebase-memory CLI (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
     return 0
   fi
 
   check_script "$codebase_memory_script" "codebase-memory/install" || return 1
 
-  section "Instalando MCP codebase-memory"
+  section "Instalando codebase-memory CLI"
 
   local args=()
   [ "$assume_yes" -eq 1 ] && args+=("--yes")

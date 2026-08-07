@@ -14,8 +14,8 @@ O script executa, nesta ordem:
 1. Instala dependências com `wsl-install-deps.sh`.
 2. Executa `adapters/copilot-cli/copilot-cli-adapter.sh`.
 3. Executa `adapters/opencode/opencode-adapter.sh`.
-4. Configura os MCPs globais.
+4. Configura as ferramentas CLI globais.
 
 Use `OPENCODE_SKIP_DEPS=1`, `OPENCODE_SKIP_COPILOT_ADAPTER=1`,
-`OPENCODE_SKIP_OPENCODE_ADAPTER=1`, `OPENCODE_SKIP_CRAWL4AI=1` ou
-`OPENCODE_SKIP_CODEBASE_MEMORY=1` para pular etapas específicas.
+`OPENCODE_SKIP_OPENCODE_ADAPTER=1` ou `OPENCODE_SKIP_CODEBASE_MEMORY=1`
+para pular etapas específicas.
