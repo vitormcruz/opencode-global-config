@@ -11,7 +11,8 @@ setup_file() {
   export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
   export OPENCODE_SKIP_DOCTREE=1
-  bash "$REPO_ROOT/adapters/opencode/opencode-adapter.sh" --yes
+  PYTHONPATH="$REPO_ROOT/src" python3 -m opencode_config.adapters.opencode \
+    --yes --repo-root "$REPO_ROOT"
 }
 
 teardown_file() { common_teardown; }
@@ -21,7 +22,8 @@ teardown_file() { common_teardown; }
 # ---------------------------------------------------------------------------
 
 @test "repo-state: opencode-adapter --yes executa com sucesso" {
-  run bash "$REPO_ROOT/adapters/opencode/opencode-adapter.sh" --yes
+  run env PYTHONPATH="$REPO_ROOT/src" python3 \
+    -m opencode_config.adapters.opencode --yes --repo-root "$REPO_ROOT"
   assert_success
 }
 

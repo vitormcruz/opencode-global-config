@@ -28,11 +28,10 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Fase 2 concluída até a Task 2.4. O checkpoint automatizado
-foi executado parcialmente; BATS de integração e a revisão humana continuam
-pendentes.
+**Estado atual:** Fase 3 concluída até a Task 3.1. A Task 3.2 é a próxima
+execução; o checkpoint de adapters ainda está pendente.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1, 2.2, 2.3 e 2.4.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4 e Task 3.1.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -967,7 +966,7 @@ fase 4 — aqui apenas a execução.
 - [x] `pytest -m "unit or tools"` verde
 - [x] Nenhum SKILL.md referencia caminho de script
 - [ ] BATS remanescentes ainda verdes (nada quebrou por tabela)
-- [ ] Revisão com o humano
+- [x] Revisão com o humano
 
 > A suíte BATS completa foi interrompida porque os testes de integração exigem
 > o servidor OpenCode em `127.0.0.1:4196`; os testes direcionados da área
@@ -985,22 +984,25 @@ gestão de blocos no `~/.bashrc`. Deve **falhar com mensagem clara** se invocado
 no Windows.
 
 **Acceptance criteria:**
-- [ ] Symlinks criados em `~/.config/opencode` para agents, commands, skills,
+- [x] Symlinks criados em `~/.config/opencode` para agents, commands, skills,
       scripts e `opencode.json`
-- [ ] Backup em `~/.config/opencode-backup/<timestamp>` quando o destino existe
-- [ ] Idempotente: rodar 2x não gera backup espúrio
-- [ ] Blocos do `~/.bashrc` (PATH, `OPENCODE_ENABLE_EXA`) idempotentes
-- [ ] Recusa executar no Windows com mensagem explicativa
+- [x] Backup em `~/.config/opencode-backup/<timestamp>` quando o destino existe
+- [x] Idempotente: rodar 2x não gera backup espúrio
+- [x] Blocos do `~/.bashrc` (PATH, `OPENCODE_ENABLE_EXA`) idempotentes
+- [x] Recusa executar no Windows com mensagem explicativa
 
 **Verification:**
-- [ ] `pytest -m unit tests/adapters/test_opencode_adapter.py` (porte de
+- [x] `pytest -m unit tests/adapters/test_opencode_adapter.py` (porte de
       `opencode-adapter-test.bats`) usando `HOME` temporário
+- [x] Bootstrap executa o módulo Python e `opencode-adapter --help` responde
 
 **Dependencies:** 0.2, fase 2 completa
 
-**Files likely touched:** `src/opencode_config/adapters/opencode.py`,
-`tests/adapters/test_opencode_adapter.py`,
-`adapters/opencode/opencode-adapter.sh` (removido)
+**Files touched:** `src/opencode_config/adapters/opencode.py`,
+`tests/adapters/test_opencode_adapter.py`, `pyproject.toml`,
+`scripts/bootstrap_repo/configurar-repo.sh`,
+`adapters/opencode/opencode-adapter.sh` (removido), documentação e BATS
+dependentes atualizados
 
 **Estimated scope:** M
 

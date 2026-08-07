@@ -5,14 +5,16 @@ canônica deste repositório.
 
 ## Uso
 
-Execute a partir da raiz do repositório:
+Execute após instalar o pacote editável:
 
 ```bash
-./adapters/opencode/opencode-adapter.sh --yes
+opencode-adapter --yes
 ```
 
 O adapter cria ou atualiza links em `~/.config/opencode/` para os agentes,
 comandos, skills, scripts e `opencode.json` deste repositório.
+
+O adapter funciona em Linux e WSL. No Windows, use o adapter do Copilot.
 
 O bootstrap principal também executa este adapter automaticamente. Para
 evitar sua execução, use `OPENCODE_SKIP_OPENCODE_ADAPTER=1`.

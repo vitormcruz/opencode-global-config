@@ -19,7 +19,7 @@ Depois de clonar este repo, rode:
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
-3. **Executa o adapter OpenCode** (`adapters/opencode/opencode-adapter.sh`)
+3. **Executa o adapter OpenCode** (`opencode-adapter`)
 4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
 
 Cada parte pode ser pulada via variaveis de ambiente:
@@ -124,7 +124,7 @@ agentskills.io e copia artefatos auxiliares.
 Use diretamente:
 
 ```bash
-./adapters/opencode/opencode-adapter.sh --yes
+opencode-adapter --yes
 ./adapters/copilot-cli/copilot-cli-adapter.sh --yes
 ```
 

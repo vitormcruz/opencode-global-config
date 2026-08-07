@@ -13,7 +13,7 @@ O script executa, nesta ordem:
 
 1. Instala dependências com `wsl-install-deps.sh`.
 2. Executa `adapters/copilot-cli/copilot-cli-adapter.sh`.
-3. Executa `adapters/opencode/opencode-adapter.sh`.
+3. Executa `opencode-adapter` via o módulo Python do repositório.
 4. Configura as ferramentas CLI globais.
 
 Use `OPENCODE_SKIP_DEPS=1`, `OPENCODE_SKIP_COPILOT_ADAPTER=1`,

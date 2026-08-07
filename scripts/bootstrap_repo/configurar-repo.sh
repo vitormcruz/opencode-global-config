@@ -55,7 +55,6 @@ warn() { printf '%s\n' "$*" >&2; }
 # Scripts auxiliares
 wsl_deps_script="${script_dir}/wsl-install-deps.sh"
 copilot_adapter_script="${repo_root}/adapters/copilot-cli/copilot-cli-adapter.sh"
-opencode_adapter_script="${repo_root}/adapters/opencode/opencode-adapter.sh"
 codebase_memory_script="${repo_root}/scripts/codebase-memory/install.sh"
 
 check_script() {
@@ -135,14 +134,19 @@ run_opencode_adapter() {
     return 0
   fi
 
-  check_script "$opencode_adapter_script" "opencode-adapter.sh" || return 1
-
   section "Configurando OpenCode"
 
   local args=()
   [ "$assume_yes" -eq 1 ] && args+=("--yes")
 
-  bash "$opencode_adapter_script" "${args[@]}"
+  if ! command -v python3 >/dev/null 2>&1; then
+    warn "ERRO: Python 3 nao encontrado para executar o adapter OpenCode"
+    return 1
+  fi
+
+  PYTHONPATH="${repo_root}/src${PYTHONPATH:+:${PYTHONPATH}}" \
+    python3 -m opencode_config.adapters.opencode \
+    "${args[@]}" --repo-root "$repo_root"
 }
 
 # ---------------------------------------------------------------------------

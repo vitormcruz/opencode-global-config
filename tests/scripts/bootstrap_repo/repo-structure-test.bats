@@ -258,8 +258,8 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/configurar-repo.sh"
 }
 
-@test "adapters/opencode/opencode-adapter.sh é executável" {
-  assert_file_executable "$REPO_ROOT/adapters/opencode/opencode-adapter.sh"
+@test "adapter OpenCode Python existe" {
+  assert_file_exist "$REPO_ROOT/src/opencode_config/adapters/opencode.py"
 }
 
 @test "scripts/bootstrap_repo/wsl-install-deps.sh é executável" {
