@@ -842,15 +842,15 @@ Usar o módulo de contrato JSON de `lib/` (Task 0.2). Confirmar e documentar que
 o OCR é feito pelo próprio docling — sem `tesseract`/`ocrmypdf`.
 
 **Acceptance criteria:**
-- [ ] Contrato JSON de entrada e saída idêntico ao do script bash
-- [ ] Mensagens de erro e `hint` de instalação preservadas e adaptadas por SO
-- [ ] `opencode-doc-extract` disponível no PATH após `pipx install --editable .`
-- [ ] `skills/doc-extract/SKILL.md` chama `opencode-doc-extract` sem caminho
+- [x] Contrato JSON de entrada e saída idêntico ao do script bash
+- [x] Mensagens de erro e `hint` de instalação preservadas e adaptadas por SO
+- [x] `opencode-doc-extract` disponível no PATH após `pipx install --editable .`
+- [x] `skills/doc-extract/SKILL.md` chama `opencode-doc-extract` sem caminho
 
 **Verification:**
-- [ ] `pytest -m tools tests/cli/test_doc_extract.py` (porte de
+- [x] `pytest -m tools tests/cli/test_doc_extract.py` (porte de
       `opencode-doc-extract-test.bats`, 136 linhas)
-- [ ] Extração real de um PDF de `tests/test-resources/`
+- [x] Extração real de um PDF de `tests/test-resources/`
 
 **Dependencies:** 0.2
 
