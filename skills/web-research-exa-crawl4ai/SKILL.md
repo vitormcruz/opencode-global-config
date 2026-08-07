@@ -1,136 +1,168 @@
 ---
 name: web-research-exa-crawl4ai
 description: >
-  Pesquisa web sem URL especifica - usa websearch/Exa para descoberta de fontes
-  e Crawl4AI para extracao, validacao e aprofundamento progressivo com confirmacao
-  do humano; incorpora sites sugeridos pelo humano e prioriza fontes oficiais.
-  Quando uma URL descoberta apontar para documento binario (PDF, DOCX, XLSX,
-  imagem etc.), delegar extracao para a skill doc-extract em vez de crawl4ai.
+  Pesquisa web sem URL específica - usa web_search_exa, websearch ou a busca
+  padrão do ambiente para descobrir fontes e o CLI crwl (crawl4ai) para
+  extração, validação e aprofundamento progressivo. Prioriza fontes oficiais e
+  delega documentos binários para a skill doc-extract.
 ---
 
-Voce e uma skill de pesquisa web hibrida.
+Você é uma skill de pesquisa web híbrida.
 
 ## Objetivo
-Obter respostas atuais com boa cobertura, alta precisao e consumo controlado de token, combinando descoberta rapida de fontes com extracao e validacao confiaveis.
+Obter respostas atuais com boa cobertura, alta precisão e consumo controlado de
+tokens, combinando descoberta de fontes com extração e validação confiáveis.
 
 ## Quando usar
 Use esta skill quando o humano pedir:
 - pesquisa, busca ou levantamento na web
-- noticias atuais
-- comparacao de produtos, servicos, ferramentas ou fontes
-- verificacao de preco, documentacao ou informacoes publicas online
-- aprofundamento progressivo sobre um tema pesquisavel na internet
+- notícias atuais
+- comparação de produtos, serviços, ferramentas ou fontes
+- verificação de preço, documentação ou informações públicas online
+- aprofundamento progressivo sobre um tema pesquisável na internet
 
-## Quando nao usar
-- Se o humano fornecer uma URL especifica como alvo principal da leitura, nao use `websearch`; va direto para `Crawl4AI`.
-- Se a tarefa nao exigir pesquisa atual na web, nao carregue esta skill desnecessariamente.
+## Quando não usar
+- Se o humano fornecer uma URL específica como alvo principal, não use busca;
+  vá direto para `crwl`.
+- Se a tarefa não exigir pesquisa atual na web, não carregue esta skill.
+
+## Cadeia de descoberta
+Use a primeira opção disponível nesta ordem:
+1. `web_search_exa`, se a ferramenta remota Exa estiver disponível.
+2. `websearch`, se a busca nativa do OpenCode estiver disponível.
+3. a busca padrão do ambiente, como fallback final.
+
+Não troque essa ordem por preferência de cliente. Se nenhuma busca estiver
+disponível, peça uma URL ao humano ou use fontes conhecidas explicitamente.
 
 ## Ferramentas
-- `websearch`: descoberta inicial de fontes, apenas quando o pedido NAO trouxer URL especifica
-- `crawl4ai_md`: extracao principal de conteudo
-- `crawl4ai_execute_js`: usar quando a pagina depender de JS ou o conteudo estiver incompleto
-- `crawl4ai_html`: usar apenas se o markdown perder estrutura importante
-- `crawl4ai_screenshot` e `crawl4ai_pdf`: usar apenas se o humano pedir evidencia visual ou arquivo
+- `crwl`: CLI do crawl4ai para extração de Markdown, HTML, JS, screenshot,
+  PDF e deep crawl.
+- `web_search_exa`: descoberta inicial de fontes, quando disponível.
+- `websearch`: descoberta alternativa, quando disponível.
+- `doc-extract`: extração de documentos binários.
 
 ## Regras principais
-1. Se o humano fornecer URL especifica, nao use `websearch`; va direto para `Crawl4AI`.
-2. Se o pedido for uma pesquisa aberta sem URL especifica, use `websearch` para descoberta.
-3. Na primeira passada, faca um esforco inicial robusto: consulte ate 5 URLs relevantes.
-4. Priorize fontes oficiais, documentacao original, fontes primarias e os sites sugeridos pelo humano.
-5. Se o humano sugerir sites, dominios, portais, motores de busca ou plataformas especificas, incorpore esses alvos na estrategia de busca e priorize-os quando pertinentes.
-6. Combine busca geral com busca orientada por site quando isso melhorar cobertura, confiabilidade ou velocidade.
-7. Nao baseie a resposta apenas no resultado bruto da busca; valide nas URLs escolhidas.
-8. Nao use `curl` ou `bash` para buscar paginas web quando `websearch` ou `Crawl4AI` forem suficientes.
-9. Nao responda pesquisa atual apenas com conhecimento do modelo quando houver necessidade real de busca.
+1. Se o humano fornecer URL específica, vá direto para `crwl`.
+2. Em pesquisa aberta, siga a cadeia de descoberta declarada acima.
+3. Na primeira passada, consulte até 5 URLs relevantes.
+4. Priorize fontes oficiais, documentação original e fontes primárias.
+5. Incorpore sites sugeridos pelo humano quando forem pertinentes.
+6. Combine busca geral com busca orientada por site quando isso melhorar
+   cobertura, confiabilidade ou velocidade.
+7. Valide as URLs escolhidas; não responda apenas com o resultado bruto da busca.
+8. Não use `curl` ou `bash` para buscar páginas quando as ferramentas desta
+   skill forem suficientes.
+9. Não responda pesquisa atual apenas com conhecimento do modelo.
 
-## Fluxo padrao
+## Fluxo padrão
 1. Classifique o pedido:
-   - com URL especifica -> ir direto para extracao
-   - sem URL especifica -> usar `websearch`
+   - com URL específica: vá direto para extração
+   - sem URL específica: siga a cadeia de descoberta
 2. Descoberta:
-   - fazer 1-2 buscas no maximo
-   - selecionar ate 5 URLs
-   - priorizar fonte oficial, fontes primarias e fontes sugeridas pelo humano
-3. Extracao:
-   - usar `crawl4ai_md` nas URLs selecionadas
-   - **ATENCAO**: se a URL terminar em `.pdf`, `.docx`, `.pptx`, `.xlsx` ou for uma imagem
-     (`.png`, `.jpg`, `.jpeg`, `.tiff`, `.bmp`, `.gif`), `crawl4ai` falha com `ERR_FAILED`.
-     Nestes casos, use a skill `doc-extract` para baixar e extrair o conteudo do arquivo.
-   - se necessario, usar `crawl4ai_execute_js`
-   - usar `crawl4ai_html` apenas em caso de perda de estrutura relevante
-4. Validacao:
-   - para fatos sensiveis, preco e noticia atual, confirmar em pelo menos 2 fontes quando possivel
-   - em caso de conflito, priorizar fonte oficial e declarar divergencia
+   - faça no máximo 2 buscas
+   - selecione até 5 URLs
+   - priorize fonte oficial, fontes primárias e sites sugeridos
+3. Extração:
+   - use `crwl` conforme os exemplos executáveis abaixo
+   - para URL binária, use a skill `doc-extract`
+4. Validação:
+   - para fatos sensíveis, preço e notícia atual, confirme em 2 fontes quando
+     possível
+   - em conflito, priorize fonte oficial e declare a divergência
 5. Resposta:
-   - responder de forma objetiva
-   - citar as principais fontes usadas
-   - explicitar incerteza quando houver
-   - resumir achados sem despejar conteudo bruto das paginas
+   - responda de forma objetiva e cite as principais fontes
+   - explicite incerteza e não despeje conteúdo bruto das páginas
+
+## Exemplos de operações `crwl`
+Os comandos abaixo usam `https://example.com` como alvo reproduzível.
+
+### Markdown
+```bash
+crwl https://example.com -o md-fit
+```
+
+### HTML estruturado
+```bash
+crwl https://example.com -o json > page.json
+```
+
+### JavaScript
+```bash
+crwl https://example.com -c 'js_code=document.title' -o md-fit
+```
+
+### Screenshot
+```bash
+crwl https://example.com -c screenshot=true -O saida.json
+```
+
+### PDF
+```bash
+crwl https://example.com -c pdf=true -O saida.json
+```
+
+### Deep crawl
+```bash
+crwl https://example.com --deep-crawl bfs --max-pages 10
+```
 
 ## Aprofundamento progressivo
-Entre em modo de aprofundamento quando:
-- as informacoes estiverem insuficientes
-- houver conflito relevante entre fontes
-- o humano pedir para aprofundar, pesquisar mais ou ir mais fundo
+Entre em modo de aprofundamento quando as informações estiverem insuficientes,
+houver conflito relevante ou o humano pedir mais investigação.
 
 ### Regras do aprofundamento
-1. Nao avance mais de um nivel sem confirmar com o humano.
-2. Antes de cada nova iteracao, informe:
-   - o que ja foi feito
-   - por que ainda nao basta
-   - o que sera feito na proxima iteracao
-   - quanto mais de esforco sera gasto
-3. So continue apos confirmacao do humano.
-4. Pare quando houver confianca suficiente, quando o humano pedir para parar, ou quando o ganho esperado for baixo frente ao custo.
+1. Não avance mais de um nível sem confirmar com o humano.
+2. Antes de cada iteração, informe o que foi feito, por que não basta, o próximo
+   passo e o esforço adicional estimado.
+3. Só continue após confirmação do humano.
+4. Pare quando houver confiança suficiente, o humano pedir para parar ou o ganho
+   esperado for baixo frente ao custo.
 
-### Niveis
-- Nivel 1 - padrao forte:
-  - ate 5 URLs totais
-  - foco em fonte oficial, sites sugeridos e fontes complementares
-- Nivel 2 - aprofundado:
-  - ate 7 URLs totais
-  - buscas refinadas adicionais
-  - pode usar `crawl4ai_execute_js`
-- Nivel 3 - investigacao pesada:
-  - ate 10 URLs totais
-  - triangulacao ampla e verificacao cruzada forte
-  - requer confirmacao explicita do humano
+### Níveis
+- Nível 1 - padrão forte: até 5 URLs, com foco em fontes oficiais e primárias.
+- Nível 2 - aprofundado: até 7 URLs, buscas refinadas e possível JS.
+- Nível 3 - investigação pesada: até 10 URLs, triangulação forte e confirmação
+  explícita.
 
-## Mensagem padrao de checkpoint
-Use um texto neste formato:
-"Ja consultei <resumo curto do que foi feito>. Ainda faltam <lacunas ou conflitos>. Na proxima iteracao posso subir do <nivel atual> para o <proximo nivel>, fazendo <acoes planejadas>. Isso adiciona aproximadamente <esforco incremental: buscas, URLs e possivel JS>. Quer que eu aprofunde?"
+## Mensagem padrão de checkpoint
+Use este formato:
+"Já consultei <resumo>. Ainda faltam <lacunas ou conflitos>. Posso subir do
+<nível atual> para o <próximo nível>, fazendo <ações> e gastando
+<esforço incremental>. Quer que eu aprofunde?"
 
-## Criterios de eficiencia
-- Pare assim que houver evidencia suficiente para responder com confianca.
-- Prefira qualidade de fonte a quantidade de fontes.
-- Evite `html`, `screenshot` e `pdf` por padrao.
-- Use JS apenas quando houver forte indicio de conteudo dinamico relevante.
-- Nao faca crawl de URLs claramente redundantes ou de baixa qualidade se ja houver cobertura suficiente.
+## Critérios de eficiência
+- Pare quando houver evidência suficiente para responder com confiança.
+- Prefira qualidade de fonte a quantidade.
+- Evite HTML, screenshot e PDF por padrão.
+- Use JS somente quando houver forte indício de conteúdo dinâmico relevante.
+- Não faça crawl de URLs redundantes quando já houver cobertura suficiente.
 
 ## Resiliencia a rate limits (429)
-O MCP pode retornar HTTP 429 quando o limite de requisicoes e atingido. Este erro e **sempre temporario e contornavel**.
+O `crwl` pode retornar falha com exit code diferente de zero quando o site
+responde 429, o timeout expira ou há bloqueio. O erro deve ser tratado como
+temporário quando houver evidência de rate limit, não como resposta final.
 
-### Comportamento obrigatorio ao receber 429
-1. **NUNCA desista da pesquisa** por causa de 429. NUNCA reporte o erro como fatal ou retorne resposta incompleta.
+### Comportamento obrigatório ao receber 429
+1. **NUNCA desista da pesquisa** por causa de 429 e não retorne resposta
+   incompleta sem informar a limitação.
 2. **Aplique backoff progressivo**:
-   - Espere 3-5 segundos e tente a mesma requisicao novamente.
-   - Se persistir, espere 10-15 segundos e tente mais uma vez.
+   - espere 3-5 segundos e repita o comando
+   - se persistir, espere 10-15 segundos e tente mais uma vez
 3. **Reduza a carga** se o limite persistir:
-   - Diminua o numero de URLs simultaneas. Processe URLs em sequencia em vez de paralelo.
-   - Reduza o numero de buscas (ex: de 2 para 1).
-   - Omita ferramentas secundarias (`crawl4ai_html`, `crawl4ai_screenshot`, `crawl4ai_pdf`) e foque apenas em `crawl4ai_md`.
+   - processe URLs em chamadas sequenciais, não em paralelo
+   - reduza o número de buscas e omita operações secundárias
 4. **Use fallback por ferramenta**:
-   - Se `crawl4ai_md` retornar 429, tente `webfetch` na mesma URL como alternativa leve.
-   - Se `websearch` retornar 429, faca a busca manualmente via `webfetch` em sites conhecidos, ou peca ao humano para confirmar uma URL especifica.
+   - em falha do `crwl`, tente `webfetch` na mesma URL quando for adequado
+   - em falha de `websearch`, tente `web_search_exa` ou a busca padrão
 5. **Ajuste o escopo da resposta**:
-   - Se for impossivel obter todas as fontes, use o que conseguiu e deixe explicito: "Atingi o limite de requisicoes temporario; consegui validar em X fontes. Posso aprofundar mais se necessario."
-6. **Chamadas paralelas vs sequenciais**:
-   - Quando houver sinal de quota apertada (um 429 ja ocorreu), passe a fazer chamadas **sequenciais** ao inves de paralelas.
+   - informe o exit code, timeout ou bloqueio e quantas fontes foram validadas
+6. Quando um 429 já ocorreu, prefira chamadas sequenciais a chamadas paralelas.
 
 ## Fallback
-Se `websearch` nao estiver disponivel, informe isso brevemente e execute a melhor estrategia possivel
-apenas com `Crawl4AI`, deixando claro que a descoberta de fontes pode ficar menos eficiente.
+Se `web_search_exa` e `websearch` não estiverem disponíveis, informe isso
+brevemente e use a busca padrão do ambiente ou peça uma URL específica.
 
-**Fallback para documentos binarios**: `crawl4ai` nao consegue abrir arquivos PDF, Office ou imagens
-diretamente (retorna `ERR_FAILED`). Sempre que uma URL selecionada for um documento binario, use a
-skill `doc-extract` como substituto — ela baixa o arquivo e extrai texto/tabelas via Docling.
+**Fallback para documentos binários**: não use `crwl` diretamente para PDF,
+DOCX, PPTX, XLSX ou imagens quando a URL apontar para o arquivo. Use a skill
+`doc-extract`, que baixa o arquivo e extrai texto e tabelas via Docling.
