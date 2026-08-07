@@ -167,13 +167,7 @@ externamente (ex: opencode/big-pickle). Use apenas modelos aprovados pela sua or
 # Build da imagem
 # ---------------------------------------------------------------------------
 
-prepare_mock_artifacts() {
-  log "Preparando artefatos do mock MCP..."
-  npm --prefix "$REPO_ROOT/tests/integration/mcp-mock" install
-}
-
 build_image() {
-  prepare_mock_artifacts
   log "Construindo imagem Docker '${IMAGE_NAME}'..."
   docker build -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$REPO_ROOT"
   log "Imagem construída com sucesso."

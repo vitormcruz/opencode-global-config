@@ -28,5 +28,5 @@ RUN chmod +x tests/integration/docker/entrypoint.sh
 
 EXPOSE 4096
 
-# Sobe o mock MCP local e depois o opencode serve
+# Sobe o OpenCode para os testes comportamentais
 CMD ["/opt/opencode-config/tests/integration/docker/entrypoint.sh"]
