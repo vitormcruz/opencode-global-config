@@ -34,7 +34,9 @@ Siga este fluxo estritamente.
 ## Regra de progressao automatica entre etapas
 
 - Ao concluir uma etapa, o agente deve prosseguir automaticamente para a etapa seguinte.
-- Nao espere nova mensagem do humano quando a etapa atual ja estiver concluida e a proxima etapa nao depender de confirmacao, decisao humana ou tratamento de erro.
+- Nao espere nova mensagem do humano quando a etapa atual ja estiver
+  concluida e a proxima etapa nao depender de confirmacao, decisao humana ou
+  tratamento de erro.
 - O fluxo e bloqueante apenas no sentido de ordem: a etapa N+1 depende do termino completo da etapa N.
 - O fluxo nao exige pausa entre etapas ja resolvidas.
 - O agente deve apenas registrar brevemente o resultado da etapa concluida e seguir adiante.
@@ -54,8 +56,9 @@ Siga este fluxo estritamente.
 - informar ao humano se o repo ja estava indexado ou nao
 
 **Execucao:**
-- No **GitHub Copilot**, execute: `mcp codebase-memory list_projects`
-- No **OpenCode**, use o fluxo nativo equivalente para listar projetos.
+- No **GitHub Copilot**, execute: `codebase-memory-mcp cli list_projects '{}'`
+- No **OpenCode**, execute o mesmo CLI no WSL:
+  `codebase-memory-mcp cli list_projects '{}'`
 - Se o repositorio atual ja estiver indexado, informe isso ao usuario antes de reindexar.
 
 **Condicao de encerramento da etapa:**
@@ -74,10 +77,10 @@ Siga este fluxo estritamente.
 
 **Execucao:**
 - No **GitHub Copilot**, execute com JSON posicional unico e `repo_path` absoluto, por exemplo:
-  `mcp codebase-memory index_repository '{"repo_path":"/mnt/c/Users/ur5y/Projetos/opencode-config"}'`
-- Nao use `--repo_path "."` no Copilot, pois essa sintaxe falha com o wrapper `mcp` neste ambiente.
-- No **OpenCode** ou em hooks/scripts locais, use:
-  `codebase-memory-mcp cli index_repository '{"repo_path": "."}'
+  `codebase-memory-mcp cli index_repository '{"repo_path":"/mnt/c/Users/ur5y/Projetos/opencode-config"}'`
+- Use `repo_path` absoluto em ambos os ambientes para evitar ambiguidades.
+- No **OpenCode** ou em hooks/scripts locais, use o mesmo CLI:
+  `codebase-memory-mcp cli index_repository '{"repo_path": "."}'`
 - Exiba o resultado da indexacao.
 
 **O que e indexado:**
@@ -114,5 +117,6 @@ Ao finalizar todas as etapas, informe ao humano:
 
 1. **Status da indexacao:** numero de nos e arestas no grafo
 2. **Instrucoes locais:** caminho do arquivo criado/atualizado
-3. **Auto-index:** confirmacao de que o auto-index global esta habilitado - o grafo sera mantido automaticamente atualizado via background watcher
+3. **Auto-index:** confirmacao de que o auto-index global esta habilitado - o
+   grafo sera mantido automaticamente atualizado via background watcher
 4. **Uso:** exemplos de comandos para explorar codigo e documentacao

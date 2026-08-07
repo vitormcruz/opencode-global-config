@@ -1,15 +1,15 @@
 # Regras Globais
 
-## Descoberta de Codigo e Documentacao (LEIA ANTES DE BUSCAR)
+## Descoberta de Código e Documentação (LEIA ANTES DE BUSCAR)
 
-Use SEMPRE ferramentas MCP antes de grep/glob. Ferramentas MCP retornam
-resultados estruturados, consomem menos tokens e entendem a arquitetura
-do projeto.
+Use SEMPRE `codebase-memory-mcp cli` antes de grep/glob. O CLI retorna
+resultados estruturados, consome menos tokens e entende a arquitetura do
+projeto.
 
-### codebase-memory (CODIGO)
+### codebase-memory CLI (CÓDIGO)
 
-Use para funcoes, classes, rotas, callers, data flow, arquitetura E secoes de
-documentos Markdown (arquivos .md sao indexados como nos do tipo Section).
+Use para funções, classes, rotas, callers, data flow, arquitetura e seções de
+documentos Markdown (arquivos `.md` são indexados como nós do tipo Section).
 
 Para buscar em documentacao, use `query_graph` com Cypher para consultar
 nos do tipo `Section`:
@@ -25,30 +25,29 @@ Ordem:
   4. `query_graph` — padroes complexos multi-entidade (Cypher), busca em docs
   5. `get_architecture` — visao geral do projeto
 
-### grep/glob (FALLBACK — apenas quando MCP nao resolve)
+### grep/glob (FALLBACK — apenas quando o CLI não resolve)
 
-  - `grep` — strings literais, mensagens de erro, valores de config
-  - `glob` — arquivos por nome/padrao
+  - `grep` — strings literais, mensagens de erro e valores de config
+  - `glob` — arquivos por nome ou padrão
 
-### Recovery Obrigatorio
+### Recovery obrigatório
 
-`search_graph` retornar "project not found":
-  1. Chame `list_projects` para obter o nome exato do projeto indexado
-  2. Re-tente `search_graph` com o nome correto
-  3. So caia para grep/glob se o projeto nao estiver indexado
+Se o CLI retornar `"project not found"`:
+  1. Execute `codebase-memory-mcp cli list_projects '{}'`
+  2. Copie o nome exato do projeto indexado
+  3. Retente a busca com o nome correto
+  4. Só caia para grep/glob se o projeto não estiver indexado
 
-### Acesso MCP por Cliente
+### Acesso por cliente
 
-| Cliente | codebase-memory |
-|---|---|
-| OpenCode | Ferramentas nativas: `search_graph`, `trace_path`... |
-| GitHub Copilot | CLI: `mcp codebase-memory <tool> '{"project":"..."}'` |
+| Cliente | Ambiente | codebase-memory |
+|---|---|---|
+| OpenCode | WSL | `codebase-memory-mcp cli <tool> '<json>'` |
+| GitHub Copilot | Windows | `codebase-memory-mcp cli <tool> '<json>'` |
 
-No Copilot, NUNCA tente usar ferramentas MCP nativas. Sempre use o wrapper
-CLI `mcp`. Para `codebase-memory`, prefira JSON posicional unico, use
-`repo_path` absoluto ao indexar e inclua `project` explicitamente nas
-consultas ao grafo. Consulte `.github/copilot-specific.instructions.md`
-para detalhes.
+Ambos os clientes usam o CLI nativo, com JSON posicional único, `repo_path`
+absoluto para indexação e `project` explícito nas consultas. Consulte
+`.github/copilot-specific.instructions.md` para detalhes.
 
 ## Idioma
 - PT-BR (ASCII ok).
@@ -56,13 +55,15 @@ para detalhes.
 
 ### Atalho: "configure este repo"
 
-- Se o humano pedir explicitamente "configure este repo" (ou equivalente), isso conta como confirmacao para executar o bootstrap.
+- Se o humano pedir explicitamente "configure este repo" (ou equivalente),
+  isso conta como confirmacao para executar o bootstrap.
 - Comando canonico:
 
 ```bash
 bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
-- Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os comandos prontos para copia e cola em um bloco unico.
+- Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os
+  comandos prontos para copia e cola em um bloco unico.
 - Aguarde a execucao desses comandos pelo humano antes de seguir com a configuracao do repo.
 
 ## Configuracao Global via Links Simbolicos
@@ -91,7 +92,9 @@ ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
       ~/.config/opencode/scripts
 ```
 
-- Assim voce mantem estas configs versionadas em um repo Git separado (`opencode-config`), mas o OpenCode continua lendo tudo a partir de `~/.config/opencode`.
+- Assim voce mantem estas configs versionadas em um repo Git separado
+  (`opencode-config`), mas o OpenCode continua lendo tudo a partir de
+  `~/.config/opencode`.
 
 ## Bootstrap
 
@@ -137,7 +140,8 @@ source ~/.bashrc
 - Prefira listas curtas a textos longos.
 - Textos de resposta com mais de 20 linhas são supeitos. Humanos não gostam de ler muita coisa, então respostas muito
   longas não são eficientes e deixam de ser lidas
-- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique muito clara a importância dele ou se o humano
+- Não escreva texto explicativo com mais que 30 linhas, a não ser que fique
+  muito clara a importância dele ou se o humano
 - pedir explicitamente.
 - Ao invés de dar uma resposta muito longa, resuma em até 20 ~30 linhas (no máximo) e pergunte se o humano quer se
 - aprofundar mais em algum outro detalhe ou mesmo que dê uma explicação bem mais detalhada.
@@ -228,8 +232,11 @@ nas descrições
   ambiente.
 
 # README
-- Mantenha a seção de dependências do `README.md` atualizada sempre que mudar bootstrap, scripts, skills ou requisitos de instalação.
-- A seção deve ser enxuta e voltada ao humano: listar claramente o que é instalado automaticamente e quais comandos com `sudo` o humano precisa executar.
+- Mantenha a seção de dependências do `README.md` atualizada sempre que mudar
+  bootstrap, scripts, skills ou requisitos de instalação.
+- A seção deve ser enxuta e voltada ao humano: listar claramente o que é
+  instalado automaticamente e quais comandos com `sudo` o humano precisa
+  executar.
 
 # Upstream de Skills Externas
 - Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:

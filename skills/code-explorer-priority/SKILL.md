@@ -1,104 +1,92 @@
 ---
 name: code-explorer-priority
 description: >
-  REGRA ABSOLUTA: use codebase-memory (search_graph, trace_path,
-  query_graph) para buscas em CODIGO e DOCUMENTACAO. NUNCA use grep/glob
-  antes de esgotar as ferramentas MCP. Se search_graph falhar com "project
-  not found", chame list_projects e re-tente. No Copilot, use SEMPRE o CLI
-  wrapper `mcp`. Esta skill existe para impedir que voce caia direto em
-  grep/glob — carregue-a antes de QUALQUER busca.
-  Triggers: pesquisar, procurar, buscar, encontrar, explorar, investigar,
-  search, find, look for, locate, explore, investigate, onde esta, onde
-  estao, procura, busca, code discovery, how does, como funciona.
+  REGRA ABSOLUTA: use codebase-memory-mcp cli para buscas em CÓDIGO e
+  DOCUMENTAÇÃO. NUNCA use grep/glob antes de esgotar o CLI. Se o CLI retornar
+  "project not found", execute list_projects e retente. Triggers: pesquisar,
+  procurar, buscar, encontrar, explorar, investigar, search, find, look for,
+  locate, explore, investigate, onde está, onde estão, procura, busca, code
+  discovery, how does, como funciona.
 ---
 
-# Descoberta MCP-First
+# Descoberta CLI-first
 
 Ao receber QUALQUER pedido de busca, siga esta ordem. Nunca pule para
-grep/glob sem antes esgotar as ferramentas MCP.
+grep/glob sem antes esgotar o `codebase-memory-mcp cli`.
 
-## Papel de Cada Ferramenta
+## Papel de cada ferramenta
 
-| Ferramenta | Use para | Nao use para |
+| Ferramenta | Use para | Não use para |
 |---|---|---|
-| `codebase-memory` | Codigo E Documentacao: funcoes, classes, rotas, callers, arquitetura, workflows, specs, ADRs, agentes | Strings soltas em qualquer lugar |
-| `grep` | Strings literais, erros, configs — SOMENTE fallback | Busca estrutural |
-| `glob` | Arquivos por nome/padrao — SOMENTE fallback | Conteudo de arquivos |
+| `codebase-memory-mcp cli` | Código, docs, símbolos e arquitetura | Strings soltas |
+| `grep` | Strings literais, erros e configs — SOMENTE fallback | Busca estrutural |
+| `glob` | Arquivos por nome ou padrão — SOMENTE fallback | Conteúdo de arquivos |
 
 ## Acesso por Cliente
 
 ### OpenCode
-Ferramentas MCP sao nativas. Use `search_graph`, `trace_path`, etc.
-diretamente.
+
+No OpenCode, execute o CLI nativo no WSL:
+`codebase-memory-mcp cli <tool> '<json>'`.
 
 ### GitHub Copilot
-Ferramentas MCP NAO sao nativas. Use SEMPRE o CLI wrapper.
 
-Para `codebase-memory`, no Copilot, prefira SEMPRE um unico JSON posicional e
-inclua `project` explicitamente nas consultas ao grafo. Nao use `--query`,
-`--function_name`, `--qualified_name`, `--repo_path` ou `--project`.
+No Copilot, execute o mesmo CLI nativo no Windows:
+`codebase-memory-mcp cli <tool> '<json>'`.
+
+Exemplos:
 
 ```bash
-mcp codebase-memory list_projects
-mcp codebase-memory search_graph '{"project":"<nome>","query":"termos"}'
-mcp codebase-memory trace_path '{"project":"<nome>","function_name":"Foo"}'
-# Para buscar em documentos (nos Section):
-mcp codebase-memory query_graph '{"project":"<nome>","query":"MATCH (s:Section) WHERE s.name CONTAINS \"termo\" RETURN s"}'
+codebase-memory-mcp cli list_projects '{}'
+codebase-memory-mcp cli search_graph '{"project":"<nome>","query":"termos"}'
+codebase-memory-mcp cli trace_path '{"project":"<nome>","function_name":"Foo"}'
+codebase-memory-mcp cli query_graph '{"project":"<nome>","query":"MATCH ..."}'
 ```
 
-NUNCA tente usar search_graph, trace_path, etc. como
-ferramentas nativas no Copilot — elas nao existem nesse ambiente.
+## Passo 0: confirmar projeto indexado
 
-## Passo 0: Confirmar projeto indexado
+Execute `codebase-memory-mcp cli list_projects '{}'` e anote o nome exato.
+Se o CLI retornar `"project not found"`, use `list_projects` novamente,
+confirme o projeto e retente a consulta.
 
-OpenCode: `list_projects`
-Copilot: `mcp codebase-memory list_projects`
+O codebase-memory indexa código e documentação em uma única base. Documentos
+Markdown tornam-se nós do tipo `Section`.
 
-Anote o nome exato. Se nao estiver indexado:
-`mcp codebase-memory index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'`
-
-O `codebase-memory` indexa **codigo e documentacao** em uma unica base.
-Documentos Markdown se tornam nos do tipo `Section`.
-
-## Passo 1: Classificar a busca
+## Passo 1: classificar a busca
 
 | Tipo de busca | Ferramenta |
 |---|---|
-| Funcao, classe, rota, variavel | `search_graph` |
-| Quem chama / quem e chamado | `trace_path` |
-| Documentacao, workflow, spec, ADR, agentes | `search_graph` ou `query_graph` com filtros em Section |
-| Conteudo de funcao/classe especifica | `get_code_snippet` |
-| Conteudo de documento especifico | `read_file` (apos encontrar via search_graph) |
-| Padrao complexo multi-entidade | `query_graph` |
-| Visao geral da arquitetura | `get_architecture` |
-| String literal, mensagem de erro | `grep` (so depois de esgotar MCP) |
-| Arquivo por nome | `glob` (so depois de esgotar MCP) |
+| Função, classe, rota ou variável | `search_graph` |
+| Quem chama ou é chamado | `trace_path` |
+| Documento, workflow, spec, ADR ou agente | `search_graph` ou `query_graph` |
+| Conteúdo de função ou classe | `get_code_snippet` |
+| Conteúdo de documento específico | `get_code_snippet` após localizar |
+| Padrão complexo multi-entidade | `query_graph` |
+| Visão geral da arquitetura | `get_architecture` |
+| String literal ou mensagem de erro | `grep` somente após esgotar o CLI |
+| Arquivo por nome | `glob` somente após esgotar o CLI |
 
-### Busca em Documentacao
+### Busca em documentação
 
-Como o codebase-memory indexa Markdown como nos `Section`, use Cypher:
+Como o codebase-memory indexa Markdown como nós `Section`, use:
 
-```cypher
-MATCH (s:Section) WHERE s.name CONTAINS "termo" RETURN s.file, s.name
+```bash
+codebase-memory-mcp cli query_graph \
+  '{"project":"<nome>","query":"MATCH (s:Section) WHERE s.name CONTAINS \"termo\" RETURN s.file, s.name"}'
 ```
 
-Ou via `search_graph` com descricao semantica:
-`mcp codebase-memory search_graph '{"project":"nome","query":"workflow multi-agente"}'`
+## Passo 2: executar com recovery
 
-## Passo 2: Executar com recovery
+1. Execute `search_graph` com o projeto confirmado.
+2. Se houver `"project not found"`, execute
+   `codebase-memory-mcp cli list_projects '{}'`.
+3. Retente `search_graph` com o nome exato retornado.
+4. Se o CLI falhar ou o projeto não estiver indexado, use grep/glob como
+   fallback e registre essa limitação.
 
-### codebase-memory (CODIGO + DOCUMENTACAO)
+## Passo 3: navegar resultados
 
-1. `search_graph(project="<nome>", query="<descricao>")`
-2. "project not found"? → `list_projects` → retentar
-3. Vazio? → reformular termos da busca
-4. Para docs: `query_graph` com pattern em Section
-5. Em `search_code`, use `pattern`, nao `query`
-6. So entao → `grep`
-
-## Passo 3: Navegar resultados
-
-- `search_graph` → `get_code_snippet` ou `read_file`
-- `trace_path` → siga trilha com `depth=3`
-- `query_graph` → refine pattern Cypher se necessario
-- `get_code_snippet` → leia trecho especifico
+- `search_graph` → `get_code_snippet` para ler o símbolo localizado.
+- `trace_path` → siga a trilha de chamadas até o limite necessário.
+- `query_graph` → refine a consulta Cypher quando houver muitas entidades.
+- `get_architecture` → use para uma visão geral antes de detalhar símbolos.

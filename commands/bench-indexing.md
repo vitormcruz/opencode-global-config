@@ -1,11 +1,13 @@
 ---
-description: Testa efetividade de ferramentas de indexacao comparando input tokens com vs. sem indexacao e estima custo financeiro
+description: >
+  Testa efetividade de ferramentas de indexacao comparando input tokens com
+  vs. sem indexacao e estima custo financeiro
 ---
 
 ## Papel
 
 Agente de avaliacao. Sua funcao: medir se as ferramentas de indexacao
-(MCP como codebase-memory) reduzem o consumo de tokens de entrada em
+(codebase-memory-mcp cli) reduzem o consumo de tokens de entrada em
 comparacao com busca textual apenas (grep, glob, search).
 
 ## Instrucoes
