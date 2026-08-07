@@ -26,6 +26,17 @@ administrador nos dois SOs.
 **Escopo:** 12 decisões de arquitetura, 28 tasks em 7 fases, ~3.500 linhas de
 shell e 4.608 linhas de BATS migradas.
 
+## Tracking de execução
+
+**Estado atual:** Fase 2 concluída até a Task 2.3. A Task 2.4 está em
+implementação.
+
+**Concluído:** Fase 0, Fase 1, Tasks 2.1, 2.2 e 2.3.
+
+**Exceção registrada:** a integração OpenCode continua bloqueada sem
+`OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
+impediu a execução das demais verificações da Fase 1.
+
 ## Contexto Levantado (inventário)
 
 ### Estado atual
@@ -494,14 +505,14 @@ marcadores `unit`, `tools`, `opencode`, `copilot`. Criar
 `requirements-dev.txt` e documentar a criação da `.venv`.
 
 **Acceptance criteria:**
-- [ ] `pip install -e .` funciona a partir da raiz do repo
-- [ ] `pipx install --editable .` funciona
-- [ ] `pytest --markers` lista os 4 marcadores registrados
-- [ ] `.venv/`, `*.egg-info/`, `__pycache__/` no `.gitignore`
+- [x] `pip install -e .` funciona a partir da raiz do repo
+- [x] `pipx install --editable .` funciona
+- [x] `pytest --markers` lista os 4 marcadores registrados
+- [x] `.venv/`, `*.egg-info/`, `__pycache__/` no `.gitignore`
 
 **Verification:**
-- [ ] `python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt && .venv/bin/pip install -e .`
-- [ ] `.venv/bin/pytest --collect-only` retorna 0 testes sem erro
+- [x] `python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt && .venv/bin/pip install -e .`
+- [x] `.venv/bin/pytest --collect-only` retorna 0 testes sem erro
 
 **Dependencies:** None
 
@@ -522,14 +533,14 @@ diretórios user-space por SO, e manipulação idempotente de blocos marcados em
 arquivos de config (`~/.bashrc`).
 
 **Acceptance criteria:**
-- [ ] Detecção distingue corretamente Linux nativo, WSL e Windows
-- [ ] Contrato JSON tem uma única implementação, reutilizada por todos os wrappers
-- [ ] Escrita de bloco marcado é idempotente (aplicar 2x = mesmo resultado)
-- [ ] Nenhum módulo de `lib/` importa código específico de SO no import time
+- [x] Detecção distingue corretamente Linux nativo, WSL e Windows
+- [x] Contrato JSON tem uma única implementação, reutilizada por todos os wrappers
+- [x] Escrita de bloco marcado é idempotente (aplicar 2x = mesmo resultado)
+- [x] Nenhum módulo de `lib/` importa código específico de SO no import time
 
 **Verification:**
-- [ ] `pytest -m unit tests/lib/` passa
-- [ ] Testes de detecção de SO cobrem os 3 ambientes via monkeypatch
+- [x] `pytest -m unit tests/lib/` passa
+- [x] Testes de detecção de SO cobrem os 3 ambientes via monkeypatch
 
 **Dependencies:** 0.1
 
@@ -549,12 +560,12 @@ atual continue funcionando enquanto o pytest é introduzido. Nenhuma suíte BATS
 é removida nesta fase.
 
 **Acceptance criteria:**
-- [ ] `pytest -m unit` roda e passa (mesmo que com poucos testes)
-- [ ] `make test-unit` continua passando sem alteração de comportamento
-- [ ] Fixture de `HOME` temporário impede que testes escrevam no `HOME` real
+- [x] `pytest -m unit` roda e passa (mesmo que com poucos testes)
+- [x] `make test-unit` continua passando sem alteração de comportamento
+- [x] Fixture de `HOME` temporário impede que testes escrevam no `HOME` real
 
 **Verification:**
-- [ ] `pytest -m unit` e `make test-unit` ambos verdes na mesma árvore
+- [x] `pytest -m unit` e `make test-unit` ambos verdes na mesma árvore
 
 **Dependencies:** 0.1
 
@@ -565,10 +576,10 @@ atual continue funcionando enquanto o pytest é introduzido. Nenhuma suíte BATS
 ---
 
 ### Checkpoint: Fundação
-- [ ] `pipx install --editable .` instala o pacote
-- [ ] `pytest -m unit` verde
-- [ ] `make test-unit` (BATS) ainda verde — nenhuma regressão introduzida
-- [ ] Revisão com o humano antes de prosseguir
+- [x] `pipx install --editable .` instala o pacote
+- [x] `pytest -m unit` verde
+- [x] `make test-unit` (BATS) ainda verde — nenhuma regressão introduzida
+- [x] Revisão com o humano antes de prosseguir
 
 ---
 
@@ -584,17 +595,17 @@ atual continue funcionando enquanto o pytest é introduzido. Nenhuma suíte BATS
 passa a limpar o bloco legado). Remover as suítes BATS correspondentes.
 
 **Acceptance criteria:**
-- [ ] Nenhum arquivo sob `scripts/crawl4ai/` referencia Docker ou MCP
-- [ ] Bootstrap remove o bloco legado do `~/.bashrc` se presente
-- [ ] `tests/scripts/crawl4ai/install-crawl4ai-mcp-test.bats` e
+- [x] Nenhum arquivo sob `scripts/crawl4ai/` referencia Docker ou MCP
+- [x] Bootstrap remove o bloco legado do `~/.bashrc` se presente
+- [x] `tests/scripts/crawl4ai/install-crawl4ai-mcp-test.bats` e
       `start-crawl4ai-test.bats` removidos
-- [ ] `tests/scripts/doctree/` removido — suíte órfã, testa
+- [x] `tests/scripts/doctree/` removido — suíte órfã, testa
       `scripts/doctree/install.sh` que não existe (ver Q3)
-- [ ] `grep -ri "crawl4ai-sanitized\|11235" ` não retorna nada no repo
+- [x] `grep -ri "crawl4ai-sanitized\|11235" ` não retorna nada no repo
 
 **Verification:**
-- [ ] `make test-tools` verde após a remoção
-- [ ] `docker images | grep crawl4ai-sanitized` pode ser limpo manualmente
+- [x] `make test-tools` verde após a remoção
+- [x] `docker images | grep crawl4ai-sanitized` pode ser limpo manualmente
 
 **Dependencies:** 0.1
 
@@ -616,14 +627,14 @@ passa a limpar o bloco legado). Remover as suítes BATS correspondentes.
 `test-copilot-integration` no Makefile, e as 7 suítes BATS `mcp-avelino:*`.
 
 **Acceptance criteria:**
-- [ ] `grep -ri "avelino"` não retorna nada fora de `plan/`
-- [ ] Adapters não escrevem mais `~/.config/mcp/servers.json`
-- [ ] `tests/integration/copilot-mcp-test.bats` removido
-- [ ] Testes de adapter que asseguravam `servers.json` removidos ou reescritos
+- [x] `grep -ri "avelino"` não retorna nada fora de `plan/`
+- [x] Adapters não escrevem mais `~/.config/mcp/servers.json`
+- [x] `tests/integration/copilot-mcp-test.bats` removido
+- [x] Testes de adapter que asseguravam `servers.json` removidos ou reescritos
 
 **Verification:**
-- [ ] `make test-unit` verde
-- [ ] Rodar ambos os adapters num `HOME` temporário não cria `.config/mcp/`
+- [x] `make test-unit` verde
+- [x] Rodar ambos os adapters num `HOME` temporário não cria `.config/mcp/`
 
 **Dependencies:** 1.1
 
@@ -646,16 +657,16 @@ Remover o pós-processamento de `opencode.json` feito por
 que existia só para consertar a entrada MCP.
 
 **Acceptance criteria:**
-- [ ] `opencode.json` não contém a chave `mcp` (ou contém `{}`)
-- [ ] `codebase-memory/install.sh` não edita mais `opencode.json`
-- [ ] `codebase-memory-mcp install -y` deixa de ser invocado (instalava skills MCP)
-- [ ] `auto_index=true` continua sendo configurado — é config do binário, não
+- [x] `opencode.json` não contém a chave `mcp` (ou contém `{}`)
+- [x] `codebase-memory/install.sh` não edita mais `opencode.json`
+- [x] `codebase-memory-mcp install -y` deixa de ser invocado (instalava skills MCP)
+- [x] `auto_index=true` continua sendo configurado — é config do binário, não
       do transporte MCP (ver Q2)
-- [ ] O binário `codebase-memory-mcp` continua sendo instalado (é o CLI)
+- [x] O binário `codebase-memory-mcp` continua sendo instalado (é o CLI)
 
 **Verification:**
-- [ ] `pytest`/BATS de integração MCP removidos e suíte verde
-- [ ] `codebase-memory-mcp cli list_projects '{}'` responde JSON válido
+- [x] `pytest`/BATS de integração MCP removidos e suíte verde
+- [x] `codebase-memory-mcp cli list_projects '{}'` responde JSON válido
 
 **Dependencies:** 1.2
 
@@ -679,16 +690,16 @@ MCP HTTP — pelo tratamento de falha equivalente do CLI (exit code, timeout,
 bloqueio do site).
 
 **Acceptance criteria:**
-- [ ] Nenhuma menção a `crawl4ai_md`, `crawl4ai_html`, `crawl4ai_execute_js`,
+- [x] Nenhuma menção a `crawl4ai_md`, `crawl4ai_html`, `crawl4ai_execute_js`,
       `crawl4ai_screenshot`, `crawl4ai_pdf`
-- [ ] Cadeia de fallback de websearch declarada explicitamente
-- [ ] Um exemplo executável por operação (md, html, js, screenshot, pdf, deep)
-- [ ] Fallback para `doc-extract` em URLs binárias preservado
-- [ ] `description` do frontmatter continua carregando os triggers de ativação
+- [x] Cadeia de fallback de websearch declarada explicitamente
+- [x] Um exemplo executável por operação (md, html, js, screenshot, pdf, deep)
+- [x] Fallback para `doc-extract` em URLs binárias preservado
+- [x] `description` do frontmatter continua carregando os triggers de ativação
 
 **Verification:**
-- [ ] `pytest -m unit tests/skills/test_web_research.py` (porte do `.bats`)
-- [ ] Execução manual: `crwl https://example.com -o md-fit` retorna markdown
+- [x] `pytest -m unit tests/skills/test_web_research.py` (porte do `.bats`)
+- [x] Execução manual: `crwl https://example.com -o md-fit` retorna markdown
 
 **Dependencies:** 1.1
 
@@ -713,16 +724,16 @@ wrapper), `skills/code-explorer-priority/SKILL.md`,
 e o fato de que **ambos** agora usam o mesmo CLI.
 
 **Acceptance criteria:**
-- [ ] Nenhum documento instrui `mcp <servidor> <tool>`
-- [ ] Sintaxe documentada validada: `codebase-memory-mcp cli list_projects '{}'`
-- [ ] A regra "MCP antes de grep/glob" vira "CLI antes de grep/glob", sem
+- [x] Nenhum documento instrui `mcp <servidor> <tool>`
+- [x] Sintaxe documentada validada: `codebase-memory-mcp cli list_projects '{}'`
+- [x] A regra "MCP antes de grep/glob" vira "CLI antes de grep/glob", sem
       perder força imperativa
-- [ ] Instruções de recovery ("project not found" → `list_projects` → re-tentar)
+- [x] Instruções de recovery ("project not found" → `list_projects` → re-tentar)
       preservadas
 
 **Verification:**
-- [ ] `pytest -m unit tests/skills/test_code_explorer.py` (porte do `.bats`)
-- [ ] `grep -rn "mcp --list\|mcp codebase-memory\|mcp crawl4ai"` retorna vazio
+- [x] `pytest -m unit tests/skills/test_code_explorer.py` (porte do `.bats`)
+- [x] `grep -rn "mcp --list\|mcp codebase-memory\|mcp crawl4ai"` retorna vazio
 
 **Dependencies:** 1.2
 
@@ -743,13 +754,13 @@ e o fato de que **ambos** agora usam o mesmo CLI.
 AD-7 move a lógica de preferência para dentro da própria skill.
 
 **Acceptance criteria:**
-- [ ] Nenhum adapter transforma o texto da skill `web-research-exa-crawl4ai`
-- [ ] SKILL.md copiado para `~/.copilot/skills/` é byte-idêntico ao do repo
+- [x] Nenhum adapter transforma o texto da skill `web-research-exa-crawl4ai`
+- [x] SKILL.md copiado para `~/.copilot/skills/` é byte-idêntico ao do repo
       (exceto normalização de frontmatter)
 
 **Verification:**
-- [ ] `pytest`/BATS de adapter verde
-- [ ] `diff` entre `skills/web-research-exa-crawl4ai/SKILL.md` e a cópia gerada
+- [x] `pytest`/BATS de adapter verde
+- [x] `diff` entre `skills/web-research-exa-crawl4ai/SKILL.md` e a cópia gerada
 
 **Dependencies:** 1.4
 
@@ -768,13 +779,13 @@ substituindo o bloco que instalava o `mcp`. Verificação de presença via
 `command -v crwl`.
 
 **Acceptance criteria:**
-- [ ] Bootstrap detecta `crwl` já instalado e não reinstala
-- [ ] `crawl4ai-setup` é executado após a instalação (baixa o browser)
-- [ ] Falha de instalação reporta hint acionável, não aborta o bootstrap inteiro
+- [x] Bootstrap detecta `crwl` já instalado e não reinstala
+- [x] `crawl4ai-setup` é executado após a instalação (baixa o browser)
+- [x] Falha de instalação reporta hint acionável, não aborta o bootstrap inteiro
 
 **Verification:**
-- [ ] Testes BATS de `wsl-install-deps` cobrindo presente/ausente
-- [ ] `crwl --help` responde após bootstrap num ambiente limpo
+- [x] Testes BATS de `wsl-install-deps` cobrindo presente/ausente
+- [x] `crwl --help` responde após bootstrap num ambiente limpo
 
 **Dependencies:** 1.2
 
@@ -796,14 +807,14 @@ dependência obrigatória gerenciada pelo bootstrap, conforme AD-13),
 descreve acesso "via MCP"). Registrar as decisões AD-1..AD-13 como ADR.
 
 **Acceptance criteria:**
-- [ ] README não menciona MCP local, Docker ou `mcp (avelino)`
-- [ ] Variáveis de skip documentadas refletem a realidade pós-mudança
-- [ ] ADR criado em `docs/adr/` cobrindo a eliminação de MCP
-- [ ] AWS CLI aparece na tabela de dependências do README, não como nota solta
-- [ ] Nenhuma linha de MD passa de 120 colunas
+- [x] README não menciona MCP local, Docker ou `mcp (avelino)`
+- [x] Variáveis de skip documentadas refletem a realidade pós-mudança
+- [x] ADR criado em `docs/adr/` cobrindo a eliminação de MCP
+- [x] AWS CLI aparece na tabela de dependências do README, não como nota solta
+- [x] Nenhuma linha de MD passa de 120 colunas
 
 **Verification:**
-- [ ] `grep -rn "avelino\|11235\|mcp/sse"` retorna apenas `plan/` e `docs/adr/`
+- [x] `grep -rn "avelino\|11235\|mcp/sse"` retorna apenas `plan/` e `docs/adr/`
 
 **Dependencies:** 1.1, 1.2, 1.3, 1.4, 1.5, 1.7
 
@@ -817,13 +828,16 @@ descreve acesso "via MCP"). Registrar as decisões AD-1..AD-13 como ADR.
 ---
 
 ### Checkpoint: MCP eliminado
-- [ ] `grep -ri "avelino\|crawl4ai-sanitized\|mcp/sse\|11235"` limpo
-- [ ] `opencode.json` sem bloco `mcp`
-- [ ] `crwl` e `codebase-memory-mcp cli` funcionam no WSL
+- [x] `grep -ri "avelino\|crawl4ai-sanitized\|mcp/sse\|11235"` limpo
+- [x] `opencode.json` sem bloco `mcp`
+- [x] `crwl` e `codebase-memory-mcp cli` funcionam no WSL
 - [ ] `make test-opencode` verde
-- [ ] Skills `web-research-exa-crawl4ai` e `code-explorer-priority` validadas
+- [x] Skills `web-research-exa-crawl4ai` e `code-explorer-priority` validadas
       em execução real (não só por grep)
-- [ ] Revisão com o humano antes de prosseguir
+- [x] Revisão com o humano antes de prosseguir
+
+> `make test-opencode` permanece pendente porque requer
+> `OPENCODE_TEST_MODEL`; o bloqueio foi aceito explicitamente para seguir.
 
 ---
 
