@@ -1,13 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["@slkiser/opencode-quota"],
-  "mcp": {
-    "crawl4ai": {
-      "type": "remote",
-      "url": "http://127.0.0.1:11235/mcp/sse",
-      "enabled": true
-    }
-  },
   "agent": {
     "plan": {
       "model": "opencode/big-pickle"

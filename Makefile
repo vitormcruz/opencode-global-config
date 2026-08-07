@@ -76,7 +76,6 @@ test-opencode-integration:
 	  $(BATS) \
 	    $(TESTS_DIR)/integration/agents-test.bats \
 	    $(TESTS_DIR)/integration/commands-test.bats \
-	    $(TESTS_DIR)/integration/mcp-test.bats \
 	    $(TESTS_DIR)/integration/prompts-test.bats \
 	    $(TESTS_DIR)/integration/skills-activation-test.bats \
 	    $(TESTS_DIR)/integration/docker/container-test-opencode-test.bats'
@@ -100,7 +99,6 @@ test-opencode-integration-rebuild:
 	  $(BATS) \
 	    $(TESTS_DIR)/integration/agents-test.bats \
 	    $(TESTS_DIR)/integration/commands-test.bats \
-	    $(TESTS_DIR)/integration/mcp-test.bats \
 	    $(TESTS_DIR)/integration/prompts-test.bats \
 	    $(TESTS_DIR)/integration/skills-activation-test.bats \
 	    $(TESTS_DIR)/integration/docker/container-test-opencode-test.bats'

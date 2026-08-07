@@ -8,20 +8,6 @@
         "prune": true,
         "reserved": 10000
     },
-    "mcp": {
-        "crawl4ai": {
-            "type": "remote",
-            "url": "http://localhost:11235/mcp/sse",
-            "enabled": true
-        },
-        "codebase-memory": {
-            "type": "local",
-            "command": [
-                "codebase-memory-mcp"
-            ],
-            "enabled": true
-        }
-    },
     "agent": {
         "aws-analista": {
             "permission": {
