@@ -18,3 +18,8 @@ Thumbs.db
 **/node_modules/**
 tests/integration/mcp-mock/package-lock.json
 #./out/
+
+# Python
+.venv/
+*.egg-info/
+__pycache__/

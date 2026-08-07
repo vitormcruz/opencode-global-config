@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opencode-config"
+version = "0.1.0"
+description = "Configuracoes globais do OpenCode e do GitHub Copilot CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+opencode-config-check = "opencode_config:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "unit: testes unitarios sem dependencias externas",
+    "tools: testes que requerem ferramentas instaladas",
+    "opencode: testes de integracao do OpenCode",
+    "copilot: testes de integracao do Copilot CLI",
+]
