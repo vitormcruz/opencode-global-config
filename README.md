@@ -80,7 +80,6 @@ Instaladas automaticamente (quando possivel):
 - `bats-support`
 - `bats-assert`
 - `bats-file`
-- `mcp (avelino)`
 
 O bootstrap tambem instala skills de codebase-memory em `~/.config/opencode/skills/`,
 habilitando comandos `/` de indexacao e busca.
@@ -141,7 +140,6 @@ Destinos sincronizados pelo Copilot CLI:
 - `skills/*/` → `~/.copilot/skills/`
 - `agents/default-artifacts/` → `~/.copilot/agents/default-artifacts/`
 - `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/`
-- MCPs CLI → `~/.config/mcp/servers.json`
 
 ## Testes
 

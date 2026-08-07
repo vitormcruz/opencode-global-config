@@ -32,8 +32,7 @@ teardown() {
   assert_output --partial "Instala dependencias WSL"
   assert_output --partial "Executa o adapter Copilot CLI"
   assert_output --partial "Executa o adapter OpenCode"
-  assert_output --partial "Instala MCPs"
-  assert_output --partial "MCPs"
+  assert_output --partial "Instala ferramentas globais"
 }
 
 @test "configurar-repo com opcao invalida retorna exit 2" {
@@ -56,9 +55,7 @@ teardown() {
   export OPENCODE_SKIP_DEPS=1
   export OPENCODE_SKIP_COPILOT_ADAPTER=1
   export OPENCODE_SKIP_OPENCODE_ADAPTER=1
-  export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
-  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -67,9 +64,7 @@ teardown() {
 @test "configurar-repo respeita OPENCODE_SKIP_COPILOT_ADAPTER=1" {
   export OPENCODE_SKIP_COPILOT_ADAPTER=1
   export OPENCODE_SKIP_OPENCODE_ADAPTER=1
-  export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
-  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
@@ -77,27 +72,15 @@ teardown() {
 
 @test "configurar-repo respeita OPENCODE_SKIP_OPENCODE_ADAPTER=1" {
   export OPENCODE_SKIP_OPENCODE_ADAPTER=1
-  export OPENCODE_SKIP_CRAWL4AI=1
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
-  export OPENCODE_SKIP_DOCTREE=1
 
   run bash "$SCRIPT" --quiet
   assert_success
 }
 
 # ---------------------------------------------------------------------------
-# Variaveis de ambiente SKIP para MCPs
+# Variaveis de ambiente SKIP para ferramentas globais
 # ---------------------------------------------------------------------------
-
-@test "configurar-repo respeita OPENCODE_SKIP_CRAWL4AI=1" {
-  export OPENCODE_SKIP_CRAWL4AI=1
-  export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_ADAPTER=1
-  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
-
-  run bash "$SCRIPT" --quiet
-  assert_success
-}
 
 @test "configurar-repo respeita OPENCODE_SKIP_CODEBASE_MEMORY=1" {
   export OPENCODE_SKIP_CODEBASE_MEMORY=1
@@ -109,24 +92,13 @@ teardown() {
   assert_success
 }
 
-@test "configurar-repo respeita OPENCODE_SKIP_DOCTREE=1" {
-  export OPENCODE_SKIP_DOCTREE=1
-  export OPENCODE_SKIP_DEPS=1
-  export OPENCODE_SKIP_COPILOT_ADAPTER=1
-  export OPENCODE_SKIP_OPENCODE_ADAPTER=1
-
-  run bash "$SCRIPT" --quiet
-  assert_success
-}
-
-@test "configurar-repo --help exibe informacao sobre MCPs" {
+@test "configurar-repo --help exibe ferramentas globais" {
   run bash "$SCRIPT" --help
   assert_success
-  assert_output --partial "crawl4ai"
   assert_output --partial "codebase-memory"
 }
 
-@test "configurar-repo referencia servers.json no resumo final" {
-  run grep -q 'servers.json' "$SCRIPT"
-  assert_success
+@test "configurar-repo nao referencia configuracao MCP removida" {
+  run grep -Eq 'servers\.json|OPENCODE_SKIP_CRAWL4AI|run_crawl4ai' "$SCRIPT"
+  assert_failure
 }

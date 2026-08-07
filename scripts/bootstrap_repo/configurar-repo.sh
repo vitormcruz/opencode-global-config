@@ -190,7 +190,6 @@ main() {
   say "  ls -la ~/.copilot/agents/ 2>/dev/null || true"
   say "  ls -la ~/.copilot/instructions/ 2>/dev/null || true"
   say "  ls -la ~/.copilot/skills/ 2>/dev/null || true"
-  say "  cat ~/.config/mcp/servers.json 2>/dev/null || true"
   say ""
 }
 

@@ -570,12 +570,6 @@ else
 fi
 say ""
 
-# --- mcp (avelino) ---
-say "[mcp (avelino)] MCP CLI"
-MCP_INSTALL_DIR="${HOME}/.local/bin"
-MCP_URL="${MCP_URL:-https://github.com/avelino/mcp/releases/latest/download/mcp-x86_64-unknown-linux-gnu}"
-MCP_EXPECTED_SHA="${MCP_EXPECTED_SHA:-}"
-
 fix_chrondb_lib() {
   local chrondb_lib="${HOME}/.chrondb/lib"
   local tmp_dir="${chrondb_lib}/.tmp-extract-runtime"
@@ -585,37 +579,6 @@ fix_chrondb_lib() {
     rmdir "$tmp_dir" 2>/dev/null
   fi
 }
-
-if has_cmd mcp; then
-  status_ok "mcp ($(mcp --version 2>/dev/null | head -1 || echo ok))"
-else
-  if ! has_cmd curl; then
-    status_missing "mcp"
-    status_hint "Instale curl para baixar o mcp automaticamente"
-  else
-    _mcp_tmp="$(mktemp)"
-    if curl -fsSL "$MCP_URL" -o "$_mcp_tmp" 2>/dev/null; then
-      _mcp_sha="$(sha256sum "$_mcp_tmp" | awk '{print $1}')"
-      say "            SHA do arquivo: $_mcp_sha"
-      if [ -n "$MCP_EXPECTED_SHA" ] && [ "$_mcp_sha" != "$MCP_EXPECTED_SHA" ]; then
-        say "  ERROR: SHA mismatch ao instalar mcp"
-        say "         SHA esperado no repo: $MCP_EXPECTED_SHA"
-        say "         SHA real do arquivo:  $_mcp_sha"
-        say "         Para atualizar: MCP_EXPECTED_SHA=<novo valor>"
-        rm -f "$_mcp_tmp"
-        exit 1
-      fi
-      mkdir -p "$MCP_INSTALL_DIR"
-      mv "$_mcp_tmp" "$MCP_INSTALL_DIR/mcp"
-      chmod +x "$MCP_INSTALL_DIR/mcp"
-      status_installed "mcp"
-    else
-      rm -f "$_mcp_tmp"
-      status_missing "mcp"
-      status_hint "Falha ao baixar mcp. Tente manualmente: $MCP_URL"
-    fi
-  fi
-fi
 
 fix_chrondb_lib
 say ""
