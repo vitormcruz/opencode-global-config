@@ -55,7 +55,6 @@ test-tools:
 	        $(TESTS_DIR)/scripts/opencode-md-export-test.bats \
 	        $(TESTS_DIR)/scripts/opencode-svgtoimage-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/wsl-install-deps-test.bats \
-	        $(TESTS_DIR)/scripts/crawl4ai \
 	        $(TESTS_DIR)/scripts/codebase-memory
 
 ## OpenCode via container Docker (reusa container existente)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # configurar-repo.sh
 # Entrypoint principal para configurar o repo opencode-config.
-# Orquestra: deps (WSL), adapters de plataforma e MCPs globais.
+# Orquestra: deps (WSL), adapters de plataforma e ferramentas globais.
 #
 # Uso: ./scripts/bootstrap_repo/configurar-repo.sh [--yes]
 
@@ -25,7 +25,7 @@ Configura o repositorio opencode-config:
   1. Instala dependencias WSL
   2. Executa o adapter Copilot CLI
   3. Executa o adapter OpenCode
-  4. Instala MCPs e ferramentas globais (crawl4ai, codebase-memory)
+  4. Instala ferramentas globais (codebase-memory)
 
 Uso:
   ./scripts/bootstrap_repo/configurar-repo.sh [--yes] [--quiet]
@@ -40,7 +40,6 @@ Variaveis de ambiente:
   OPENCODE_SKIP_COPILOT_ADAPTER=1 Pula o adapter Copilot CLI
   OPENCODE_SKIP_OPENCODE_ADAPTER=1 Pula o adapter OpenCode
   OPENCODE_SKIP_SKILL_SYNC=1     Pula sincronizacao de skills upstream
-  OPENCODE_SKIP_CRAWL4AI=1       Pula configuracao do MCP crawl4ai
   OPENCODE_SKIP_CODEBASE_MEMORY=1 Pula configuracao do MCP codebase-memory
 EOF
       exit 0
@@ -57,7 +56,6 @@ warn() { printf '%s\n' "$*" >&2; }
 wsl_deps_script="${script_dir}/wsl-install-deps.sh"
 copilot_adapter_script="${repo_root}/adapters/copilot-cli/copilot-cli-adapter.sh"
 opencode_adapter_script="${repo_root}/adapters/opencode/opencode-adapter.sh"
-crawl4ai_script="${repo_root}/scripts/crawl4ai/install-crawl4ai-mcp.sh"
 codebase_memory_script="${repo_root}/scripts/codebase-memory/install.sh"
 
 check_script() {
@@ -72,6 +70,20 @@ check_script() {
 section() {
   say ""
   say "=== $* ==="
+}
+
+cleanup_legacy_crawl4ai_bashrc() {
+  local bashrc_file="${HOME}/.bashrc"
+  [ -f "$bashrc_file" ] || return 0
+
+  local cleaned_file
+  cleaned_file="$(mktemp)"
+  awk '
+    /^# Crawl4AI MCP - INICIO$/ { removing=1; next }
+    /^# Crawl4AI MCP - FIM$/ { removing=0; next }
+    !removing { print }
+  ' "$bashrc_file" > "$cleaned_file"
+  mv "$cleaned_file" "$bashrc_file"
 }
 
 # ---------------------------------------------------------------------------
@@ -134,21 +146,8 @@ run_opencode_adapter() {
 }
 
 # ---------------------------------------------------------------------------
-# Fase 4: Instalar MCPs
+# Fase 4: Instalar ferramentas globais
 # ---------------------------------------------------------------------------
-run_crawl4ai() {
-  if [ "${OPENCODE_SKIP_CRAWL4AI:-0}" = "1" ]; then
-    say "SKIP: MCP crawl4ai (OPENCODE_SKIP_CRAWL4AI=1)"
-    return 0
-  fi
-
-  check_script "$crawl4ai_script" "install-crawl4ai-mcp" || return 1
-
-  section "Instalando MCP crawl4ai"
-
-  bash "$crawl4ai_script"
-}
-
 run_codebase_memory() {
   if [ "${OPENCODE_SKIP_CODEBASE_MEMORY:-0}" = "1" ]; then
     say "SKIP: MCP codebase-memory (OPENCODE_SKIP_CODEBASE_MEMORY=1)"
@@ -170,6 +169,8 @@ run_codebase_memory() {
 # Main: Orquestra as fases
 # ---------------------------------------------------------------------------
 main() {
+  cleanup_legacy_crawl4ai_bashrc
+
   say ""
   say "╔══════════════════════════════════════════════════════════╗"
   say "║       Configurando repositorio opencode-config           ║"
@@ -179,7 +180,6 @@ main() {
   run_deps || warn "Falha na instalacao de dependencias (continuando...)"
   run_copilot_adapter || warn "Falha no adapter Copilot CLI (continuando...)"
   run_opencode_adapter || warn "Falha no adapter OpenCode (continuando...)"
-  run_crawl4ai || warn "Falha na instalacao do crawl4ai (continuando...)"
   run_codebase_memory || warn "Falha na instalacao do codebase-memory (continuando...)"
 
   section "Concluido"
