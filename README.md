@@ -20,7 +20,7 @@ O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
 3. **Executa o adapter OpenCode** (`adapters/opencode/opencode-adapter.sh`)
-4. **Instala ferramentas globais** — codebase-memory
+4. **Instala ferramentas globais** — `crwl` e codebase-memory
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
@@ -57,7 +57,8 @@ O `configurar-repo.sh` cria links simbolicos em `~/.config/opencode`:
 
 O arquivo `AGENTS.md` e local a este repo e **nao** e linkado globalmente.
 
-Se ja existir algo nesses destinos, o script move o conteudo anterior para um backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
+Se ja existir algo nesses destinos, o script move o conteudo anterior para um
+backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
 ## Variaveis de ambiente
 
@@ -73,6 +74,7 @@ Instaladas automaticamente (quando possivel):
 
 - `bats`
 - `pipx`
+- `crawl4ai` (`crwl`) e o browser via `crawl4ai-setup`
 - `docling`
 - `playwright`
 - `bun`

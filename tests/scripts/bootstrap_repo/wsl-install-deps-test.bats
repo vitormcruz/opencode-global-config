@@ -372,6 +372,94 @@ CHECK_PYTHON3_FN='
 }
 
 # ---------------------------------------------------------------------------
+# crwl — instalação via pipx e preparação do browser
+# ---------------------------------------------------------------------------
+
+@test "wsl-install-deps detecta crwl presente sem reinstalar" {
+  local fake_bin pipx_log setup_log
+  fake_bin="$(mktemp -d)"
+  pipx_log="$TEST_HOME/pipx.log"
+  setup_log="$TEST_HOME/crawl4ai-setup.log"
+
+  printf '#!/bin/sh\nprintf "crwl %s\\n" "$*" >/dev/null\n' > "$fake_bin/crwl"
+  printf '#!/bin/sh\nprintf "setup\\n" >> "$CRWL_SETUP_LOG"\n' > "$fake_bin/crawl4ai-setup"
+  cat > "$fake_bin/pipx" <<'MOCK'
+#!/bin/sh
+printf '%s\n' "$*" >> "$PIPX_LOG"
+MOCK
+  chmod +x "$fake_bin/crwl" "$fake_bin/crawl4ai-setup" "$fake_bin/pipx"
+
+  run env PATH="$fake_bin:$TEST_HOME/.local/bin:$PATH" \
+    PIPX_LOG="$pipx_log" CRWL_SETUP_LOG="$setup_log" \
+    /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "OK       crwl"
+  ! grep -Fq "install crawl4ai" "$pipx_log"
+  [ ! -e "$setup_log" ]
+
+  rm -rf "$fake_bin"
+}
+
+@test "wsl-install-deps instala crawl4ai e executa crawl4ai-setup" {
+  local fake_bin pipx_log setup_log
+  fake_bin="$(mktemp -d)"
+  pipx_log="$TEST_HOME/pipx.log"
+  setup_log="$TEST_HOME/crawl4ai-setup.log"
+
+  cat > "$fake_bin/pipx" <<'MOCK'
+#!/bin/sh
+printf '%s\n' "$*" >> "$PIPX_LOG"
+if [ "$1" = "install" ] && [ "$2" = "crawl4ai" ]; then
+  cat > "$PIPX_INSTALL_BIN/crwl" <<'CRWL'
+#!/bin/sh
+exit 0
+CRWL
+  cat > "$PIPX_INSTALL_BIN/crawl4ai-setup" <<'SETUP'
+#!/bin/sh
+printf 'setup\n' >> "$CRWL_SETUP_LOG"
+SETUP
+  chmod +x "$PIPX_INSTALL_BIN/crwl" "$PIPX_INSTALL_BIN/crawl4ai-setup"
+fi
+MOCK
+  chmod +x "$fake_bin/pipx"
+
+  run env PATH="$fake_bin:$TEST_HOME/.local/bin:/usr/bin:/bin" \
+    PIPX_LOG="$pipx_log" PIPX_INSTALL_BIN="$TEST_HOME/.local/bin" \
+    CRWL_SETUP_LOG="$setup_log" \
+    /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "INSTALLED crwl"
+  grep -Fq "install crawl4ai" "$pipx_log"
+  assert_file_exist "$setup_log"
+
+  rm -rf "$fake_bin"
+}
+
+@test "wsl-install-deps reporta falha de crawl4ai sem abortar bootstrap" {
+  local fake_bin pipx_log
+  fake_bin="$(mktemp -d)"
+  pipx_log="$TEST_HOME/pipx.log"
+
+  cat > "$fake_bin/pipx" <<'MOCK'
+#!/bin/sh
+printf '%s\n' "$*" >> "$PIPX_LOG"
+if [ "$1" = "install" ] && [ "$2" = "crawl4ai" ]; then
+  exit 1
+fi
+MOCK
+  chmod +x "$fake_bin/pipx"
+
+  run env PATH="$fake_bin:$TEST_HOME/.local/bin:/usr/bin:/bin" \
+    PIPX_LOG="$pipx_log" /usr/bin/bash "$SCRIPT" --yes
+  assert_success
+  assert_output --partial "Falha ao instalar crawl4ai"
+  assert_output --partial "pipx install crawl4ai"
+  grep -Fq "install crawl4ai" "$pipx_log"
+
+  rm -rf "$fake_bin"
+}
+
+# ---------------------------------------------------------------------------
 # [codebase-memory-mcp] — verificação de disponibilidade
 # ---------------------------------------------------------------------------
 

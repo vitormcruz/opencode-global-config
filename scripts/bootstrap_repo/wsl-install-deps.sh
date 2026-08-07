@@ -362,6 +362,18 @@ install_docling_pipx() {
   pipx ensurepath 2>/dev/null || true
 }
 
+install_crwl_pipx() {
+  say "  -> Instalando crawl4ai via pipx..."
+  local install_status=0
+
+  pipx install crawl4ai || install_status=$?
+  if [ "$install_status" -ne 0 ]; then
+    return "$install_status"
+  fi
+
+  pipx ensurepath 2>/dev/null || true
+}
+
 # --------------------------------------------------------------------------
 # Confirmar acao (respeita --yes)
 # --------------------------------------------------------------------------
@@ -510,6 +522,40 @@ elif confirm_action "  Instalar docling via pipx agora?"; then
 else
   status_missing "docling"
   status_hint "Para instalar depois: pipx install docling"
+fi
+say ""
+
+# --- crwl ---
+say "[crwl] Skill: web-research-exa-crawl4ai"
+export PATH="$HOME/.local/bin:$PATH"
+if has_cmd crwl; then
+  status_ok "crwl"
+elif ! has_cmd pipx; then
+  status_missing "crwl"
+  status_hint "Primeiro instale pipx, depois: pipx install crawl4ai"
+elif confirm_action "  Instalar crawl4ai via pipx agora?"; then
+  if install_crwl_pipx; then
+    export PATH="$HOME/.local/bin:$PATH"
+    if ! has_cmd crwl; then
+      status_missing "crwl instalado mas nao encontrado no PATH"
+      status_hint "Execute: export PATH=\"\$HOME/.local/bin:\$PATH\""
+    elif ! has_cmd crawl4ai-setup; then
+      status_installed "crwl"
+      status_hint "Instale o browser manualmente: crawl4ai-setup"
+    elif crawl4ai-setup; then
+      status_installed "crwl"
+    else
+      status_installed "crwl"
+      status_hint "Falha ao preparar o browser; tente: crawl4ai-setup"
+    fi
+  else
+    status_missing "crwl"
+    status_hint "Falha ao instalar crawl4ai"
+    status_hint "Tente manualmente: pipx install crawl4ai"
+  fi
+else
+  status_missing "crwl"
+  status_hint "Para instalar depois: pipx install crawl4ai && crawl4ai-setup"
 fi
 say ""
 
