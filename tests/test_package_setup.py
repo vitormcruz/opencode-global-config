@@ -45,6 +45,13 @@ def test_project_registers_doc_extract_entrypoint():
 
 
 @pytest.mark.unit
+def test_project_registers_md_export_entrypoint():
+    pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text()
+
+    assert 'opencode-md-export = "opencode_config.cli.md_export:main"' in pyproject
+
+
+@pytest.mark.unit
 def test_python_artifacts_are_ignored():
     gitignore = (REPOSITORY_ROOT / ".gitignore").read_text()
 

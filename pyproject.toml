@@ -13,6 +13,7 @@ dependencies = []
 [project.scripts]
 opencode-config-check = "opencode_config:main"
 opencode-doc-extract = "opencode_config.cli.doc_extract:main"
+opencode-md-export = "opencode_config.cli.md_export:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

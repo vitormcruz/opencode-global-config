@@ -25,7 +25,7 @@ Converter arquivos `.md` para `docx`, `pptx` ou `xlsx` usando o Pandoc como back
 
 ## Ferramenta
 
-Script: `~/.config/opencode/scripts/opencode-md-export.sh`
+Comando: `opencode-md-export`
 
 ## Entrada (stdin, JSON)
 
@@ -60,7 +60,8 @@ Script: `~/.config/opencode/scripts/opencode-md-export.sh`
 
 1. Nunca sobrescrever arquivo existente sem `--force` explicito nas `extraArgs`.
 2. `outputDir` default: `./out/md-export/<timestamp>/`
-3. Se `pandoc` nao estiver no PATH, retornar `ok: false` com `hint` de instalacao.
+3. Se `pandoc` nao estiver no PATH nem no diretorio portatil do repositorio,
+   retornar `ok: false` com `hint` de instalacao.
 4. Nao tentar instalar dependencias; apenas informar.
 5. O agente deve passar `source` como caminho absoluto ou relativo ao diretorio de trabalho atual.
 
@@ -88,7 +89,7 @@ Converter para XLSX (tabelas Markdown):
 
 ## Sugestoes de instalacao (quando pandoc faltar)
 
-- Ubuntu/WSL: `sudo apt-get update && sudo apt-get install -y pandoc`
-- macOS: `brew install pandoc`
-- Windows: `winget install JohnMacFarlane.Pandoc`
-- Ou baixe em: https://pandoc.org/installing.html
+- Recomendado: baixe o ZIP portatil oficial e extraia em `tools/pandoc/`
+- Windows: use o `pandoc.exe` do ZIP portatil, sem instalacao administrativa
+- Linux/WSL e macOS: use o ZIP portatil ou uma instalacao user-space
+- Docs: https://pandoc.org/installing.html

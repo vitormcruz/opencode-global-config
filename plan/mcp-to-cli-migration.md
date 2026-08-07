@@ -869,12 +869,12 @@ o OCR é feito pelo próprio docling — sem `tesseract`/`ocrmypdf`.
 estratégia zero-admin de AD-9 (zip portátil no Windows).
 
 **Acceptance criteria:**
-- [ ] Conversões docx/pptx/xlsx produzem os mesmos artefatos do script bash
-- [ ] Localiza o `pandoc` tanto no PATH quanto no diretório portátil do repo
-- [ ] `skills/md-export/SKILL.md` chama `opencode-md-export`
+- [x] Conversões docx/pptx/xlsx produzem os mesmos artefatos do script bash
+- [x] Localiza o `pandoc` tanto no PATH quanto no diretório portátil do repo
+- [x] `skills/md-export/SKILL.md` chama `opencode-md-export`
 
 **Verification:**
-- [ ] `pytest -m tools tests/cli/test_md_export.py` (porte de
+- [x] `pytest -m tools tests/cli/test_md_export.py` (porte de
       `opencode-md-export-test.bats`, 179 linhas)
 
 **Dependencies:** 0.2
