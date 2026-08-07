@@ -270,10 +270,6 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.sh"
 }
 
-@test "scripts/opencode-doc-extract.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/opencode-doc-extract.sh"
-}
-
 @test "scripts/opencode-md-export.sh é executável" {
   assert_file_executable "$REPO_ROOT/scripts/opencode-md-export.sh"
 }

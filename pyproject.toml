@@ -12,6 +12,7 @@ dependencies = []
 
 [project.scripts]
 opencode-config-check = "opencode_config:main"
+opencode-doc-extract = "opencode_config.cli.doc_extract:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

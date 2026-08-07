@@ -38,6 +38,13 @@ def test_project_registers_required_pytest_markers(pytestconfig):
 
 
 @pytest.mark.unit
+def test_project_registers_doc_extract_entrypoint():
+    pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text()
+
+    assert 'opencode-doc-extract = "opencode_config.cli.doc_extract:main"' in pyproject
+
+
+@pytest.mark.unit
 def test_python_artifacts_are_ignored():
     gitignore = (REPOSITORY_ROOT / ".gitignore").read_text()
 

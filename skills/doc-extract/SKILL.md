@@ -33,7 +33,7 @@ para `md`, `json`, `text` ou `html`, facilitando que a IA leia e processe o cont
 
 ## Ferramenta
 
-Script: `~/.config/opencode/scripts/opencode-doc-extract.sh`
+Comando: `opencode-doc-extract`
 
 ## Formatos de entrada suportados (via Docling)
 
@@ -73,6 +73,7 @@ Script: `~/.config/opencode/scripts/opencode-doc-extract.sh`
 3. Nao tentar instalar dependencias; apenas informar.
 4. Para PDFs escaneados (sem texto), OCR e ativado por padrao; desative com `"ocr": false` se o PDF
    ja tiver texto selecionavel.
+   O OCR e executado pelo proprio Docling; nao requer `tesseract` nem `ocrmypdf`.
 5. O agente deve ler o(s) arquivo(s) gerados em `artifacts` para obter o conteudo extraido.
 6. **Imagens base64 no output**: o Docling inclui imagens como `![Image](data:image/...base64...)`.
    Essas linhas sao longas e poluem o contexto. Ao ler o `.md` gerado, ignore linhas que comecem com
