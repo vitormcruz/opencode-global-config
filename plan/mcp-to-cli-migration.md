@@ -294,6 +294,7 @@ em user-space ou binário portátil.
 | git | PortableGit (Windows) / já presente no Linux |
 | Playwright + Chromium | `npx playwright install` → `%LOCALAPPDATA%\ms-playwright` |
 | pytest + plugins | `.venv` do repo (AD-8) |
+| AWS CLI v2 | script oficial em modo user-local (ver AD-13) |
 
 **Duas simplificações descobertas na investigação:**
 
@@ -398,6 +399,68 @@ A remoção do MCP (fase 1) vem logo após a fundação por dois motivos: é o
 pedido original (entrega valor cedo) e é a fatia de maior risco técnico
 (falha rápido).
 
+### AD-13: AWS CLI v2 como dependência obrigatória e gerenciada — APROVADO
+
+**Decisão:** o AWS CLI v2 entra no registro de dependências do bootstrap como
+**obrigatório nos dois SOs**, instalado pelo script oficial da AWS em modo
+**user-local** (sem `sudo`, sem admin).
+
+**Motivação:** o agente `aws-analista` opera inteiramente via `aws` CLI, e as
+skills `aws-sso-login` e `aws-add-account-sso` têm como passo 1 do fluxo
+"validar se o AWS CLI está disponível". O `opencode.json` concede permissão
+dedicada `"aws-*": "allow"` ao agente. Apesar disso, a dependência **nunca
+entrou no bootstrap** — figurava apenas como nota solta no `README.md:104`
+("Dependência externa fora desse comando"). Nenhum script a detecta ou instala.
+
+**Instaladores oficiais (ambos verificados nesta sessão):**
+
+Invocação — Linux/WSL:
+
+```bash
+curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash
+```
+
+Invocação — Windows (PowerShell):
+
+```powershell
+irm https://awscli.amazonaws.com/v2/install.ps1 | iex
+```
+
+| | Linux/WSL | Windows |
+|---|---|---|
+| Script | `install.sh` (23.658 B) | `install.ps1` (15.594 B) |
+| Default | user-local, **sem root** | user-local, **sem admin** |
+| Destino | `$HOME/.local/share/aws-cli` + symlink em `$HOME/.local/bin` | `%LOCALAPPDATA%\Programs\Amazon\AWSCLIV2` |
+| Escopo global | `--system` (exige root) | `-System` (exige admin) |
+| Silencioso | `--quiet` | `-Quiet` |
+| Pinar versão | `--version <X.Y.Z>` | `-Version <X.Y.Z>` |
+| Ajuda | `--help` | `-Help` |
+
+**Propriedades que sustentam a decisão:**
+
+- Os dois scripts são **simétricos por design** — mesmos modos, mesma
+  semântica, elevação sempre opt-in e nunca default.
+- O Windows usa um MSI **dedicado por usuário** (`AWSCLIV2-User.msi`), publicado
+  pela própria AWS — não é extração improvisada do MSI per-machine.
+- O `install.ps1` verifica **assinatura Authenticode** do MSI antes de instalar.
+- Ambos são **idempotentes**: detectam a versão instalada e saem com
+  "nothing to do"; recusam downgrade com mensagem acionável.
+- No Windows *"the MSI manages PATH"* — o bootstrap não precisa mexer no PATH.
+- No Linux respeitam `XDG_DATA_HOME`/`XDG_BIN_HOME`, e o default
+  `$HOME/.local/bin` é exatamente a convenção que AD-9 já adota.
+- Ambos falham cedo e com mensagem explícita se `--system`/`-System` for pedido
+  sem privilégio — nunca degradam silenciosamente.
+
+**Nota de pesquisa:** a documentação espelhada em
+`awsdocs/aws-cli-user-guide` (GitHub) está **desatualizada** na seção Windows —
+afirma "Admin rights to install software" sem qualificador e não menciona o
+script. A página viva em `docs.aws.amazon.com` traz "(if installing for all
+users)" e as três abas *Install script (recommended)*, *MSI installer - All
+users*, *MSI installer - Current user*. Consultar sempre a página viva.
+
+**Sem risco novo:** não há workaround envolvido, então nenhum risco específico
+é criado. Falha de download por proxy corporativo já está coberta por R5.
+
 ## Skills de Referência (obrigatórias para o executor)
 
 O executor deve carregar e aplicar estas skills ao longo de todo o plano:
@@ -413,7 +476,7 @@ O executor deve carregar e aplicar estas skills ao longo de todo o plano:
 | `code-review-and-quality` | Checkpoint de cada fase, antes de seguir |
 | `debugging-and-error-recovery` | Qualquer falha de teste ou desvio de comportamento |
 | `security-and-hardening` | Fase 4: download de binários portáteis, verificação de SHA, escrita em PATH |
-| `documentation-and-adrs` | Fase 1 e 6: registrar as decisões AD-1..AD-12 como ADRs |
+| `documentation-and-adrs` | Fase 1 e 6: registrar as decisões AD-1..AD-13 como ADRs |
 | `git-workflow-and-versioning` | Commits por fatia, Conventional Commits |
 | `caveman` | Formato das mensagens de commit |
 | `spec-driven-development` | Fase 4: comportamento do bootstrap interativo precisa de spec antes do código |
@@ -725,15 +788,18 @@ substituindo o bloco que instalava o `mcp`. Verificação de presença via
 #### Task 1.8: Atualizar documentação da fase 1
 
 **Description:** Atualizar `README.md` (seções Bootstrap e Dependências —
-remover `mcp (avelino)` e o container crawl4ai, adicionar `crwl`),
+remover `mcp (avelino)` e o container crawl4ai, adicionar `crwl`, e promover o
+AWS CLI de "dependência externa fora desse comando" (`README.md:104`) a
+dependência obrigatória gerenciada pelo bootstrap, conforme AD-13),
 `AGENTS.md` (seção Bootstrap, variáveis `OPENCODE_SKIP_*`) e
 `agents/default-artifacts/doc-readme.md:127` (linha do codebase-memory que
-descreve acesso "via MCP"). Registrar as decisões AD-1..AD-12 como ADR.
+descreve acesso "via MCP"). Registrar as decisões AD-1..AD-13 como ADR.
 
 **Acceptance criteria:**
 - [ ] README não menciona MCP local, Docker ou `mcp (avelino)`
 - [ ] Variáveis de skip documentadas refletem a realidade pós-mudança
 - [ ] ADR criado em `docs/adr/` cobrindo a eliminação de MCP
+- [ ] AWS CLI aparece na tabela de dependências do README, não como nota solta
 - [ ] Nenhuma linha de MD passa de 120 colunas
 
 **Verification:**
@@ -976,7 +1042,7 @@ estado de cada uma.
 - [ ] Registro é declarativo — acrescentar dependência não exige código novo
 - [ ] Detecção reporta: presente/ausente, versão, caminho, método previsto
 - [ ] Nenhuma instalação ocorre na fase de detecção
-- [ ] Cobre as dependências da tabela de AD-9
+- [ ] Cobre as dependências da tabela de AD-9, incluindo o AWS CLI (AD-13)
 
 **Verification:**
 - [ ] `pytest -m unit tests/bootstrap/test_detect.py` com PATH mockado
@@ -996,8 +1062,8 @@ estado de cada uma.
 
 **Description:** Implementar os instaladores de AD-9: pipx, `npm -g` com prefix
 user-space, fnm (binário portátil, incl. `fnm-windows.zip`), pandoc portátil,
-PortableGit, `crawl4ai-setup`, `npx playwright install`, e a criação da `.venv`.
-Downloads devem verificar SHA quando o upstream publicar.
+PortableGit, `crawl4ai-setup`, `npx playwright install`, AWS CLI v2 (AD-13) e a
+criação da `.venv`. Downloads devem verificar SHA quando o upstream publicar.
 
 **Acceptance criteria:**
 - [ ] Nenhum instalador requer `sudo` ou elevação
@@ -1006,6 +1072,9 @@ Downloads devem verificar SHA quando o upstream publicar.
 - [ ] Download verifica integridade quando houver SHA publicado; aborta se
       divergir, exibindo ambos os hashes
 - [ ] Falha de uma dependência não aborta as demais
+- [ ] AWS CLI instalado pelo script oficial em modo user-local, com `--quiet` /
+      `-Quiet`, e **nunca** com `--system` / `-System`
+- [ ] Reexecutar o instalador do AWS CLI é no-op quando já está na versão alvo
 
 **Verification:**
 - [ ] `pytest -m unit tests/bootstrap/test_installers.py` com rede mockada
@@ -1278,7 +1347,8 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - [ ] `AGENTS.md` reflete o repo pós-migração, sem regra órfã
 - [ ] README documenta bootstrap Linux **e** Windows, com a estratégia zero-admin
 - [ ] Seção de dependências do README bate com o registro de AD-10
-- [ ] ADRs cobrem AD-1..AD-12
+- [ ] `aws --version` funciona nos dois SOs após bootstrap, sem elevação (AD-13)
+- [ ] ADRs cobrem AD-1..AD-13
 - [ ] Nenhuma linha de MD passa de 120 colunas
 
 **Verification:**
@@ -1367,3 +1437,33 @@ Resta uma questão para o humano:
   disponível? Se não, a fase 4 fica bloqueada no último passo e as fases 5–6
   seguem em paralelo no WSL — mas o objetivo "funcionar no Windows" só é
   comprovado ao final.
+
+## Varredura de Ferramentas Externas (concluída)
+
+Após identificar que o AWS CLI havia escapado do inventário original, foi feita
+uma varredura sistemática de `agents/` e `skills/` atrás de outras ferramentas
+externas invocadas diretamente por agentes — classe de dependência que a
+varredura inicial (focada em MCP e scripts) não cobria.
+
+**Resultado: o AWS CLI era a única lacuna real.** Nenhuma segunda foi
+encontrada.
+
+As demais ferramentas detectadas — `semgrep`, `trivy`, `gitleaks`, `axe`,
+`pa11y`, `lighthouse`, `sqlfluff`, `alembic`, `flyway`, `liquibase`, `eslint`,
+`prettier`, `ruff`, `mypy` — são **harness do projeto-alvo**, não dependências
+do `opencode-config`. Isso é explícito por design:
+
+- `skills/harness-catalog/SKILL.md`: "Não são regras obrigatórias. O harness
+  efetivo de cada agente é definido no /doc/README.md de cada projeto."
+- `agents/sec.md:197`: "conforme stack"
+- `agents/front.md:265`: "usando ferramentas do projeto"
+- `agents/dba.md:43`: "por conta própria"
+
+Corretamente fora do escopo do bootstrap — não devem entrar no registro de
+AD-9/AD-10.
+
+**Dependências de nível de repo, todas já cobertas:** `docling` (doc-extract),
+`pandoc` (md-export), Playwright (browser-testing e, sob AD-9, svg-to-image),
+`crwl` (web-research + doc-extract), `aws` (aws-analista + as duas skills AWS,
+agora endereçado por AD-13). Os scripts do repo exigem apenas `git` e
+`python3`.
