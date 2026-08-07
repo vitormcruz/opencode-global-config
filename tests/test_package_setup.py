@@ -52,6 +52,13 @@ def test_project_registers_md_export_entrypoint():
 
 
 @pytest.mark.unit
+def test_project_registers_svgtoimage_entrypoint():
+    pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text()
+
+    assert 'opencode-svgtoimage = "opencode_config.cli.svgtoimage:main"' in pyproject
+
+
+@pytest.mark.unit
 def test_python_artifacts_are_ignored():
     gitignore = (REPOSITORY_ROOT / ".gitignore").read_text()
 

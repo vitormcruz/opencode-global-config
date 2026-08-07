@@ -11,7 +11,8 @@ Entrada:
 - SVG completo via stdin.
 
 Execucao:
-- Script: ~/.config/opencode/scripts/opencode-svgtoimage.sh
+- Comando: `opencode-svgtoimage`
+- Backend: Playwright/Chromium, compartilhado com a skill `browser-testing`
 
 Saida em stdout (uma unica linha JSON):
 
@@ -22,3 +23,4 @@ Saida em stdout (uma unica linha JSON):
 Uso:
 - Agentes devem enviar o SVG cru via stdin para este script.
 - Devem usar o campo `markdown` diretamente na resposta ao usuario.
+- Nao requer `resvg` nem `rsvg-convert`.

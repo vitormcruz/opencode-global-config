@@ -894,16 +894,16 @@ README. Manter o contrato de entrada (SVG via stdin) e a variável de override
 se ainda fizer sentido.
 
 **Acceptance criteria:**
-- [ ] PNG gerado a partir de SVG via stdin, com dimensões corretas
-- [ ] Funciona sem `resvg` e sem `rsvg-convert` instalados
-- [ ] Reaproveita a instalação de Playwright da skill `browser-testing` — não
+- [x] PNG gerado a partir de SVG via stdin, com dimensões corretas
+- [x] Funciona sem `resvg` e sem `rsvg-convert` instalados
+- [x] Reaproveita a instalação de Playwright da skill `browser-testing` — não
       instala um segundo browser
-- [ ] `skills/svg-to-image/SKILL.md` atualizado
+- [x] `skills/svg-to-image/SKILL.md` atualizado
 
 **Verification:**
-- [ ] `pytest -m tools tests/cli/test_svgtoimage.py` (porte de
+- [x] `pytest -m tools tests/cli/test_svgtoimage.py` (porte de
       `opencode-svgtoimage-test.bats`, 83 linhas)
-- [ ] Comparação visual/dimensional com a saída do `resvg` atual
+- [x] Comparação visual/dimensional com a saída do `resvg` atual
 
 **Dependencies:** 0.2
 

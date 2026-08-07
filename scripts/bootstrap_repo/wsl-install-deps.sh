@@ -10,7 +10,6 @@
 #   - pandoc (conversao de Markdown para docx/pptx)
 #   - pipx (instalador de apps Python em isolamento)
 #   - docling (extracao de documentos via pipx)
-#   - resvg/rsvg-convert (conversao de SVG para PNG)
 #   - playwright (browser testing via WSL)
 
 # -------------------------------------------------------------------
@@ -559,32 +558,8 @@ else
 fi
 say ""
 
-# --- conversor SVG ---
-say "[resvg ou rsvg-convert] Skill: svg-to-image"
-if has_cmd resvg; then
-  status_ok "resvg"
-elif has_cmd rsvg-convert; then
-  status_ok "rsvg-convert"
-else
-  status_missing "resvg"
-  status_missing "rsvg-convert"
-  case "$OS" in
-    wsl|linux)
-      status_hint "Instalar: sudo apt-get install -y librsvg2-bin"
-      need_sudo_pkg "librsvg2-bin"
-      ;;
-    macos)
-      status_hint "Instalar: brew install librsvg"
-      ;;
-    *)
-      status_hint "Instale resvg ou rsvg-convert para usar a skill svg-to-image"
-      ;;
-  esac
-fi
-say ""
-
 # --- Playwright (browser-testing) ---
-say "[playwright] Skill: browser-testing (via WSL)"
+say "[playwright] Skills: browser-testing e svg-to-image (via WSL)"
 if has_cmd playwright; then
   status_ok "playwright"
 else

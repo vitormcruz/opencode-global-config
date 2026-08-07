@@ -51,7 +51,6 @@ test-tools:
 	@printf '    ./scripts/bootstrap_repo/configurar-repo.sh\n'
 	@printf '\n'
 	$(BATS) \
-	        $(TESTS_DIR)/scripts/opencode-svgtoimage-test.bats \
 	        $(TESTS_DIR)/scripts/bootstrap_repo/wsl-install-deps-test.bats \
 	        $(TESTS_DIR)/scripts/codebase-memory
 

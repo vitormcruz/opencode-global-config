@@ -97,7 +97,7 @@ Pacotes que precisam de `sudo` no Ubuntu/WSL:
 ```bash
 sudo apt-get update && sudo apt-get install -y \
   make pandoc pipx \
-  tesseract-ocr ocrmypdf ghostscript qpdf librsvg2-bin
+  tesseract-ocr ocrmypdf ghostscript qpdf
 ```
 
 O AWS CLI v2 e usado por `aws-sso-login` e `aws-add-account-sso`.

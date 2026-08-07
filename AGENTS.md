@@ -225,7 +225,7 @@ nas descrições
 - Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.
 - **Nenhum teste pode usar `skip`** — quando um pré-requisito externo não estiver
   disponível, o teste deve usar `fail "mensagem clara"`. Testes de integração que
-  dependem de ferramentas externas (pandoc, docling, resvg, playwright, etc.) devem
+  dependem de ferramentas externas (pandoc, docling, playwright, etc.) devem
   falhar com instrução de instalação. Testes unitários nunca devem depender de
   ferramentas externas — usam mocks/stubs. Silenciar testes esconde problemas de
   ambiente.

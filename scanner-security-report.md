@@ -13,7 +13,7 @@ problemas de segurança conhecidos nos 29 artefatos instalados por este repo.
 | **PyPI** (pipx) | docling | `pip-audit` | `pipx install pip-audit` |
 | **npm global** | Playwright, Exa e plugins OpenCode | `npm audit` | nativo do Node.js |
 | **PyPI** (pipx) | crawl4ai | `pip-audit` | `pipx install pip-audit` |
-| **APT system** | make, pandoc, librsvg2-bin e jq | `debsecan` / `trivy rootfs` | `apt install debsecan` |
+| **APT system** | make, pandoc e jq | `debsecan` / `trivy rootfs` | `apt install debsecan` |
 | **Tarballs GitHub** | bats-core, bats-support, bats-assert, bats-file | `trivy fs` / `grype .` | binario |
 | **Script remoto** | nvm install.sh (via `curl | bash`) | Auditoria manual + `gpg --verify` | N/A |
 | **Node.js via nvm** | Node.js 22 | `nvm audit` (Node.js --security-revert) + `npm audit` | nativo |
