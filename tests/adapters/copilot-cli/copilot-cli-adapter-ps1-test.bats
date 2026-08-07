@@ -32,6 +32,11 @@ SCRIPT="$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.ps1"
   assert_failure
 }
 
+@test "adapter PowerShell nao sincroniza configuracao MCP" {
+  run grep -q 'McpServersJson\|Sync-McpCli\|servers\.json' "$SCRIPT"
+  assert_failure
+}
+
 @test "adapter PowerShell valida frontmatter de skills" {
   run grep -q 'function Adapt-SkillForCopilot' "$SCRIPT"
   assert_success

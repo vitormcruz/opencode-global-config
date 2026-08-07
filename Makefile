@@ -113,7 +113,7 @@ test-opencode-integration-default-model:
 test-opencode-integration-rebuild-default-model:
 	$(MAKE) test-opencode-integration-rebuild OPENCODE_TEST_MODEL=opencode/big-pickle
 
-## Integracao Copilot CLI (requer copilot e mcp no PATH)
+## Integracao Copilot CLI (requer copilot no PATH)
 test-copilot-integration:
 	@bash -c 'set -e; \
 	  if ! command -v copilot >/dev/null 2>&1; then \
@@ -124,16 +124,8 @@ test-copilot-integration:
 	    echo "  copilot --login"; \
 	    exit 1; \
 	  fi; \
-	  if ! command -v mcp >/dev/null 2>&1; then \
-	    echo "ERRO: avelino/mcp nao encontrado no PATH"; \
-	    echo ""; \
-	    echo "Instale via bootstrap:"; \
-	    echo "  ./scripts/bootstrap_repo/configurar-repo.sh --yes"; \
-	    exit 1; \
-	  fi; \
 	  $(BATS) \
-	    $(TESTS_DIR)/integration/copilot-cli-test.bats \
-	    $(TESTS_DIR)/integration/copilot-mcp-test.bats'
+	    $(TESTS_DIR)/integration/copilot-cli-test.bats'
 
 help:
 	@grep -E '^##' Makefile | sed 's/## //'

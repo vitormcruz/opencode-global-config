@@ -124,4 +124,4 @@ O analista deve elicitar:
 
 | Ferramenta | Uso | Instalação |
 |-----------|-----|-----------|
-| codebase-memory | Grafo de conhecimento do código-fonte e docs (.md). Permite que agentes naveguem estrutura, rastreiem chamadas e consultem seções de documentação sem precisar ler arquivo por arquivo. | `npx -y @avelino/codebase-memory-mcp` (via MCP) |
+| codebase-memory | Grafo de conhecimento do código-fonte e docs (.md). Permite que agentes naveguem estrutura, rastreiem chamadas e consultem seções de documentação sem precisar ler arquivo por arquivo. | `codebase-memory-mcp cli <tool> '<json>'` |

@@ -14,7 +14,6 @@ copilot_dir="${dest_root}/.copilot"
 skills_dir="${copilot_dir}/skills"
 instructions_dir="${copilot_dir}/instructions"
 agents_dir="${copilot_dir}/agents"
-mcp_servers_json="${dest_root}/.config/mcp/servers.json"
 backup_dir="${dest_root}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
 
 assume_yes=0
@@ -30,7 +29,6 @@ while [[ $# -gt 0 ]]; do
       skills_dir="${copilot_dir}/skills"
       instructions_dir="${copilot_dir}/instructions"
       agents_dir="${copilot_dir}/agents"
-      mcp_servers_json="${dest_root}/.config/mcp/servers.json"
       backup_dir="${dest_root}/.config/copilot-backup/$(date +%Y%m%d-%H%M%S)"
       shift
       ;;
@@ -57,7 +55,6 @@ Opcoes:
   commands/*.md     -> ~/.copilot/skills/*/SKILL.md
   default-artifacts -> ~/.copilot/agents/default-artifacts/
   copilot-instrs    -> ~/.copilot/instructions/copilot-specific.instructions.md
-  MCPs CLI globais (crawl4ai,codebase-memory) -> ~/.config/mcp/servers.json
 EOF
       exit 0
       ;;
@@ -382,47 +379,6 @@ sync_instructions() {
   say "OK    copilot-specific.instructions.md (user global)"
 }
 
-sync_mcp_cli() {
-  say "--- MCP CLI ---" >&2
-  ensure_dir "$(dirname "$mcp_servers_json")"
-  backup_if_exists "$mcp_servers_json"
-  python3 - <<'PY' "$mcp_servers_json"
-import json, pathlib, sys
-path = pathlib.Path(sys.argv[1])
-# Formato mcpServers para avelino/mcp CLI
-new_servers = {
-    'crawl4ai': {
-        # SSE server usa url
-        'url': 'http://localhost:11235/mcp/sse',
-    },
-    'codebase-memory': {
-        # stdio server usa command + args
-        'command': 'codebase-memory-mcp',
-        'args': [],
-    },
-}
-if path.exists():
-    try:
-        data = json.loads(path.read_text(encoding='utf-8'))
-    except Exception:
-        data = {'mcpServers': {}}
-else:
-    data = {'mcpServers': {}}
-servers = data.setdefault('mcpServers', {})
-added = []
-updated = []
-for key, value in new_servers.items():
-    if key not in servers:
-        servers[key] = value
-        added.append(key)
-    elif servers[key] != value:
-        servers[key] = value
-        updated.append(key)
-path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-print(json.dumps({'added': added, 'updated': updated}))
-PY
-}
-
 show_plan() {
   local n_skills n_agents n_commands
   n_skills="$(find "$repo_root/skills" -mindepth 1 -maxdepth 1 -type d | while read -r d; do [[ -f "$d/SKILL.md" ]] && printf 'x\n'; done | wc -l)"
@@ -433,7 +389,6 @@ show_plan() {
   say "Skills:       $skills_dir"
   say "Instructions: $instructions_dir"
   say "Agents:       $agents_dir"
-  say "MCP CLI:      $mcp_servers_json"
   say ""
   say "Plano:"
   say "  - Copiar $n_skills skill(s) para ~/.copilot/skills/"
@@ -441,7 +396,6 @@ show_plan() {
   say "  - Converter $n_commands command(s) em skills"
   say "  - Copiar agents/default-artifacts/ para ~/.copilot/agents/default-artifacts/"
   say "  - Copiar .github/copilot-specific.instructions.md para ~/.copilot/instructions/"
-  say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
 
 confirm() {
@@ -465,25 +419,6 @@ main() {
   sync_commands_as_skills
   sync_default_artifacts
   sync_instructions
-  local mcp_cli_result cli_added cli_updated
-  mcp_cli_result="$(sync_mcp_cli)"
-  cli_added="$(python3 - <<'PY' "$mcp_cli_result"
-import json, sys
-payload = json.loads(sys.argv[1] or '{}')
-print(', '.join(payload.get('added', [])))
-PY
-  )"
-  cli_updated="$(python3 - <<'PY' "$mcp_cli_result"
-import json, sys
-payload = json.loads(sys.argv[1] or '{}')
-print(', '.join(payload.get('updated', [])))
-PY
-  )"
-  if [[ -n "$cli_added" || -n "$cli_updated" ]]; then
-    say "OK    servers.json (add: ${cli_added:-nenhum}; update: ${cli_updated:-nenhum})"
-  else
-    say "OK    servers.json (sem alteracoes necessarias)"
-  fi
   say ""
   say "Pronto."
 }

@@ -87,8 +87,8 @@ NUNCA inicie uma investigacao com ferramentas nativas sem antes tentar indexar.
 ## Arquitetura MCP no Copilot
 
 O GitHub Copilot suporta MCP nativamente, mas nao e possivel utiliza-lo no ambiente
-de uso. Para acessar os servidores MCP configurados neste repo, usamos o wrapper CLI
-`avelino/mcp` instalado em `~/.local/bin/mcp`.
+de uso. Para acessar as ferramentas configuradas neste repo, usamos os CLIs nativos
+instalados em user-space.
 
 Fluxo de acesso:
   1. Copilot recebe instrucao para usar uma tool MCP
@@ -128,7 +128,7 @@ Prefira pipes com `jq` para filtrar saida JSON.
 ## Ferramentas de Indexacao
 
 Este projeto utiliza `codebase-memory-mcp` como servidor MCP.
-O acesso pelo Copilot e feito via CLI `mcp` (avelino/mcp), nao por MCP nativo.
+O acesso pelo Copilot e feito diretamente pelos CLIs nativos, nao por MCP nativo.
 
 ### Como usar pelo Copilot
 

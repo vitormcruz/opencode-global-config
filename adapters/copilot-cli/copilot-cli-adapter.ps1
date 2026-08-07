@@ -57,7 +57,6 @@ Opcoes:
   commands\*.md     -> %USERPROFILE%\.copilot\skills\*\SKILL.md
   default-artifacts -> %USERPROFILE%\.copilot\agents\default-artifacts\
   copilot-instrs    -> %USERPROFILE%\.copilot\instructions\copilot-specific.instructions.md
-  MCPs CLI globais (crawl4ai,codebase-memory) -> %USERPROFILE%\.config\mcp\servers.json
 "@
 }
 
@@ -77,13 +76,11 @@ if ($DestRoot) {
     $SkillsDir       = Join-Path $DestRoot ".copilot\skills"
     $InstructionsDir = Join-Path $DestRoot ".copilot\instructions"
     $AgentsDir       = Join-Path $DestRoot ".copilot\agents"
-    $McpServersJson  = Join-Path $DestRoot ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $DestRoot "copilot-backup"
 } else {
     $SkillsDir       = Join-Path $env:USERPROFILE ".copilot\skills"
     $InstructionsDir = Join-Path $env:USERPROFILE ".copilot\instructions"
     $AgentsDir       = Join-Path $env:USERPROFILE ".copilot\agents"
-    $McpServersJson  = Join-Path $env:USERPROFILE ".config\mcp\servers.json"
     $BackupRoot      = Join-Path $env:USERPROFILE ".config\copilot-backup"
 }
 
@@ -489,58 +486,6 @@ function Sync-Instructions {
     Say "OK    copilot-specific.instructions.md (user global)"
 }
 
-function Sync-McpCli {
-    Ensure-Dir (Split-Path -Parent $McpServersJson)
-    Backup-IfExists $McpServersJson
-
-    $newServers = @{
-        "crawl4ai" = [ordered]@{
-            "type" = "sse"
-            "url"  = "http://localhost:11235/mcp/sse"
-        }
-        "codebase-memory" = [ordered]@{
-            "command" = "codebase-memory-mcp"
-            "args"    = @()
-        }
-    }
-
-    if (Test-Path $McpServersJson) {
-        try   { $data = Get-Content $McpServersJson -Raw | ConvertFrom-Json }
-        catch { $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} } }
-    } else {
-        $data = [PSCustomObject]@{ servers = [PSCustomObject]@{} }
-    }
-
-    if (-not @($data.PSObject.Properties | Where-Object { $_.Name -eq "servers" }).Count) {
-        $data | Add-Member -MemberType NoteProperty -Name "servers" -Value ([PSCustomObject]@{})
-    }
-
-    $added = @()
-    $updated = @()
-    foreach ($key in $newServers.Keys) {
-        $existing = $data.servers.PSObject.Properties[$key]
-        if (-not $existing) {
-            $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
-            $added += $key
-        } else {
-            $currentJson = ($existing.Value | ConvertTo-Json -Depth 10 -Compress)
-            $expectedJson = ($newServers[$key] | ConvertTo-Json -Depth 10 -Compress)
-            if ($currentJson -ne $expectedJson) {
-                $data.servers.PSObject.Properties.Remove($key)
-                $data.servers | Add-Member -MemberType NoteProperty -Name $key -Value $newServers[$key]
-                $updated += $key
-            }
-        }
-    }
-
-    $data | ConvertTo-Json -Depth 10 | Set-Content -Path $McpServersJson -Encoding UTF8
-
-    return [PSCustomObject]@{
-        Added = $added
-        Updated = $updated
-    }
-}
-
 # ──────────────────────────────────────────────────────────────
 # Show-Plan / Main
 # ──────────────────────────────────────────────────────────────
@@ -555,7 +500,6 @@ function Show-Plan {
     Say "Skills:       $SkillsDir"
     Say "Instructions: $InstructionsDir"
     Say "Agents:       $AgentsDir"
-    Say "MCP CLI:      $McpServersJson"
     Say ""
     Say "Plano:"
     Say "  - Copiar $nSkills skill(s) para .copilot\skills\"
@@ -563,7 +507,6 @@ function Show-Plan {
     Say "  - Converter $nCommands command(s) em skills"
     Say "  - Copiar .github/copilot-specific.instructions.md para .copilot\\instructions\\"
     Say "  - Copiar agents\default-artifacts para .copilot\agents\default-artifacts"
-    Say "  - Configurar MCPs CLI globais (crawl4ai, codebase-memory) em servers.json"
 }
 
 Show-Plan
@@ -573,11 +516,5 @@ Sync-Agents
 Sync-CommandsAsSkills
 Sync-DefaultArtifacts
 Sync-Instructions
-$mcpCliResult = Sync-McpCli
-if ($mcpCliResult.Added.Count -gt 0 -or $mcpCliResult.Updated.Count -gt 0) {
-    Say "OK    servers.json (add: $((@($mcpCliResult.Added) -join ', ') -replace '^$', 'nenhum'); update: $((@($mcpCliResult.Updated) -join ', ') -replace '^$', 'nenhum'))"
-} else {
-    Say "OK    servers.json (sem alteracoes necessarias)"
-}
 Say ""
 Say "Pronto."

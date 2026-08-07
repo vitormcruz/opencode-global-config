@@ -64,3 +64,9 @@ run_adapter() {
   assert_not_exist "$DEST_ROOT/.copilot/agents/eng-software.md"
   assert_not_exist "$DEST_ROOT/.copilot/commands"
 }
+
+@test "adapter Copilot nao cria configuracao MCP" {
+  run_adapter
+  assert_success
+  assert_not_exist "$DEST_ROOT/.config/mcp/servers.json"
+}
