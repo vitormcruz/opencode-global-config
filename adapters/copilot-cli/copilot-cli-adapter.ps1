@@ -296,9 +296,7 @@ function Rewrite-ScriptRefs([string]$SkillName, [string]$SkillDest) {
 
 # ──────────────────────────────────────────────────────────────
 # Adapt-SkillForCopilot
-# Aplica adaptacoes especificas por skill ao SKILL.md copiado.
-# Atualmente: web-research-exa-crawl4ai substitui 'websearch'
-# pela tool real do Exa MCP (web_search_exa).
+# Aplica validacoes e adaptacoes de frontmatter ao SKILL.md copiado.
 # ──────────────────────────────────────────────────────────────
 
 function Adapt-SkillForCopilot([string]$SkillName, [string]$SkillDest) {
@@ -343,13 +341,6 @@ function Adapt-SkillForCopilot([string]$SkillName, [string]$SkillDest) {
         }
         if (-not $content) { $content = $original }
     }
-    # Substitui referencias a 'websearch' pela tool do Exa MCP.
-    # 'websearch/Exa' -> 'web_search_exa' (remove o sufixo /Exa redundante)
-    $content  = $content  -replace '`websearch/Exa`', '`web_search_exa`'
-    $content  = $content  -replace 'websearch/Exa',   'web_search_exa'
-    $content  = $content  -replace '`websearch`',     '`web_search_exa`'
-    $content  = $content  -replace '\bwebsearch\b',   'web_search_exa'
-
     if ($content -ne $original) {
         Write-Utf8NoBom $skillMd $content
     }

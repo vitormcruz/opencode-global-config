@@ -37,6 +37,11 @@ SCRIPT="$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.ps1"
   assert_failure
 }
 
+@test "adapter PowerShell nao reescreve websearch" {
+  run grep -q 'web_search_exa' "$SCRIPT"
+  assert_failure
+}
+
 @test "adapter PowerShell valida frontmatter de skills" {
   run grep -q 'function Adapt-SkillForCopilot' "$SCRIPT"
   assert_success

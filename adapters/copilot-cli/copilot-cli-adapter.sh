@@ -202,12 +202,6 @@ for match in re.findall(r'\./scripts/(\S+)', content):
         cmd = f'wsl python {wsl_base}/{match}' if dst.suffix == '.py' else f'wsl bash {wsl_base}/{match}'
         content = content.replace(f'./scripts/{match}', cmd)
 
-if skill_name == 'web-research-exa-crawl4ai':
-    content = content.replace('`websearch/Exa`', '`web_search_exa`')
-    content = content.replace('websearch/Exa', 'web_search_exa')
-    content = content.replace('`websearch`', '`web_search_exa`')
-    content = re.sub(r'\bwebsearch\b', 'web_search_exa', content)
-
 if content != original:
     skill_md.write_text(content, encoding='utf-8')
 PY

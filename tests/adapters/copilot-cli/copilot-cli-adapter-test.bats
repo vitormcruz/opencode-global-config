@@ -70,3 +70,16 @@ run_adapter() {
   assert_success
   assert_not_exist "$DEST_ROOT/.config/mcp/servers.json"
 }
+
+@test "adapter Copilot preserva skill web-research sem reescrita" {
+  run grep -q 'web_search_exa' \
+    "$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.sh"
+  assert_failure
+
+  run_adapter
+  assert_success
+  run cmp \
+    "$REPO_ROOT/skills/web-research-exa-crawl4ai/SKILL.md" \
+    "$DEST_ROOT/.copilot/skills/web-research-exa-crawl4ai/SKILL.md"
+  assert_success
+}
