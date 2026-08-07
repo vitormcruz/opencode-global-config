@@ -28,10 +28,11 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Fase 3 concluída até a Task 3.1. A Task 3.2 é a próxima
-execução; o checkpoint de adapters ainda está pendente.
+**Estado atual:** Task 3.2 implementada e validada no WSL; a validação real no
+Windows e a revisão do checkpoint de adapters ainda estão pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4 e Task 3.1.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Task 3.1 e implementação da
+Task 3.2.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -1018,17 +1019,18 @@ comandos são os mesmos nos dois SOs. Passa a ser **Windows-first** (AD-6),
 ainda executável no Linux para testes.
 
 **Acceptance criteria:**
-- [ ] Um único código-fonte; `.sh` e `.ps1` removidos
-- [ ] Conversão de frontmatter de agentes e de commands→skills preservada
-- [ ] Validação de nome de skill e frontmatter preservada
-- [ ] Nenhuma reescrita de caminho de script no SKILL.md copiado
-- [ ] A regra de sincronização `.sh`/`.ps1` sai do `AGENTS.md` (não há mais par)
+- [x] Um único código-fonte; `.sh` e `.ps1` removidos
+- [x] Conversão de frontmatter de agentes e de commands→skills preservada
+- [x] Validação de nome de skill e frontmatter preservada
+- [x] Nenhuma reescrita de caminho de script no SKILL.md copiado
+- [x] A regra de sincronização `.sh`/`.ps1` sai do `AGENTS.md` (não há mais par)
 
 **Verification:**
-- [ ] `pytest -m unit tests/adapters/test_copilot_adapter.py` (porte de
+- [x] `pytest -m unit tests/adapters/test_copilot_adapter.py` (porte de
       `copilot-cli-adapter-test.bats` + `-ps1-test.bats`)
-- [ ] Execução com `--dest-root` temporário produz a árvore esperada
+- [x] Execução com `--dest-root` temporário produz a árvore esperada
 - [ ] Execução real no Windows produz `%USERPROFILE%\.copilot\` funcional
+      (pendente: este ambiente só disponibiliza WSL/Linux)
 
 **Dependencies:** 3.1
 
@@ -1042,10 +1044,10 @@ ainda executável no Linux para testes.
 ---
 
 ### Checkpoint: Adapters migrados
-- [ ] Um único adapter por cliente, em Python
-- [ ] `pytest -m unit` verde
+- [x] Um único adapter por cliente, em Python
+- [x] `pytest -m unit` verde
 - [ ] Adapter Copilot validado **no Windows real**, não só em mock
-- [ ] `AGENTS.md` sem a regra de sincronização `.sh`/`.ps1`
+- [x] `AGENTS.md` sem a regra de sincronização `.sh`/`.ps1`
 - [ ] Revisão com o humano
 
 ---

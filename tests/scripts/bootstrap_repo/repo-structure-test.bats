@@ -266,8 +266,8 @@ console.log('valid');
   assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-install-deps.sh"
 }
 
-@test "adapters/copilot-cli/copilot-cli-adapter.sh é executável" {
-  assert_file_executable "$REPO_ROOT/adapters/copilot-cli/copilot-cli-adapter.sh"
+@test "adapter Copilot Python existe" {
+  assert_file_exist "$REPO_ROOT/src/opencode_config/adapters/copilot.py"
 }
 
 # ---------------------------------------------------------------------------

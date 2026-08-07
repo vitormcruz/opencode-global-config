@@ -18,7 +18,7 @@ Depois de clonar este repo, rode:
 
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
+2. **Executa o adapter Copilot CLI** (`opencode-copilot-adapter`)
 3. **Executa o adapter OpenCode** (`opencode-adapter`)
 4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
 
@@ -125,14 +125,10 @@ Use diretamente:
 
 ```bash
 opencode-adapter --yes
-./adapters/copilot-cli/copilot-cli-adapter.sh --yes
+opencode-copilot-adapter --yes
 ```
 
-No Windows, a versão PowerShell do adapter Copilot CLI é:
-
-```powershell
-.\adapters\copilot-cli\copilot-cli-adapter.ps1 -Yes
-```
+O mesmo comando Python funciona no Linux, WSL e Windows.
 
 Destinos sincronizados pelo Copilot CLI:
 

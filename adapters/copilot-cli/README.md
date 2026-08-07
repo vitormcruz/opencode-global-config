@@ -5,17 +5,13 @@ diretórios usados pelo Copilot CLI.
 
 ## Uso
 
-No WSL ou Linux, execute:
+Execute após instalar o pacote editável:
 
-```bash
-./adapters/copilot-cli/copilot-cli-adapter.sh --yes
+```text
+opencode-copilot-adapter --yes
 ```
 
-No Windows, execute a versão PowerShell:
-
-```powershell
-.\adapters\copilot-cli\copilot-cli-adapter.ps1 -Yes
-```
+O mesmo comando funciona em Linux, WSL e Windows.
 
 O adapter sincroniza agentes, skills, comandos convertidos e artefatos
 auxiliares para `~/.copilot/`. O bootstrap principal também executa este

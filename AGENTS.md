@@ -106,7 +106,7 @@ Depois de clonar este repo, rode:
 
 O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
+2. **Executa o adapter Copilot CLI** (`opencode-copilot-adapter`)
 3. **Executa o adapter OpenCode** (`opencode-adapter`)
 4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
 
@@ -308,15 +308,10 @@ Todos suportam `--yes` e `--check-only`.
 # Sincronizacao dos Adaptadores
 - A fonte canonica fica em `agents/`, `skills/`, `commands/` e `docs/`.
 - `adapters/opencode/` cria links simbolicos para a configuracao nativa.
-- `adapters/copilot-cli/` converte e copia artefatos para `~/.copilot/`.
-- Os scripts `adapters/copilot-cli/copilot-cli-adapter.ps1` e
-  `adapters/copilot-cli/copilot-cli-adapter.sh`
-  sao adaptadores do mesmo repo para o GitHub Copilot em plataformas diferentes.
-- O comportamento canonico nao pertence a apenas um deles: o canonico e que ambos sao adaptadores
-  deste repo para a estrutura de artefatos que o Copilot aceita em cada plataforma.
-- Regra obrigatoria: os dois devem permanecer semanticamente sincronizados e devem ser alterados
-  juntos sempre que houver mudanca no mapeamento `repo -> artefatos do Copilot`.
-- Ao implementar a mudanca, adapte apenas diferencas de plataforma, paths e formato de deploy,
-  preservando a mesma intencao e a mesma cobertura funcional nos dois ambientes.
+- `adapters/copilot-cli/` documenta o adapter Python que converte e copia
+  artefatos para `~/.copilot/`.
+- O comportamento canônico fica em
+  `src/opencode_config/adapters/copilot.py`, com o mesmo comando em Linux,
+  WSL e Windows.
 - Se uma mudanca tocar apenas um desses scripts, o agente deve tratar isso como possivel
   divergencia, verificar imediatamente o outro e informar isso ao humano.

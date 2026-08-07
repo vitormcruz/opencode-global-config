@@ -38,13 +38,20 @@ def test_mcp_wrapper_artifacts_are_not_orchestrated(repo_root: Path):
     )
 
     for path in files:
+        if not path.exists():
+            continue
         content = path.read_text(encoding="utf-8")
         assert "servers.json" not in content
 
 
 @pytest.mark.unit
 def test_copilot_integration_does_not_reference_removed_mcp_suite(repo_root: Path):
-    makefile = (repo_root / "Makefile").read_text(encoding="utf-8")
+    makefile_path = repo_root / "Makefile"
+    makefile = (
+        makefile_path.read_text(encoding="utf-8")
+        if makefile_path.exists()
+        else ""
+    )
 
     assert "command -v mcp" not in makefile
     assert "copilot-mcp-test.bats" not in makefile
