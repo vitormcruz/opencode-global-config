@@ -28,10 +28,11 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Fase 2 concluída até a Task 2.3. A Task 2.4 está em
-implementação.
+**Estado atual:** Fase 2 concluída até a Task 2.4. O checkpoint automatizado
+foi executado parcialmente; BATS de integração e a revisão humana continuam
+pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1, 2.2 e 2.3.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1, 2.2, 2.3 e 2.4.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -941,15 +942,15 @@ visual — validar antes de descartar o `resvg`.
 fase 4 — aqui apenas a execução.
 
 **Acceptance criteria:**
-- [ ] `run` e `run.sh` removidos; um único entry point
-- [ ] Cleanup do script temporário garantido mesmo em falha (equivalente ao `trap`)
-- [ ] Contrato JSON de saída preservado
-- [ ] `skills/browser-testing/SKILL.md` atualizado
+- [x] `run` e `run.sh` removidos; um único entry point
+- [x] Cleanup do script temporário garantido mesmo em falha (equivalente ao `trap`)
+- [x] Contrato JSON de saída preservado
+- [x] `skills/browser-testing/SKILL.md` atualizado
 
 **Verification:**
-- [ ] `pytest -m tools tests/cli/test_browser_test.py` (porte de
+- [x] `pytest -m tools tests/cli/test_browser_test.py` (porte de
       `run-test.bats`, 132 linhas)
-- [ ] Execução real de um teste Playwright trivial
+- [x] Execução real de um teste Playwright trivial
 
 **Dependencies:** 0.2
 
@@ -962,11 +963,15 @@ fase 4 — aqui apenas a execução.
 ---
 
 ### Checkpoint: Wrappers migrados
-- [ ] Os 4 entry points respondem no PATH após `pipx install --editable .`
-- [ ] `pytest -m "unit or tools"` verde
-- [ ] Nenhum SKILL.md referencia caminho de script
+- [x] Os 4 entry points respondem no PATH após `pipx install --editable .`
+- [x] `pytest -m "unit or tools"` verde
+- [x] Nenhum SKILL.md referencia caminho de script
 - [ ] BATS remanescentes ainda verdes (nada quebrou por tabela)
 - [ ] Revisão com o humano
+
+> A suíte BATS completa foi interrompida porque os testes de integração exigem
+> o servidor OpenCode em `127.0.0.1:4196`; os testes direcionados da área
+> modificada permanecem verdes.
 
 ---
 

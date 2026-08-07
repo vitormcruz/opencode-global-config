@@ -6,7 +6,7 @@ description: Testes funcionais de UI com Playwright. Use quando validar fluxos w
 
 # browser-testing
 
-Skill para testes funcionais de UI usando Playwright via WSL.
+Skill para testes funcionais de UI usando Playwright em Linux, WSL ou Windows.
 
 ## Quando usar
 
@@ -17,22 +17,17 @@ Skill para testes funcionais de UI usando Playwright via WSL.
 
 ## Ambiente
 
-### Detecção WSL
+### Execução por plataforma
 
-- Se `uname` retorna "Linux" com `/proc/version` contendo
-  "microsoft" → está no WSL, executar direto
-- Se está no Windows (PowerShell/cmd) → prefixar com
-  `wsl -e bash -c "..."`
-- O script executor (`scripts/browser-test/run`) lida com
-  isso internamente
+- Linux e WSL: executar `opencode-browser-test` diretamente
+- Windows: executar `opencode-browser-test` diretamente, sem prefixo `wsl`
+- O comando resolve Node.js e Playwright no user-space configurado pelo bootstrap
 
 ### Instalação
 
-Se Playwright não está disponível:
-
-```bash
-bash scripts/browser-test/install-playwright.sh --yes
-```
+O bootstrap do repositório instala Playwright e o Chromium no user-space.
+Se o executor reportar que Playwright não está disponível, execute novamente
+o bootstrap antes de repetir o teste.
 
 ## Workflow de teste funcional
 
@@ -81,7 +76,7 @@ const { chromium } = require('playwright');
 ### 2. Executar via executor
 
 ```bash
-bash scripts/browser-test/run /tmp/browser-test-abc123.js
+opencode-browser-test /tmp/browser-test-abc123.js
 ```
 
 O executor:
@@ -120,7 +115,7 @@ O executor:
 ## Ciclo de vida dos scripts
 
 1. Agente gera `/tmp/browser-test-<uuid>.js`
-2. Executor roda o script no WSL
+2. Executor roda o script na plataforma atual
 3. Coleta: exit code, stdout (JSON), screenshots
 4. **Deleta o script** — não deixa lixo no projeto
 5. Persiste evidências no arquivo de planejamento
