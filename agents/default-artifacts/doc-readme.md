@@ -124,4 +124,4 @@ O analista deve elicitar:
 
 | Ferramenta | Uso | Instalação |
 |-----------|-----|-----------|
-| codebase-memory | Grafo de conhecimento do código-fonte e docs (.md). Permite que agentes naveguem estrutura, rastreiem chamadas e consultem seções de documentação sem precisar ler arquivo por arquivo. | `codebase-memory-mcp cli <tool> '<json>'` |
+| codebase-memory CLI | Grafo de código e docs; navegação estrutural e consulta de seções. | `codebase-memory-mcp cli` |

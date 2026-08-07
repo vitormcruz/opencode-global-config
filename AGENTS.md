@@ -108,14 +108,13 @@ O script executa quatro fases:
 1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
 2. **Executa o adapter Copilot CLI** (`adapters/copilot-cli/copilot-cli-adapter.sh`)
 3. **Executa o adapter OpenCode** (`adapters/opencode/opencode-adapter.sh`)
-4. **Instala MCPs globais** — crawl4ai, codebase-memory
+4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
 
 Cada parte pode ser pulada via variaveis de ambiente:
 - `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
 - `OPENCODE_SKIP_COPILOT_ADAPTER=1` — pula o adapter Copilot CLI
 - `OPENCODE_SKIP_OPENCODE_ADAPTER=1` — pula o adapter OpenCode
-- `OPENCODE_SKIP_CRAWL4AI=1` — pula configuracao do MCP crawl4ai
-- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do MCP codebase-memory
+- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do codebase-memory CLI
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 
