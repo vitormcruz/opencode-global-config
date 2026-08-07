@@ -57,10 +57,11 @@ teardown() { common_teardown; }
   rm -rf "$fake_bin"
 }
 
-@test "codebase-memory/install instala skills em ~/.config/opencode/skills/" {
-  local fake_bin fake_home
+@test "codebase-memory/install configura auto-index sem instalar skills" {
+  local fake_bin fake_home invocation_log
   fake_bin="$(mktemp -d)"
   fake_home="$(mktemp -d)"
+  invocation_log="$fake_home/codebase-memory.log"
 
   for cmd in bash head mkdir basename grep cp rm; do
     local p
@@ -70,24 +71,17 @@ teardown() { common_teardown; }
 
   cat > "$fake_bin/codebase-memory-mcp" <<'SCRIPT'
 #!/bin/bash
-if [[ "$*" == *"install"* && "$*" == *"-y"* ]]; then
-  mkdir -p "$HOME/.config/opencode/skills"
-  for skill in exploring tracing quality reference; do
-    mkdir -p "$HOME/.config/opencode/skills/codebase-memory-$skill"
-    echo "# codebase-memory-$skill" > "$HOME/.config/opencode/skills/codebase-memory-$skill/SKILL.md"
-  done
-fi
+printf '%s\n' "$*" >> "$CODEBASE_MEMORY_LOG"
 exit 0
 SCRIPT
   chmod +x "$fake_bin/codebase-memory-mcp"
 
-  run env PATH="$fake_bin" HOME="$fake_home" /usr/bin/bash "$SCRIPT" --yes
+  run env PATH="$fake_bin" HOME="$fake_home" \
+    CODEBASE_MEMORY_LOG="$invocation_log" /usr/bin/bash "$SCRIPT" --yes
   assert_success
-
-  [ -f "$fake_home/.config/opencode/skills/codebase-memory-exploring/SKILL.md" ]
-  [ -f "$fake_home/.config/opencode/skills/codebase-memory-tracing/SKILL.md" ]
-  [ -f "$fake_home/.config/opencode/skills/codebase-memory-quality/SKILL.md" ]
-  [ -f "$fake_home/.config/opencode/skills/codebase-memory-reference/SKILL.md" ]
+  assert_output --partial "Auto-index habilitado"
+  grep -Fq "config set auto_index true" "$invocation_log"
+  [ ! -d "$fake_home/.config/opencode/skills" ]
 
   rm -rf "$fake_bin" "$fake_home"
 }

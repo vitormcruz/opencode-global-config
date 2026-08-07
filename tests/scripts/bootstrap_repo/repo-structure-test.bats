@@ -300,26 +300,26 @@ console.log('valid');
 # AGENTS.md — secao de descoberta MCP-first
 # ---------------------------------------------------------------------------
 
-@test "AGENTS.md contem secao 'Descoberta de Codigo e Documentacao'" {
-  run grep -c "Descoberta de Codigo e Documentacao" "$REPO_ROOT/AGENTS.md"
+@test "AGENTS.md contem secao 'Descoberta de Código e Documentação'" {
+  run grep -c "Descoberta de Código e Documentação" "$REPO_ROOT/AGENTS.md"
   assert_success
   [[ "$output" -ge 1 ]]
 }
 
-@test "AGENTS.md contem secao 'codebase-memory (CODIGO)'" {
-  run grep -c "codebase-memory (CODIGO)" "$REPO_ROOT/AGENTS.md"
+@test "AGENTS.md contem secao 'codebase-memory CLI (CÓDIGO)'" {
+  run grep -c "codebase-memory CLI (CÓDIGO)" "$REPO_ROOT/AGENTS.md"
   assert_success
   [[ "$output" -ge 1 ]]
 }
 
-@test "AGENTS.md contem 'Acesso MCP por Cliente'" {
-  run grep -c "Acesso MCP por Cliente" "$REPO_ROOT/AGENTS.md"
+@test "AGENTS.md contem 'Acesso por cliente'" {
+  run grep -c "Acesso por cliente" "$REPO_ROOT/AGENTS.md"
   assert_success
   [[ "$output" -ge 1 ]]
 }
 
-@test "AGENTS.md contem Recovery Obrigatorio" {
-  run grep -c "Recovery Obrigatorio" "$REPO_ROOT/AGENTS.md"
+@test "AGENTS.md contem Recovery obrigatório" {
+  run grep -c "Recovery obrigatório" "$REPO_ROOT/AGENTS.md"
   assert_success
   [[ "$output" -ge 1 ]]
 }
