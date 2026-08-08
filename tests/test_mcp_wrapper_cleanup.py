@@ -23,6 +23,11 @@ def test_legacy_install_wrappers_are_removed(repo_root: Path):
 
 
 @pytest.mark.unit
+def test_makefile_is_removed(repo_root: Path):
+    assert not (repo_root / "Makefile").exists()
+
+
+@pytest.mark.unit
 def test_mcp_wrapper_artifacts_are_not_orchestrated(repo_root: Path):
     files = (
         repo_root / "scripts/bootstrap_repo/wsl-install-deps.sh",

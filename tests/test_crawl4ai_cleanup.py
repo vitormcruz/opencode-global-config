@@ -14,9 +14,7 @@ def test_crawl4ai_legacy_tree_and_orphaned_doctree_suite_are_removed(repo_root):
 
 @pytest.mark.unit
 def test_make_test_tools_does_not_reference_removed_crawl4ai_suite(repo_root):
-    makefile = (repo_root / "Makefile").read_text(encoding="utf-8")
-
-    assert "$(TESTS_DIR)/scripts/crawl4ai" not in makefile
+    assert not (repo_root / "Makefile").exists()
 
 
 @pytest.mark.unit

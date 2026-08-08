@@ -134,6 +134,24 @@ def _bashrc_has(path: Path, pattern: str) -> bool:
     return bool(re.search(pattern, _read_text(path), flags=re.MULTILINE))
 
 
+def _remove_legacy_bats_block(path: Path) -> None:
+    existing = _read_text(path)
+    updated = re.sub(
+        r"^# opencode-config: bibliotecas do BATS[ \t]*\n?",
+        "",
+        existing,
+        flags=re.MULTILINE,
+    )
+    updated = re.sub(
+        r"^export BATS_LIB_PATH=\"\$HOME/\.local/lib/bats\"[ \t]*\n?",
+        "",
+        updated,
+        flags=re.MULTILINE,
+    )
+    if updated != existing:
+        path.write_text(updated, encoding="utf-8")
+
+
 def _natural_version_key(value: str) -> tuple[tuple[int, int | str], ...]:
     return tuple(
         (0, int(part)) if part.isdigit() else (1, part)
@@ -159,6 +177,7 @@ def _fnm_active_node_bin(home: Path, environment: Mapping[str, str]) -> Path | N
 
 def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     bashrc = home / ".bashrc"
+    _remove_legacy_bats_block(bashrc)
 
     if not _bashrc_has(
         bashrc,
@@ -176,19 +195,8 @@ def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     ):
         _append_block(
             bashrc,
-            "# opencode-config: binarios locais (bats-core etc.)\n"
+            "# opencode-config: binarios locais\n"
             'export PATH="$HOME/.local/bin:$PATH"',
-        )
-
-    if not _bashrc_has(
-        bashrc,
-        r"^[ \t]*export[ \t]+BATS_LIB_PATH=\"\$HOME/\.local/lib/bats\""
-        r"([ \t]*|[ \t]*#.*)$",
-    ):
-        _append_block(
-            bashrc,
-            "# opencode-config: bibliotecas do BATS\n"
-            'export BATS_LIB_PATH="$HOME/.local/lib/bats"',
         )
 
     if not _bashrc_has(bashrc, r"fnm/node-versions"):
@@ -252,14 +260,6 @@ def _print_plan(
         output(f"OK    {bashrc} PATH includes ~/.local/bin")
     else:
         output(f"ENV   {bashrc} << PATH=$HOME/.local/bin:$PATH")
-
-    if _bashrc_has(
-        bashrc,
-        r"^[ \t]*export[ \t]+BATS_LIB_PATH=\"\$HOME/\.local/lib/bats\"",
-    ):
-        output(f"OK    {bashrc} BATS_LIB_PATH=$HOME/.local/lib/bats")
-    else:
-        output(f"ENV   {bashrc} << BATS_LIB_PATH=$HOME/.local/lib/bats")
 
     if _bashrc_has(bashrc, r"fnm/node-versions"):
         output(f"OK    {bashrc} PATH includes fnm node")
