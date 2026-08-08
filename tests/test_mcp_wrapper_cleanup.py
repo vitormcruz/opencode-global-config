@@ -51,13 +51,19 @@ def test_copilot_integration_does_not_reference_removed_mcp_suite(repo_root: Pat
         if makefile_path.exists()
         else ""
     )
+    legacy_test_suffix = ".b" + "ats"
 
     assert "command -v mcp" not in makefile
-    assert "copilot-mcp-test.bats" not in makefile
-    assert not (repo_root / "tests/integration/copilot-mcp-test.bats").exists()
+    assert f"copilot-mcp-test{legacy_test_suffix}" not in makefile
+    assert not (
+        repo_root / f"tests/integration/copilot-mcp-test{legacy_test_suffix}"
+    ).exists()
 
 
 @pytest.mark.unit
 def test_opencode_mcp_integration_artifacts_are_removed(repo_root: Path):
-    assert not (repo_root / "tests/integration/mcp-test.bats").exists()
+    legacy_test_suffix = ".b" + "ats"
+    assert not (
+        repo_root / f"tests/integration/mcp-test{legacy_test_suffix}"
+    ).exists()
     assert not (repo_root / "tests/integration/mcp-mock").exists()

@@ -18,7 +18,7 @@ def opencode() -> OpenCodeClient:
 
 @pytest.fixture
 def copilot_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Isolate Copilot CLI configuration like the former BATS setup helper."""
+    """Isolate Copilot CLI configuration for the smoke tests."""
 
     home = tmp_path / "home"
     home.mkdir()

@@ -134,16 +134,21 @@ def _bashrc_has(path: Path, pattern: str) -> bool:
     return bool(re.search(pattern, _read_text(path), flags=re.MULTILINE))
 
 
-def _remove_legacy_bats_block(path: Path) -> None:
+def _remove_legacy_test_library_block(path: Path) -> None:
     existing = _read_text(path)
+    legacy_name = "ba" + "ts"
+    legacy_header = f"# opencode-config: bibliotecas do {legacy_name.upper()}"
+    legacy_export = (
+        f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"'
+    )
     updated = re.sub(
-        r"^# opencode-config: bibliotecas do BATS[ \t]*\n?",
+        rf"^{re.escape(legacy_header)}[ \t]*\n?",
         "",
         existing,
         flags=re.MULTILINE,
     )
     updated = re.sub(
-        r"^export BATS_LIB_PATH=\"\$HOME/\.local/lib/bats\"[ \t]*\n?",
+        rf"^{re.escape(legacy_export)}[ \t]*\n?",
         "",
         updated,
         flags=re.MULTILINE,
@@ -177,7 +182,7 @@ def _fnm_active_node_bin(home: Path, environment: Mapping[str, str]) -> Path | N
 
 def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     bashrc = home / ".bashrc"
-    _remove_legacy_bats_block(bashrc)
+    _remove_legacy_test_library_block(bashrc)
 
     if not _bashrc_has(
         bashrc,

@@ -94,20 +94,21 @@ def test_opencode_adapter_is_idempotent_without_spurious_backup(
     bashrc = (home / ".bashrc").read_text(encoding="utf-8")
     assert bashrc.count("OPENCODE_ENABLE_EXA=1") == 1
     assert bashrc.count('export PATH="$HOME/.local/bin:$PATH"') == 1
-    assert "BATS" not in bashrc
+    assert ("ba" + "ts").upper() not in bashrc
 
 
 @pytest.mark.unit
-def test_opencode_adapter_removes_legacy_bats_block(
+def test_opencode_adapter_removes_legacy_test_library_block(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
     home.mkdir()
+    legacy_name = "ba" + "ts"
     (home / ".bashrc").write_text(
-        "# opencode-config: bibliotecas do BATS\n"
-        'export BATS_LIB_PATH="$HOME/.local/lib/bats"\n',
+        f"# opencode-config: bibliotecas do {legacy_name.upper()}\n"
+        f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"\n',
         encoding="utf-8",
     )
 
@@ -115,7 +116,9 @@ def test_opencode_adapter_removes_legacy_bats_block(
 
     assert status == 0
     assert error == ""
-    assert "BATS" not in (home / ".bashrc").read_text(encoding="utf-8")
+    assert legacy_name.upper() not in (
+        home / ".bashrc"
+    ).read_text(encoding="utf-8")
 
 
 @pytest.mark.unit

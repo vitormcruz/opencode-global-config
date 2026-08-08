@@ -30,7 +30,7 @@ class OpenCodeResponse:
 
 @dataclass(frozen=True)
 class CommandResult:
-    """Small equivalent of the result exposed by BATS ``run``."""
+    """Small result wrapper for command-like HTTP assertions."""
 
     returncode: int
     stdout: str = ""
@@ -38,7 +38,7 @@ class CommandResult:
     status_code: int | None = None
 
     def json(self) -> Any:
-        """Decode command output as JSON, matching the BATS ``jq`` assertion."""
+        """Decode command output as JSON for structured assertions."""
 
         try:
             return json.loads(self.stdout)
@@ -47,7 +47,7 @@ class CommandResult:
 
 
 class OpenCodeClient:
-    """Minimal standard-library client replacing the BATS behavioral helper."""
+    """Minimal standard-library client for behavioral integration tests."""
 
     def __init__(self) -> None:
         port = os.environ.get("OPENCODE_PORT", "4196")
@@ -71,7 +71,7 @@ class OpenCodeClient:
 
     @staticmethod
     def require_model() -> None:
-        """Fail with the same instruction as the BATS helper when no model exists."""
+        """Fail with an actionable instruction when no model exists."""
 
         if not os.environ.get("OPENCODE_TEST_MODEL"):
             pytest.fail(
@@ -80,7 +80,7 @@ class OpenCodeClient:
             )
 
     def get(self, path: str) -> CommandResult:
-        """Run a GET request and expose a BATS-like success result."""
+        """Run a GET request and expose a command-like result."""
 
         return self._command_result(self._request("GET", path))
 
