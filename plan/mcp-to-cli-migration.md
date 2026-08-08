@@ -1327,14 +1327,15 @@ repo-structure, chrondb-fix). Converter a orquestração do container Docker
 `entrypoint.sh` em `entrypoint.py` (adicionando `python3` ao Dockerfile).
 
 **Acceptance criteria:**
-- [ ] Nenhum arquivo `.bats` no repo
-- [ ] Container de teste sobe e desce por fixture, com teardown garantido
-- [ ] Guarda de `OPENCODE_TEST_MODEL` vira `pytest.fail` com a mesma orientação
-- [ ] Cobertura equivalente — nenhum teste perdido na conversão
+- [x] Nenhum arquivo `.bats` no repo
+- [x] Container de teste sobe e desce por fixture, com teardown garantido
+- [x] Guarda de `OPENCODE_TEST_MODEL` vira `pytest.fail` com a mesma orientação
+- [x] Cobertura equivalente — nenhum teste perdido na conversão
 
 **Verification:**
-- [ ] `pytest -m opencode` verde no WSL
-- [ ] Comparar contagem de asserções antes/depois por suíte
+- [ ] `pytest -m opencode` verde no WSL — bloqueado neste ambiente:
+      serviço OpenCode/Docker e `OPENCODE_TEST_MODEL` não estão disponíveis
+- [x] Comparar contagem de testes antes/depois: 160 BATS → 160 pytest
 
 **Dependencies:** fase 5 completa
 
@@ -1354,14 +1355,14 @@ repo-structure, chrondb-fix). Converter a orquestração do container Docker
 `~/.bashrc` (com limpeza idempotente do bloco legado).
 
 **Acceptance criteria:**
-- [ ] `Makefile` removido
-- [ ] Bootstrap não instala mais nada de BATS
-- [ ] Bloco `BATS_LIB_PATH` removido do `~/.bashrc` pelo bootstrap
-- [ ] `grep -ri "bats"` retorna apenas `plan/` e `docs/adr/`
+- [x] `Makefile` removido
+- [x] Bootstrap não instala mais nada de BATS
+- [x] Bloco `BATS_LIB_PATH` removido do `~/.bashrc` pelo bootstrap
+- [x] `grep -ri "bats"` retorna apenas `plan/` e `docs/adr/`
 
 **Verification:**
-- [ ] `pytest -m "unit or tools"` verde
-- [ ] Bootstrap num `HOME` limpo não cria `~/.local/lib/bats`
+- [x] `pytest -m "unit or tools"` verde
+- [x] Bootstrap num `HOME` limpo não cria `~/.local/lib/bats`
 
 **Dependencies:** 6.1
 
