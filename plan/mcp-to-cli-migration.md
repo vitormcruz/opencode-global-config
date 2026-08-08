@@ -28,12 +28,12 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 5.2 concluída e validada no WSL; a Task 4.5 e todas as
+**Estado atual:** Task 5.3 concluída e validada no WSL; a Task 4.5 e todas as
 validações Windows foram adiadas para a validação multiplataforma final, e as
 revisões dos checkpoints continuam pendentes.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4
-e Tasks 5.1–5.2.
+e Tasks 5.1–5.3.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -49,6 +49,8 @@ Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
 23 testes.
+Para a Task 5.3, `pytest -m unit tests/scaffold/test_mapa_produto.py` passou
+com 30 testes, incluindo a comparação da árvore Bash versus Python.
 
 ## Contexto Levantado (inventário)
 
@@ -1285,13 +1287,13 @@ script com a maior suíte de testes do repo (`scaffold-test.bats`, 450 linhas) �
 tratar essa suíte como especificação executável.
 
 **Acceptance criteria:**
-- [ ] Estrutura de diretórios e arquivos gerada idêntica à do script bash
-- [ ] Comportamento de idempotência e de sobrescrita preservado
-- [ ] Os 450 linhas de spec BATS têm equivalente pytest
+- [x] Estrutura de diretórios e arquivos gerada idêntica à do script bash
+- [x] Comportamento de idempotência e de sobrescrita preservado
+- [x] Os 450 linhas de spec BATS têm equivalente pytest
 
 **Verification:**
-- [ ] `pytest -m unit tests/scaffold/test_mapa_produto.py`
-- [ ] Diff de árvore gerada: bash vs Python, num diretório temporário
+- [x] `pytest -m unit tests/scaffold/test_mapa_produto.py`
+- [x] Diff de árvore gerada: bash vs Python, num diretório temporário
 
 **Dependencies:** 0.2
 

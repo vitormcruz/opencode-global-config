@@ -207,17 +207,17 @@ sem verificações.
 
 ## Script de Scaffold
 
-Use `scripts/mapa-produto/scaffold.sh` para criar
+Use `opencode-scaffold-mapa` para criar
 scaffold deterministicamente:
 
 ```bash
-scripts/mapa-produto/scaffold.sh --doc <arquivo-destino> --harness <agents-destino>
+opencode-scaffold-mapa --doc <arquivo-destino> --harness <agents-destino>
 ```
 
 As flags `--doc` e `--harness` são opcionais — use apenas
-as que precisa. O script é idempotente (não duplica
-seções existentes). Detecte o SO e, se necessário, gere
-wrapper equivalente (PowerShell no Windows).
+as que precisa. O comando é idempotente (não duplica
+seções existentes) e funciona nativamente em WSL/Linux e
+Windows.
 
 ## Princípios de Documentação
 
