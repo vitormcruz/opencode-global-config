@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     jq \
     bash \
+    python3 \
     nodejs \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,11 +23,12 @@ WORKDIR /opt/opencode-config
 RUN cp tests/integration/config/opencode.test.json opencode.json
 
 # Executa bootstrap (cria symlinks em /root/.config/opencode)
-RUN bash ./adapters/opencode/opencode-adapter.sh --yes
+RUN PYTHONPATH=/opt/opencode-config/src \
+    python3 -m opencode_config.adapters.opencode --yes
 
-RUN chmod +x tests/integration/docker/entrypoint.sh
+RUN chmod +x tests/integration/docker/entrypoint.py
 
 EXPOSE 4096
 
 # Sobe o OpenCode para os testes comportamentais
-CMD ["/opt/opencode-config/tests/integration/docker/entrypoint.sh"]
+CMD ["python3", "/opt/opencode-config/tests/integration/docker/entrypoint.py"]
