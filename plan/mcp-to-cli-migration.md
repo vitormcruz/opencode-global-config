@@ -28,11 +28,11 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 4.2 concluída e validada no WSL; as validações Windows
+**Estado atual:** Task 4.3 concluída e validada no WSL; as validações Windows
 foram adiadas para a validação multiplataforma final, e as revisões dos
 checkpoints continuam pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.2.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.3.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -1129,15 +1129,15 @@ imprimir bloco único copiável para o restante. Suportar `--yes` (instala tudo
 que falta) e `--check-only` (não instala nada).
 
 **Acceptance criteria:**
-- [ ] Tabela mostra nome, status, versão e método por dependência
-- [ ] Seleção por item, com default sensato
-- [ ] Sem TTY, `--yes` é obrigatório — erro claro caso contrário
-- [ ] `--check-only` não altera nada no sistema
-- [ ] Bloco de comandos manuais sai em **um único bloco** copiável
+- [x] Tabela mostra nome, status, versão e método por dependência
+- [x] Seleção por item, com default sensato
+- [x] Sem TTY, `--yes` é obrigatório — erro claro caso contrário
+- [x] `--check-only` não altera nada no sistema
+- [x] Bloco de comandos manuais sai em **um único bloco** copiável
 
 **Verification:**
-- [ ] `pytest -m unit tests/bootstrap/test_interactive.py` com stdin simulado
-- [ ] `--check-only` num ambiente sujo não modifica nada (verificado por hash
+- [x] `pytest -m unit tests/bootstrap/test_interactive.py` com stdin simulado
+- [x] `--check-only` num ambiente sujo não modifica nada (verificado por hash
       do `HOME` temporário antes/depois)
 
 **Dependencies:** 4.2
