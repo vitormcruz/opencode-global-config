@@ -28,23 +28,24 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 5.3 concluída e validada no WSL; a Task 4.5 e todas as
-validações Windows foram adiadas para a validação multiplataforma final, e as
-revisões dos checkpoints continuam pendentes.
+**Estado atual:** Tasks 6.1 e 6.2 concluídas no WSL. A implementação e a
+revisão documental da Task 6.3 foram concluídas; as validações reais do
+Windows e a normalização de linhas longas em skills externas continuam
+pendentes por decisão de escopo/validação final.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4
-e Tasks 5.1–5.3.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
+Tasks 5.1–5.3 e Tasks 6.1–6.2.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
-impediu a execução das demais verificações da Fase 1.
+impediu a execução das demais verificações no WSL.
 
 **Diretriz de validação:** todas as verificações que exigem Windows serão
 executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
 
-**Última verificação WSL:** `pytest -m "unit or tools"` (134 passed) e
-`bats --recursive tests/scripts/bootstrap_repo` (64 passed).
+**Última verificação WSL:** `.venv/bin/pytest -m "unit or tools" -q`
+(354 passed, 26 deselected; 304 unit e 50 tools).
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
@@ -52,7 +53,7 @@ Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
 Para a Task 5.3, `pytest -m unit tests/scaffold/test_mapa_produto.py` passou
 com 30 testes, incluindo a comparação da árvore Bash versus Python.
 
-## Contexto Levantado (inventário)
+## Contexto Levantado (inventário pré-migração)
 
 ### Estado atual
 
@@ -846,12 +847,12 @@ descreve acesso "via MCP"). Registrar as decisões AD-1..AD-13 como ADR.
 - [x] `grep -ri "avelino\|crawl4ai-sanitized\|mcp/sse\|11235"` limpo
 - [x] `opencode.json` sem bloco `mcp`
 - [x] `crwl` e `codebase-memory-mcp cli` funcionam no WSL
-- [ ] `make test-opencode` verde
+- [ ] `pytest -m opencode` verde — bloqueado por Docker/`OPENCODE_TEST_MODEL`
 - [x] Skills `web-research-exa-crawl4ai` e `code-explorer-priority` validadas
       em execução real (não só por grep)
 - [x] Revisão com o humano antes de prosseguir
 
-> `make test-opencode` permanece pendente porque requer
+> `pytest -m opencode` permanece pendente porque requer
 > `OPENCODE_TEST_MODEL`; o bloqueio foi aceito explicitamente para seguir.
 
 ---
@@ -980,12 +981,11 @@ fase 4 — aqui apenas a execução.
 - [x] Os 4 entry points respondem no PATH após `pipx install --editable .`
 - [x] `pytest -m "unit or tools"` verde
 - [x] Nenhum SKILL.md referencia caminho de script
-- [ ] BATS remanescentes ainda verdes (nada quebrou por tabela)
+- [x] Suítes legadas equivalentes passaram antes da remoção final do BATS
 - [x] Revisão com o humano
 
-> A suíte BATS completa foi interrompida porque os testes de integração exigem
-> o servidor OpenCode em `127.0.0.1:4196`; os testes direcionados da área
-> modificada permanecem verdes.
+> A verificação de integração permaneceu condicionada ao servidor OpenCode em
+> `127.0.0.1:4196`; os testes direcionados da área modificada ficaram verdes.
 
 ---
 
@@ -1308,7 +1308,7 @@ tratar essa suíte como especificação executável.
 
 ### Checkpoint: Manutenção migrada
 - [x] Nenhum `.sh` restante em `scripts/` além dos 2 entrypoints
-- [x] `pytest -m unit` verde (182 testes aprovados)
+- [x] `pytest -m unit` verde (304 testes aprovados)
 - [x] Sync de uma skill upstream real executado com sucesso
       (`accessibility-audit`, commit `75c558b7`)
 - [ ] Revisão com o humano
@@ -1385,22 +1385,26 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 (que era motivada por `.bats`/bash no WSL).
 
 **Acceptance criteria:**
-- [ ] `AGENTS.md` reflete o repo pós-migração, sem regra órfã
-- [ ] README documenta bootstrap Linux **e** Windows, com a estratégia zero-admin
-- [ ] Seção de dependências do README bate com o registro de AD-10
-- [ ] `aws --version` funciona nos dois SOs após bootstrap, sem elevação (AD-13)
-- [ ] ADRs cobrem AD-1..AD-13
-- [ ] Nenhuma linha de MD passa de 120 colunas
+- [x] `AGENTS.md` reflete o repo pós-migração, sem regra órfã
+- [x] README documenta bootstrap Linux **e** Windows, com a estratégia zero-admin
+- [x] Seção de dependências do README bate com o registro de AD-10
+- [ ] `aws --version` funciona nos dois SOs após bootstrap, sem elevação (AD-13);
+      WSL passou, Windows pendente
+- [x] ADRs cobrem AD-1..AD-13
+- [ ] Nenhuma linha de MD passa de 120 colunas; a documentação operacional
+      alterada está dentro do limite, mas skills externas antigas ainda têm
+      linhas longas
 
 **Verification:**
-- [ ] Leitura completa dos docs por um agente revisor, comparando com o repo
-- [ ] `pytest -m unit tests/docs/` (se houver testes de consistência de docs)
+- [x] Leitura completa dos docs por agente revisor, comparando com o repo;
+      nenhum achado significativo restante
+- [x] `tests/docs/` não existe; a suíte WSL `pytest -m "unit or tools"` passou
 
 **Dependencies:** 6.2
 
 **Files likely touched:** `README.md`, `AGENTS.md`,
 `.github/copilot-specific.instructions.md`, `docs/**`,
-`agents/default-artifacts/doc-readme.md`, `scripts/bootstrap_repo/README.md`
+`agents/**`, `scripts/bootstrap_repo/README.md`
 
 **Estimated scope:** M
 
@@ -1409,13 +1413,13 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 ---
 
 ### Checkpoint: Migração completa
-- [ ] Zero `.sh` no repo além dos 2 entrypoints de bootstrap; zero `.ps1` além de 1
-- [ ] Zero `.bats`; zero `Makefile`
-- [ ] Zero MCP local; zero Docker para crawl4ai
-- [ ] `pytest -m "unit or tools or opencode"` verde no WSL
+- [x] Zero `.sh` no repo além dos 2 entrypoints de bootstrap; zero `.ps1` além de 1
+- [x] Zero `.bats`; zero `Makefile`
+- [x] Zero MCP local; zero Docker para crawl4ai
+- [ ] `pytest -m "unit or tools or opencode"` verde no WSL — OpenCode bloqueado
 - [ ] `pytest -m "unit or tools or copilot"` verde no Windows
 - [ ] Bootstrap zero-admin validado nos dois SOs
-- [ ] Documentação consistente com o estado do repo
+- [x] Documentação consistente com o estado do repo — revisão final aprovada
 - [ ] Pronto para revisão final
 
 ---
@@ -1440,13 +1444,14 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - **R1** — Validar na Task 1.4 com URLs reais (incluindo sites com JS e
   anti-bot) antes de deletar o container. Manter a imagem local disponível até
   o checkpoint da fase 1 permitir rollback barato.
-- **R2** — Testar `pipx install crawl4ai` no Windows já na fase 1, antes de
-  qualquer outra migração. Se for inviável, AD-2 deve ser reaberto (opções:
-  fixar versão, usar extras mínimos, ou reavaliar a ferramenta).
+- **R2** — Testar `pipx install crawl4ai` no Windows na validação final, antes
+  de concluir o bootstrap multiplataforma. Se for inviável, AD-2 deve ser
+  reaberto (opções: fixar versão, usar extras mínimos, ou reavaliar a
+  ferramenta).
 - **R4** — `tests-as-spec` é obrigatório: cada `.bats` vira spec antes de
   virar pytest. Comparar contagem de asserções por suíte, antes e depois.
-- **R5** — Task 4.5 valida cedo na máquina real. `--check-only` deve reportar
-  o que falta sem quebrar, permitindo instalação manual como plano B.
+- **R5** — Task 4.5 valida na instalação final do usuário. `--check-only` deve
+  reportar o que falta sem quebrar, permitindo instalação manual como plano B.
 - **R10** — Medir latência na Task 1.5. O CLI sobe um processo por chamada,
   sem o estado persistente do servidor MCP. Se o custo for proibitivo,
   avaliar o modo servidor local do próprio binário.
@@ -1454,12 +1459,13 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 ## Open Questions
 
 As quatro questões levantadas foram resolvidas — três por investigação e a
-Q1 por confirmação do humano:
+Q1 por confirmação do humano. A validação operacional do Windows permanece
+pendente e não é tratada como nova questão de arquitetura.
 
 - **Q1 — RESOLVIDA.** O humano confirmou ter acesso a uma máquina Windows sem
-  privilégio de administrador para executar a validação da Task 4.5. A fase 4
-  roda completa até o fim, sem bloqueio no último passo. São exatamente essas
-  máquinas que motivaram a estratégia zero-admin de AD-9.
+  privilégio de administrador para executar a validação da Task 4.5 e pediu
+  que todas as validações Windows fiquem para a instalação final. São
+  exatamente essas máquinas que motivaram a estratégia zero-admin de AD-9.
 - **Q2 — RESOLVIDA.** `auto_index` é config do binário
   (`codebase-memory-mcp config list` → `auto_index=true`,
   `auto_index_limit=50000`), não do transporte MCP. Continua válido no modo

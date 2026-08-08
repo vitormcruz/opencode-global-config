@@ -169,11 +169,11 @@ de harness e registra a tabela no `AGENTS.md`.
 
 | Agente | Comando de Execução | Descrição |
 |--------|--------------------|-----------|
-| eng-software | harness/eng-software.sh | Testes, análise estática |
-| dba | harness/dba.sh | Validação de schema |
-| sec | harness/sec.sh | OWASP checks, secrets |
-| qa | harness/qa.sh | Cobertura, aceitação |
-| front | harness/front.sh | Linting, a11y |
+| eng-software | harness/eng-software | Testes, análise estática |
+| dba | harness/dba | Validação de schema |
+| sec | harness/sec | OWASP checks, secrets |
+| qa | harness/qa | Cobertura, aceitação |
+| front | harness/front | Linting, a11y |
 | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
@@ -242,7 +242,7 @@ para a filosofia de documentação do projeto.
 
 | Prática | Exemplos |
 |---------|----------|
-| Grafo de conhecimento | Graphify (multi-linguagem, MCP server) |
+| Grafo de conhecimento | codebase-memory CLI (código e documentação) |
 | Specs executáveis | Cucumber (JVM/JS), Gauge, pytest-bdd |
 | Fitness functions | ArchUnit (Java), ArchUnitTS, ArchUnitPython, go-arctest |
 | Modelo "as code" | DBML + dbml2sql, RosettaDB diff, pg-schema-dbml |
@@ -347,7 +347,8 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Se o humano não quiser harness para um agente, registra
   `SEM HARNESS A PEDIDO DO HUMANO`.
 - Somente após TODOS os itens aprovados, cria os scripts
-  de uma vez (inclusive pass-through para os sem regras).
+  dos harnesses definidos. Entradas marcadas
+  `SEM HARNESS A PEDIDO DO HUMANO` não geram script.
 
 ### Fase 4 — Implementação
 

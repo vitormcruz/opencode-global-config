@@ -57,10 +57,14 @@ absoluto para indexação e `project` explícito nas consultas. Consulte
 
 - Se o humano pedir explicitamente "configure este repo" (ou equivalente),
   isso conta como confirmacao para executar o bootstrap.
-- Comando canonico:
+- Comandos canônicos por sistema:
 
 ```bash
 bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
+```
+
+```powershell
+.\scripts\bootstrap_repo\configurar-repo.ps1 --yes
 ```
 - Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os
   comandos prontos para copia e cola em um bloco unico.
@@ -104,9 +108,10 @@ Depois de clonar este repo, rode:
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O bootstrap detecta e instala dependencias com `opencode-bootstrap`. Em
-WSL/Linux ele configura o OpenCode; no Windows configura somente o Copilot CLI.
-Use `--yes`, `--quiet` ou `--check-only` conforme a necessidade.
+No Windows, execute `.\scripts\bootstrap_repo\configurar-repo.ps1 --yes` no
+PowerShell. O bootstrap detecta e instala dependências em user-space, sem
+`sudo` ou administrador. Linux/WSL configura o OpenCode; Windows configura
+somente o Copilot CLI. Use `--yes`, `--quiet` ou `--check-only`.
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 
@@ -194,10 +199,11 @@ nas descrições
 # Regras Obrigatórias Para Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
-- Framework: `pytest` em `tests/` — use
-  `.venv/bin/pytest -m "unit or tools or opencode"`.
-- Execute os testes no ambiente alvo; a integração OpenCode requer Docker e
-  `OPENCODE_TEST_MODEL`, e a integração Copilot deve rodar no Windows.
+- Framework: `pytest` em `tests/`. No WSL/Linux, use
+  `.venv/bin/pytest -m "unit or tools or opencode"`; no Windows, use
+  `.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"`.
+- Execute os testes no ambiente alvo. A integração OpenCode requer Docker e
+  `OPENCODE_TEST_MODEL` no WSL/Linux; a integração Copilot roda no Windows.
 - Não use `skip`: quando uma dependência externa não estiver disponível,
   use `pytest.fail` com uma mensagem clara e acionável.
 - A estrutura de testes deve espelhar a estrutura do código.
@@ -207,7 +213,7 @@ nas descrições
 - Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
 - Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.
 - **Nenhum teste pode usar `skip`** — quando um pré-requisito externo não estiver
-  disponível, o teste deve usar `fail "mensagem clara"`. Testes de integração que
+  disponível, o teste deve usar `pytest.fail("mensagem clara")`. Testes de integração que
   dependem de ferramentas externas (pandoc, docling, playwright, etc.) devem
   falhar com instrução de instalação. Testes unitários nunca devem depender de
   ferramentas externas — usam mocks/stubs. Silenciar testes esconde problemas de
@@ -276,7 +282,9 @@ inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
 2. Verificar se mudancas upstream afetam o `SKILL.md` local
 3. Atualizar `SKILL.md` manualmente se necessario
 4. Atualizar `UPSTREAM.md` com novo SHA (feito automaticamente pelo script)
-5. Rodar `make test-opencode` para garantir que nada quebrou
+5. Rodar os testes no executável pytest do SO para garantir que nada quebrou:
+   WSL/Linux com `.venv/bin/pytest -m "unit or tools"` ou Windows com
+   `.\.venv\Scripts\pytest.exe -m "unit or tools"`.
 
 ### Scripts de sync disponiveis
 
@@ -296,5 +304,9 @@ Todos suportam `--yes` e `--check-only`.
 - O comportamento canônico fica em
   `src/opencode_config/adapters/copilot.py`, com o mesmo comando em Linux,
   WSL e Windows.
-- Se uma mudanca tocar apenas um desses scripts, o agente deve tratar isso como possivel
-  divergencia, verificar imediatamente o outro e informar isso ao humano.
+- Os entrypoints finos `configurar-repo.sh` e `configurar-repo.ps1` apenas
+  verificam Python e delegam ao pacote; não existem adapters paralelos por
+  shell para sincronizar.
+- Ao alterar o comportamento de um adapter, atualize o módulo Python e seus
+  testes correspondentes. Verifique também o outro adapter quando a mudança
+  afetar o contrato entre plataformas.

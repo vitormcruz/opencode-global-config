@@ -1,16 +1,30 @@
 # Bootstrap
 
-`configurar-repo.sh` é o ponto de entrada para configurar as plataformas e
-dependências deste repositório.
+Os entrypoints finos configuram as plataformas e dependências deste
+repositório. Ambos delegam a mesma lógica ao pacote Python.
 
-## Uso
+## Linux e WSL
 
 ```bash
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O entrypoint fino verifica Python 3.10+ e delega para
-`opencode_config.bootstrap.main`. O módulo detecta dependencias, executa a
-selecao interativa e configura o adapter pertinente ao sistema operacional.
+O entrypoint verifica Python >= 3.10, executa a detecção e seleção interativa e
+configura o adapter OpenCode.
 
-Use `--yes`, `--quiet` ou `--check-only`.
+## Windows
+
+Execute no PowerShell:
+
+```powershell
+.\scripts\bootstrap_repo\configurar-repo.ps1 --yes
+```
+
+O entrypoint verifica Python >= 3.10 e configura somente o adapter Copilot CLI.
+Ele não cria links em `~/.config/opencode`.
+
+## Opções
+
+Use `--yes` para instalar tudo que estiver ausente, `--quiet` para suprimir a
+tabela de detecção ou `--check-only` para apenas exibir o diagnóstico. O
+bootstrap não usa `sudo` nem exige privilégios de administrador.

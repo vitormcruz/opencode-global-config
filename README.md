@@ -4,38 +4,43 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 
 ## Como funciona
 
-- O OpenCode le as configuracoes globais a partir de `~/.config/opencode`.
+- No Linux/WSL, o OpenCode le as configuracoes globais a partir de
+  `~/.config/opencode`.
 - Este repo e a fonte de verdade e pode ficar em qualquer caminho local.
-- O bootstrap cria links simbolicos em `~/.config/opencode` apontando para este repo.
+- No Windows, o bootstrap copia os artefatos para
+  `%USERPROFILE%\.copilot`.
 
 ## Bootstrap
 
-Depois de clonar este repo, rode:
+Depois de clonar este repositório, use o entrypoint correspondente ao sistema
+operacional:
 
 ```bash
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O bootstrap detecta e instala dependencias com `opencode-bootstrap`. Em
-WSL/Linux ele configura o OpenCode; no Windows configura somente o Copilot CLI.
-Use `--yes`, `--quiet` ou `--check-only` conforme a necessidade.
+```powershell
+.\scripts\bootstrap_repo\configurar-repo.ps1 --yes
+```
 
-Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
+O bootstrap verifica Python >= 3.10, detecta as dependências e configura o
+adapter correto: OpenCode no Linux/WSL e Copilot CLI no Windows. A instalação
+é sempre em user-space; não usa `sudo` nem exige administrador. Use
+`--yes`, `--quiet` ou `--check-only` conforme a necessidade.
+
+`--check-only` apenas detecta dependências e exibe os comandos manuais
+pendentes. Não instala, não executa adapters e não altera configurações.
+
+No Linux/WSL, o adapter cria links simbólicos em `~/.config/opencode` e
+garante `OPENCODE_ENABLE_EXA=1` no `~/.bashrc`. Para aplicar a variável no
+shell atual:
 
 ```bash
 source ~/.bashrc
 ```
 
-No ambiente WSL deste repo, o script faz duas coisas:
-
-- cria/atualiza os links simbolicos em `~/.config/opencode`
-- garante `export OPENCODE_ENABLE_EXA=1` em `~/.bashrc`
-
-Para aplicar a variavel no shell atual depois do bootstrap:
-
-```bash
-source ~/.bashrc
-```
+No Windows, o adapter copia os artefatos para `%USERPROFILE%\.copilot` e não
+configura o OpenCode.
 
 ## O que o script faz
 
@@ -58,24 +63,32 @@ backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
 Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider nao e o nativo do OpenCode.
 
-## Dependencias das skills
+## Dependências
 
-Detectadas e instaladas automaticamente pelo `opencode-bootstrap`, sempre em
-user-space:
+Python >= 3.10 é o único pré-requisito do entrypoint e deve estar disponível
+antes do bootstrap. As demais dependências são detectadas e instaladas em
+user-space conforme a seleção interativa ou `--yes`:
 
-- Python >= 3.10
-- Node.js via fnm
-- `pipx`
-- `crawl4ai` (`crwl`) e o browser via `crawl4ai-setup`
-- `docling`
-- `codebase-memory-mcp`
-- pandoc portatil
-- PortableGit no Windows
-- Playwright + Chromium
-- pytest e plugins em `.venv`
-- `aws-cli` v2 (dependencia obrigatoria gerenciada pelo bootstrap)
+| Dependência | Linux/WSL | Windows |
+|---|---|---|
+| Node.js 22 | fnm portátil | fnm portátil |
+| pipx | `pip install --user pipx` | `py -m pip install --user pipx` |
+| `crwl` | `pipx install crawl4ai` + `crawl4ai-setup` | igual ao Linux |
+| docling | `pipx install docling` | igual ao Linux |
+| codebase-memory-mcp | npm com prefixo user-space | npm com prefixo user-space |
+| pandoc | arquivo portátil oficial | arquivo portátil oficial |
+| git | pré-existente ou pacote do sistema | PortableGit |
+| Playwright + Chromium | npm + `npx playwright install` | igual ao Linux |
+| pytest | `.venv` + `requirements-dev.txt` | igual ao Linux |
+| AWS CLI v2 | instalador oficial user-local | instalador oficial user-local |
 
-O AWS CLI v2 e usado por `aws-sso-login` e `aws-add-account-sso`.
+`pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
+`--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
+`aws-add-account-sso`; após o bootstrap, confirme com `aws --version`.
+
+O Docling não exige um modelo LLM externo para ser instalado ou executado pelo
+wrapper. OCR e conversão são delegados ao próprio Docling; recursos opcionais
+que baixem modelos só são acionados quando o comando utilizado exigir.
 
 Para rodar so a verificacao de dependencias:
 
@@ -98,12 +111,21 @@ agentskills.io e copia artefatos auxiliares.
 
 Use diretamente:
 
+Linux/WSL:
+
 ```bash
 opencode-adapter --yes
+```
+
+Windows:
+
+```powershell
 opencode-copilot-adapter --yes
 ```
 
-O mesmo comando Python funciona no Linux, WSL e Windows.
+O pacote Python é compartilhado entre os sistemas, mas cada adapter respeita
+seu cliente: `opencode-adapter` é exclusivo de Linux/WSL e
+`opencode-copilot-adapter` é o adapter do Windows.
 
 Destinos sincronizados pelo Copilot CLI:
 
@@ -124,10 +146,17 @@ Comandos disponiveis:
 .venv/bin/pytest -m "unit or tools or copilot"
 ```
 
+No Windows, use o executável da virtualenv pelo PowerShell:
+
+```powershell
+.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"
+```
+
 ### Testes de integração (Camada 2)
 
-Os testes de integração exigem um modelo configurado explicitamente. Por segurança,
-**não há modelo padrão** — você deve escolher conscientemente qual modelo usar.
+Os testes de integração exigem um modelo configurado explicitamente. Por
+segurança, **não há modelo padrão** — você deve escolher conscientemente qual
+modelo usar.
 
 **Opção 1: modelo próprio (recomendado)**
 
@@ -146,9 +175,9 @@ Para executar a integração Copilot:
 .venv/bin/pytest -m copilot
 ```
 
-Pre-requisitos:
+Pré-requisitos:
 
 - Python >= 3.10 e dependências de `requirements-dev.txt`
-- Docker para a integração OpenCode
+- Docker somente para a integração OpenCode no WSL/Linux
 - `OPENCODE_TEST_MODEL` para testes que enviam prompts
-- dependencias externas conforme o alvo escolhido
+- dependências externas conforme o alvo escolhido

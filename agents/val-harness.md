@@ -100,7 +100,7 @@ agentes que atuaram nela produziram evidências completas.
 |--------|-----------------|-----------|--------|
 | eng-software | Definido | Presente e completa | ✅ OK |
 | dba | Definido | Ausente | ❌ FALHA |
-| sec | SEM HARNESS | — | ✅ OK |
+| sec | SEM HARNESS A PEDIDO DO HUMANO | — | ✅ OK |
 | front | Não definido | — | ⚠️ LACUNA |
 
 ### Falhas

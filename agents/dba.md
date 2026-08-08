@@ -37,7 +37,8 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  AGENTS.md, siga sem harness.
+  AGENTS.md, registre LACUNA e não prossiga até o
+  humano definir a política.
 - **Somente ferramentas do AGENTS.md**: nunca
   execute ferramentas de linting/análise (squawk,
   sqlfluff, Atlas, etc.) por conta própria. Só use o

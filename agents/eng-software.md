@@ -64,7 +64,8 @@ faz revisão de si mesmo, ou propõe commit.
   o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  AGENTS.md, siga sem harness.
+  AGENTS.md, registre LACUNA e não prossiga até o
+  humano definir a política.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -198,7 +199,7 @@ um ponto sensível — pode mudar o plano.
 |---------|------|
 | Nada muda | Registrar decisão ("refatoração sem impacto no plano") e seguir. |
 | Ajuste mínimo no plano | Propor ao humano. Se aprovado, registrar no arquivo (motivo + decisão) e seguir. |
-| Mudança significativa | Registrar estado atual no arquivo, atualizar Status para `GATE-REFATORAÇÃO — volta ao planejamento` e retornar ao solicitante. |
+| Mudança significativa | Registrar estado; Status=`GATE-REFATORAÇÃO — volta ao planejamento`; retornar. |
 
 **Regra absoluta**: no gate de refatoração, **sempre**
 consultar o humano se houver possibilidade de mudança no

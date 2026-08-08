@@ -73,6 +73,14 @@ Se o CLI retornar `"project not found"`:
 Para extração web, use `crwl` diretamente conforme a skill
 `web-research-exa-crawl4ai`; não use transportes ou wrappers de servidor.
 
+### Separação por ambiente
+
+- WSL/Linux: use o OpenCode e os CLIs instalados localmente.
+- Windows: use o Copilot CLI e os mesmos CLIs nativos, sem prefixar comandos
+  com `wsl`.
+- `codebase-memory-mcp cli` é uma execução local do CLI; não configure nem
+  inicie um servidor MCP para realizar buscas.
+
 ## Ferramentas nativas como fallback estrito
 
 Use `grep_search`, `file_search`, `read_file`, `list_dir` ou

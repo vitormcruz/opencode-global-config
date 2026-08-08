@@ -221,15 +221,16 @@ documentar e como manter:
    de schema) em vez de depender apenas de instruções
    de prompt. Ferramentas determinísticas produzem
    resultados reproduzíveis e verificáveis.
-   **Script único por agente** — cada agente tem um
-   único script executável que encapsula todas as
-   verificações. O script segue a interface padronizada
-   (sem argumentos, JSON stdout, exit code).
+   **Script único por harness definido** — cada agente com
+   harness aprovado tem um único script executável que
+   encapsula todas as verificações. O script segue a
+   interface padronizada (sem argumentos, JSON stdout,
+   exit code).
 
 5. **Execução obrigatória na construção e revisão da
-   construção** — o agente sempre executa o comando do
-   AGENTS.md ao final da sua atividade nessas fases. O
-   script é idempotente.
+   construção** — o agente com harness definido sempre
+   executa o comando do AGENTS.md ao final da sua atividade
+   nessas fases. O script é idempotente.
 
 ### Pré-requisito: `curador-produto-editor`
 
@@ -269,28 +270,33 @@ documentar e como manter:
 
 **Comportamento do agente:**
 1. Ao final da execução (construção ou revisão),
-    roda o comando do AGENTS.md
+    roda o comando do AGENTS.md quando houver harness
 2. `fail` → lê `findings`, tenta resolver, roda
    harness novamente
 3. `pass` → lê `prompt`, executa se houver
-4. Persiste saída JSON na seção
+4. `SEM HARNESS A PEDIDO DO HUMANO` → não executa
+   harness
+5. Seção ausente/vazia → registra LACUNA e interrompe
+6. Persiste saída JSON na seção
    `## Evidências de Harness` do arquivo de planejamento
 
-**O script sempre existe.** O `curador-produto-editor`
-cria um script para **todos** os agentes ao montar o
-projeto. Se o humano não definiu ferramentas ou regras
-para um agente, o script retorna `{ "status": "pass" }`
-sem verificações (pass-through). Assim o agente **sempre
-chama** o script sem se preocupar se há algo configurado
-ou não.
+**O script existe para cada harness definido.** O
+`curador-produto-editor` cria o script quando o humano
+aprova ferramentas ou regras para o agente. Entradas com
+`SEM HARNESS A PEDIDO DO HUMANO` não geram script e o
+agente não executa harness. Se a entrada estiver ausente
+ou vazia, registra LACUNA e o workflow aguarda decisão
+do humano.
 
 **Portabilidade:** linguagem livre por projeto;
 contrato é a interface (sem argumento + JSON + exit code).
 
 ```
-harness/<agente>.sh
+harness/<agente>
 ```
 
+- O caminho não presume linguagem nem extensão; o AGENTS.md registra o comando
+  executável real do projeto.
 - **Interface**: sem argumentos. Saída JSON em stdout:
   `{ "status": "pass | fail", "findings": [...], "prompt": "..." }`
 - **Exit code**: 0 = pass, 1 = fail.
@@ -367,8 +373,9 @@ fluxo em 4 fases com aprovação do humano:
 - Acumula todas as decisões sem criar nada.
 - **PROIBIDO criar scripts antes da Fase 3 estar 100%
   concluída.** Somente após TODOS os itens aprovados,
-  cria os scripts de uma vez (inclusive pass-through para
-  os sem regras).
+  cria scripts para os harnesses definidos. Entradas
+  marcadas `SEM HARNESS A PEDIDO DO HUMANO` não geram
+  script.
 
 #### Fase 4 — Implementação
 
@@ -376,9 +383,9 @@ fluxo em 4 fases com aprovação do humano:
   na Fase 2.
 - Cria os scripts de harness conforme aprovado na Fase 3.
 - Registra tabela no topo do `AGENTS.md`.
-- **Instalação de dependências** — quando todos os
-  harnesses estiverem definidos, identifica deps
-  necessárias. Se houver comandos com `sudo`, entrega
+- **Instalação de dependências** — quando todas as
+  entradas de harness tiverem decisão explícita, identifica
+  deps necessárias. Se houver comandos com `sudo`, entrega
   ao humano em bloco de código. Executa o restante e
   valida (`tool --version`).
 
@@ -387,10 +394,10 @@ interromper o processo em qualquer etapa. Nesse caso o
 `curador-produto-editor`:
 - Confirma com o humano se realmente deseja encerrar.
 - Atualiza o docs/README.md com o que já foi decidido.
-- Para cada agente cujo harness não foi definido,
+- Para cada agente sem harness por decisão explícita,
   registra `SEM HARNESS A PEDIDO DO HUMANO`.
-- Isso garante que o workflow dev prossiga sem
-  interrupções por ausência de harness.
+- Para cada agente sem decisão, registra LACUNA e
+  interrompe o workflow até o humano decidir.
 
 ---
 
@@ -439,7 +446,7 @@ sequenceDiagram
         edit ->> Humano: Quais ferramentas/prompts?
         Humano -->> edit: Resposta
     end
-    edit ->> edit: Cria scripts (todos, inclusive pass-through)
+    edit ->> edit: Cria scripts para harnesses definidos
     edit ->> edit: Registra Harness no AGENTS.md
     end
 

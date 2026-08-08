@@ -1,6 +1,10 @@
 # Mapa do Produto
 
-Este documento é a fonte de verdade do produto. Define o escopo do que será construído, os artefatos que devem ser produzidos em cada ciclo de desenvolvimento e as regras que governam como esses artefatos são criados e mantidos. É lido por agentes e humanos antes de qualquer ciclo de implementação.
+Este documento é a fonte de verdade do produto. Define o escopo do que será
+construído, os artefatos que devem ser produzidos em cada ciclo de
+desenvolvimento e as regras que governam como esses artefatos são criados e
+mantidos. É lido por agentes e humanos antes de qualquer ciclo de
+implementação.
 
 ## Definição de Escopo
 
@@ -15,8 +19,11 @@ O analista deve elicitar:
 - Nenhum requisito pode ficar sem critério, e vice-versa
 - Toda Regra de Negócio deve ter pelo menos um Requisito Funcional associado
 - Nem todo Requisito Funcional precisa necessariamente ter uma Regra de Negócio associada
-- Regras de controle de acesso são transversais e devem ser elicitadas como uma matriz separada (`RN-ACL`), não como itens sequenciais da lista de regras de negócio
-- Requisitos Não Funcionais associados a uma funcionalidade ficam no arquivo da história e são validados por critérios de aceite daquela história
+- Regras de controle de acesso são transversais e devem ser elicitadas como
+  uma matriz separada (`RN-ACL`), não como itens sequenciais da lista de
+  regras de negócio
+- Requisitos Não Funcionais associados a uma funcionalidade ficam no arquivo
+  da história e são validados por critérios de aceite daquela história
 - Requisitos Não Funcionais gerais (transversais, sem história específica) são:
     - Consolidados em `docs/specs/rnf-gerais.md`
     - Derivados em Critérios de Aceitação no mesmo arquivo, com uma seção para cada RNF
@@ -37,7 +44,7 @@ O analista deve elicitar:
 | RNFs Gerais | Concordion | eng-software | docs/specs/rnf-gerais.md |
 | Regras de Produto | Tabela | eng-software | nenhum |
 | Modelo de Dados | DBML | dba | docs/modelo.dbml |
-| Threat Model | Concordion - Markdown | sec | docs/threat-model/ |
+| Threat Model | Concordion - Markdown | sec | docs/threat-model.md |
 | Plano de Testes Manuais | Markdown | qa | nenhum |
 | Identidade Visual | Protótipo HTML/SVG | front | plan/ui/ |
 | ADR (Arquitetura) | Concordion - Markdown | eng-software | docs/adr/ |
@@ -50,7 +57,9 @@ O analista deve elicitar:
 - Doc derivável do código não se armazena — gere sob demanda
 - Doc desatualizada é pior que ausência de doc
 - Preferir formatos versionáveis (Markdown, Mermaid, DBML)
-- Preferir especificações executáveis a documentação passiva — Concordion-Markdown é o formato padrão para regras que podem ser validadas por código
+- Preferir especificações executáveis a documentação passiva —
+  Concordion-Markdown é o formato padrão para regras que podem ser validadas
+  por código
 
 ##### Regras de Negócio
 - Derivado das histórias de usuário
@@ -77,7 +86,8 @@ O analista deve elicitar:
 
 ##### Regras de Produto
 - Formato tabular: Regra | Descrição | Exceções
-- Escopo: decisões de produto que guiam a implementação (comportamentos padrão, limites, validações que o sistema deve impor)
+- Escopo: decisões de produto que guiam a implementação (comportamentos
+  padrão, limites, validações que o sistema deve impor)
 - Descartadas junto com o arquivo de planejamento ao fim do ciclo
 
 ##### Modelo de Dados

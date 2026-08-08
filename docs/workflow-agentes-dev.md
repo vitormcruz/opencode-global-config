@@ -45,31 +45,31 @@ devflow
 
 ## Agentes
 
-| Sigla             | Nome completo          | Tipo               | Fases onde atua                                              |
-|-------------------|------------------------|---------------------|--------------------------------------------------------------|
-| `devflow`             | Orquestrador           | Roteador stateless  | todas (roteia)                                               |
-| `eng-software`    | Engenheiro de Software | Executor            | Planejamento, Construção, Ajustes integrativos               |
-| `front`           | Engenheiro Frontend    | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
-| `curador-produto` | Curador de Produto     | Executor            | Revisão do Plano, Revisão da Construção, Finalização |
-| `dba`             | Analista de BD         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção |
-| `sec`             | Analista Cyber         | Executor            | Planejamento, Construção, Revisão do Plano, Revisão da Construção, Testes |
-| `rev`             | Revisor Integrativo    | Executor            | Revisão do Plano, Revisão da Construção                        |
-| `qa`              | Testador               | Executor            | Planejamento, Revisão do Plano, Revisão da Construção, Testes  |
-| `val-harness`     | Validador de Harness   | Executor            | Construção, Revisão da Construção |
+| Sigla | Nome completo | Tipo | Fases onde atua |
+|---|---|---|---|
+| `devflow` | Orquestrador | Roteador | Todas; apenas roteia |
+| `eng-software` | Engenheiro de Software | Executor | Planejamento e construção |
+| `front` | Engenheiro Frontend | Executor | Planejamento, construção e revisões |
+| `curador-produto` | Curador de Produto | Executor | Revisões e finalização |
+| `dba` | Analista de BD | Executor | Planejamento, construção e revisões |
+| `sec` | Analista Cyber | Executor | Planejamento, construção, revisões e testes |
+| `rev` | Revisor Integrativo | Executor | Revisões do plano e da construção |
+| `qa` | Testador | Executor | Planejamento, revisões e testes |
+| `val-harness` | Validador de Harness | Executor | Construção e revisão da construção |
 
 ### Especialidades
 
-| Agente             | No planejamento                                        | Na construção                                                                          | Na validação                                                                              |
-|--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| `devflow`              | Roteia fases, spawna agentes, mantém Status do arquivo | Roteia fases, spawna agentes, mantém Status do arquivo                                 | Roteia fases, spawna agentes                                                              |
-| `eng-software`     | Planeja implementação do código                        | TDD (testes → código → refatoração); aplica ajustes integrativos                       | —                                                                                         |
-| `curador-produto`  | —                                                      | —                                                                                      | Verifica aderência ao docs/README.md; guardião do docs/README.md (não edita — delega ao curador-produto-editor); revisa docs nos loops; revisão final |
-| `dba`              | Modela dados                                           | Atualiza modelo, scripts, informa `eng-software` quais classes/comportamentos alterar  | Revisa e corrige artefatos de BD; devolve resumo                                          |
-| `sec`              | Analisa requisitos de segurança (pós-plano de código)  | Gera configs de segurança se necessário                                                | Revisa e corrige segurança; planeja e executa testes de segurança; devolve resumo          |
-| `qa`               | Planeja testes manuais, aceitação, exploratórios       | —                                                                                      | Revisa e corrige cobertura de testes; executa testes automatizados e manuais; devolve resumo |
-| `front`            | Prototipar telas, validar identidade visual com humano | Implementar UI conforme identidade visual aprovada                                     | Revisa aderência à identidade visual aprovada                                             |
-| `rev`              | —                                                      | —                                                                                      | Revisão integrativa: consistência entre partes e aderência ao plano; não corrige — devolve relatório |
-| `val-harness`      | —                                                      | —                                                                                      | Valida evidências de harness dos agentes da fase (apenas após Construção e Revisão da Construção, se houve modificações); cruza com AGENTS.md |
+| Agente | Planejamento | Construção | Validação |
+|---|---|---|---|
+| `devflow` | Roteia fases e mantém o Status | Roteia fases e mantém o Status | Roteia fases |
+| `eng-software` | Planeja o código | TDD e ajustes integrativos | — |
+| `curador-produto` | — | — | Valida docs/README.md e harness |
+| `dba` | Modela dados | Atualiza modelo e scripts | Revisa artefatos de BD |
+| `sec` | Analisa requisitos de segurança | Gera configurações | Revisa segurança e testa |
+| `qa` | Planeja testes | — | Revisa cobertura e executa testes |
+| `front` | Prototipa telas | Implementa UI | Revisa identidade visual |
+| `rev` | — | — | Revisa consistência e aderência ao plano |
+| `val-harness` | — | — | Valida evidências de harness |
 
 > **Nota de sequenciamento (P26):** `sec` analisa
 > requisitos de segurança com base no plano de
@@ -516,11 +516,12 @@ Premissas detalhadas: 21.1–21.3.
     manutenção do harness são responsabilidade do
     `curador-produto-editor` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
-    na construção e na revisão da construção**, sempre
-    que o agente altera artefatos. **Harness não se
-    aplica ao planejamento nem à revisão do plano.**
-    Implementado como
-    **script único por agente** — sem argumentos, sem
+    na construção e na revisão da construção** para agentes
+    com harness definido. Agentes marcados
+    `SEM HARNESS A PEDIDO DO HUMANO` não executam harness.
+    **Harness não se aplica ao planejamento nem à revisão
+    do plano.** Implementado como
+    **script único por harness** — sem argumentos, sem
     parâmetro de fase, idempotente.
 33. **Agente localiza seu harness antes de executar** —
     ao iniciar uma tarefa na construção ou revisão da
@@ -529,7 +530,8 @@ Premissas detalhadas: 21.1–21.3.
     ele. Se houver comando registrado, executa o script.
     Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
     segue sem harness. Se a seção não existir ou estiver
-    vazia, segue sem harness.
+    vazia, registra LACUNA e não prossegue até o humano
+    definir a política.
 34. **Evidência de execução do harness** — todo agente
     que possui harness deve produzir, ao final da sua
     execução, a saída JSON do script como evidência.
@@ -594,7 +596,7 @@ sequenceDiagram
 
     %% ── INÍCIO ──────────────────────────────
     Humano ->> devflow: Nova funcionalidade (requisitos)
-    Note right of devflow: Workflow de Definição de Escopo<br/>(ver workflow-definicao-escopo.md)<br/>Validação + Elicitação
+    Note right of devflow: Workflow de Escopo<br/>workflow-definicao-escopo.md<br/>Validação + Elicitação
     devflow ->> devflow: Cria arquivo de planejamento<br/>Status: PLANEJAMENTO
 
     %% ── PLANEJAMENTO ──────────────────────────
@@ -846,7 +848,7 @@ sequenceDiagram
 
     loop Revalidação (guarda do humano)
         opt Lacunas em outros domínios
-            Note right of devflow: devflow spawna cada especialista<br/>indicado pelo curador (eng, dba,<br/>sec, qa, front — conforme docs/README.md)
+            Note right of devflow: especialistas do curador<br/>eng, dba, sec, qa, front<br/>docs/README.md
             devflow ->> eng: Extrair/criar artefato de spec<br/>do domínio indicado
             eng -->> devflow: Artefatos criados (resumo curto)
         end
@@ -878,7 +880,7 @@ sequenceDiagram
 
 | Plataforma | Como `devflow` spawna agentes | Comunicação com humano |
 |---|---|---|
-| **Copilot CLI** | `task(agent_type=...)` ou `/fleet` | Devflow media. Subagentes retornam perguntas; não precisam ser primários. |
+| **Copilot CLI** | `task(agent_type=...)` ou `/fleet` | Devflow media; subagentes retornam perguntas |
 | **OpenCode** | Subagentes | Devflow media. Subagentes retornam perguntas; não precisam de tool `ask`. |
 
 **Ambas as plataformas**: subagentes retornam perguntas ao invés de

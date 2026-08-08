@@ -58,7 +58,8 @@ spawna outros agentes, ou propõe commit.
   houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  AGENTS.md, siga sem harness.
+  AGENTS.md, registre LACUNA e não prossiga até o
+  humano definir a política.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.

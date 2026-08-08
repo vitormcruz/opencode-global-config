@@ -2,23 +2,28 @@
 
 | Agente | Comando de Execução | Descrição |
 |--------|--------------------|-----------|
-| eng-software | `harness/eng-software.sh` | Testes backend |
-| dba | `harness/dba.sh` | Validação de schema e modelo de dados |
-| sec | `harness/sec.sh` | Segurança — secrets, dependências, OWASP |
-| qa | `harness/qa.sh` | Cobertura de testes e acessibilidade |
-| front | `harness/front.sh` | Testes, lint, build e acessibilidade do frontend |
-| rev | `harness/rev.sh` | Revisão de documentação e consistência cross-artefato |
-| analista | (sem harness) | SEM HARNESS |
-| val-harness | (sem harness) | SEM HARNESS |
-| curador-produto | (sem harness) | SEM HARNESS |
+| eng-software | `harness/eng-software` | Testes backend |
+| dba | `harness/dba` | Validação de schema e modelo de dados |
+| sec | `harness/sec` | Segurança — secrets, dependências, OWASP |
+| qa | `harness/qa` | Cobertura de testes e acessibilidade |
+| front | `harness/front` | Testes, lint, build e acessibilidade do frontend |
+| rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+| analista | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+| val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+| curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 
-> Scripts shell. Interface: saída JSON `{ status, findings[], prompt }`, exit 0 = pass, exit 1 = fail.
+> Ferramentas do projeto. Interface: saída JSON `{ status, findings[], prompt }`;
+> exit 0 = pass, exit 1 = fail.
 
-> **PROIBIDO/NAO PODE:** bypassar, comentar, remover ou condicionar qualquer verificação do harness. Ferramenta ausente NAO justifica remoção — o correto é reportar severidade `melhoria` com instrução de instalação. Todo finding `bloqueante` DEVE ser resolvido antes de avançar no workflow. O harness é inegociável.
+> **PROIBIDO/NAO PODE:** bypassar, comentar, remover ou condicionar
+> qualquer verificação do harness. Ferramenta ausente NAO justifica remoção —
+> o correto é reportar severidade `melhoria` com instrução de instalação.
+> Todo finding `bloqueante` DEVE ser resolvido antes de avançar no workflow.
+> O harness é inegociável.
 
 ### eng-software
 
-**Arquivo:** `harness/eng-software.sh`
+**Arquivo:** `harness/eng-software`
 **Descrição:** Testes backend
 **O que deve conter:**
 - Comandos de teste específicos do projeto (unitários + integração)
@@ -26,7 +31,7 @@
 
 ### dba
 
-**Arquivo:** `harness/dba.sh`
+**Arquivo:** `harness/dba`
 **Descrição:** Validação de schema e modelo de dados
 **O que deve conter:**
 - Validação de existência de documentos de especificação
@@ -36,7 +41,7 @@
 
 ### sec
 
-**Arquivo:** `harness/sec.sh`
+**Arquivo:** `harness/sec`
 **Descrição:** Segurança — secrets, dependências, OWASP
 **O que deve conter:**
 - Secrets scan no repositório
@@ -47,7 +52,7 @@
 
 ### qa
 
-**Arquivo:** `harness/qa.sh`
+**Arquivo:** `harness/qa`
 **Descrição:** Cobertura de testes e acessibilidade
 **O que deve conter:**
 - Relatório de cobertura de testes
@@ -57,7 +62,7 @@
 
 ### front
 
-**Arquivo:** `harness/front.sh`
+**Arquivo:** `harness/front`
 **Descrição:** Testes, lint, build e acessibilidade do frontend
 **O que deve conter:**
 - Testes frontend
@@ -67,23 +72,14 @@
 - Prompt instrucional: verificar aderência à identidade visual aprovada
 - Critérios de harness: [a definir com humano]
 
-### rev
-
-**Arquivo:** `harness/rev.sh`
-**Descrição:** Revisão de documentação e consistência cross-artefato
-**O que deve conter:**
-- Validação de sintaxe de documentação (markdownlint ou equivalente)
-- Prompt instrucional: verificar consistência entre artefatos (BD, código, segurança, testes, docs) e aderência ao plano aprovado
-- Critérios de harness: [a definir com humano]
-
 ### analista
 
-**Status:** `SEM HARNESS`
+**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
 
 ### val-harness
 
-**Status:** `SEM HARNESS`
+**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
 
 ### curador-produto
 
-**Status:** `SEM HARNESS`
+**Status:** `SEM HARNESS A PEDIDO DO HUMANO`

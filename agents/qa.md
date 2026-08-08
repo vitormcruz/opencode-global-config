@@ -54,7 +54,8 @@ faz revisão integrativa, ou propõe commit.
   o prompt e execute se houver.
   Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
   siga sem harness. Se não houver seção de harness no
-  AGENTS.md, siga sem harness.
+  AGENTS.md, registre LACUNA e não prossiga até o
+  humano definir a política.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -173,8 +174,8 @@ especificação imutável e suas implicações.
 Rodar suíte de testes e reportar resultados.
 
 **O que fazer**:
-1. Identificar o comando de teste do projeto (Makefile,
-   package.json, pytest, etc.).
+1. Identificar o comando de teste documentado pelo projeto
+   (`pyproject.toml`, `package.json`, scripts equivalentes, etc.).
 2. Executar a suíte completa de testes automatizados.
 3. Executar testes manuais planejados (quando aplicável):
    - Seguir roteiro definido no plano de testes.
