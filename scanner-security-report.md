@@ -14,7 +14,6 @@ problemas de segurança conhecidos nos 29 artefatos instalados por este repo.
 | **npm global** | Playwright, Exa e plugins OpenCode | `npm audit` | nativo do Node.js |
 | **PyPI** (pipx) | crawl4ai | `pip-audit` | `pipx install pip-audit` |
 | **APT system** | make, pandoc e jq | `debsecan` / `trivy rootfs` | `apt install debsecan` |
-| **Tarballs GitHub** | bats-core, bats-support, bats-assert, bats-file | `trivy fs` / `grype .` | binario |
 | **Script remoto** | nvm install.sh (via `curl | bash`) | Auditoria manual + `gpg --verify` | N/A |
 | **Node.js via nvm** | Node.js 22 | `nvm audit` (Node.js --security-revert) + `npm audit` | nativo |
 | **Chromium** | Playwright browser download | `npm audit` (monitorar playwright) | nativo |
@@ -144,7 +143,7 @@ nao como imagem ou servico local.
 **Status:** Script deste repo usa `nvm-sh/nvm v0.40.1`. Atualizar para
 `v0.40.4` para corrigir esta CVE.
 
-### 4.4 BATS, Docling, Graphifyy
+### 4.4 Docling, Graphifyy
 
 Nenhuma CVE publica conhecida ate a data deste relatorio.
 
@@ -194,7 +193,6 @@ nvm --version 2>/dev/null || echo "nvm not found"
 | Limitacao | Explicacao |
 |---|---|
 | **Sem reachability** | Trivy/Grype reportam CVEs mesmo se o codigo vulneravel nao for executado |
-| **Tarballs sem lockfile** | BATS tarballs nao tem SBOM — Trivy escaneia apenas arquivos extraidos |
 | **Scripts remotos (`curl | bash`)** | Nenhum scanner automatico cobre isso; requer auditoria manual |
 | **Dependencias transitivas** | APT e npm tem dependencias que nao sao escaneadas recursivamente |
 | **Falsos positivos** | `debsecan` no Ubuntu reporta CVEs Debian que nao se aplicam (uso limitado a Debian puro) |

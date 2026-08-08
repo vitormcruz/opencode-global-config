@@ -191,27 +191,18 @@ nas descrições
 - Toda mudança — em workflow **ou** em agentes — **sempre** passa
   pelo humano antes de ser aplicada. Sem exceção.
 
-# Regras Obrigatórias Pora Testes
+# Regras Obrigatórias Para Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no bootstrap.
-- Framework: BATS-core em `tests/` — rodar com `make test-opencode-opencode`.
-- **Execução sempre via WSL** — os testes usam Bash/BATS e devem
-  ser executados dentro do WSL.
-  - **Regra**: sempre use `wsl -- bash -ic "COMANDO"` para executar
-    comandos no WSL a partir do PowerShell/cmd. Nunca use
-    `wsl -e bash -c` — esse modo não carrega `~/.bashrc` e
-    ferramentas como `node`, `fnm`, `bats` não estarão no PATH.
-  - Exemplo canônico:
-    `wsl -- bash -ic "cd /mnt/c/Users/<usr>/Projetos/opencode-config && make test-opencode"`
-  - Se já estiver dentro do WSL (terminal Linux), execute
-    diretamente sem prefixo `wsl`.
-- **Line endings obrigatoriamente LF** — arquivos `.bats` e scripts Bash
-  executados no WSL/Linux devem usar LF (`\n`), nunca CRLF (`\r\n`).
-  CRLF causa falhas silenciosas (ex: `grep "^---$"` não encontra `---\r`).
-  Ao criar esses arquivos no Windows, garantir conversão para LF antes do commit.
+- Framework: `pytest` em `tests/` — use
+  `.venv/bin/pytest -m "unit or tools or opencode"`.
+- Execute os testes no ambiente alvo; a integração OpenCode requer Docker e
+  `OPENCODE_TEST_MODEL`, e a integração Copilot deve rodar no Windows.
+- Não use `skip`: quando uma dependência externa não estiver disponível,
+  use `pytest.fail` com uma mensagem clara e acionável.
 - A estrutura de testes deve espelhar a estrutura do código.
-- Se um teste cobre um script, ele deve ter o mesmo nome do script com sufixo `-test`.
-- Não criar testes para scripts cuja única função é executar ou orquestrar testes.
+- Testes de scripts devem ficar em `tests/scripts/` com nomes `test_*.py`.
+- Não crie testes para scripts cuja única função é executar ou orquestrar testes.
 - Scripts de bootstrap devem ficar em `scripts/bootstrap_repo/`.
 - Novos scripts desse tipo também devem entrar em `scripts/bootstrap_repo/`.
 - Os testes desses scripts devem espelhar isso em `tests/scripts/bootstrap_repo/`.

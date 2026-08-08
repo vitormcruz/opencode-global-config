@@ -1,7 +1,5 @@
 # Forca LF em TODO arquivo de texto, em QUALQUER commit
 * text=auto eol=lf
 
-# Protecao explicita para shell/scripts de teste
+# Protecao explicita para entrypoints shell
 *.sh text eol=lf
-*.bats text eol=lf
-Makefile text eol=lf

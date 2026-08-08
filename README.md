@@ -115,26 +115,14 @@ Destinos sincronizados pelo Copilot CLI:
 
 ## Testes
 
-Alvos disponiveis:
+Comandos disponiveis:
 
 ```bash
-make help
-make test-opencode
-make test-copilot
-make test-unit
-make test-tools
-make test-opencode-integration
-make test-copilot-integration
+.venv/bin/pytest -m unit
+.venv/bin/pytest -m tools
+.venv/bin/pytest -m "unit or tools or opencode"
+.venv/bin/pytest -m "unit or tools or copilot"
 ```
-
-Resumo dos alvos:
-
-- `make test-opencode`: roda todos os testes para OpenCode (unit + tools + integracao)
-- `make test-copilot`: roda todos os testes para Copilot (unit + tools + integracao)
-- `make test-unit`: testes unitarios puros — sem dependencias externas
-- `make test-tools`: testes que requerem ferramentas instaladas no WSL
-- `make test-opencode-integration`: Camada 2 via API HTTP do OpenCode
-- `make test-copilot-integration`: testes de integracao Copilot CLI (requer copilot no PATH)
 
 ### Testes de integração (Camada 2)
 
@@ -145,33 +133,22 @@ Os testes de integração exigem um modelo configurado explicitamente. Por segur
 
 ```bash
 export OPENCODE_TEST_MODEL='openai/gpt-4'
-make test-opencode-integration
-```
-
-**Opção 2: atalho para modelo aberto padrão (apenas ambientes não-sensíveis)**
-
-```bash
-make test-opencode-integration-default-model
+.venv/bin/pytest -m opencode
 ```
 
 > **AVISO**: O modelo aberto padrão (`opencode/big-pickle`) é um modelo externo
 > que **COLETA DADOS** enviados a ele. **Nunca use em ambientes corporativos ou
 > com dados sensíveis.** Use apenas para testes pessoais ou de demonstração.
 
-**Opção 3: rodar tudo (unit + tools + integração)**
+Para executar a integração Copilot:
 
 ```bash
-export OPENCODE_TEST_MODEL='openai/gpt-4'
-make test-opencode
+.venv/bin/pytest -m copilot
 ```
-
-Os testes usam `bats` do PATH e bibliotecas auxiliares instaladas pelo
-bootstrap em `~/.local/lib/bats`.
-
-Documentação do framework: [BATS-core](https://bats-core.readthedocs.io/)
 
 Pre-requisitos:
 
-- `make`
-- `jq` (para testes de integração)
+- Python >= 3.10 e dependências de `requirements-dev.txt`
+- Docker para a integração OpenCode
+- `OPENCODE_TEST_MODEL` para testes que enviam prompts
 - dependencias externas conforme o alvo escolhido

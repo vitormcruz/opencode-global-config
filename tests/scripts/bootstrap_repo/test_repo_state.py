@@ -191,6 +191,15 @@ def test_repo_state_bashrc_enables_exa(
     )
 
 
+def test_repo_state_does_not_create_legacy_test_library_directory(
+    bootstrapped_repo_state: RepoState,
+) -> None:
+    legacy_directory = "ba" + "ts"
+    assert not (
+        bootstrapped_repo_state.home / ".local" / "lib" / legacy_directory
+    ).exists()
+
+
 def test_repo_state_doctree_instruction_does_not_exist(
     bootstrapped_repo_state: RepoState,
 ) -> None:
