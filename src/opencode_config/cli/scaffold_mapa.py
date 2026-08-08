@@ -110,11 +110,11 @@ HARNESS_TEMPLATE = dedent(
 
     | Agente | Comando de Execução | Descrição |
     |--------|--------------------|-----------|
-    | eng-software | harness/eng-software.sh | Testes, análise estática |
-    | dba | harness/dba.sh | Validação de schema |
-    | sec | harness/sec.sh | OWASP checks, secrets |
-    | qa | harness/qa.sh | Cobertura, aceitação |
-    | front | harness/front.sh | Linting, a11y |
+    | eng-software | harness/eng-software | Testes, análise estática |
+    | dba | harness/dba | Validação de schema |
+    | sec | harness/sec | OWASP checks, secrets |
+    | qa | harness/qa | Cobertura, aceitação |
+    | front | harness/front | Linting, a11y |
     | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
     | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
     | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
@@ -126,7 +126,7 @@ HARNESS_TEMPLATE = dedent(
     sem argumentos, saída JSON (`status`, `findings`, `prompt`), exit code
     0/1.
 
-    #### harness/eng-software.sh
+    #### harness/eng-software
 
     **Objetivo:** Validar código — testes automatizados e análise estática.
 
@@ -139,7 +139,7 @@ HARNESS_TEMPLATE = dedent(
     - Testes quebrados
     - Erros de lint/type check
 
-    #### harness/dba.sh
+    #### harness/dba
 
     **Objetivo:** Validar schema e migrations.
 
@@ -152,7 +152,7 @@ HARNESS_TEMPLATE = dedent(
     - SQL inválido (error no linter)
     - Divergência entre schema e modelo "as code"
 
-    #### harness/sec.sh
+    #### harness/sec
 
     **Objetivo:** Validar segurança do código e dependências.
 
@@ -166,7 +166,7 @@ HARNESS_TEMPLATE = dedent(
     - Segredos detectados
     - Vulnerabilidades críticas em dependências
 
-    #### harness/qa.sh
+    #### harness/qa
 
     **Objetivo:** Validar cobertura de testes e qualidade.
 
@@ -178,7 +178,7 @@ HARNESS_TEMPLATE = dedent(
     - Cobertura abaixo do baseline
     - Violations critical de acessibilidade
 
-    #### harness/front.sh
+    #### harness/front
 
     **Objetivo:** Validar código frontend — lint, acessibilidade e aderência
     visual.

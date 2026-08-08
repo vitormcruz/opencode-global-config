@@ -254,11 +254,11 @@ def test_harness_scaffold_contains_default_executor_commands(tmp_path: Path) -> 
 
     assert status == 0
     for row in (
-        "| eng-software | harness/eng-software.sh | Testes, análise estática",
-        "| dba | harness/dba.sh | Validação de schema",
-        "| sec | harness/sec.sh | OWASP checks, secrets",
-        "| qa | harness/qa.sh | Cobertura, aceitação",
-        "| front | harness/front.sh | Linting, a11y",
+        "| eng-software | harness/eng-software | Testes, análise estática",
+        "| dba | harness/dba | Validação de schema",
+        "| sec | harness/sec | OWASP checks, secrets",
+        "| qa | harness/qa | Cobertura, aceitação",
+        "| front | harness/front | Linting, a11y",
     ):
         assert row in content
 
@@ -297,11 +297,11 @@ def test_harness_scaffold_describes_each_executor_script(tmp_path: Path) -> None
 
     assert status == 0
     for section in (
-        "harness/eng-software.sh",
-        "harness/dba.sh",
-        "harness/sec.sh",
-        "harness/qa.sh",
-        "harness/front.sh",
+        "harness/eng-software",
+        "harness/dba",
+        "harness/sec",
+        "harness/qa",
+        "harness/front",
     ):
         assert f"#### {section}" in content
 
