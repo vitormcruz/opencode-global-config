@@ -1,11 +1,10 @@
 # Metadados do Upstream
 
-repositorio: https://github.com/sickn33/antigravity-awesome-skills
+repositorio: https://github.com/sickn33/antigravity-awesome-skills.git
 branch: main
-commit: 5e71bbadce5202e95c5427bcf966c122414bcb76
-data_commit: 2026-07-03 18:58:54 +0200
-sincronizado_em: 2026-07-03 17:27 UTC
-path_upstream: skills/accessibility-compliance-accessibility-audit/
+commit: 75c558b7ea89a023877b96eac74ced7aa1ee93f6
+data_commit: 2026-08-08 07:06:12 +0000
+sincronizado_em: 2026-08-08 12:24 UTC
 
 ## Arquivos sincronizados
 
