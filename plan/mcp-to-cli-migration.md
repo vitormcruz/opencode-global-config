@@ -28,11 +28,11 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 4.1 concluída e validada no WSL; as validações Windows
+**Estado atual:** Task 4.2 concluída e validada no WSL; as validações Windows
 foram adiadas para a validação multiplataforma final, e as revisões dos
 checkpoints continuam pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Task 4.1.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.2.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -1093,19 +1093,20 @@ PortableGit, `crawl4ai-setup`, `npx playwright install`, AWS CLI v2 (AD-13) e a
 criação da `.venv`. Downloads devem verificar SHA quando o upstream publicar.
 
 **Acceptance criteria:**
-- [ ] Nenhum instalador requer `sudo` ou elevação
-- [ ] Binários portáteis vão para um diretório user-space único e o PATH é
+- [x] Nenhum instalador requer `sudo` ou elevação
+- [x] Binários portáteis vão para um diretório user-space único e o PATH é
       atualizado de forma idempotente
-- [ ] Download verifica integridade quando houver SHA publicado; aborta se
+- [x] Download verifica integridade quando houver SHA publicado; aborta se
       divergir, exibindo ambos os hashes
-- [ ] Falha de uma dependência não aborta as demais
-- [ ] AWS CLI instalado pelo script oficial em modo user-local, com `--quiet` /
+- [x] Falha de uma dependência não aborta as demais
+- [x] AWS CLI instalado pelo script oficial em modo user-local, com `--quiet` /
       `-Quiet`, e **nunca** com `--system` / `-System`
-- [ ] Reexecutar o instalador do AWS CLI é no-op quando já está na versão alvo
+- [x] Reexecutar o instalador do AWS CLI é no-op quando já está na versão alvo
 
 **Verification:**
-- [ ] `pytest -m unit tests/bootstrap/test_installers.py` com rede mockada
+- [x] `pytest -m unit tests/bootstrap/test_installers.py` com rede mockada
 - [ ] Instalação real ponta-a-ponta num Windows sem admin
+      (adiada para a validação multiplataforma final pelo humano)
 
 **Dependencies:** 4.1
 
