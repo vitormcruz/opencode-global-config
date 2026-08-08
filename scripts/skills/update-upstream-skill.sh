@@ -84,6 +84,10 @@ supports_assume_yes() {
     return 0
   fi
 
+  if [[ "$command" == bash\ scripts/*/sync.sh ]]; then
+    return 0
+  fi
+
   if ! local_script="$(extract_local_script_path "$command")"; then
     return 1
   fi

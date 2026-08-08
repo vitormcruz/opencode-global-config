@@ -98,6 +98,47 @@ def test_sync_check_only_returns_non_argument_error(
 
 
 @pytest.mark.unit
+def test_sync_yes_skips_interactive_confirmation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License",
+            "skills/accessibility-compliance-accessibility-audit/SKILL.md": "skill",
+        },
+    )
+
+    class Temporary:
+        def cleanup(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        skills_sync,
+        "_clone_upstream",
+        lambda _spec: (Temporary(), upstream),
+    )
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda _prompt: pytest.fail("--yes nao deveria pedir confirmacao"),
+    )
+    status = skills_sync.run(
+        [
+            "sync",
+            "accessibility-audit",
+            "--yes",
+            "--repo-root",
+            str(tmp_path / "repo"),
+        ],
+        output=StringIO(),
+        error=StringIO(),
+    )
+
+    assert status == 0
+
+
+@pytest.mark.unit
 def test_accessibility_skill_file_exists(repo_root: Path) -> None:
     assert (repo_root / "skills/accessibility-audit/SKILL.md").is_file()
 
@@ -299,6 +340,8 @@ def test_accessibility_sync_preserves_skill_and_description_adaptation(
     ).read_text(encoding="utf-8") == "playbook"
     metadata = (local_skill / "UPSTREAM.md").read_text(encoding="utf-8")
     assert "commit:" in metadata
+    assert "data_commit:" in metadata
+    assert "sincronizado_em:" in metadata
     assert "## Adaptacao da description" in metadata
     assert "custom adaptation" in metadata
 

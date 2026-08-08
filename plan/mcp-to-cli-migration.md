@@ -28,11 +28,12 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 4.4 concluída e validada no WSL; as validações Windows
-foram adiadas para a validação multiplataforma final, e as revisões dos
-checkpoints continuam pendentes.
+**Estado atual:** Task 5.1 concluída e validada no WSL; a Task 4.5 e todas as
+validações Windows foram adiadas para a validação multiplataforma final, e as
+revisões dos checkpoints continuam pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.4.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4
+e Task 5.1.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -44,6 +45,8 @@ Essas pendências não bloqueiam a execução das fases intermediárias.
 
 **Última verificação WSL:** `pytest -m "unit or tools"` (134 passed) e
 `bats --recursive tests/scripts/bootstrap_repo` (64 passed).
+Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
+25 testes.
 
 ## Contexto Levantado (inventário)
 
@@ -1226,13 +1229,13 @@ pelos metadados de `UPSTREAM.md`. Preservar a regra de ouro: **nunca
 sobrescrever `SKILL.md`**.
 
 **Acceptance criteria:**
-- [ ] `SKILL.md` jamais é sobrescrito pelo sync
-- [ ] `--yes` e `--check-only` preservados em todos os fluxos
-- [ ] `UPSTREAM.md` atualizado com novo SHA e data após sync
-- [ ] Campos `description_lang` / `description_note` preservados
+- [x] `SKILL.md` jamais é sobrescrito pelo sync
+- [x] `--yes` e `--check-only` preservados em todos os fluxos
+- [x] `UPSTREAM.md` atualizado com novo SHA e data após sync
+- [x] Campos `description_lang` / `description_note` preservados
 
 **Verification:**
-- [ ] `pytest -m unit tests/skills_mgmt/test_sync.py` (porte de
+- [x] `pytest -m unit tests/skills_mgmt/test_sync.py` (porte de
       `accessibility-audit-sync-test.bats` + `addyosmani-sync-test.bats`)
       com repositório git fake
 

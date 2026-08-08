@@ -289,11 +289,11 @@ inicial. Atualizacoes upstream devem ser aplicadas manualmente via merge.
 
 ### Scripts de sync disponiveis
 
-| Skill(s) | Script |
+| Skill(s) | Comando |
 |---|---|
-| prompt-improver | `scripts/prompt-improver/sync.sh` |
-| 12 skills addyosmani | `scripts/addyosmani/sync.sh` |
-| accessibility-audit | `scripts/accessibility-audit/sync.sh` |
+| prompt-improver | `opencode-skills sync prompt-improver` |
+| 12 skills addyosmani | `opencode-skills sync addyosmani` |
+| accessibility-audit | `opencode-skills sync accessibility-audit` |
 
 Todos suportam `--yes` e `--check-only`.
 
