@@ -17,6 +17,7 @@ from opencode_config.bootstrap.installers import (
     install_npm_global,
     install_node,
     install_pipx,
+    install_playwright,
 )
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import resolve_user_space_paths
@@ -165,6 +166,30 @@ def test_install_codebase_memory_enables_auto_index(
         "auto_index",
         "true",
     )
+
+
+@pytest.mark.unit
+def test_install_playwright_installs_package_and_chromium(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    commands: list[tuple[str, ...]] = []
+
+    result = install_playwright(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[0][-1] == "@playwright/test"
+    assert commands[1] == (
+        "npx",
+        "--yes",
+        "playwright",
+        "install",
+        "chromium",
+    )
+    assert all("sudo" not in command for command in commands for command in command)
 
 
 @pytest.mark.unit

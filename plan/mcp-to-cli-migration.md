@@ -1307,9 +1307,10 @@ tratar essa suíte como especificação executável.
 ---
 
 ### Checkpoint: Manutenção migrada
-- [ ] Nenhum `.sh` restante em `scripts/` além dos 2 entrypoints
-- [ ] `pytest -m unit` verde
-- [ ] Sync de uma skill upstream real executado com sucesso
+- [x] Nenhum `.sh` restante em `scripts/` além dos 2 entrypoints
+- [x] `pytest -m unit` verde (182 testes aprovados)
+- [x] Sync de uma skill upstream real executado com sucesso
+      (`accessibility-audit`, commit `75c558b7`)
 - [ ] Revisão com o humano
 
 ---

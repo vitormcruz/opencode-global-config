@@ -17,15 +17,9 @@ def test_opencode_configs_have_no_mcp_block(repo_root: Path):
 
 
 @pytest.mark.unit
-def test_codebase_memory_install_keeps_cli_install_and_auto_index(repo_root: Path):
-    content = (repo_root / "scripts/codebase-memory/install.sh").read_text(
-        encoding="utf-8"
-    )
-
-    assert "npm install -g codebase-memory-mcp" in content
-    assert "codebase-memory-mcp config set auto_index true" in content
-    assert "codebase-memory-mcp install -y" not in content
-    assert "OPENCODE_JSON" not in content
+def test_legacy_install_wrappers_are_removed(repo_root: Path):
+    assert not (repo_root / "scripts/browser-test/install-playwright.sh").exists()
+    assert not (repo_root / "scripts/codebase-memory/install.sh").exists()
 
 
 @pytest.mark.unit
