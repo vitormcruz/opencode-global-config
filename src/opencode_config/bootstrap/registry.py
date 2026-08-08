@@ -67,6 +67,7 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "fnm em user-space",
             windows="fnm-windows.zip em user-space",
         ),
+        minimum_version=(22,),
     ),
     DependencySpec(
         name="pipx",
@@ -137,6 +138,7 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "script oficial AWS em modo user-local",
             windows="script oficial AWS em modo user-local",
         ),
+        minimum_version=(2,),
     ),
 )
 

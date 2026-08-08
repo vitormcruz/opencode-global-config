@@ -221,15 +221,41 @@ def test_install_node_bootstraps_fnm_before_installing_node(
     context = make_context(tmp_path)
     commands: list[tuple[str, ...]] = []
 
+    def runner(command, **_kwargs):
+        commands.append(tuple(command))
+        stdout = ""
+        if tuple(command) == ("fnm", "which", "22"):
+            stdout = str(
+                tmp_path
+                / "fnm"
+                / "node-versions"
+                / "v22"
+                / "installation"
+                / "bin"
+                / "node"
+            )
+        return CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout=stdout,
+            stderr="",
+        )
+
     result = install_node(
         context,
         fnm_url=f"file://{archive}",
-        runner=successful_runner(commands),
+        runner=runner,
     )
 
     assert result.success
     assert (context.paths.bin_dir / "fnm").is_file()
-    assert commands[-1] == ("fnm", "install", "22")
+    assert commands[-2:] == [
+        ("fnm", "install", "22"),
+        ("fnm", "which", "22"),
+    ]
+    assert str(
+        tmp_path / "fnm" / "node-versions" / "v22" / "installation" / "bin"
+    ) in context.current_environment["PATH"]
 
 
 @pytest.mark.unit

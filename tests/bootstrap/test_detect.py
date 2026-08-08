@@ -57,6 +57,39 @@ def test_registry_declares_all_ad9_dependencies_and_install_methods() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    ("name", "stdout"),
+    [
+        ("node", "v18.20.0\n"),
+        ("aws-cli", "aws-cli/1.32.0 Python/3.11.0\n"),
+    ],
+)
+def test_registry_marks_unsupported_major_versions_as_outdated(
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    stdout: str,
+) -> None:
+    spec = next(item for item in DEPENDENCY_REGISTRY if item.name == name)
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.detect.shutil.which",
+        lambda *_args, **_kwargs: f"/mock/bin/{name}",
+    )
+
+    result = detect_dependency(
+        spec,
+        EnvironmentKind.WINDOWS,
+        runner=lambda command, **_: CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout=stdout,
+            stderr="",
+        ),
+    )
+
+    assert result.status is DependencyStatus.OUTDATED
+
+
+@pytest.mark.unit
 def test_detect_dependency_reports_present_version_path_and_method(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

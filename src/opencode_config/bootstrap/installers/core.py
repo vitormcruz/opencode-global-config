@@ -387,6 +387,20 @@ def install_node(
             fetcher=fetcher,
         )
     _execute(context, ["fnm", "install", "22"], runner=runner)
+    node_result = _execute(
+        context,
+        ["fnm", "which", "22"],
+        runner=runner,
+    )
+    node_executable = node_result.stdout.strip().splitlines()
+    if not node_executable:
+        raise InstallerError("fnm nao retornou o caminho do Node.js 22")
+    ensure_path_entry(
+        Path(node_executable[-1]).parent,
+        environment_kind=context.environment,
+        profile_path=context.profile_path,
+        environ=context.current_environment,
+    )
     return _result("node", "Node.js 22 instalado via fnm")
 
 
