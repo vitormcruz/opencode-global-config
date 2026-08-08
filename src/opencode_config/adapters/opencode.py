@@ -9,6 +9,7 @@ from io import StringIO
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 from typing import TextIO
 
@@ -299,15 +300,16 @@ def _sync_skills(
         output("SKIP  sincronizacao de skills (OPENCODE_SKIP_SKILL_SYNC=1)")
         return
 
-    list_script = repository / "scripts" / "skills" / "list-updatable.sh"
-    update_script = (
-        repository / "scripts" / "skills" / "update-upstream-skill.sh"
+    skills_cli = shutil.which("opencode-skills")
+    skills_command = (
+        [skills_cli]
+        if skills_cli is not None
+        else [sys.executable, "-m", "opencode_config.cli.skills_sync"]
     )
-    if not list_script.is_file() or not update_script.is_file():
-        output("AVISO: scripts de sync nao encontrados, pulando.")
-        return
-
-    listed = run_command(["bash", str(list_script)], cwd=repository)
+    listed = run_command(
+        [*skills_command, "list", "--repo-root", str(repository)],
+        cwd=repository,
+    )
     if not listed.succeeded:
         output("AVISO: nao foi possivel listar skills, pulando.")
         return
@@ -320,7 +322,13 @@ def _sync_skills(
     for skill in skills:
         output(f"Sincronizando: {skill}")
         updated = run_command(
-            ["bash", str(update_script), skill],
+            [
+                *skills_command,
+                "update",
+                skill,
+                "--repo-root",
+                str(repository),
+            ],
             cwd=repository,
         )
         if not updated.succeeded:

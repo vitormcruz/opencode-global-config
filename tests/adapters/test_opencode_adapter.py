@@ -161,6 +161,53 @@ def test_opencode_adapter_accepts_quiet(
 
 
 @pytest.mark.unit
+def test_opencode_adapter_uses_skills_cli_for_upstream_sync(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from opencode_config.adapters import opencode
+    from opencode_config.lib.process import CommandResult
+
+    repository = make_repository(tmp_path)
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(opencode.shutil, "which", lambda _name: "opencode-skills")
+
+    def fake_run_command(command: list[str], **_kwargs: object) -> CommandResult:
+        calls.append(tuple(command))
+        stdout = (
+            "prompt-improver\n"
+            if command[:2] == ["opencode-skills", "list"]
+            else ""
+        )
+        return CommandResult(tuple(command), 0, stdout, "")
+
+    monkeypatch.setattr(opencode, "run_command", fake_run_command)
+    output: list[str] = []
+
+    opencode._sync_skills(
+        repository,
+        output.append,
+        {},
+    )
+
+    assert calls == [
+        (
+            "opencode-skills",
+            "list",
+            "--repo-root",
+            str(repository),
+        ),
+        (
+            "opencode-skills",
+            "update",
+            "prompt-improver",
+            "--repo-root",
+            str(repository),
+        ),
+    ]
+
+
+@pytest.mark.unit
 def test_project_registers_opencode_adapter_entrypoint(repo_root: Path) -> None:
     pyproject = (repo_root / "pyproject.toml").read_text(encoding="utf-8")
 

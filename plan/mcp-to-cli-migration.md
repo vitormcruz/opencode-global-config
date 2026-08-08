@@ -28,12 +28,12 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 5.1 concluída e validada no WSL; a Task 4.5 e todas as
+**Estado atual:** Task 5.2 concluída e validada no WSL; a Task 4.5 e todas as
 validações Windows foram adiadas para a validação multiplataforma final, e as
 revisões dos checkpoints continuam pendentes.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4
-e Task 5.1.
+e Tasks 5.1–5.2.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -47,6 +47,8 @@ Essas pendências não bloqueiam a execução das fases intermediárias.
 `bats --recursive tests/scripts/bootstrap_repo` (64 passed).
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
+Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
+23 testes.
 
 ## Contexto Levantado (inventário)
 
@@ -1258,12 +1260,12 @@ entry point, preservando os status de retorno (`success`,
 `--dry-run`.
 
 **Acceptance criteria:**
-- [ ] Todos os status de retorno preservados
-- [ ] `--dry-run` não altera nada
-- [ ] `commands/sync-upstream-skills.md` atualizado para os novos comandos
+- [x] Todos os status de retorno preservados
+- [x] `--dry-run` não altera nada
+- [x] `commands/sync-upstream-skills.md` atualizado para os novos comandos
 
 **Verification:**
-- [ ] `pytest -m unit tests/skills_mgmt/test_update.py` (porte de
+- [x] `pytest -m unit tests/skills_mgmt/test_update.py` (porte de
       `list-updatable-test.bats` + `update-upstream-skill-test.bats`)
 
 **Dependencies:** 5.1

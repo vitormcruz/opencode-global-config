@@ -22,11 +22,11 @@ sincronizado_em: 2026-06-05 13:39 UTC
 
 Execute a partir da raiz do repo:
 
-    bash scripts/prompt-improver/sync.sh
+    opencode-skills sync prompt-improver
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/prompt-improver/sync.sh --check-only
+    opencode-skills sync prompt-improver --check-only
 
 ## Licenca
 

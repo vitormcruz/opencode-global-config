@@ -19,11 +19,11 @@ path_upstream: skills/accessibility-compliance-accessibility-audit/
 
 Execute a partir da raiz do repo:
 
-    bash scripts/accessibility-audit/sync.sh
+    opencode-skills sync accessibility-audit
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/accessibility-audit/sync.sh --check-only
+    opencode-skills sync accessibility-audit --check-only
 
 ## Licenca
 

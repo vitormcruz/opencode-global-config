@@ -19,11 +19,11 @@ sincronizado_em: 2026-07-03 16:44 UTC
 
 Execute a partir da raiz do repo:
 
-    bash scripts/addyosmani/sync.sh
+    opencode-skills sync addyosmani
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    bash scripts/addyosmani/sync.sh --check-only
+    opencode-skills sync addyosmani --check-only
 
 ## Licenca
 
