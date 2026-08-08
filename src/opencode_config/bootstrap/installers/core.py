@@ -310,10 +310,21 @@ def install_codebase_memory(
     *,
     runner: Runner | None = None,
 ) -> InstallResult:
-    return install_npm_global(
+    result = install_npm_global(
         context,
         "codebase-memory-mcp",
         runner=runner,
+    )
+    _execute(
+        context,
+        ["codebase-memory-mcp", "config", "set", "auto_index", "true"],
+        runner=runner,
+    )
+    return InstallResult(
+        name=result.name,
+        success=True,
+        changed=True,
+        message=f"{result.message}; auto-index habilitado",
     )
 
 

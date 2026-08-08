@@ -11,6 +11,7 @@ from opencode_config.bootstrap.installers import (
     ensure_path_entry,
     download_file,
     install_aws_cli,
+    install_codebase_memory,
     install_dependencies,
     install_fnm,
     install_npm_global,
@@ -142,6 +143,28 @@ def test_install_npm_global_uses_user_prefix(tmp_path: Path) -> None:
     assert "--prefix" in command
     assert str(context.paths.npm_bin.parent) in command
     assert "--system" not in command
+
+
+@pytest.mark.unit
+def test_install_codebase_memory_enables_auto_index(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    commands: list[tuple[str, ...]] = []
+
+    result = install_codebase_memory(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[-1] == (
+        "codebase-memory-mcp",
+        "config",
+        "set",
+        "auto_index",
+        "true",
+    )
 
 
 @pytest.mark.unit
