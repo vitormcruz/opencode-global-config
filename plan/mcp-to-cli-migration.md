@@ -28,15 +28,19 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 3.2 implementada e validada no WSL; a validação real no
-Windows e a revisão do checkpoint de adapters ainda estão pendentes.
+**Estado atual:** Task 4.1 concluída e validada no WSL; as validações Windows
+foram adiadas para a validação multiplataforma final, e as revisões dos
+checkpoints continuam pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Task 3.1 e implementação da
-Task 3.2.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Task 4.1.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
 impediu a execução das demais verificações da Fase 1.
+
+**Diretriz de validação:** todas as verificações que exigem Windows serão
+executadas somente ao final da migração, pelo humano, em outra instalação.
+Essas pendências não bloqueiam a execução das fases intermediárias.
 
 ## Contexto Levantado (inventário)
 
@@ -1030,7 +1034,7 @@ ainda executável no Linux para testes.
       `copilot-cli-adapter-test.bats` + `-ps1-test.bats`)
 - [x] Execução com `--dest-root` temporário produz a árvore esperada
 - [ ] Execução real no Windows produz `%USERPROFILE%\.copilot\` funcional
-      (pendente: este ambiente só disponibiliza WSL/Linux)
+      (adiada para a validação multiplataforma final pelo humano)
 
 **Dependencies:** 3.1
 
@@ -1062,13 +1066,13 @@ instalação por SO, obrigatória/opcional) e o motor que o percorre produzindo 
 estado de cada uma.
 
 **Acceptance criteria:**
-- [ ] Registro é declarativo — acrescentar dependência não exige código novo
-- [ ] Detecção reporta: presente/ausente, versão, caminho, método previsto
-- [ ] Nenhuma instalação ocorre na fase de detecção
-- [ ] Cobre as dependências da tabela de AD-9, incluindo o AWS CLI (AD-13)
+- [x] Registro é declarativo — acrescentar dependência não exige código novo
+- [x] Detecção reporta: presente/ausente, versão, caminho, método previsto
+- [x] Nenhuma instalação ocorre na fase de detecção
+- [x] Cobre as dependências da tabela de AD-9, incluindo o AWS CLI (AD-13)
 
 **Verification:**
-- [ ] `pytest -m unit tests/bootstrap/test_detect.py` com PATH mockado
+- [x] `pytest -m unit tests/bootstrap/test_detect.py` com PATH mockado
 
 **Dependencies:** 0.2
 
