@@ -114,6 +114,7 @@ def test_browser_test_without_node_returns_json_error(
     assert status != 0
     assert result["ok"] is False
     assert "node" in result["error"]
+    assert "opencode-bootstrap" in result["error"]
     assert not script.exists()
 
 

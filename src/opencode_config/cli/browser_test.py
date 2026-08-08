@@ -105,13 +105,13 @@ def _execute_script(script_path: Path) -> tuple[int, str]:
     node = shutil.which("node")
     if node is None:
         return 1, _legacy_error(
-            "node nao encontrado no PATH. Execute install-playwright.sh primeiro"
+            "node nao encontrado no PATH. Execute opencode-bootstrap --yes"
         )
 
     playwright = _playwright_available()
     if playwright is None:
         return 1, _legacy_error(
-            "playwright nao instalado. Execute install-playwright.sh primeiro"
+            "playwright nao instalado. Execute opencode-bootstrap --yes"
         )
 
     started = time.monotonic()
