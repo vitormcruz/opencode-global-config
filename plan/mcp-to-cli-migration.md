@@ -28,11 +28,11 @@ shell e 4.608 linhas de BATS migradas.
 
 ## Tracking de execução
 
-**Estado atual:** Task 4.3 concluída e validada no WSL; as validações Windows
+**Estado atual:** Task 4.4 concluída e validada no WSL; as validações Windows
 foram adiadas para a validação multiplataforma final, e as revisões dos
 checkpoints continuam pendentes.
 
-**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.3.
+**Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2 e Tasks 4.1–4.4.
 
 **Exceção registrada:** a integração OpenCode continua bloqueada sem
 `OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
@@ -41,6 +41,9 @@ impediu a execução das demais verificações da Fase 1.
 **Diretriz de validação:** todas as verificações que exigem Windows serão
 executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
+
+**Última verificação WSL:** `pytest -m "unit or tools"` (134 passed) e
+`bats --recursive tests/scripts/bootstrap_repo` (64 passed).
 
 ## Contexto Levantado (inventário)
 
@@ -1157,16 +1160,17 @@ instalação zero-admin se ausente, e delegam para `opencode-bootstrap`. A
 seleção de adapter passa a ser **derivada do SO** (AD-6), não de flag.
 
 **Acceptance criteria:**
-- [ ] Cada entrypoint tem ≤ ~40 linhas e nenhuma lógica de negócio
-- [ ] Python ausente → mensagem acionável específica do SO, sem stack trace
-- [ ] No Linux roda o adapter OpenCode; no Windows, o Copilot; nunca ambos
-- [ ] `--yes`, `--quiet`, `--check-only` repassados corretamente
+- [x] Cada entrypoint tem ≤ ~40 linhas e nenhuma lógica de negócio
+- [x] Python ausente → mensagem acionável específica do SO, sem stack trace
+- [x] No Linux roda o adapter OpenCode; no Windows, o Copilot; nunca ambos
+- [x] `--yes`, `--quiet`, `--check-only` repassados corretamente
 
 **Verification:**
-- [ ] `pytest -m unit tests/bootstrap/test_entrypoints.py` (porte de
+- [x] `pytest -m unit tests/bootstrap/test_entrypoints.py` (porte de
       `configurar-repo-test.bats`, 132 linhas)
-- [ ] `bash scripts/bootstrap_repo/configurar-repo.sh --check-only` no WSL
+- [x] `bash scripts/bootstrap_repo/configurar-repo.sh --check-only` no WSL
 - [ ] `.\scripts\bootstrap_repo\configurar-repo.ps1 -CheckOnly` no Windows
+      (adiado para a validação multiplataforma final pelo humano)
 
 **Dependencies:** 4.3, 3.2
 

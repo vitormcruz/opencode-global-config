@@ -24,10 +24,11 @@ HELP_TEXT = """opencode-adapter
 Cria links simbolicos em ~/.config/opencode apontando para este repo.
 
 Uso:
-  opencode-adapter [--yes] [--repo-root PATH]
+  opencode-adapter [--yes] [--quiet] [--repo-root PATH]
 
 Opcoes:
   --yes             Nao pergunta confirmacao
+  --quiet           Suprime saidas detalhadas
   --repo-root PATH  Define a raiz do repositorio
   --help            Mostra esta ajuda
 """
@@ -382,14 +383,19 @@ def configure(
     _sync_skills(resolved_repository, write, os.environ)
 
 
-def _parse_arguments(arguments: Sequence[str]) -> tuple[bool, str | None]:
+def _parse_arguments(
+    arguments: Sequence[str],
+) -> tuple[bool, bool, str | None]:
     assume_yes = False
+    quiet = False
     repository: str | None = None
     index = 0
     while index < len(arguments):
         argument = arguments[index]
         if argument == "--yes":
             assume_yes = True
+        elif argument == "--quiet":
+            quiet = True
         elif argument in {"--help", "-h"}:
             raise SystemExit(0)
         elif argument == "--repo-root":
@@ -402,7 +408,7 @@ def _parse_arguments(arguments: Sequence[str]) -> tuple[bool, str | None]:
         else:
             raise AdapterError(f"Opcao desconhecida: {argument}")
         index += 1
-    return assume_yes, repository
+    return assume_yes, quiet, repository
 
 
 def _dispatch(
@@ -411,7 +417,7 @@ def _dispatch(
     error: TextIO,
 ) -> int:
     try:
-        assume_yes, repository_argument = _parse_arguments(arguments)
+        assume_yes, quiet, repository_argument = _parse_arguments(arguments)
     except SystemExit:
         output.write(HELP_TEXT)
         return 0
@@ -421,11 +427,12 @@ def _dispatch(
         return 2
 
     try:
+        configure_output = StringIO() if quiet else output
         configure(
             _resolve_repo_root(repository_argument),
             Path(os.environ.get("HOME") or Path.home()),
             assume_yes=assume_yes,
-            output=output,
+            output=configure_output,
             error=error,
         )
     except (AdapterError, OSError, UnsupportedEnvironmentError) as problem:

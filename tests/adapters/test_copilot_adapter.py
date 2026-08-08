@@ -214,4 +214,4 @@ def test_bootstrap_invokes_python_copilot_adapter(repo_root: Path) -> None:
     ).read_text(encoding="utf-8")
 
     assert "adapters/copilot-cli/copilot-cli-adapter.sh" not in bootstrap
-    assert "opencode_config.adapters.copilot" in bootstrap
+    assert "opencode_config.bootstrap.main" in bootstrap

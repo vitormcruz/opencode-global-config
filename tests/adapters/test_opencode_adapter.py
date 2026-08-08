@@ -140,6 +140,27 @@ def test_opencode_adapter_help_returns_success(
 
 
 @pytest.mark.unit
+def test_opencode_adapter_accepts_quiet(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repository = make_repository(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+
+    status, output, error = run_adapter(
+        monkeypatch,
+        repository,
+        home,
+        arguments=["--yes", "--quiet"],
+    )
+
+    assert status == 0
+    assert output == ""
+    assert error == ""
+
+
+@pytest.mark.unit
 def test_project_registers_opencode_adapter_entrypoint(repo_root: Path) -> None:
     pyproject = (repo_root / "pyproject.toml").read_text(encoding="utf-8")
 
@@ -156,4 +177,4 @@ def test_bootstrap_invokes_python_opencode_adapter(repo_root: Path) -> None:
     ).read_text(encoding="utf-8")
 
     assert "adapters/opencode/opencode-adapter.sh" not in bootstrap
-    assert "opencode_config.adapters.opencode" in bootstrap
+    assert "opencode_config.bootstrap.main" in bootstrap

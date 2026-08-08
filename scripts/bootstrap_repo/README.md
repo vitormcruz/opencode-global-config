@@ -9,13 +9,8 @@ dependências deste repositório.
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O script executa, nesta ordem:
+O entrypoint fino verifica Python 3.10+ e delega para
+`opencode_config.bootstrap.main`. O módulo detecta dependencias, executa a
+selecao interativa e configura o adapter pertinente ao sistema operacional.
 
-1. Instala dependências com `wsl-install-deps.sh`.
-2. Executa `opencode-copilot-adapter` via o módulo Python do repositório.
-3. Executa `opencode-adapter` via o módulo Python do repositório.
-4. Configura as ferramentas CLI globais.
-
-Use `OPENCODE_SKIP_DEPS=1`, `OPENCODE_SKIP_COPILOT_ADAPTER=1`,
-`OPENCODE_SKIP_OPENCODE_ADAPTER=1` ou `OPENCODE_SKIP_CODEBASE_MEMORY=1`
-para pular etapas específicas.
+Use `--yes`, `--quiet` ou `--check-only`.

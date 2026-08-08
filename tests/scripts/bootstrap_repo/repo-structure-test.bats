@@ -262,8 +262,12 @@ console.log('valid');
   assert_file_exist "$REPO_ROOT/src/opencode_config/adapters/opencode.py"
 }
 
-@test "scripts/bootstrap_repo/wsl-install-deps.sh é executável" {
-  assert_file_executable "$REPO_ROOT/scripts/bootstrap_repo/wsl-install-deps.sh"
+@test "scripts/bootstrap_repo/wsl-install-deps.sh foi removido" {
+  assert_not_exist "$REPO_ROOT/scripts/bootstrap_repo/wsl-install-deps.sh"
+}
+
+@test "scripts/bootstrap_repo/configurar-repo.ps1 existe" {
+  assert_file_exist "$REPO_ROOT/scripts/bootstrap_repo/configurar-repo.ps1"
 }
 
 @test "adapter Copilot Python existe" {

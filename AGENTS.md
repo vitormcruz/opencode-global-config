@@ -104,17 +104,9 @@ Depois de clonar este repo, rode:
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O script executa quatro fases:
-1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Executa o adapter Copilot CLI** (`opencode-copilot-adapter`)
-3. **Executa o adapter OpenCode** (`opencode-adapter`)
-4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
-
-Cada parte pode ser pulada via variaveis de ambiente:
-- `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
-- `OPENCODE_SKIP_COPILOT_ADAPTER=1` — pula o adapter Copilot CLI
-- `OPENCODE_SKIP_OPENCODE_ADAPTER=1` — pula o adapter OpenCode
-- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do codebase-memory CLI
+O bootstrap detecta e instala dependencias com `opencode-bootstrap`. Em
+WSL/Linux ele configura o OpenCode; no Windows configura somente o Copilot CLI.
+Use `--yes`, `--quiet` ou `--check-only` conforme a necessidade.
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 

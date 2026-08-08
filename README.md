@@ -16,17 +16,9 @@ Depois de clonar este repo, rode:
 ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```
 
-O script executa quatro fases:
-1. **Instala dependencias** (`scripts/bootstrap_repo/wsl-install-deps.sh`)
-2. **Executa o adapter Copilot CLI** (`opencode-copilot-adapter`)
-3. **Executa o adapter OpenCode** (`opencode-adapter`)
-4. **Instala ferramentas globais** — `crwl` e `codebase-memory-mcp`
-
-Cada parte pode ser pulada via variaveis de ambiente:
-- `OPENCODE_SKIP_DEPS=1` — pula instalacao de dependencias
-- `OPENCODE_SKIP_COPILOT_ADAPTER=1` — pula o adapter Copilot CLI
-- `OPENCODE_SKIP_OPENCODE_ADAPTER=1` — pula o adapter OpenCode
-- `OPENCODE_SKIP_CODEBASE_MEMORY=1` — pula configuracao do codebase-memory CLI
+O bootstrap detecta e instala dependencias com `opencode-bootstrap`. Em
+WSL/Linux ele configura o OpenCode; no Windows configura somente o Copilot CLI.
+Use `--yes`, `--quiet` ou `--check-only` conforme a necessidade.
 
 Para aplicar a variavel `OPENCODE_ENABLE_EXA` no shell atual:
 
@@ -68,44 +60,27 @@ Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider n
 
 ## Dependencias das skills
 
-Sincronizadas automaticamente pelo bootstrap (`configurar-repo.sh -> wsl-install-deps.sh`).
+Detectadas e instaladas automaticamente pelo `opencode-bootstrap`, sempre em
+user-space:
 
-Instaladas automaticamente (quando possivel):
-
-- `bats`
+- Python >= 3.10
+- Node.js via fnm
 - `pipx`
 - `crawl4ai` (`crwl`) e o browser via `crawl4ai-setup`
 - `docling`
-- `playwright`
-- `bun`
 - `codebase-memory-mcp`
+- pandoc portatil
+- PortableGit no Windows
+- Playwright + Chromium
+- pytest e plugins em `.venv`
 - `aws-cli` v2 (dependencia obrigatoria gerenciada pelo bootstrap)
-- `bats-support`
-- `bats-assert`
-- `bats-file`
-
-O bootstrap instala o `codebase-memory-mcp` como CLI nativo e habilita o
-auto-index no proprio binario.
-
-As libs auxiliares do BATS sao instaladas em `~/.local/lib/bats` e o
-script garante `BATS_LIB_PATH="$HOME/.local/lib/bats"` no `~/.bashrc`.
-
-Requer **Ubuntu 22.04+** (ou equivalente com Python >= 3.10).
-
-Pacotes que precisam de `sudo` no Ubuntu/WSL:
-
-```bash
-sudo apt-get update && sudo apt-get install -y \
-  make pandoc pipx \
-  tesseract-ocr ocrmypdf ghostscript qpdf
-```
 
 O AWS CLI v2 e usado por `aws-sso-login` e `aws-add-account-sso`.
 
 Para rodar so a verificacao de dependencias:
 
 ```bash
-./scripts/bootstrap_repo/wsl-install-deps.sh
+./scripts/bootstrap_repo/configurar-repo.sh --check-only
 ```
 
 ## Adapters

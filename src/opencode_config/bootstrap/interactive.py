@@ -142,6 +142,7 @@ def run_bootstrap(
     installer: Installer = install_dependencies,
     assume_yes: bool = False,
     check_only: bool = False,
+    quiet: bool = False,
     input_stream: TextIOBase | None = None,
     output: TextIOBase | None = None,
 ) -> BootstrapResult:
@@ -157,7 +158,8 @@ def run_bootstrap(
         if detections is not None
         else detector(selected_environment)
     )
-    output.write(render_detection_table(found))
+    if not quiet:
+        output.write(render_detection_table(found))
 
     missing = tuple(filter(_needs_install, found))
     if check_only:

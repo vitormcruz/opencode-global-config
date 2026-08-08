@@ -66,6 +66,16 @@ def test_project_registers_browser_test_entrypoint():
 
 
 @pytest.mark.unit
+def test_project_registers_bootstrap_entrypoint():
+    pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text()
+
+    assert (
+        'opencode-bootstrap = "opencode_config.bootstrap.main:main"'
+        in pyproject
+    )
+
+
+@pytest.mark.unit
 def test_python_artifacts_are_ignored():
     gitignore = (REPOSITORY_ROOT / ".gitignore").read_text()
 
