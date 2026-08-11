@@ -81,6 +81,15 @@ Para extração web, use `crwl` diretamente conforme a skill
 - `codebase-memory-mcp cli` é uma execução local do CLI; não configure nem
   inicie um servidor MCP para realizar buscas.
 
+## Comunicação obrigatória do bootstrap
+
+Ao executar o bootstrap como agente, leia e repasse ao humano qualquer bloco
+`Orientacao Docling` ou `Comandos manuais pendentes`. Para `Orientacao Docling`,
+informe que o download de modelos é opcional, mostre o comando exibido e aguarde
+aprovação explícita antes de executá-lo. Para erros TLS/certificado, explique
+que o agente precisa confirmar com o humano uma CA PEM ou mirror aprovado;
+nunca desative TLS, invente certificados ou oculte a saída do bootstrap.
+
 ## Ferramentas nativas como fallback estrito
 
 Use `grep_search`, `file_search`, `read_file`, `list_dir` ou
