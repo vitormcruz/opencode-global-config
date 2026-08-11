@@ -328,3 +328,40 @@ def test_failed_installation_is_included_in_single_manual_block(
     assert "instalar required-tool" in output.getvalue()
     assert "falha simulada" in output.getvalue()
     assert output.getvalue().count("```") == 2
+
+
+@pytest.mark.unit
+def test_tls_installation_failure_guides_agent_to_converse_with_human(
+    tmp_path: Path,
+) -> None:
+    detections = (make_detection("required-tool", required=True),)
+    output = StringIO()
+
+    def failing_installer(
+        names,
+        _context: InstallContext,
+    ) -> tuple[InstallResult, ...]:
+        return tuple(
+            InstallResult(
+                name=name,
+                success=False,
+                changed=False,
+                error="self-signed certificate in certificate chain",
+            )
+            for name in names
+        )
+
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        assume_yes=True,
+        input_stream=StringIO(),
+        output=output,
+        installer=failing_installer,
+    )
+
+    rendered = output.getvalue()
+    assert "orientacao para agente" in rendered
+    assert "converse com o humano" in rendered
+    assert "strict-ssl=false" in rendered
+    assert "NODE_TLS_REJECT_UNAUTHORIZED=0" in rendered

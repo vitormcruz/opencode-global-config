@@ -99,6 +99,10 @@ $env:PLAYWRIGHT_DOWNLOAD_HOST = "https://<mirror-corporativo>/playwright"
 No Linux/WSL, use `export PLAYWRIGHT_DOWNLOAD_HOST=...`. Sem essa variável, o
 bootstrap usa o CDN público padrão do Playwright.
 
+Falhas de certificado ou TLS aparecem no bloco de comandos pendentes com
+orientação para o agente conversar com o humano sobre uma CA PEM aprovada ou
+mirror do ambiente. O bootstrap não desativa TLS nem grava certificados.
+
 Os comandos `opencode-doc-extract`, `opencode-md-export`,
 `opencode-svgtoimage` e `opencode-browser-test` são instalados pelo próprio
 bootstrap via `pipx install --editable .`.

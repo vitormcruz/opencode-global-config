@@ -121,8 +121,36 @@ def _manual_block(
         detail = (errors or {}).get(detection.name) or detection.error
         if detail:
             output.write(f"erro: {detail}\n")
+            guidance = _tls_guidance(detail)
+            if guidance:
+                output.write(f"{guidance}\n")
     output.write("```\n")
     return pending
+
+
+def _tls_guidance(detail: str) -> str:
+    """Orienta o agente sem desativar TLS ou inventar CA corporativa."""
+
+    normalized = detail.casefold()
+    indicators = (
+        "certificate",
+        "cert chain",
+        "self-signed",
+        "ssl",
+        "tls",
+        "x509",
+    )
+    if not any(indicator in normalized for indicator in indicators):
+        return ""
+
+    return (
+        "orientacao para agente: converse com o humano e confirme CA PEM "
+        "corporativa aprovada ou mirror oficial do ambiente; depois, use "
+        "variaveis temporarias da sessao, como NODE_EXTRA_CA_CERTS, "
+        "SSL_CERT_FILE e REQUESTS_CA_BUNDLE. Nunca use strict-ssl=false, "
+        "NODE_TLS_REJECT_UNAUTHORIZED=0, ignore-certificate-errors ou grave "
+        "CA/URL corporativa no repositorio."
+    )
 
 
 def _default_context(
