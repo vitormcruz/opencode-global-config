@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 from pathlib import Path
 import shutil
 import struct
@@ -40,6 +41,9 @@ def isolate_playwright_path(
     tmp_path: Path,
 ) -> None:
     """Mantem Node e Playwright no PATH, excluindo conversores legados."""
+
+    if os.name == "nt":
+        return
 
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()

@@ -50,6 +50,7 @@ def test_registry_declares_managed_dependencies_and_install_methods() -> None:
         "pytest",
         "aws-cli",
         "opencode-config",
+        "copilot",
     }
     assert all(spec.commands for spec in DEPENDENCY_REGISTRY)
     assert all(spec.install_methods for spec in DEPENDENCY_REGISTRY)
@@ -61,6 +62,14 @@ def test_registry_declares_managed_dependencies_and_install_methods() -> None:
         spec for spec in DEPENDENCY_REGISTRY if spec.name == "opencode-config"
     )
     assert package_spec.commands == ("opencode-config-check",)
+
+
+@pytest.mark.unit
+def test_registry_declares_copilot_cli_entrypoint() -> None:
+    spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "copilot")
+
+    assert spec.commands == ("copilot",)
+    assert "npm install" in spec.install_method_for(EnvironmentKind.WINDOWS)
 
 
 @pytest.mark.unit

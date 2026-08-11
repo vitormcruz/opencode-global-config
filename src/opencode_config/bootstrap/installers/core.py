@@ -23,8 +23,10 @@ from opencode_config.lib.process import CommandResult, run_command
 FNM_VERSION = "1.38.1"
 PANDOC_VERSION = "3.7.0.2"
 PORTABLE_GIT_VERSION = "2.53.0"
+CODEBASE_MEMORY_VERSION = "0.9.0"
 AWS_LINUX_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.sh"
 AWS_WINDOWS_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.ps1"
+INSTALL_COMMAND_TIMEOUT_SECONDS = 1800
 
 
 class InstallerError(RuntimeError):
@@ -42,6 +44,7 @@ class InstallContext:
     current_environment: MutableMapping[str, str] = field(
         default_factory=lambda: dict(os.environ)
     )
+    persist_paths: bool = True
 
 
 @dataclass(frozen=True)
@@ -61,7 +64,7 @@ DependencyInstaller = Callable[[InstallContext], InstallResult]
 
 
 def _path_separator(environment: EnvironmentKind) -> str:
-    return ";" if environment is EnvironmentKind.WINDOWS else os.pathsep
+    return ";" if environment is EnvironmentKind.WINDOWS else ":"
 
 
 def _path_value(environ: Mapping[str, str]) -> str:
@@ -275,13 +278,29 @@ def _execute(
     command: Iterable[str | os.PathLike[str]],
     *,
     runner: Runner | None = None,
+    timeout: float | None = INSTALL_COMMAND_TIMEOUT_SECONDS,
 ) -> CommandResult:
     args = [os.fspath(argument) for argument in command]
     execute = run_command if runner is None else runner
+    if runner is None and context.environment is EnvironmentKind.WINDOWS:
+        executable = shutil.which(
+            args[0],
+            path=_path_value(context.current_environment),
+        )
+        if executable is not None:
+            args[0] = executable
     try:
-        result = execute(args, env=context.current_environment)
+        result = execute(
+            args,
+            env=context.current_environment,
+            timeout=timeout,
+        )
     except FileNotFoundError as error:
         raise InstallerError(f"Comando nao encontrado: {args[0]}") from error
+    if result.timed_out:
+        raise InstallerError(
+            f"{args[0]} excedeu timeout de {timeout:g}s"
+        )
     if not result.succeeded:
         detail = result.stderr or result.stdout or "comando falhou"
         raise InstallerError(f"{args[0]} falhou: {detail.strip()}")
@@ -317,6 +336,7 @@ def _ensure_pipx_bin_path(context: InstallContext) -> Path:
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     return path
 
@@ -355,6 +375,7 @@ def install_pipx(
             environment_kind=context.environment,
             profile_path=context.profile_path,
             environ=context.current_environment,
+            persist=context.persist_paths,
         )
     _ensure_pipx_bin_path(context)
     ensure_path_entry(
@@ -362,6 +383,7 @@ def install_pipx(
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     if shutil.which(
         "pipx",
@@ -404,8 +426,16 @@ def install_crwl(
     *,
     runner: Runner | None = None,
 ) -> InstallResult:
+    pipx_bin = _ensure_pipx_bin_path(context)
     result = _install_pipx_app(context, "crawl4ai", "crwl", runner=runner)
-    _execute(context, ["crawl4ai-setup"], runner=runner)
+    _require_pipx_entrypoint(context, "crawl4ai-setup", pipx_bin)
+    setup = _execute(context, ["crawl4ai-setup"], runner=runner)
+    setup_output = f"{setup.stdout}\n{setup.stderr}"
+    if "failed to install browsers" in setup_output.casefold():
+        raise InstallerError(
+            "crawl4ai-setup declarou falha na instalacao dos browsers: "
+            f"{setup_output.strip()}"
+        )
     return InstallResult(
         name=result.name,
         success=True,
@@ -443,6 +473,7 @@ def install_npm_global(
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     return _result(package, f"{package} instalado no prefix user-space")
 
@@ -454,7 +485,7 @@ def install_codebase_memory(
 ) -> InstallResult:
     result = install_npm_global(
         context,
-        "codebase-memory-mcp",
+        f"codebase-memory-mcp@{CODEBASE_MEMORY_VERSION}",
         runner=runner,
     )
     _execute(
@@ -463,7 +494,7 @@ def install_codebase_memory(
         runner=runner,
     )
     return InstallResult(
-        name=result.name,
+        name="codebase-memory-mcp",
         success=True,
         changed=True,
         message=f"{result.message}; auto-index habilitado",
@@ -496,6 +527,32 @@ def install_opencode_config(
     return _result(
         "opencode-config",
         "entry points do repositorio instalados via pipx",
+    )
+
+
+def install_copilot(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    if context.environment is not EnvironmentKind.WINDOWS:
+        raise InstallerError("Copilot CLI user-space e suportado somente no Windows")
+
+    result = install_npm_global(
+        context,
+        "@github/copilot",
+        runner=runner,
+    )
+    copilot_path = _path_value(context.current_environment)
+    if shutil.which("copilot", path=copilot_path) is None:
+        raise InstallerError(
+            f"copilot nao foi exposto pelo npm em {context.paths.npm_bin}"
+        )
+    return InstallResult(
+        name="copilot",
+        success=True,
+        changed=result.changed,
+        message="Copilot CLI instalado no prefix user-space",
     )
 
 
@@ -535,6 +592,7 @@ def install_fnm(
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     return _result("fnm", f"fnm instalado em {context.paths.bin_dir}")
 
@@ -571,6 +629,7 @@ def install_node(
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     return _result("node", "Node.js 22 instalado via fnm")
 
@@ -669,6 +728,7 @@ def _install_binary_archive(
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
+        persist=context.persist_paths,
     )
     return _result(name, f"{name} instalado em {context.paths.bin_dir}")
 
@@ -741,6 +801,7 @@ def install_git(
             environment_kind=context.environment,
             profile_path=context.profile_path,
             environ=context.current_environment,
+            persist=context.persist_paths,
         )
     return _result("git", f"PortableGit instalado em {install_dir}")
 
@@ -900,6 +961,7 @@ def install_aws_cli(
             environment_kind=context.environment,
             profile_path=context.profile_path,
             environ=context.current_environment,
+            persist=context.persist_paths,
         )
     return _result("aws-cli", "AWS CLI instalado em user-space")
 
@@ -926,6 +988,7 @@ INSTALLERS: Mapping[str, DependencyInstaller] = {
     "docling": install_docling,
     "codebase-memory-mcp": install_codebase_memory,
     "opencode-config": install_opencode_config,
+    "copilot": install_copilot,
     "pandoc": install_pandoc,
     "git": install_git,
     "playwright": install_playwright,

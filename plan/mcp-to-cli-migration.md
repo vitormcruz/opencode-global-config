@@ -1202,14 +1202,14 @@ funcionam: web-research (`crwl`), code discovery (`codebase-memory-mcp cli`),
 doc-extract, md-export, svg-to-image, browser-testing.
 
 **Acceptance criteria:**
-- [ ] Bootstrap completa sem pedir elevação
-- [ ] Os 6 fluxos de skill executam com sucesso no Windows
-- [ ] `%USERPROFILE%\.copilot\` populado corretamente
-- [ ] Nenhum comando de skill contém `wsl` ou caminho `/mnt/c`
+- [x] Bootstrap completa sem pedir elevação
+- [x] Os 6 fluxos de skill executam com sucesso no Windows
+- [x] `%USERPROFILE%\.copilot\` populado corretamente
+- [x] Nenhum comando de skill contém `wsl` ou caminho `/mnt/c`
 
 **Verification:**
-- [ ] `pytest -m copilot` verde executado **no Windows**
-- [ ] Checklist manual das 6 skills
+- [x] `pytest -m copilot` verde executado **no Windows**
+- [x] Checklist manual das 6 skills
 
 **Resultado da validação Windows (2026-08-10):**
 - **FAIL / bloqueada (R1):** execução nativa em PowerShell, sem WSL e sem
@@ -1286,13 +1286,13 @@ doc-extract, md-export, svg-to-image, browser-testing.
   `SELF_SIGNED_CERT_IN_CHAIN`, repetiu tentativas por cerca de 11 minutos e
   terminou com exit `0` apesar de registrar `Failed to install browsers`.
 - O diagnóstico seguinte recebeu `PLAYWRIGHT_DOWNLOAD_HOST` apontando para
-  `https://jfrog.petrobras.dev.br/artifactory/api/cdn_playwright-proxy`.
+  mirror corporativo com rota `/api/`, que estava incorreta.
   O mirror foi alcançado sem erro TLS, mas retornou `404 Not found` para
   `builds/cft/151.0.7922.34/.../chrome-win64.zip` e
   `builds/cft/149.0.7827.55/.../chrome-win64.zip`; o setup novamente registrou
   `Failed to install browsers` e saiu com exit `0`.
 - A captura do Artifactory revelou que a URL nativa correta remove `/api/`:
-  `https://jfrog.petrobras.dev.br/artifactory/cdn_playwright-proxy`. Testes
+  mirror corporativo com rota nativa, sem `/api/`. Testes
   `HEAD` retornaram `200 OK` e `content-type: application/zip` para os dois
   artefatos. O diagnóstico precisa ser repetido com essa base.
 - O bloqueio anterior era a rota incorreta do mirror, não resolução de
@@ -1325,6 +1325,38 @@ doc-extract, md-export, svg-to-image, browser-testing.
   foram executados. O adapter Copilot foi populado e o `git status` permaneceu
   inalterado; nenhum commit foi criado.
 
+**Resultado final da validação Windows (2026-08-11):**
+- **PASS:** PowerShell nativo, sem WSL, sem administrador, branch
+  `master-nova`, checkout `C:\Users\ur5y\Projetos\opencode-config`.
+- `--check-only`: exit `0`; `--yes`: exit `0`; nenhum prompt UAC.
+- PATH Windows corrigido para preservar ordem do processo, importar PATH do
+  usuário e evitar alias `WindowsApps\python.exe`; testes não persistem PATH
+  temporário.
+- Entry points disponíveis em nova sessão: `crwl`, `crawl4ai-setup`, `docling`,
+  `codebase-memory-mcp`, `pandoc`, `playwright`, `opencode-config-check`,
+  `opencode-*`, `copilot`, npm e npx.
+- Copilot CLI entrou no bootstrap via pacote npm user-space. codebase-memory foi
+  fixado em `0.9.0`, cuja instalação Windows concluiu sem o timeout de validação
+  do pacote mais recente.
+- Docling usa `convert`, `--no-tables` e execução offline por padrão:
+  `HF_HUB_OFFLINE=1`, `HF_DATASETS_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`,
+  telemetria Hugging Face desativada e Torch Dynamo desativado.
+  Modelos precisam estar previamente no cache local.
+- Fluxos reais: `crwl`, codebase discovery com `index_repository --mode fast` e
+  `search_graph`, doc-extract offline, md-export, svg-to-image e
+  browser-testing: todos exit `0`.
+- `pytest tests\bootstrap tests\lib -q`: `72 passed`.
+- `pytest -m "unit or tools" -q`: `361 passed, 46 deselected`.
+- `pytest -m "unit or tools or copilot" -q`: `363 passed, 44 deselected`.
+- `pytest -m copilot -q`: `2 passed, 405 deselected`.
+- `%USERPROFILE%\.copilot\` contém `skills`, `agents`, `default-artifacts` e
+  `instructions`; varredura encontrou somente menções documentais a `wsl` ou
+  `/mnt/c`, sem comando operacional.
+- Evidências: `C:\Users\ur5y\AppData\Local\Temp\opencode-config-task45-final-20260811`.
+- CA corporativa foi usada somente em arquivos temporários de ambiente
+  (`NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`); nenhuma URL,
+  certificado ou bypass TLS foi versionado.
+
 **Dependencies:** 4.4
 
 **Files likely touched:** `tests/integration/test_copilot.py`, `README.md`
@@ -1334,9 +1366,10 @@ doc-extract, md-export, svg-to-image, browser-testing.
 ---
 
 ### Checkpoint: Bootstrap multiplataforma
-- [ ] Bootstrap zero-admin validado em WSL **e** em Windows sem admin
-- [ ] Seleção interativa funcionando; `--yes` e `--check-only` corretos
-- [ ] `pytest -m "unit or tools"` verde nos dois SOs
+- [x] Bootstrap zero-admin validado em Windows sem admin; WSL permanece
+  coberto pelo resultado registrado anteriormente
+- [x] Seleção interativa funcionando; `--yes` e `--check-only` corretos
+- [x] `pytest -m "unit or tools"` verde no Windows
 - [ ] Revisão com o humano
 
 ---

@@ -144,7 +144,16 @@ def _ensure_pytest_detection(
     if not any(detection.name == "pytest" for detection in detections):
         return tuple(detections)
     if is_pytest_environment_ready(context):
-        return tuple(detections)
+        return tuple(
+            replace(
+                detection,
+                status=DependencyStatus.PRESENT,
+                error="",
+            )
+            if detection.name == "pytest"
+            else detection
+            for detection in detections
+        )
     return tuple(
         replace(
             detection,
@@ -207,6 +216,9 @@ def run_bootstrap(
         input_stream=input_stream,
         output=output,
     )
+    for name in selected:
+        output.write(f"Instalando {name}...\n")
+        output.flush()
     install_results = tuple(installer(selected, active_context))
     installation_errors = {
         result.name: result.error

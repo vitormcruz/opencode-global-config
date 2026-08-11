@@ -45,7 +45,7 @@ def update_marked_block(path: Path, name: str, content: str) -> None:
     pattern = _block_pattern(name)
 
     if pattern.search(existing):
-        updated = pattern.sub(block, existing)
+        updated = pattern.sub(lambda _match: block, existing)
     else:
         separator = "" if not existing else ("" if existing.endswith("\n\n") else "\n")
         updated = f"{existing}{separator}{block}"

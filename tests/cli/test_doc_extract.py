@@ -34,10 +34,14 @@ def install_fake_docling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
 
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
-    executable = fake_bin / "docling"
-    executable.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
-    executable.chmod(0o755)
-    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}/usr/bin:/bin")
+    if os.name == "nt":
+        executable = fake_bin / "docling.cmd"
+        executable.write_text("@echo off\nexit /b 0\n", encoding="utf-8")
+    else:
+        executable = fake_bin / "docling"
+        executable.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        executable.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
 
 
 @pytest.mark.tools
@@ -220,3 +224,42 @@ def test_doc_extract_error_output_is_valid_json(
 
     assert isinstance(result, dict)
     assert result["ok"] is False
+
+
+@pytest.mark.unit
+def test_doc_extract_forces_local_offline_model_execution(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    from opencode_config.cli import doc_extract
+    from opencode_config.lib.process import CommandResult
+
+    executable = tmp_path / "docling.cmd"
+    executable.write_text("@echo off\nexit /b 0\n", encoding="utf-8")
+    monkeypatch.setenv("PATH", str(tmp_path))
+    observed: dict[str, str] = {}
+
+    def fake_run(command, *, env, **_kwargs):
+        observed.update(env)
+        return CommandResult(tuple(command), 0, "", "")
+
+    monkeypatch.setattr(doc_extract, "run_command", fake_run)
+    result = doc_extract.extract_document(
+        {
+            "source": str(repo_root / "tests/test-resources/sample.pdf"),
+            "outputDir": str(tmp_path / "out"),
+        }
+    )
+
+    assert result.ok
+    assert all(
+        observed[name] == "1"
+        for name in (
+            "HF_DATASETS_OFFLINE",
+            "HF_HUB_DISABLE_TELEMETRY",
+            "HF_HUB_OFFLINE",
+            "TORCHDYNAMO_DISABLE",
+            "TRANSFORMERS_OFFLINE",
+        )
+    )

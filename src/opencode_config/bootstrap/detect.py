@@ -197,4 +197,8 @@ def detect_dependencies(
             runner=runner,
         )
         for spec in specs
+        if (
+            spec.supported_environments is None
+            or selected_environment in spec.supported_environments
+        )
     )

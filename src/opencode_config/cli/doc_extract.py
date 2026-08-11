@@ -17,6 +17,13 @@ from opencode_config.lib.process import run_command
 
 SUPPORTED_FORMATS = frozenset({"md", "markdown", "json", "text", "txt", "html"})
 DOCS_URL = "https://github.com/docling-project/docling"
+OFFLINE_ENVIRONMENT = {
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "HF_HUB_OFFLINE": "1",
+    "TORCHDYNAMO_DISABLE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+}
 
 
 def _installation_hint() -> str:
@@ -45,8 +52,8 @@ def _string_value(value: Any) -> str:
     return str(value)
 
 
-def _is_false(value: Any) -> bool:
-    return value is False or str(value) in {"false", "False", "0"}
+def _is_true(value: Any) -> bool:
+    return value is True or str(value) in {"true", "True", "1"}
 
 
 def _read_payload() -> tuple[Mapping[str, Any], str]:
@@ -136,11 +143,11 @@ def extract_document(payload: Mapping[str, Any]) -> ToolResult:
     except OSError as error:
         return _failure(f"Nao foi possivel criar o diretorio de saida: {error}")
 
-    args = ["--to", output_format, "--output", output_dir_text]
-    if _is_false(payload.get("ocr")):
+    args = ["convert", "--to", output_format, "--output", output_dir_text]
+    if not _is_true(payload.get("ocr")):
         args.append("--no-ocr")
-    if _is_false(payload.get("tables")):
-        args.append("--no-table-structure")
+    if not _is_true(payload.get("tables")):
+        args.append("--no-tables")
 
     image_export_mode = _string_value(payload.get("imageExportMode"))
     if image_export_mode:
@@ -156,7 +163,9 @@ def extract_document(payload: Mapping[str, Any]) -> ToolResult:
     args.append(source_file)
 
     try:
-        command_result = run_command([docling, *args])
+        environment = os.environ.copy()
+        environment.update(OFFLINE_ENVIRONMENT)
+        command_result = run_command([docling, *args], env=environment)
     except OSError as error:
         return _failure(f"Nao foi possivel executar docling: {error}")
 

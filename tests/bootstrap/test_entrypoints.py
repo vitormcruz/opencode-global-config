@@ -61,6 +61,32 @@ def test_windows_context_includes_pipx_bin_before_dependency_detection(
 
 
 @pytest.mark.unit
+def test_windows_context_imports_persisted_user_path(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from opencode_config.bootstrap import main as bootstrap_main
+
+    monkeypatch.setattr(
+        bootstrap_main,
+        "_read_windows_user_path",
+        lambda: r"C:\Users\tester\.local\bin;C:\Users\tester\AppData\npm",
+    )
+    monkeypatch.setenv("Path", r"C:\Windows\System32")
+
+    context = bootstrap_main._context_for(EnvironmentKind.WINDOWS, tmp_path)
+    path_value = next(
+        value
+        for name, value in context.current_environment.items()
+        if name.casefold() == "path"
+    )
+
+    entries = path_value.split(";")
+    assert r"C:\Users\tester\.local\bin" in entries
+    assert r"C:\Users\tester\AppData\npm" in entries
+
+
+@pytest.mark.unit
 def test_linux_runs_only_opencode_adapter(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

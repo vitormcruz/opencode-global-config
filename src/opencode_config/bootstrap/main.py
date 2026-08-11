@@ -1,6 +1,6 @@
 """Entrypoint do bootstrap multiplataforma."""
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 import os
 import re
@@ -94,6 +94,60 @@ def _run_copilot_adapter(repo_root: Path, arguments: Sequence[str]) -> int:
     return adapter_main(arguments)
 
 
+def _read_windows_user_path() -> str:
+    if sys.platform != "win32":
+        return ""
+
+    import winreg
+
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
+            value, _ = winreg.QueryValueEx(key, "Path")
+    except OSError:
+        return ""
+    return str(value)
+
+
+def _merge_path_values(
+    current: Mapping[str, str],
+    user_path: str,
+    environment: EnvironmentKind,
+) -> dict[str, str]:
+    merged = dict(current)
+    path_key = next(
+        (name for name in merged if name.casefold() == "path"),
+        "Path" if environment is EnvironmentKind.WINDOWS else "PATH",
+    )
+    separator = ";" if environment is EnvironmentKind.WINDOWS else ":"
+    current_value = next(
+        (value for name, value in merged.items() if name.casefold() == "path"),
+        "",
+    )
+    values = [
+        entry
+        for entry in f"{current_value}{separator}{user_path}".split(separator)
+        if entry
+    ]
+    unique: list[str] = []
+    for entry in values:
+        normalized = entry.casefold() if environment is EnvironmentKind.WINDOWS else entry
+        if not any(
+            (
+                existing.casefold()
+                if environment is EnvironmentKind.WINDOWS
+                else existing
+            )
+            == normalized
+            for existing in unique
+        ):
+            unique.append(entry)
+    merged[path_key] = separator.join(unique)
+    for name in list(merged):
+        if name.casefold() == "path" and name != path_key:
+            del merged[name]
+    return merged
+
+
 def _context_for(
     environment: EnvironmentKind,
     repo_root: Path,
@@ -103,12 +157,20 @@ def _context_for(
     profile = None
     if environment is not EnvironmentKind.WINDOWS:
         profile = Path.home() / ".bashrc"
+    current_environment = dict(os.environ)
+    if environment is EnvironmentKind.WINDOWS:
+        current_environment = _merge_path_values(
+            current_environment,
+            _read_windows_user_path(),
+            environment,
+        )
     context = InstallContext(
         environment=environment,
         paths=resolve_user_space_paths(environment),
         repo_root=repo_root,
         profile_path=profile,
-        current_environment=dict(os.environ),
+        current_environment=current_environment,
+        persist_paths=persist_paths,
     )
     if environment is EnvironmentKind.WINDOWS:
         for path in (
@@ -129,7 +191,12 @@ def _cleanup_legacy_bashrc(*, check_only: bool) -> None:
     if check_only:
         return
 
-    bashrc = Path.home() / ".bashrc"
+    home = (
+        os.environ.get("HOME")
+        or os.environ.get("USERPROFILE")
+        or os.fspath(Path.home())
+    )
+    bashrc = Path(home) / ".bashrc"
     if not bashrc.is_file():
         return
 

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -55,9 +56,12 @@ def test_bootstrap_removes_legacy_crawl4ai_bashrc_block(repo_root, tmp_path):
     )
     result = subprocess.run(
         [
-            "bash",
-            str(repo_root / "scripts/bootstrap_repo/configurar-repo.sh"),
+            sys.executable,
+            "-m",
+            "opencode_config.bootstrap.main",
             "--quiet",
+            "--repo-root",
+            str(repo_root),
         ],
         cwd=repo_root,
         env=environment,

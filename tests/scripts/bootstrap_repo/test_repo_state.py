@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 
 
-pytestmark = pytest.mark.tools
+pytestmark = pytest.mark.opencode
 
 
 @dataclass(frozen=True)

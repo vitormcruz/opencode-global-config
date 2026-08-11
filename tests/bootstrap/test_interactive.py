@@ -196,6 +196,30 @@ def test_bootstrap_reinstalls_repo_in_venv_when_global_pytest_is_present(
 
 
 @pytest.mark.unit
+def test_bootstrap_keeps_pytest_present_when_venv_is_ready(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    detections = (
+        make_detection("pytest", required=False),
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.interactive.is_pytest_environment_ready",
+        lambda _context: True,
+    )
+
+    result = run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert result.selected == ()
+    assert result.detections[0].status is DependencyStatus.PRESENT
+
+
+@pytest.mark.unit
 def test_bootstrap_yes_selects_all_missing_without_prompt(
     tmp_path: Path,
 ) -> None:

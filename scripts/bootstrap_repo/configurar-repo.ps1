@@ -7,7 +7,7 @@ param(
 function Import-UserPath {
     $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($userPath) {
-        $env:Path = "$userPath;$env:Path"
+        $env:Path = "$env:Path;$userPath"
     }
 }
 

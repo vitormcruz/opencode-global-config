@@ -190,6 +190,26 @@ def test_update_marked_block_replaces_existing_content(tmp_path):
 
 
 @pytest.mark.unit
+def test_update_marked_block_accepts_windows_paths(tmp_path):
+    config_path = tmp_path / "profile.ps1"
+
+    update_marked_block(
+        config_path,
+        "path",
+        '$env:Path = "C:\\Users\\tester\\.local\\bin;$env:Path"',
+    )
+    update_marked_block(
+        config_path,
+        "path",
+        '$env:Path = "C:\\Users\\tester\\AppData\\npm;$env:Path"',
+    )
+
+    content = config_path.read_text(encoding="utf-8")
+    assert "C:\\Users\\tester\\.local\\bin" not in content
+    assert "C:\\Users\\tester\\AppData\\npm" in content
+
+
+@pytest.mark.unit
 def test_remove_marked_block_removes_only_requested_block(tmp_path):
     config_path = tmp_path / ".bashrc"
     config_path.write_text("before\n", encoding="utf-8")

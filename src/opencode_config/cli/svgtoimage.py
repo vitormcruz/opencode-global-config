@@ -63,6 +63,7 @@ def _node_environment(playwright: str) -> dict[str, str]:
     module_paths = [
         executable.parent / "node_modules",
         executable.parent.parent / "node_modules",
+        executable.parent / "node_modules" / "@playwright" / "test" / "node_modules",
     ]
 
     npm = shutil.which("npm")

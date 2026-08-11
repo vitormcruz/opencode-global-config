@@ -31,7 +31,7 @@ def run_adapter(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_creates_canonical_symlinks(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -52,7 +52,7 @@ def test_opencode_adapter_creates_canonical_symlinks(
     assert "Pronto." in output
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_backs_up_existing_destination(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -76,7 +76,7 @@ def test_opencode_adapter_backs_up_existing_destination(
     assert (config_dir / "skills").is_symlink()
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_is_idempotent_without_spurious_backup(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -97,7 +97,7 @@ def test_opencode_adapter_is_idempotent_without_spurious_backup(
     assert ("ba" + "ts").upper() not in bashrc
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_removes_legacy_test_library_block(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -164,7 +164,7 @@ def test_opencode_adapter_help_returns_success(
     assert captured.err == ""
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_accepts_quiet(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

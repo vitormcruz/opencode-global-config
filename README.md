@@ -75,13 +75,14 @@ user-space conforme a seleção interativa ou `--yes`:
 | pipx | `pip install --user pipx` | `py -m pip install --user pipx` |
 | `crwl` | `pipx install crawl4ai` + `crawl4ai-setup` | igual ao Linux |
 | docling | `pipx install docling` | igual ao Linux |
-| codebase-memory-mcp | npm com prefixo user-space | npm com prefixo user-space |
+| codebase-memory-mcp 0.9.0 | npm com prefixo user-space | npm com prefixo user-space |
 | pandoc | arquivo portátil oficial | arquivo portátil oficial |
 | git | pré-existente ou pacote do sistema | PortableGit |
 | Playwright + Chromium | npm + `npx playwright install` | igual ao Linux |
 | pytest | `.venv` + `requirements-dev.txt` | igual ao Linux |
 | AWS CLI v2 | instalador oficial user-local | instalador oficial user-local |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
+| Copilot CLI | cliente externo | npm com prefixo user-space |
 
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
@@ -103,8 +104,9 @@ Os comandos `opencode-doc-extract`, `opencode-md-export`,
 bootstrap via `pipx install --editable .`.
 
 O Docling não exige um modelo LLM externo para ser instalado ou executado pelo
-wrapper. OCR e conversão são delegados ao próprio Docling; recursos opcionais
-que baixem modelos só são acionados quando o comando utilizado exigir.
+wrapper. O wrapper executa em modo offline: modelos precisam existir no cache
+local; downloads e telemetria ficam desativados. A conversão PDF pode exigir
+artefatos locais de layout/OCR previamente provisionados.
 
 Para rodar so a verificacao de dependencias:
 

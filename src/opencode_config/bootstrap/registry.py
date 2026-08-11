@@ -17,6 +17,7 @@ class DependencySpec:
         EnvironmentKind,
         tuple[str, ...],
     ] = field(default_factory=dict)
+    supported_environments: frozenset[EnvironmentKind] | None = None
     required: bool = True
     version_args: tuple[str, ...] = ("--version",)
     version_pattern: str = (
@@ -176,6 +177,15 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "pipx install --editable .",
             windows="pipx install --editable .",
+        ),
+    ),
+    DependencySpec(
+        name="copilot",
+        commands=("copilot",),
+        supported_environments=frozenset({EnvironmentKind.WINDOWS}),
+        install_methods=_methods(
+            "cliente Copilot externo",
+            windows="npm install --global --prefix user-space @github/copilot",
         ),
     ),
 )

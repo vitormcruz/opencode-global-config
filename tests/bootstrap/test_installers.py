@@ -12,6 +12,7 @@ from opencode_config.bootstrap.installers import (
     download_file,
     install_aws_cli,
     install_codebase_memory,
+    install_copilot,
     install_crwl,
     install_dependencies,
     install_fnm,
@@ -40,6 +41,7 @@ def make_context(
         paths=paths,
         repo_root=tmp_path,
         profile_path=tmp_path / ".profile",
+        persist_paths=False,
     )
 
 
@@ -62,23 +64,24 @@ def test_ensure_path_entry_is_idempotent_for_profile_and_process(
 ) -> None:
     profile = tmp_path / ".profile"
     environment = {"PATH": "/usr/bin"}
+    linux_bin = Path("/tmp/opencode-config-test-bin")
 
     ensure_path_entry(
-        tmp_path / "bin",
+        linux_bin,
         environment_kind=EnvironmentKind.LINUX,
         profile_path=profile,
         environ=environment,
     )
     first_content = profile.read_text(encoding="utf-8")
     ensure_path_entry(
-        tmp_path / "bin",
+        linux_bin,
         environment_kind=EnvironmentKind.LINUX,
         profile_path=profile,
         environ=environment,
     )
 
     assert profile.read_text(encoding="utf-8") == first_content
-    assert environment["PATH"] == f"{tmp_path / 'bin'}:/usr/bin"
+    assert environment["PATH"] == f"{linux_bin}:/usr/bin"
     assert first_content.count("opencode-config:bootstrap-path") == 2
 
 
@@ -240,6 +243,33 @@ def test_install_npm_global_windows_uses_npm_bin_as_prefix(tmp_path: Path) -> No
 
 
 @pytest.mark.unit
+def test_windows_real_executor_resolves_cmd_entrypoints(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    observed: list[tuple[str, ...]] = []
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            r"C:\Node\npm.CMD" if command == "npm" else None
+        ),
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.run_command",
+        lambda command, **_kwargs: (
+            observed.append(tuple(command))
+            or CommandResult(tuple(command), 0, "", "")
+        ),
+    )
+
+    install_npm_global(context, "codebase-memory-mcp")
+
+    assert observed[0][0] == r"C:\Node\npm.CMD"
+
+
+@pytest.mark.unit
 def test_install_crwl_uses_pipx_bin_and_checks_entrypoints(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -293,6 +323,41 @@ def test_install_crwl_fails_when_pipx_does_not_expose_entrypoint(
 
     with pytest.raises(InstallerError, match="crwl"):
         install_crwl(context, runner=successful_runner([]))
+
+
+@pytest.mark.unit
+def test_install_crwl_rejects_false_success_from_browser_setup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+
+    def runner(command, **_kwargs):
+        if tuple(command) == ("crawl4ai-setup",):
+            return CommandResult(
+                args=tuple(command),
+                returncode=0,
+                stdout="Failed to install browsers",
+                stderr="",
+            )
+        return CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            str(context.paths.pipx_bin / f"{command}.exe")
+            if command in {"pipx", "crwl", "crawl4ai-setup"}
+            else None
+        ),
+    )
+
+    with pytest.raises(InstallerError, match="Failed to install browsers"):
+        install_crwl(context, runner=runner)
 
 
 @pytest.mark.unit
@@ -408,6 +473,8 @@ def test_install_codebase_memory_enables_auto_index(
     )
 
     assert result.success
+    assert result.name == "codebase-memory-mcp"
+    assert commands[0][-1] == "codebase-memory-mcp@0.9.0"
     assert commands[-1] == (
         "codebase-memory-mcp",
         "config",
@@ -415,6 +482,32 @@ def test_install_codebase_memory_enables_auto_index(
         "auto_index",
         "true",
     )
+
+
+@pytest.mark.unit
+def test_install_copilot_uses_user_npm_prefix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            str(context.paths.npm_bin / "copilot.cmd")
+            if command == "copilot"
+            else None
+        ),
+    )
+
+    result = install_copilot(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[0][-1] == "@github/copilot"
+    assert str(context.paths.npm_bin) in commands[0]
 
 
 @pytest.mark.unit
