@@ -72,15 +72,24 @@ Resultado: `373 passed, 26 deselected`.
 
 Após os commits Windows, a suíte unit/tools foi reexecutada no WSL. O teste
 auxiliar do Docling foi corrigido para criar `docling` no Linux/WSL e
-`docling.cmd` no Windows. A execução atual terminou com `368 passed, 2 failed,
-46 deselected`. Permanecem duas falhas reais do fluxo Docling,
-causadas pela divergência do argumento `convert`, que está sendo investigada
-por um agente no Windows.
+`docling.cmd` no Windows. Após a correção do contrato compartilhado, a execução
+WSL terminou com `372 passed, 46 deselected`.
 
-Não altere `src/opencode_config/cli/doc_extract.py` nem escolha uma sintaxe
-Docling alternativa antes de a investigação Windows registrar a versão,
-executável e comando efetivamente usados nos dois sistemas. Se as duas falhas
-persistirem, registre-as como bloqueio explícito em vez de mascará-las.
+O wrapper agora usa a forma comum às versões verificadas:
+`docling --to ... --output ... arquivo`, sem ramificação por sistema
+operacional. Também retorna falha quando o comando termina com exit `0` mas não
+produz artefato não vazio. O agente Windows deve validar exatamente esse
+contrato com o Docling instalado nativamente e registrar a versão usada.
+
+Essa validação Windows foi concluída posteriormente:
+
+- Docling 2.119.0 aceitou a forma sem `convert`;
+- `sample.md` produziu artefato não vazio;
+- `sample.pdf` vazio retornou `ok:false`;
+- `pytest -m "unit or tools or copilot" -q`: `374 passed, 44 deselected`.
+
+Não reabra essa correção multiplataforma. Preserve o contrato atual enquanto
+valida somente a integração OpenCode no WSL.
 
 A execução abaixo produziu 24 erros:
 

@@ -31,11 +31,12 @@ shell e 4.608 linhas de BATS migradas.
 **Estado atual:** Tasks 6.1 e 6.2 concluídas no WSL. A implementação e a
 revisão documental da Task 6.3 foram concluídas. A validação Windows da Task
 4.5 foi executada e registrada como PASS pelo agente Windows; a revisão humana
-e a reconciliação do fluxo Docling permanecem pendentes. Os defeitos Windows
+permanece pendente. Os defeitos Windows
 anteriores de PATH case-insensitive, instalação do pacote no `.venv`, caminho
 real de apps do pipx e detecção independente de `npm`/`npx` foram cobertos por
-testes e corrigidos. A compatibilidade do comando Docling ainda está sob
-investigação no Windows e não deve ser considerada concluída.
+testes e corrigidos. O wrapper Docling agora usa a sintaxe comum às versões
+verificadas e rejeita artefatos vazios; a validação nativa Windows foi repetida
+com sucesso.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
 Tasks 5.1–5.3 e Tasks 6.1–6.2.
@@ -49,11 +50,10 @@ executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
 
 **Última verificação WSL:** após os commits Windows, a suíte
-`.venv/bin/pytest -m "unit or tools" -q` terminou com `368 passed, 2 failed,
-46 deselected`. O teste auxiliar multiplataforma foi corrigido nesta revisão;
-as duas falhas restantes são reais no fluxo Docling e permanecem pendentes da
-investigação do comando no Windows. Não são tratadas como ausência de
-dependência.
+`.venv/bin/pytest -m "unit or tools" -q` terminou com `372 passed, 46
+deselected` após a correção do contrato Docling e do teste auxiliar
+multiplataforma. No Windows, `pytest -m "unit or tools or copilot" -q`
+terminou com `374 passed, 44 deselected`.
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
@@ -1341,18 +1341,17 @@ doc-extract, md-export, svg-to-image, browser-testing.
 - Copilot CLI entrou no bootstrap via pacote npm user-space. codebase-memory foi
   fixado em `0.9.0`, cuja instalação Windows concluiu sem o timeout de validação
   do pacote mais recente.
-- O relatório Windows registrou Docling com `convert`, `--no-tables` e
-  execução offline por padrão. A compatibilidade de `convert` com o CLI
-  compartilhado está sob investigação; não é considerada validada até que a
-  versão, o executável e os argumentos do wrapper sejam comparados nos dois
-  sistemas. Modelos precisam estar previamente no cache local.
+- O relatório Windows registrou Docling 2.119.0, enquanto o WSL usava 2.96.1.
+  O wrapper foi corrigido para usar a sintaxe comum sem `convert` e passou a
+  exigir artefato não vazio; modelos precisam estar previamente no cache local.
+  A revalidação Windows desse contrato ainda está pendente.
 - Fluxos reais: `crwl`, codebase discovery com `index_repository --mode fast` e
   `search_graph`, doc-extract offline, md-export, svg-to-image e
   browser-testing: todos exit `0`.
 - `pytest tests\bootstrap tests\lib -q`: `72 passed`.
-- `pytest -m "unit or tools" -q`: validação Windows registrada como
-  `361 passed, 46 deselected`; a revalidação WSL permanece pendente por duas
-  falhas do fluxo Docling sob investigação.
+- `pytest -m "unit or tools" -q`: validação Windows anterior registrada como
+  `361 passed, 46 deselected`; WSL após a correção: `372 passed, 46
+  deselected`.
 - `pytest -m "unit or tools or copilot" -q`: `363 passed, 44 deselected`.
 - `pytest -m copilot -q`: `2 passed, 405 deselected`.
 - `%USERPROFILE%\.copilot\` contém `skills`, `agents`, `default-artifacts` e
@@ -1363,6 +1362,16 @@ doc-extract, md-export, svg-to-image, browser-testing.
   (`NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`); nenhuma URL,
   certificado ou bypass TLS foi versionado.
 
+**Revalidação Windows após a correção Docling (2026-08-11):**
+- **PASS:** Docling 2.119.0, wrapper `opencode-doc-extract.exe` e forma comum
+  sem `convert` validados em PowerShell nativo.
+- `sample.md`: `ok:true`, artefato não vazio de 129 bytes.
+- `sample.pdf` vazio: `ok:false`, erro explícito de artefato vazio.
+- `pytest tests\cli\test_doc_extract.py -q`: `13 passed`.
+- `pytest -m "unit or tools or copilot" -q`: `374 passed, 44 deselected`.
+- Evidências: diretórios temporários
+  `docling-md-validation` e `docling-empty-pdf-validation`.
+
 **Dependencies:** 4.4
 
 **Files likely touched:** `tests/integration/test_copilot.py`, `README.md`
@@ -1372,10 +1381,10 @@ doc-extract, md-export, svg-to-image, browser-testing.
 ---
 
 ### Checkpoint: Bootstrap multiplataforma
-- [ ] Bootstrap zero-admin validado em Windows sem admin; revalidação WSL e
-  reconciliação do fluxo Docling ainda pendentes
+- [x] Bootstrap zero-admin validado em Windows sem admin e WSL; fluxo Docling
+  revalidado nos dois sistemas
 - [x] Seleção interativa funcionando; `--yes` e `--check-only` corretos
-- [x] `pytest -m "unit or tools"` verde no Windows
+- [x] Suítes `unit/tools` verdes no WSL e no Windows após a correção Docling
 - [ ] Revisão com o humano
 
 ---
