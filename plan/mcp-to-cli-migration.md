@@ -29,14 +29,13 @@ shell e 4.608 linhas de BATS migradas.
 ## Tracking de execução
 
 **Estado atual:** Tasks 6.1 e 6.2 concluídas no WSL. A implementação e a
-revisão documental da Task 6.3 foram concluídas. A Task 4.5 continua pendente:
-a segunda validação Windows encontrou um defeito de PATH case-insensitive e a
-instalação do pacote no `.venv` ainda não estava sendo feita; ambos foram
-cobertos por testes e corrigidos no WSL. O diagnóstico isolado concluiu com
-sucesso a instalação dos browsers usando o mirror corporativo, mas a validação
-final do bootstrap revelou dois defeitos Windows: o diretório padrão de apps do
-pipx não é o diretório gerenciado e `npm`/`npx` não são verificados quando
-`node` já está presente.
+revisão documental da Task 6.3 foram concluídas. A validação Windows da Task
+4.5 foi executada e registrada como PASS pelo agente Windows; a revisão humana
+e a reconciliação do fluxo Docling permanecem pendentes. Os defeitos Windows
+anteriores de PATH case-insensitive, instalação do pacote no `.venv`, caminho
+real de apps do pipx e detecção independente de `npm`/`npx` foram cobertos por
+testes e corrigidos. A compatibilidade do comando Docling ainda está sob
+investigação no Windows e não deve ser considerada concluída.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
 Tasks 5.1–5.3 e Tasks 6.1–6.2.
@@ -49,8 +48,12 @@ impediu a execução das demais verificações no WSL.
 executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
 
-**Última verificação WSL:** `.venv/bin/pytest -m "unit or tools" -q`
-(364 passed, 26 deselected).
+**Última verificação WSL:** após os commits Windows, a suíte
+`.venv/bin/pytest -m "unit or tools" -q` terminou com `368 passed, 2 failed,
+46 deselected`. O teste auxiliar multiplataforma foi corrigido nesta revisão;
+as duas falhas restantes são reais no fluxo Docling e permanecem pendentes da
+investigação do comando no Windows. Não são tratadas como ausência de
+dependência.
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
@@ -1338,15 +1341,18 @@ doc-extract, md-export, svg-to-image, browser-testing.
 - Copilot CLI entrou no bootstrap via pacote npm user-space. codebase-memory foi
   fixado em `0.9.0`, cuja instalação Windows concluiu sem o timeout de validação
   do pacote mais recente.
-- Docling usa `convert`, `--no-tables` e execução offline por padrão:
-  `HF_HUB_OFFLINE=1`, `HF_DATASETS_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`,
-  telemetria Hugging Face desativada e Torch Dynamo desativado.
-  Modelos precisam estar previamente no cache local.
+- O relatório Windows registrou Docling com `convert`, `--no-tables` e
+  execução offline por padrão. A compatibilidade de `convert` com o CLI
+  compartilhado está sob investigação; não é considerada validada até que a
+  versão, o executável e os argumentos do wrapper sejam comparados nos dois
+  sistemas. Modelos precisam estar previamente no cache local.
 - Fluxos reais: `crwl`, codebase discovery com `index_repository --mode fast` e
   `search_graph`, doc-extract offline, md-export, svg-to-image e
   browser-testing: todos exit `0`.
 - `pytest tests\bootstrap tests\lib -q`: `72 passed`.
-- `pytest -m "unit or tools" -q`: `361 passed, 46 deselected`.
+- `pytest -m "unit or tools" -q`: validação Windows registrada como
+  `361 passed, 46 deselected`; a revalidação WSL permanece pendente por duas
+  falhas do fluxo Docling sob investigação.
 - `pytest -m "unit or tools or copilot" -q`: `363 passed, 44 deselected`.
 - `pytest -m copilot -q`: `2 passed, 405 deselected`.
 - `%USERPROFILE%\.copilot\` contém `skills`, `agents`, `default-artifacts` e
@@ -1366,8 +1372,8 @@ doc-extract, md-export, svg-to-image, browser-testing.
 ---
 
 ### Checkpoint: Bootstrap multiplataforma
-- [x] Bootstrap zero-admin validado em Windows sem admin; WSL permanece
-  coberto pelo resultado registrado anteriormente
+- [ ] Bootstrap zero-admin validado em Windows sem admin; revalidação WSL e
+  reconciliação do fluxo Docling ainda pendentes
 - [x] Seleção interativa funcionando; `--yes` e `--check-only` corretos
 - [x] `pytest -m "unit or tools"` verde no Windows
 - [ ] Revisão com o humano

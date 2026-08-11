@@ -73,6 +73,45 @@ def test_registry_declares_copilot_cli_entrypoint() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("environment", tuple(EnvironmentKind))
+@pytest.mark.parametrize(
+    ("stdout", "expected_status"),
+    [
+        ("codebase-memory-mcp 0.8.0\n", DependencyStatus.OUTDATED),
+        ("codebase-memory-mcp 0.9.0\n", DependencyStatus.PRESENT),
+    ],
+)
+def test_registry_requires_supported_codebase_memory_version(
+    monkeypatch: pytest.MonkeyPatch,
+    environment: EnvironmentKind,
+    stdout: str,
+    expected_status: DependencyStatus,
+) -> None:
+    spec = next(
+        item
+        for item in DEPENDENCY_REGISTRY
+        if item.name == "codebase-memory-mcp"
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.detect.shutil.which",
+        lambda *_args, **_kwargs: "/mock/bin/codebase-memory-mcp",
+    )
+
+    result = detect_dependency(
+        spec,
+        environment,
+        runner=lambda command, **_: CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout=stdout,
+            stderr="",
+        ),
+    )
+
+    assert result.status is expected_status
+
+
+@pytest.mark.unit
 def test_registry_tracks_npm_and_npx_separately_from_node() -> None:
     npm_spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "npm")
     npx_spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "npx")

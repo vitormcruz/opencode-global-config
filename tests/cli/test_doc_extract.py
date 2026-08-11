@@ -235,9 +235,7 @@ def test_doc_extract_forces_local_offline_model_execution(
     from opencode_config.cli import doc_extract
     from opencode_config.lib.process import CommandResult
 
-    executable = tmp_path / "docling.cmd"
-    executable.write_text("@echo off\nexit /b 0\n", encoding="utf-8")
-    monkeypatch.setenv("PATH", str(tmp_path))
+    install_fake_docling(tmp_path, monkeypatch)
     observed: dict[str, str] = {}
 
     def fake_run(command, *, env, **_kwargs):

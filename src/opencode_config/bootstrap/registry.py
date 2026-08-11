@@ -128,6 +128,7 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "npm install -g codebase-memory-mcp com prefix user-space",
             windows="npm install -g codebase-memory-mcp com prefix user-space",
         ),
+        minimum_version=(0, 9, 0),
     ),
     DependencySpec(
         name="pandoc",

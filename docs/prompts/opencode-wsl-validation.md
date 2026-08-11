@@ -30,7 +30,8 @@ commit final, apague somente
 - Root WSL: `/mnt/c/Users/ur5y/Projetos/opencode-config`
 - Branch esperada: `master-nova`
 - Plano: `plan/mcp-to-cli-migration.md`
-- Estado parcial atual: commit `28791d4`
+- O checkout contém os commits de validação Windows posteriores a `28791d4`;
+  use o estado real do worktree como fonte da verdade e preserve esses commits.
 - Leia o plano inteiro e `AGENTS.md` antes de agir.
 - Não reabra AD-1..AD-12.
 - OpenCode é exclusivo de Linux/WSL.
@@ -61,13 +62,25 @@ Carregue e aplique:
 
 O pacote e a suíte unit/tools já foram migrados para pytest.
 
-Baseline WSL confirmado:
+Baseline WSL anterior aos ajustes Windows:
 
 ```bash
 .venv/bin/pytest -m "unit or tools" -q
 ```
 
 Resultado: `373 passed, 26 deselected`.
+
+Após os commits Windows, a suíte unit/tools foi reexecutada no WSL. O teste
+auxiliar do Docling foi corrigido para criar `docling` no Linux/WSL e
+`docling.cmd` no Windows. A execução atual terminou com `368 passed, 2 failed,
+46 deselected`. Permanecem duas falhas reais do fluxo Docling,
+causadas pela divergência do argumento `convert`, que está sendo investigada
+por um agente no Windows.
+
+Não altere `src/opencode_config/cli/doc_extract.py` nem escolha uma sintaxe
+Docling alternativa antes de a investigação Windows registrar a versão,
+executável e comando efetivamente usados nos dois sistemas. Se as duas falhas
+persistirem, registre-as como bloqueio explícito em vez de mascará-las.
 
 A execução abaixo produziu 24 erros:
 
