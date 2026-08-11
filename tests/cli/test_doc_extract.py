@@ -166,7 +166,7 @@ def test_doc_extract_without_docling_uses_windows_hint(
 
 
 @pytest.mark.tools
-def test_doc_extract_with_pdf_returns_success(
+def test_doc_extract_with_empty_pdf_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
@@ -183,6 +183,32 @@ def test_doc_extract_with_pdf_returns_success(
         capsys,
         {
             "source": str(repo_root / "tests/test-resources/sample.pdf"),
+            "outputDir": str(output_dir),
+        },
+    )
+
+    assert result["ok"] is False
+    assert "artefato" in result["stderr"]
+
+
+@pytest.mark.tools
+def test_doc_extract_with_markdown_returns_success(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    if shutil.which("docling") is None:
+        pytest.fail(
+            "docling nao disponivel neste ambiente — instale docling para executar este teste"
+        )
+
+    output_dir = tmp_path / "out"
+    result = invoke_cli(
+        monkeypatch,
+        capsys,
+        {
+            "source": str(repo_root / "tests/test-resources/sample.md"),
             "outputDir": str(output_dir),
         },
     )
@@ -191,7 +217,7 @@ def test_doc_extract_with_pdf_returns_success(
 
 
 @pytest.mark.tools
-def test_doc_extract_with_pdf_generates_artifact(
+def test_doc_extract_with_markdown_generates_non_empty_artifact(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
@@ -207,12 +233,14 @@ def test_doc_extract_with_pdf_generates_artifact(
         monkeypatch,
         capsys,
         {
-            "source": str(repo_root / "tests/test-resources/sample.pdf"),
+            "source": str(repo_root / "tests/test-resources/sample.md"),
             "outputDir": str(output_dir),
         },
     )
 
-    assert result["artifacts"]
+    artifacts = [Path(path) for path in result["artifacts"]]
+    assert artifacts
+    assert all(path.is_file() and path.stat().st_size > 0 for path in artifacts)
 
 
 @pytest.mark.tools
@@ -227,6 +255,34 @@ def test_doc_extract_error_output_is_valid_json(
 
 
 @pytest.mark.unit
+def test_doc_extract_rejects_empty_artifact_after_successful_command(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    from opencode_config.cli import doc_extract
+    from opencode_config.lib.process import CommandResult
+
+    install_fake_docling(tmp_path, monkeypatch)
+
+    def fake_run(command, **_kwargs):
+        output_dir = Path(command[command.index("--output") + 1])
+        (output_dir / "sample.md").write_text("", encoding="utf-8")
+        return CommandResult(tuple(command), 0, "", "")
+
+    monkeypatch.setattr(doc_extract, "run_command", fake_run)
+    result = doc_extract.extract_document(
+        {
+            "source": str(repo_root / "tests/test-resources/sample.md"),
+            "outputDir": str(tmp_path / "out"),
+        }
+    )
+
+    assert not result.ok
+    assert "artefato" in result.stderr
+
+
+@pytest.mark.unit
 def test_doc_extract_forces_local_offline_model_execution(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -237,9 +293,14 @@ def test_doc_extract_forces_local_offline_model_execution(
 
     install_fake_docling(tmp_path, monkeypatch)
     observed: dict[str, str] = {}
+    observed_command: tuple[str, ...] = ()
 
     def fake_run(command, *, env, **_kwargs):
+        nonlocal observed_command
+        observed_command = tuple(command)
         observed.update(env)
+        output_dir = Path(command[command.index("--output") + 1])
+        (output_dir / "sample.md").write_text("fake output\n", encoding="utf-8")
         return CommandResult(tuple(command), 0, "", "")
 
     monkeypatch.setattr(doc_extract, "run_command", fake_run)
@@ -251,6 +312,7 @@ def test_doc_extract_forces_local_offline_model_execution(
     )
 
     assert result.ok
+    assert "convert" not in observed_command
     assert all(
         observed[name] == "1"
         for name in (

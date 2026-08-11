@@ -111,6 +111,8 @@ O Docling não exige um modelo LLM externo para ser instalado ou executado pelo
 wrapper. O wrapper executa em modo offline: modelos precisam existir no cache
 local; downloads e telemetria ficam desativados. A conversão PDF pode exigir
 artefatos locais de layout/OCR previamente provisionados.
+Uma extração só é considerada bem-sucedida quando o Docling gera pelo menos um
+artefato não vazio; documentos sem conteúdo retornam erro explícito.
 
 Ao finalizar o bootstrap com Docling disponível, o terminal imprime o comando
 de provisionamento local. O download é opcional e deve ser executado pelo

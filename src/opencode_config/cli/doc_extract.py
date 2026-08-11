@@ -98,7 +98,11 @@ def _collect_artifacts(
     return [
         os.path.join(output_dir_text, path.name)
         for path in sorted(output_dir.iterdir())
-        if path.is_file() and path.name.endswith(f".{extension}")
+        if (
+            path.is_file()
+            and path.name.endswith(f".{extension}")
+            and path.stat().st_size > 0
+        )
     ]
 
 
@@ -143,7 +147,7 @@ def extract_document(payload: Mapping[str, Any]) -> ToolResult:
     except OSError as error:
         return _failure(f"Nao foi possivel criar o diretorio de saida: {error}")
 
-    args = ["convert", "--to", output_format, "--output", output_dir_text]
+    args = ["--to", output_format, "--output", output_dir_text]
     if not _is_true(payload.get("ocr")):
         args.append("--no-ocr")
     if not _is_true(payload.get("tables")):
@@ -186,6 +190,16 @@ def extract_document(payload: Mapping[str, Any]) -> ToolResult:
             f"Nao foi possivel listar os artefatos gerados: {error}",
             stdout=command_result.stdout,
         )
+
+    if not artifacts:
+        diagnostic = command_result.stderr.strip() or command_result.stdout.strip()
+        message = (
+            "Docling terminou sem gerar artefato nao vazio"
+            " no diretorio de saida"
+        )
+        if diagnostic:
+            message = f"{message}: {diagnostic}"
+        return _failure(message, stdout=command_result.stdout)
 
     return ToolResult.success(
         engine="docling",
