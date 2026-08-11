@@ -36,7 +36,9 @@ anteriores de PATH case-insensitive, instalação do pacote no `.venv`, caminho
 real de apps do pipx e detecção independente de `npm`/`npx` foram cobertos por
 testes e corrigidos. O wrapper Docling agora usa a sintaxe comum às versões
 verificadas e rejeita artefatos vazios; a validação nativa Windows foi repetida
-com sucesso.
+com sucesso. A revisão posterior do adapter Copilot também corrigiu a
+materialização de permissões herdadas; o commit `c3cd8ad` preserva as tools
+omitidas como permitidas, removendo somente regras explícitas `deny`.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
 Tasks 5.1–5.3 e Tasks 6.1–6.2.
@@ -1053,6 +1055,22 @@ ainda executável no Linux para testes.
 - [x] Execução com `--dest-root` temporário produz a árvore esperada
 - [ ] Execução real no Windows produz `%USERPROFILE%\.copilot\` funcional
       (adiada para a validação multiplataforma final pelo humano)
+
+**Correção posterior (2026-08-11, commit `c3cd8ad`):**
+
+- No OpenCode, `* = allow` é o default; permissões omitidas são herdadas.
+- No Copilot CLI, `tools` é uma lista explícita quando presente.
+- O adapter passou a materializar as permissões herdadas e a remover somente
+  tools com regra `deny`.
+- Regras estruturadas de `task`, incluindo `"*": deny`, também são
+  interpretadas.
+- `aws-analista`, com `edit: deny` e `webfetch: deny`, passa a receber
+  `read`, `execute`, `search`, `web` e `agent`.
+- `edit` e `webfetch` continuam bloqueados.
+- Teste de regressão adicionado em
+  `tests/adapters/test_copilot_adapter.py`.
+- Validação: 13 testes do adapter e 374 testes `unit/tools`; 46 foram
+  deselecionados.
 
 **Dependencies:** 3.1
 
