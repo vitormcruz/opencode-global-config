@@ -31,6 +31,7 @@ Opcoes:
 """
 
 _SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_AGENT_PERMISSIONS = ("edit", "bash", "webfetch", "websearch", "task")
 _COMMAND_DESCRIPTIONS = {
     "index-codebase": (
         "Indexa repo no codebase-memory. Ative quando humano pedir "
@@ -49,6 +50,12 @@ _COMMAND_DESCRIPTIONS = {
 
 class AdapterError(RuntimeError):
     """Erro esperado durante a sincronizacao do adapter."""
+
+
+def _permission_is_denied(value: str) -> bool:
+    """Detecta deny em permissoes simples e regras estruturadas de task."""
+
+    return re.search(r"\bdeny\b", value) is not None
 
 
 def _resolve_repo_root(explicit: str | None) -> Path:
@@ -167,17 +174,25 @@ def convert_agent_frontmatter(content: str) -> str:
         if current_permission == "task" and re.match(r"^\s{4}", line):
             permissions["task"] = line.strip().lower()
 
+    # In OpenCode, omitted permissions inherit the default capability. Copilot
+    # needs that capability listed explicitly in `tools`; only explicit deny
+    # removes it from the converted agent.
+    effective_permissions = {
+        name: permissions.get(name, "allow") for name in _AGENT_PERMISSIONS
+    }
+
     tools = ["read"]
-    if permissions.get("edit") == "allow":
+    if not _permission_is_denied(effective_permissions["edit"]):
         tools.append("edit")
-    if permissions.get("bash") == "allow":
+    if not _permission_is_denied(effective_permissions["bash"]):
         tools.append("execute")
     tools.append("search")
-    if permissions.get("webfetch") == "allow" or permissions.get(
-        "websearch"
-    ) == "allow":
+    if (
+        not _permission_is_denied(effective_permissions["webfetch"])
+        or not _permission_is_denied(effective_permissions["websearch"])
+    ):
         tools.append("web")
-    if permissions.get("task") and "allow" in permissions["task"]:
+    if not _permission_is_denied(effective_permissions["task"]):
         tools.append("agent")
 
     if not description:
