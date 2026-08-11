@@ -18,12 +18,16 @@ from .core import (
     install_docling,
     install_fnm,
     install_git,
+    install_npm,
     install_npm_global,
+    install_npx,
+    install_opencode_config,
     install_node,
     install_pandoc,
     install_playwright,
     install_pipx,
     install_pytest,
+    is_pytest_environment_ready,
 )
 
 __all__ = [
@@ -44,10 +48,14 @@ __all__ = [
     "install_docling",
     "install_fnm",
     "install_git",
+    "install_npm",
     "install_npm_global",
+    "install_npx",
+    "install_opencode_config",
     "install_node",
     "install_pandoc",
     "install_playwright",
     "install_pipx",
     "install_pytest",
+    "is_pytest_environment_ready",
 ]

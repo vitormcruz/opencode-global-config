@@ -52,15 +52,37 @@ def _environment_for(
     return detect_environment() if environment is None else environment
 
 
+def _path_value(environment: Mapping[str, str]) -> str | None:
+    """Retorna PATH sem depender da capitalização usada pelo sistema."""
+
+    return next(
+        (
+            value
+            for name, value in environment.items()
+            if name.casefold() == "path"
+        ),
+        None,
+    )
+
+
 def _command_environment(
     environment: Mapping[str, str] | None,
 ) -> tuple[Mapping[str, str] | None, str | None]:
     if environment is None:
-        return None, os.environ.get("PATH")
+        return None, _path_value(os.environ)
 
     merged = dict(os.environ)
-    merged.update(environment)
-    return merged, merged.get("PATH")
+    for name, value in environment.items():
+        existing_name = next(
+            (
+                current_name
+                for current_name in merged
+                if current_name.casefold() == name.casefold()
+            ),
+            None,
+        )
+        merged[existing_name or name] = value
+    return merged, _path_value(merged)
 
 
 def _extract_version(output: str, pattern: str) -> str | None:
@@ -116,7 +138,7 @@ def detect_dependency(
 
     command_environment, path_environment = _command_environment(env)
     executable: str | None = None
-    for command in spec.commands:
+    for command in spec.commands_for(environment):
         executable = shutil.which(command, path=path_environment)
         if executable is not None:
             break

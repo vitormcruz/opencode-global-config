@@ -71,7 +71,7 @@ user-space conforme a seleção interativa ou `--yes`:
 
 | Dependência | Linux/WSL | Windows |
 |---|---|---|
-| Node.js 22 | fnm portátil | fnm portátil |
+| Node.js 22 + npm/npx | fnm portátil | fnm portátil |
 | pipx | `pip install --user pipx` | `py -m pip install --user pipx` |
 | `crwl` | `pipx install crawl4ai` + `crawl4ai-setup` | igual ao Linux |
 | docling | `pipx install docling` | igual ao Linux |
@@ -81,10 +81,26 @@ user-space conforme a seleção interativa ou `--yes`:
 | Playwright + Chromium | npm + `npx playwright install` | igual ao Linux |
 | pytest | `.venv` + `requirements-dev.txt` | igual ao Linux |
 | AWS CLI v2 | instalador oficial user-local | instalador oficial user-local |
+| entry points do repo | `pipx install --editable .` | igual ao Linux |
 
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
-`aws-add-account-sso`; após o bootstrap, confirme com `aws --version`.
+`aws-add-account-sso`; após o bootstrap, abra um novo PowerShell no Windows
+para carregar o PATH persistido e confirme com `aws --version`.
+
+Em redes corporativas, o download dos browsers do Playwright/Patchright pode
+usar um mirror configurado apenas no ambiente, sem URL fixa no repositório:
+
+```powershell
+$env:PLAYWRIGHT_DOWNLOAD_HOST = "https://<mirror-corporativo>/playwright"
+```
+
+No Linux/WSL, use `export PLAYWRIGHT_DOWNLOAD_HOST=...`. Sem essa variável, o
+bootstrap usa o CDN público padrão do Playwright.
+
+Os comandos `opencode-doc-extract`, `opencode-md-export`,
+`opencode-svgtoimage` e `opencode-browser-test` são instalados pelo próprio
+bootstrap via `pipx install --editable .`.
 
 O Docling não exige um modelo LLM externo para ser instalado ou executado pelo
 wrapper. OCR e conversão são delegados ao próprio Docling; recursos opcionais

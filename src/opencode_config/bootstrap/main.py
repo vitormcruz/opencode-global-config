@@ -14,7 +14,7 @@ from opencode_config.lib.environment import (
 )
 from opencode_config.lib.paths import resolve_user_space_paths
 
-from .installers import InstallContext
+from .installers import InstallContext, ensure_path_entry
 from .interactive import InteractiveError, run_bootstrap
 
 
@@ -97,17 +97,32 @@ def _run_copilot_adapter(repo_root: Path, arguments: Sequence[str]) -> int:
 def _context_for(
     environment: EnvironmentKind,
     repo_root: Path,
+    *,
+    persist_paths: bool = True,
 ) -> InstallContext:
     profile = None
     if environment is not EnvironmentKind.WINDOWS:
         profile = Path.home() / ".bashrc"
-    return InstallContext(
+    context = InstallContext(
         environment=environment,
         paths=resolve_user_space_paths(environment),
         repo_root=repo_root,
         profile_path=profile,
         current_environment=dict(os.environ),
     )
+    if environment is EnvironmentKind.WINDOWS:
+        for path in (
+            context.paths.pipx_bin,
+            context.paths.npm_bin,
+            context.paths.bin_dir,
+        ):
+            ensure_path_entry(
+                path,
+                environment_kind=environment,
+                environ=context.current_environment,
+                persist=persist_paths,
+            )
+    return context
 
 
 def _cleanup_legacy_bashrc(*, check_only: bool) -> None:
@@ -160,7 +175,11 @@ def run(
             bootstrap_result = None
         else:
             bootstrap_result = run_bootstrap(
-                context=_context_for(environment, repo_root),
+                context=_context_for(
+                    environment,
+                    repo_root,
+                    persist_paths=not check_only,
+                ),
                 repo_root=repo_root,
                 environment=environment,
                 assume_yes=assume_yes,

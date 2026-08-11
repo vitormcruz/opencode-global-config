@@ -82,7 +82,7 @@ def test_resolves_windows_user_space_directories(tmp_path):
     assert paths.config_dir == app_data
     assert paths.data_dir == local_app_data
     assert paths.bin_dir == local_app_data / "opencode-config" / "bin"
-    assert paths.pipx_bin == local_app_data / "pipx" / "bin"
+    assert paths.pipx_bin == tmp_path / ".local" / "bin"
     assert paths.npm_bin == app_data / "npm"
 
 

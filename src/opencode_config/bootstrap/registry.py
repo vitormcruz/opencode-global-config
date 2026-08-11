@@ -1,6 +1,6 @@
 """Registro declarativo das dependencias gerenciadas pelo bootstrap."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections.abc import Mapping
 
 from opencode_config.lib.environment import EnvironmentKind
@@ -13,6 +13,10 @@ class DependencySpec:
     name: str
     commands: tuple[str, ...]
     install_methods: Mapping[EnvironmentKind, str]
+    commands_by_environment: Mapping[
+        EnvironmentKind,
+        tuple[str, ...],
+    ] = field(default_factory=dict)
     required: bool = True
     version_args: tuple[str, ...] = ("--version",)
     version_pattern: str = (
@@ -25,6 +29,11 @@ class DependencySpec:
         """Retorna o primeiro comando candidato da dependencia."""
 
         return self.commands[0]
+
+    def commands_for(self, environment: EnvironmentKind) -> tuple[str, ...]:
+        """Retorna os comandos candidatos para um ambiente."""
+
+        return self.commands_by_environment.get(environment, self.commands)
 
     def install_method_for(self, environment: EnvironmentKind) -> str:
         """Retorna o metodo previsto para um ambiente."""
@@ -54,6 +63,9 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
     DependencySpec(
         name="python",
         commands=("python3", "python"),
+        commands_by_environment={
+            EnvironmentKind.WINDOWS: ("python", "python3"),
+        },
         install_methods=_methods(
             "pre-requisito: Python >= 3.10",
             windows="pre-requisito: Python >= 3.10 (instalacao por usuario)",
@@ -68,6 +80,24 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             windows="fnm-windows.zip em user-space",
         ),
         minimum_version=(22,),
+    ),
+    DependencySpec(
+        name="npm",
+        commands=("npm",),
+        install_methods=_methods(
+            "fnm em user-space",
+            windows="fnm-windows.zip em user-space",
+        ),
+        version_args=("--version",),
+    ),
+    DependencySpec(
+        name="npx",
+        commands=("npx",),
+        install_methods=_methods(
+            "fnm em user-space",
+            windows="fnm-windows.zip em user-space",
+        ),
+        version_args=("--version",),
     ),
     DependencySpec(
         name="pipx",
@@ -139,6 +169,14 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             windows="script oficial AWS em modo user-local",
         ),
         minimum_version=(2,),
+    ),
+    DependencySpec(
+        name="opencode-config",
+        commands=("opencode-config-check",),
+        install_methods=_methods(
+            "pipx install --editable .",
+            windows="pipx install --editable .",
+        ),
     ),
 )
 

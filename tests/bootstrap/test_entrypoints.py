@@ -37,8 +37,27 @@ def test_powershell_entrypoint_is_thin_and_delegates_to_python(
 
     assert len(content.splitlines()) <= 40
     assert "opencode_config.bootstrap.main" in content
+    assert '[Environment]::GetEnvironmentVariable("Path", "User")' in content
     assert "copilot-adapter" not in content
     assert "opencode-adapter" not in content
+
+
+@pytest.mark.unit
+def test_windows_context_includes_pipx_bin_before_dependency_detection(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from opencode_config.bootstrap import main as bootstrap_main
+
+    monkeypatch.setenv("Path", r"C:\Windows\System32")
+    context = bootstrap_main._context_for(EnvironmentKind.WINDOWS, tmp_path)
+    path_value = next(
+        value
+        for name, value in context.current_environment.items()
+        if name.casefold() == "path"
+    )
+
+    assert str(context.paths.pipx_bin) in path_value
 
 
 @pytest.mark.unit

@@ -32,12 +32,14 @@ def make_spec(
 
 
 @pytest.mark.unit
-def test_registry_declares_all_ad9_dependencies_and_install_methods() -> None:
+def test_registry_declares_managed_dependencies_and_install_methods() -> None:
     names = {spec.name for spec in DEPENDENCY_REGISTRY}
 
     assert names == {
         "python",
         "node",
+        "npm",
+        "npx",
         "pipx",
         "crwl",
         "docling",
@@ -47,6 +49,7 @@ def test_registry_declares_all_ad9_dependencies_and_install_methods() -> None:
         "playwright",
         "pytest",
         "aws-cli",
+        "opencode-config",
     }
     assert all(spec.commands for spec in DEPENDENCY_REGISTRY)
     assert all(spec.install_methods for spec in DEPENDENCY_REGISTRY)
@@ -54,6 +57,53 @@ def test_registry_declares_all_ad9_dependencies_and_install_methods() -> None:
         set(spec.install_methods) == set(EnvironmentKind)
         for spec in DEPENDENCY_REGISTRY
     )
+    package_spec = next(
+        spec for spec in DEPENDENCY_REGISTRY if spec.name == "opencode-config"
+    )
+    assert package_spec.commands == ("opencode-config-check",)
+
+
+@pytest.mark.unit
+def test_registry_tracks_npm_and_npx_separately_from_node() -> None:
+    npm_spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "npm")
+    npx_spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "npx")
+
+    assert npm_spec.commands == ("npm",)
+    assert npx_spec.commands == ("npx",)
+    assert npm_spec.install_method_for(EnvironmentKind.WINDOWS)
+    assert npx_spec.install_method_for(EnvironmentKind.WINDOWS)
+
+
+@pytest.mark.unit
+def test_windows_python_detection_prefers_python_over_python3(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "python")
+    calls: list[tuple[str, ...]] = []
+
+    def fake_which(command: str, path: str | None = None) -> str:
+        del path
+        return f"C:/Python/{command}.exe"
+
+    def fake_runner(command: list[str], **_: object) -> CommandResult:
+        calls.append(tuple(command))
+        return CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="Python 3.14.0\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr("opencode_config.bootstrap.detect.shutil.which", fake_which)
+
+    result = detect_dependency(
+        spec,
+        EnvironmentKind.WINDOWS,
+        runner=fake_runner,
+    )
+
+    assert result.status is DependencyStatus.PRESENT
+    assert calls == [("C:/Python/python.exe", "--version")]
 
 
 @pytest.mark.unit
@@ -87,6 +137,32 @@ def test_registry_marks_unsupported_major_versions_as_outdated(
     )
 
     assert result.status is DependencyStatus.OUTDATED
+
+
+@pytest.mark.unit
+def test_npm_is_missing_even_when_node_is_available(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "npm")
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.detect.shutil.which",
+        lambda command, path=None: (
+            "/mock/bin/node" if command == "node" else None
+        ),
+    )
+
+    result = detect_dependency(
+        spec,
+        EnvironmentKind.WINDOWS,
+        runner=lambda command, **_: CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="",
+            stderr="",
+        ),
+    )
+
+    assert result.status is DependencyStatus.MISSING
 
 
 @pytest.mark.unit
@@ -125,6 +201,35 @@ def test_detect_dependency_reports_present_version_path_and_method(
     assert result.install_method == "metodo Linux"
     assert result.required is False
     assert calls == [("/mock/bin/fake-tool", "--version")]
+
+
+@pytest.mark.unit
+def test_detect_dependency_reads_windows_path_case_insensitively(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spec = make_spec()
+    observed_paths: list[str | None] = []
+
+    def fake_which(command: str, path: str | None = None) -> str:
+        observed_paths.append(path)
+        return f"C:/tools/{command}.exe"
+
+    monkeypatch.setattr("opencode_config.bootstrap.detect.shutil.which", fake_which)
+
+    result = detect_dependency(
+        spec,
+        EnvironmentKind.WINDOWS,
+        env={"Path": "C:/tools"},
+        runner=lambda command, **_: CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="fake-tool 1.2.3\n",
+            stderr="",
+        ),
+    )
+
+    assert result.status is DependencyStatus.PRESENT
+    assert observed_paths == ["C:/tools"]
 
 
 @pytest.mark.unit

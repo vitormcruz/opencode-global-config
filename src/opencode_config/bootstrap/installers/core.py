@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import stat
 import sys
+import sysconfig
 import tarfile
 import tempfile
 import urllib.request
@@ -63,23 +64,100 @@ def _path_separator(environment: EnvironmentKind) -> str:
     return ";" if environment is EnvironmentKind.WINDOWS else os.pathsep
 
 
+def _path_value(environ: Mapping[str, str]) -> str:
+    """Retorna PATH sem depender da capitalização usada pelo sistema."""
+
+    return next(
+        (
+            value
+            for name, value in environ.items()
+            if name.casefold() == "path"
+        ),
+        "",
+    )
+
+
+def _same_path(
+    first: str,
+    second: str,
+    environment: EnvironmentKind,
+) -> bool:
+    if environment is EnvironmentKind.WINDOWS:
+        return first.casefold() == second.casefold()
+    return first == second
+
+
+def _persist_windows_user_path(target: str) -> None:
+    """Persiste um caminho no PATH do usuário sem exigir elevação."""
+
+    if os.name != "nt":
+        return
+
+    import winreg
+
+    access = winreg.KEY_QUERY_VALUE | winreg.KEY_SET_VALUE
+    with winreg.CreateKeyEx(
+        winreg.HKEY_CURRENT_USER,
+        "Environment",
+        0,
+        access,
+    ) as key:
+        try:
+            current, value_type = winreg.QueryValueEx(key, "Path")
+        except FileNotFoundError:
+            current = ""
+            value_type = winreg.REG_EXPAND_SZ
+
+        entries = [
+            entry for entry in str(current).split(";") if entry
+        ]
+        if any(entry.casefold() == target.casefold() for entry in entries):
+            return
+
+        winreg.SetValueEx(
+            key,
+            "Path",
+            0,
+            value_type,
+            ";".join([target, *entries]),
+        )
+
+
 def ensure_path_entry(
     path: Path,
     *,
     environment_kind: EnvironmentKind,
     profile_path: Path | None = None,
     environ: MutableMapping[str, str] | None = None,
+    persist: bool = True,
 ) -> None:
     """Adiciona um diretorio ao PATH atual e ao perfil, uma unica vez."""
 
     target = str(path)
     variables = os.environ if environ is None else environ
     separator = _path_separator(environment_kind)
+    path_key = next(
+        (
+            name
+            for name in variables
+            if name.casefold() == "path"
+        ),
+        "PATH",
+    )
     entries = [
-        entry for entry in variables.get("PATH", "").split(separator) if entry
+        entry for entry in variables.get(path_key, "").split(separator) if entry
     ]
-    if target not in entries:
-        variables["PATH"] = separator.join([target, *entries])
+    if not any(
+        _same_path(entry, target, environment_kind)
+        for entry in entries
+    ):
+        variables[path_key] = separator.join([target, *entries])
+    for name in list(variables):
+        if name.casefold() == "path" and name != path_key:
+            del variables[name]
+
+    if persist and environment_kind is EnvironmentKind.WINDOWS:
+        _persist_windows_user_path(target)
 
     if profile_path is None:
         return
@@ -214,6 +292,49 @@ def _result(name: str, message: str = "") -> InstallResult:
     return InstallResult(name=name, success=True, changed=True, message=message)
 
 
+def _python_user_scripts_path(
+    environment: EnvironmentKind,
+) -> Path | None:
+    if environment is not EnvironmentKind.WINDOWS:
+        return None
+
+    try:
+        scripts = sysconfig.get_path("scripts", scheme="nt_user")
+    except (KeyError, TypeError, ValueError):
+        return None
+    return Path(scripts) if scripts else None
+
+
+def _pipx_bin_path(context: InstallContext) -> Path:
+    configured = context.current_environment.get("PIPX_BIN_DIR")
+    return Path(configured) if configured else context.paths.pipx_bin
+
+
+def _ensure_pipx_bin_path(context: InstallContext) -> Path:
+    path = _pipx_bin_path(context)
+    ensure_path_entry(
+        path,
+        environment_kind=context.environment,
+        profile_path=context.profile_path,
+        environ=context.current_environment,
+    )
+    return path
+
+
+def _require_pipx_entrypoint(
+    context: InstallContext,
+    command_name: str,
+    pipx_bin: Path,
+) -> None:
+    if shutil.which(
+        command_name,
+        path=_path_value(context.current_environment),
+    ) is None:
+        raise InstallerError(
+            f"{command_name} nao foi exposto pelo pipx em {pipx_bin}"
+        )
+
+
 def install_pipx(
     context: InstallContext,
     *,
@@ -227,12 +348,29 @@ def install_pipx(
         [sys.executable, "-m", "pip", "install", "--user", "pipx"],
         runner=runner,
     )
+    user_scripts = _python_user_scripts_path(context.environment)
+    if user_scripts is not None:
+        ensure_path_entry(
+            user_scripts,
+            environment_kind=context.environment,
+            profile_path=context.profile_path,
+            environ=context.current_environment,
+        )
+    _ensure_pipx_bin_path(context)
     ensure_path_entry(
         context.paths.bin_dir,
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
     )
+    if shutil.which(
+        "pipx",
+        path=_path_value(context.current_environment),
+    ) is None:
+        raise InstallerError(
+            "pipx foi instalado, mas o executavel nao ficou disponivel "
+            "no PATH do bootstrap"
+        )
     return _result("pipx", "pipx instalado em user-space")
 
 
@@ -243,13 +381,13 @@ def _install_pipx_app(
     *,
     runner: Runner | None = None,
 ) -> InstallResult:
-    _execute(context, ["pipx", "install", package], runner=runner)
-    ensure_path_entry(
-        context.paths.pipx_bin,
-        environment_kind=context.environment,
-        profile_path=context.profile_path,
-        environ=context.current_environment,
+    pipx_bin = _ensure_pipx_bin_path(context)
+    _execute(
+        context,
+        ["pipx", "install", "--force", package],
+        runner=runner,
     )
+    _require_pipx_entrypoint(context, command_name, pipx_bin)
     return _result(command_name, f"{package} instalado via pipx")
 
 
@@ -282,7 +420,11 @@ def install_npm_global(
     *,
     runner: Runner | None = None,
 ) -> InstallResult:
-    prefix = context.paths.npm_bin.parent
+    prefix = (
+        context.paths.npm_bin
+        if context.environment is EnvironmentKind.WINDOWS
+        else context.paths.npm_bin.parent
+    )
     prefix.mkdir(parents=True, exist_ok=True)
     _execute(
         context,
@@ -325,6 +467,35 @@ def install_codebase_memory(
         success=True,
         changed=True,
         message=f"{result.message}; auto-index habilitado",
+    )
+
+
+def install_opencode_config(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    """Instala os entry points deste repositorio via pipx."""
+
+    if context.repo_root is None:
+        raise InstallerError("Raiz do repositorio necessaria para instalar o pacote")
+
+    pipx_bin = _ensure_pipx_bin_path(context)
+    _execute(
+        context,
+        [
+            "pipx",
+            "install",
+            "--force",
+            "--editable",
+            context.repo_root,
+        ],
+        runner=runner,
+    )
+    _require_pipx_entrypoint(context, "opencode-config-check", pipx_bin)
+    return _result(
+        "opencode-config",
+        "entry points do repositorio instalados via pipx",
     )
 
 
@@ -378,7 +549,7 @@ def install_node(
 ) -> InstallResult:
     if shutil.which(
         "fnm",
-        path=context.current_environment.get("PATH"),
+        path=_path_value(context.current_environment),
     ) is None:
         install_fnm(
             context,
@@ -402,6 +573,71 @@ def install_node(
         environ=context.current_environment,
     )
     return _result("node", "Node.js 22 instalado via fnm")
+
+
+def _rename_install_result(
+    result: InstallResult,
+    name: str,
+) -> InstallResult:
+    return InstallResult(
+        name=name,
+        success=result.success,
+        changed=result.changed,
+        message=result.message,
+        error=result.error,
+    )
+
+
+def _command_available(
+    context: InstallContext,
+    command: str,
+) -> bool:
+    return shutil.which(
+        command,
+        path=_path_value(context.current_environment),
+    ) is not None
+
+
+def install_npm(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    return _install_node_entrypoint(context, "npm", runner=runner)
+
+
+def install_npx(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    return _install_node_entrypoint(context, "npx", runner=runner)
+
+
+def _install_node_entrypoint(
+    context: InstallContext,
+    command: str,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    if _command_available(context, command):
+        return _result(command, f"{command} ja disponivel")
+
+    result = _rename_install_result(
+        install_node(context, runner=runner),
+        command,
+    )
+    if not result.success:
+        return result
+    if _command_available(context, command):
+        return result
+    return InstallResult(
+        name=command,
+        success=False,
+        changed=result.changed,
+        message=result.message,
+        error=f"{command} nao ficou disponivel apos instalar Node.js",
+    )
 
 
 def _install_binary_archive(
@@ -523,6 +759,40 @@ def install_playwright(
     return _result("playwright", "Playwright e Chromium instalados")
 
 
+def _venv_python_path(context: InstallContext) -> Path:
+    if context.repo_root is None:
+        raise InstallerError("Raiz do repositorio necessaria para usar .venv")
+    python_name = "Scripts/python.exe" if (
+        context.environment is EnvironmentKind.WINDOWS
+    ) else "bin/python"
+    return context.repo_root / ".venv" / python_name
+
+
+def is_pytest_environment_ready(context: InstallContext) -> bool:
+    """Verifica se a virtualenv consegue importar o pacote do repositorio."""
+
+    if context.repo_root is None:
+        return False
+    python_path = _venv_python_path(context)
+    if not python_path.is_file():
+        return False
+    environment = {
+        name: value
+        for name, value in context.current_environment.items()
+        if name.casefold() not in {"pythonpath", "pythonhome"}
+    }
+    result = run_command(
+        [
+            python_path,
+            "-c",
+            "import opencode_config; import pytest",
+        ],
+        cwd=context.repo_root,
+        env=environment,
+    )
+    return result.succeeded
+
+
 def install_pytest(
     context: InstallContext,
     *,
@@ -530,7 +800,15 @@ def install_pytest(
 ) -> InstallResult:
     if context.repo_root is None:
         raise InstallerError("Raiz do repositorio necessaria para criar .venv")
+    if is_pytest_environment_ready(context):
+        return InstallResult(
+            name="pytest",
+            success=True,
+            changed=False,
+            message=f".venv ja configurada em {context.repo_root / '.venv'}",
+        )
     venv_path = context.repo_root / ".venv"
+    python_path = _venv_python_path(context)
     _execute(
         context,
         [sys.executable, "-m", "venv", venv_path],
@@ -538,14 +816,23 @@ def install_pytest(
     )
     requirements = context.repo_root / "requirements-dev.txt"
     if requirements.is_file():
-        python_name = "Scripts/python.exe" if (
-            context.environment is EnvironmentKind.WINDOWS
-        ) else "bin/python"
         _execute(
             context,
-            [venv_path / python_name, "-m", "pip", "install", "-r", requirements],
+            [python_path, "-m", "pip", "install", "-r", requirements],
             runner=runner,
         )
+    _execute(
+        context,
+        [
+            python_path,
+            "-m",
+            "pip",
+            "install",
+            "--editable",
+            context.repo_root,
+        ],
+        runner=runner,
+    )
     return _result("pytest", f".venv criada em {venv_path}")
 
 
@@ -632,10 +919,13 @@ def _manual_prerequisite(name: str) -> DependencyInstaller:
 INSTALLERS: Mapping[str, DependencyInstaller] = {
     "python": _manual_prerequisite("python"),
     "node": install_node,
+    "npm": install_npm,
+    "npx": install_npx,
     "pipx": install_pipx,
     "crwl": install_crwl,
     "docling": install_docling,
     "codebase-memory-mcp": install_codebase_memory,
+    "opencode-config": install_opencode_config,
     "pandoc": install_pandoc,
     "git": install_git,
     "playwright": install_playwright,

@@ -54,7 +54,7 @@ def resolve_user_space_paths(
             config_dir=app_data,
             data_dir=local_app_data,
             bin_dir=local_app_data / "opencode-config" / "bin",
-            pipx_bin=local_app_data / "pipx" / "bin",
+            pipx_bin=resolved_home / ".local" / "bin",
             npm_bin=app_data / "npm",
         )
 

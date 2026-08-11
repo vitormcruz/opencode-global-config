@@ -136,6 +136,66 @@ def test_bootstrap_with_everything_present_does_not_require_tty(
 
 
 @pytest.mark.unit
+def test_bootstrap_detects_using_the_context_environment(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    observed: dict[str, object] = {}
+
+    def detector(environment, *, env):
+        observed["environment"] = environment
+        observed["env"] = env
+        return ()
+
+    run_bootstrap(
+        context=context,
+        environment=EnvironmentKind.LINUX,
+        detector=detector,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert observed["environment"] is EnvironmentKind.LINUX
+    assert observed["env"] is context.current_environment
+
+
+@pytest.mark.unit
+def test_bootstrap_reinstalls_repo_in_venv_when_global_pytest_is_present(
+    tmp_path: Path,
+) -> None:
+    detections = (
+        make_detection(
+            "pytest",
+            required=False,
+            status=DependencyStatus.PRESENT,
+        ),
+    )
+    selected: list[str] = []
+
+    def fake_installer(
+        names,
+        _context: InstallContext,
+    ) -> tuple[InstallResult, ...]:
+        selected.extend(names)
+        return tuple(
+            InstallResult(name=name, success=True, changed=True)
+            for name in names
+        )
+
+    result = run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        assume_yes=True,
+        input_stream=StringIO(),
+        output=StringIO(),
+        installer=fake_installer,
+    )
+
+    assert result.selected == ("pytest",)
+    assert selected == ["pytest"]
+
+
+@pytest.mark.unit
 def test_bootstrap_yes_selects_all_missing_without_prompt(
     tmp_path: Path,
 ) -> None:
@@ -242,4 +302,5 @@ def test_failed_installation_is_included_in_single_manual_block(
 
     assert not result.install_results[0].success
     assert "instalar required-tool" in output.getvalue()
+    assert "falha simulada" in output.getvalue()
     assert output.getvalue().count("```") == 2

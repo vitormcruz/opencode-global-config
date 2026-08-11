@@ -29,9 +29,14 @@ shell e 4.608 linhas de BATS migradas.
 ## Tracking de execução
 
 **Estado atual:** Tasks 6.1 e 6.2 concluídas no WSL. A implementação e a
-revisão documental da Task 6.3 foram concluídas; as validações reais do
-Windows e a normalização de linhas longas em skills externas continuam
-pendentes por decisão de escopo/validação final.
+revisão documental da Task 6.3 foram concluídas. A Task 4.5 continua pendente:
+a segunda validação Windows encontrou um defeito de PATH case-insensitive e a
+instalação do pacote no `.venv` ainda não estava sendo feita; ambos foram
+cobertos por testes e corrigidos no WSL. O diagnóstico isolado concluiu com
+sucesso a instalação dos browsers usando o mirror corporativo, mas a validação
+final do bootstrap revelou dois defeitos Windows: o diretório padrão de apps do
+pipx não é o diretório gerenciado e `npm`/`npx` não são verificados quando
+`node` já está presente.
 
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
 Tasks 5.1–5.3 e Tasks 6.1–6.2.
@@ -45,7 +50,7 @@ executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
 
 **Última verificação WSL:** `.venv/bin/pytest -m "unit or tools" -q`
-(354 passed, 26 deselected; 304 unit e 50 tools).
+(364 passed, 26 deselected).
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
@@ -1206,6 +1211,120 @@ doc-extract, md-export, svg-to-image, browser-testing.
 - [ ] `pytest -m copilot` verde executado **no Windows**
 - [ ] Checklist manual das 6 skills
 
+**Resultado da validação Windows (2026-08-10):**
+- **FAIL / bloqueada (R1):** execução nativa em PowerShell, sem WSL e sem
+  elevação, a partir de `C:\Users\ur5y\Projetos\opencode-config`.
+- `--check-only` terminou com exit `0`, mas reportou Python incompatível e
+  dependências pendentes.
+- `--yes` terminou com exit `1`; o adapter Copilot sincronizou os artefatos,
+  mas `pipx`, `crwl`, Docling, codebase-memory, Pandoc, Playwright, AWS CLI e
+  Copilot permaneceram ausentes.
+- Nenhum prompt UAC, bloqueio de `.ps1` ou bloqueio de download portátil foi
+  observado.
+- `%USERPROFILE%\.copilot\` foi populado com `skills`, `agents`,
+  `default-artifacts` e `instructions`.
+- `crwl` não estava no PATH; a execução de `https://example.com` e os demais
+  cinco fluxos foram interrompidos conforme o gatilho R1. O comportamento do
+  `crwl` no Windows permanece não validado.
+- `pytest -m copilot`, o conjunto Windows e a inspeção de comandos proibidos
+  não foram executados.
+- Evidências: `C:\Users\ur5y\AppData\Local\Temp\opencode-config-windows-validation`.
+
+**Correção autorizada após a falha (2026-08-10):**
+- A detecção Windows prioriza `python` antes do alias `python3`.
+- O bootstrap persiste diretórios user-space no PATH do usuário, inclui o
+  diretório real de scripts do `pipx` e usa o prefixo npm correto no Windows.
+- O pacote `opencode-config` passa a ser instalado via
+  `pipx install --editable .`, disponibilizando os entry points das skills.
+- Falhas de instalação passam a aparecer no bloco de comandos manuais.
+- Testes WSL: `359 passed, 26 deselected`.
+- A nova execução Windows permanece pendente; os seis fluxos ainda não foram
+  validados após a correção.
+
+**Resultado da segunda validação Windows (2026-08-10):**
+- A detecção do Python passou a funcionar (`3.14.0`).
+- `--check-only` terminou com exit `0`; `--yes` terminou com exit `1`.
+- `pipx` e `npm` continuaram indisponíveis dentro do processo do bootstrap.
+- `pytest -m copilot` falhou na coleta com 8 erros `ModuleNotFoundError:
+  opencode_config`.
+- Os seis fluxos de skill continuaram sem execução; o bloqueio R1 permanece
+  sem avaliação porque `crwl` não chegou a ser instalado.
+- Nenhum UAC, bloqueio de `.ps1` ou alteração inesperada no Git foi observado.
+- Evidências: `C:\Users\ur5y\AppData\Local\Temp\opencode-config-windows-validation-20260810-1106`.
+
+**Correção adicional após a segunda validação (2026-08-10):**
+- PATH agora é atualizado de forma case-insensitive, preservando a chave
+  Windows `Path` e evitando uma segunda chave `PATH`.
+- Detecção e instaladores usam o PATH real do ambiente, independentemente da
+  capitalização.
+- `install_pytest` instala o pacote do repositório em modo editável no `.venv`.
+- Em Linux, a comparação de entradas do PATH continua case-sensitive.
+- A detecção valida que o `.venv` importa `opencode_config`, mesmo quando há
+  `pytest` global; `PYTHONPATH` do bootstrap não mascara essa verificação.
+- Regressões direcionadas: `37 passed`; suíte WSL: `364 passed, 26 deselected`.
+- No Windows, uma nova sessão PowerShell deve ser aberta após o bootstrap para
+  carregar o PATH persistido.
+
+**Resultado da terceira validação Windows (2026-08-10):**
+- Execução em novas sessões PowerShell nativas, sem WSL, instalações manuais ou
+  administrador.
+- `--check-only` terminou com exit `0`.
+- `--yes` não produziu saída por mais de 10 minutos e foi interrompido
+  manualmente, sem erro explícito ou bloco adicional de comandos pendentes.
+- Após nova sessão, `pipx` (`1.16.6`) e Pandoc (`3.7.0.2`) estavam disponíveis;
+  `crwl`, Docling, `codebase-memory-mcp` e pytest global continuavam ausentes.
+- `.venv\Scripts\pytest.exe` existia, mas `import opencode_config` falhou e
+  `pytest -m copilot -q` terminou com 8 erros de coleta.
+- `%USERPROFILE%\.copilot\` permaneceu populado corretamente e as 13
+  ocorrências de `wsl`/`/mnt/c` estavam somente em documentação/instruções.
+- Os seis fluxos não foram executados conforme R1. Como o bootstrap foi
+  interrompido durante o setup dos browsers, o comportamento do CLI não foi
+  avaliado.
+- Diagnóstico isolado concluído: `pipx install crawl4ai` instalou
+  `crawl4ai 0.9.2` e criou `crwl.exe` usando Python 3.14. O `crawl4ai-setup`
+  falhou ao baixar Chromium e Patchright do CDN do Playwright com
+  `SELF_SIGNED_CERT_IN_CHAIN`, repetiu tentativas por cerca de 11 minutos e
+  terminou com exit `0` apesar de registrar `Failed to install browsers`.
+- O diagnóstico seguinte recebeu `PLAYWRIGHT_DOWNLOAD_HOST` apontando para
+  `https://jfrog.petrobras.dev.br/artifactory/api/cdn_playwright-proxy`.
+  O mirror foi alcançado sem erro TLS, mas retornou `404 Not found` para
+  `builds/cft/151.0.7922.34/.../chrome-win64.zip` e
+  `builds/cft/149.0.7827.55/.../chrome-win64.zip`; o setup novamente registrou
+  `Failed to install browsers` e saiu com exit `0`.
+- A captura do Artifactory revelou que a URL nativa correta remove `/api/`:
+  `https://jfrog.petrobras.dev.br/artifactory/cdn_playwright-proxy`. Testes
+  `HEAD` retornaram `200 OK` e `content-type: application/zip` para os dois
+  artefatos. O diagnóstico precisa ser repetido com essa base.
+- O bloqueio anterior era a rota incorreta do mirror, não resolução de
+  dependências ou incompatibilidade do pacote; AD-2 não precisa ser reaberta.
+- O setup também criou backup/migração da base em
+  `C:\Users\ur5y\.crawl4ai`; o pacote e seus executáveis ficaram isolados na
+  pasta temporária do diagnóstico.
+- Nenhum arquivo versionado foi revertido ou editado; as 10 alterações
+  intencionais permaneceram.
+- Evidências:
+  `C:\Users\ur5y\AppData\Local\Temp\opencode-config-task45-validation-20260810-1158`.
+- Diagnóstico:
+  `C:\Users\ur5y\AppData\Local\Temp\crawl4ai-diagnostic-20260810-140850`.
+- Diagnóstico com mirror:
+  `C:\Users\ur5y\AppData\Local\Temp\crawl4ai-diagnostic-20260810-144412`.
+- Diagnóstico com rota nativa corrigida:
+  `C:\Users\ur5y\AppData\Local\Temp\crawl4ai-diagnostic-20260810-150912`.
+  Playwright e Patchright concluíram a instalação de Chrome, headless shell,
+  FFmpeg e Winldd usando o mirror; não houve erro TLS, 404 ou falha de setup.
+- Validação final do bootstrap:
+  `C:\Users\ur5y\AppData\Local\Temp\opencode-config-task45-final-20260810-1532`.
+  `node 22.14.0` e `pipx 1.16.6` foram detectados, mas `npm`/`npx` não
+  estavam disponíveis. Os ambientes pipx foram criados em
+  `C:\Users\ur5y\AppData\Local\pipx\pipx\venvs`, com apps expostos em
+  `C:\Users\ur5y\.local\bin`; o bootstrap esperava
+  `C:\Users\ur5y\AppData\Local\pipx\bin`, fazendo `crawl4ai-setup` falhar por
+  comando não encontrado.
+- Acceptance criteria permanecem bloqueados por R1: bootstrap sem elevação
+  falhou; os seis fluxos, a varredura de comandos proibidos e o pytest não
+  foram executados. O adapter Copilot foi populado e o `git status` permaneceu
+  inalterado; nenhum commit foi criado.
+
 **Dependencies:** 4.4
 
 **Files likely touched:** `tests/integration/test_copilot.py`, `README.md`
@@ -1422,6 +1541,12 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - [x] Documentação consistente com o estado do repo — revisão final aprovada
 - [ ] Pronto para revisão final
 
+**Estado Windows:** a validação final de 2026-08-10 falhou antes dos fluxos de
+skill por dois defeitos do bootstrap: apps pipx expostos em diretório diferente
+do PATH gerenciado e ausência de verificação de `npm`/`npx` quando `node` está
+presente. O mirror de browsers já foi validado isoladamente; R1 permanece
+bloqueado até a correção e nova execução.
+
 ---
 
 ## Risks and Mitigations
@@ -1444,14 +1569,15 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - **R1** — Validar na Task 1.4 com URLs reais (incluindo sites com JS e
   anti-bot) antes de deletar o container. Manter a imagem local disponível até
   o checkpoint da fase 1 permitir rollback barato.
-- **R2** — Testar `pipx install crawl4ai` no Windows na validação final, antes
-  de concluir o bootstrap multiplataforma. Se for inviável, AD-2 deve ser
-  reaberto (opções: fixar versão, usar extras mínimos, ou reavaliar a
-  ferramenta).
+- **R2** — `pipx install crawl4ai` foi reproduzido isoladamente no Windows
+  com sucesso (`crawl4ai 0.9.2`, Python 3.14); o risco de resolução das
+  dependências não foi confirmado.
 - **R4** — `tests-as-spec` é obrigatório: cada `.bats` vira spec antes de
   virar pytest. Comparar contagem de asserções por suíte, antes e depois.
-- **R5** — Task 4.5 valida na instalação final do usuário. `--check-only` deve
-  reportar o que falta sem quebrar, permitindo instalação manual como plano B.
+- **R5** — A primeira configuração usou `/api/` indevidamente e recebeu
+  `404 Not found`; a rota nativa sem `/api/` instalou com sucesso todos os
+  browsers no diagnóstico isolado. Repetir no bootstrap completo; não usar
+  bypass TLS inseguro.
 - **R10** — Medir latência na Task 1.5. O CLI sobe um processo por chamada,
   sem o estado persistente do servidor MCP. Se o custo for proibitivo,
   avaliar o modo servidor local do próprio binário.

@@ -12,12 +12,18 @@ from opencode_config.bootstrap.installers import (
     download_file,
     install_aws_cli,
     install_codebase_memory,
+    install_crwl,
     install_dependencies,
     install_fnm,
+    install_npm,
     install_npm_global,
     install_node,
+    install_npx,
+    install_opencode_config,
     install_pipx,
     install_playwright,
+    install_pytest,
+    is_pytest_environment_ready,
 )
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import resolve_user_space_paths
@@ -77,6 +83,21 @@ def test_ensure_path_entry_is_idempotent_for_profile_and_process(
 
 
 @pytest.mark.unit
+def test_ensure_path_entry_preserves_linux_case_sensitive_paths(
+    tmp_path: Path,
+) -> None:
+    environment = {"PATH": "/opt/tool"}
+
+    ensure_path_entry(
+        tmp_path / "Tool",
+        environment_kind=EnvironmentKind.LINUX,
+        environ=environment,
+    )
+
+    assert environment["PATH"] == f"{tmp_path / 'Tool'}:/opt/tool"
+
+
+@pytest.mark.unit
 def test_download_file_verifies_expected_sha256(tmp_path: Path) -> None:
     source = tmp_path / "source.bin"
     destination = tmp_path / "downloads" / "target.bin"
@@ -114,9 +135,14 @@ def test_download_file_rejects_hash_mismatch_with_both_hashes(
 @pytest.mark.unit
 def test_install_pipx_is_user_local_and_does_not_use_sudo(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     context = make_context(tmp_path)
     commands: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: "/mock/pipx" if command == "pipx" else None,
+    )
 
     result = install_pipx(context, runner=successful_runner(commands))
 
@@ -125,6 +151,56 @@ def test_install_pipx_is_user_local_and_does_not_use_sudo(
     assert "--user" in command
     assert "sudo" not in command
     assert str(context.paths.bin_dir) in context.current_environment["PATH"]
+
+
+@pytest.mark.unit
+def test_install_pipx_windows_adds_python_user_scripts_to_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+    user_scripts = tmp_path / "AppData" / "Roaming" / "Python" / "Scripts"
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.sysconfig.get_path",
+        lambda *_args, **_kwargs: str(user_scripts),
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            str(user_scripts / "pipx.exe") if command == "pipx" else None
+        ),
+    )
+
+    result = install_pipx(context, runner=successful_runner(commands))
+
+    assert result.success
+    assert str(user_scripts) in context.current_environment["PATH"].split(";")
+
+
+@pytest.mark.unit
+def test_windows_path_entry_is_persisted_for_future_processes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    persisted: list[str] = []
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core._persist_windows_user_path",
+        persisted.append,
+    )
+    environment = {"Path": r"C:\Windows\System32"}
+
+    ensure_path_entry(
+        tmp_path / "bin",
+        environment_kind=EnvironmentKind.WINDOWS,
+        environ=environment,
+    )
+
+    assert persisted == [str(tmp_path / "bin")]
+    assert environment["Path"] == (
+        f"{tmp_path / 'bin'};C:\\Windows\\System32"
+    )
+    assert "PATH" not in environment
 
 
 @pytest.mark.unit
@@ -144,6 +220,179 @@ def test_install_npm_global_uses_user_prefix(tmp_path: Path) -> None:
     assert "--prefix" in command
     assert str(context.paths.npm_bin.parent) in command
     assert "--system" not in command
+
+
+@pytest.mark.unit
+def test_install_npm_global_windows_uses_npm_bin_as_prefix(tmp_path: Path) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+
+    result = install_npm_global(
+        context,
+        "codebase-memory-mcp",
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    command = commands[0]
+    assert str(context.paths.npm_bin) in command
+    assert str(context.paths.npm_bin.parent) not in command
+
+
+@pytest.mark.unit
+def test_install_crwl_uses_pipx_bin_and_checks_entrypoints(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+
+    def runner(command, **_kwargs):
+        commands.append(tuple(command))
+        return CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
+
+    def which(command: str, path: str | None = None) -> str | None:
+        del path
+        if command in {"pipx", "crwl", "crawl4ai-setup"}:
+            return str(context.paths.pipx_bin / f"{command}.exe")
+        return None
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        which,
+    )
+
+    result = install_crwl(context, runner=runner)
+
+    assert result.success
+    assert commands == [
+        ("pipx", "install", "--force", "crawl4ai"),
+        ("crawl4ai-setup",),
+    ]
+    assert str(context.paths.pipx_bin) in context.current_environment["PATH"]
+
+
+@pytest.mark.unit
+def test_install_crwl_fails_when_pipx_does_not_expose_entrypoint(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            "/mock/pipx" if command == "pipx" else None
+        ),
+    )
+
+    with pytest.raises(InstallerError, match="crwl"):
+        install_crwl(context, runner=successful_runner([]))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("name", "installer"),
+    [("npm", install_npm), ("npx", install_npx)],
+)
+def test_node_runtime_entrypoint_installers_rename_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    installer,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    available = False
+
+    def which(command, **_kwargs):
+        return f"/mock/bin/{command}" if available and command == name else None
+
+    def install_runtime(*_args, **_kwargs):
+        nonlocal available
+        available = True
+        return InstallResult(
+            name="node",
+            success=True,
+            changed=True,
+            message="node instalado",
+        )
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        which,
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.install_node",
+        install_runtime,
+    )
+
+    result = installer(context)
+
+    assert result.name == name
+    assert result.success
+
+
+@pytest.mark.unit
+def test_node_runtime_entrypoint_installers_report_missing_entrypoint(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.install_node",
+        lambda *_args, **_kwargs: InstallResult(
+            name="node",
+            success=True,
+            changed=True,
+            message="node instalado",
+        ),
+    )
+
+    result = install_npm(context)
+
+    assert result.name == "npm"
+    assert not result.success
+    assert "npm" in result.error
+
+
+@pytest.mark.unit
+def test_install_opencode_config_uses_editable_repo_with_pipx(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            "/mock/opencode-config-check"
+            if command == "opencode-config-check"
+            else None
+        ),
+    )
+
+    result = install_opencode_config(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[0] == (
+        "pipx",
+        "install",
+        "--force",
+        "--editable",
+        str(tmp_path),
+    )
 
 
 @pytest.mark.unit
@@ -190,6 +439,68 @@ def test_install_playwright_installs_package_and_chromium(
         "chromium",
     )
     assert all("sudo" not in command for command in commands for command in command)
+
+
+@pytest.mark.unit
+def test_install_pytest_installs_the_repository_in_the_virtualenv(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "requirements-dev.txt").write_text(
+        "pytest>=8,<10\n",
+        encoding="utf-8",
+    )
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    commands: list[tuple[str, ...]] = []
+
+    result = install_pytest(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[-1] == (
+        str(tmp_path / ".venv" / "Scripts" / "python.exe"),
+        "-m",
+        "pip",
+        "install",
+        "--editable",
+        str(tmp_path),
+    )
+
+
+@pytest.mark.unit
+def test_pytest_environment_check_ignores_bootstrap_pythonpath(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    python_path = tmp_path / ".venv" / "Scripts" / "python.exe"
+    python_path.parent.mkdir(parents=True)
+    python_path.touch()
+    context.current_environment["PYTHONPATH"] = str(tmp_path / "src")
+    observed_environment: dict[str, str] = {}
+    observed_command: list[str] = []
+
+    def successful_import(command, *, cwd, env):
+        del cwd
+        observed_command.extend(command)
+        observed_environment.update(env)
+        return CommandResult(
+            args=(str(python_path),),
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
+
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.run_command",
+        successful_import,
+    )
+
+    assert is_pytest_environment_ready(context)
+    assert observed_command[-1] == "import opencode_config; import pytest"
+    assert "PYTHONPATH" not in observed_environment
+    assert "PYTHONHOME" not in observed_environment
 
 
 @pytest.mark.unit

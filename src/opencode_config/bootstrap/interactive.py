@@ -1,7 +1,7 @@
 """Selecao interativa e orquestracao do bootstrap."""
 
-from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass, replace
 from io import TextIOBase
 from pathlib import Path
 import sys
@@ -14,6 +14,7 @@ from .installers import (
     InstallContext,
     InstallResult,
     install_dependencies,
+    is_pytest_environment_ready,
 )
 
 
@@ -108,6 +109,7 @@ def _select_missing(
 def _manual_block(
     detections: Sequence[DependencyDetection],
     output: TextIOBase,
+    errors: Mapping[str, str] | None = None,
 ) -> tuple[str, ...]:
     pending = tuple(detection.name for detection in detections)
     if not pending:
@@ -116,6 +118,9 @@ def _manual_block(
     output.write("\nComandos manuais pendentes:\n```text\n")
     for detection in detections:
         output.write(f"# {detection.name}\n{detection.install_method}\n")
+        detail = (errors or {}).get(detection.name) or detection.error
+        if detail:
+            output.write(f"erro: {detail}\n")
     output.write("```\n")
     return pending
 
@@ -129,6 +134,28 @@ def _default_context(
         environment=environment,
         paths=resolve_user_space_paths(environment),
         repo_root=root,
+    )
+
+
+def _ensure_pytest_detection(
+    detections: Sequence[DependencyDetection],
+    context: InstallContext,
+) -> tuple[DependencyDetection, ...]:
+    if not any(detection.name == "pytest" for detection in detections):
+        return tuple(detections)
+    if is_pytest_environment_ready(context):
+        return tuple(detections)
+    return tuple(
+        replace(
+            detection,
+            status=DependencyStatus.MISSING,
+            version=None,
+            path=None,
+        )
+        if detection.name == "pytest"
+        and detection.status is DependencyStatus.PRESENT
+        else detection
+        for detection in detections
     )
 
 
@@ -153,11 +180,19 @@ def run_bootstrap(
     selected_environment = (
         detect_environment() if environment is None else environment
     )
+    active_context = context or _default_context(
+        selected_environment,
+        repo_root,
+    )
     found = tuple(
         detections
         if detections is not None
-        else detector(selected_environment)
+        else detector(
+            selected_environment,
+            env=active_context.current_environment,
+        )
     )
+    found = _ensure_pytest_detection(found, active_context)
     if not quiet:
         output.write(render_detection_table(found))
 
@@ -172,11 +207,12 @@ def run_bootstrap(
         input_stream=input_stream,
         output=output,
     )
-    active_context = context or _default_context(
-        selected_environment,
-        repo_root,
-    )
     install_results = tuple(installer(selected, active_context))
+    installation_errors = {
+        result.name: result.error
+        for result in install_results
+        if result.error
+    }
     successful = {
         result.name for result in install_results if result.success
     }
@@ -185,5 +221,9 @@ def run_bootstrap(
         for detection in missing
         if detection.name not in successful
     )
-    manual = _manual_block(pending, output)
+    manual = _manual_block(
+        pending,
+        output,
+        errors=installation_errors,
+    )
     return BootstrapResult(found, selected, install_results, manual)

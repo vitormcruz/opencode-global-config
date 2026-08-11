@@ -4,6 +4,14 @@ param(
     [string[]]$Arguments
 )
 
+function Import-UserPath {
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath) {
+        $env:Path = "$userPath;$env:Path"
+    }
+}
+
+Import-UserPath
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 $python = Get-Command python -ErrorAction SilentlyContinue
@@ -21,4 +29,6 @@ if ($LASTEXITCODE -ne 0) {
 
 $env:PYTHONPATH = "$repoRoot\src;$env:PYTHONPATH"
 & $python.Source -m opencode_config.bootstrap.main --repo-root $repoRoot @Arguments
-exit $LASTEXITCODE
+$status = $LASTEXITCODE
+Import-UserPath
+exit $status
