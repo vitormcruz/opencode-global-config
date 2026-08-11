@@ -52,13 +52,14 @@ def render_detection_table(
 ) -> str:
     """Renderiza a tabela sem depender de biblioteca externa."""
 
-    lines = ["nome | status | versao | metodo"]
-    lines.append("-----|--------|---------|-------")
+    lines = ["nome | status | versao | caminho | metodo"]
+    lines.append("-----|--------|---------|---------|-------")
     for detection in detections:
         version = detection.version or "-"
+        path = str(detection.path) if detection.path is not None else "-"
         lines.append(
             f"{detection.name} | {detection.status.value} | "
-            f"{version} | {detection.install_method}"
+            f"{version} | {path} | {detection.install_method}"
         )
     return "\n".join(lines) + "\n"
 

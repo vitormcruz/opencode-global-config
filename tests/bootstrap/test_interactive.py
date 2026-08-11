@@ -27,6 +27,7 @@ def make_detection(
     *,
     required: bool,
     status: DependencyStatus = DependencyStatus.MISSING,
+    path: Path | None = None,
 ) -> DependencyDetection:
     spec = DependencySpec(
         name=name,
@@ -42,7 +43,7 @@ def make_detection(
         spec=spec,
         status=status,
         version=None,
-        path=None,
+        path=path,
         install_method=f"instalar {name}",
     )
 
@@ -97,6 +98,28 @@ def test_bootstrap_renders_table_and_selects_each_missing_dependency(
     assert selected == ["required-tool"]
     assert result.selected == ("required-tool",)
     assert rendered.count("```") == 2
+
+
+@pytest.mark.unit
+def test_bootstrap_renders_detection_path_in_table(tmp_path: Path) -> None:
+    output = StringIO()
+    detection = make_detection(
+        "aws-cli",
+        required=True,
+        status=DependencyStatus.PRESENT,
+        path=Path("C:/Program Files/Amazon/AWSCLIV2/aws.exe"),
+    )
+
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=(detection,),
+        input_stream=StringIO(),
+        output=output,
+    )
+
+    rendered = output.getvalue()
+    assert "caminho" in rendered
+    assert str(detection.path) in rendered
 
 
 @pytest.mark.unit

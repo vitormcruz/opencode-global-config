@@ -1372,6 +1372,29 @@ doc-extract, md-export, svg-to-image, browser-testing.
 - Evidências: diretórios temporários
   `docling-md-validation` e `docling-empty-pdf-validation`.
 
+**Validação específica AWS CLI Windows (2026-08-11):**
+- **PASS:** PowerShell 5.1 nativo, sem WSL, sem administrador, em
+  `C:\Users\ur5y\Projetos\opencode-config`.
+- `configurar-repo.ps1 --check-only`: exit `0` em duas sessões; `aws-cli`
+  reportado como `present`, versão `2.36.19`, caminho user-local e método
+  `script oficial AWS em modo user-local`. Nenhuma instalação ou elevação
+  ocorreu.
+- `aws --version`: exit `0`, `aws-cli/2.36.19`; `Get-Command aws` apontou para
+  `C:\Users\ur5y\AppData\Local\Programs\Amazon\AWSCLIV2\aws.exe`.
+- O AWS CLI já estava válido; `--yes` não foi necessário. O instalador
+  compartilhado continua coberto por testes que exigem `-Quiet`, rejeitam
+  `-System` e preservam os argumentos Linux.
+- Artefatos Copilot válidos encontrados: `aws-analista.agent.md`,
+  `aws-sso-login/SKILL.md` e `aws-add-account-sso/SKILL.md`. O adapter usa o
+  sufixo `.agent.md`, conforme documentado no README; o caminho literal
+  `aws-analista.md` do prompt não é o nome válido do artefato Copilot.
+- Testes Windows: `.\.venv\Scripts\pytest.exe -m unit
+  tests\bootstrap\test_interactive.py tests\bootstrap\test_detect.py
+  tests\bootstrap\test_installers.py`: `60 passed`; suíte
+  `unit or tools or copilot`: `375 passed, 44 deselected`.
+- Evidências não sensíveis:
+  `C:\Users\ur5y\AppData\Local\Temp\opencode-config-aws-cli-validation`.
+
 **Dependencies:** 4.4
 
 **Files likely touched:** `tests/integration/test_copilot.py`, `README.md`
@@ -1555,8 +1578,8 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - [x] `AGENTS.md` reflete o repo pós-migração, sem regra órfã
 - [x] README documenta bootstrap Linux **e** Windows, com a estratégia zero-admin
 - [x] Seção de dependências do README bate com o registro de AD-10
-- [ ] `aws --version` funciona nos dois SOs após bootstrap, sem elevação (AD-13);
-      WSL passou, Windows pendente
+- [x] `aws --version` funciona nos dois SOs após bootstrap, sem elevação (AD-13);
+      WSL e Windows validados
 - [x] ADRs cobrem AD-1..AD-13
 - [ ] Nenhuma linha de MD passa de 120 colunas; a documentação operacional
       alterada está dentro do limite, mas skills externas antigas ainda têm
