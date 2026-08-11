@@ -112,6 +112,10 @@ wrapper. O wrapper executa em modo offline: modelos precisam existir no cache
 local; downloads e telemetria ficam desativados. A conversão PDF pode exigir
 artefatos locais de layout/OCR previamente provisionados.
 
+Ao finalizar o bootstrap com Docling disponível, o terminal imprime o comando
+de provisionamento local. O download é opcional e deve ser executado pelo
+humano em sessão aprovada; `--check-only` não imprime nem executa esse comando.
+
 Para rodar so a verificacao de dependencias:
 
 ```bash

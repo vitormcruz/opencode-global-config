@@ -153,6 +153,33 @@ def _tls_guidance(detail: str) -> str:
     )
 
 
+def _docling_model_guidance(
+    environment: EnvironmentKind,
+    output: TextIOBase,
+) -> None:
+    if environment is EnvironmentKind.WINDOWS:
+        command = (
+            'docling-tools models download --output-dir '
+            '"$env:USERPROFILE\\.cache\\docling\\models"'
+        )
+    else:
+        command = (
+            'docling-tools models download --output-dir '
+            '"$HOME/.cache/docling/models"'
+        )
+
+    output.write(
+        "\nOrientacao Docling:\n"
+        "O bootstrap instalou o pacote, mas nao baixa modelos automaticamente.\n"
+        "Para provisionar modelos locais, em sessao aprovada pelo humano, execute:\n"
+        f"  {command}\n"
+        "Depois, opencode-doc-extract usa somente cache local e nao baixa "
+        "modelos.\n"
+        "Se a rede exigir CA ou mirror corporativo, confirme-os com o humano; "
+        "nao desative TLS.\n"
+    )
+
+
 def _default_context(
     environment: EnvironmentKind,
     repo_root: Path | None,
@@ -266,4 +293,14 @@ def run_bootstrap(
         output,
         errors=installation_errors,
     )
+    docling_available = any(
+        detection.name == "docling"
+        and detection.status is DependencyStatus.PRESENT
+        for detection in found
+    ) or any(
+        result.name == "docling" and result.success
+        for result in install_results
+    )
+    if docling_available:
+        _docling_model_guidance(selected_environment, output)
     return BootstrapResult(found, selected, install_results, manual)

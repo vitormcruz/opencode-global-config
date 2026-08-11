@@ -365,3 +365,53 @@ def test_tls_installation_failure_guides_agent_to_converse_with_human(
     assert "converse com o humano" in rendered
     assert "strict-ssl=false" in rendered
     assert "NODE_TLS_REJECT_UNAUTHORIZED=0" in rendered
+
+
+@pytest.mark.unit
+def test_bootstrap_guides_docling_model_provisioning_after_install(
+    tmp_path: Path,
+) -> None:
+    detections = (
+        make_detection(
+            "docling",
+            required=True,
+            status=DependencyStatus.PRESENT,
+        ),
+    )
+    output = StringIO()
+
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        input_stream=StringIO(),
+        output=output,
+    )
+
+    rendered = output.getvalue()
+    assert "Orientacao Docling" in rendered
+    assert "docling-tools models download" in rendered
+    assert "nao baixa modelos automaticamente" in rendered
+
+
+@pytest.mark.unit
+def test_check_only_does_not_print_docling_model_provisioning_command(
+    tmp_path: Path,
+) -> None:
+    detections = (
+        make_detection(
+            "docling",
+            required=True,
+            status=DependencyStatus.PRESENT,
+        ),
+    )
+    output = StringIO()
+
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        check_only=True,
+        input_stream=StringIO(),
+        output=output,
+    )
+
+    assert "docling-tools models download" not in output.getvalue()
