@@ -43,9 +43,11 @@ omitidas como permitidas, removendo somente regras explícitas `deny`.
 **Concluído:** Fase 0, Fase 1, Tasks 2.1–2.4, Tasks 3.1–3.2, Tasks 4.1–4.4,
 Tasks 5.1–5.3 e Tasks 6.1–6.2.
 
-**Exceção registrada:** a integração OpenCode continua bloqueada sem
-`OPENCODE_TEST_MODEL`, conforme decisão explícita do humano. Esse bloqueio não
-impediu a execução das demais verificações no WSL.
+**Integração OpenCode validada (WSL, 2026-08-12):** o serviço OpenCode subiu
+no container de teste em `127.0.0.1:4196` com o modelo aprovado
+`opencode/big-pickle` (já configurado no ambiente de teste) e
+`pytest -m opencode` ficou verde. Detalhes na seção
+"Validação OpenCode WSL (2026-08-12)" ao final do plano.
 
 **Diretriz de validação:** todas as verificações que exigem Windows serão
 executadas somente ao final da migração, pelo humano, em outra instalação.
@@ -857,13 +859,13 @@ descreve acesso "via MCP"). Registrar as decisões AD-1..AD-13 como ADR.
 - [x] `grep -ri "avelino\|crawl4ai-sanitized\|mcp/sse\|11235"` limpo
 - [x] `opencode.json` sem bloco `mcp`
 - [x] `crwl` e `codebase-memory-mcp cli` funcionam no WSL
-- [ ] `pytest -m opencode` verde — bloqueado por Docker/`OPENCODE_TEST_MODEL`
+- [x] `pytest -m opencode` verde — validado em 2026-08-12 (ver seção final)
 - [x] Skills `web-research-exa-crawl4ai` e `code-explorer-priority` validadas
       em execução real (não só por grep)
 - [x] Revisão com o humano antes de prosseguir
 
-> `pytest -m opencode` permanece pendente porque requer
-> `OPENCODE_TEST_MODEL`; o bloqueio foi aceito explicitamente para seguir.
+> `pytest -m opencode` foi validado em 2026-08-12 com o serviço OpenCode no
+> Docker e `OPENCODE_TEST_MODEL=opencode/big-pickle`.
 
 ---
 
@@ -1541,8 +1543,8 @@ repo-structure, chrondb-fix). Converter a orquestração do container Docker
 - [x] Cobertura equivalente — nenhum teste perdido na conversão
 
 **Verification:**
-- [ ] `pytest -m opencode` verde no WSL — bloqueado neste ambiente:
-      serviço OpenCode/Docker e `OPENCODE_TEST_MODEL` não estão disponíveis
+- [x] `pytest -m opencode` verde no WSL — validado em 2026-08-12 (44 passed,
+      376 deselected); serviço OpenCode no Docker com modelo `opencode/big-pickle`
 - [x] Comparar contagem de testes antes/depois: 160 BATS → 160 pytest
 
 **Dependencies:** fase 5 completa
@@ -1624,7 +1626,8 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 - [x] Zero `.sh` no repo além dos 2 entrypoints de bootstrap; zero `.ps1` além de 1
 - [x] Zero `.bats`; zero `Makefile`
 - [x] Zero MCP local; zero Docker para crawl4ai
-- [ ] `pytest -m "unit or tools or opencode"` verde no WSL — OpenCode bloqueado
+- [x] `pytest -m "unit or tools or opencode"` verde no WSL — validado em
+      2026-08-12 (418 passed, 2 deselected)
 - [ ] `pytest -m "unit or tools or copilot"` verde no Windows
 - [ ] Bootstrap zero-admin validado nos dois SOs
 - [x] Documentação consistente com o estado do repo — revisão final aprovada
@@ -1729,3 +1732,72 @@ AD-9/AD-10.
 `crwl` (web-research + doc-extract), `aws` (aws-analista + as duas skills AWS,
 agora endereçado por AD-13). Os scripts do repo exigem apenas `git` e
 `python3`.
+
+## Validação OpenCode WSL (2026-08-12)
+
+**Ambiente:** WSL/Linux, branch `master-nova`, checkout
+`/mnt/e/Projetos/opencode-global-config`, Python 3.12.3, Docker 29.5.2,
+pytest 9.1.1.
+
+**Causa do bloqueio anterior:** a suíte `pytest -m opencode` exigia (a) o
+serviço OpenCode respondendo em `127.0.0.1:4196` e (b) `OPENCODE_TEST_MODEL`.
+Sem o serviço, todos os testes da área falhavam na fixture por conexão
+recusada (24 erros). Sem o modelo, o orquestrador Docker recusa criar o
+container.
+
+**Resolução:** o container `opencode-config-test` já existia (imagem
+`opencode-config-test:latest`, 739 MB) com o modelo
+`OPENCODE_TEST_MODEL=opencode/big-pickle` embutido no ambiente (modelo
+aprovado já configurado; nenhuma credencial foi exposta ou inventada). O
+orquestrador reiniciou o container parado e o serviço passou a responder.
+
+**Comandos e códigos de saída:**
+
+```text
+python3 tests/integration/docker/container_test_opencode.py --up   # exit 0
+curl -fsS http://127.0.0.1:4196/                                    # HTTP 200
+.venv/bin/pytest -m opencode -q                                     # 44 passed
+.venv/bin/pytest -m "unit or tools or opencode" -q                  # 418 passed
+.venv/bin/pytest -m "unit or tools" -q                              # 374 passed
+python3 tests/integration/docker/container_test_opencode.py --down  # exit 0
+```
+
+**Defeito corrigido (TDD):** `test_specific_agent_selection_works` selecionava
+o agente `analista`, um agente pesado (carrega skill `grill-me`, lê contexto,
+invoca subagente `revisor-historia`) que excede o timeout HTTP do client e,
+mesmo respondendo, iniciaria uma entrevista em vez de dizer "ok". O teste
+passou a usar o agente `plan` (agente `primary` leve, com modelo definido na
+config de teste), que responde "ok" em ~2,7 s. O teste nunca havia rodado de
+fato — a suíte inteira era erro de fixture antes de o serviço subir.
+
+**Regressão de baseline resolvida:** `test_opencode_mcp_integration_artifacts_
+are_removed` falhava porque `tests/integration/mcp-mock/node_modules`
+(21 MB, **não versionado**, gitignored) restou no worktree após a Task 1.3.
+Removido o leftover; o teste voltou ao verde. Nenhum arquivo versionado foi
+alterado nessa remoção.
+
+**Adapter OpenCode (WSL):**
+- `configurar-repo.sh --check-only`: exit 0 (tabela de dependências correta).
+- `configurar-repo.sh --yes` (com `OPENCODE_SKIP_DEPS=1` e
+  `OPENCODE_SKIP_SKILL_SYNC=1` para evitar installs de rede e git-fetch dos
+  upstreams fora do escopo): exit 0.
+- 5 links canônicos em `~/.config/opencode` apontam para este repo;
+  `OPENCODE_ENABLE_EXA=1` no `~/.bashrc`; execução **idempotente** (nenhum
+  backup novo criado).
+- Adapter OpenCode é Linux-only (`opencode.py` levanta erro no Windows);
+  o bootstrap só roda o adapter Copilot no Windows (`main.py`).
+
+**Entry points validados:** `opencode-config-check`,
+`opencode-doc-extract`, `opencode-md-export`, `opencode-svgtoimage`,
+`opencode-browser-test` (instalados no `.venv`, respondem o contrato JSON) e
+`codebase-memory-mcp cli list_projects '{}'` (retorna projetos; CLI
+funcional). `crwl` permanece ausente neste ambiente (`pipx install crawl4ai`);
+reportado com honestidade, não simulado.
+
+**Não reintroduzidos:** `opencode.json` sem bloco `mcp` (0 ocorrências);
+nenhum Docker para Crawl4AI criado; Docker usado somente para o teste OpenCode.
+
+**Estado do checkpoint:** `pytest -m opencode` e
+`pytest -m "unit or tools or opencode"` verdes no WSL; baseline `unit or
+tools` verde. Container parado (`--down`); imagem preservada para
+reprodutibilidade. Bloqueio residual: nenhum para a integração OpenCode/WSL.

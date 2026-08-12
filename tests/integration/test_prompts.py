@@ -46,7 +46,7 @@ def test_specific_agent_selection_works(opencode):
         session,
         "Responda apenas: ok",
         os.environ["OPENCODE_TEST_MODEL"],
-        "analista",
+        "plan",
     )
     assert result.returncode == 0
     assert "ok" in result.stdout
