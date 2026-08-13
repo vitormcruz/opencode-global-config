@@ -125,6 +125,20 @@ o reaproveita e **nao o derruba** no teardown. Carregar 3,5 GB de pesos leva
 dezenas de segundos, e executar a suite varias vezes em sequencia e o padrao de
 uso normal. O servidor permanece disponivel entre execucoes sucessivas.
 
+### D11 — Enforcement de privacidade em duas camadas
+
+Ambas as verificacoes entram na suite:
+
+1. **Config:** assertar que a config efetiva do OpenCode nao declara nenhum
+   provider externo.
+2. **Rede:** de dentro do container, tentar alcancar um host externo e exigir
+   que a conexao falhe.
+
+Rationale: e literalmente um teste do proprio ambiente de teste, o que
+normalmente seria excesso. Neste caso especifico se justifica, porque a
+garantia buscada e de seguranca e privacidade — e a camada 1 sozinha so prova
+intencao, nao isolamento.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
