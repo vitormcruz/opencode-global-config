@@ -238,7 +238,7 @@ nas descrições
 - Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:
   - Criar `UPSTREAM.md` na pasta da skill com a origem e instrucoes de sync.
   - Registrar a skill no comando `opencode-skills list` para permitir atualização futura.
-  - Usar `skills/update-upstream-skill` para sincronizar.
+  - Usar `opencode-skills update NOME` para sincronizar.
 
 ## Manutencao de Upstream — Padrao do Repo
 
