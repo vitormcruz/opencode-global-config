@@ -93,6 +93,15 @@ def test_project_not_found_recovery_is_preserved(discovery_content: str):
 
 
 @pytest.mark.unit
+def test_index_command_has_no_linux_path_for_copilot(repo_root: Path):
+    command = (repo_root / "commands/index-codebase.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "/mnt/c" not in command
+
+
+@pytest.mark.unit
 def test_client_matrix_uses_same_cli_on_wsl_and_windows(repo_root: Path):
     agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
     instructions = (

@@ -77,7 +77,7 @@ Siga este fluxo estritamente.
 
 **Execucao:**
 - No **GitHub Copilot**, execute com JSON posicional unico e `repo_path` absoluto, por exemplo:
-  `codebase-memory-mcp cli index_repository '{"repo_path":"/mnt/c/Users/ur5y/Projetos/opencode-config"}'`
+  `codebase-memory-mcp cli index_repository '{"repo_path":"C:\\Users\\<usuario>\\Projetos\\opencode-config"}'`
 - Use `repo_path` absoluto em ambos os ambientes para evitar ambiguidades.
 - No **OpenCode** ou em hooks/scripts locais, use o mesmo CLI:
   `codebase-memory-mcp cli index_repository '{"repo_path": "."}'`
