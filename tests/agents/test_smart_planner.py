@@ -90,12 +90,12 @@ def test_smart_planner_has_decision_and_commit_gate(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_requires_commit_after_each_approved_decision(
+def test_smart_planner_auto_commits_after_confirmed_modification(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "Após CADA decisão aprovada" in content
-    assert "SÓ ENTÃO faça a próxima pergunta" in content
+    assert "commita automaticamente" in content
+    assert "posso commitar" in content
 
 
 @pytest.mark.unit
@@ -108,9 +108,11 @@ def test_smart_planner_creates_skeleton_before_first_question(
 
 
 @pytest.mark.unit
-def test_smart_planner_requires_intermediate_commits(repo_root: Path) -> None:
+def test_smart_planner_commits_are_automatic_not_optional(
+    repo_root: Path,
+) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "commit intermediário é obrigatório, não opcional" in content
+    assert "automáticos, não opcionais" in content
 
 
 @pytest.mark.unit
@@ -164,8 +166,10 @@ def test_smart_planner_has_executor_review_section(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_references_grill_me_skill(repo_root: Path) -> None:
-    assert "grill-me" in smart_planner_file(repo_root).read_text(encoding="utf-8")
+def test_smart_planner_uses_adaptive_question_blocks(repo_root: Path) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "blocos adaptativos" in content
+    assert "1 e 5" in content
 
 
 @pytest.mark.unit
@@ -176,8 +180,12 @@ def test_smart_planner_references_planning_skill(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_references_caveman_skill(repo_root: Path) -> None:
-    assert "caveman" in smart_planner_file(repo_root).read_text(encoding="utf-8")
+def test_smart_planner_uses_concise_commits_without_caveman(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "caveman" not in content
+    assert "concisa" in content
 
 
 @pytest.mark.unit
@@ -188,12 +196,13 @@ def test_smart_planner_references_prompt_improver_skill(repo_root: Path) -> None
 
 
 @pytest.mark.unit
-def test_smart_planner_uses_distinct_commits_for_distinct_decisions(
+def test_smart_planner_groups_commits_by_coherence_without_amend(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "Decisões diferentes" in content
-    assert "commits diferentes" in content
+    assert "coerência narrativa" in content
+    assert "--amend" in content
+    assert "Nunca use" in content
 
 
 @pytest.mark.unit
@@ -214,3 +223,31 @@ def test_agents_md_contains_smart_planner_behavioral_restriction(
     content = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
     pattern = r"smart-planner.*nunca.*edita codigo|SmartPlanner.*Restricao"
     assert re.search(pattern, content, re.IGNORECASE) is not None
+
+
+@pytest.mark.unit
+def test_smart_planner_has_central_premise_capable_for_cheap(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "Premissa Central" in content
+    assert "modelo mais capaz" in content
+    assert "modelo barato" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_has_detail_calibration_self_question(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "Calibração de Detalhe" in content
+    assert "agente menos capaz" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_has_initial_context_triage_section(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "Triagem de Contexto Inicial" in content
+    assert "prompt inicial fraco" in content

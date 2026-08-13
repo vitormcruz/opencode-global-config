@@ -163,16 +163,19 @@ source ~/.bashrc
 
 - Use Conventional Commits. Formato: `tipo(escopo): descricao curta`
   Tipos: feat, fix, docs, style, refactor, test, chore, ci, build, perf.
-- Mensagem de commit sempre no modo caveman (skill skills/caveman):
-  terse, sem filler, sem artigos, so substancia.
-- Proponha mensagens de commit sempre que o humano pedir
-- **Use a skill `cave-man`** para definir o formato das mensagens de commit.
+- Mensagem de commit concisa e resumida: sem filler, direta ao ponto.
+- Proponha mensagens de commit sempre que o humano pedir.
 - Descubra a linguagem definida pelo contexto do Projeto, mas use PT-BR por padrão caso não encontre.
 - O humano sempre que validar tudo antes do commit, então **não** realize o commit antes do humano validar e dar ok.
 - Mostre a mensagem de commit, mas SEMPRE espere confirmação do humano para realizar o commit
 - NUNCA realize o commit independentemente.
 - SEMPRE pergunte ao humano antes de realizar o commit.
 - SÓ realize o commit quando o humano autorizar
+- **Exceção — smart-planner:** durante o planejamento, depois que o humano
+  confirma a modificação do plano, o smart-planner commita o arquivo de
+  planejamento automaticamente, sem perguntar "posso commitar?" por commit.
+  O agrupamento de modificações em cada commit é decidido pelo agente
+  (nem micro-commits ruidosos, nem batches grandes que perdem atomicidade).
 - NUNCA simular rename ou move como delete + create.
 - Sempre usar `git mv` para mover ou renomear arquivos versionados, preservando histórico.
 - Se um arquivo versionado precisar ser movido e editado, primeiro fazer o `git mv` e só depois editar.
