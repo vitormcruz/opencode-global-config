@@ -238,9 +238,306 @@ Nao basta configurar o provider local. O plano deve incluir verificacao ativa:
 
 ## Task List
 
-<!-- Preenchido apos resolver todos os ramos de decisao. -->
+Ambiente de execucao: **WSL/Linux**. Comando de teste padrao:
+`.venv/bin/pytest -m "unit or tools or opencode"`.
 
-_(pendente)_
+### Fase 1: Fundacao — servidor do modelo
+
+#### Task 1: Criar `BonsaiServer` com download e start do `llama-server`
+
+**Description:** Criar o utilitario que provisiona o modelo Bonsai e sobe o
+`llama-server`, espelhando o padrao de `DockerSession` em
+`tests/integration/docker/container_test_opencode.py` (stdlib pura, sem
+dependencias novas).
+
+Parametros fixos:
+- GGUF: `prism-ml/Bonsai-27B-gguf` → `Bonsai-27B-Q1_0.gguf` (3,54 GB)
+- mmproj: `Bonsai-27B-mmproj-Q8_0.gguf` (0,59 GB)
+- Destino do download: `~/.cache/opencode-config/models/`
+- Porta: `8080`; flags: `--jinja`, `--sleep-idle-seconds 600`
+- Download via URL publica do HF (`gated=false`, sem token):
+  `https://huggingface.co/prism-ml/Bonsai-27B-gguf/resolve/main/<arquivo>`
+
+**Acceptance criteria:**
+- [ ] `BonsaiServer.ensure_up()` baixa os GGUF apenas quando ausentes, sobe o
+      `llama-server` e aguarda `GET /v1/models` responder 200
+- [ ] Se o servidor ja estiver rodando na porta, reusa sem subir outro
+- [ ] `stop()` encerra o processo; `require_available()` falha com mensagem
+      acionavel quando indisponivel
+- [ ] CLI `--up` / `--down` / `--status` funciona
+
+**Verification:**
+- [ ] `python3 tests/integration/model/bonsai_server.py --up` sobe o servidor
+- [ ] `curl -s localhost:8080/v1/models` retorna JSON com o modelo
+- [ ] `--up` executado duas vezes nao cria segundo processo
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `tests/integration/model/bonsai_server.py` (novo)
+- `tests/integration/model/__init__.py` (novo, se necessario)
+
+**Estimated scope:** M
+
+---
+
+#### Task 2: Fixture `bonsai_server` e testes do utilitario
+
+**Description:** Expor o `BonsaiServer` a suite via fixture session-scoped e
+cobrir o utilitario com testes unitarios, espelhando
+`tests/integration/docker/conftest.py` e `test_container_test_opencode.py`.
+
+**Acceptance criteria:**
+- [ ] Fixture `bonsai_server` com `scope="session"` chama `ensure_up()` uma
+      unica vez por execucao da suite
+- [ ] O teardown **nao** derruba o servidor (requisito de D9/D12)
+- [ ] Falhas de pre-requisito usam `pytest.fail` com instrucao acionavel,
+      nunca `skip`
+- [ ] Testes unitarios usam mocks; nao dependem do servidor real
+
+**Verification:**
+- [ ] `.venv/bin/pytest tests/integration/model/test_bonsai_server.py -m unit`
+      passa sem o `llama-server` no ar
+
+**Dependencies:** Task 1
+
+**Files likely touched:**
+- `tests/integration/model/conftest.py` (novo)
+- `tests/integration/model/test_bonsai_server.py` (novo)
+
+**Estimated scope:** S
+
+---
+
+### Checkpoint: Fundacao
+
+- [ ] O `llama-server` sobe, responde e dorme apos 10 min de ociosidade
+- [ ] Testes unitarios do utilitario passam sem o servidor no ar
+- [ ] Revisar com o humano antes de prosseguir
+
+---
+
+### Fase 2: OpenCode apontando para o modelo local
+
+#### Task 3: Configurar provider OpenAI-compatible local
+
+**Description:** Substituir `opencode/big-pickle` em
+`tests/integration/config/opencode.test.json` por um provider local que aponta
+para o `llama-server`. O container alcanca o host via
+`host.docker.internal` (adicionar `--add-host=host.docker.internal:host-gateway`
+no `docker run`).
+
+Shape esperado da config:
+
+```json
+{
+  "provider": {
+    "bonsai-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": { "baseURL": "http://host.docker.internal:8080/v1" },
+      "models": { "bonsai-27b": { "name": "Bonsai 27B 1-bit" } }
+    }
+  },
+  "agent": {
+    "plan":  { "model": "bonsai-local/bonsai-27b" },
+    "build": { "model": "bonsai-local/bonsai-27b" }
+  }
+}
+```
+
+**Acceptance criteria:**
+- [ ] Nenhuma referencia a `opencode/big-pickle` ou provider externo na config
+- [ ] O container resolve `host.docker.internal` e alcanca a porta 8080
+- [ ] Uma mensagem enviada ao OpenCode retorna resposta gerada pelo Bonsai
+
+**Verification:**
+- [ ] `python3 tests/integration/docker/container_test_opencode.py --rebuild`
+      sobe o container e o OpenCode responde
+- [ ] Um prompt simples via API retorna texto nao vazio
+
+**Dependencies:** Task 1
+
+**Files likely touched:**
+- `tests/integration/config/opencode.test.json`
+- `tests/integration/docker/container_test_opencode.py`
+
+**Estimated scope:** S
+
+---
+
+#### Task 4: Remover a selecao de modelo (D8 e D10)
+
+**Description:** Eliminar `OPENCODE_TEST_MODEL` e toda a maquinaria de escolha
+de modelo. Referencias mapeadas: `AGENTS.md:214`, `README.md:206,224`,
+`behavioral_helper.py:76-80`, `docker/conftest.py:22`,
+`container_test_opencode.py:113-176,315-319`, `entrypoint.py:49-60,88-101`,
+`test_prompts.py:39-48`.
+
+Remover: `extract_models_from_config`, `choose_model_interactively`,
+`select_model_if_needed`, `_model_error`, `DockerSession.list_models`, a flag
+`--models` do CLI, `OpenCodeClient.require_model`, `_apply_test_model` do
+entrypoint e os testes correspondentes.
+
+**Acceptance criteria:**
+- [ ] `git grep OPENCODE_TEST_MODEL` retorna vazio (exceto `plan/`)
+- [ ] Nenhuma mensagem no repo sugere OpenAI, Anthropic ou Ollama como modelo
+      de teste
+- [ ] A suite roda sem nenhuma variavel de modelo definida
+
+**Verification:**
+- [ ] `.venv/bin/pytest -m "unit or tools"` passa
+- [ ] `git grep -n "OPENCODE_TEST_MODEL" -- . ':!plan'` nao retorna nada
+
+**Dependencies:** Task 3
+
+**Files likely touched:**
+- `tests/integration/behavioral_helper.py`
+- `tests/integration/docker/container_test_opencode.py`
+- `tests/integration/docker/test_container_test_opencode.py`
+- `tests/integration/docker/entrypoint.py`
+- `tests/integration/docker/conftest.py`
+- `tests/integration/test_prompts.py`
+
+**Estimated scope:** M
+
+---
+
+### Checkpoint: OpenCode no modelo local
+
+- [ ] A suite de integracao do OpenCode roda de ponta a ponta contra o Bonsai
+- [ ] Nenhuma variavel de modelo e necessaria
+- [ ] Revisar com o humano antes de prosseguir
+
+---
+
+### Fase 3: Isolamento e enforcement
+
+#### Task 5: Rede Docker `--internal` para o container de teste
+
+**Description:** Criar e usar a rede `opencode-test-net` com
+`docker network create --internal`, conectando o container de teste apenas a
+ela. Manter `--add-host=host.docker.internal:host-gateway` para alcancar o
+`llama-server` no host.
+
+**Acceptance criteria:**
+- [ ] `DockerSession` cria a rede quando ausente e usa `--network opencode-test-net`
+- [ ] O container alcanca `host.docker.internal:8080`
+- [ ] O container **nao** alcanca nenhum host da internet
+
+**Verification:**
+- [ ] `docker exec opencode-config-test curl -s --max-time 5 https://example.com`
+      falha
+- [ ] A suite de integracao continua passando
+
+**Dependencies:** Task 3
+
+**Files likely touched:**
+- `tests/integration/docker/container_test_opencode.py`
+- `tests/integration/docker/test_container_test_opencode.py`
+
+**Estimated scope:** S
+
+---
+
+#### Task 6: Testes de enforcement de privacidade (D11)
+
+**Description:** Adicionar os dois testes que comprovam o isolamento.
+
+**Acceptance criteria:**
+- [ ] Teste de config: falha se a config efetiva declarar qualquer provider
+      alem de `bonsai-local`
+- [ ] Teste de rede: executa dentro do container uma tentativa de conexao a um
+      host externo e **exige** que ela falhe
+- [ ] Ambos usam `pytest.fail` com mensagem explicando a violacao de privacidade
+
+**Verification:**
+- [ ] `.venv/bin/pytest -m opencode -k enforcement` passa
+- [ ] Introduzir um provider externo na config faz o teste 1 falhar
+      (verificacao manual, revertida em seguida)
+
+**Dependencies:** Task 5
+
+**Files likely touched:**
+- `tests/integration/test_privacy_enforcement.py` (novo)
+
+**Estimated scope:** S
+
+---
+
+### Checkpoint: Isolamento comprovado
+
+- [ ] Container comprovadamente sem acesso a internet
+- [ ] Config sem qualquer provider externo
+- [ ] Revisar com o humano antes de prosseguir
+
+---
+
+### Fase 4: Estabilizacao e documentacao
+
+#### Task 7: Ajustar timeouts e estabilizar a suite comportamental
+
+**Description:** O primeiro request apos o sleep de ociosidade paga a recarga
+do modelo, e o Bonsai 1-bit e mais lento que o modelo externo anterior. Ampliar
+os timeouts e revalidar os testes comportamentais.
+
+**Acceptance criteria:**
+- [ ] `urlopen(..., timeout=10)` em `behavioral_helper.py` ampliado para
+      absorver a recarga do modelo
+- [ ] `test_agents.py`, `test_commands.py`, `test_prompts.py` e
+      `test_skills_activation.py` passam com o Bonsai
+- [ ] Assercoes rigidas demais para um modelo menor sao afrouxadas sem perder
+      o proposito do teste
+
+**Verification:**
+- [ ] `.venv/bin/pytest -m opencode` passa duas vezes seguidas
+- [ ] A segunda execucao reaproveita o servidor (mais rapida)
+
+**Dependencies:** Task 4, Task 6
+
+**Files likely touched:**
+- `tests/integration/behavioral_helper.py`
+- `tests/integration/test_agents.py`
+- `tests/integration/test_commands.py`
+- `tests/integration/test_prompts.py`
+- `tests/integration/test_skills_activation.py`
+
+**Estimated scope:** M
+
+---
+
+#### Task 8: Atualizar documentacao
+
+**Description:** Refletir o novo fluxo no `README.md` e no `AGENTS.md`,
+removendo as instrucoes de `OPENCODE_TEST_MODEL` e documentando o
+pre-requisito do `llama-server` local. Respeitar o limite de 120 colunas.
+
+**Acceptance criteria:**
+- [ ] `README.md` documenta: baixar/subir o Bonsai, requisito de disco
+      (~4,2 GB), `bonsai_server.py --up/--down`, e o sleep de 10 minutos
+- [ ] A secao de variaveis de ambiente nao cita mais `OPENCODE_TEST_MODEL`
+- [ ] `AGENTS.md:214` atualizado para o novo pre-requisito
+- [ ] A garantia de privacidade e explicada: build tem rede, runtime e isolado
+
+**Verification:**
+- [ ] Leitura manual: um dev novo consegue rodar a suite so com o README
+- [ ] Nenhuma linha ultrapassa 120 colunas
+
+**Dependencies:** Task 7
+
+**Files likely touched:**
+- `README.md`
+- `AGENTS.md`
+
+**Estimated scope:** S
+
+---
+
+### Checkpoint: Completo
+
+- [ ] Suite de integracao roda 100% contra o modelo on-premises
+- [ ] Nenhum modelo externo e alcancavel em runtime
+- [ ] Documentacao atualizada
+- [ ] Pronto para revisao
 
 ## Risks and Mitigations
 
@@ -251,6 +548,9 @@ _(pendente)_
 | Repos 27B privados no HF exigem `BONSAI_TOKEN` | — | **Resolvido:** repos ja publicos (`gated=false`) |
 | Hardware insuficiente para servir 27B | Baixo | D3: variante 1-bit cabe nos 6 GB de VRAM |
 | Tool calling do Bonsai 1-bit insuficiente para agentes | Medio | D5: tratado via replan, sem fallback pre-construido |
+| Bonsai 1-bit mais lento que o modelo anterior | Medio | Task 7: ampliar timeouts e revalidar assercoes |
+| Recarga apos o sleep de ociosidade atrasa o primeiro request | Baixo | Task 7: timeout generoso no primeiro contato |
+| `host.docker.internal` indisponivel em rede `--internal` | Medio | Task 5: fallback para o IP do gateway da bridge |
 
 ## Open Questions
 
