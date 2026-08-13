@@ -162,6 +162,25 @@ fronteira de privacidade fica explicita: **build tem rede, runtime e isolado**.
 Rationale: com um unico modelo on-premises suportado, tornar o modelo
 configuravel reintroduz exatamente o risco que o plano quer eliminar.
 
+### D10 — Remocao do codigo e dos testes de selecao de modelo
+
+Decorrencia direta de D8. Sao removidos:
+
+- `extract_models_from_config()`, `choose_model_interactively()`,
+  `select_model_if_needed()` e `_model_error()` em
+  `container_test_opencode.py`
+- a flag `--models` do CLI e `DockerSession.list_models()`
+- `OpenCodeClient.require_model()` em `behavioral_helper.py`
+- os testes correspondentes em
+  `tests/integration/docker/test_container_test_opencode.py`
+
+Substituidos por testes que verificam o provider local: Bonsai declarado na
+config efetiva e respondendo.
+
+Rationale: codigo de selecao de modelo nao tem proposito quando existe um
+unico modelo local, e as mensagens de erro citando OpenAI/Anthropic/Ollama
+contradizem o objetivo de privacidade do plano.
+
 ### D4 — `llama-server` roda no host/WSL, fora do container
 
 O servidor do modelo roda como servico de longa duracao no host (WSL), e o
