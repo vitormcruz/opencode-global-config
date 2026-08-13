@@ -139,6 +139,25 @@ normalmente seria excesso. Neste caso especifico se justifica, porque a
 garantia buscada e de seguranca e privacidade — e a camada 1 sozinha so prova
 intencao, nao isolamento.
 
+### D12 — Sleep por ociosidade nativo do `llama-server`
+
+O servidor sobe com `--sleep-idle-seconds 600` (recurso nativo do
+`llama-server`, PR ggml-org/llama.cpp#18228).
+
+- Apos 10 minutos sem requisicoes, o modelo e a KV cache saem da memoria
+  sozinhos, liberando os ~4,1 GB de VRAM sem intervencao humana.
+- Qualquer nova requisicao recarrega o modelo automaticamente; o processo
+  permanece vivo e o endpoint continua respondendo.
+- A fixture nunca derruba o servidor. O CLI `--down` fica disponivel para
+  desligamento explicito.
+- **Consequencia a tratar:** o primeiro request apos o sleep paga o custo de
+  recarga. Os timeouts do `behavioral_helper` (hoje `urlopen(..., timeout=10)`)
+  precisam ser ampliados para absorver isso.
+
+Rationale: entrega o comportamento desejado sem watchdog, heartbeat ou estado
+em disco. Como o servidor dorme em vez de morrer, nao ha corrida entre
+"derrubar" e "usar" — a fonte classica de flakiness em watchdogs.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -235,4 +254,4 @@ _(pendente)_
 
 ## Open Questions
 
-- Qual o mecanismo exato de desligamento do `llama-server` ocioso?
+_(nenhuma pendente)_
