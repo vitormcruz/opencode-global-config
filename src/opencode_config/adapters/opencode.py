@@ -9,7 +9,6 @@ from io import StringIO
 import os
 from pathlib import Path
 import re
-import shutil
 import sys
 from typing import TextIO
 
@@ -18,7 +17,6 @@ from opencode_config.lib.environment import (
     UnsupportedEnvironmentError,
     detect_environment,
 )
-from opencode_config.lib.process import run_command
 
 HELP_TEXT = """opencode-adapter
 
@@ -134,21 +132,18 @@ def _bashrc_has(path: Path, pattern: str) -> bool:
     return bool(re.search(pattern, _read_text(path), flags=re.MULTILINE))
 
 
-def _remove_legacy_test_library_block(path: Path) -> None:
+def _remove_legacy_library_block(path: Path) -> None:
     existing = _read_text(path)
-    legacy_name = "ba" + "ts"
-    legacy_header = f"# opencode-config: bibliotecas do {legacy_name.upper()}"
-    legacy_export = (
-        f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"'
-    )
     updated = re.sub(
-        rf"^{re.escape(legacy_header)}[ \t]*\n?",
+        r"^# opencode-config: bibliotecas do [A-Za-z0-9_-]+[ \t]*\n"
+        r"^export [A-Z0-9_]+_LIB_PATH="
+        r'"\$HOME/\.local/lib/[A-Za-z0-9_-]+"[ \t]*\n?',
         "",
         existing,
         flags=re.MULTILINE,
     )
     updated = re.sub(
-        rf"^{re.escape(legacy_export)}[ \t]*\n?",
+        r"^# opencode-config: bin[aá]rios locais \([^)\r\n]*\)[ \t]*\n?",
         "",
         updated,
         flags=re.MULTILINE,
@@ -182,7 +177,7 @@ def _fnm_active_node_bin(home: Path, environment: Mapping[str, str]) -> Path | N
 
 def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     bashrc = home / ".bashrc"
-    _remove_legacy_test_library_block(bashrc)
+    _remove_legacy_library_block(bashrc)
 
     if not _bashrc_has(
         bashrc,
@@ -294,52 +289,6 @@ def _confirm(
         raise AdapterError("operacao cancelada")
 
 
-def _sync_skills(
-    repository: Path,
-    output: Callable[[str], None],
-    environment: Mapping[str, str],
-) -> None:
-    output("")
-    output("--- Sincronizando skills upstream ---")
-    if environment.get("OPENCODE_SKIP_SKILL_SYNC", "0") == "1":
-        output("SKIP  sincronizacao de skills (OPENCODE_SKIP_SKILL_SYNC=1)")
-        return
-
-    skills_cli = shutil.which("opencode-skills")
-    skills_command = (
-        [skills_cli]
-        if skills_cli is not None
-        else [sys.executable, "-m", "opencode_config.cli.skills_sync"]
-    )
-    listed = run_command(
-        [*skills_command, "list", "--repo-root", str(repository)],
-        cwd=repository,
-    )
-    if not listed.succeeded:
-        output("AVISO: nao foi possivel listar skills, pulando.")
-        return
-
-    skills = [line for line in listed.stdout.splitlines() if line]
-    if not skills:
-        output("Nenhuma skill para sincronizar.")
-        return
-
-    for skill in skills:
-        output(f"Sincronizando: {skill}")
-        updated = run_command(
-            [
-                *skills_command,
-                "update",
-                skill,
-                "--repo-root",
-                str(repository),
-            ],
-            cwd=repository,
-        )
-        if not updated.succeeded:
-            output(f"AVISO: falha ao sincronizar {skill}.")
-
-
 def configure(
     repository: Path,
     home: Path,
@@ -393,7 +342,6 @@ def configure(
         )
     _setup_bashrc(resolved_home, os.environ)
     write("Pronto.")
-    _sync_skills(resolved_repository, write, os.environ)
 
 
 def _parse_arguments(

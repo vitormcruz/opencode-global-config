@@ -67,6 +67,39 @@ def test_sync_invalid_option_returns_exit_two() -> None:
 
 
 @pytest.mark.unit
+def test_documented_skill_command_has_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def timeout(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired("git", 1)
+
+    monkeypatch.setattr(skills_sync.subprocess, "run", timeout)
+
+    status, output = skills_sync._run_documented_command(
+        "python -c 'print(1)'",
+        tmp_path,
+    )
+
+    assert status == 1
+    assert "tempo limite" in output
+
+
+@pytest.mark.unit
+def test_upstream_clone_has_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def timeout(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired("git clone", 1)
+
+    monkeypatch.setattr(skills_sync.subprocess, "run", timeout)
+    spec = skills_sync.SPECS["prompt-improver"]
+
+    with pytest.raises(skills_sync.SyncError, match="tempo limite"):
+        skills_sync._clone_upstream(spec)
+
+
+@pytest.mark.unit
 def test_sync_check_only_returns_non_argument_error(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

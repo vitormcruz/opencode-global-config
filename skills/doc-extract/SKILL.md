@@ -129,5 +129,5 @@ Extrair PDF com imagens referenciadas:
 - Recomendado (pipx): `pipx install docling`
   - Se pipx nao estiver instalado: `pip install --user pipx && pipx ensurepath`
 - Alternativa (pip): `pip install --user docling`
-- Ubuntu/WSL (pipx via apt): `sudo apt-get install -y pipx && pipx install docling`
+- Ubuntu/WSL: `python3 -m pip install --user pipx && pipx install docling`
 - Docs: https://github.com/docling-project/docling

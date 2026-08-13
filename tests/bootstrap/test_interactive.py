@@ -354,6 +354,42 @@ def test_failed_installation_is_included_in_single_manual_block(
 
 
 @pytest.mark.unit
+def test_manual_block_keeps_failure_details_outside_copyable_commands(
+    tmp_path: Path,
+) -> None:
+    detections = (make_detection("required-tool", required=True),)
+
+    def failing_installer(
+        names,
+        _context: InstallContext,
+    ) -> tuple[InstallResult, ...]:
+        return tuple(
+            InstallResult(
+                name=name,
+                success=False,
+                changed=False,
+                error="falha simulada",
+            )
+            for name in names
+        )
+
+    output = StringIO()
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        assume_yes=True,
+        input_stream=StringIO(),
+        output=output,
+        installer=failing_installer,
+    )
+
+    manual = output.getvalue().split("```text\n", 1)[1]
+    commands, details = manual.split("\n```\n", 1)
+    assert "erro:" not in commands
+    assert "falha simulada" in details
+
+
+@pytest.mark.unit
 def test_tls_installation_failure_guides_agent_to_converse_with_human(
     tmp_path: Path,
 ) -> None:
@@ -438,3 +474,43 @@ def test_check_only_does_not_print_docling_model_provisioning_command(
     )
 
     assert "docling-tools models download" not in output.getvalue()
+
+
+@pytest.mark.unit
+def test_manual_block_uses_explicit_copyable_command(
+    tmp_path: Path,
+) -> None:
+    spec = DependencySpec(
+        name="example-tool",
+        commands=("example-tool",),
+        install_methods={
+            EnvironmentKind.LINUX: "metodo descritivo user-space",
+            EnvironmentKind.WSL: "metodo descritivo user-space",
+            EnvironmentKind.WINDOWS: "metodo descritivo user-space",
+        },
+        manual_commands={
+            EnvironmentKind.LINUX: "python -m pip install --user example-tool",
+        },
+    )
+    detection = DependencyDetection(
+        spec=spec,
+        status=DependencyStatus.MISSING,
+        version=None,
+        path=None,
+        install_method=spec.install_method_for(EnvironmentKind.LINUX),
+        environment=EnvironmentKind.LINUX,
+    )
+    output = StringIO()
+
+    run_bootstrap(
+        context=make_context(tmp_path),
+        detections=(detection,),
+        check_only=True,
+        input_stream=StringIO(),
+        output=output,
+    )
+
+    rendered = output.getvalue()
+    manual = rendered.split("Comandos manuais pendentes:\n", 1)[1]
+    assert "python -m pip install --user example-tool" in manual
+    assert "metodo descritivo user-space" not in manual

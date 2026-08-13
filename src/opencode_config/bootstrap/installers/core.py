@@ -478,6 +478,19 @@ def install_npm_global(
     return _result(package, f"{package} instalado no prefix user-space")
 
 
+def fix_chrondb_lib(home: Path) -> None:
+    """Normaliza a estrutura nativa extraida pelo codebase-memory-mcp."""
+
+    chrondb_lib = Path(home) / ".chrondb" / "lib"
+    temporary = chrondb_lib / ".tmp-extract-runtime"
+    if not temporary.is_dir() or not (temporary / "libchrondb.so").is_file():
+        return
+
+    for source in temporary.iterdir():
+        shutil.move(str(source), str(chrondb_lib / source.name))
+    temporary.rmdir()
+
+
 def install_codebase_memory(
     context: InstallContext,
     *,
@@ -493,6 +506,7 @@ def install_codebase_memory(
         ["codebase-memory-mcp", "config", "set", "auto_index", "true"],
         runner=runner,
     )
+    fix_chrondb_lib(context.paths.home)
     return InstallResult(
         name="codebase-memory-mcp",
         success=True,

@@ -33,6 +33,7 @@ class DependencyDetection:
     path: Path | None
     install_method: str
     error: str = ""
+    environment: EnvironmentKind = EnvironmentKind.LINUX
 
     @property
     def name(self) -> str:
@@ -41,6 +42,12 @@ class DependencyDetection:
     @property
     def required(self) -> bool:
         return self.spec.required
+
+    @property
+    def manual_command(self) -> str:
+        """Retorna o comando copiavel para instalar esta dependencia."""
+
+        return self.spec.manual_command_for(self.environment)
 
 
 Runner = Callable[..., CommandResult]
@@ -124,6 +131,7 @@ def _missing_result(
         version=None,
         path=None,
         install_method=spec.install_method_for(environment),
+        environment=environment,
     )
 
 
@@ -159,6 +167,7 @@ def detect_dependency(
             path=Path(executable),
             install_method=spec.install_method_for(environment),
             error=result.stderr or result.stdout or "comando falhou",
+            environment=environment,
         )
 
     version = _extract_version(
@@ -176,6 +185,7 @@ def detect_dependency(
         version=version,
         path=Path(executable),
         install_method=spec.install_method_for(environment),
+        environment=environment,
     )
 
 

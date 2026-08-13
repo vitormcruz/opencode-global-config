@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -94,7 +95,45 @@ def test_opencode_adapter_is_idempotent_without_spurious_backup(
     bashrc = (home / ".bashrc").read_text(encoding="utf-8")
     assert bashrc.count("OPENCODE_ENABLE_EXA=1") == 1
     assert bashrc.count('export PATH="$HOME/.local/bin:$PATH"') == 1
-    assert ("ba" + "ts").upper() not in bashrc
+    assert "LIB_PATH" not in bashrc
+
+
+@pytest.mark.opencode
+def test_opencode_adapter_does_not_mutate_repository(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repository = make_repository(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    marker = repository / "mutation.txt"
+    fake_skills_cli = fake_bin / "opencode-skills"
+    fake_skills_cli.write_text(
+        "#!/usr/bin/env python3\n"
+        "import os\n"
+        "from pathlib import Path\n"
+        "import sys\n"
+        "if sys.argv[1] == 'list':\n"
+        "    print('prompt-improver')\n"
+        "elif sys.argv[1] == 'update':\n"
+        "    Path(os.environ['MUTATION_MARKER']).write_text('mutated')\n",
+        encoding="utf-8",
+    )
+    fake_skills_cli.chmod(0o755)
+
+    monkeypatch.setenv(
+        "PATH",
+        f"{fake_bin}{os.pathsep}{os.environ.get('PATH', '')}",
+    )
+    monkeypatch.setenv("MUTATION_MARKER", str(marker))
+
+    status, _, error = run_adapter(monkeypatch, repository, home)
+
+    assert status == 0
+    assert error == ""
+    assert not marker.exists()
 
 
 @pytest.mark.opencode
@@ -105,7 +144,7 @@ def test_opencode_adapter_removes_legacy_test_library_block(
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
     home.mkdir()
-    legacy_name = "ba" + "ts"
+    legacy_name = "legacytest"
     (home / ".bashrc").write_text(
         f"# opencode-config: bibliotecas do {legacy_name.upper()}\n"
         f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"\n',
@@ -117,6 +156,29 @@ def test_opencode_adapter_removes_legacy_test_library_block(
     assert status == 0
     assert error == ""
     assert legacy_name.upper() not in (
+        home / ".bashrc"
+    ).read_text(encoding="utf-8")
+
+
+@pytest.mark.opencode
+def test_opencode_adapter_removes_legacy_local_binary_comment(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repository = make_repository(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".bashrc").write_text(
+        "# opencode-config: binarios locais (legacy-tool etc.)\n"
+        'export PATH="$HOME/.local/bin:$PATH"\n',
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repository, home)
+
+    assert status == 0
+    assert error == ""
+    assert "legacy-tool" not in (
         home / ".bashrc"
     ).read_text(encoding="utf-8")
 
@@ -183,53 +245,6 @@ def test_opencode_adapter_accepts_quiet(
     assert status == 0
     assert output == ""
     assert error == ""
-
-
-@pytest.mark.unit
-def test_opencode_adapter_uses_skills_cli_for_upstream_sync(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    from opencode_config.adapters import opencode
-    from opencode_config.lib.process import CommandResult
-
-    repository = make_repository(tmp_path)
-    calls: list[tuple[str, ...]] = []
-    monkeypatch.setattr(opencode.shutil, "which", lambda _name: "opencode-skills")
-
-    def fake_run_command(command: list[str], **_kwargs: object) -> CommandResult:
-        calls.append(tuple(command))
-        stdout = (
-            "prompt-improver\n"
-            if command[:2] == ["opencode-skills", "list"]
-            else ""
-        )
-        return CommandResult(tuple(command), 0, stdout, "")
-
-    monkeypatch.setattr(opencode, "run_command", fake_run_command)
-    output: list[str] = []
-
-    opencode._sync_skills(
-        repository,
-        output.append,
-        {},
-    )
-
-    assert calls == [
-        (
-            "opencode-skills",
-            "list",
-            "--repo-root",
-            str(repository),
-        ),
-        (
-            "opencode-skills",
-            "update",
-            "prompt-improver",
-            "--repo-root",
-            str(repository),
-        ),
-    ]
 
 
 @pytest.mark.unit

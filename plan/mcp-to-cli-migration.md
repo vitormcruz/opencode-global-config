@@ -53,11 +53,16 @@ no container de teste em `127.0.0.1:4196` com o modelo aprovado
 executadas somente ao final da migração, pelo humano, em outra instalação.
 Essas pendências não bloqueiam a execução das fases intermediárias.
 
-**Última verificação WSL:** após os commits Windows, a suíte
+**Verificações WSL:** após os commits Windows, a suíte histórica
 `.venv/bin/pytest -m "unit or tools" -q` terminou com `372 passed, 46
 deselected` após a correção do contrato Docling e do teste auxiliar
-multiplataforma. No Windows, `pytest -m "unit or tools or copilot" -q`
-terminou com `374 passed, 44 deselected`.
+multiplataforma. A reexecução após a revisão posterior chegou a `391 passed,
+48 deselected`; a fixture agora reutiliza o cache Hugging Face local existente,
+sem copiar dados para o HOME temporário. A suíte combinada
+`.venv/bin/pytest -m "unit or tools or opencode" -q` terminou com `437 passed,
+2 deselected`, e `pytest -m opencode` com `46 passed, 393 deselected`.
+No Windows, `pytest -m "unit or tools or copilot" -q` terminou com `374
+passed, 44 deselected`.
 Para a Task 5.1, `pytest -m unit tests/skills_mgmt/test_sync.py` passou com
 25 testes.
 Para a Task 5.2, `pytest -m unit tests/skills_mgmt/test_update.py` passou com
@@ -712,7 +717,8 @@ que existia só para consertar a entrada MCP.
 **Description:** Substituir as tools MCP pelo CLI `crwl` conforme o mapeamento
 de AD-2, e implementar a cadeia de preferência de websearch de AD-7
 (`web_search_exa` → `websearch` → padrão do ambiente). Incluir exemplos
-prontos de cada operação, já que screenshot/pdf têm sintaxe menos óbvia.
+prontos de cada operação suportada; URLs binárias seguem pelo `doc-extract`,
+pois PDF não é serializável pelo `crwl` 0.9.2.
 Substituir a seção "Resiliencia a rate limits (429)" — que descrevia erro do
 MCP HTTP — pelo tratamento de falha equivalente do CLI (exit code, timeout,
 bloqueio do site).
@@ -721,13 +727,15 @@ bloqueio do site).
 - [x] Nenhuma menção a `crawl4ai_md`, `crawl4ai_html`, `crawl4ai_execute_js`,
       `crawl4ai_screenshot`, `crawl4ai_pdf`
 - [x] Cadeia de fallback de websearch declarada explicitamente
-- [x] Um exemplo executável por operação (md, html, js, screenshot, pdf, deep)
+- [x] Exemplos executáveis para md, html, js, screenshot e deep; a limitação
+      de PDF binário e o fallback para `doc-extract` estão documentados
 - [x] Fallback para `doc-extract` em URLs binárias preservado
 - [x] `description` do frontmatter continua carregando os triggers de ativação
 
 **Verification:**
 - [x] `pytest -m unit tests/skills/test_web_research.py` (porte do `.bats`)
-- [x] Execução manual: `crwl https://example.com -o md-fit` retorna markdown
+- [x] Execução real dos cinco exemplos: `crwl crawl https://example.com`
+      retorna artefatos não vazios (2026-08-13)
 
 **Dependencies:** 1.1
 
@@ -1540,12 +1548,16 @@ repo-structure, chrondb-fix). Converter a orquestração do container Docker
 - [x] Nenhum arquivo `.bats` no repo
 - [x] Container de teste sobe e desce por fixture, com teardown garantido
 - [x] Guarda de `OPENCODE_TEST_MODEL` vira `pytest.fail` com a mesma orientação
-- [x] Cobertura equivalente — nenhum teste perdido na conversão
+- [x] Cobertura equivalente para os requisitos ativos; remoções de requisitos
+      obsoletos estão registradas na auditoria R4
 
 **Verification:**
-- [x] `pytest -m opencode` verde no WSL — validado em 2026-08-12 (44 passed,
-      376 deselected); serviço OpenCode no Docker com modelo `opencode/big-pickle`
-- [x] Comparar contagem de testes antes/depois: 160 BATS → 160 pytest
+- [x] `pytest -m opencode` verde no WSL — revalidado em 2026-08-13 (46 passed,
+      393 deselected); serviço OpenCode no Docker com modelo
+      `opencode/big-pickle`
+- [x] Auditoria de cobertura registrada na nota R4: o escopo nominal foi
+      160 BATS → 149 pytest antes das correções; `chrondb-fix` foi restaurado
+      com 4 testes e 5 casos MCP foram declarados obsoletos por AD-1
 
 **Dependencies:** fase 5 completa
 
@@ -1568,7 +1580,8 @@ repo-structure, chrondb-fix). Converter a orquestração do container Docker
 - [x] `Makefile` removido
 - [x] Bootstrap não instala mais nada de BATS
 - [x] Bloco `BATS_LIB_PATH` removido do `~/.bashrc` pelo bootstrap
-- [x] `grep -ri "bats"` retorna apenas `plan/` e `docs/adr/`
+- [x] Não há referências funcionais a BATS fora do histórico do plano;
+      a rotina de limpeza legada cita explicitamente o bloco removido
 
 **Verification:**
 - [x] `pytest -m "unit or tools"` verde
@@ -1607,8 +1620,8 @@ scripts, sincronização de adapters `.sh`/`.ps1`, e a regra de line endings LF
 
 **Verification:**
 - [x] Leitura completa dos docs por agente revisor, comparando com o repo;
-      nenhum achado significativo restante
-- [x] `tests/docs/` não existe; a suíte WSL `pytest -m "unit or tools"` passou
+      13 achados registrados e tratados na seção de revisão posterior
+- [x] `tests/docs/` não existe; suíte WSL repetida após as correções finais
 
 **Dependencies:** 6.2
 
@@ -1665,7 +1678,20 @@ bloqueado até a correção e nova execução.
   com sucesso (`crawl4ai 0.9.2`, Python 3.14); o risco de resolução das
   dependências não foi confirmado.
 - **R4** — `tests-as-spec` é obrigatório: cada `.bats` vira spec antes de
-  virar pytest. Comparar contagem de asserções por suíte, antes e depois.
+  virar pytest. Auditoria posterior (2026-08-13) reconciliou o escopo
+  nominal da Task 6.1 (160 casos BATS → 149 nós pytest antes das correções):
+
+  | Suíte removida | Casos | Decisão |
+  |---|---:|---|
+  | `chrondb-fix` | 4 | restaurada no instalador Python e portada |
+  | `crawl4ai-real` | 2 | obsoleta com a remoção do servidor MCP; coberta por `crwl` |
+  | `copilot mcp --help/--list` | 2 | obsoleta com a remoção do MCP local |
+  | prompt com MCP mockado | 1 | obsoleta com a remoção do MCP local |
+
+  A diferença restante foi causada por parametrização e reorganização das
+  suítes portadas; não representa um requisito ativo perdido.
+  Reexecução após as correções: 160 nós nas 11 suítes ativas e 4 testes
+  adicionais de `chrondb` em `tests/bootstrap/test_installers.py`.
 - **R5** — A primeira configuração usou `/api/` indevidamente e recebeu
   `404 Not found`; a rota nativa sem `/api/` instalou com sucesso todos os
   browsers no diagnóstico isolado. Repetir no bootstrap completo; não usar
@@ -1778,9 +1804,8 @@ alterado nessa remoção.
 
 **Adapter OpenCode (WSL):**
 - `configurar-repo.sh --check-only`: exit 0 (tabela de dependências correta).
-- `configurar-repo.sh --yes` (com `OPENCODE_SKIP_DEPS=1` e
-  `OPENCODE_SKIP_SKILL_SYNC=1` para evitar installs de rede e git-fetch dos
-  upstreams fora do escopo): exit 0.
+- `configurar-repo.sh --yes` (com `OPENCODE_SKIP_DEPS=1`; o sync de skills
+  upstream já é uma operação explícita): exit 0.
 - 5 links canônicos em `~/.config/opencode` apontam para este repo;
   `OPENCODE_ENABLE_EXA=1` no `~/.bashrc`; execução **idempotente** (nenhum
   backup novo criado).
@@ -1797,7 +1822,48 @@ reportado com honestidade, não simulado.
 **Não reintroduzidos:** `opencode.json` sem bloco `mcp` (0 ocorrências);
 nenhum Docker para Crawl4AI criado; Docker usado somente para o teste OpenCode.
 
-**Estado do checkpoint:** `pytest -m opencode` e
+**Estado histórico do checkpoint:** `pytest -m opencode` e
 `pytest -m "unit or tools or opencode"` verdes no WSL; baseline `unit or
-tools` verde. Container parado (`--down`); imagem preservada para
-reprodutibilidade. Bloqueio residual: nenhum para a integração OpenCode/WSL.
+tools` verde antes da revisão posterior. Container parado (`--down`); imagem
+preservada para reprodutibilidade. A revisão posterior registrou um bloqueio
+separado no teste PDF do Docling por modelos offline ausentes.
+
+## Registro da revisão posterior (2026-08-13)
+
+A revisão final encontrou 13 não conformidades. As correções autorizadas
+foram aplicadas sem reabrir AD-1..AD-13:
+
+- **Isolamento e mutação:** `HOME`, `USERPROFILE` e `XDG_CONFIG_HOME` agora
+  são isolados por fixture autouse; o adapter OpenCode não sincroniza
+  upstream automaticamente nem altera a árvore canônica.
+- **Cobertura:** `fix_chrondb_lib` foi restaurada no instalador Python e seus
+  quatro casos foram portados. Cinco casos dependentes do MCP local foram
+  declarados obsoletos por AD-1 e vinculados à cobertura CLI vigente.
+- **Crawl4AI:** os exemplos publicados usam `crwl crawl`; cinco operações
+  foram executadas com artefatos não vazios. PDF binário é explicitamente
+  encaminhado para `doc-extract`.
+- **Bootstrap:** `DependencySpec` separa método descritivo de comando manual
+  por sistema operacional; detalhes de erro ficam fora do bloco copiável.
+  Instalações e dicas não usam `sudo` ou elevação.
+- **Ambiente e documentação:** as cinco variáveis `OPENCODE_*` do código
+  estão documentadas; regras órfãs de `sudo`, caminhos WSL absolutos e
+  `skills/list-updatable` foram corrigidas em README, AGENTS e workflow.
+- **Skills upstream:** comandos Git têm timeout de 300 segundos e reportam
+  falha acionável. O leftover não rastreado `tests/opencode-int-test/` foi
+  removido e a guarda procura qualquer `mcp-mock` sob `tests/`.
+- **Escopo:** `fdb8629` foi mantido nesta branch por decisão humana e fica
+  registrado como desvio independente da migração.
+- **Docling WSL:** a fixture autouse agora preserva `HF_HOME` apontando para um
+  cache Hugging Face existente, sem copiar dados para o HOME temporário, enquanto
+  mantém `HOME` isolado. O teste PDF passou com os modelos já provisionados; a suíte
+  `.venv/bin/pytest -m "unit or tools"` terminou com `391 passed, 48
+  deselected`. O teste unitário que simula comando bem-sucedido sem artefato
+  permanece verde; não houve download automático nem bypass de TLS.
+- **OpenCode WSL:** o container foi iniciado com a imagem existente e o modelo
+  `opencode/big-pickle`, a suíte `pytest -m opencode` terminou com `46 passed`,
+  e a suíte combinada com `unit/tools` terminou com `437 passed, 2
+  deselected`. O container foi parado após a validação; a imagem foi mantida.
+
+As validações que usam `OPENCODE_SKIP_DEPS=1` não comprovam a instalação das
+dependências. O sync upstream é operação explícita desde a correção do
+adapter; `OPENCODE_SKIP_SKILL_SYNC` não é mais uma variável funcional.

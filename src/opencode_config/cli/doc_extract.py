@@ -39,7 +39,7 @@ def _installation_hint() -> str:
     return (
         "Recomendado: pipx install docling | Se pipx nao instalado: "
         "pip install --user pipx && pipx ensurepath | Ubuntu/WSL: "
-        "sudo apt-get install -y pipx && pipx install docling | "
+        "python3 -m pip install --user pipx && pipx install docling | "
         f"Docs: {DOCS_URL}"
     )
 

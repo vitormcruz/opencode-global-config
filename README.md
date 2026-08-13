@@ -59,9 +59,20 @@ backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
 ## Variaveis de ambiente
 
+- `OPENCODE_CONFIG_REPO`: substitui a detecção automática da raiz do checkout;
+  use apenas quando o repo estiver em um caminho não detectável.
 - `OPENCODE_ENABLE_EXA=1`: habilita a tool `websearch` do OpenCode via Exa AI
 
 Sem essa variavel, a tool `websearch` nao aparece no runtime quando o provider nao e o nativo do OpenCode.
+
+### Variáveis de validação
+
+Estas variáveis existem apenas para diagnósticos controlados e testes do
+bootstrap; uma execução completa não deve usá-las:
+
+- `OPENCODE_SKIP_DEPS=1`: não instala nem detecta dependências.
+- `OPENCODE_SKIP_OPENCODE_ADAPTER=1`: não executa o adapter OpenCode.
+- `OPENCODE_SKIP_COPILOT_ADAPTER=1`: não executa o adapter Copilot CLI.
 
 ## Dependências
 
@@ -131,7 +142,7 @@ O repositório mantém uma fonte canônica e adapters por plataforma:
 | Adapter | Entrada | Destino |
 |---|---|---|
 | `adapters/opencode/` | agents, skills, commands e configuração | links em `~/.config/opencode/` |
-| `adapters/copilot-cli/` | fonte canônica transformada | `~/.copilot/` |
+| `src/opencode_config/adapters/copilot.py` | fonte canônica transformada | `~/.copilot/` |
 
 O adapter OpenCode cria links simbólicos. O adapter Copilot CLI converte
 frontmatter de agentes, transforma commands em skills, valida skills no padrão
@@ -154,6 +165,9 @@ opencode-copilot-adapter --yes
 O pacote Python é compartilhado entre os sistemas, mas cada adapter respeita
 seu cliente: `opencode-adapter` é exclusivo de Linux/WSL e
 `opencode-copilot-adapter` é o adapter do Windows.
+
+O adapter OpenCode não altera arquivos da fonte canônica. A sincronização de
+skills upstream é uma operação separada: `opencode-skills sync NOME`.
 
 Destinos sincronizados pelo Copilot CLI:
 

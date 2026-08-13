@@ -116,16 +116,19 @@ def _manual_block(
     if not pending:
         return ()
 
+    details: list[str] = []
     output.write("\nComandos manuais pendentes:\n```text\n")
     for detection in detections:
-        output.write(f"# {detection.name}\n{detection.install_method}\n")
+        output.write(f"# {detection.name}\n{detection.manual_command}\n")
         detail = (errors or {}).get(detection.name) or detection.error
         if detail:
-            output.write(f"erro: {detail}\n")
+            details.append(f"erro: {detail}")
             guidance = _tls_guidance(detail)
             if guidance:
-                output.write(f"{guidance}\n")
+                details.append(guidance)
     output.write("```\n")
+    if details:
+        output.write("\n" + "\n".join(details) + "\n")
     return pending
 
 

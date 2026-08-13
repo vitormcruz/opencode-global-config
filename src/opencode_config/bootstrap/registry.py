@@ -13,6 +13,7 @@ class DependencySpec:
     name: str
     commands: tuple[str, ...]
     install_methods: Mapping[EnvironmentKind, str]
+    manual_commands: Mapping[EnvironmentKind, str] = field(default_factory=dict)
     commands_by_environment: Mapping[
         EnvironmentKind,
         tuple[str, ...],
@@ -41,6 +42,14 @@ class DependencySpec:
 
         return self.install_methods[environment]
 
+    def manual_command_for(self, environment: EnvironmentKind) -> str:
+        """Retorna o comando copiavel previsto para um ambiente."""
+
+        return self.manual_commands.get(
+            environment,
+            self.install_method_for(environment),
+        )
+
 
 _ALL_ENVIRONMENTS = {
     EnvironmentKind.LINUX,
@@ -60,6 +69,17 @@ def _methods(linux: str, wsl: str | None = None, windows: str = ""):
     }
 
 
+def _commands(linux: str, wsl: str | None = None, windows: str = ""):
+    """Cria o mapa de comandos copiaveis por ambiente."""
+
+    wsl_command = linux if wsl is None else wsl
+    return {
+        EnvironmentKind.LINUX: linux,
+        EnvironmentKind.WSL: wsl_command,
+        EnvironmentKind.WINDOWS: windows,
+    }
+
+
 DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
     DependencySpec(
         name="python",
@@ -71,6 +91,12 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "pre-requisito: Python >= 3.10",
             windows="pre-requisito: Python >= 3.10 (instalacao por usuario)",
         ),
+        manual_commands=_commands(
+            "python3 --version",
+            windows=(
+                "winget install --scope user --id Python.Python.3.12"
+            ),
+        ),
         minimum_version=(3, 10),
     ),
     DependencySpec(
@@ -79,6 +105,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "fnm em user-space",
             windows="fnm-windows.zip em user-space",
+        ),
+        manual_commands=_commands(
+            "fnm install 22 && fnm use 22",
+            windows="fnm install 22; fnm use 22",
         ),
         minimum_version=(22,),
     ),
@@ -89,6 +119,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "fnm em user-space",
             windows="fnm-windows.zip em user-space",
         ),
+        manual_commands=_commands(
+            "fnm install 22 && fnm use 22",
+            windows="fnm install 22; fnm use 22",
+        ),
         version_args=("--version",),
     ),
     DependencySpec(
@@ -97,6 +131,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "fnm em user-space",
             windows="fnm-windows.zip em user-space",
+        ),
+        manual_commands=_commands(
+            "fnm install 22 && fnm use 22",
+            windows="fnm install 22; fnm use 22",
         ),
         version_args=("--version",),
     ),
@@ -107,6 +145,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "pip install --user pipx",
             windows="python -m pip install --user pipx",
         ),
+        manual_commands=_commands(
+            "python3 -m pip install --user pipx",
+            windows="python -m pip install --user pipx",
+        ),
     ),
     DependencySpec(
         name="crwl",
@@ -114,12 +156,20 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "pipx install crawl4ai + crawl4ai-setup",
         ),
+        manual_commands=_commands(
+            "pipx install crawl4ai && crawl4ai-setup",
+            windows="pipx install crawl4ai; crawl4ai-setup",
+        ),
         version_args=("--help",),
     ),
     DependencySpec(
         name="docling",
         commands=("docling",),
         install_methods=_methods("pipx install docling"),
+        manual_commands=_commands(
+            "pipx install docling",
+            windows="pipx install docling",
+        ),
     ),
     DependencySpec(
         name="codebase-memory-mcp",
@@ -127,6 +177,14 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "npm install -g codebase-memory-mcp com prefix user-space",
             windows="npm install -g codebase-memory-mcp com prefix user-space",
+        ),
+        manual_commands=_commands(
+            "npm install --global --prefix \"$HOME/.local\" "
+            "codebase-memory-mcp@0.9.0",
+            windows=(
+                'npm install --global --prefix "$env:APPDATA\\npm" '
+                "codebase-memory-mcp@0.9.0"
+            ),
         ),
         minimum_version=(0, 9, 0),
     ),
@@ -137,6 +195,53 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "download do arquivo portatil oficial",
             windows="download do zip portatil oficial",
         ),
+        manual_commands=_commands(
+            "\n".join(
+                (
+                    'mkdir -p "$HOME/.local"',
+                    (
+                        'curl -fL "https://github.com/jgm/pandoc/releases/'
+                        'download/3.7.0.2/'
+                        'pandoc-3.7.0.2-linux-amd64.tar.gz" '
+                        '-o "/tmp/pandoc.tar.gz"'
+                    ),
+                    (
+                        'tar -xzf "/tmp/pandoc.tar.gz" '
+                        '--strip-components=1 -C "$HOME/.local"'
+                    ),
+                    'rm -f "/tmp/pandoc.tar.gz"',
+                )
+            ),
+            windows="\n".join(
+                (
+                    '$archive = Join-Path $env:TEMP "pandoc.zip"',
+                    (
+                        '$destination = Join-Path $env:LOCALAPPDATA '
+                        '"opencode-config\\bin"'
+                    ),
+                    (
+                        'New-Item -ItemType Directory -Force '
+                        '$destination | Out-Null'
+                    ),
+                    (
+                        'Invoke-WebRequest -Uri '
+                        '"https://github.com/jgm/pandoc/releases/download/'
+                        '3.7.0.2/pandoc-3.7.0.2-windows-x86_64.zip" '
+                        '-OutFile $archive'
+                    ),
+                    (
+                        '$extract = Join-Path $env:TEMP '
+                        '"pandoc-extract"'
+                    ),
+                    'Expand-Archive -Force $archive $extract',
+                    (
+                        'Copy-Item (Join-Path $extract '
+                        '"pandoc-3.7.0.2\\pandoc.exe") $destination'
+                    ),
+                    'Remove-Item -Recurse -Force $extract, $archive',
+                )
+            ),
+        ),
     ),
     DependencySpec(
         name="git",
@@ -144,6 +249,33 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "git pre-instalado ou pacote do sistema",
             windows="PortableGit em user-space",
+        ),
+        manual_commands=_commands(
+            "git --version",
+            windows="\n".join(
+                (
+                    (
+                        '$archive = Join-Path $env:TEMP '
+                        '"PortableGit-2.53.0-64-bit.7z.exe"'
+                    ),
+                    (
+                        'Invoke-WebRequest -Uri '
+                        '"https://github.com/git-for-windows/git/releases/'
+                        'download/v2.53.0.windows.1/'
+                        'PortableGit-2.53.0-64-bit.7z.exe" '
+                        '-OutFile $archive'
+                    ),
+                    (
+                        '$destination = Join-Path $env:LOCALAPPDATA '
+                        '"opencode-config\\PortableGit"'
+                    ),
+                    (
+                        'Start-Process -Wait -FilePath $archive '
+                        '-ArgumentList "-y", "-o$destination"'
+                    ),
+                    'Remove-Item $archive',
+                )
+            ),
         ),
     ),
     DependencySpec(
@@ -153,6 +285,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "npx playwright install",
             windows="npx playwright install",
         ),
+        manual_commands=_commands(
+            "npx --yes playwright install chromium",
+            windows="npx --yes playwright install chromium",
+        ),
     ),
     DependencySpec(
         name="pytest",
@@ -160,6 +296,15 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "criar .venv e instalar requirements-dev.txt",
             windows="criar .venv e instalar requirements-dev.txt",
+        ),
+        manual_commands=_commands(
+            "python3 -m venv .venv && "
+            ".venv/bin/python -m pip install -r requirements-dev.txt",
+            windows=(
+                "python -m venv .venv; "
+                ".venv\\Scripts\\python.exe -m pip install "
+                "-r requirements-dev.txt"
+            ),
         ),
         required=False,
     ),
@@ -170,12 +315,20 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
             "script oficial AWS em modo user-local",
             windows="script oficial AWS em modo user-local",
         ),
+        manual_commands=_commands(
+            'curl -fsSL "https://awscli.amazonaws.com/v2/install.sh" | bash',
+            windows='irm "https://awscli.amazonaws.com/v2/install.ps1" | iex',
+        ),
         minimum_version=(2,),
     ),
     DependencySpec(
         name="opencode-config",
         commands=("opencode-config-check",),
         install_methods=_methods(
+            "pipx install --editable .",
+            windows="pipx install --editable .",
+        ),
+        manual_commands=_commands(
             "pipx install --editable .",
             windows="pipx install --editable .",
         ),
@@ -187,6 +340,13 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         install_methods=_methods(
             "cliente Copilot externo",
             windows="npm install --global --prefix user-space @github/copilot",
+        ),
+        manual_commands=_commands(
+            "npm install --global --prefix \"$HOME/.local\" @github/copilot",
+            windows=(
+                'npm install --global --prefix "$env:APPDATA\\npm" '
+                "@github/copilot"
+            ),
         ),
     ),
 )

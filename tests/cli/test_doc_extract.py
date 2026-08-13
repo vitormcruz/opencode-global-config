@@ -166,6 +166,30 @@ def test_doc_extract_without_docling_uses_windows_hint(
 
 
 @pytest.mark.tools
+def test_doc_extract_without_docling_uses_zero_admin_linux_hint(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    repo_root: Path,
+) -> None:
+    from opencode_config.lib import environment
+
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}/usr/bin:/bin")
+    monkeypatch.setattr(environment.platform, "system", lambda: "Linux")
+
+    result = invoke_cli(
+        monkeypatch,
+        capsys,
+        {"source": str(repo_root / "tests/test-resources/sample.pdf")},
+    )
+
+    assert "python3 -m pip install --user pipx" in result["hint"]
+    assert "sudo apt-get" not in result["hint"]
+
+
+@pytest.mark.tools
 def test_doc_extract_with_empty_pdf_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

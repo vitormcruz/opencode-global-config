@@ -1,5 +1,6 @@
 from io import StringIO
 from pathlib import Path
+import re
 
 import pytest
 
@@ -40,6 +41,24 @@ def test_powershell_entrypoint_is_thin_and_delegates_to_python(
     assert '[Environment]::GetEnvironmentVariable("Path", "User")' in content
     assert "copilot-adapter" not in content
     assert "opencode-adapter" not in content
+
+
+@pytest.mark.unit
+def test_source_environment_variables_are_documented(repo_root: Path) -> None:
+    source_root = repo_root / "src/opencode_config"
+    source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in source_root.rglob("*.py")
+    )
+    documentation = "\n".join(
+        (repo_root / name).read_text(encoding="utf-8")
+        for name in ("README.md", "AGENTS.md")
+    )
+
+    variables = set(re.findall(r"\bOPENCODE_[A-Z_]+\b", source))
+    documented = set(re.findall(r"\bOPENCODE_[A-Z_]+\b", documentation))
+
+    assert variables <= documented
 
 
 @pytest.mark.unit

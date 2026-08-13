@@ -25,6 +25,7 @@ from opencode_config.bootstrap.installers import (
     install_playwright,
     install_pytest,
     is_pytest_environment_ready,
+    fix_chrondb_lib,
 )
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import resolve_user_space_paths
@@ -466,6 +467,9 @@ def test_install_codebase_memory_enables_auto_index(
 ) -> None:
     context = make_context(tmp_path)
     commands: list[tuple[str, ...]] = []
+    temporary = tmp_path / ".chrondb/lib/.tmp-extract-runtime"
+    temporary.mkdir(parents=True)
+    (temporary / "libchrondb.so").write_text("\x00", encoding="utf-8")
 
     result = install_codebase_memory(
         context,
@@ -482,6 +486,64 @@ def test_install_codebase_memory_enables_auto_index(
         "auto_index",
         "true",
     )
+    assert (tmp_path / ".chrondb/lib/libchrondb.so").is_file()
+    assert not temporary.exists()
+
+
+@pytest.mark.unit
+def test_fix_chrondb_lib_moves_runtime_files_from_temp_directory(
+    tmp_path: Path,
+) -> None:
+    chrondb_lib = tmp_path / ".chrondb/lib"
+    temporary = chrondb_lib / ".tmp-extract-runtime"
+    temporary.mkdir(parents=True)
+    for name, content in {
+        "libchrondb.h": "#define CHRONDB 1",
+        "libchrondb.so": "\x00",
+        "graal_isolate.h": "header",
+        "graal_isolate_dynamic.h": "header",
+        "libchrondb_dynamic.h": "header",
+    }.items():
+        (temporary / name).write_text(content, encoding="utf-8")
+
+    fix_chrondb_lib(tmp_path)
+
+    assert all((chrondb_lib / name).is_file() for name in (
+        "libchrondb.h",
+        "libchrondb.so",
+        "graal_isolate.h",
+        "graal_isolate_dynamic.h",
+        "libchrondb_dynamic.h",
+    ))
+    assert not temporary.exists()
+
+
+@pytest.mark.unit
+def test_fix_chrondb_lib_is_idempotent_when_temp_directory_is_missing(
+    tmp_path: Path,
+) -> None:
+    fix_chrondb_lib(tmp_path)
+
+    assert not (tmp_path / ".chrondb/lib/.tmp-extract-runtime").exists()
+
+
+@pytest.mark.unit
+def test_fix_chrondb_lib_preserves_existing_runtime_files(
+    tmp_path: Path,
+) -> None:
+    chrondb_lib = tmp_path / ".chrondb/lib"
+    chrondb_lib.mkdir(parents=True)
+    existing = chrondb_lib / "libchrondb.so"
+    existing.write_text("existing", encoding="utf-8")
+
+    fix_chrondb_lib(tmp_path)
+
+    assert existing.read_text(encoding="utf-8") == "existing"
+
+
+@pytest.mark.unit
+def test_fix_chrondb_lib_is_exposed_by_bootstrap_installers() -> None:
+    assert callable(fix_chrondb_lib)
 
 
 @pytest.mark.unit

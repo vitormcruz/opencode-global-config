@@ -1,6 +1,7 @@
 """Fixtures compartilhadas das suites pytest."""
 
 from collections.abc import Callable, Mapping
+import os
 from pathlib import Path
 
 import pytest
@@ -13,14 +14,29 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Cria HOME temporario e ajusta aliases usados nos dois SOs."""
 
-    home = tmp_path / "home"
+    original_home = Path.home()
+    original_local_app_data = os.environ.get("LOCALAPPDATA")
+    home = tmp_path / ".isolated-home"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+    if "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
+        browser_cache = (
+            Path(original_local_app_data) / "ms-playwright"
+            if original_local_app_data
+            else original_home / ".cache" / "ms-playwright"
+        )
+        if browser_cache.is_dir():
+            monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(browser_cache))
+    if "HF_HOME" not in os.environ:
+        huggingface_cache = original_home / ".cache" / "huggingface"
+        if huggingface_cache.is_dir():
+            monkeypatch.setenv("HF_HOME", str(huggingface_cache))
     return home
 
 

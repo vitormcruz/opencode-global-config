@@ -79,32 +79,30 @@ Os comandos abaixo usam `https://example.com` como alvo reproduzível.
 
 ### Markdown
 ```bash
-crwl https://example.com -o md-fit
+crwl crawl https://example.com -o md-fit
 ```
 
 ### HTML estruturado
 ```bash
-crwl https://example.com -o json > page.json
+crwl crawl https://example.com -o all -O page.json
 ```
 
 ### JavaScript
 ```bash
-crwl https://example.com -c 'js_code=document.title' -o md-fit
+crwl crawl https://example.com -c 'js_code=document.title' -o md-fit
 ```
 
 ### Screenshot
 ```bash
-crwl https://example.com -c screenshot=true -O saida.json
+crwl crawl https://example.com -c screenshot=true -o all -O saida.json
 ```
 
-### PDF
-```bash
-crwl https://example.com -c pdf=true -O saida.json
-```
+Para URLs que apontam diretamente para PDF, DOCX ou XLSX, use a skill
+`doc-extract`: a versão 0.9.2 do `crwl` não serializa PDF binário no JSON.
 
 ### Deep crawl
 ```bash
-crwl https://example.com --deep-crawl bfs --max-pages 10
+crwl crawl https://example.com --deep-crawl bfs --max-pages 10
 ```
 
 ## Aprofundamento progressivo

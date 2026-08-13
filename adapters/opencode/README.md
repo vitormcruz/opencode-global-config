@@ -18,3 +18,6 @@ O adapter funciona em Linux e WSL. No Windows, use o adapter do Copilot.
 
 O bootstrap principal também executa este adapter automaticamente. Para
 evitar sua execução, use `OPENCODE_SKIP_OPENCODE_ADAPTER=1`.
+
+O adapter não altera os arquivos do repositório. Para sincronizar skills
+upstream, execute separadamente `opencode-skills sync NOME`.

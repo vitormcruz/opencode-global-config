@@ -55,8 +55,8 @@ Suas capacidades:
 5. **Gerar scaffold inicial** dos scripts de harness
    baseado nas ferramentas encontradas
 6. **Instalar dependências de harness** — executar
-   instalação (sem sudo); entregar ao humano comandos
-   com sudo em bloco de código
+   instalações user-space e entregar ao humano os
+   comandos pendentes em bloco de código
 
 ## Template Default do docs/README.md
 

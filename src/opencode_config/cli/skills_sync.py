@@ -15,6 +15,8 @@ import sys
 import tempfile
 from typing import TextIO
 
+SKILL_COMMAND_TIMEOUT_SECONDS = 300
+
 
 class SyncError(RuntimeError):
     """Indica que um upstream não pode ser sincronizado com segurança."""
@@ -103,7 +105,13 @@ def _run_git(upstream_dir: Path, *arguments: str) -> str:
             check=True,
             capture_output=True,
             text=True,
+            timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
         )
+    except subprocess.TimeoutExpired as problem:
+        raise SyncError(
+            "tempo limite ao ler metadados Git do upstream "
+            f"({SKILL_COMMAND_TIMEOUT_SECONDS}s)"
+        ) from problem
     except (OSError, subprocess.CalledProcessError) as problem:
         raise SyncError(f"falha ao ler metadados Git do upstream: {problem}") from problem
     return completed.stdout.strip()
@@ -431,6 +439,7 @@ def _run_documented_command(
                 cwd=repo_root,
                 capture_output=True,
                 text=True,
+                timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
             )
         else:
             completed = subprocess.run(
@@ -439,7 +448,14 @@ def _run_documented_command(
                 shell=True,
                 capture_output=True,
                 text=True,
+                timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
             )
+    except subprocess.TimeoutExpired as problem:
+        return (
+            1,
+            "comando de atualizacao excedeu o tempo limite de "
+            f"{SKILL_COMMAND_TIMEOUT_SECONDS}s: {problem}",
+        )
     except (OSError, ValueError) as problem:
         return 1, str(problem)
     return completed.returncode, completed.stdout + completed.stderr
@@ -616,7 +632,14 @@ def _clone_upstream(spec: SyncSpec) -> tuple[tempfile.TemporaryDirectory[str], P
             check=True,
             capture_output=True,
             text=True,
+            timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
         )
+    except subprocess.TimeoutExpired as problem:
+        temporary.cleanup()
+        raise SyncError(
+            "tempo limite ao clonar upstream "
+            f"({SKILL_COMMAND_TIMEOUT_SECONDS}s)"
+        ) from problem
     except (OSError, subprocess.CalledProcessError) as problem:
         temporary.cleanup()
         raise SyncError(f"falha ao clonar upstream: {problem}") from problem

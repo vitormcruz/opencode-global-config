@@ -66,9 +66,9 @@ bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
 ```powershell
 .\scripts\bootstrap_repo\configurar-repo.ps1 --yes
 ```
-- Se a configuracao exigir pacotes com `sudo`, primeiro entregue ao humano os
-  comandos prontos para copia e cola em um bloco unico.
-- Aguarde a execucao desses comandos pelo humano antes de seguir com a configuracao do repo.
+- Se uma dependencia nao estiver disponivel, use os comandos user-space
+  exibidos pelo bootstrap e aguarde a execucao pelo humano antes de seguir.
+  Nao introduza instrucoes que exijam `sudo` ou administrador.
 
 ## Configuracao Global via Links Simbolicos
 
@@ -79,20 +79,21 @@ Padrao de links (exemplo neste ambiente WSL):
 
 ```bash
 mkdir -p ~/.config/opencode
+REPO_ROOT="$(pwd)"
 
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/agents \
+ln -s "$REPO_ROOT/agents" \
       ~/.config/opencode/agents
 
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/commands \
+ln -s "$REPO_ROOT/commands" \
       ~/.config/opencode/commands
 
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/opencode.json \
+ln -s "$REPO_ROOT/opencode.json" \
       ~/.config/opencode/opencode.json
 
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/skills \
+ln -s "$REPO_ROOT/skills" \
       ~/.config/opencode/skills
 
-ln -s /mnt/c/Users/<usr>/Projetos/opencode-config/scripts \
+ln -s "$REPO_ROOT/scripts" \
       ~/.config/opencode/scripts
 ```
 
@@ -129,6 +130,10 @@ Para aplicar a variavel no shell atual depois do bootstrap:
 ```bash
 source ~/.bashrc
 ```
+
+As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
+`OPENCODE_SKIP_*`, estão documentadas na seção "Variáveis de ambiente" do
+`README.md`. Não use esses overrides em uma validação completa.
 
 ## Concisao
 - Responda de forma curta por padrao.
@@ -226,13 +231,13 @@ nas descrições
 - Mantenha a seção de dependências do `README.md` atualizada sempre que mudar
   bootstrap, scripts, skills ou requisitos de instalação.
 - A seção deve ser enxuta e voltada ao humano: listar claramente o que é
-  instalado automaticamente e quais comandos com `sudo` o humano precisa
+  instalado automaticamente e quais comandos user-space o humano pode
   executar.
 
 # Upstream de Skills Externas
 - Skills baseadas em repositórios externos devem seguir o padrão de upstream do repo:
   - Criar `UPSTREAM.md` na pasta da skill com a origem e instrucoes de sync.
-  - Registrar a skill em `skills/list-updatable` para permitir atualização futura.
+  - Registrar a skill no comando `opencode-skills list` para permitir atualização futura.
   - Usar `skills/update-upstream-skill` para sincronizar.
 
 ## Manutencao de Upstream — Padrao do Repo

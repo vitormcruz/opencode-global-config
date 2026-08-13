@@ -58,6 +58,40 @@ def test_registry_declares_managed_dependencies_and_install_methods() -> None:
         set(spec.install_methods) == set(EnvironmentKind)
         for spec in DEPENDENCY_REGISTRY
     )
+    assert all(spec.manual_commands for spec in DEPENDENCY_REGISTRY)
+    assert all(
+        set(spec.manual_commands) == set(EnvironmentKind)
+        for spec in DEPENDENCY_REGISTRY
+    )
+    assert all(
+        spec.manual_command_for(environment).strip()
+        for spec in DEPENDENCY_REGISTRY
+        for environment in EnvironmentKind
+    )
+    prose_markers = (
+        "metodo",
+        "requisito",
+        "instale",
+        "user-space",
+        "user-local",
+        "arquivo portatil",
+    )
+    assert all(
+        not any(
+            marker in spec.manual_command_for(environment).casefold()
+            for marker in prose_markers
+        )
+        for spec in DEPENDENCY_REGISTRY
+        for environment in EnvironmentKind
+    )
+    codebase_spec = next(
+        spec
+        for spec in DEPENDENCY_REGISTRY
+        if spec.name == "codebase-memory-mcp"
+    )
+    assert "com prefix user-space" not in (
+        codebase_spec.manual_command_for(EnvironmentKind.WINDOWS)
+    )
     package_spec = next(
         spec for spec in DEPENDENCY_REGISTRY if spec.name == "opencode-config"
     )

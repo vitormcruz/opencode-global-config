@@ -385,9 +385,9 @@ fluxo em 4 fases com aprovação do humano:
 - Registra tabela no topo do `AGENTS.md`.
 - **Instalação de dependências** — quando todas as
   entradas de harness tiverem decisão explícita, identifica
-  deps necessárias. Se houver comandos com `sudo`, entrega
-  ao humano em bloco de código. Executa o restante e
-  valida (`tool --version`).
+  deps necessárias. Usa apenas instalações user-space e
+  entrega ao humano os comandos pendentes em bloco de
+  código. Executa o restante e valida (`tool --version`).
 
 **Interrupção a qualquer momento** — o humano pode
 interromper o processo em qualquer etapa. Nesse caso o
@@ -453,7 +453,7 @@ sequenceDiagram
     rect rgb(240, 255, 240)
     Note over Humano, edit: INSTALAÇÃO
     edit ->> edit: Identifica deps necessárias
-    opt Comandos com sudo
+    opt Comandos user-space pendentes
         edit ->> Humano: Comandos para executar (bloco)
         Humano -->> edit: Executado
     end

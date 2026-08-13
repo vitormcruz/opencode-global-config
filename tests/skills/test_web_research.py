@@ -1,4 +1,7 @@
 from pathlib import Path
+import json
+import shutil
+import subprocess
 
 import pytest
 
@@ -74,16 +77,68 @@ def test_skill_declares_websearch_preference_chain(skill_content: str):
 @pytest.mark.unit
 def test_skill_has_executable_crwl_example_for_each_operation(skill_content: str):
     examples = (
-        "crwl https://example.com -o md-fit",
-        "crwl https://example.com -o json",
-        "crwl https://example.com -c 'js_code=document.title' -o md-fit",
-        "crwl https://example.com -c screenshot=true -O saida.json",
-        "crwl https://example.com -c pdf=true -O saida.json",
-        "crwl https://example.com --deep-crawl bfs --max-pages",
+        "crwl crawl https://example.com -o md-fit",
+        "crwl crawl https://example.com -o all -O page.json",
+        "crwl crawl https://example.com -c 'js_code=document.title' -o md-fit",
+        "crwl crawl https://example.com -c screenshot=true -o all -O saida.json",
+        "crwl crawl https://example.com --deep-crawl bfs --max-pages",
     )
 
     for example in examples:
         assert example in skill_content
+
+
+@pytest.mark.tools
+def test_published_crwl_examples_execute(
+    tmp_path: Path,
+) -> None:
+    crwl = shutil.which("crwl")
+    if crwl is None:
+        pytest.fail(
+            "crwl nao disponivel — instale crawl4ai com "
+            "`pipx install crawl4ai` antes deste teste"
+        )
+
+    url = "https://example.com"
+
+    def run_example(arguments: list[str]) -> subprocess.CompletedProcess[str]:
+        result = subprocess.run(
+            [crwl, "crawl", *arguments],
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
+        )
+        if result.returncode != 0:
+            pytest.fail(
+                f"exemplo crwl falhou (exit {result.returncode}): "
+                f"{result.stderr or result.stdout}"
+            )
+        return result
+
+    markdown = run_example([url, "-o", "md-fit"])
+    assert markdown.stdout.strip()
+
+    html_path = tmp_path / "page.json"
+    run_example([url, "-o", "all", "-O", str(html_path)])
+    assert html_path.stat().st_size > 0
+    json.loads(html_path.read_text(encoding="utf-8"))
+
+    javascript = run_example(
+        [url, "-c", "js_code=document.title", "-o", "md-fit"]
+    )
+    assert javascript.stdout.strip()
+
+    screenshot_path = tmp_path / "saida.json"
+    run_example(
+        [url, "-c", "screenshot=true", "-o", "all", "-O", str(screenshot_path)]
+    )
+    assert screenshot_path.stat().st_size > 0
+
+    deep = run_example(
+        [url, "--deep-crawl", "bfs", "--max-pages", "1", "-o", "md-fit"]
+    )
+    assert deep.stdout.strip()
 
 
 @pytest.mark.unit
