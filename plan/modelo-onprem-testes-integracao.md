@@ -85,6 +85,27 @@ endpoint LLM arbitrario. Portanto:
 Rationale: assumir a limitacao real da ferramenta em vez de interceptar
 internals nao documentados do Copilot (opcao descartada por fragilidade).
 
+### D3 — Bonsai 27B 1-bit (`Q1_0`) como modelo padrao
+
+- Default: `Bonsai-27B-Q1_0.gguf` (3,54 GB) + `Bonsai-27B-mmproj-Q8_0.gguf`,
+  que cabe inteiro nos 6 GB de VRAM da RTX A1000.
+- A variante Ternary 27B (`Q2_0`, 6,67 GB) fica selecionavel por variavel de
+  ambiente, para validacoes pontuais contra a variante de maior qualidade.
+- Somente variantes **27B** sao admitidas: as menores nao tem tool calling.
+
+Rationale: velocidade importa em suite de testes, e caber inteiro na VRAM
+evita offload para CPU. Licenca Apache 2.0 e repositorio publico.
+
+### D5 — Sem modelo alternativo no escopo
+
+O plano foca exclusivamente no Bonsai. Nenhum fallback (por exemplo
+Qwen3.6-35B-A3B) sera implementado ou documentado como caminho suportado.
+Se o tool calling do Bonsai 1-bit se mostrar insuficiente durante a execucao,
+o assunto sera revisto em um replan.
+
+Rationale: manter o escopo simples e evitar construir infraestrutura para um
+problema que ainda nao ocorreu.
+
 ### D4 — `llama-server` roda no host/WSL, fora do container
 
 O servidor do modelo roda como servico de longa duracao no host (WSL), e o
@@ -120,9 +141,9 @@ _(pendente)_
 | Copilot CLI nao permite endpoint LLM arbitrario | Alto | D1: harness Copilot fica em smoke tests deterministicos |
 | Modelos Bonsai < 27B nao tem tool calling | Alto | Restringir a escolha as variantes 27B |
 | Repos 27B privados no HF exigem `BONSAI_TOKEN` | — | **Resolvido:** repos ja publicos (`gated=false`) |
-| Hardware insuficiente para servir 27B | Medio | A definir na escolha de variante |
+| Hardware insuficiente para servir 27B | Baixo | D3: variante 1-bit cabe nos 6 GB de VRAM |
+| Tool calling do Bonsai 1-bit insuficiente para agentes | Medio | D5: tratado via replan, sem fallback pre-construido |
 
 ## Open Questions
 
-- Qual variante do Bonsai 27B sera usada (1-bit vs ternary)?
 - Como resolver o download de artefatos externos no build da imagem Docker?
