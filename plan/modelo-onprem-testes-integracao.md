@@ -106,6 +106,25 @@ o assunto sera revisto em um replan.
 Rationale: manter o escopo simples e evitar construir infraestrutura para um
 problema que ainda nao ocorreu.
 
+### D9 — `BonsaiServer` como utilitario de teste, com servidor persistente
+
+Espelha o padrao ja existente em `container_test_opencode.py`/`DockerSession`:
+
+- `tests/integration/model/bonsai_server.py` — classe `BonsaiServer`
+  (stdlib pura), com `ensure_up()`, `stop()`, `require_available()` e CLI
+  `--up` / `--down` / `--status`. Responsabilidades: baixar o GGUF do
+  HuggingFace quando ausente, subir o `llama-server` com `--jinja` e aguardar
+  o endpoint responder.
+- `tests/integration/model/conftest.py` — fixture `bonsai_server` com
+  `scope="session"`: o modelo e carregado uma unica vez por execucao da suite.
+- `tests/integration/model/test_bonsai_server.py` — testes unitarios do
+  utilitario.
+
+**Requisito imprescindivel:** se o `llama-server` ja estiver rodando, a fixture
+o reaproveita e **nao o derruba** no teardown. Carregar 3,5 GB de pesos leva
+dezenas de segundos, e executar a suite varias vezes em sequencia e o padrao de
+uso normal. O servidor permanece disponivel entre execucoes sucessivas.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -183,4 +202,4 @@ _(pendente)_
 
 ## Open Questions
 
-- Onde vive o utilitario que provisiona e sobe o `llama-server`?
+- Qual o mecanismo exato de desligamento do `llama-server` ocioso?
