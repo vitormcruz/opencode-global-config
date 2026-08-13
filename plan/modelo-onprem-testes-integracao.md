@@ -85,16 +85,18 @@ endpoint LLM arbitrario. Portanto:
 Rationale: assumir a limitacao real da ferramenta em vez de interceptar
 internals nao documentados do Copilot (opcao descartada por fragilidade).
 
-### D3 — Bonsai 27B 1-bit (`Q1_0`) como modelo padrao
+### D3 — Bonsai 27B 1-bit (`Q1_0`) como unico modelo
 
-- Default: `Bonsai-27B-Q1_0.gguf` (3,54 GB) + `Bonsai-27B-mmproj-Q8_0.gguf`,
-  que cabe inteiro nos 6 GB de VRAM da RTX A1000.
-- A variante Ternary 27B (`Q2_0`, 6,67 GB) fica selecionavel por variavel de
-  ambiente, para validacoes pontuais contra a variante de maior qualidade.
-- Somente variantes **27B** sao admitidas: as menores nao tem tool calling.
+- Modelo unico: `Bonsai-27B-Q1_0.gguf` (3,54 GB) +
+  `Bonsai-27B-mmproj-Q8_0.gguf`, que cabe inteiro nos 6 GB de VRAM da
+  RTX A1000.
+- **Sem variante selecionavel.** A Ternary 27B nao entra no escopo e nao ha
+  variavel de ambiente para trocar de modelo. Se no futuro houver necessidade
+  de outra variante, isso sera objeto de um novo planejamento.
 
 Rationale: velocidade importa em suite de testes, e caber inteiro na VRAM
-evita offload para CPU. Licenca Apache 2.0 e repositorio publico.
+evita offload para CPU. Licenca Apache 2.0 e repositorio publico. Manter um
+unico caminho suportado e coerente com D5 e D8.
 
 ### D5 — Sem modelo alternativo no escopo
 
