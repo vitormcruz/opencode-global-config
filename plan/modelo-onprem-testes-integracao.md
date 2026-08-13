@@ -106,6 +106,43 @@ o assunto sera revisto em um replan.
 Rationale: manter o escopo simples e evitar construir infraestrutura para um
 problema que ainda nao ocorreu.
 
+### D6 — Isolamento via rede Docker `--internal`
+
+O container de teste roda em uma rede dedicada criada com
+`docker network create --internal opencode-test-net`.
+
+- A rede interna nao recebe rota para a internet: qualquer tentativa de
+  alcancar um provider externo falha por construcao.
+- O container continua alcancando o host pelo IP do gateway da bridge, que e
+  onde o `llama-server` escuta (D4).
+
+Rationale: isolamento real e verificavel, sem container de proxy adicional.
+
+### D7 — Build com rede, runtime isolado
+
+O download do OpenCode no build da imagem (`curl https://opencode.ai/install`)
+e mantido.
+
+Rationale: o `curl` ocorre antes do `COPY .`, portanto nenhum conteudo do
+repositorio trafega. Baixar software nao caracteriza vazamento de dados. A
+fronteira de privacidade fica explicita: **build tem rede, runtime e isolado**.
+
+### D8 — Bonsai como modelo fixo; `OPENCODE_TEST_MODEL` removida
+
+- `tests/integration/config/opencode.test.json` passa a declarar um provider
+  OpenAI-compatible local apontando para o `llama-server`, e os agentes `plan`
+  e `build` usam o modelo Bonsai.
+- A variavel `OPENCODE_TEST_MODEL` deixa de existir. Nao ha modelo a escolher:
+  a suite usa o modelo baixado localmente.
+- Toda a logica de selecao de modelo e removida: `select_model_if_needed`,
+  `choose_model_interactively`, `extract_models_from_config`,
+  `_model_error`, a flag `--models` e o `require_model` do helper. As mensagens
+  que sugerem OpenAI/Anthropic/Ollama desaparecem junto.
+- O `entrypoint.py` deixa de aplicar modelo por variavel de ambiente.
+
+Rationale: com um unico modelo on-premises suportado, tornar o modelo
+configuravel reintroduz exatamente o risco que o plano quer eliminar.
+
 ### D4 — `llama-server` roda no host/WSL, fora do container
 
 O servidor do modelo roda como servico de longa duracao no host (WSL), e o
@@ -146,4 +183,4 @@ _(pendente)_
 
 ## Open Questions
 
-- Como resolver o download de artefatos externos no build da imagem Docker?
+- Onde vive o utilitario que provisiona e sobe o `llama-server`?
