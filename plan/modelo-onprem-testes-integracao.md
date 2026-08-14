@@ -240,6 +240,32 @@ Rationale: uma maquina so-CPU pode ser uma ordem de grandeza mais lenta que
 uma com CUDA. Um limite alto nao penaliza quem roda em GPU, porque nunca e
 alcancado.
 
+### D17 — Deteccao de backend valida capacidade real, nao sintoma
+
+A deteccao do D15 e ingenua: trata a presenca de `nvidia-smi` como prova de
+CUDA. No WSL, `nvidia-smi` vem do driver do Windows e existe mesmo sem o
+runtime CUDA instalado — o binario CUDA e baixado e falha ao carregar por
+falta de `libcudart.so.12` e `libcublas.so.12`.
+
+A deteccao passa a verificar a **capacidade efetiva**:
+
+- Antes de escolher CUDA, confirmar que `libcudart.so.12` e `libcublas.so.12`
+  sao resolviveis pelo linker.
+- Se nao forem, descer para Vulkan e, na ausencia deste, para CPU.
+- Nada e instalado: sem `apt`, sem `sudo`, sem dependencia nova e sem
+  manipular `LD_LIBRARY_PATH`.
+- Ao rebaixar o backend, o `BonsaiServer` imprime uma linha informando que
+  CUDA foi ignorado por falta de runtime, com o comando de instalacao para
+  quem quiser acelerar depois. E informativo, nunca obrigatorio.
+
+Rationale: a suite precisa passar em qualquer maquina sem intervencao manual —
+esse criterio sustenta o plano inteiro. Instalar CUDA como pre-requisito
+transformaria um teste automatizado em algo dependente de setup nao
+documentado. Isto **reforca** o D15: o provisionamento continua automatico,
+fixado no mesmo release e sem compilacao; apenas a deteccao deixa de confiar
+em um sintoma. Os pesos 1-bit tem 3,54 GB e cabem folgados em RAM, e o D16 ja
+removeu tempo como criterio de falha — CPU e um caminho valido.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -747,6 +773,38 @@ Ordem de deteccao (identica a `download_binaries.sh` do `Bonsai-demo`):
 
 ---
 
+#### Task 12: Endurecer a deteccao de backend (D17)
+
+**Description:** Corrigir a deteccao de backend do `BonsaiServer` para validar
+capacidade real antes de escolher CUDA, com rebaixamento automatico para
+Vulkan e depois CPU, e mensagem informativa quando o rebaixamento ocorrer.
+
+**Acceptance criteria:**
+- [ ] CUDA so e escolhido se `libcudart.so.12` e `libcublas.so.12` forem
+      resolviveis pelo linker
+- [ ] Sem runtime CUDA, o backend cai para Vulkan e, na ausencia deste, CPU
+- [ ] O rebaixamento imprime uma linha informativa com o comando de instalacao
+- [ ] Nenhuma instalacao, `sudo`, dependencia nova ou `LD_LIBRARY_PATH`
+- [ ] Se um binario ja baixado nao corresponder ao backend detectado, ele e
+      substituido em vez de reutilizado
+
+**Verification:**
+- [ ] Teste unitario com o probe de biblioteca mockado cobre os tres caminhos:
+      CUDA disponivel, CUDA ausente com Vulkan, e so CPU
+- [ ] No WSL sem runtime CUDA, `bonsai_server.py --up` sobe o servidor e serve
+      `/v1/models`
+- [ ] `.venv/bin/pytest -m "unit or tools"` passa
+
+**Dependencies:** Task 11
+
+**Files likely touched:**
+- `tests/integration/model/bonsai_server.py`
+- `tests/integration/model/test_bonsai_server.py`
+
+**Estimated scope:** S
+
+---
+
 #### Task 10: Validar o runtime completo no WSL/Linux
 
 **Description:** Executar a suite de verdade, no WSL/Linux (D13), com o
@@ -769,7 +827,7 @@ validacao: so gera codigo se algum criterio falhar.
 - [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes
 - [ ] `git grep -n "OPENCODE_CONFIG" -- tests/integration` nao retorna nada
 
-**Dependencies:** Task 9, Task 11
+**Dependencies:** Task 9, Task 11, Task 12
 
 **Files likely touched:**
 - nenhum, se todos os criterios passarem
@@ -797,6 +855,7 @@ validacao: so gera codigo se algum criterio falhar.
 | Bonsai 1-bit mais lento que o modelo anterior | Medio | D16: timeout deixa de ser criterio de falha |
 | Recarga apos o sleep de ociosidade atrasa o primeiro request | Baixo | D16: guarda alta, nunca atingida |
 | Maquina sem GPU: modelo em CPU, muito mais lento | Medio | D15 escolhe build CPU; D16 evita falha por lentidao |
+| `nvidia-smi` sem runtime CUDA (tipico no WSL) | Alto | D17: valida `libcudart`/`libcublas` e rebaixa o backend |
 | Maquina com pouca memoria (< ~5 GB livres) | Baixo | Falha explicita do `llama-server`; documentar requisito |
 | Release fixado do fork sai do ar | Baixo | Versao fixada e verificavel; trocar exige replan |
 | `host.docker.internal` indisponivel em rede `--internal` | Medio | Task 5: fallback para o IP do gateway da bridge |
