@@ -153,8 +153,8 @@ As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 - Nunca ultrapasse mais de 120 colunas, de texto, faça word-wrap para garantir essa regra
 
 # Exibição de Texto copie e cola
-- Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e colar, faça isso em um bloco de código 
-único para facilitar a cópia.
+- Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e
+  colar, faça isso em um bloco de código único para facilitar a cópia.
 
 ## Acao
 - Nao execute mudancas (edicao de arquivos, comandos destrutivos) sem confirmacao explicita do humano.
@@ -210,8 +210,11 @@ nas descrições
 - Framework: `pytest` em `tests/`. No WSL/Linux, use
   `.venv/bin/pytest -m "unit or tools or opencode"`; no Windows, use
   `.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"`.
-- Execute os testes no ambiente alvo. A integração OpenCode requer Docker e
-  `OPENCODE_TEST_MODEL` no WSL/Linux; a integração Copilot roda no Windows.
+- Execute os testes no ambiente alvo. A integração OpenCode requer Docker e o
+  llama-server local do Bonsai no WSL/Linux; a integração Copilot roda no
+  Windows.
+- O servidor Bonsai fica em `tests/integration/model/` e deve ser iniciado com
+  `python3 tests/integration/model/bonsai_server.py --up` antes da integração.
 - Não use `skip`: quando uma dependência externa não estiver disponível,
   use `pytest.fail` com uma mensagem clara e acionável.
 - A estrutura de testes deve espelhar a estrutura do código.

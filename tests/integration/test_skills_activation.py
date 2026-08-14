@@ -7,7 +7,6 @@ pytestmark = pytest.mark.opencode
 
 
 def test_prompt_mentions_doc_extract_with_coherent_response(opencode):
-    opencode.require_model()
     session = opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
@@ -20,7 +19,6 @@ def test_prompt_mentions_doc_extract_with_coherent_response(opencode):
 
 
 def test_prompt_mentions_md_export_with_coherent_response(opencode):
-    opencode.require_model()
     session = opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
@@ -33,7 +31,6 @@ def test_prompt_mentions_md_export_with_coherent_response(opencode):
 
 
 def test_svg_to_image_skill_can_be_mentioned_without_error(opencode):
-    opencode.require_model()
     session = opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
@@ -46,7 +43,6 @@ def test_svg_to_image_skill_can_be_mentioned_without_error(opencode):
 
 
 def test_test_driven_development_skill_has_tdd_trigger(opencode):
-    opencode.require_model()
     session = opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 
@@ -59,7 +55,6 @@ def test_test_driven_development_skill_has_tdd_trigger(opencode):
 
 
 def test_accessibility_audit_skill_can_be_mentioned(opencode):
-    opencode.require_model()
     session = opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
 

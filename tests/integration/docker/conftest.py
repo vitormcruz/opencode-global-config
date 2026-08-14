@@ -15,11 +15,11 @@ def docker_session() -> Iterator[DockerSession]:
 
     session = DockerSession()
     try:
-        session.ensure_up(interactive=False)
+        session.ensure_up()
     except ContainerTestError as error:
         pytest.fail(
             f"{error}\n"
-            "Instale/inicie Docker, defina OPENCODE_TEST_MODEL e execute "
+            "Instale/inicie Docker, suba o llama-server local e execute "
             "novamente a suíte pytest de integração.",
             pytrace=False,
         )

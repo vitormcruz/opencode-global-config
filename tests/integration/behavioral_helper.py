@@ -12,6 +12,9 @@ from urllib.request import Request, urlopen
 import pytest
 
 
+REQUEST_TIMEOUT_SECONDS = 120
+
+
 @dataclass(frozen=True)
 class OpenCodeResponse:
     """Response returned by the OpenCode HTTP API."""
@@ -69,16 +72,6 @@ class OpenCodeClient:
         if response.status_code >= 400:
             pytest.fail(self.service_error)
 
-    @staticmethod
-    def require_model() -> None:
-        """Fail with an actionable instruction when no model exists."""
-
-        if not os.environ.get("OPENCODE_TEST_MODEL"):
-            pytest.fail(
-                "ERRO: OPENCODE_TEST_MODEL não definido. "
-                "Defina o modelo antes de rodar testes."
-            )
-
     def get(self, path: str) -> CommandResult:
         """Run a GET request and expose a command-like result."""
 
@@ -119,18 +112,11 @@ class OpenCodeClient:
         self,
         session_id: str,
         text: str,
-        model: str = "",
         agent: str = "",
     ) -> CommandResult:
-        """Send a message and return concatenated text parts as command output."""
+        """Send a message using the model fixed by the effective config."""
 
         payload: dict[str, Any] = {"parts": [{"type": "text", "text": text}]}
-        if model:
-            provider_id, separator, model_id = model.partition("/")
-            payload["model"] = {
-                "providerID": provider_id,
-                "modelID": model_id if separator else provider_id,
-            }
         if agent:
             payload["agent"] = agent
 
@@ -178,7 +164,7 @@ class OpenCodeClient:
             method=method,
         )
         try:
-            with urlopen(request, timeout=10) as response:
+            with urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
                 body = response.read().decode("utf-8", errors="replace")
                 return OpenCodeResponse(response.status, body)
         except HTTPError as error:

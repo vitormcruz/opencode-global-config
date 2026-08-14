@@ -204,20 +204,40 @@ No Windows, use o executável da virtualenv pelo PowerShell:
 
 ### Testes de integração (Camada 2)
 
-Os testes de integração exigem um modelo configurado explicitamente. Por
-segurança, **não há modelo padrão** — você deve escolher conscientemente qual
-modelo usar.
+Os testes comportamentais do OpenCode usam exclusivamente o Bonsai local,
+servido pelo llama-server no WSL/Linux. Consulte a seção de pré-requisitos
+antes de executar a suíte.
 
-**Opção 1: modelo próprio (recomendado)**
+#### Servidor local Bonsai
+
+O servidor requer aproximadamente 4,2 GB livres em
+`~/.cache/opencode-config/models/`. O comando abaixo baixa os dois arquivos
+GGUF quando ainda não existem e inicia o `llama-server` na porta 8080:
+
+Instale o `llama-server` do llama.cpp no WSL/Linux e confirme que ele está no
+`PATH`:
 
 ```bash
-export OPENCODE_TEST_MODEL='openai/gpt-4'
-.venv/bin/pytest -m opencode
+llama-server --version
 ```
 
-> **AVISO**: O modelo aberto padrão (`opencode/big-pickle`) é um modelo externo
-> que **COLETA DADOS** enviados a ele. **Nunca use em ambientes corporativos ou
-> com dados sensíveis.** Use apenas para testes pessoais ou de demonstração.
+```bash
+python3 tests/integration/model/bonsai_server.py --up
+python3 tests/integration/model/bonsai_server.py --status
+```
+
+O processo usa `--jinja` para tool calling e
+`--sleep-idle-seconds 600`: após 10 minutos sem requisições, os pesos saem da
+memória e são recarregados automaticamente na próxima requisição. A fixture
+pytest reaproveita o processo e não o encerra. Para desligamento explícito:
+
+```bash
+python3 tests/integration/model/bonsai_server.py --down
+```
+
+```bash
+.venv/bin/pytest -m opencode
+```
 
 Para executar a integração Copilot:
 
@@ -229,5 +249,9 @@ Pré-requisitos:
 
 - Python >= 3.10 e dependências de `requirements-dev.txt`
 - Docker somente para a integração OpenCode no WSL/Linux
-- `OPENCODE_TEST_MODEL` para testes que enviam prompts
+- llama-server local com os pesos Bonsai 27B 1-bit
 - dependências externas conforme o alvo escolhido
+
+O build da imagem Docker tem acesso à rede apenas para instalar o OpenCode.
+Durante os testes, o container usa a rede interna `opencode-test-net`, sem rota
+para a internet, e acessa somente o llama-server pelo gateway do host.

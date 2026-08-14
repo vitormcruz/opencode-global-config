@@ -46,20 +46,6 @@ def _write_json(path: Path, value: dict) -> None:
                 pass
 
 
-def _apply_test_model(config: dict, model: str) -> dict:
-    agent = config.get("agent")
-    if not isinstance(agent, dict):
-        agent = {}
-        config["agent"] = agent
-    for agent_name in ("plan", "build"):
-        agent_config = agent.get(agent_name)
-        if not isinstance(agent_config, dict):
-            agent_config = {}
-            agent[agent_name] = agent_config
-        agent_config["model"] = model
-    return config
-
-
 def _merge_json(base: object, override: object) -> object:
     """Implement jq's recursive object merge used for provider settings."""
 
@@ -86,20 +72,9 @@ def _merge_host_provider(config: dict, host_config_file: Path) -> dict:
 
 
 def configure() -> None:
-    """Apply environment-provided model and provider configuration."""
+    """Apply the optional host provider overlay without changing the model."""
 
-    model = os.environ.get("OPENCODE_TEST_MODEL", "")
     config = _read_json(CONFIG_FILE)
-    if model:
-        print(f"[entrypoint] Aplicando modelo: {model}", flush=True)
-        _write_json(CONFIG_FILE, _apply_test_model(config, model))
-    else:
-        print(
-            "[entrypoint] WARN: OPENCODE_TEST_MODEL não definido, "
-            "usando config padrão.",
-            flush=True,
-        )
-
     host_config = os.environ.get("OPENCODE_CONFIG", "")
     if host_config:
         host_config_file = Path(host_config)

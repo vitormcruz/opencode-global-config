@@ -16,7 +16,6 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
@@ -25,6 +24,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 CONTAINER_NAME = "opencode-config-test"
 IMAGE_NAME = "opencode-config-test:latest"
+NETWORK_NAME = "opencode-test-net"
 HOST_PORT = 4196
 CONTAINER_PORT = 4096
 
@@ -33,147 +33,8 @@ class ContainerTestError(RuntimeError):
     """Raised when the Docker/OpenCode test prerequisites are not met."""
 
 
-def _json_scalar(value: Any) -> str:
-    """Render a jq ``-r``-like scalar for the uncommon non-string case."""
-
-    if isinstance(value, str):
-        return value
-    if value is True:
-        return "true"
-    if value is False:
-        return "false"
-    if value is None:
-        return ""
-    if isinstance(value, (int, float)):
-        return str(value)
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-
-
-def extract_models_from_config(config_file: str | Path) -> list[str]:
-    """Return unique ``provider/model`` names declared by an OpenCode config.
-
-    This mirrors the former jq pipeline: agent models are read from
-    ``agent.*.model`` and provider models from ``provider.*.models``.  Invalid
-    or missing files intentionally produce an empty result, matching the
-    shell helper's silent failure behavior.
-    """
-
-    try:
-        with Path(config_file).open(encoding="utf-8") as stream:
-            config = json.load(stream)
-    except (OSError, json.JSONDecodeError, TypeError, ValueError):
-        return []
-
-    if not isinstance(config, dict):
-        return []
-
-    models: set[str] = set()
-    agent = config.get("agent")
-    if isinstance(agent, dict):
-        agent_entries = agent.values()
-    elif isinstance(agent, list):
-        agent_entries = agent
-    else:
-        agent_entries = ()
-
-    for entry in agent_entries:
-        if not isinstance(entry, dict):
-            continue
-        model = entry.get("model")
-        # jq's ``// empty`` omits null and false, but preserves an empty string.
-        if model is None or model is False:
-            continue
-        rendered = _json_scalar(model)
-        if rendered:
-            models.add(rendered)
-
-    provider = config.get("provider")
-    if isinstance(provider, dict):
-        for provider_name, provider_config in provider.items():
-            if not isinstance(provider_config, dict):
-                continue
-            provider_models = provider_config.get("models")
-            if not isinstance(provider_models, dict):
-                continue
-            for model_name in provider_models:
-                models.add(f"{provider_name}/{model_name}")
-
-    # jq's ``unique`` sorts before emitting.
-    return sorted(models)
-
-
 def _log(message: str) -> None:
     print(f"[container-test-opencode] {message}")
-
-
-def _warn(message: str) -> None:
-    print(f"[container-test-opencode] WARN: {message}", file=sys.stderr)
-
-
-def _model_error() -> ContainerTestError:
-    return ContainerTestError(
-        "OPENCODE_TEST_MODEL não definido.\n\n"
-        "Para executar testes de integração, defina explicitamente o modelo:\n\n"
-        "  export OPENCODE_TEST_MODEL='seu-modelo-aqui'\n"
-        "  pytest -m opencode\n\n"
-        "Exemplos:\n"
-        "  - OpenAI:      export OPENCODE_TEST_MODEL='openai/gpt-4'\n"
-        "  - Anthropic:   export OPENCODE_TEST_MODEL='anthropic/claude-3-5-sonnet'\n"
-        "  - Local (Ollama): export OPENCODE_TEST_MODEL='ollama/llama3.1'\n\n"
-        "Para listar modelos disponíveis no ambiente Docker, execute:\n"
-        "  python3 tests/integration/docker/container_test_opencode.py --models\n\n"
-        "IMPORTANTE: em ambientes corporativos/sensíveis, use apenas modelos "
-        "aprovados pela sua organização."
-    )
-
-
-def choose_model_interactively(models: list[str]) -> str:
-    """Prompt for one model, retaining the shell helper's numbered workflow."""
-
-    if not models:
-        raise ContainerTestError("Nenhum modelo disponível para seleção.")
-
-    print("Modelos disponíveis:", file=sys.stderr)
-    for index, model in enumerate(models, start=1):
-        print(f"  {index}) {model}", file=sys.stderr)
-    print(file=sys.stderr)
-
-    while True:
-        try:
-            choice = input("Escolha o número do modelo: ")
-        except EOFError as error:
-            raise _model_error() from error
-        if choice.isdigit() and 1 <= int(choice) <= len(models):
-            return models[int(choice) - 1]
-        print("Escolha inválida. Digite um número da lista.", file=sys.stderr)
-
-
-def select_model_if_needed(*, interactive: bool) -> str:
-    """Resolve the model from the environment or, optionally, config prompt."""
-
-    configured = os.environ.get("OPENCODE_TEST_MODEL", "")
-    if configured:
-        _log(f"Modelo configurado: {configured}")
-        return configured
-
-    config_path = os.environ.get("OPENCODE_CONFIG", "")
-    if config_path:
-        path = Path(config_path)
-        if path.is_file():
-            config_models = extract_models_from_config(path)
-            if config_models:
-                if not interactive:
-                    raise _model_error()
-                _log(f"Modelos encontrados em OPENCODE_CONFIG ({path}):")
-                selected = choose_model_interactively(config_models)
-                os.environ["OPENCODE_TEST_MODEL"] = selected
-                _log(f"Modelo selecionado: {selected}")
-                return selected
-            _warn(f"Nenhum modelo encontrado em OPENCODE_CONFIG: {path}")
-        else:
-            _warn(f"OPENCODE_CONFIG aponta para arquivo inexistente: {path}")
-
-    raise _model_error()
 
 
 @dataclass
@@ -256,6 +117,44 @@ class DockerSession:
         )
         return result.returncode == 0 and self.container_name in result.stdout.split()
 
+    def network_exists(self) -> bool:
+        """Return whether the dedicated internal test network exists."""
+
+        result = self._run_docker(
+            "network",
+            "ls",
+            "--filter",
+            f"name=^{NETWORK_NAME}$",
+            "--format",
+            "{{.Name}}",
+        )
+        return result.returncode == 0 and NETWORK_NAME in result.stdout.split()
+
+    def ensure_test_network(self) -> None:
+        """Create the isolated test network when it is not already present."""
+
+        if self.network_exists():
+            return
+        _log(f"Criando rede Docker interna '{NETWORK_NAME}'...")
+        self._checked_docker("network", "create", "--internal", NETWORK_NAME)
+
+    def container_uses_test_network(self) -> bool:
+        """Return whether the named container is attached only to the test network."""
+
+        result = self._run_docker(
+            "inspect",
+            "--format",
+            "{{json .NetworkSettings.Networks}}",
+            self.container_name,
+        )
+        if result.returncode != 0:
+            return False
+        try:
+            networks = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            return False
+        return isinstance(networks, dict) and set(networks) == {NETWORK_NAME}
+
     def remove_container_if_exists(self) -> None:
         """Remove the named container when present."""
 
@@ -286,18 +185,6 @@ class DockerSession:
         )
         _log("Imagem construída com sucesso.")
 
-    def list_models(self) -> str:
-        """List models exposed by the built OpenCode image."""
-
-        return self._checked_docker(
-            "run",
-            "--rm",
-            self.image_name,
-            "/root/.opencode/bin/opencode",
-            "--pure",
-            "models",
-        )
-
     def _container_logs(self) -> str:
         result = self._run_docker("logs", self.container_name)
         lines = (result.stdout or result.stderr).splitlines()
@@ -306,29 +193,34 @@ class DockerSession:
     def start_container(self) -> None:
         """Start or create the container and wait for OpenCode's HTTP endpoint."""
 
+        self.ensure_test_network()
+        if self.container_exists() and not self.container_uses_test_network():
+            _log(
+                f"Container '{self.container_name}' está fora da rede isolada. "
+                "Recriando..."
+            )
+            self.remove_container_if_exists()
+
         if self.container_running():
             _log(f"Container '{self.container_name}' já está em execução. Reusando.")
         elif self.container_exists():
             _log(f"Container '{self.container_name}' existe parado. Reiniciando...")
             self._checked_docker("start", self.container_name)
         else:
-            model = os.environ.get("OPENCODE_TEST_MODEL", "")
-            if not model:
-                raise _model_error()
             _log(f"Criando e iniciando container '{self.container_name}'...")
-            docker_env = ["-e", f"OPENCODE_TEST_MODEL={model}"]
+            docker_options = ["--add-host=host.docker.internal:host-gateway"]
             docker_volumes: list[str] = []
             config_path = os.environ.get("OPENCODE_CONFIG", "")
             if config_path and Path(config_path).is_file():
                 container_config = "/opt/opencode-config/host-opencode-config.json"
-                docker_env.extend(["-e", f"OPENCODE_CONFIG={container_config}"])
+                docker_options.extend(["-e", f"OPENCODE_CONFIG={container_config}"])
                 docker_volumes.extend(
                     ["-v", f"{config_path}:{container_config}:ro"]
                 )
 
             host_ca = Path("/etc/ssl/certs/ca-certificates.crt")
             if host_ca.is_file():
-                docker_env.extend(
+                docker_options.extend(
                     ["-e", "NODE_EXTRA_CA_CERTS=/etc/ssl/certs/host-ca-certificates.crt"]
                 )
                 docker_volumes.extend(
@@ -340,9 +232,11 @@ class DockerSession:
                 "-d",
                 "--name",
                 self.container_name,
+                "--network",
+                NETWORK_NAME,
                 "-p",
                 f"{self.host_port}:{self.container_port}",
-                *docker_env,
+                *docker_options,
                 *docker_volumes,
                 self.image_name,
             )
@@ -388,11 +282,11 @@ class DockerSession:
         else:
             _log(f"Container '{self.container_name}' não está em execução.")
 
-    def ensure_up(self, *, rebuild: bool = False, interactive: bool = False) -> None:
-        """Build/select/start the container for a CLI or pytest session."""
+    def ensure_up(self, *, rebuild: bool = False) -> None:
+        """Build and start the fixed local-model container."""
 
         self.check_docker()
-        select_model_if_needed(interactive=interactive)
+        self.ensure_test_network()
         if rebuild:
             self.remove_container_if_exists()
             self.build_image()
@@ -420,11 +314,6 @@ def _parser() -> argparse.ArgumentParser:
         help="Reconstrói a imagem e recria o container.",
     )
     actions.add_argument("--down", action="store_true", help="Para o container.")
-    actions.add_argument(
-        "--models",
-        action="store_true",
-        help="Lista modelos disponíveis na imagem.",
-    )
     return parser
 
 
@@ -434,13 +323,10 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     session = DockerSession()
     try:
-        if args.models:
-            session.check_docker()
-            print(session.list_models(), end="")
-        elif args.down:
+        if args.down:
             session.down()
         else:
-            session.ensure_up(rebuild=args.rebuild, interactive=True)
+            session.ensure_up(rebuild=args.rebuild)
     except ContainerTestError as error:
         print(f"[container-test-opencode] ERROR: {error}", file=sys.stderr)
         return 1

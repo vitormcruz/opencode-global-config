@@ -1,12 +1,25 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["@slkiser/opencode-quota"],
+  "provider": {
+    "bonsai-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://host.docker.internal:8080/v1"
+      },
+      "models": {
+        "bonsai-27b": {
+          "name": "Bonsai 27B 1-bit"
+        }
+      }
+    }
+  },
   "agent": {
     "plan": {
-      "model": "opencode/big-pickle"
+      "model": "bonsai-local/bonsai-27b"
     },
     "build": {
-      "model": "opencode/big-pickle"
+      "model": "bonsai-local/bonsai-27b"
     },
     "aws-analista": {
       "permission": {
