@@ -160,6 +160,44 @@ Rationale: entrega o comportamento desejado sem watchdog, heartbeat ou estado
 em disco. Como o servidor dorme em vez de morrer, nao ha corrida entre
 "derrubar" e "usar" — a fonte classica de flakiness em watchdogs.
 
+### D13 — Execucao exclusivamente no WSL/Linux
+
+A suite de integracao do OpenCode roda **somente no WSL/Linux**. Windows esta
+fora do escopo deste plano.
+
+Rationale: apenas o OpenCode permite apontar para um modelo arbitrario, e o
+OpenCode e o harness suportado no WSL/Linux. O harness Copilot, unico no
+Windows, ficou restrito a smoke tests deterministicos por D1 — ele nao executa
+inferencia e portanto nao precisa do Bonsai.
+
+Consequencias operacionais:
+
+- Nao investigar, diagnosticar ou corrigir ausencia de `llama-server`,
+  `python3` ou falhas TLS/Schannel no PATH do Windows. Sao irrelevantes.
+- Toda validacao de runtime (download dos pesos, `llama-server`, Docker,
+  `pytest -m opencode`) acontece no WSL/Linux.
+- O acesso ao HuggingFace deve ser testado a partir do WSL antes de qualquer
+  conclusao sobre CA corporativa ou mirror. Se o download falhar **no WSL**,
+  ai sim solicitar CA aprovada ou mirror ao humano — nunca desabilitar TLS.
+
+### D14 — Publicacao da porta via proxy TCP no host
+
+Em rede Docker `--internal`, `-p 127.0.0.1:4196:4096` nao publica a porta: o
+container responde internamente em `127.0.0.1:4096`, mas o host nao alcanca
+`127.0.0.1:4196`. A solucao e um proxy TCP em stdlib rodando no host.
+
+- Bind exclusivo em `127.0.0.1:4196`, encaminhando para o IP do container na
+  rede `opencode-test-net`.
+- O `-p` do Docker e **removido** do `docker run`.
+- Lifecycle explicito em `--up`, `--down`, `--rebuild` e na fixture.
+- Nao anexar segunda rede ao container, nao publicar porta Docker e nao
+  liberar egress.
+- O gateway real mapeado para `host.docker.internal` e o bloqueio de saida
+  externa permanecem intactos.
+
+Rationale: preserva o isolamento comprovado por D6/D11 e restabelece o acesso
+do host ao OpenCode sem abrir nenhuma rota nova para fora.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -285,9 +323,10 @@ Parametros fixos:
 
 #### Task 2: Fixture `bonsai_server` e testes do utilitario
 
-**Description:** Expor o `BonsaiServer` a suite via fixture session-scoped e
-cobrir o utilitario com testes unitarios, espelhando
-`tests/integration/docker/conftest.py` e `test_container_test_opencode.py`.
+**Description:** Expor o `BonsaiServer` no escopo de toda a suite via fixture
+session-scoped e cobrir o utilitario com testes unitarios. As fixtures OpenCode
+e Docker dependem dela, garantindo que o modelo esteja disponivel antes do
+container.
 
 **Acceptance criteria:**
 - [x] Fixture `bonsai_server` com `scope="session"` chama `ensure_up()` uma
@@ -304,7 +343,7 @@ cobrir o utilitario com testes unitarios, espelhando
 **Dependencies:** Task 1
 
 **Files likely touched:**
-- `tests/integration/model/conftest.py` (novo)
+- `tests/integration/conftest.py`
 - `tests/integration/model/test_bonsai_server.py` (novo)
 
 **Estimated scope:** S
@@ -382,6 +421,8 @@ entrypoint e os testes correspondentes.
 
 **Acceptance criteria:**
 - [x] `git grep OPENCODE_TEST_MODEL` retorna vazio (exceto `plan/`)
+- [x] `OPENCODE_CONFIG` nao e montada, propagada nem mesclada no runtime de
+      integracao
 - [x] Nenhuma mensagem no repo sugere OpenAI, Anthropic ou Ollama como modelo
       de teste
 - [ ] A suite roda sem nenhuma variavel de modelo definida
@@ -418,11 +459,13 @@ entrypoint e os testes correspondentes.
 
 **Description:** Criar e usar a rede `opencode-test-net` com
 `docker network create --internal`, conectando o container de teste apenas a
-ela. Manter `--add-host=host.docker.internal:host-gateway` para alcancar o
-`llama-server` no host.
+ela. O gateway real da bridge e descoberto antes de mapear
+`host.docker.internal` para alcancar o `llama-server` no host.
 
 **Acceptance criteria:**
 - [x] `DockerSession` cria a rede quando ausente e usa `--network opencode-test-net`
+- [x] Rede existente e validada como `Internal=true`; o gateway real e
+      descoberto antes do mapeamento de `host.docker.internal`
 - [ ] O container alcanca `host.docker.internal:8080`
 - [ ] O container **nao** alcanca nenhum host da internet
 
@@ -448,8 +491,12 @@ ela. Manter `--add-host=host.docker.internal:host-gateway` para alcancar o
 **Acceptance criteria:**
 - [x] Teste de config: falha se a config efetiva declarar qualquer provider
       alem de `bonsai-local`
+- [x] Teste de config tambem fixa o modelo `bonsai-local/bonsai-27b` e a URL
+      local esperada
 - [x] Teste de rede: executa dentro do container uma tentativa de conexao a um
       host externo e **exige** que ela falhe
+- [x] Respostas HTTP externas nao sao confundidas com bloqueio; somente erros
+      de DNS, conexao ou timeout aprovam o enforcement
 - [x] Ambos usam `pytest.fail` com mensagem explicando a violacao de privacidade
 
 **Verification:**
@@ -544,6 +591,110 @@ pre-requisito do `llama-server` local. Respeitar o limite de 120 colunas.
 **Bloqueio de verificação:** Docker, `llama-server` e os pesos Bonsai não estão
 disponíveis no ambiente atual. As verificações de runtime permanecem pendentes
 em WSL/Linux com os pré-requisitos ativos.
+
+---
+
+## Replan — Fase 5: Runtime comprovado
+
+Contexto do replan (pos-commit `bc80a0a`): a migracao foi implementada, mas o
+runtime nunca foi comprovado de ponta a ponta. Diagnostico do working tree:
+
+- O proxy TCP **foi escrito mas nao ligado**. Existem `_run_tcp_proxy`,
+  `_proxy_connection`, `start_proxy`, `stop_proxy`, `proxy_pid_path` e as
+  flags CLI `--proxy*` em `container_test_opencode.py`, porem:
+  - `start_container()` ainda passa `-p 127.0.0.1:4196:4096` e **nunca chama**
+    `start_proxy()`;
+  - `down()` **nunca chama** `stop_proxy()`;
+  - `_wait_until_ready()` aguarda em `127.0.0.1:4196`, porta que ninguem
+    publica na rede interna.
+- A rede `--internal` esta correta: bloqueia DNS/egress e o container alcanca
+  o gateway real e o Bonsai.
+- O `BonsaiServer` baixa os pesos GGUF mas nao provisiona o `llama-server`,
+  e agora falha cedo quando o executavel nao esta no PATH.
+
+#### Task 9: Ligar o proxy TCP ao lifecycle
+
+**Description:** Concluir a implementacao iniciada no working tree, conectando
+o proxy ja escrito ao ciclo de vida do container. Inspecionar o diff atual
+antes de escrever codigo novo — nao reescrever o que ja existe.
+
+Alteracoes necessarias em
+`tests/integration/docker/container_test_opencode.py`:
+
+1. Remover `-p 127.0.0.1:{host_port}:{container_port}` do `docker run` em
+   `start_container()`.
+2. Apos o container estar em execucao, descobrir seu IP via `container_ip()` e
+   chamar `start_proxy(ip)`.
+3. Chamar `_wait_until_ready()` somente depois que o proxy estiver ativo.
+4. Chamar `stop_proxy()` em `down()` e no caminho de `--rebuild`, antes de
+   remover o container.
+5. Garantir que a fixture derrube o proxy de forma coerente com o lifecycle do
+   container.
+
+**Acceptance criteria:**
+- [ ] `docker run` nao contem mais `-p`
+- [ ] `--up` e `--rebuild` sobem container e proxy; `--down` derruba ambos
+- [ ] Executar `--up` duas vezes nao deixa dois proxies vivos (o PID antigo e
+      encerrado antes de iniciar outro)
+- [ ] O proxy escuta exclusivamente em `127.0.0.1`, nunca em `0.0.0.0`
+- [ ] Nenhuma segunda rede e anexada ao container
+
+**Verification:**
+- [ ] `python3 tests/integration/docker/container_test_opencode.py --rebuild`
+      inicia o container com sucesso
+- [ ] `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4196/` retorna
+      `200` no host
+- [ ] `--down` seguido de `curl` na mesma URL falha (proxy encerrado)
+- [ ] `ss -ltnp | grep 4196` mostra bind em `127.0.0.1`, nao `0.0.0.0`
+
+**Dependencies:** Task 5
+
+**Files likely touched:**
+- `tests/integration/docker/container_test_opencode.py`
+- `tests/integration/docker/test_container_test_opencode.py`
+- `tests/integration/conftest.py`
+
+**Estimated scope:** M
+
+---
+
+#### Task 10: Validar o runtime completo no WSL/Linux
+
+**Description:** Executar a suite de verdade, no WSL/Linux (D13), com o
+`llama-server` servindo o Bonsai e o container isolado. Esta task e de
+validacao: so gera codigo se algum criterio falhar.
+
+**Acceptance criteria:**
+- [ ] O container alcanca `/v1/models` no Bonsai via `host.docker.internal`
+- [ ] `api.openai.com` permanece inacessivel por DNS e por conexao
+- [ ] A suite `-m opencode` conecta ao servico e passa **duas vezes seguidas**
+- [ ] A configuracao efetiva usa exclusivamente `bonsai-local/bonsai-27b`
+- [ ] `OPENCODE_CONFIG` continua ausente de `tests/integration`
+- [ ] Nenhum `pytest.skip`, dependencia nova ou fallback de modelo
+
+**Verification:**
+- [ ] `docker exec opencode-config-test curl -s --max-time 5
+      http://host.docker.internal:8080/v1/models` retorna JSON
+- [ ] `docker exec opencode-config-test curl -s --max-time 5
+      https://api.openai.com` falha
+- [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes
+- [ ] `git grep -n "OPENCODE_CONFIG" -- tests/integration` nao retorna nada
+
+**Dependencies:** Task 9
+
+**Files likely touched:**
+- nenhum, se todos os criterios passarem
+
+**Estimated scope:** S
+
+---
+
+### Checkpoint: Runtime comprovado
+
+- [ ] Host alcanca o OpenCode; OpenCode alcanca o Bonsai; ninguem alcanca a
+      internet
+- [ ] Suite verde duas vezes seguidas
+- [ ] Revisar com o humano antes de finalizar
 
 ## Risks and Mitigations
 
