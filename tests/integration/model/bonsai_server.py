@@ -8,11 +8,16 @@ by successive pytest executions.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import os
+import platform
+import re
 import shutil
 import signal
+import stat
 import subprocess
 import sys
+import tarfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,11 +31,23 @@ MODEL_FILE = "Bonsai-27B-Q1_0.gguf"
 MMPROJ_FILE = "Bonsai-27B-mmproj-Q8_0.gguf"
 MODEL_BASE_URL = f"https://huggingface.co/{MODEL_REPOSITORY}/resolve/main"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "models"
+LLAMA_RELEASE_TAG = "prism-b9596-9fcaed7"
+LLAMA_RELEASE_BASE_URL = (
+    "https://github.com/PrismML-Eng/llama.cpp/releases/download/"
+    f"{LLAMA_RELEASE_TAG}"
+)
+DEFAULT_LLAMA_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "llama"
+LLAMA_RELEASE_MARKER = ".llama_release"
+LLAMA_BACKEND_MARKER = ".llama_backend"
+CUDA_RUNTIME_INSTALL_COMMAND = (
+    "sudo apt install cuda-cudart-12-8 libcublas-12-8"
+)
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_BIND_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
 IDLE_SECONDS = 600
 PID_FILE_NAME = "llama-server.pid"
+DOWNLOAD_TIMEOUT_SECONDS = 600
 
 
 class BonsaiServerError(RuntimeError):
@@ -47,6 +64,9 @@ class BonsaiServer:
 
     cache_dir: Path = field(
         default_factory=lambda: Path.home() / ".cache" / "opencode-config" / "models"
+    )
+    llama_cache_dir: Path = field(
+        default_factory=lambda: Path.home() / ".cache" / "opencode-config" / "llama"
     )
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
@@ -90,24 +110,17 @@ class BonsaiServer:
         return f"{self.endpoint_url}/v1/models"
 
     def _find_executable(self) -> str:
-        executable = self.executable or shutil.which("llama-server")
-        if executable is None:
-            raise BonsaiServerError(
-                "llama-server nao encontrado no PATH. "
-                "Instale o llama.cpp e verifique:\n"
-                "  llama-server --version\n"
-                "Depois execute:\n"
-                "  python3 tests/integration/model/bonsai_server.py --up"
-            )
-        return executable
+        if self.executable is not None:
+            return self.executable
+        return self._ensure_llama_binary()
 
     def _download_file(self, url: str, destination: Path) -> None:
         """Download one model artifact atomically."""
 
         temporary_path = destination.with_name(f".{destination.name}.part")
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        destination.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with urlopen(url, timeout=60) as response:
+            with urlopen(url, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response:
                 with temporary_path.open("wb") as output:
                     self._copy_response(response, output)
             if temporary_path.stat().st_size == 0:
@@ -124,6 +137,261 @@ class BonsaiServer:
             ) from error
 
     @staticmethod
+    def _command_output(command: list[str]) -> str:
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except OSError:
+            return ""
+        return f"{result.stdout}\n{result.stderr}"
+
+    @classmethod
+    def _cuda_version(cls) -> tuple[int, int] | None:
+        for command in ("nvcc", "nvidia-smi"):
+            executable = shutil.which(command)
+            if executable is None:
+                continue
+            arguments = ["--version"] if command == "nvcc" else []
+            output = cls._command_output([executable, *arguments])
+            match = re.search(r"(?:release|CUDA Version:)\s*(\d+)\.(\d+)", output)
+            if match is None:
+                return (12, 4)
+            return int(match.group(1)), int(match.group(2))
+        return None
+
+    @staticmethod
+    def _cuda_runtime_available() -> bool:
+        for library in ("libcudart.so.12", "libcublas.so.12"):
+            try:
+                ctypes.CDLL(library)
+            except OSError:
+                return False
+        return True
+
+    @classmethod
+    def _select_llama_asset(cls) -> str:
+        architecture = platform.machine().lower()
+        if architecture not in {"x86_64", "amd64"}:
+            raise BonsaiServerError(
+                f"Arquitetura Linux não suportada para o llama-server: {architecture}."
+            )
+
+        cuda_version = cls._cuda_version()
+        if cuda_version is not None:
+            if not cls._cuda_runtime_available():
+                _log(
+                    "CUDA ignorado: runtime ausente "
+                    "(libcudart.so.12/libcublas.so.12). Para habilitar GPU: "
+                    f"{CUDA_RUNTIME_INSTALL_COMMAND}"
+                )
+                if shutil.which("vulkaninfo") is not None:
+                    return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-vulkan-x64.tar.gz"
+                return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-x64.tar.gz"
+            major, minor = cuda_version
+            cuda_tag = "12.8" if major > 12 or (major == 12 and minor >= 8) else "12.4"
+            return f"llama-{LLAMA_RELEASE_TAG}-bin-linux-cuda-{cuda_tag}-x64.tar.gz"
+
+        if any(shutil.which(command) for command in ("rocminfo", "rocm-smi", "hipcc")):
+            return (
+                f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-rocm-7.2-x64.tar.gz"
+            )
+
+        if shutil.which("vulkaninfo") is not None:
+            return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-vulkan-x64.tar.gz"
+
+        return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-x64.tar.gz"
+
+    @staticmethod
+    def _find_binary(root: Path) -> Path | None:
+        direct_path = root / "llama-server"
+        if direct_path.is_file():
+            return direct_path
+        for path in root.rglob("llama-server"):
+            if path.is_file():
+                return path
+        return None
+
+    def _cached_llama_binary(self) -> Path | None:
+        if not self.llama_cache_dir.is_dir():
+            return None
+        return self._find_binary(self.llama_cache_dir)
+
+    def _cached_release(self) -> str | None:
+        try:
+            return (
+                self.llama_cache_dir / LLAMA_RELEASE_MARKER
+            ).read_text(encoding="ascii").strip()
+        except (FileNotFoundError, OSError):
+            return None
+
+    def _cached_backend(self) -> str | None:
+        try:
+            return (
+                self.llama_cache_dir / LLAMA_BACKEND_MARKER
+            ).read_text(encoding="ascii").strip()
+        except (FileNotFoundError, OSError):
+            return None
+
+    def _inferred_cached_backend(self) -> str:
+        backend_markers = (
+            ("cuda", "libggml-cuda.so"),
+            ("rocm", "libggml-rocm.so"),
+            ("vulkan", "libggml-vulkan.so"),
+        )
+        for backend, marker in backend_markers:
+            if any(self.llama_cache_dir.rglob(marker + "*")):
+                return backend
+        return "cpu"
+
+    @staticmethod
+    def _asset_backend(asset: str) -> str:
+        if "-cuda-" in asset:
+            return "cuda"
+        if "-rocm-" in asset:
+            return "rocm"
+        if "-vulkan-" in asset:
+            return "vulkan"
+        return "cpu"
+
+    @staticmethod
+    def _safe_extract(archive: tarfile.TarFile, destination: Path) -> None:
+        root = destination.resolve()
+        members = archive.getmembers()
+        link_members: list[tarfile.TarInfo] = []
+        for member in members:
+            target = (destination / member.name).resolve()
+            if target != root and root not in target.parents:
+                raise BonsaiServerError(
+                    f"Arquivo inseguro no pacote do llama-server: {member.name}"
+                )
+            if member.isdir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            if member.isfile():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                source = archive.extractfile(member)
+                if source is None:
+                    raise BonsaiServerError(
+                        "Não foi possível extrair o arquivo do llama-server: "
+                        f"{member.name}"
+                    )
+                with source, target.open("wb") as output:
+                    shutil.copyfileobj(source, output)
+                target.chmod(member.mode & 0o777)
+                continue
+            if member.issym() or member.islnk():
+                link_members.append(member)
+                continue
+            raise BonsaiServerError(
+                f"Tipo de arquivo não suportado no pacote do llama-server: "
+                f"{member.name}"
+            )
+
+        for member in link_members:
+            target = (destination / member.name).resolve()
+            if target.exists() or target.is_symlink():
+                raise BonsaiServerError(
+                    f"Arquivo duplicado no pacote do llama-server: {member.name}"
+                )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            link_target = Path(member.linkname)
+            if member.issym():
+                if link_target.is_absolute():
+                    raise BonsaiServerError(
+                        f"Link absoluto no pacote do llama-server: {member.name}"
+                    )
+                resolved_link = (target.parent / link_target).resolve()
+                if resolved_link != root and root not in resolved_link.parents:
+                    raise BonsaiServerError(
+                        f"Link inseguro no pacote do llama-server: {member.name}"
+                    )
+                target.symlink_to(member.linkname)
+                continue
+            resolved_link = (destination / link_target).resolve()
+            if resolved_link != root and root not in resolved_link.parents:
+                raise BonsaiServerError(
+                    f"Hard link inseguro no pacote do llama-server: {member.name}"
+                )
+            if not resolved_link.is_file() or resolved_link.is_symlink():
+                raise BonsaiServerError(
+                    f"Destino ausente para hard link do llama-server: {member.name}"
+                )
+            target.hardlink_to(resolved_link)
+
+    def _download_llama_binary(self, asset: str | None = None) -> str:
+        asset = asset or self._select_llama_asset()
+        backend = self._asset_backend(asset)
+        archive_path = self.llama_cache_dir.parent / asset
+        extraction_dir = self.llama_cache_dir.parent / (
+            f".{self.llama_cache_dir.name}.extract-{os.getpid()}"
+        )
+        url = f"{LLAMA_RELEASE_BASE_URL}/{asset}"
+        self._remove_if_exists(archive_path)
+        if extraction_dir.exists():
+            shutil.rmtree(extraction_dir)
+
+        try:
+            _log(f"Baixando o binário {asset}...")
+            self._download_file(url, archive_path)
+            extraction_dir.mkdir(parents=True, exist_ok=True)
+            with tarfile.open(archive_path, mode="r:gz") as archive:
+                self._safe_extract(archive, extraction_dir)
+            binary = self._find_binary(extraction_dir)
+            if binary is None:
+                raise BonsaiServerError(
+                    "O pacote do llama-server não contém um executável "
+                    "`llama-server`."
+                )
+            if self.llama_cache_dir.exists():
+                shutil.rmtree(self.llama_cache_dir)
+            os.replace(extraction_dir, self.llama_cache_dir)
+            binary = self._find_binary(self.llama_cache_dir)
+            if binary is None:
+                raise BonsaiServerError(
+                    "O executável `llama-server` desapareceu após a instalação."
+                )
+            binary.chmod(binary.stat().st_mode | stat.S_IXUSR)
+            (self.llama_cache_dir / LLAMA_RELEASE_MARKER).write_text(
+                f"{LLAMA_RELEASE_TAG}\n",
+                encoding="ascii",
+            )
+            (self.llama_cache_dir / LLAMA_BACKEND_MARKER).write_text(
+                f"{backend}\n",
+                encoding="ascii",
+            )
+            return str(binary)
+        except BonsaiServerError:
+            raise
+        except (OSError, tarfile.TarError, ValueError) as error:
+            raise BonsaiServerError(
+                f"Falha ao instalar o binário do llama-server a partir de {url}."
+            ) from error
+        finally:
+            self._remove_if_exists(archive_path)
+            if extraction_dir.exists():
+                shutil.rmtree(extraction_dir)
+
+    def _ensure_llama_binary(self) -> str:
+        asset = self._select_llama_asset()
+        backend = self._asset_backend(asset)
+        cached_binary = self._cached_llama_binary()
+        cached_backend = self._cached_backend() or (
+            self._inferred_cached_backend() if cached_binary is not None else None
+        )
+        if (
+            cached_binary is not None
+            and self._cached_release() in {None, LLAMA_RELEASE_TAG}
+            and cached_backend == backend
+        ):
+            cached_binary.chmod(cached_binary.stat().st_mode | stat.S_IXUSR)
+            return str(cached_binary)
+        return self._download_llama_binary(asset)
+
+    @staticmethod
     def _copy_response(response: BinaryIO, output: BinaryIO) -> None:
         while True:
             chunk = response.read(1024 * 1024)
@@ -134,7 +402,10 @@ class BonsaiServer:
     @staticmethod
     def _remove_if_exists(path: Path) -> None:
         try:
-            path.unlink()
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
         except FileNotFoundError:
             pass
 
@@ -172,6 +443,7 @@ class BonsaiServer:
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
+            start_new_session=True,
         )
         self.pid_path.write_text(str(process.pid), encoding="ascii")
         return process
@@ -218,8 +490,8 @@ class BonsaiServer:
         else:
             return self
 
-        self._ensure_model_files()
         executable = self._find_executable()
+        self._ensure_model_files()
         self._process = self._start_process(executable)
         self._owns_process = True
         try:
