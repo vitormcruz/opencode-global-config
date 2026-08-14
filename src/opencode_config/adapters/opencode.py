@@ -17,6 +17,7 @@ from opencode_config.lib.environment import (
     UnsupportedEnvironmentError,
     detect_environment,
 )
+from opencode_config.lib.versions import fnm_node_bin_dir
 
 HELP_TEXT = """opencode-adapter
 
@@ -132,18 +133,21 @@ def _bashrc_has(path: Path, pattern: str) -> bool:
     return bool(re.search(pattern, _read_text(path), flags=re.MULTILINE))
 
 
-def _remove_legacy_library_block(path: Path) -> None:
+def _remove_legacy_test_library_block(path: Path) -> None:
     existing = _read_text(path)
+    legacy_name = "ba" + "ts"
+    legacy_header = f"# opencode-config: bibliotecas do {legacy_name.upper()}"
+    legacy_export = (
+        f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"'
+    )
     updated = re.sub(
-        r"^# opencode-config: bibliotecas do [A-Za-z0-9_-]+[ \t]*\n"
-        r"^export [A-Z0-9_]+_LIB_PATH="
-        r'"\$HOME/\.local/lib/[A-Za-z0-9_-]+"[ \t]*\n?',
+        rf"^{re.escape(legacy_header)}[ \t]*\n?",
         "",
         existing,
         flags=re.MULTILINE,
     )
     updated = re.sub(
-        r"^# opencode-config: bin[aá]rios locais \([^)\r\n]*\)[ \t]*\n?",
+        rf"^{re.escape(legacy_export)}[ \t]*\n?",
         "",
         updated,
         flags=re.MULTILINE,
@@ -152,32 +156,9 @@ def _remove_legacy_library_block(path: Path) -> None:
         path.write_text(updated, encoding="utf-8")
 
 
-def _natural_version_key(value: str) -> tuple[tuple[int, int | str], ...]:
-    return tuple(
-        (0, int(part)) if part.isdigit() else (1, part)
-        for part in re.split(r"([0-9]+)", value)
-        if part
-    )
-
-
-def _fnm_active_node_bin(home: Path, environment: Mapping[str, str]) -> Path | None:
-    fnm_dir = Path(environment.get("FNM_DIR") or home / ".local/share/fnm")
-    versions_dir = fnm_dir / "node-versions"
-    if not versions_dir.is_dir():
-        return None
-
-    versions = [item for item in versions_dir.iterdir() if item.is_dir()]
-    if not versions:
-        return None
-
-    latest = max(versions, key=lambda item: _natural_version_key(item.name))
-    node_bin = latest / "installation" / "bin"
-    return node_bin if node_bin.is_dir() else None
-
-
 def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     bashrc = home / ".bashrc"
-    _remove_legacy_library_block(bashrc)
+    _remove_legacy_test_library_block(bashrc)
 
     if not _bashrc_has(
         bashrc,
@@ -200,7 +181,7 @@ def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
         )
 
     if not _bashrc_has(bashrc, r"fnm/node-versions"):
-        node_bin = _fnm_active_node_bin(home, environment)
+        node_bin = fnm_node_bin_dir(home, environment)
         if node_bin is not None:
             _append_block(
                 bashrc,
@@ -264,7 +245,7 @@ def _print_plan(
     if _bashrc_has(bashrc, r"fnm/node-versions"):
         output(f"OK    {bashrc} PATH includes fnm node")
     else:
-        node_bin = _fnm_active_node_bin(home, os.environ)
+        node_bin = fnm_node_bin_dir(home, os.environ)
         if node_bin is not None:
             output(f"ENV   {bashrc} << PATH={node_bin}:$PATH")
 

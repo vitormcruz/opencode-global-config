@@ -678,32 +678,93 @@ def test_install_fnm_extracts_binary_to_user_bin_and_updates_path(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    ("relative_bin", "expected_tail"),
+    [
+        ("installation/bin", "installation/bin"),      # layout Linux/WSL
+        ("installation", "installation"),              # layout Windows
+    ],
+)
+def test_fnm_node_bin_dir_resolves_layout_por_plataforma(
+    tmp_path: Path,
+    relative_bin: str,
+    expected_tail: str,
+) -> None:
+    from opencode_config.lib.versions import fnm_node_bin_dir
+
+    fnm_dir = tmp_path / "fnm"
+    version_dir = fnm_dir / "node-versions" / "v22.23.2"
+    node_bin = version_dir / relative_bin
+    node_bin.mkdir(parents=True)
+    (node_bin / "node").write_text("node", encoding="utf-8")
+
+    result = fnm_node_bin_dir(tmp_path, {"FNM_DIR": str(fnm_dir)}, major=22)
+
+    assert result is not None
+    assert result.is_dir()
+    assert result.parts[-len(Path(expected_tail).parts):] == Path(
+        expected_tail
+    ).parts
+
+
+@pytest.mark.unit
+def test_fnm_node_bin_dir_filtra_por_major_e_ordena_mais_recente(
+    tmp_path: Path,
+) -> None:
+    from opencode_config.lib.versions import fnm_node_bin_dir
+
+    fnm_dir = tmp_path / "fnm"
+    versions = fnm_dir / "node-versions"
+    for name in ("v20.11.1", "v22.3.0", "v22.23.2"):
+        node_bin = versions / name / "installation" / "bin"
+        node_bin.mkdir(parents=True)
+        (node_bin / "node").write_text("node", encoding="utf-8")
+
+    result = fnm_node_bin_dir(tmp_path, {"FNM_DIR": str(fnm_dir)}, major=22)
+
+    assert result is not None
+    assert result.name == "bin"
+    assert result.parent.parent.name == "v22.23.2"
+
+
+@pytest.mark.unit
 def test_install_node_bootstraps_fnm_before_installing_node(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     archive = tmp_path / "fnm.zip"
     with zipfile.ZipFile(archive, "w") as output:
         output.writestr("release/fnm", "binary")
     context = make_context(tmp_path)
+    # O fnm grava cada versao em $FNM_DIR/node-versions/vX.Y.Z/installation/bin.
+    # Apontamos FNM_DIR para um diretorio controlado e criamos o layout real
+    # que install_node deve descobrir (sem depender do subcomando `fnm which`,
+    # removido nas versoes atuais do fnm).
+    fnm_dir = tmp_path / "fnm"
+    node_bin = (
+        fnm_dir
+        / "node-versions"
+        / "v22.23.2"
+        / "installation"
+        / "bin"
+    )
+    node_bin.mkdir(parents=True)
+    (node_bin / "node").write_text("node", encoding="utf-8")
+    context.current_environment["FNM_DIR"] = str(fnm_dir)
+    # Garante que o bootstrap nao enxergue um fnm/node pre-existente no PATH do
+    # ambiente de desenvolvimento, forcando a instalacao user-space completa.
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda *_args, **_kwargs: None,
+    )
     commands: list[tuple[str, ...]] = []
 
     def runner(command, **_kwargs):
         commands.append(tuple(command))
-        stdout = ""
-        if tuple(command) == ("fnm", "which", "22"):
-            stdout = str(
-                tmp_path
-                / "fnm"
-                / "node-versions"
-                / "v22"
-                / "installation"
-                / "bin"
-                / "node"
-            )
         return CommandResult(
             args=tuple(command),
             returncode=0,
-            stdout=stdout,
+            stdout="",
             stderr="",
         )
 
@@ -715,36 +776,52 @@ def test_install_node_bootstraps_fnm_before_installing_node(
 
     assert result.success
     assert (context.paths.bin_dir / "fnm").is_file()
-    assert commands[-2:] == [
-        ("fnm", "install", "22"),
-        ("fnm", "which", "22"),
-    ]
-    assert str(
-        tmp_path / "fnm" / "node-versions" / "v22" / "installation" / "bin"
-    ) in context.current_environment["PATH"]
+    assert ("fnm", "install", "22") in commands
+    assert ("fnm", "which", "22") not in commands
+    assert str(node_bin) in context.current_environment["PATH"]
 
 
 @pytest.mark.unit
 def test_install_aws_cli_uses_quiet_user_local_linux_script(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     script = tmp_path / "aws-install.sh"
     script.write_text("#!/bin/sh\n", encoding="utf-8")
     context = make_context(tmp_path)
-    commands: list[tuple[str, ...]] = []
+    # Simula unzip presente (pre-requisito do instalador oficial da AWS).
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda *_args, **_kwargs: "/usr/bin/unzip",
+    )
+    captured: list[tuple[tuple[str, ...], dict[str, str]]] = []
+
+    def runner(command, *, env=None, **_kwargs):
+        captured.append((tuple(command), dict(env or {})))
+        return CommandResult(
+            args=tuple(command),
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
 
     result = install_aws_cli(
         context,
         script_url=f"file://{script}",
-        runner=successful_runner(commands),
+        runner=runner,
     )
 
     assert result.success
-    command = commands[0]
+    command, env = captured[0]
+    # O install.sh oficial (v2) aceita apenas --version/--system/--quiet/--help;
+    # o local de instalacao user-local e controlado por variaveis XDG.
     assert "--quiet" in command
     assert "--system" not in command
-    assert str(context.paths.data_dir / "aws-cli") in command
-    assert str(context.paths.bin_dir) in command
+    assert "--install-dir" not in command
+    assert "--bin-dir" not in command
+    assert "--update" not in command
+    assert env["XDG_DATA_HOME"] == str(context.paths.data_dir)
+    assert env["XDG_BIN_HOME"] == str(context.paths.bin_dir)
 
 
 @pytest.mark.unit
@@ -762,6 +839,27 @@ def test_install_aws_cli_is_noop_for_matching_target_version(
 
     assert result.success
     assert not result.changed
+
+
+@pytest.mark.unit
+def test_install_aws_cli_requires_unzip_on_linux(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path)
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda *_args, **_kwargs: None,
+    )
+
+    with pytest.raises(InstallerError, match="unzip"):
+        install_aws_cli(
+            context,
+            script_url=f"file://{tmp_path / 'unused.sh'}",
+            runner=lambda *_args, **_kwargs: pytest.fail(
+                "nao deve baixar/rodar o instalador sem unzip"
+            ),
+        )
 
 
 @pytest.mark.unit

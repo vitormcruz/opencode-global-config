@@ -100,6 +100,14 @@ user-space conforme a seleção interativa ou `--yes`:
 `aws-add-account-sso`; após o bootstrap, abra um novo PowerShell no Windows
 para carregar o PATH persistido e confirme com `aws --version`.
 
+No Linux/WSL o instalador oficial do AWS CLI v2 exige `unzip` (pacote do
+sistema), que não pode ser instalado em user-space. O bootstrap detecta a
+ausência e falha com a instrução clara antes de baixar o bundle. Instale com:
+
+```bash
+sudo apt install unzip   # ou o equivalente da sua distro
+```
+
 Em redes corporativas, o download dos browsers do Playwright/Patchright pode
 usar um mirror configurado apenas no ambiente, sem URL fixa no repositório:
 
