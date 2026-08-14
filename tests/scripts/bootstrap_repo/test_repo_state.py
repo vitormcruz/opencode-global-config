@@ -41,7 +41,6 @@ def bootstrapped_repo_state(
                 "HOME": str(home),
                 "XDG_CONFIG_HOME": str(home / ".config"),
                 "OPENCODE_SKIP_DEPS": "1",
-                "OPENCODE_SKIP_SKILL_SYNC": "1",
                 "OPENCODE_SKIP_CRAWL4AI": "1",
                 "OPENCODE_SKIP_CODEBASE_MEMORY": "1",
                 "OPENCODE_SKIP_DOCTREE": "1",

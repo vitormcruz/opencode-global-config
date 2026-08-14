@@ -9,7 +9,6 @@ from io import StringIO
 import os
 from pathlib import Path
 import re
-import shutil
 import sys
 from typing import TextIO
 
@@ -18,7 +17,6 @@ from opencode_config.lib.environment import (
     UnsupportedEnvironmentError,
     detect_environment,
 )
-from opencode_config.lib.process import run_command
 from opencode_config.lib.versions import fnm_node_bin_dir
 
 HELP_TEXT = """opencode-adapter
@@ -272,52 +270,6 @@ def _confirm(
         raise AdapterError("operacao cancelada")
 
 
-def _sync_skills(
-    repository: Path,
-    output: Callable[[str], None],
-    environment: Mapping[str, str],
-) -> None:
-    output("")
-    output("--- Sincronizando skills upstream ---")
-    if environment.get("OPENCODE_SKIP_SKILL_SYNC", "0") == "1":
-        output("SKIP  sincronizacao de skills (OPENCODE_SKIP_SKILL_SYNC=1)")
-        return
-
-    skills_cli = shutil.which("opencode-skills")
-    skills_command = (
-        [skills_cli]
-        if skills_cli is not None
-        else [sys.executable, "-m", "opencode_config.cli.skills_sync"]
-    )
-    listed = run_command(
-        [*skills_command, "list", "--repo-root", str(repository)],
-        cwd=repository,
-    )
-    if not listed.succeeded:
-        output("AVISO: nao foi possivel listar skills, pulando.")
-        return
-
-    skills = [line for line in listed.stdout.splitlines() if line]
-    if not skills:
-        output("Nenhuma skill para sincronizar.")
-        return
-
-    for skill in skills:
-        output(f"Sincronizando: {skill}")
-        updated = run_command(
-            [
-                *skills_command,
-                "update",
-                skill,
-                "--repo-root",
-                str(repository),
-            ],
-            cwd=repository,
-        )
-        if not updated.succeeded:
-            output(f"AVISO: falha ao sincronizar {skill}.")
-
-
 def configure(
     repository: Path,
     home: Path,
@@ -371,7 +323,6 @@ def configure(
         )
     _setup_bashrc(resolved_home, os.environ)
     write("Pronto.")
-    _sync_skills(resolved_repository, write, os.environ)
 
 
 def _parse_arguments(
