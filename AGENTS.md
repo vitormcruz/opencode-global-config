@@ -205,8 +205,9 @@ nas descrições
 - Execute os testes no ambiente alvo. A integração OpenCode requer Docker e o
   llama-server local do Bonsai no WSL/Linux; a integração Copilot roda no
   Windows.
-- O servidor Bonsai fica em `tests/integration/model/` e deve ser iniciado com
-  `python3 tests/integration/model/bonsai_server.py --up` antes da integração.
+- O servidor Bonsai fica em `tests/integration/model/`; a fixture session-scoped
+  inicia ou reutiliza o serviço antes da integração. Para iniciar manualmente:
+  `python3 tests/integration/model/bonsai_server.py --up`.
 - Não use `skip`: quando uma dependência externa não estiver disponível,
   use `pytest.fail` com uma mensagem clara e acionável.
 - A estrutura de testes deve espelhar a estrutura do código.

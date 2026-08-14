@@ -239,6 +239,11 @@ python3 tests/integration/model/bonsai_server.py --down
 .venv/bin/pytest -m opencode
 ```
 
+Ao iniciar a suíte, a fixture session-scoped reutiliza o `llama-server` e sobe
+o container OpenCode na porta local `127.0.0.1:4196`. A rede dedicada valida
+`Internal=true` e calcula o gateway real antes de criar
+`host.docker.internal`, sem aceitar overlays externos de configuração.
+
 Para executar a integração Copilot:
 
 ```bash
@@ -254,4 +259,4 @@ Pré-requisitos:
 
 O build da imagem Docker tem acesso à rede apenas para instalar o OpenCode.
 Durante os testes, o container usa a rede interna `opencode-test-net`, sem rota
-para a internet, e acessa somente o llama-server pelo gateway do host.
+para a internet, e acessa somente o llama-server pelo gateway real da bridge.
