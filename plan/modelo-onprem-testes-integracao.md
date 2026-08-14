@@ -198,6 +198,48 @@ container responde internamente em `127.0.0.1:4096`, mas o host nao alcanca
 Rationale: preserva o isolamento comprovado por D6/D11 e restabelece o acesso
 do host ao OpenCode sem abrir nenhuma rota nova para fora.
 
+### D15 — Provisionamento automatico do `llama-server` no `BonsaiServer`
+
+O `BonsaiServer` passa a provisionar tambem o binario, nao apenas os pesos.
+
+- Fonte: release **fixado** `prism-b9596-9fcaed7` do fork
+  `PrismML-Eng/llama.cpp` (Apache 2.0), que publica binarios pre-compilados
+  para CUDA, ROCm, Vulkan e CPU. Nao ha compilacao local.
+- Deteccao de backend replicando `scripts/download_binaries.sh` do
+  `Bonsai-demo`:
+  1. `nvcc` ou `nvidia-smi` presente → CUDA (tag `12.8` se versao >= 12.8,
+     senao `12.4`)
+  2. `rocminfo` / `rocm-smi` / `hipcc` → ROCm 7.2
+  3. `vulkaninfo` → Vulkan
+  4. nenhum → CPU (`ubuntu-x64`)
+- Destino: `~/.cache/opencode-config/llama/`, ao lado dos pesos. O
+  `llama-server` extraido de la e usado diretamente.
+- Fica no `BonsaiServer`, **nao no bootstrap**: e dependencia exclusiva dos
+  testes de integracao, e o bootstrap nao deve baixar centenas de MB para
+  quem so quer usar o repositorio.
+- Falha de download produz mensagem acionavel. Nunca `pytest.skip`.
+
+Rationale: elimina qualquer escolha manual e qualquer compilacao. A versao
+fixada garante reprodutibilidade e imunidade a quebras por release novo — o
+mesmo que o `Bonsai-demo` faz.
+
+### D16 — Timeout nunca e criterio de falha
+
+Timeout como assercao de desempenho ("responda em N segundos ou falhe") esta
+proibido: transforma lentidao em falha e gera intermitencia.
+
+O parametro `timeout` permanece **apenas** como guarda contra travamento, com
+valor alto o bastante para nunca ser atingido por uma maquina lenta (ex.:
+600s em `urlopen`). Consequencias:
+
+- Nenhum teste falha por lentidao; apenas por travamento real.
+- A suite permanece interrompivel — `timeout=None` (bloqueio infinito) foi
+  descartado por remover a rede de seguranca.
+
+Rationale: uma maquina so-CPU pode ser uma ordem de grandeza mais lenta que
+uma com CUDA. Um limite alto nao penaliza quem roda em GPU, porque nunca e
+alcancado.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -523,15 +565,16 @@ ela. O gateway real da bridge e descoberto antes de mapear
 
 ### Fase 4: Estabilizacao e documentacao
 
-#### Task 7: Ajustar timeouts e estabilizar a suite comportamental
+#### Task 7: Eliminar timeout como criterio de falha (D16)
 
-**Description:** O primeiro request apos o sleep de ociosidade paga a recarga
-do modelo, e o Bonsai 1-bit e mais lento que o modelo externo anterior. Ampliar
-os timeouts e revalidar os testes comportamentais.
+**Description:** Garantir que nenhum teste falhe por lentidao do modelo. O
+primeiro request apos o sleep de ociosidade paga a recarga, e uma maquina
+so-CPU pode ser uma ordem de grandeza mais lenta que uma com CUDA.
 
 **Acceptance criteria:**
-- [x] `urlopen(..., timeout=10)` em `behavioral_helper.py` ampliado para
-      absorver a recarga do modelo
+- [ ] `urlopen(...)` em `behavioral_helper.py` usa valor alto (ex.: 600s),
+      atuando apenas como guarda contra travamento, nunca como assercao
+- [ ] Nenhum teste usa tempo de resposta como criterio de aprovacao
 - [ ] `test_agents.py`, `test_commands.py`, `test_prompts.py` e
       `test_skills_activation.py` passam com o Bonsai
 - [x] Assercoes rigidas demais para um modelo menor sao afrouxadas sem perder
@@ -540,6 +583,7 @@ os timeouts e revalidar os testes comportamentais.
 **Verification:**
 - [ ] `.venv/bin/pytest -m opencode` passa duas vezes seguidas
 - [ ] A segunda execucao reaproveita o servidor (mais rapida)
+- [ ] Nenhum limite curto de tempo permanece como criterio de aprovacao
 
 **Dependencies:** Task 4, Task 6
 
@@ -658,6 +702,51 @@ Alteracoes necessarias em
 
 ---
 
+#### Task 11: Provisionar o `llama-server` automaticamente (D15)
+
+**Description:** Estender o `BonsaiServer` para baixar tambem o binario, nao
+apenas os pesos. Hoje ele falha cedo quando o executavel nao esta no PATH, o
+que exige instalacao manual.
+
+Release fixado: `prism-b9596-9fcaed7` em
+`https://github.com/PrismML-Eng/llama.cpp/releases/download/prism-b9596-9fcaed7/`
+
+Assets Linux x64 disponiveis:
+- CUDA 12.8: `llama-prism-b9596-9fcaed7-bin-linux-cuda-12.8-x64.tar.gz`
+- CUDA 12.4: `llama-prism-b9596-9fcaed7-bin-linux-cuda-12.4-x64.tar.gz`
+- ROCm 7.2: `llama-prism-b9596-9fcaed7-bin-ubuntu-rocm-7.2-x64.tar.gz`
+- Vulkan:   `llama-prism-b9596-9fcaed7-bin-ubuntu-vulkan-x64.tar.gz`
+- CPU:      `llama-prism-b9596-9fcaed7-bin-ubuntu-x64.tar.gz`
+
+Ordem de deteccao (identica a `download_binaries.sh` do `Bonsai-demo`):
+`nvcc`/`nvidia-smi` → CUDA · `rocminfo`/`rocm-smi`/`hipcc` → ROCm ·
+`vulkaninfo` → Vulkan · nenhum → CPU.
+
+**Acceptance criteria:**
+- [ ] `ensure_up()` baixa e extrai o binario para
+      `~/.cache/opencode-config/llama/` quando ausente
+- [ ] A deteccao escolhe o asset correto para o hardware local
+- [ ] Um `llama-server` ja presente no cache nao e rebaixado
+- [ ] Falha de download produz mensagem acionavel; nunca `pytest.skip`
+- [ ] Nenhuma dependencia nova: download e extracao com a stdlib
+      (`urllib`, `tarfile`)
+
+**Verification:**
+- [ ] Com o cache vazio, `bonsai_server.py --up` baixa binario e pesos e sobe
+      o servidor
+- [ ] `~/.cache/opencode-config/llama/` contem um `llama-server` executavel
+- [ ] Em maquina com NVIDIA, os logs do `llama-server` indicam uso de GPU
+
+**Dependencies:** Task 1
+
+**Files likely touched:**
+- `tests/integration/model/bonsai_server.py`
+- `tests/integration/model/test_bonsai_server.py`
+
+**Estimated scope:** M
+
+---
+
 #### Task 10: Validar o runtime completo no WSL/Linux
 
 **Description:** Executar a suite de verdade, no WSL/Linux (D13), com o
@@ -680,7 +769,7 @@ validacao: so gera codigo se algum criterio falhar.
 - [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes
 - [ ] `git grep -n "OPENCODE_CONFIG" -- tests/integration` nao retorna nada
 
-**Dependencies:** Task 9
+**Dependencies:** Task 9, Task 11
 
 **Files likely touched:**
 - nenhum, se todos os criterios passarem
@@ -705,8 +794,11 @@ validacao: so gera codigo se algum criterio falhar.
 | Repos 27B privados no HF exigem `BONSAI_TOKEN` | — | **Resolvido:** repos ja publicos (`gated=false`) |
 | Hardware insuficiente para servir 27B | Baixo | D3: variante 1-bit cabe nos 6 GB de VRAM |
 | Tool calling do Bonsai 1-bit insuficiente para agentes | Medio | D5: tratado via replan, sem fallback pre-construido |
-| Bonsai 1-bit mais lento que o modelo anterior | Medio | Task 7: ampliar timeouts e revalidar assercoes |
-| Recarga apos o sleep de ociosidade atrasa o primeiro request | Baixo | Task 7: timeout generoso no primeiro contato |
+| Bonsai 1-bit mais lento que o modelo anterior | Medio | D16: timeout deixa de ser criterio de falha |
+| Recarga apos o sleep de ociosidade atrasa o primeiro request | Baixo | D16: guarda alta, nunca atingida |
+| Maquina sem GPU: modelo em CPU, muito mais lento | Medio | D15 escolhe build CPU; D16 evita falha por lentidao |
+| Maquina com pouca memoria (< ~5 GB livres) | Baixo | Falha explicita do `llama-server`; documentar requisito |
+| Release fixado do fork sai do ar | Baixo | Versao fixada e verificavel; trocar exige replan |
 | `host.docker.internal` indisponivel em rede `--internal` | Medio | Task 5: fallback para o IP do gateway da bridge |
 
 ## Open Questions
