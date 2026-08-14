@@ -1,21 +1,24 @@
 ---
 name: question-orchestration
 description: >
-  Protocolo conversacional para smart-planner e devflow: conduz triagem,
-  perguntas adaptativas e confirmações de decisão sem cansar o humano. Use
-  quando precisar planejar por perguntas, mediar dúvidas de agentes, rotear
-  decisões ou reduzir carga cognitiva. Triggers: "mediação de perguntas",
-  "rotear perguntas", "perguntas de agentes", "devflow", "smart-planner",
-  "organizar dúvidas", "escalar decisão", "planejamento interativo".
+  Protocolo conversacional para smart-planner, devflow, analista e
+  curador-produto-editor: conduz triagem, perguntas adaptativas e confirmações
+  de decisão sem cansar o humano. Use quando precisar planejar por perguntas,
+  mediar dúvidas de agentes, rotear decisões ou reduzir carga cognitiva.
+  Triggers: "mediação de perguntas", "rotear perguntas", "perguntas de
+  agentes", "devflow", "smart-planner", "analista", "curador-produto-editor",
+  "elicitação de escopo", "curadoria de documentação", "organizar dúvidas",
+  "escalar decisão", "planejamento interativo".
 ---
 
 # Orquestração de Perguntas
 
 ## Escopo e fonte única
 
-Esta skill é a fonte única do protocolo conversacional compartilhado pelo
-smart-planner e pelo devflow. Ela define como triagem, perguntas e decisões
-são conduzidas; os agentes que a usam não devem duplicar essas regras.
+Esta skill é a fonte única do protocolo conversacional compartilhado por
+smart-planner, devflow, analista e curador-produto-editor. Ela define como
+triagem, perguntas e decisões são conduzidas; os agentes que a usam não devem
+duplicar essas regras.
 
 Não define a estrutura do plano nem a política de Git. Também não define
 tarefas de domínio, persistência do plano, commits, handoff, replan ou

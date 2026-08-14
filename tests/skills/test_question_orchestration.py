@@ -26,6 +26,8 @@ def test_question_orchestration_frontmatter_has_activation_triggers(
     assert "description:" in frontmatter
     assert "mediação" in frontmatter
     assert "perguntas" in frontmatter
+    assert "analista" in frontmatter
+    assert "curador-produto-editor" in frontmatter
 
 
 @pytest.mark.unit

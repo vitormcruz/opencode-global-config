@@ -79,7 +79,6 @@ faz revisão integrativa, ou propõe commit.
 |-------|-----------|--------|
 | test-driven-development | Planejar testes | Sempre que planejar ou revisar testes |
 | tests-as-spec | Proteger cobertura como spec | Na revisão de testabilidade e cobertura |
-| grill-me | Validar decisões | No planejamento de testes |
 | browser-testing | Testes funcionais de UI | Quando houver UI no escopo de testes |
 
 ### Condicionais (carregar quando a condição se aplicar)
@@ -118,10 +117,8 @@ Analisar requisitos e produzir um plano de testes.
    esperada, resultado esperado.
 5. Avaliar se critérios de aceitação são testáveis. Se
    algum não for, reportar ao solicitante/humano.
-6. *Use a skill \`grill-me\`* para validar cada decisão
-   de testes com o humano antes de persistir no arquivo.
-7. Persistir plano de testes no arquivo indicado.
-8. Verificar no docs/README.md se o plano de testes
+6. Persistir plano de testes no arquivo indicado.
+7. Verificar no docs/README.md se o plano de testes
    deve ser persistido em arquivo permanente. Se sim,
    marcar para extração ao final do workflow.
 

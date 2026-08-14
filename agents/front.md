@@ -87,7 +87,6 @@ commit.
 |-------|-----------|--------|
 | frontend-ui-engineering | Implementar UI | Sempre que implementar componentes visuais |
 | accessibility-audit | Garantir acessibilidade | Sempre que produzir componentes visuais |
-| grill-me | Validar decisões visuais | Na prototipagem de telas |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -119,31 +118,27 @@ gerar protótipos para validação do humano.
 3. Analisar o codebase existente — entender design
    system, componentes reutilizáveis, padrões visuais
    do projeto.
-4. **Usar a skill \`grill-me\`** para validar cada decisão
-   visual com o humano: layout, paleta, tipografia,
-   referências. Decisões triviais não precisam de
-   validação.
-5. Consultar `## Regras de Produto` no arquivo de
+4. Consultar `## Regras de Produto` no arquivo de
    planejamento antes de prototipar campos de entrada.
    Para cada campo visível ao usuário (input, label,
    placeholder): verificar máscara, formato de exibição
    e limites. O que estiver como `(a definir)` ou
    ausente: perguntar ao humano e registrar antes de
    prosseguir.
-6. Gerar protótipos:
+5. Gerar protótipos:
    - **HTML estático** para alta fidelidade (cores,
      tipografia, espaçamentos, interações visuais).
    - **SVG** para wireframes estruturais (layout, fluxo,
      hierarquia de informação).
    - O formato depende da necessidade — decidir com base
      no que o humano precisa validar.
-7. Persistir protótipos em pasta dedicada (ex.:
+6. Persistir protótipos em pasta dedicada (ex.:
    `plan/ui/`) com nomes descritivos.
-8. Registrar no arquivo de planejamento seção
+7. Registrar no arquivo de planejamento seção
    `## Protótipos de Tela` com links para os arquivos.
-9. Apresentar ao humano para aprovação visual.
-10. Iterar até aprovação.
-11. Registrar resultado:
+8. Apresentar ao humano para aprovação visual.
+9. Iterar até aprovação.
+10. Registrar resultado:
     `Identidade Visual: APROVADA` na seção de protótipos.
 
 **Identidade visual** inclui: paleta de cores, tipografia,

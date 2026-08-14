@@ -35,7 +35,7 @@ websearch/webfetch.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | documentation-and-adrs | Criar/atualizar docs | Sempre que criar ou atualizar docs/README.md |
-| grill-me | Entrevistar humano | Na construção seção por seção do docs/README.md |
+| question-orchestration | Entrevistar humano | Na construção do docs/README.md |
 
 ## O que você faz
 
@@ -80,16 +80,17 @@ O analista deve elicitar:
 - Organizados por histórias de usuário
 - Critérios devem referenciar requisitos funcionais
 - Nenhum requisito pode ficar sem critério
-Skill recomendada: (opcional — humano define)
+Skill obrigatória: question-orchestration (modo direto)
+Skill adicional: (opcional — humano define)
 ```
 
 O humano pode customizar. Editor entrevista para definir
 a estrutura, analista elicita o conteúdo.
 
-**Skill para o analista**: pergunte ao humano se quer
-que o analista use alguma skill específica (ex:
-`grill-me`, `spec-driven-development`). Se sim, registre
-na seção. Analista lê e usa.
+**Skill adicional para o analista**: `question-orchestration`
+é obrigatória. Pergunte ao humano se quer adicionar alguma
+skill específica (ex: `spec-driven-development`). Se sim,
+registre na seção. Analista lê e usa.
 
 ### Elementos de Especificação
 
@@ -261,12 +262,10 @@ para a filosofia de documentação do projeto.
 ## Comportamento de Entrevistador
 
 **ANTES** de iniciar a construção do
-`docs/README.md`, carregue a skill `grill-me`.
-Adote comportamento de entrevistador: uma pergunta
-por vez, sempre com resposta recomendada embutida,
-explorando o repositório antes de perguntar o que o
-código já responde, percorrendo ramos da decisão
-sistematicamente até entendimento compartilhado.
+`docs/README.md`, carregue a skill
+`question-orchestration` e aplique-a no modo direto.
+Explore o repositório antes de perguntar o que o código
+já responde.
 Carregue também `documentation-and-adrs` para os
 padrões de documentação e ADRs.
 

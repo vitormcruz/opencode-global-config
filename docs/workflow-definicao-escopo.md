@@ -49,8 +49,9 @@ ao final, transiciona para o workflow de desenvolvimento
 
 `devflow` spawna `analista`:
 
-1. Analista lê `docs/README.md` (seção Definição de
-   Escopo) + o que o humano forneceu
+1. Analista carrega `question-orchestration` no modo direto
+   e lê `docs/README.md` (seção Definição de Escopo) + o
+   que o humano forneceu
 2. Compara: bate com o definido na seção?
 3. Se faltar → elicita com humano
 4. Grava no Arquivo de Planejamento

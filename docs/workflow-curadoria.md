@@ -108,16 +108,18 @@ documentar e como manter:
    - Organizados por histórias de usuário
    - Critérios devem referenciar requisitos funcionais
    - Nenhum requisito pode ficar sem critério
-   Skill recomendada: (opcional — humano define)
+   Skill obrigatória: question-orchestration (modo direto)
+   Skill adicional: (opcional — humano define)
    ```
 
    O humano pode customizar. Editor entrevista para
    definir a estrutura, analista elicita o conteúdo.
 
-   **Skill para o analista**: editor pergunta ao humano
-   se quer que o analista use alguma skill específica
-   (ex: `grill-me`, `spec-driven-development`). Se sim,
-   registra na seção. Analista lê e usa.
+   **Skill adicional para o analista**:
+   `question-orchestration` é obrigatória. Editor pergunta
+   ao humano se quer adicionar alguma skill específica
+   (ex: `spec-driven-development`). Se sim, registra na
+   seção. Analista lê e usa.
 
    #### Elementos de Especificação
 
@@ -432,8 +434,7 @@ sequenceDiagram
     edit ->> edit: Analisa projeto (estrutura, tools)
     edit ->> Humano: Propõe Definição de Escopo
     Humano -->> edit: Aprovação / ajustes
-    edit ->> Humano: Pergunta skill para analista
-    Humano -->> edit: Decisão
+    edit ->> edit: Define question-orchestration para analista
     edit ->> Humano: Propõe tabela Elementos de Especificação
     Humano -->> edit: Aprovação / ajustes
     edit ->> Humano: Pergunta Regras de Documentação

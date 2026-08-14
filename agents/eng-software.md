@@ -89,7 +89,6 @@ faz revisão de si mesmo, ou propõe commit.
 |-------|-----------|--------|
 | test-driven-development | Construir via TDD | Sempre que escrever código produtivo |
 | tests-as-spec | Proteger testes como spec | Sempre que houver testes existentes |
-| grill-me | Validar decisões | Em planejamento e gates |
 | planning-and-task-breakdown | Planejar implementação | Na capacidade 1 (planejar) |
 | documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa |
 
@@ -121,30 +120,25 @@ Analisar requisitos e produzir um plano de codificação.
    antes de prosseguir. Não invente requisitos.
 2. Analisar o codebase atual — entender como acomodar a
    funcionalidade nova.
-3. **Usar a skill \`grill-me\`** para validar cada decisão
-   não-trivial com o humano. Pergunte sobre ambiguidades,
-   prioridades e restrições. Decisões triviais (nome de
-   variável, formatação, ordem de passos sem impacto
-   funcional) não precisam de validação.
-4. Avaliar granularidade do plano em relação à capacidade
+3. Avaliar granularidade do plano em relação à capacidade
    de revisão do humano e ao contexto disponível:
    - Plano grande demais → sugira dividir.
    - Plano pequeno demais → sugira agregar.
    - A decisão final é do humano.
-5. Produzir plano de codificação com etapas numeradas.
-6. Inicializar seção `## Regras de Produto` no arquivo
+4. Produzir plano de codificação com etapas numeradas.
+5. Inicializar seção `## Regras de Produto` no arquivo
    de planejamento: extrair dos requisitos o que já for
    possível definir (tamanhos, formatos, máscaras,
    limites numéricos). Campos ainda sem definição:
    marcar como `(a definir)`.
-6.1. Ler docs/README.md para identificar obrigações
+5.1. Ler docs/README.md para identificar obrigações
    de spec deste domínio (ex.: specs executáveis, ADRs)
    e incluir criação desses artefatos no plano.
-7. Se identificar decisão arquitetural significativa,
+6. Se identificar decisão arquitetural significativa,
    sugerir registro em ADR. **ANTES** de criar o
    ADR, carregue a skill `documentation-and-adrs` —
    ela define o template e o processo de registro.
-8. Verificar ADRs existentes — garantir que o plano não
+7. Verificar ADRs existentes — garantir que o plano não
    contradiz decisões arquiteturais já registradas. Se
    houver conflito, propor atualização do ADR ao humano.
 
