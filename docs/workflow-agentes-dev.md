@@ -193,26 +193,28 @@ Premissas detalhadas: 21.1–21.3.
    formulam perguntas, salvam progresso parcial e
    retornam.** O Devflow media a comunicação agente-humano
    em modo orquestrado (ver premissas 4.1 a 4.4).
-   4.1. **Checklist estrutural** — Devflow avalia cada
-        pergunta com: o que está sendo decidido está
-        explícito? Contexto presente? Opções com trade-offs?
-        Recomendação justificada? Pergunta autocontida?
-        Itens ausentes → orientação de reformulação. Máximo
-        2 rodadas; na 3ª, apresenta ao humano com nota:
-        "Agente não conseguiu detalhar mais."
-   4.2. **Grill-me sob demanda** — Devflow decide se usa
-        grill-me com base no contexto. Pergunta curta/objetiva
-        → apresenta direto. Elaborada/múltiplas/volumosa →
-        grill-me serializa uma por vez.
+   4.1. **Protocolo de mediação** — Devflow aplica a skill
+        `question-orchestration` no modo mediado. Essa skill
+        é a fonte única de organização e apresentação de
+        perguntas; os agentes não precisam carregá-la.
+   4.2. **Checklist estrutural** — Devflow avalia cada
+        pergunta: decisão explícita, contexto, opções com
+        trade-offs, recomendação justificada e pergunta
+        autocontida. Itens ausentes retornam ao agente para
+        reformulação. Máximo 2 rodadas; na 3ª, apresenta ao
+        humano com a nota: "Agente não conseguiu detalhar
+        mais."
    4.3. **Continuidade da mediação** — Devflow nunca encerra
         a mediação por conta própria. Continua enquanto o
-        humano quiser prosseguir. Se humano não entender
-        após reformulações, oferece alternativas mas só para
-        quando humano decidir parar.
-   4.4. **Prompt-improver** — Devflow pode sugerir ao humano
-        melhorar seu input antes de rotear ao agente. Sempre
-        sugere, nunca aplica automaticamente. Se humano
-        recusar, segue normalmente.
+        humano quiser prosseguir. Se o humano não entender
+        após reformulações, oferece alternativas, mas só para
+        quando ele decidir.
+   4.4. **Prompt-improver para handoff** — Antes de spawnar
+        um subagente, Devflow usa `prompt-improver`
+        autonomamente no modo de briefing interno. O insumo
+        original do humano continua como fonte de verdade; o
+        briefing não inventa decisões nem resolve
+        ambiguidades, que retornam pela mediação.
 5. **Falha de agente** — se não consegue completar a
    tarefa (erro, incerteza, falta de informação), registra
    o impedimento no arquivo e retorna resumo ao `devflow`,

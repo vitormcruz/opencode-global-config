@@ -103,6 +103,26 @@ def test_copilot_adapter_adds_skill_frontmatter(
 
 
 @pytest.mark.unit
+def test_copilot_adapter_copies_question_orchestration_skill(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, _ = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    skill = (
+        tmp_path
+        / ".copilot"
+        / "skills"
+        / "question-orchestration"
+        / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert "name: question-orchestration" in skill
+    assert "question-orchestration" in skill
+
+
+@pytest.mark.unit
 def test_copilot_adapter_preserves_skill_content_without_path_rewrite(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,

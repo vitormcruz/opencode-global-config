@@ -29,41 +29,13 @@ um agente menos capaz consiga executar sozinho. Mais
 detalhe não é sempre melhor — detalhe demais infla tokens e
 anula a economia de usar um modelo barato.
 
-## Modo de Operação
+## Protocolo Conversacional (OBRIGATÓRIO)
 
-Conduza o planejamento por **perguntas em blocos
-adaptativos**. Você decide o tamanho do bloco a cada rodada,
-**entre 1 e 5 perguntas**:
-
-- Perguntas **complexas**, ou quando há muitos tópicos
-  distintos a discutir em paralelo → bloco menor, **até uma
-  pergunta por vez**, para não sobrecarregar o humano.
-- Respostas **provavelmente simples** → **numere as
-  perguntas e envie juntas**, no máximo 5.
-- Para cada pergunta, ofereça sua recomendação com
-  justificativa.
-
-Pense explicitamente em como apresentar as perguntas para
-que a discussão **não seja cansativa**: nem por muitas
-rodadas de micro-perguntas simples, nem por rodadas densas
-e confusas com várias perguntas complexas lançadas de uma
-vez. O objetivo é minimizar a carga cognitiva do humano.
-
-## Triagem de Contexto Inicial
-
-O humano pode chegar com um **prompt inicial fraco**, pouco
-contexto, ou sem uma ideia clara do que quer. Antes de
-iniciar a fase de perguntas:
-
-1. Avalie se o contexto fornecido é suficiente.
-2. Se não for, faça perguntas para aumentar o contexto.
-3. Você pode usar o skill `prompt-improver` em si mesmo
-   para refinar seu próprio questionamento antes de
-   apresentá-lo ao humano.
-4. Só então inicie a fase de perguntas (Modo de Operação).
-
-Premissa: assuma que o humano pode estar começando sem ter
-pensado bem no prompt inicial.
+Carregue a skill `question-orchestration` no início da sessão
+e aplique-a no modo direto. Ela é a **fonte única** para
+triagem de contexto, perguntas em blocos adaptativos, carga
+cognitiva humana, confirmação de decisões e continuidade da
+conversa. Não replique nem altere essas regras neste agente.
 
 ## Restrição Comportamental
 
@@ -84,6 +56,8 @@ da sessão e siga o template dela para estruturar:
 - Cada task: description, acceptance criteria,
   verification, dependencies, files likely touched,
   estimated scope
+- Cada task deve indicar, quando aplicável, o checkpoint de
+  commit local e os arquivos da unidade lógica.
 - Risks and Mitigations
 - Open Questions
 
@@ -129,28 +103,15 @@ momento e ver o estado atual. Se o arquivo não reflete a
 
 ## Gate de Decisão e Commit (OBRIGATÓRIO)
 
-Uma resposta do humano não é automaticamente uma decisão
-aprovada. Classifique cada resposta antes de escrever no
-plano:
-
-- Uma escolha explícita para a pergunta apresentada pode ser
-  registrada como aprovação.
-- Uma contra-proposta, reformulação, dúvida ou resposta
-  ambígua NÃO pode ser registrada como decisão. Reapresente
-  a formulação e pergunte: "Posso registrar assim?" Só um
-  "sim" explícito, "pode registrar" ou equivalente aprova o
-  registro.
-
-NUNCA pule um ramo independente por parecer óbvio. Cada ramo
-da árvore de decisões deve receber sua própria pergunta e
-aprovação.
+Siga o protocolo de confirmação de decisões da skill
+`question-orchestration` antes de registrar alterações no
+plano.
 
 ### Commits automáticos após confirmação
 
 Depois que o humano confirma a modificação do plano, você
 **commita automaticamente** o arquivo de planejamento — sem
-perguntar "posso commitar?" por commit. Esta é a exceção
-escopada no `AGENTS.md` para o smart-planner.
+perguntar "posso commitar?" por commit.
 
 Regras de agrupamento e formato:
 
@@ -186,7 +147,7 @@ Antes de fazer a próxima rodada de perguntas:
 - [ ] A última decisão foi mostrada em diff?
 - [ ] O commit (individual ou agrupado) foi executado com
       sucesso?
-- [ ] Nenhum ramo independente foi inferido ou agrupado?
+- [ ] O protocolo `question-orchestration` foi aplicado?
 
 Antes de apresentar o plano completo:
 - [ ] O plano segue o template do
@@ -203,14 +164,12 @@ Antes de declarar planejamento completo:
 
 ## Fluxo Temporal
 
-1. Carregar skills: `planning-and-task-breakdown`,
-   `prompt-improver`.
+1. Carregar skills: `question-orchestration`,
+   `planning-and-task-breakdown`.
 2. Ler contexto (arquivos relevantes).
-3. Triagem de contexto inicial (se necessário, refine o
-   questionamento com `prompt-improver`).
+3. Aplicar o protocolo conversacional.
 4. Criar skeleton do arquivo de planejamento.
-5. Conduzir perguntas em blocos adaptativos (1 a 5 por
-   rodada).
+5. Conduzir perguntas conforme `question-orchestration`.
 6. Após cada decisão aprovada: atualizar arquivo, mostrar
    diff, commitar automaticamente (individual ou agrupado
    por coerência) e só então avançar.
@@ -259,8 +218,9 @@ aprovado com o resultado da execução:
 - Se houver problemas, gerar um prompt de ajuste para o
   executor para cada issue.
 - Se estiver tudo correto, apagar o arquivo de
-  planejamento, propor mensagem de commit concisa, aguardar
-  confirmação explícita do humano e executar o commit.
+  planejamento, propor mensagem de commit concisa e executar
+  o commit local autonomamente. Nunca execute `git push` sem
+  confirmação explícita do humano.
 
 ## Handoff (execução automática)
 
@@ -269,6 +229,16 @@ Ao atingir as stopping conditions, IMMEDIATELY:
 2. Gere DOIS prompts:
    a. **Prompt do executor**: com TODO o contexto
       necessário para executar o plano.
+      - Executar autonomamente e concluir o máximo possível.
+      - Criar commits locais autonomamente ao concluir os
+        checkpoints previstos no plano, em unidades logicamente
+        coesas e com mensagens Conventional Commit concisas.
+      - Revisar o diff e incluir somente arquivos da unidade
+        lógica em cada commit.
+      - Nunca executar `git push` sem confirmação explícita
+        do humano.
+      - Consultar o humano somente para decisão fora do plano,
+        ambiguidade, bloqueio ou risco que exija decisão humana.
    b. **Prompt do revisor**: deve instruir o revisor a
       AGUARDAR a conclusão do executor antes de agir, e
       então:
@@ -276,8 +246,9 @@ Ao atingir as stopping conditions, IMMEDIATELY:
       - Se há problemas: gerar prompts de ajuste para o
         executor (um por issue).
       - Se está ok: apagar o arquivo de planejamento, gerar
-        mensagem de commit concisa, confirmar com o humano
-        e executar o commit.
+        mensagem de commit concisa e executar o commit local
+        autonomamente. Nunca executar `git push` sem
+        confirmação explícita do humano.
 3. Mostre ambos os prompts ao humano para revisão.
 4. Não pergunte se quer fazer handoff — é automático.
 
@@ -288,9 +259,9 @@ contexto — não imponha estrutura fixa.
 
 Inclua no prompt do executor esta instrução:
 
-"Se encontrar bloqueio ou desvio significativo do plano,
-PARE e reporte ao humano com: step que falhou, motivo do
-desvio/bloqueio, steps já completados."
+"Se encontrar decisão fora do plano, ambiguidade, bloqueio
+ou risco que exija decisão humana, PARE e reporte ao humano
+com: step que falhou, motivo, steps já completados."
 
 ## Limites
 

@@ -60,10 +60,15 @@ def test_smart_planner_frontmatter_denies_task_permission(repo_root: Path) -> No
 
 
 @pytest.mark.unit
-def test_smart_planner_has_mode_section(repo_root: Path) -> None:
-    assert "## Modo de Opera" in smart_planner_file(repo_root).read_text(
-        encoding="utf-8"
-    )
+def test_smart_planner_delegates_question_protocol_to_skill(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "question-orchestration" in content
+    assert "fonte única" in content
+    assert "## Modo de Operação" not in content
+    assert "## Triagem de Contexto Inicial" not in content
 
 
 @pytest.mark.unit
@@ -116,18 +121,12 @@ def test_smart_planner_commits_are_automatic_not_optional(
 
 
 @pytest.mark.unit
-def test_smart_planner_requires_explicit_counterproposal_approval(
+def test_smart_planner_keeps_its_commit_gate_after_delegating_questions(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "contra-proposta" in content
-    assert "Posso registrar assim?" in content
-
-
-@pytest.mark.unit
-def test_smart_planner_does_not_skip_obvious_branches(repo_root: Path) -> None:
-    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "NUNCA pule um ramo independente" in content
+    assert "### Commits automáticos após confirmação" in content
+    assert "commita automaticamente" in content
 
 
 @pytest.mark.unit
@@ -168,13 +167,22 @@ def test_smart_planner_has_executor_review_section(repo_root: Path) -> None:
 @pytest.mark.unit
 def test_smart_planner_uses_adaptive_question_blocks(repo_root: Path) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "blocos adaptativos" in content
-    assert "1 e 5" in content
+    assert "question-orchestration" in content
+    assert "entre 1 e 4 perguntas" not in content
 
 
 @pytest.mark.unit
 def test_smart_planner_references_planning_skill(repo_root: Path) -> None:
     assert "planning-and-task-breakdown" in smart_planner_file(repo_root).read_text(
+        encoding="utf-8"
+    )
+
+
+@pytest.mark.unit
+def test_smart_planner_uses_question_orchestration(
+    repo_root: Path,
+) -> None:
+    assert "question-orchestration" in smart_planner_file(repo_root).read_text(
         encoding="utf-8"
     )
 
@@ -245,9 +253,35 @@ def test_smart_planner_has_detail_calibration_self_question(
 
 
 @pytest.mark.unit
-def test_smart_planner_has_initial_context_triage_section(
+def test_smart_planner_delegates_initial_context_triage(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "Triagem de Contexto Inicial" in content
-    assert "prompt inicial fraco" in content
+
+    assert "question-orchestration" in content
+    assert "prompt inicial fraco" not in content
+
+
+@pytest.mark.unit
+def test_smart_planner_handoff_requires_autonomous_local_commits(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    handoff = re.sub(r"\s+", " ", content.split("## Handoff", maxsplit=1)[1])
+
+    assert "commits locais autonomamente" in handoff
+    assert "unidades logicamente coesas" in handoff
+    assert "`git push`" in handoff
+    assert "confirmação explícita do humano" in handoff
+
+
+@pytest.mark.unit
+def test_agents_md_allows_local_commits_and_requires_push_confirmation(
+    repo_root: Path,
+) -> None:
+    content = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "`git push` exige confirmação explícita do humano" in content
+    assert "NUNCA realize o commit independentemente." not in content
+    assert "SÓ realize o commit quando o humano autorizar" not in content
+    assert "Exceção — smart-planner" not in content
