@@ -18,6 +18,7 @@ from opencode_config.lib.config import update_marked_block
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import UserSpacePaths
 from opencode_config.lib.process import CommandResult, run_command
+from opencode_config.lib.versions import fnm_node_bin_dir
 
 
 FNM_VERSION = "1.38.1"
@@ -279,6 +280,7 @@ def _execute(
     *,
     runner: Runner | None = None,
     timeout: float | None = INSTALL_COMMAND_TIMEOUT_SECONDS,
+    extra_env: Mapping[str, str] | None = None,
 ) -> CommandResult:
     args = [os.fspath(argument) for argument in command]
     execute = run_command if runner is None else runner
@@ -289,10 +291,13 @@ def _execute(
         )
         if executable is not None:
             args[0] = executable
+    env = context.current_environment
+    if extra_env:
+        env = {**env, **extra_env}
     try:
         result = execute(
             args,
-            env=context.current_environment,
+            env=env,
             timeout=timeout,
         )
     except FileNotFoundError as error:
@@ -616,16 +621,15 @@ def install_node(
             fetcher=fetcher,
         )
     _execute(context, ["fnm", "install", "22"], runner=runner)
-    node_result = _execute(
-        context,
-        ["fnm", "which", "22"],
-        runner=runner,
+    node_bin = fnm_node_bin_dir(
+        context.paths.home,
+        context.current_environment,
+        major=22,
     )
-    node_executable = node_result.stdout.strip().splitlines()
-    if not node_executable:
-        raise InstallerError("fnm nao retornou o caminho do Node.js 22")
+    if node_bin is None:
+        raise InstallerError("fnm nao expoe o diretorio bin do Node.js 22")
     ensure_path_entry(
-        Path(node_executable[-1]).parent,
+        node_bin,
         environment_kind=context.environment,
         profile_path=context.profile_path,
         environ=context.current_environment,
@@ -918,6 +922,15 @@ def install_aws_cli(
         )
 
     linux = context.environment is not EnvironmentKind.WINDOWS
+    if linux and shutil.which(
+        "unzip",
+        path=_path_value(context.current_environment),
+    ) is None:
+        raise InstallerError(
+            "unzip e pre-requisito do instalador oficial da AWS CLI v2 "
+            "(ele extrai o bundle interno). Instale com o gerenciador da "
+            "sua distro, por exemplo: sudo apt install unzip"
+        )
     source_url = script_url or (AWS_LINUX_INSTALL_URL if linux else AWS_WINDOWS_INSTALL_URL)
     suffix = ".sh" if linux else ".ps1"
     with tempfile.TemporaryDirectory(prefix="opencode-aws-") as temporary:
@@ -929,18 +942,24 @@ def install_aws_cli(
             fetcher=fetcher,
         )
         if linux:
+            # O install.sh oficial (v2) aceita apenas --version, -s/--system,
+            # -q/--quiet e -h/--help. O local de instalacao user-local e
+            # controlado pelas variaveis de ambiente XDG_DATA_HOME (raiz; o
+            # binario fica em $XDG_DATA_HOME/aws-cli) e XDG_BIN_HOME (onde os
+            # symlinks aws/aws_completer sao criados). --update e aplicado
+            # automaticamente quando o instalador detecta uma versao anterior.
             command: list[str | os.PathLike[str]] = [
                 "bash",
                 script,
-                "--install-dir",
-                context.paths.data_dir / "aws-cli",
-                "--bin-dir",
-                context.paths.bin_dir,
-                "--update",
                 "--quiet",
             ]
             if target_version is not None:
                 command.extend(["--version", target_version])
+            aws_env: dict[str, str] = {
+                "XDG_DATA_HOME": os.fspath(context.paths.data_dir),
+                "XDG_BIN_HOME": os.fspath(context.paths.bin_dir),
+            }
+            _execute(context, command, runner=runner, extra_env=aws_env)
         else:
             command = [
                 "powershell",
@@ -953,7 +972,7 @@ def install_aws_cli(
             ]
             if target_version is not None:
                 command.extend(["-Version", target_version])
-        _execute(context, command, runner=runner)
+            _execute(context, command, runner=runner)
 
     if linux:
         ensure_path_entry(

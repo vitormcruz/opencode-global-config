@@ -19,6 +19,7 @@ from opencode_config.lib.environment import (
     detect_environment,
 )
 from opencode_config.lib.process import run_command
+from opencode_config.lib.versions import fnm_node_bin_dir
 
 HELP_TEXT = """opencode-adapter
 
@@ -157,29 +158,6 @@ def _remove_legacy_test_library_block(path: Path) -> None:
         path.write_text(updated, encoding="utf-8")
 
 
-def _natural_version_key(value: str) -> tuple[tuple[int, int | str], ...]:
-    return tuple(
-        (0, int(part)) if part.isdigit() else (1, part)
-        for part in re.split(r"([0-9]+)", value)
-        if part
-    )
-
-
-def _fnm_active_node_bin(home: Path, environment: Mapping[str, str]) -> Path | None:
-    fnm_dir = Path(environment.get("FNM_DIR") or home / ".local/share/fnm")
-    versions_dir = fnm_dir / "node-versions"
-    if not versions_dir.is_dir():
-        return None
-
-    versions = [item for item in versions_dir.iterdir() if item.is_dir()]
-    if not versions:
-        return None
-
-    latest = max(versions, key=lambda item: _natural_version_key(item.name))
-    node_bin = latest / "installation" / "bin"
-    return node_bin if node_bin.is_dir() else None
-
-
 def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
     bashrc = home / ".bashrc"
     _remove_legacy_test_library_block(bashrc)
@@ -205,7 +183,7 @@ def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
         )
 
     if not _bashrc_has(bashrc, r"fnm/node-versions"):
-        node_bin = _fnm_active_node_bin(home, environment)
+        node_bin = fnm_node_bin_dir(home, environment)
         if node_bin is not None:
             _append_block(
                 bashrc,
@@ -269,7 +247,7 @@ def _print_plan(
     if _bashrc_has(bashrc, r"fnm/node-versions"):
         output(f"OK    {bashrc} PATH includes fnm node")
     else:
-        node_bin = _fnm_active_node_bin(home, os.environ)
+        node_bin = fnm_node_bin_dir(home, os.environ)
         if node_bin is not None:
             output(f"ENV   {bashrc} << PATH={node_bin}:$PATH")
 
