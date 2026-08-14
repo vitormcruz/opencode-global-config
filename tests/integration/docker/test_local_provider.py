@@ -43,9 +43,14 @@ def test_start_container_uses_host_gateway_without_model_environment(
     session = DockerSession(repo_root=tmp_path, script_dir=tmp_path)
     docker_calls: list[tuple[str, ...]] = []
     monkeypatch.setattr(session, "network_exists", lambda: True)
-    monkeypatch.delenv("OPENCODE_CONFIG", raising=False)
+    monkeypatch.setattr(session, "network_is_internal", lambda: True)
+    monkeypatch.setattr(session, "network_gateway", lambda: "172.18.0.1")
+    monkeypatch.setattr(session, "container_ip", lambda: "172.18.0.2")
+    overlay_variable = "OPENCODE" + "_CONFIG"
+    monkeypatch.setenv(overlay_variable, str(tmp_path / "host.json"))
     monkeypatch.setattr(session, "container_running", lambda: False)
     monkeypatch.setattr(session, "container_exists", lambda: False)
+    monkeypatch.setattr(session, "start_proxy", Mock())
     monkeypatch.setattr(
         session,
         "_checked_docker",
@@ -58,30 +63,36 @@ def test_start_container_uses_host_gateway_without_model_environment(
     assert len(docker_calls) == 1
     command = docker_calls[0]
     assert command[command.index("--network") + 1] == "opencode-test-net"
-    assert "--add-host=host.docker.internal:host-gateway" in command
-    assert not any(argument.startswith("OPENCODE_") for argument in command)
+    assert "--add-host=host.docker.internal:172.18.0.1" in command
+    assert "-p" not in command
+    assert overlay_variable not in command
 
 
-def test_entrypoint_keeps_the_fixed_model_configuration(
-    tmp_path: Path,
+def test_entrypoint_ignores_host_config_overlay(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    config_path = tmp_path / "opencode.json"
-    config_path.write_text(
-        json.dumps(
-            {
-                "agent": {
-                    "plan": {"model": "bonsai-local/bonsai-27b"},
-                    "build": {"model": "bonsai-local/bonsai-27b"},
-                }
-            }
-        ),
-        encoding="utf-8",
+    overlay_variable = "OPENCODE" + "_CONFIG"
+    monkeypatch.setenv(overlay_variable, "/tmp/host-opencode.json")
+    exec_arguments: list[tuple[str, list[str]]] = []
+    monkeypatch.setattr(
+        entrypoint.os,
+        "execv",
+        lambda path, arguments: exec_arguments.append((path, arguments)),
     )
-    monkeypatch.setattr(entrypoint, "CONFIG_FILE", config_path)
-    monkeypatch.delenv("OPENCODE_CONFIG", raising=False)
 
-    entrypoint.configure()
+    entrypoint.main()
 
-    result = json.loads(config_path.read_text(encoding="utf-8"))
-    assert result["agent"]["plan"]["model"] == "bonsai-local/bonsai-27b"
+    assert exec_arguments == [
+        (
+            entrypoint.OPENCODE_BINARY,
+            [
+                entrypoint.OPENCODE_BINARY,
+                "--pure",
+                "serve",
+                "--hostname",
+                "0.0.0.0",
+                "--port",
+                "4096",
+            ],
+        )
+    ]

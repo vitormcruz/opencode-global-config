@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 import pytest
 
 
-REQUEST_TIMEOUT_SECONDS = 120
+REQUEST_TIMEOUT_SECONDS = 600
 
 
 @dataclass(frozen=True)

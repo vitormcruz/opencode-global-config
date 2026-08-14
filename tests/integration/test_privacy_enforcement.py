@@ -13,7 +13,10 @@ import pytest
 pytestmark = pytest.mark.opencode
 
 CONTAINER_NAME = "opencode-config-test"
+NETWORK_NAME = "opencode-test-net"
 EFFECTIVE_CONFIG = "/opt/opencode-config/opencode.json"
+LOCAL_BASE_URL = "http://host.docker.internal:8080/v1"
+LOCAL_MODEL = "bonsai-local/bonsai-27b"
 
 
 def _require_docker() -> str:
@@ -27,7 +30,7 @@ def _require_docker() -> str:
 
 
 @pytest.fixture(scope="module")
-def docker_executable() -> Iterator[str]:
+def docker_executable(docker_session) -> Iterator[str]:
     executable = _require_docker()
     result = subprocess.run(
         [executable, "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME],
@@ -58,6 +61,27 @@ def _exec_in_container(
     )
 
 
+def test_network_is_internal(docker_executable: str) -> None:
+    result = subprocess.run(
+        [
+            docker_executable,
+            "network",
+            "inspect",
+            "--format",
+            "{{.Internal}}",
+            NETWORK_NAME,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0 or result.stdout.strip().lower() != "true":
+        pytest.fail(
+            f"Violação de privacidade: a rede {NETWORK_NAME} não é interna.\n"
+            f"{(result.stderr or result.stdout).strip()}"
+        )
+
+
 def test_config_enforcement_allows_only_bonsai_local(
     docker_executable: str,
 ) -> None:
@@ -83,6 +107,31 @@ def test_config_enforcement_allows_only_bonsai_local(
             "Violação de privacidade: providers externos declarados na config "
             f"efetiva: {sorted(providers)}"
         )
+    provider = providers["bonsai-local"]
+    agent_config = config.get("agent") if isinstance(config, dict) else None
+    options = provider.get("options") if isinstance(provider, dict) else None
+    models = provider.get("models") if isinstance(provider, dict) else None
+    model_config = models.get("bonsai-27b") if isinstance(models, dict) else None
+    plan_config = agent_config.get("plan") if isinstance(agent_config, dict) else None
+    build_config = agent_config.get("build") if isinstance(agent_config, dict) else None
+    if (
+        not isinstance(provider, dict)
+        or not isinstance(options, dict)
+        or options.get("baseURL") != LOCAL_BASE_URL
+        or not isinstance(models, dict)
+        or set(models) != {"bonsai-27b"}
+        or not isinstance(model_config, dict)
+        or model_config.get("name") != "Bonsai 27B 1-bit"
+        or not isinstance(agent_config, dict)
+        or not isinstance(plan_config, dict)
+        or plan_config.get("model") != LOCAL_MODEL
+        or not isinstance(build_config, dict)
+        or build_config.get("model") != LOCAL_MODEL
+    ):
+        pytest.fail(
+            "Violação de privacidade: a config efetiva não fixa exclusivamente "
+            "bonsai-local/bonsai-27b em host.docker.internal:8080/v1."
+        )
 
 
 def test_local_bonsai_endpoint_is_reachable(
@@ -92,6 +141,8 @@ def test_local_bonsai_endpoint_is_reachable(
         docker_executable,
         "curl",
         "-fsS",
+        "--noproxy",
+        "*",
         "--max-time",
         "10",
         "http://host.docker.internal:8080/v1/models",
@@ -110,13 +161,21 @@ def test_network_enforcement_blocks_external_access(
     result = _exec_in_container(
         docker_executable,
         "curl",
-        "-fsS",
+        "--silent",
+        "--show-error",
+        "--noproxy",
+        "*",
         "--max-time",
         "5",
+        "--output",
+        "/dev/null",
+        "--write-out",
+        "%{http_code}",
         "https://example.com",
     )
-    if result.returncode == 0:
+    http_code = result.stdout.strip()
+    if result.returncode not in {6, 7, 28} or http_code not in {"", "000"}:
         pytest.fail(
             "Violação de privacidade: o container alcançou a internet. "
-            "A rede opencode-test-net deve ser criada com --internal."
+            "A rede opencode-test-net deve ser interna e sem proxy externo."
         )

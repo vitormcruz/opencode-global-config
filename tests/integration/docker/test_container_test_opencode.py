@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -21,6 +21,7 @@ def test_ensure_up_starts_the_container_without_model_selection(
     start_container = Mock()
     monkeypatch.setattr(session, "check_docker", check_docker)
     monkeypatch.setattr(session, "network_exists", lambda: True)
+    monkeypatch.setattr(session, "network_is_internal", lambda: True)
     monkeypatch.setattr(session, "container_exists", lambda: True)
     monkeypatch.setattr(session, "start_container", start_container)
 
@@ -60,8 +61,13 @@ def test_start_container_uses_only_the_internal_test_network(
     session = DockerSession(repo_root=tmp_path, script_dir=tmp_path)
     docker_calls: list[tuple[str, ...]] = []
     monkeypatch.setattr(session, "network_exists", lambda: True)
+    monkeypatch.setattr(session, "network_is_internal", lambda: True)
+    monkeypatch.setattr(session, "network_gateway", lambda: "172.18.0.1")
+    monkeypatch.setattr(session, "container_ip", lambda: "172.18.0.2")
     monkeypatch.setattr(session, "container_running", lambda: False)
     monkeypatch.setattr(session, "container_exists", lambda: False)
+    start_proxy = Mock()
+    monkeypatch.setattr(session, "start_proxy", start_proxy)
     monkeypatch.setattr(
         session,
         "_checked_docker",
@@ -74,4 +80,39 @@ def test_start_container_uses_only_the_internal_test_network(
     run_command = docker_calls[0]
     assert "--network" in run_command
     assert run_command[run_command.index("--network") + 1] == NETWORK_NAME
-    assert "--add-host=host.docker.internal:host-gateway" in run_command
+    assert "--add-host=host.docker.internal:172.18.0.1" in run_command
+    assert "-p" not in run_command
+    start_proxy.assert_called_once_with("172.18.0.2")
+
+
+def test_existing_network_is_recreated_when_not_internal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    checked_docker = Mock()
+    monkeypatch.setattr(session, "network_exists", lambda: True)
+    monkeypatch.setattr(session, "network_is_internal", lambda: False)
+    monkeypatch.setattr(session, "container_exists", lambda: False)
+    monkeypatch.setattr(session, "_checked_docker", checked_docker)
+
+    session.ensure_test_network()
+
+    assert checked_docker.call_args_list == [
+        call("network", "rm", NETWORK_NAME),
+        call("network", "create", "--internal", NETWORK_NAME),
+    ]
+
+
+def test_container_reuses_only_matching_runtime_topology(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    monkeypatch.setattr(session, "container_uses_test_network", lambda: True)
+    monkeypatch.setattr(
+        session,
+        "container_has_host_gateway",
+        lambda gateway: gateway == "172.18.0.1",
+    )
+
+    assert session.container_is_compatible("172.18.0.1")
+    assert not session.container_is_compatible("172.19.0.1")

@@ -42,7 +42,7 @@ def test_requests_allow_time_for_bonsai_wake_up(
 
     OpenCodeClient().get("/")
 
-    assert timeouts == [120]
+    assert timeouts == [600]
 
 
 def test_send_message_does_not_expose_model_selection() -> None:
