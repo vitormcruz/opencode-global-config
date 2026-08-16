@@ -28,7 +28,6 @@ from urllib.request import urlopen
 
 MODEL_REPOSITORY = "prism-ml/Bonsai-27B-gguf"
 MODEL_FILE = "Bonsai-27B-Q1_0.gguf"
-MMPROJ_FILE = "Bonsai-27B-mmproj-Q8_0.gguf"
 MODEL_BASE_URL = f"https://huggingface.co/{MODEL_REPOSITORY}/resolve/main"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "models"
 LLAMA_RELEASE_TAG = "prism-b9596-9fcaed7"
@@ -46,6 +45,7 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_BIND_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
 IDLE_SECONDS = 600
+DETERMINISTIC_SEED = 42
 PID_FILE_NAME = "llama-server.pid"
 DOWNLOAD_TIMEOUT_SECONDS = 600
 
@@ -87,12 +87,6 @@ class BonsaiServer:
         """Return the fixed path of the Bonsai model weights."""
 
         return self.cache_dir / MODEL_FILE
-
-    @property
-    def mmproj_path(self) -> Path:
-        """Return the fixed path of the multimodal projector weights."""
-
-        return self.cache_dir / MMPROJ_FILE
 
     @property
     def pid_path(self) -> Path:
@@ -410,10 +404,7 @@ class BonsaiServer:
             pass
 
     def _ensure_model_files(self) -> None:
-        artifacts = (
-            (MODEL_FILE, self.model_path),
-            (MMPROJ_FILE, self.mmproj_path),
-        )
+        artifacts = ((MODEL_FILE, self.model_path),)
         for filename, destination in artifacts:
             if destination.is_file() and destination.stat().st_size > 0:
                 continue
@@ -425,13 +416,15 @@ class BonsaiServer:
             executable,
             "--model",
             str(self.model_path),
-            "--mmproj",
-            str(self.mmproj_path),
             "--host",
             self.bind_host,
             "--port",
             str(self.port),
             "--jinja",
+            "--temp",
+            "0",
+            "--seed",
+            str(DETERMINISTIC_SEED),
             "--sleep-idle-seconds",
             str(IDLE_SECONDS),
         ]

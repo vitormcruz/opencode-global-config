@@ -48,7 +48,7 @@ def test_model_paths_use_the_fixed_cache_layout(tmp_path: Path) -> None:
     server = BonsaiServer(cache_dir=tmp_path)
 
     assert server.model_path == tmp_path / "Bonsai-27B-Q1_0.gguf"
-    assert server.mmproj_path == tmp_path / "Bonsai-27B-mmproj-Q8_0.gguf"
+    assert not hasattr(server, "mmproj_path")
     assert server.endpoint_url == "http://127.0.0.1:8080"
 
 
@@ -335,10 +335,7 @@ def test_ensure_up_downloads_missing_files_and_waits_for_readiness(
     result = server.ensure_up()
 
     assert result is server
-    assert [path for _, path in downloaded] == [
-        server.model_path,
-        server.mmproj_path,
-    ]
+    assert [path for _, path in downloaded] == [server.model_path]
     assert all(url.startswith("https://huggingface.co/prism-ml/Bonsai-27B-gguf/")
                for url, _ in downloaded)
     assert server._process is process
@@ -371,7 +368,6 @@ def test_ensure_up_does_not_download_present_artifacts(
 ) -> None:
     server = BonsaiServer(cache_dir=tmp_path)
     server.model_path.write_bytes(b"model")
-    server.mmproj_path.write_bytes(b"mmproj")
     server.require_available = Mock(side_effect=BonsaiServerError("offline"))
     monkeypatch.setattr(
         server,
@@ -397,7 +393,11 @@ def test_start_process_uses_jinja_and_native_idle_sleep(
 
     command = popen.call_args.args[0]
     assert command[:2] == ["llama-server", "--model"]
-    assert "--mmproj" in command
+    assert "--mmproj" not in command
+    temp_index = command.index("--temp")
+    assert command[temp_index + 1] == "0"
+    seed_index = command.index("--seed")
+    assert command[seed_index + 1] == str(bonsai_server.DETERMINISTIC_SEED)
     assert "--jinja" in command
     assert "--sleep-idle-seconds" in command
     assert "600" in command
