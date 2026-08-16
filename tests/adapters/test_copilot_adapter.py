@@ -36,7 +36,7 @@ def test_copilot_adapter_converts_agent_frontmatter(
     agent = (
         tmp_path / ".copilot" / "agents" / "eng-software.agent.md"
     ).read_text(encoding="utf-8")
-    assert 'tools: ["read", "edit", "execute", "search"]' in agent
+    assert 'tools: ["read", "edit", "execute", "search", "web"]' in agent
     assert "temperature:" not in agent
 
 

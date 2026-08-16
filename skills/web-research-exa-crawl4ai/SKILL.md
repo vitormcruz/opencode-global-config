@@ -1,10 +1,11 @@
 ---
 name: web-research-exa-crawl4ai
 description: >
-  Pesquisa web sem URL específica - usa web_search_exa, websearch ou a busca
-  padrão do ambiente para descobrir fontes e o CLI crwl (crawl4ai) para
-  extração, validação e aprofundamento progressivo. Prioriza fontes oficiais e
-  delega documentos binários para a skill doc-extract.
+  Pesquisa web sem URL específica - usa websearch como busca padrão (no
+  OpenCode via Exa AI quando ativa; senão, busca padrão da plataforma) e o CLI
+  crwl (crawl4ai) para extração, validação e aprofundamento progressivo.
+  Prioriza fontes oficiais e delega documentos binários para a skill
+  doc-extract.
 ---
 
 Você é uma skill de pesquisa web híbrida.
@@ -27,19 +28,21 @@ Use esta skill quando o humano pedir:
 - Se a tarefa não exigir pesquisa atual na web, não carregue esta skill.
 
 ## Cadeia de descoberta
-Use a primeira opção disponível nesta ordem:
-1. `web_search_exa`, se a ferramenta remota Exa estiver disponível.
-2. `websearch`, se a busca nativa do OpenCode estiver disponível.
-3. a busca padrão do ambiente, como fallback final.
+Use `websearch` como busca padrão — é uma **capacidade**: cada plataforma a
+traduz para um MCP ou recurso de busca mais avançado disponível. No OpenCode,
+`websearch` usa a **Exa AI** (MCP hospedado da Exa, ativado por
+`OPENCODE_ENABLE_EXA=1`, sem chave); se a Exa não estiver disponível, usa a
+busca padrão da plataforma. No Copilot e em outras ferramentas, usa o
+equivalente nativo de busca web do ambiente.
 
-Não troque essa ordem por preferência de cliente. Se nenhuma busca estiver
-disponível, peça uma URL ao humano ou use fontes conhecidas explicitamente.
+Não troque `websearch` por outra ferramenta de busca por preferência de
+cliente. Se nenhuma busca estiver disponível, peça uma URL ao humano ou use
+fontes conhecidas explicitamente.
 
 ## Ferramentas
 - `crwl`: CLI do crawl4ai para extração de Markdown, HTML, JS, screenshot,
   PDF e deep crawl.
-- `web_search_exa`: descoberta inicial de fontes, quando disponível.
-- `websearch`: descoberta alternativa, quando disponível.
+- `websearch`: descoberta de fontes (ferramenta de busca nativa do ambiente).
 - `doc-extract`: extração de documentos binários.
 
 ## Regras principais
@@ -152,14 +155,14 @@ temporário quando houver evidência de rate limit, não como resposta final.
    - reduza o número de buscas e omita operações secundárias
 4. **Use fallback por ferramenta**:
    - em falha do `crwl`, tente `webfetch` na mesma URL quando for adequado
-   - em falha de `websearch`, tente `web_search_exa` ou a busca padrão
+   - em falha de `websearch`, tente a busca padrão do ambiente
 5. **Ajuste o escopo da resposta**:
    - informe o exit code, timeout ou bloqueio e quantas fontes foram validadas
 6. Quando um 429 já ocorreu, prefira chamadas sequenciais a chamadas paralelas.
 
 ## Fallback
-Se `web_search_exa` e `websearch` não estiverem disponíveis, informe isso
-brevemente e use a busca padrão do ambiente ou peça uma URL específica.
+Se `websearch` não estiver disponível, informe isso brevemente e use a busca
+padrão do ambiente ou peça uma URL específica.
 
 **Fallback para documentos binários**: não use `crwl` diretamente para PDF,
 DOCX, PPTX, XLSX ou imagens quando a URL apontar para o arquivo. Use a skill

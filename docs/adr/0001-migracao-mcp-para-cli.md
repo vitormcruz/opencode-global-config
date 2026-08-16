@@ -24,7 +24,7 @@ comportamento. O plano de migração aprovado registra as seguintes decisões:
 | AD-4 | Migrar scripts para Python e testes para pytest. |
 | AD-5 | OpenCode permanece exclusivo de WSL/Linux. |
 | AD-6 | Copilot CLI fica exclusivo do Windows; clientes não são misturados. |
-| AD-7 | Preferir `web_search_exa`, depois `websearch`, depois busca padrão. |
+| AD-7 (rev.) | `websearch` como busca padrão única; busca do ambiente como fallback. |
 | AD-8 | Remover o Makefile ao final e usar marcadores/fixtures pytest. |
 | AD-9 | Instalar dependências em user-space, sem sudo ou administrador. |
 | AD-10 | Detectar dependências antes de instalar e permitir seleção interativa. |

@@ -66,12 +66,12 @@ def test_skill_has_no_legacy_mcp_tool_names(skill_content: str):
 
 
 @pytest.mark.unit
-def test_skill_declares_websearch_preference_chain(skill_content: str):
-    exa = skill_content.index("web_search_exa")
+def test_skill_uses_websearch_as_generic_default(skill_content: str):
     native = skill_content.index("websearch")
     environment = skill_content.index("busca padrão do ambiente")
 
-    assert exa < native < environment
+    assert native < environment
+    assert "web_search_exa" not in skill_content
 
 
 @pytest.mark.unit

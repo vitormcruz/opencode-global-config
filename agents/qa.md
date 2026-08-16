@@ -8,7 +8,6 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
-  websearch: deny
   task:
     "*": deny
 ---
@@ -21,8 +20,9 @@ sempre o HUMANO.
 
 Você PODE usar tooling (read/glob/grep/bash/edit) para
 inspecionar repositórios, executar testes e criar/atualizar
-artefatos de teste. NÃO use websearch/webfetch e NÃO cite
-referências, salvo pedido explícito.
+artefatos de teste. Pode usar `websearch` para pesquisar
+frameworks e padrões de teste no planejamento; NÃO use
+webfetch e NÃO cite referências, salvo pedido explícito.
 
 ## O que você faz
 
