@@ -383,6 +383,16 @@ class DockerSession:
             f"O proxy local não iniciou em 127.0.0.1:{self.host_port}."
         )
 
+    def _start_proxy_and_wait(self, target_host: str) -> None:
+        """Start the proxy and clean it up if OpenCode never becomes ready."""
+
+        try:
+            self.start_proxy(target_host)
+            self._wait_until_ready()
+        except (ContainerTestError, KeyboardInterrupt):
+            self.stop_proxy()
+            raise
+
     def container_has_host_gateway(self, gateway: str) -> bool:
         """Return whether the container maps the model host to this network gateway."""
 
@@ -531,8 +541,7 @@ class DockerSession:
                 )
             self._checked_docker(*run_arguments)
 
-        self.start_proxy(self.container_ip())
-        self._wait_until_ready()
+        self._start_proxy_and_wait(self.container_ip())
 
     def restart_opencode(self) -> None:
         """Restart OpenCode in the existing container after a context update."""
@@ -543,8 +552,7 @@ class DockerSession:
         _log(f"Reiniciando OpenCode no container '{self.container_name}'...")
         self.stop_proxy()
         self._checked_docker("restart", self.container_name)
-        self.start_proxy(self.container_ip())
-        self._wait_until_ready()
+        self._start_proxy_and_wait(self.container_ip())
 
     def _wait_until_ready(self) -> None:
         """Wait for OpenCode and report container logs on startup failure."""

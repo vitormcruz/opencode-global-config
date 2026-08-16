@@ -163,6 +163,32 @@ def test_start_proxy_detaches_from_the_cli_process(
     assert popen.call_args.kwargs["start_new_session"] is True
 
 
+def test_start_container_stops_proxy_when_readiness_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    stop_proxy = Mock()
+    start_proxy = Mock()
+    monkeypatch.setattr(session, "ensure_test_network", Mock())
+    monkeypatch.setattr(session, "network_gateway", lambda: "172.18.0.1")
+    monkeypatch.setattr(session, "container_exists", lambda: False)
+    monkeypatch.setattr(session, "container_running", lambda: False)
+    monkeypatch.setattr(session, "container_ip", lambda: "172.18.0.2")
+    monkeypatch.setattr(session, "_checked_docker", Mock())
+    monkeypatch.setattr(session, "stop_proxy", stop_proxy)
+    monkeypatch.setattr(session, "start_proxy", start_proxy)
+    monkeypatch.setattr(
+        session,
+        "_wait_until_ready",
+        Mock(side_effect=container_test_opencode.ContainerTestError("OpenCode down")),
+    )
+
+    with pytest.raises(container_test_opencode.ContainerTestError, match="OpenCode down"):
+        session.start_container()
+
+    assert stop_proxy.call_count == 2
+
+
 def test_existing_network_is_recreated_when_not_internal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

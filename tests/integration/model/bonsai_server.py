@@ -46,6 +46,7 @@ DEFAULT_BIND_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
 IDLE_SECONDS = 600
 DETERMINISTIC_SEED = 42
+CONTEXT_SIZE = 16_384
 PID_FILE_NAME = "llama-server.pid"
 DOWNLOAD_TIMEOUT_SECONDS = 600
 
@@ -416,6 +417,8 @@ class BonsaiServer:
             executable,
             "--model",
             str(self.model_path),
+            "--ctx-size",
+            str(CONTEXT_SIZE),
             "--host",
             self.bind_host,
             "--port",

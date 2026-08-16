@@ -398,6 +398,8 @@ def test_start_process_uses_jinja_and_native_idle_sleep(
     assert command[temp_index + 1] == "0"
     seed_index = command.index("--seed")
     assert command[seed_index + 1] == str(bonsai_server.DETERMINISTIC_SEED)
+    context_index = command.index("--ctx-size")
+    assert command[context_index + 1] == str(bonsai_server.CONTEXT_SIZE)
     assert "--jinja" in command
     assert "--sleep-idle-seconds" in command
     assert "600" in command
