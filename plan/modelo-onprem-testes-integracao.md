@@ -266,6 +266,47 @@ fixado no mesmo release e sem compilacao; apenas a deteccao deixa de confiar
 em um sintoma. Os pesos 1-bit tem 3,54 GB e cabem folgados em RAM, e o D16 ja
 removeu tempo como criterio de falha — CPU e um caminho valido.
 
+### D18 — Amostragem determinista e remocao do modulo de visao
+
+A suite nao era repetivel: o `BonsaiServer` sobe o `llama-server` sem
+`--temp` nem `--seed`, herdando amostragem estocastica (temp 0.8), enquanto as
+assercoes dependem do texto gerado (`"ok" in stdout`, `"sim" in stdout`). Duas
+execucoes do mesmo commit na mesma maquina podiam divergir.
+
+- `--temp 0`: decodificacao gulosa, sempre o token mais provavel. Todos os
+  testes sao de obediencia a instrucao, nao de geracao aberta — diversidade
+  aqui e defeito, nao recurso.
+- `--seed` fixo: torna reprodutivel qualquer aleatoriedade residual.
+- Remocao do `--mmproj`: o projector de visao (601 MB) e carregado sempre, mas
+  nenhum teste envia imagem. Menos download, menos RAM e boot mais rapido.
+
+Mitigacao para repeticao degenerada: modelos muito quantizados podem entrar em
+loop de repeticao sob decodificacao gulosa. Se isso ocorrer, o executor troca
+para `--temp 0.1` — quase deterministico, suficiente para escapar do loop. A
+troca so acontece mediante evidencia empirica, nunca preventivamente.
+
+Rationale: repetibilidade e um requisito da suite; desempenho nao e. Estas
+mudancas valem em qualquer maquina, nao instalam nada e nao dependem do
+backend.
+
+### D19 — Desempenho e propriedade do ambiente, nunca da suite
+
+Com backend CPU, a suite levou 22m06s (50 testes). A causa e a ausencia do
+runtime CUDA no WSL, nao o hardware: a GPU tem 6 GB e os pesos 3,54 GB.
+
+Mesmo assim, a suite **nao** instala pacotes de sistema:
+
+- Baixar um binario self-contained para o cache (D15) e diferente de `apt
+  install` com `sudo`, que muta a maquina e varia por distribuicao.
+- A suite nao falha por ausencia de GPU: isso a tornaria inexecutavel em CI e
+  reintroduziria lentidao como criterio de falha, proibido pelo D16.
+- Falha legitima e apenas incapacidade real: memoria insuficiente, binario
+  ausente ou servidor que nao sobe.
+
+Se o humano instalar o runtime CUDA no ambiente, o D17 detecta e passa a usar
+GPU sozinho, sem alteracao de codigo nem de plano. Isso permanece uma escolha
+de ambiente, jamais um pre-requisito da suite.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -805,6 +846,37 @@ Vulkan e depois CPU, e mensagem informativa quando o rebaixamento ocorrer.
 
 ---
 
+#### Task 13: Fixar amostragem determinista e remover o mmproj (D18)
+
+**Description:** Ajustar `_command()` do `BonsaiServer` para passar `--temp 0`
+e `--seed` fixo, e remover `--mmproj` junto com o download do arquivo de
+projector.
+
+**Acceptance criteria:**
+- [ ] O comando do `llama-server` contem `--temp 0` e `--seed` com valor fixo
+- [ ] `--mmproj` foi removido do comando e o projector nao e mais baixado
+- [ ] Nenhum teste de integracao envia imagem (confirmado por inspecao)
+- [ ] A suite `-m opencode` produz o mesmo resultado em duas execucoes
+- [ ] Se ocorrer repeticao degenerada, e so nesse caso, `--temp 0.1` substitui
+      `--temp 0`, com o motivo registrado no reporte
+
+**Verification:**
+- [ ] Teste unitario cobre a presenca de `--temp`/`--seed` e a ausencia de
+      `--mmproj`
+- [ ] `.venv/bin/pytest -m "unit or tools"` passa
+- [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes com
+      resultados identicos
+
+**Dependencies:** Task 12
+
+**Files likely touched:**
+- `tests/integration/model/bonsai_server.py`
+- `tests/integration/model/test_bonsai_server.py`
+
+**Estimated scope:** S
+
+---
+
 #### Task 10: Validar o runtime completo no WSL/Linux
 
 **Description:** Executar a suite de verdade, no WSL/Linux (D13), com o
@@ -827,7 +899,7 @@ validacao: so gera codigo se algum criterio falhar.
 - [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes
 - [ ] `git grep -n "OPENCODE_CONFIG" -- tests/integration` nao retorna nada
 
-**Dependencies:** Task 9, Task 11, Task 12
+**Dependencies:** Task 9, Task 11, Task 12, Task 13
 
 **Files likely touched:**
 - nenhum, se todos os criterios passarem
@@ -856,6 +928,9 @@ validacao: so gera codigo se algum criterio falhar.
 | Recarga apos o sleep de ociosidade atrasa o primeiro request | Baixo | D16: guarda alta, nunca atingida |
 | Maquina sem GPU: modelo em CPU, muito mais lento | Medio | D15 escolhe build CPU; D16 evita falha por lentidao |
 | `nvidia-smi` sem runtime CUDA (tipico no WSL) | Alto | D17: valida `libcudart`/`libcublas` e rebaixa o backend |
+| Amostragem estocastica torna testes intermitentes | Alto | D18: `--temp 0` e `--seed` fixo |
+| Repeticao degenerada sob decodificacao gulosa | Baixo | D18: executor troca para `--temp 0.1` se ocorrer |
+| Suite lenta em CPU (22 min) incomoda o loop de dev | Medio | D19: desempenho e do ambiente; D17 usa GPU se houver |
 | Maquina com pouca memoria (< ~5 GB livres) | Baixo | Falha explicita do `llama-server`; documentar requisito |
 | Release fixado do fork sai do ar | Baixo | Versao fixada e verificavel; trocar exige replan |
 | `host.docker.internal` indisponivel em rede `--internal` | Medio | Task 5: fallback para o IP do gateway da bridge |
