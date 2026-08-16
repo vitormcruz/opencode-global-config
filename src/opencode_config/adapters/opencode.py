@@ -135,19 +135,16 @@ def _bashrc_has(path: Path, pattern: str) -> bool:
 
 def _remove_legacy_test_library_block(path: Path) -> None:
     existing = _read_text(path)
-    legacy_name = "ba" + "ts"
-    legacy_header = f"# opencode-config: bibliotecas do {legacy_name.upper()}"
-    legacy_export = (
-        f'export {legacy_name.upper()}_LIB_PATH="$HOME/.local/lib/{legacy_name}"'
-    )
     updated = re.sub(
-        rf"^{re.escape(legacy_header)}[ \t]*\n?",
+        r"^# opencode-config: bibliotecas do [A-Za-z0-9_-]+[ \t]*\n"
+        r"^export [A-Z0-9_]+_LIB_PATH="
+        r'"\$HOME/\.local/lib/[A-Za-z0-9_-]+"[ \t]*\n?',
         "",
         existing,
         flags=re.MULTILINE,
     )
     updated = re.sub(
-        rf"^{re.escape(legacy_export)}[ \t]*\n?",
+        r"^# opencode-config: bin(?:arios|ários) locais \([^)\r\n]*\)[ \t]*\n?",
         "",
         updated,
         flags=re.MULTILINE,

@@ -31,6 +31,7 @@ IMAGE_NAME = "opencode-config-test:latest"
 NETWORK_NAME = "opencode-test-net"
 HOST_PORT = 4196
 CONTAINER_PORT = 4096
+OPENCODE_BINARY = "/root/.opencode/bin/opencode"
 
 
 class ContainerTestError(RuntimeError):
@@ -67,7 +68,7 @@ def _proxy_connection(
     """Bridge one host connection to the container's internal OpenCode port."""
 
     try:
-        target = socket.create_connection((target_host, target_port), timeout=5)
+        target = socket.create_connection((target_host, target_port))
     except OSError:
         client.close()
         return
@@ -133,6 +134,7 @@ class DockerSession:
     image_name: str = IMAGE_NAME
     host_port: int = HOST_PORT
     container_port: int = CONTAINER_PORT
+    context_dir: Path | None = None
     ready_retries: int = 45
     ready_interval: float = 2.0
     _docker: str | None = field(default=None, init=False, repr=False)
@@ -370,6 +372,7 @@ class DockerSession:
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
+            start_new_session=True,
         )
         for _ in range(100):
             pid = self._read_proxy_pid()
@@ -404,7 +407,33 @@ class DockerSession:
         return (
             self.container_uses_test_network()
             and self.container_has_host_gateway(gateway)
+            and self.container_has_context_mount()
         )
+
+    def container_has_context_mount(self) -> bool:
+        """Return whether the container uses this session's prepared context."""
+
+        if self.context_dir is None:
+            return True
+        result = self._run_docker(
+            "inspect",
+            "--format",
+            "{{json .Mounts}}",
+            self.container_name,
+        )
+        if result.returncode != 0:
+            return False
+        try:
+            mounts = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            return False
+        expected_source = str(self.context_dir.resolve())
+        return any(
+            isinstance(mount, dict)
+            and mount.get("Destination") == "/opt/opencode-config"
+            and mount.get("Source") == expected_source
+            for mount in mounts
+        ) if isinstance(mounts, list) else False
 
     def remove_container_if_exists(self) -> None:
         """Remove the named container when present."""
@@ -472,8 +501,12 @@ class DockerSession:
                 docker_volumes.extend(
                     ["-v", f"{host_ca}:/etc/ssl/certs/host-ca-certificates.crt:ro"]
                 )
+            if self.context_dir is not None:
+                docker_volumes.extend(
+                    ["-v", f"{self.context_dir}:/opt/opencode-config"]
+                )
 
-            self._checked_docker(
+            run_arguments = [
                 "run",
                 "-d",
                 "--name",
@@ -483,8 +516,33 @@ class DockerSession:
                 *docker_options,
                 *docker_volumes,
                 self.image_name,
-            )
+            ]
+            if self.context_dir is not None:
+                run_arguments.extend(
+                    [
+                        OPENCODE_BINARY,
+                        "--pure",
+                        "serve",
+                        "--hostname",
+                        "0.0.0.0",
+                        "--port",
+                        str(self.container_port),
+                    ]
+                )
+            self._checked_docker(*run_arguments)
 
+        self.start_proxy(self.container_ip())
+        self._wait_until_ready()
+
+    def restart_opencode(self) -> None:
+        """Restart OpenCode in the existing container after a context update."""
+
+        if not self.container_running():
+            self.start_container()
+            return
+        _log(f"Reiniciando OpenCode no container '{self.container_name}'...")
+        self.stop_proxy()
+        self._checked_docker("restart", self.container_name)
         self.start_proxy(self.container_ip())
         self._wait_until_ready()
 

@@ -31,5 +31,6 @@ markers = [
     "unit: testes unitarios sem dependencias externas",
     "tools: testes que requerem ferramentas instaladas",
     "opencode: testes de integracao do OpenCode",
+    "opencode_context: contexto minimo de um teste OpenCode",
     "copilot: testes de integracao do Copilot CLI",
 ]

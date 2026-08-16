@@ -152,6 +152,21 @@ As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 # Geração de arquivos MD
 - Nunca ultrapasse mais de 120 colunas, de texto, faça word-wrap para garantir essa regra
 
+## Proibição de timeouts genéricos
+
+- É **PROIBIDO** definir, introduzir ou ajustar timeouts genéricos, arbitrários
+  ou escolhidos apenas por conveniência.
+- Nunca use timeouts para mascarar travamentos, impor desempenho, encerrar
+  inferências ou transformar lentidão em critério de falha.
+- A única exceção permitida é o acompanhamento contextual de um recurso
+  contínuo, quando a inatividade já tiver sido comprovada.
+- Casos super excepcionais exigem confirmação explícita do humano **antes** da
+  implementação, com justificativa do recurso afetado e do valor escolhido.
+- Não substitua um timeout proibido por um valor alto. Remova-o ou pare para
+  pedir confirmação ao humano.
+- Ao encontrar um timeout existente fora dessas exceções, informe o humano e
+  não o altere silenciosamente.
+
 # Exibição de Texto copie e cola
 - Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e
   colar, faça isso em um bloco de código único para facilitar a cópia.

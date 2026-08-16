@@ -85,6 +85,84 @@ def test_start_container_uses_only_the_internal_test_network(
     start_proxy.assert_called_once_with("172.18.0.2")
 
 
+def test_context_container_mounts_only_the_prepared_context(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context_dir = tmp_path / "context"
+    context_dir.mkdir()
+    session = DockerSession(
+        repo_root=tmp_path,
+        script_dir=tmp_path,
+        context_dir=context_dir,
+    )
+    docker_calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(session, "network_exists", lambda: True)
+    monkeypatch.setattr(session, "network_is_internal", lambda: True)
+    monkeypatch.setattr(session, "network_gateway", lambda: "172.18.0.1")
+    monkeypatch.setattr(session, "container_ip", lambda: "172.18.0.2")
+    monkeypatch.setattr(session, "container_running", lambda: False)
+    monkeypatch.setattr(session, "container_exists", lambda: False)
+    monkeypatch.setattr(session, "start_proxy", Mock())
+    monkeypatch.setattr(
+        session,
+        "_checked_docker",
+        lambda *arguments: docker_calls.append(arguments) or "",
+    )
+    monkeypatch.setattr(session, "_wait_until_ready", Mock())
+
+    session.start_container()
+
+    command = docker_calls[0]
+    assert "-v" in command
+    assert f"{context_dir}:/opt/opencode-config" in command
+    assert command[-7:] == (
+        "/root/.opencode/bin/opencode",
+        "--pure",
+        "serve",
+        "--hostname",
+        "0.0.0.0",
+        "--port",
+        "4096",
+    )
+
+
+def test_restart_opencode_reuses_the_existing_container(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    checked_docker = Mock()
+    start_proxy = Mock()
+    wait_until_ready = Mock()
+    monkeypatch.setattr(session, "container_running", lambda: True)
+    monkeypatch.setattr(session, "stop_proxy", Mock())
+    monkeypatch.setattr(session, "_checked_docker", checked_docker)
+    monkeypatch.setattr(session, "container_ip", lambda: "172.18.0.2")
+    monkeypatch.setattr(session, "start_proxy", start_proxy)
+    monkeypatch.setattr(session, "_wait_until_ready", wait_until_ready)
+
+    session.restart_opencode()
+
+    checked_docker.assert_called_once_with("restart", session.container_name)
+    start_proxy.assert_called_once_with("172.18.0.2")
+    wait_until_ready.assert_called_once_with()
+
+
+def test_start_proxy_detaches_from_the_cli_process(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    popen = Mock()
+    monkeypatch.setattr(session, "stop_proxy", Mock())
+    monkeypatch.setattr(session, "_read_proxy_pid", lambda: 12345)
+    monkeypatch.setattr(session, "_pid_is_alive", lambda pid: True)
+    monkeypatch.setattr(container_test_opencode.subprocess, "Popen", popen)
+
+    session.start_proxy("172.18.0.2")
+
+    assert popen.call_args.kwargs["start_new_session"] is True
+
+
 def test_existing_network_is_recreated_when_not_internal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

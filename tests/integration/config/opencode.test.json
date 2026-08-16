@@ -9,7 +9,12 @@
       },
       "models": {
         "bonsai-27b": {
-          "name": "Bonsai 27B 1-bit"
+          "name": "Bonsai 27B 1-bit",
+          "options": {
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          }
         }
       }
     }

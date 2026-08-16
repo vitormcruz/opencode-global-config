@@ -32,6 +32,9 @@ def test_test_config_declares_only_the_local_bonsai_provider() -> None:
     assert provider["npm"] == "@ai-sdk/openai-compatible"
     assert provider["options"]["baseURL"] == "http://host.docker.internal:8080/v1"
     assert provider["models"]["bonsai-27b"]["name"] == "Bonsai 27B 1-bit"
+    assert provider["models"]["bonsai-27b"]["options"] == {
+        "chat_template_kwargs": {"enable_thinking": False}
+    }
     assert config["agent"]["plan"]["model"] == "bonsai-local/bonsai-27b"
     assert config["agent"]["build"]["model"] == "bonsai-local/bonsai-27b"
 

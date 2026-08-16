@@ -2,11 +2,13 @@
 
 from collections.abc import Iterator
 from pathlib import Path
+import socket
 
 import pytest
 
 from behavioral_helper import OpenCodeClient
 from docker.container_test_opencode import ContainerTestError, DockerSession
+from integration_context import prepare_test_context
 from model.bonsai_server import BonsaiServer, BonsaiServerError
 
 
@@ -17,6 +19,75 @@ def opencode(docker_session: DockerSession) -> OpenCodeClient:
     client = OpenCodeClient()
     client.require_available()
     return client
+
+
+def _free_tcp_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+        listener.bind(("127.0.0.1", 0))
+        return int(listener.getsockname()[1])
+
+
+@pytest.fixture
+def isolated_opencode(
+    request: pytest.FixtureRequest,
+    repo_root: Path,
+    isolated_opencode_session: DockerSession,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Iterator[OpenCodeClient]:
+    """Run OpenCode against only the artifacts declared by the current test."""
+
+    marker = request.node.get_closest_marker("opencode_context")
+    if marker is None:
+        kind = "empty"
+        name = None
+    else:
+        kind = marker.kwargs.get("kind")
+        name = marker.kwargs.get("name")
+    if not isinstance(kind, str):
+        pytest.fail("O marcador opencode_context exige kind textual.")
+
+    context_dir = prepare_test_context(
+        repo_root,
+        isolated_opencode_session.context_dir,
+        kind=kind,
+        name=name,
+    )
+    try:
+        if isolated_opencode_session.container_running():
+            isolated_opencode_session.restart_opencode()
+        else:
+            isolated_opencode_session.ensure_up()
+        monkeypatch.setenv("OPENCODE_PORT", str(isolated_opencode_session.host_port))
+        client = OpenCodeClient()
+        client.require_available()
+        yield client
+    except ContainerTestError as error:
+        pytest.fail(
+            f"{error}\n"
+            "Instale/inicie Docker e execute novamente os testes OpenCode.",
+            pytrace=False,
+        )
+
+
+@pytest.fixture(scope="session")
+def isolated_opencode_session(
+    tmp_path_factory: pytest.TempPathFactory,
+    repo_root: Path,
+    bonsai_server: BonsaiServer,
+) -> Iterator[DockerSession]:
+    """Reuse one container while replacing its mounted context per test."""
+
+    session = DockerSession(
+        repo_root=repo_root,
+        context_dir=tmp_path_factory.mktemp("opencode-context"),
+        container_name="opencode-context-test",
+        host_port=_free_tcp_port(),
+    )
+    try:
+        yield session
+    finally:
+        session.stop_container()
+        session.remove_container_if_exists()
 
 
 @pytest.fixture(scope="session")
