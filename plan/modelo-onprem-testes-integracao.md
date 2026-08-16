@@ -307,6 +307,56 @@ Se o humano instalar o runtime CUDA no ambiente, o D17 detecta e passa a usar
 GPU sozinho, sem alteracao de codigo nem de plano. Isso permanece uma escolha
 de ambiente, jamais um pre-requisito da suite.
 
+### D20 — Contexto do `llama-server` fixado em 16.384 tokens
+
+O `--ctx-size` nunca foi definido, entao o `llama-server` usou o padrao: o
+contexto maximo de treino do modelo, **164.352 tokens**. O KV cache e alocado
+integralmente na subida do servidor, antes de qualquer requisicao.
+
+Medicao no WSL com a suite parada:
+
+| Metrica | Valor |
+|---|---|
+| `n_ctx` efetivo | 164.352 tokens |
+| RSS do `llama-server` | 12,3 GB (modelo: 3,5 GB) |
+| `VmSwap` do processo | 3,3 GB |
+| RAM do WSL | 15,8 GB (~50% do host) |
+| Swap | 3.390 MB de 4.096 (83%) |
+
+O KV cache reservou ~9 GB, estourou a RAM do WSL e empurrou 3,3 GB do modelo
+para o disco. Cada token gerado passou a depender de leitura de swap, o que
+explica boa parte dos 55 s por teste — mais do que a ausencia de CUDA.
+
+Decisao: fixar `--ctx-size 16384`.
+
+- Os testes enviam prompts curtos; o consumo real e o system prompt do OpenCode
+  mais a lista de ferramentas, na casa de alguns milhares de tokens. 16.384 da
+  cerca de 10x de folga.
+- O KV cache cai de ~9 GB para menos de 1 GB, e o modelo passa a caber
+  inteiramente em RAM.
+- Estouro de contexto falha de forma explicita, nunca degrada em silencio.
+
+Nota: o trabalho anterior de "contexto minimo" reduziu o que o **cliente**
+envia (arquivos, ferramentas, ruido). Nao tinha efeito sobre a reserva, que
+acontece no **servidor**. Sao problemas distintos.
+
+Rationale: elimina o thrashing sem instalar nada e sem depender do backend.
+Tambem melhora repetibilidade, porque remove a dependencia da RAM livre da
+maquina no momento da execucao.
+
+### D21 — Decisoes migram para um ADR ao final
+
+O arquivo de planejamento e apagado pelo revisor quando a execucao termina. As
+19 decisoes acumuladas e seus rationales se perderiam junto.
+
+As decisoes passam a ter destino duravel em `docs/adr/`, seguindo a convencao do
+`ADR-0001`: cabecalho com Status, Data e Escopo, e as secoes Contexto, Decisao
+(tabela de `AD-N`), Implementacao atual, Consequencias, Alternativas rejeitadas
+e Assercoes executaveis.
+
+O ADR e escrito ao final, refletindo o que foi **implementado**, nao o que foi
+planejado. Rationale: um ADR descreve estado real; o plano descreve intencao.
+
 ### D6 — Isolamento via rede Docker `--internal`
 
 O container de teste roda em uma rede dedicada criada com
@@ -877,6 +927,68 @@ projector.
 
 ---
 
+#### Task 14: Fixar `--ctx-size` em 16.384 (D20)
+
+**Description:** Adicionar `--ctx-size 16384` ao comando do `llama-server`,
+como constante nomeada no modulo.
+
+**Acceptance criteria:**
+- [ ] O comando contem `--ctx-size` com valor 16384 vindo de constante
+- [ ] Apos reiniciar o servidor, `/props` reporta `n_ctx` igual a 16384
+- [ ] `VmSwap` do processo fica em zero ou proximo disso
+- [ ] RSS do `llama-server` cai para a ordem de 4-5 GB
+- [ ] A suite `-m opencode` passa sem erro de estouro de contexto
+
+**Verification:**
+- [ ] Teste unitario cobre a presenca de `--ctx-size` no comando
+- [ ] `curl -s http://127.0.0.1:8080/props | tr "," "\n" | grep n_ctx`
+- [ ] `grep VmSwap /proc/<pid>/status`
+- [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa
+
+**Dependencies:** Task 13
+
+**Files likely touched:**
+- `tests/integration/model/bonsai_server.py`
+- `tests/integration/model/test_bonsai_server.py`
+
+**Estimated scope:** S
+
+---
+
+#### Task 15: Registrar as decisoes no ADR-0002 (D21)
+
+**Description:** Criar `docs/adr/0002-testes-integracao-modelo-onpremises.md`
+consolidando as 21 decisoes do plano, seguindo a estrutura do `ADR-0001`.
+
+**Acceptance criteria:**
+- [ ] Cabecalho com Status `Aceita`, Data e Escopo
+- [ ] Secao Contexto explica a motivacao: seguranca e privacidade, nenhum
+      modelo externo em runtime
+- [ ] Secao Decisao com tabela `AD-1..AD-21` mapeando D1..D21
+- [ ] Rationales preservados, em especial os nao obvios: por que o Copilot fica
+      em smoke tests, por que `nvidia-smi` nao prova CUDA, por que timeout nao
+      e criterio de falha, por que a suite nao instala pacotes de sistema, e a
+      distincao entre contexto enviado e contexto reservado
+- [ ] Secao Implementacao atual descreve o estado real ao final da execucao
+- [ ] Secao Alternativas rejeitadas cobre: modelos < 27B sem tool calling,
+      variante Ternary, instalacao de CUDA como pre-requisito, watchdog
+      proprio e publicacao de porta via `-p`
+- [ ] Secao Assercoes executaveis lista os comandos de verificacao
+- [ ] Nenhuma linha acima de 120 colunas
+
+**Verification:**
+- [ ] O ADR e legivel sem consultar o arquivo de plano
+- [ ] Nenhuma decisao do plano ficou de fora da tabela
+
+**Dependencies:** Task 10
+
+**Files likely touched:**
+- `docs/adr/0002-testes-integracao-modelo-onpremises.md`
+
+**Estimated scope:** M
+
+---
+
 #### Task 10: Validar o runtime completo no WSL/Linux
 
 **Description:** Executar a suite de verdade, no WSL/Linux (D13), com o
@@ -899,7 +1011,7 @@ validacao: so gera codigo se algum criterio falhar.
 - [ ] `.venv/bin/pytest -m "unit or tools or opencode"` passa duas vezes
 - [ ] `git grep -n "OPENCODE_CONFIG" -- tests/integration` nao retorna nada
 
-**Dependencies:** Task 9, Task 11, Task 12, Task 13
+**Dependencies:** Task 9, Task 11, Task 12, Task 13, Task 14
 
 **Files likely touched:**
 - nenhum, se todos os criterios passarem
@@ -931,6 +1043,10 @@ validacao: so gera codigo se algum criterio falhar.
 | Amostragem estocastica torna testes intermitentes | Alto | D18: `--temp 0` e `--seed` fixo |
 | Repeticao degenerada sob decodificacao gulosa | Baixo | D18: executor troca para `--temp 0.1` se ocorrer |
 | Suite lenta em CPU (22 min) incomoda o loop de dev | Medio | D19: desempenho e do ambiente; D17 usa GPU se houver |
+| KV cache padrao de 160k tokens joga o modelo em swap | Alto | D20: `--ctx-size 16384` |
+| Estouro de contexto com prompts maiores que o previsto | Baixo | D20: 16k da ~10x de folga; falha e explicita |
+| Decisoes se perdem quando o plano for apagado | Alto | D21: Task 15 consolida tudo no ADR-0002 |
+| Proxy orfao sobrevive a execucao e vaza porta | Medio | Task 9: lifecycle explicito; verificado no runtime |
 | Maquina com pouca memoria (< ~5 GB livres) | Baixo | Falha explicita do `llama-server`; documentar requisito |
 | Release fixado do fork sai do ar | Baixo | Versao fixada e verificavel; trocar exige replan |
 | `host.docker.internal` indisponivel em rede `--internal` | Medio | Task 5: fallback para o IP do gateway da bridge |
