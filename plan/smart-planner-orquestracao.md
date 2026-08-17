@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: APROVADO — aguardando seleção de modelos para execução
+Status: APROVADO — executor definido; aguardando modelo do revisor
 
 ## Overview
 
@@ -43,6 +43,12 @@ inventa decisões fora do plano.
 Executor e revisor sempre usam instâncias separadas. O revisor relata achados; o executor aplica
 os ajustes e uma nova instância revisa novamente. A tarefa só termina com aprovação explícita do
 revisor, sem bloqueios nem decisões humanas pendentes.
+
+## Execution Configuration
+
+- Modelo do executor: GPT-5.6 Terra.
+- Modelo do revisor: pendente.
+- Seleção nativa de agente e de modelo: confirmar durante a implementação.
 
 ## Task List
 
@@ -164,7 +170,6 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Selecionar o modelo do executor antes do primeiro spawn.
 - Selecionar o modelo do revisor antes do primeiro spawn.
 - A implementação deve confirmar a sintaxe suportada de permissões e de spawn em cada plataforma
   antes de fixá-la.
