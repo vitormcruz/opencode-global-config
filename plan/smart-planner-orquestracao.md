@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: CONCLUÍDO — aprovado pelo revisor independente
+Status: REPLANEJAMENTO — finalização de commit pendente
 
 ## Overview
 
@@ -44,6 +44,13 @@ Executor e revisor sempre usam instâncias separadas. O revisor relata achados; 
 os ajustes e uma nova instância revisa novamente. A tarefa só termina com aprovação explícita do
 revisor, sem bloqueios nem decisões humanas pendentes.
 
+### D6 — Sugestão de commit após revisão aprovada
+
+Após a aprovação técnica do revisor, o `smart-planner` apresenta resumo, arquivos e uma mensagem
+Conventional Commit sugerida. Ele aguarda confirmação explícita antes de criar o commit local,
+inclui somente a unidade lógica aprovada e nunca executa `git push`. A recusa do commit não
+desfaz a conclusão técnica da tarefa.
+
 ## Execution Configuration
 
 - Modelo do executor: GPT-5.6 Terra.
@@ -60,6 +67,7 @@ revisor, sem bloqueios nem decisões humanas pendentes.
   `py_compile` e `git diff --check` passaram.
 - Teste pytest direcionado: indisponível neste ambiente porque `.venv` é Linux, `pytest` não está
   no PATH e a instalação no Artifactory expirou.
+- Replanejamento: incluir a sugestão e a confirmação explícita de commit após revisão aprovada.
 
 ## Review Results
 
@@ -67,6 +75,7 @@ revisor, sem bloqueios nem decisões humanas pendentes.
 - Resultado: APPROVED, sem achados de alta confiança.
 - Avaliação da lacuna de pytest: evidência local pendente, mas não bloqueante para a correção,
   pois os contratos e a conversão do adapter foram verificados.
+- Nova revisão independente será necessária após concluir a Task 4.
 
 ## Task List
 
@@ -148,9 +157,33 @@ replanejamento e revisão, habilitando apenas a permissão mínima de subagente 
 - [ ] Nenhum caminho encerra antes da aprovação do revisor.
 - [ ] Seleção de plataforma e de modelo tem fallback explícito.
 
-### Phase 3: Validação
+### Phase 3: Finalização
 
-## Task 4: Validar contratos e adapters
+## Task 4: Formalizar a finalização por commit
+
+**Description:** Fazer o agente e o workflow sugerirem um commit local depois da aprovação
+técnica, sem criar esse commit antes da confirmação humana.
+
+**Acceptance criteria:**
+- [ ] O agente sugere resumo, arquivos e mensagem Conventional Commit após aprovação do revisor.
+- [ ] O commit local exige confirmação explícita do humano e permanece limitado à unidade lógica.
+- [ ] O workflow genérico descreve a mesma regra, inclusive a proibição de `git push` automático.
+
+**Verification:**
+- [ ] Testes de contrato confirmam a sugestão e o gate de confirmação.
+
+**Dependencies:** Tasks 2 and 3.
+
+**Files likely touched:**
+- `agents/smart-planner.md`
+- `docs/workflow-agentico-simples.md`
+- `tests/agents/test_smart_planner.py`
+
+**Estimated scope:** Small: 1-3 files.
+
+### Phase 4: Validação
+
+## Task 5: Validar contratos e adapters
 
 **Description:** Executar os testes unitários direcionados e corrigir somente inconsistências
 causadas pela nova orquestração.
@@ -163,7 +196,7 @@ causadas pela nova orquestração.
 - [ ] `.\.venv\Scripts\pytest.exe tests\agents\test_smart_planner.py
       tests\adapters\test_copilot_adapter.py -m "unit or tools or copilot"` passa.
 
-**Dependencies:** Tasks 1, 2 and 3.
+**Dependencies:** Tasks 1, 2, 3 and 4.
 
 **Files likely touched:**
 - `tests/agents/test_smart_planner.py`
@@ -188,6 +221,6 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Nenhuma decisão humana pendente.
+- O humano autorizou o commit local após a correção e a nova revisão independente.
 - Reexecutar o pytest direcionado em ambiente Windows preparado é recomendável, mas não bloqueia
   esta conclusão aprovada.
