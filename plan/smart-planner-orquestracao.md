@@ -1,5 +1,7 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
+Status: APROVADO — aguardando seleção de modelos para execução
+
 ## Overview
 
 Evoluir o `smart-planner` de gerador de prompts de handoff para um orquestrador leve que
@@ -162,5 +164,7 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Nenhuma decisão humana pendente. A implementação deve confirmar a sintaxe suportada de permissões
-  e de spawn em cada plataforma antes de fixá-la.
+- Selecionar o modelo do executor antes do primeiro spawn.
+- Selecionar o modelo do revisor antes do primeiro spawn.
+- A implementação deve confirmar a sintaxe suportada de permissões e de spawn em cada plataforma
+  antes de fixá-la.
