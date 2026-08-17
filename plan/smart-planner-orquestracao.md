@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: FINALIZAÇÃO — revisão aprovada; commit local autorizado
+Status: CONCLUÍDO — revisão aprovada e commit local criado
 
 ## Overview
 
@@ -72,6 +72,8 @@ desfaz a conclusão técnica da tarefa.
   `docs/workflow-agentico-simples.md` e `tests/agents/test_smart_planner.py`.
 - Evidências da finalização: pytest direcionado, `py_compile`, `git diff --check` e o limite de
   120 colunas passaram.
+- Commit local da implementação: `3e3826c`
+  (`feat(smart-planner): orquestrar execucao e revisao`).
 
 ## Review Results
 
@@ -228,4 +230,4 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Criar o commit local autorizado para a unidade lógica de implementação.
+- Nenhuma decisão humana pendente.
