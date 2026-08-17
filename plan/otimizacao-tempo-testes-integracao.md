@@ -233,6 +233,14 @@ exatamente qual medição faltou.
 D22 permanece aberta e documentada como trabalho futuro, condicionada à
 separação entre tempo de preparação e tempo de inferência.
 
+A Task 6 é preservada. Ela não é otimização e sim proteção: sem ela, uma
+regressão futura no repasse de `chat_template_kwargs` degradaria a suíte em
+cerca de 57 vezes e falharia com mensagem enganosa sobre o conteúdo da resposta.
+Encerrar a busca por ganho não é motivo para abrir mão da salvaguarda do ganho
+já obtido.
+
+O escopo remanescente é, portanto: Task 6, Task 7 e Task 8.
+
 ## Task List
 
 ### Fase 1B — Medição do reuso real
