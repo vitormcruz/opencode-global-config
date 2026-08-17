@@ -57,6 +57,22 @@ def test_copilot_adapter_materializes_inherited_agent_permissions(
 
 
 @pytest.mark.unit
+def test_copilot_adapter_materializes_smart_planner_subagent_capability(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "smart-planner.agent.md"
+    ).read_text(encoding="utf-8")
+    assert 'tools: ["read", "edit", "execute", "search", "agent"]' in agent
+
+
+@pytest.mark.unit
 def test_copilot_adapter_marks_subagent_not_user_invocable(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,

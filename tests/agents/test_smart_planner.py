@@ -54,9 +54,11 @@ def test_smart_planner_frontmatter_denies_webfetch_permission(repo_root: Path) -
 
 
 @pytest.mark.unit
-def test_smart_planner_frontmatter_denies_task_permission(repo_root: Path) -> None:
+def test_smart_planner_frontmatter_allows_subagent_permission(
+    repo_root: Path,
+) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert re.search(r'"\*": deny', content) is not None
+    assert re.search(r'"\*": allow', content) is not None
 
 
 @pytest.mark.unit
@@ -137,10 +139,11 @@ def test_smart_planner_has_stopping_conditions_section(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_has_handoff_section(repo_root: Path) -> None:
-    assert "## Handoff" in smart_planner_file(repo_root).read_text(
-        encoding="utf-8"
-    )
+def test_smart_planner_has_execution_orchestration_section(repo_root: Path) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "## Orquestração de Execução e Revisão" in content
+    assert "## Handoff" not in content
 
 
 @pytest.mark.unit
@@ -158,8 +161,8 @@ def test_smart_planner_has_replan_protocol_section(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_has_executor_review_section(repo_root: Path) -> None:
-    assert "## Revis" in smart_planner_file(repo_root).read_text(
+def test_smart_planner_has_independent_review_section(repo_root: Path) -> None:
+    assert "## Revisão Independente" in smart_planner_file(repo_root).read_text(
         encoding="utf-8"
     )
 
@@ -197,10 +200,11 @@ def test_smart_planner_uses_concise_commits_without_caveman(
 
 
 @pytest.mark.unit
-def test_smart_planner_references_prompt_improver_skill(repo_root: Path) -> None:
-    assert "prompt-improver" in smart_planner_file(repo_root).read_text(
-        encoding="utf-8"
-    )
+def test_smart_planner_does_not_generate_handoff_prompts(repo_root: Path) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "prompt-improver" not in content
+    assert "não gere prompts ou arquivos de" in content
 
 
 @pytest.mark.unit
@@ -263,16 +267,106 @@ def test_smart_planner_delegates_initial_context_triage(
 
 
 @pytest.mark.unit
-def test_smart_planner_handoff_requires_autonomous_local_commits(
+def test_smart_planner_orchestrates_independent_executor_and_reviewer(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    handoff = re.sub(r"\s+", " ", content.split("## Handoff", maxsplit=1)[1])
 
-    assert "commits locais autonomamente" in handoff
-    assert "unidades logicamente coesas" in handoff
-    assert "`git push`" in handoff
-    assert "confirmação explícita do humano" in handoff
+    assert "Pergunte ao humano se pode iniciar a execução" in content
+    assert "**executor** e o do **revisor**" in content
+    assert "instância nova do executor" in content
+    assert "nova instância independente do revisor" in content
+    assert "ela nunca corrige diretamente" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_has_capability_and_manual_model_fallbacks(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "Detecte a capacidade nativa de subagentes" in content
+    assert "no OpenCode" in content
+    assert "no Copilot CLI" in content
+    assert "troca manual" in content
+    assert "aguarde a confirmação humana antes do spawn" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_replans_through_human_mediation(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "## Protocolo de Replanejamento e Mediação" in content
+    assert "Não invente decisão, requisito" in content
+    assert "Inicie uma nova instância no estado correto" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_requires_explicit_independent_review_approval(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "## Condição Técnica de Término" in content
+    assert "aprovar explicitamente" in content
+    assert "O planejamento aprovado sozinho nunca é condição de término" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_finalizes_commit_only_after_human_confirmation(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "## Finalização Opcional do Commit Local" in content
+    assert "resumo conciso da implementação" in content
+    assert "arquivos da unidade lógica aprovada" in content
+    assert "mensagem Conventional Commit sugerida" in content
+    assert "aguarde confirmação explícita" in content
+    assert "Não prepare arquivos, adicione ao stage nem crie o commit" in content
+    assert "prepare somente os arquivos da unidade lógica" in content
+    assert "`git diff --staged`" in content
+    assert "informe o SHA" in content
+    assert "Nunca execute `git push` sem nova confirmação explícita" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_keeps_technical_conclusion_when_commit_is_deferred(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+
+    assert "Se o humano recusar ou adiar" in content
+    assert "conclusão técnica válida" in content
+    assert "mudanças sem commit" in content
+    assert "Não reabra a revisão por essa decisão" in content
+
+
+@pytest.mark.unit
+def test_simple_agentic_workflow_documents_the_same_contract(
+    repo_root: Path,
+) -> None:
+    workflow = (
+        repo_root / "docs" / "workflow-agentico-simples.md"
+    ).read_text(encoding="utf-8")
+
+    assert "## Máquina de Estados" in workflow
+    assert "Seleção por Capacidade e Plataforma" in workflow
+    assert "modelos separados" in workflow
+    assert "instâncias independentes" in workflow
+    assert "aprovação explícita do revisor" in workflow
+    assert "## Finalização Opcional do Commit Local" in workflow
+    assert "resumo conciso" in workflow
+    assert "arquivos da unidade lógica aprovada" in workflow
+    assert "mensagem Conventional Commit sugerida" in workflow
+    assert "aguarda confirmação explícita" in workflow
+    assert "somente os arquivos da unidade lógica" in workflow
+    assert "`git diff --staged`" in workflow
+    assert "Nunca executa `git push` sem nova confirmação explícita" in workflow
+    assert "recusar ou adiar" in workflow
+    assert "conclusão técnica permanece válida" in workflow
 
 
 @pytest.mark.unit
