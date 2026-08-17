@@ -26,6 +26,7 @@ Colhidas em 2026-08-17, no WSL, contra o `llama-server` já ajustado por D18/D20
 | RSS do servidor | 1,28 GB | `ps`, após D20 |
 | Swap em uso | 141 MB de 4.096 | `free -m` |
 | Backend efetivo | `cpu` | marcador `.llama_backend` |
+| Slots do servidor | **4** | `GET /slots` |
 | CPU | i7-13800H, AVX2, sem AVX-512 | `/proc/cpuinfo` |
 
 Comparação de raciocínio, mesmo prompt e mesmo servidor:
@@ -108,30 +109,84 @@ explicitamente, e não degradar em silêncio para 85 s por chamada.
 O modo de falha é traiçoeiro: sem o repasse, `content` vem vazio e as asserções
 de conteúdo falham com uma mensagem que não aponta para a causa real.
 
-## Task List
+### D25 — Reduzir o paralelismo do servidor a um slot
+
+Achado do replan: o `llama-server` sobe com **quatro slots**, confirmado em
+`/slots`. Cada slot mantém seu próprio cache de prefixo.
+
+Como os testes de integração são sequenciais, no máximo um slot trabalha por
+vez. Os outros três reservam contexto e fragmentam o cache: duas chamadas com o
+mesmo prefixo podem cair em slots distintos e nenhuma delas aproveita a leitura
+da outra.
+
+Isso é pré-condição de D22. Enquanto o prefixo estiver espalhado por quatro
+caches, o reuso não se sustenta mesmo que o prompt seja estável.
+
+Decisão: fixar o paralelismo em um slot, mediante medição que comprove ganho ou
+que comprove o reuso de cache viabilizado.
+
+Esta decisão é barata de testar e independente de conhecer o tamanho exato do
+prompt, por isso é executada antes da instrumentação de log.
+
+### D26 — Capturar o prompt pelo log do próprio servidor
+
+O plano original mandava usar o proxy TCP existente como ponto de captura. Isso
+estava **errado**: aquele proxy fica entre o cliente de teste e o OpenCode, e as
+chamadas a `/v1/chat/completions` seguem do container para o `llama-server`, sem
+passar por ele.
+
+Duas alternativas foram consideradas. Interpor um novo proxy no caminho do
+modelo exigiria código novo apenas para medir, com risco de vazar para o caminho
+de produção — risco já registrado nesta rodada. A verbosidade de log do próprio
+`llama-server` obtém o mesmo dado sem componente novo e sem alterar a topologia.
+
+Decisão: capturar o prompt pela verbosidade de log do `llama-server`, como
+ajuste temporário de diagnóstico, revertido ao fim da Fase 1.
+
+A captura só é necessária se D25 não resolver sozinha. Ela existe para obter o
+tamanho exato do prefixo comum quando o ganho do slot único for insuficiente.
+
 
 ### Fase 1 — Medição
 
-Nenhuma mudança de comportamento nesta fase. Ela existe para que as decisões
-D22 e D23 sejam tomadas com dados, não com hipótese.
+Nenhuma mudança permanente de comportamento nesta fase. Ela existe para que as
+decisões D22, D23 e D25 sejam tomadas com dados, não com hipótese.
 
-**Task 1 — Instrumentar e capturar o prompt real enviado pelo OpenCode**
+A ordem é deliberada: a Task 1A é barata e pode entregar o ganho sozinha,
+tornando a instrumentação da Task 1B desnecessária.
 
-Capturar, para dois testes comportamentais consecutivos e distintos, o corpo
-completo enviado ao `/v1/chat/completions`. Registrar o número de tokens de
-prompt e o tamanho do prefixo idêntico entre as duas chamadas.
+**Task 1A — Medir o efeito do slot único**
 
-A captura deve ser feita sem alterar o caminho de produção dos testes. O proxy
-já existente é o ponto natural para isso.
+Subir o `llama-server` com paralelismo de um slot e medir o efeito em duas
+chamadas consecutivas com o mesmo prefixo longo e sufixos diferentes.
 
-Entregar: contagem de tokens de prompt por chamada, tamanho do prefixo comum e
-se `chat_template_kwargs` aparece no corpo.
+Entregar: `cached_tokens` da segunda chamada, tempo de parede de cada uma e
+comparação com o comportamento de quatro slots. Confirmar em `/slots` que o
+servidor passou a expor um único slot.
+
+Se o reuso de cache passar a funcionar, reportar antes de seguir.
+
+**Task 1B — Capturar o prompt real pelo log do servidor**
+
+Executar somente se a Task 1A não evidenciar reuso, ou se o ganho for
+insuficiente.
+
+Subir o `llama-server` com verbosidade de log suficiente para registrar o prompt
+recebido e executar dois testes comportamentais consecutivos e distintos.
+Registrar o número de tokens de prompt de cada chamada e o tamanho do prefixo
+idêntico entre elas.
+
+Entregar: contagem de tokens por chamada, tamanho do prefixo comum e se
+`chat_template_kwargs` aparece no corpo recebido.
+
+A verbosidade é ajuste temporário de diagnóstico e deve ser revertida ao fim da
+fase. Não deixar a flag no caminho de produção.
 
 **Task 2 — Medir o efeito de `-t` no throughput**
 
 Subir o `llama-server` com valores distintos de `-t` e medir
 `prompt_per_second` e `predicted_per_second` com prompt de tamanho realista,
-obtido na Task 1.
+obtido na Task 1A ou 1B.
 
 Cobrir ao menos: padrão atual sem a flag, número de P-cores, e total de núcleos
 físicos. Reportar a tabela completa, inclusive resultados negativos.
@@ -143,9 +198,21 @@ sufixos diferentes. Confirmar se `cached_tokens` fica maior que zero e medir a
 redução de tempo. Isto isola a capacidade do servidor da questão de o OpenCode
 produzir ou não um prefixo estável.
 
+Executar com o paralelismo definido pela Task 1A, para que o resultado não seja
+mascarado por fragmentação entre slots.
+
 ### Fase 2 — Implementação
 
 Cada task desta fase é condicional ao resultado correspondente da Fase 1.
+
+**Task 3B — Fixar o paralelismo em um slot, se houver ganho**
+
+Somente se a Task 1A comprovar ganho de tempo ou viabilizar o reuso de cache.
+Fixar o paralelismo no comando do `BonsaiServer`, com teste automatizado que
+verifique a flag no comando construído.
+
+Se não houver ganho nem reuso viabilizado, registrar a medição e não alterar o
+comando.
 
 **Task 4 — Aplicar `-t` derivado, se houver ganho**
 
@@ -156,8 +223,8 @@ Se não houver ganho, registrar a medição e não alterar o comando.
 
 **Task 5 — Habilitar o reuso de prefixo, se for viável**
 
-Somente se as Tasks 1 e 3 mostrarem prefixo comum relevante e reuso funcional.
-A mudança deve preservar integralmente o isolamento entre testes.
+Somente se as Tasks 1A, 1B e 3 mostrarem prefixo comum relevante e reuso
+funcional. A mudança deve preservar integralmente o isolamento entre testes.
 
 Se o prefixo divergir cedo, documentar o motivo e encerrar sem mudança.
 
@@ -174,13 +241,13 @@ Esta task não é condicional.
 
 **Task 7 — Atualizar o ADR-0002**
 
-Acrescentar AD-22, AD-23 e AD-24 com os resultados reais, incluindo as medições
+Acrescentar AD-22 a AD-26 com os resultados reais, incluindo as medições
 que levaram a não aplicar alguma mudança. Registrar as medições de base desta
 rodada na seção de contexto, para que a próxima pessoa não precise remedi-las.
 
 **Task 8 — Remover o arquivo de planejamento**
 
-Somente após confirmar que o ADR-0002 contém as três decisões e as medições.
+Somente após confirmar que o ADR-0002 contém as cinco decisões e as medições.
 
 ## Orquestração
 
@@ -212,6 +279,8 @@ pendentes. A aprovação do plano, isoladamente, nunca encerra a tarefa.
 | Ganho é pequeno e o teto é o kernel ternário | Resultado é legítimo; registrar no ADR encerra a questão |
 | Suíte degrada em silêncio se o repasse do parâmetro parar | Task 6 transforma isso em falha explícita |
 | Medições feitas só nesta máquina não generalizam | ADR registra CPU e backend junto dos números |
+| Verbosidade de log da Task 1B vaza para produção | Ajuste temporário, revertido ao fim da Fase 1 |
+| Slot único vira gargalo se a suíte paralelizar no futuro | ADR registra que a premissa é execução sequencial |
 
 ## Open Questions
 
