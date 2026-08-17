@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: REVISÃO EM ANDAMENTO — finalização por commit implementada
+Status: FINALIZAÇÃO — revisão aprovada; commit local autorizado
 
 ## Overview
 
@@ -80,6 +80,9 @@ desfaz a conclusão técnica da tarefa.
 - Avaliação da lacuna de pytest: evidência local pendente, mas não bloqueante para a correção,
   pois os contratos e a conversão do adapter foram verificados.
 - Nova revisão independente será necessária após concluir a Task 4.
+- Revisor da finalização: APPROVED, sem problemas significativos.
+- Revalidação local do revisor: `py_compile`, `git diff --check` e limite de 120 colunas passaram;
+  pytest não estava disponível nessa instância.
 
 ## Task List
 
@@ -225,5 +228,4 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Revisão independente da Task 4 pendente.
-- O humano autorizou o commit local após a correção e a nova revisão independente.
+- Criar o commit local autorizado para a unidade lógica de implementação.
