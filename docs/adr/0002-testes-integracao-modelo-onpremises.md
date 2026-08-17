@@ -78,6 +78,7 @@ este registro.
 | AD-26 | D26 — Captura por log só em ambiguidade. | D27 respondeu sem instrumentação. |
 | AD-27 | D27 — Medir reuso real pelo tempo de testes consecutivos. | Evitou proxy e verbosidade temporários. |
 | AD-28 | D28 — Encerrar a rodada sem otimização adicional. | A evidência não sustenta implementar D22. |
+| AD-29 | Remover a salvaguarda falsa de D24. | O teste não distinguia a regressão que alegava proteger. |
 
 ### Detalhamento das decisões não óbvias
 
@@ -130,6 +131,25 @@ obrigatório separar, em cada teste, o tempo de preparação do tempo de inferê
 Sem essa medição, o percentual de reuso isolado não justifica otimizar um
 gargalo que pode não dominar a suíte.
 
+### AD-29 — Lacuna conhecida na desativação do raciocínio
+
+A salvaguarda adicionada no commit `674830a` foi removida porque a asserção
+verificava apenas que a resposta não estava vazia, sem detectar a regressão que
+prometia detectar. A revisão independente registrou que o teste passou no
+cenário normal em 125,26 s, com `enable_thinking=true` em 135,42 s e também sem
+a chave `chat_template_kwargs` inteira.
+
+Isso põe em dúvida a premissa de AD-24. A proximidade dos tempos sugere, como
+hipótese não investigada, que o OpenCode pode não repassar
+`chat_template_kwargs` ao provider e que o raciocínio pode estar desligado por
+outro mecanismo. Não é um fato estabelecido nem foi investigado nesta rodada.
+
+A lacuna permanece: se a suíte passar a levar cerca de 57 vezes mais e as
+respostas vierem com `content` vazio, a causa provável será o raciocínio ligado.
+Este registro é o ponto de partida da investigação. Para fechar a lacuna, o
+próximo passo é determinar como o raciocínio está efetivamente desligado hoje,
+antes de tentar proteger esse mecanismo.
+
 ## Implementação atual
 
 ### Modelo e servidor
@@ -181,11 +201,6 @@ prontidão, que antes eram uma saída adicional do lifecycle.
 Os testes unitários do `BonsaiServer` e do `DockerSession` cobrem o novo
 argumento, a ausência do projector e a limpeza do proxy após falha de prontidão.
 Os testes OpenCode selecionados executaram contra o servidor local.
-
-A suíte também envia uma mensagem curta pelo OpenCode efetivo e exige texto na
-resposta. Se o raciocínio voltar a ser gerado, a falha orienta explicitamente a
-verificar o repasse de `chat_template_kwargs.enable_thinking=false` ao provider
-local, em vez de atribuir o problema ao conteúdo da resposta.
 
 A execução solicitada da suíte terminou com 485 testes aprovados e 14 falhas
 ambientais: Node/Playwright ausentes, Docling ausente, `crwl` ausente e
@@ -253,7 +268,7 @@ As verificações da suíte e do isolamento são:
 ```bash
 .venv/bin/pytest -m "unit or tools or opencode"
 .venv/bin/pytest -m opencode \
-  tests/integration/test_skills_activation.py::test_effective_provider_disables_thinking
+  tests/integration/test_skills_activation.py
 docker exec opencode-config-test curl -s \
   http://host.docker.internal:8080/v1/models
 docker exec opencode-config-test curl -s \
