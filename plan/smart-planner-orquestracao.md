@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: REPLANEJAMENTO — finalização de commit pendente
+Status: REVISÃO EM ANDAMENTO — finalização por commit implementada
 
 ## Overview
 
@@ -65,9 +65,13 @@ desfaz a conclusão técnica da tarefa.
   `tests/agents/test_smart_planner.py` e `tests/adapters/test_copilot_adapter.py`.
 - Evidências relatadas: 39 contratos do smart-planner, contrato manual do adapter Copilot,
   `py_compile` e `git diff --check` passaram.
-- Teste pytest direcionado: indisponível neste ambiente porque `.venv` é Linux, `pytest` não está
-  no PATH e a instalação no Artifactory expirou.
+- Na primeira execução, o pytest direcionado esteve indisponível porque `.venv` era Linux,
+  `pytest` não estava no PATH e a instalação no Artifactory expirou.
 - Replanejamento: incluir a sugestão e a confirmação explícita de commit após revisão aprovada.
+- Finalização implementada em `agents/smart-planner.md`,
+  `docs/workflow-agentico-simples.md` e `tests/agents/test_smart_planner.py`.
+- Evidências da finalização: pytest direcionado, `py_compile`, `git diff --check` e o limite de
+  120 colunas passaram.
 
 ## Review Results
 
@@ -221,6 +225,5 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
+- Revisão independente da Task 4 pendente.
 - O humano autorizou o commit local após a correção e a nova revisão independente.
-- Reexecutar o pytest direcionado em ambiente Windows preparado é recomendável, mas não bloqueia
-  esta conclusão aprovada.
