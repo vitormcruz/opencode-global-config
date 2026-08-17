@@ -146,6 +146,83 @@ ajuste temporário de diagnóstico, revertido ao fim da Fase 1.
 A captura só é necessária se D25 não resolver sozinha. Ela existe para obter o
 tamanho exato do prefixo comum quando o ganho do slot único for insuficiente.
 
+## Resultados da Fase 1
+
+Colhidos em 2026-08-17 pelo executor, sem mudança permanente de comportamento.
+
+| Configuração de `-t` | Prompt tok/s | Geração tok/s |
+|---|---:|---:|
+| Padrão, sem a flag | **6,262** | **5,003** |
+| 6 P-cores | 5,563 | 4,849 |
+| 14 núcleos físicos | 6,118 | 4,851 |
+
+| Paralelismo | 1ª chamada | 2ª chamada | `cached_tokens` |
+|---|---:|---:|---:|
+| 4 slots | 283,7 s | 84,4 s | 1.311 |
+| 1 slot | 300,1 s | 86,7 s | 1.311 |
+
+Repetição isolada do cache: 300,7 s para 83,2 s, redução de 72,3%.
+
+### D25 rejeitada — o paralelismo não fragmenta o cache
+
+A premissa de D25 era que quatro slots dividiriam o cache de prefixo e
+impediriam o reuso. A medição refutou isso: com quatro slots o reuso ocorre
+normalmente, e forçar um único slot **piorou** a segunda chamada em 2,8%.
+
+O comando do `BonsaiServer` não será alterado. A Task 3B fica sem efeito.
+
+### D23 rejeitada — o padrão de threads é o melhor
+
+Nenhuma configuração explícita de `-t` superou o padrão do llama.cpp, nem em
+prompt nem em geração. Os núcleos de eficiência não contribuem para esta carga.
+
+A flag não será adicionada. Configuração sem efeito é ruído, e um valor pior que
+o padrão seria uma regressão silenciosa. A Task 4 fica sem efeito.
+
+### D22 permanece aberta e passa a ser a única alavanca
+
+O executor comprovou que **o servidor sabe reaproveitar** um prefixo repetido.
+A comprovação usou prompt sintético construído para ser idêntico, não o prompt
+real emitido pelo OpenCode.
+
+A pergunta original continua sem resposta: os testes reais emitem prefixo comum?
+Saber que o servidor tem a capacidade não diz se os testes lhe dão a chance.
+
+O desfecho é binário e ambos são aceitáveis. Se os testes já reaproveitam, os
+24 minutos são teto de hardware e a rodada encerra documentando isso. Se não
+reaproveitam, há uma redução da ordem de 72% disponível.
+
+### D27 — Medir o reuso real pelo tempo, não pelo log
+
+A Task 1B propunha ligar a verbosidade de log do servidor para ler os prompts
+reais. Existe uma via mais barata que responde à mesma pergunta.
+
+Se dois testes comportamentais consecutivos compartilham prefixo, o segundo será
+sensivelmente mais rápido, pelo mesmo mecanismo já medido na Task 3. O tempo de
+parede é observável sem instrumentação alguma.
+
+Decisão: medir o reuso real cronometrando testes reais consecutivos. A captura
+por log fica reservada para o caso de o resultado ser ambíguo.
+
+Isto também evita o risco de a verbosidade vazar para o caminho de produção.
+
+## Task List
+
+### Fase 1B — Medição do reuso real
+
+**Task 1C — Cronometrar testes reais consecutivos**
+
+Executar dois testes comportamentais consecutivos e distintos, medindo o tempo
+de cada um separadamente. Comparar a duração do segundo com a do primeiro.
+
+Um segundo teste sensivelmente mais rápido indica prefixo compartilhado e cache
+ativo. Duas durações equivalentes indicam prefixo divergente e reuso ausente.
+
+Repetir com um terceiro teste para distinguir reuso real de variação pontual.
+
+Se o resultado for ambíguo, executar então a Task 1B como originalmente
+planejada, revertendo a verbosidade ao final.
+
 
 ### Fase 1 — Medição
 
@@ -241,13 +318,14 @@ Esta task não é condicional.
 
 **Task 7 — Atualizar o ADR-0002**
 
-Acrescentar AD-22 a AD-26 com os resultados reais, incluindo as medições
+Acrescentar AD-22 a AD-27 com os resultados reais, incluindo as medições
 que levaram a não aplicar alguma mudança. Registrar as medições de base desta
 rodada na seção de contexto, para que a próxima pessoa não precise remedi-las.
 
 **Task 8 — Remover o arquivo de planejamento**
 
-Somente após confirmar que o ADR-0002 contém as cinco decisões e as medições.
+Somente após confirmar que o ADR-0002 contém as seis decisões e as medições,
+inclusive as que resultaram em rejeição.
 
 ## Orquestração
 
