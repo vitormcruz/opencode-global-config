@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: EXECUÇÃO EM ANDAMENTO — executor em execução
+Status: REVISÃO EM ANDAMENTO — implementação concluída
 
 ## Overview
 
@@ -50,6 +50,16 @@ revisor, sem bloqueios nem decisões humanas pendentes.
 - Modelo do revisor: GPT-5.6 Terra.
 - Autorização de execução: confirmada pelo humano.
 - Seleção nativa de agente e de modelo: confirmar durante a implementação.
+
+## Execution Results
+
+- Executor: concluído sem bloqueios.
+- Arquivos alterados: `agents/smart-planner.md`, `docs/workflow-agentico-simples.md`,
+  `tests/agents/test_smart_planner.py` e `tests/adapters/test_copilot_adapter.py`.
+- Evidências relatadas: 39 contratos do smart-planner, contrato manual do adapter Copilot,
+  `py_compile` e `git diff --check` passaram.
+- Teste pytest direcionado: indisponível neste ambiente porque `.venv` é Linux, `pytest` não está
+  no PATH e a instalação no Artifactory expirou.
 
 ## Task List
 
@@ -171,5 +181,6 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- A implementação deve confirmar a sintaxe suportada de permissões e de spawn em cada plataforma
-  antes de fixá-la.
+- Revisão independente pendente.
+- Confirmar na revisão a sintaxe suportada de permissões e de spawn em cada plataforma.
+- Reavaliar a validação pytest direcionada se o ambiente Windows ficar disponível.
