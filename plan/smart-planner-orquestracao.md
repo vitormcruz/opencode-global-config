@@ -1,6 +1,6 @@
 # Implementation Plan: Orquestração Simples do Smart-Planner
 
-Status: PRONTO PARA EXECUÇÃO — aguardando autorização para spawn
+Status: EXECUÇÃO EM ANDAMENTO — executor em execução
 
 ## Overview
 
@@ -48,6 +48,7 @@ revisor, sem bloqueios nem decisões humanas pendentes.
 
 - Modelo do executor: GPT-5.6 Terra.
 - Modelo do revisor: GPT-5.6 Terra.
+- Autorização de execução: confirmada pelo humano.
 - Seleção nativa de agente e de modelo: confirmar durante a implementação.
 
 ## Task List
@@ -170,6 +171,5 @@ causadas pela nova orquestração.
 
 ## Open Questions
 
-- Autorizar o início da execução orquestrada.
 - A implementação deve confirmar a sintaxe suportada de permissões e de spawn em cada plataforma
   antes de fixá-la.
