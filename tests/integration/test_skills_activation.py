@@ -6,6 +6,25 @@ import pytest
 pytestmark = pytest.mark.opencode
 
 
+@pytest.mark.opencode_context(kind="empty")
+def test_effective_provider_disables_thinking(isolated_opencode):
+    session = isolated_opencode.create_session().stdout
+    assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
+
+    result = isolated_opencode.send_message(
+        session,
+        "Responda apenas sim.",
+    )
+
+    assert result.returncode == 0
+    assert result.stdout.strip(), (
+        "O raciocínio provavelmente não está desligado no caminho efetivo dos "
+        "testes. Verifique o repasse de "
+        "`chat_template_kwargs.enable_thinking=false` do OpenCode ao provider "
+        "bonsai-local."
+    )
+
+
 @pytest.mark.opencode_context(kind="skill", name="doc-extract")
 def test_prompt_mentions_doc_extract_with_coherent_response(isolated_opencode):
     session = isolated_opencode.create_session().stdout

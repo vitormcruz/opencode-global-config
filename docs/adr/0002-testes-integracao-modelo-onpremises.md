@@ -26,6 +26,23 @@ máximo de treino do modelo, 164.352 tokens. O KV cache chegou a cerca de 9 GB,
 o RSS foi 12,3 GB e 3,3 GB do processo foram enviados para swap. A lentidão
 resultante era causada principalmente por thrashing, não pela ausência de CUDA.
 
+Em 2026-08-17, depois dos ajustes D18/D20, as medições no WSL registraram
+geração e avaliação de prompt em 6,3 tok/s. Um prompt de 2.357 tokens levou
+377 s para ingestão. A igualdade anômala entre essas taxas indica que o kernel
+do quant ternário `Q1_0` desta build não tem caminho em lote: cada token de
+prompt custa aproximadamente o mesmo que um token gerado.
+
+O backend efetivo era `cpu`, na CPU i7-13800H (AVX2, sem AVX-512; 6 P-cores e
+8 E-cores), com RSS de 1,28 GB, swap praticamente livre, `ctx-size` 16.384 e
+quatro slots. `GET /metrics` retornou 501 porque o servidor não foi iniciado
+com `--metrics`. Esses números descrevem esta máquina e não são critério de
+desempenho para outras.
+
+Com o mesmo prompt, omitir `chat_template_kwargs.enable_thinking=false` gerou
+400 tokens de raciocínio em 85,6 s e retornou texto vazio. Com o parâmetro, a
+resposta levou 1,5 s, gerou dois tokens e retornou `Sim`. `reasoning_budget: 0`
+não funcionou nesta build.
+
 ## Decisão
 
 Os IDs `AD-N` correspondem diretamente às decisões `D-N` do plano que originou
@@ -54,6 +71,13 @@ este registro.
 | AD-19 | D19 — Desempenho é propriedade do ambiente. | Sem pacotes de sistema, ambiente portátil e seguro. |
 | AD-20 | D20 — `--ctx-size` fixo em 16.384 tokens. | Reduz KV cache; contexto do cliente é distinto. |
 | AD-21 | D21 — Consolidar decisões neste ADR ao final. | Preserva o estado real após remoção do plano. |
+| AD-22 | D22 — Reuso de prefixo: trabalho futuro. | Separar preparação de inferência antes de implementar. |
+| AD-23 | D23 — Rejeitar `-t` explícito derivado da máquina. | O padrão do llama.cpp foi superior nas medições. |
+| AD-24 | D24 — Asserir raciocínio desligado. | Evita regressão silenciosa e falha enganosa. |
+| AD-25 | D25 — Rejeitar reduzir o servidor a um slot. | Quatro slots já reutilizaram cache; um slot foi pior. |
+| AD-26 | D26 — Captura por log só em ambiguidade. | D27 respondeu sem instrumentação. |
+| AD-27 | D27 — Medir reuso real pelo tempo de testes consecutivos. | Evitou proxy e verbosidade temporários. |
+| AD-28 | D28 — Encerrar a rodada sem otimização adicional. | A evidência não sustenta implementar D22. |
 
 ### Detalhamento das decisões não óbvias
 
@@ -80,6 +104,31 @@ O contexto mínimo no cliente e `--ctx-size` no servidor são controles distinto
 O primeiro reduz arquivos, ferramentas e ruído enviados em um prompt. O segundo
 define a reserva do KV cache na inicialização do `llama-server`; reduzir o
 primeiro não reduz a reserva do segundo.
+
+### Resultados da rodada de otimização
+
+D23 foi rejeitada. O padrão sem `-t` atingiu 6,262 tok/s de prompt e 5,003
+tok/s de geração; `-t 6` atingiu 5,563 e 4,849, e `-t 14` atingiu 6,118 e
+4,851, respectivamente. Nenhuma opção explícita superou o padrão.
+
+D25 também foi rejeitada. Com quatro slots, as chamadas levaram 283,7 s e
+84,4 s, com 1.311 `cached_tokens`; com um slot, 300,1 s e 86,7 s, com os mesmos
+1.311 tokens. O segundo request com um slot foi 2,8% mais lento. Uma repetição
+isolada do cache passou de 300,7 s para 83,2 s, redução de 72,3%, confirmando
+que o servidor reutiliza prefixos sem exigir o slot único.
+
+D26 não precisou ligar a verbosidade do servidor: D27 mediu os testes reais
+consecutivos em 328,18 s, 245,18 s e 239,13 s. Há reuso real, mas parcial.
+Esses testes isolados levaram de quatro a seis vezes mais que a suíte completa,
+que executa 24 testes comportamentais em cerca de 22 minutos, aproximadamente
+55 s por teste. A inconsistência indica que preparação — subida de container,
+reinício do OpenCode e montagem de contexto — compõe parcela relevante do
+cenário isolado, além da inferência.
+
+D22 permanece aberto como trabalho futuro. Antes de qualquer implementação, é
+obrigatório separar, em cada teste, o tempo de preparação do tempo de inferência.
+Sem essa medição, o percentual de reuso isolado não justifica otimizar um
+gargalo que pode não dominar a suíte.
 
 ## Implementação atual
 
@@ -133,6 +182,11 @@ Os testes unitários do `BonsaiServer` e do `DockerSession` cobrem o novo
 argumento, a ausência do projector e a limpeza do proxy após falha de prontidão.
 Os testes OpenCode selecionados executaram contra o servidor local.
 
+A suíte também envia uma mensagem curta pelo OpenCode efetivo e exige texto na
+resposta. Se o raciocínio voltar a ser gerado, a falha orienta explicitamente a
+verificar o repasse de `chat_template_kwargs.enable_thinking=false` ao provider
+local, em vez de atribuir o problema ao conteúdo da resposta.
+
 A execução solicitada da suíte terminou com 485 testes aprovados e 14 falhas
 ambientais: Node/Playwright ausentes, Docling ausente, `crwl` ausente e
 `codebase-memory-mcp` sem Node disponível. Nenhuma falha foi por estouro de
@@ -148,6 +202,8 @@ contexto, e nenhum pacote foi instalado para mascarar essas ausências.
 - CPU é um caminho válido, mas pode deixar a suíte lenta; lentidão não reprova o
   teste.
 - Após 10 minutos o modelo dorme e o primeiro request seguinte pode recarregá-lo.
+- D22 não será implementada sem medir separadamente preparação e inferência por
+  teste; a rodada de otimização está encerrada até então.
 - O ambiente precisa fornecer WSL/Linux, Docker e os CLIs/recursos exigidos por
   cada marcador; a suíte não os instala automaticamente.
 - Copilot CLI continua validando apenas o contrato de instalação e execução,
@@ -173,6 +229,12 @@ contexto, e nenhum pacote foi instalado para mascarar essas ausências.
   qualquer request; reduzir somente o contexto enviado pelo cliente não resolve.
 - **Instalar dependências de sistema durante os testes:** torna o ambiente
   mutável, não reprodutível e contrário ao D19.
+- **`-t 6` ou `-t 14` explícito:** ambos ficaram abaixo do padrão do llama.cpp
+  em prompt e geração; D23 foi rejeitada.
+- **Um único slot no `llama-server`:** não aumentou o reuso e piorou a segunda
+  chamada em 2,8%; D25 foi rejeitada.
+- **Implementar D22 com o reuso isolado:** a discrepância com a suíte completa
+  não separa preparação de inferência; D28 encerrou a rodada sem essa mudança.
 
 ## Asserções executáveis
 
@@ -190,6 +252,8 @@ As verificações da suíte e do isolamento são:
 
 ```bash
 .venv/bin/pytest -m "unit or tools or opencode"
+.venv/bin/pytest -m opencode \
+  tests/integration/test_skills_activation.py::test_effective_provider_disables_thinking
 docker exec opencode-config-test curl -s \
   http://host.docker.internal:8080/v1/models
 docker exec opencode-config-test curl -s \
