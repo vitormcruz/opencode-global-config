@@ -206,6 +206,33 @@ por log fica reservada para o caso de o resultado ser ambíguo.
 
 Isto também evita o risco de a verbosidade vazar para o caminho de produção.
 
+### D28 — Encerrar a rodada sem otimização adicional
+
+A Task 1C mediu testes reais consecutivos: 328,18 s, 245,18 s e 239,13 s. Há
+reuso de prefixo real, porém parcial, e o terceiro tempo confirma que não foi
+variação pontual.
+
+Esses números não são comparáveis com a suíte completa. A suíte executa 24
+testes comportamentais em cerca de 22 minutos, aproximadamente 55 s por teste,
+enquanto a medição isolada custou de quatro a seis vezes mais. A diferença
+indica que parte relevante do tempo isolado é preparação — subida de container,
+reinício do OpenCode e montagem de contexto — e não inferência.
+
+Consequência: o percentual de reuso medido descreve o cenário isolado, não a
+suíte. Decidir a implementação de D22 sobre esse número arriscaria otimizar um
+gargalo que talvez não seja o principal.
+
+Decisão: encerrar a rodada sem implementar D22 e sem novas medições. O
+conhecimento acumulado é consolidado no ADR, incluindo a inconsistência
+observada, para que uma rodada futura comece dela em vez de redescobri-la.
+
+Esta decisão não afirma que os 24 minutos são teto de hardware. Ela afirma que
+a evidência disponível não é suficiente para sustentar mudança, e registra
+exatamente qual medição faltou.
+
+D22 permanece aberta e documentada como trabalho futuro, condicionada à
+separação entre tempo de preparação e tempo de inferência.
+
 ## Task List
 
 ### Fase 1B — Medição do reuso real
@@ -318,14 +345,14 @@ Esta task não é condicional.
 
 **Task 7 — Atualizar o ADR-0002**
 
-Acrescentar AD-22 a AD-27 com os resultados reais, incluindo as medições
+Acrescentar AD-22 a AD-28 com os resultados reais, incluindo as medições
 que levaram a não aplicar alguma mudança. Registrar as medições de base desta
 rodada na seção de contexto, para que a próxima pessoa não precise remedi-las.
 
 **Task 8 — Remover o arquivo de planejamento**
 
-Somente após confirmar que o ADR-0002 contém as seis decisões e as medições,
-inclusive as que resultaram em rejeição.
+Somente após confirmar que o ADR-0002 contém as sete decisões e as medições,
+inclusive as que resultaram em rejeição e a inconsistência que motivou D28.
 
 ## Orquestração
 
@@ -362,4 +389,8 @@ pendentes. A aprovação do plano, isoladamente, nunca encerra a tarefa.
 
 ## Open Questions
 
-Nenhuma no momento.
+**D22 — reuso de prefixo entre testes.** Permanece aberta. Antes de qualquer
+tentativa de implementação, é necessário separar, dentro do tempo de cada teste,
+quanto é preparação (subida de container, reinício do OpenCode, montagem de
+contexto) e quanto é inferência. Sem essa separação, não há como saber se o
+gargalo dominante é o modelo ou a infraestrutura de teste.
