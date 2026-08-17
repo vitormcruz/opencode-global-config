@@ -319,6 +319,7 @@ def test_smart_planner_finalizes_commit_only_after_human_confirmation(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    normalized = re.sub(r"\s+", " ", content)
 
     assert "## Finalização Opcional do Commit Local" in content
     assert "resumo conciso da implementação" in content
@@ -327,6 +328,8 @@ def test_smart_planner_finalizes_commit_only_after_human_confirmation(
     assert "aguarde confirmação explícita" in content
     assert "Não prepare arquivos, adicione ao stage nem crie o commit" in content
     assert "prepare somente os arquivos da unidade lógica" in content
+    assert "remova o arquivo de planejamento com `git rm`" in normalized
+    assert "mesmo commit local" in normalized
     assert "`git diff --staged`" in content
     assert "informe o SHA" in content
     assert "Nunca execute `git push` sem nova confirmação explícita" in content
@@ -337,9 +340,11 @@ def test_smart_planner_keeps_technical_conclusion_when_commit_is_deferred(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    normalized = re.sub(r"\s+", " ", content)
 
     assert "Se o humano recusar ou adiar" in content
     assert "conclusão técnica válida" in content
+    assert "arquivo de planejamento e as mudanças sem commit" in normalized
     assert "mudanças sem commit" in content
     assert "Não reabra a revisão por essa decisão" in content
 
@@ -351,6 +356,7 @@ def test_simple_agentic_workflow_documents_the_same_contract(
     workflow = (
         repo_root / "docs" / "workflow-agentico-simples.md"
     ).read_text(encoding="utf-8")
+    normalized = re.sub(r"\s+", " ", workflow)
 
     assert "## Máquina de Estados" in workflow
     assert "Seleção por Capacidade e Plataforma" in workflow
@@ -363,10 +369,13 @@ def test_simple_agentic_workflow_documents_the_same_contract(
     assert "mensagem Conventional Commit sugerida" in workflow
     assert "aguarda confirmação explícita" in workflow
     assert "somente os arquivos da unidade lógica" in workflow
+    assert "remove o arquivo de planejamento com `git rm`" in normalized
+    assert "mesmo commit local" in normalized
     assert "`git diff --staged`" in workflow
     assert "Nunca executa `git push` sem nova confirmação explícita" in workflow
     assert "recusar ou adiar" in workflow
     assert "conclusão técnica permanece válida" in workflow
+    assert "plano e as mudanças ficam sem commit" in normalized
 
 
 @pytest.mark.unit

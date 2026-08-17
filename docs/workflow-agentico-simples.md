@@ -26,7 +26,8 @@ PLANEJANDO -> AGUARDANDO_APROVAÇÃO -> AGUARDANDO_AUTORIZAÇÃO
                         |                    |
                         | achados            | finalização opcional de commit
                         v                    v
-                   CORRIGINDO -> REVISANDO  COM_COMMIT_LOCAL ou SEM_COMMIT
+                   CORRIGINDO -> REVISANDO  COM_COMMIT_E_PLANO_REMOVIDO
+                                               ou SEM_COMMIT
                                       |
                                       v
                                 REPLANEJANDO -> EXECUTANDO ou REVISANDO
@@ -85,8 +86,9 @@ Após a aprovação técnica, o orquestrador apresenta ao humano um resumo conci
 unidade lógica aprovada e uma mensagem Conventional Commit sugerida. Em seguida, pergunta se pode
 criar o commit local e aguarda confirmação explícita.
 
-Com aprovação humana, prepara somente os arquivos da unidade lógica, revisa o `git diff --staged`,
-cria o commit local e informa o SHA. Nunca executa `git push` sem nova confirmação explícita do
-humano.
+Com aprovação humana, prepara somente os arquivos da unidade lógica, remove o arquivo de planejamento
+com `git rm`, revisa o `git diff --staged`, cria o commit local e informa o SHA. A remoção do plano
+entra no mesmo commit local. Nunca executa `git push` sem nova confirmação explícita do humano.
 
-Se o humano recusar ou adiar, a conclusão técnica permanece válida e as mudanças ficam sem commit.
+Se o humano recusar ou adiar, a conclusão técnica permanece válida, e o plano e as mudanças ficam sem
+commit.

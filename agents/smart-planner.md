@@ -275,10 +275,11 @@ Depois da aprovação explícita do revisor:
    Não prepare arquivos, adicione ao stage nem crie o commit apenas pela
    aprovação do revisor.
 3. Se o humano aprovar, prepare somente os arquivos da unidade lógica,
-   revise o `git diff --staged`, crie o commit local e informe o SHA.
-   Nunca execute `git push` sem nova confirmação explícita do humano.
-4. Se o humano recusar ou adiar, mantenha a conclusão técnica válida e
-   as mudanças sem commit. Não reabra a revisão por essa decisão.
+   remova o arquivo de planejamento com `git rm` e inclua sua remoção no mesmo commit local.
+   Revise o `git diff --staged`, crie o commit local e informe o SHA. Nunca execute `git push`
+   sem nova confirmação explícita do humano.
+4. Se o humano recusar ou adiar, mantenha a conclusão técnica válida, o arquivo de planejamento
+   e as mudanças sem commit. Não reabra a revisão por essa decisão.
 
 ## Limites
 
