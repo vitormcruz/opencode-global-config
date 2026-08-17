@@ -182,6 +182,24 @@ rodada na seção de contexto, para que a próxima pessoa não precise remedi-la
 
 Somente após confirmar que o ADR-0002 contém as três decisões e as medições.
 
+## Orquestração
+
+Conforme o protocolo do `smart-planner`, a execução e a revisão ocorrem em
+instâncias independentes, criadas pela capacidade nativa de subagentes da
+plataforma atual (Copilot CLI).
+
+| Papel | Modelo | Origem da escolha |
+|---|---|---|
+| Executor | GPT-5.6 Terra | Reutilizado de `plan/smart-planner-orquestracao.md` |
+| Revisor | GPT-5.6 Terra | Reutilizado de `plan/smart-planner-orquestracao.md` |
+
+O revisor recebe o plano, o ADR e o resultado observável da execução, mas nunca
+a sessão do executor. Achados retornam ao executor em uma instância nova; a
+instância revisora anterior jamais é reutilizada.
+
+O término técnico só ocorre com aprovação explícita do revisor, sem achados
+pendentes. A aprovação do plano, isoladamente, nunca encerra a tarefa.
+
 ## Risks and Mitigations
 
 | Risco | Mitigação |
