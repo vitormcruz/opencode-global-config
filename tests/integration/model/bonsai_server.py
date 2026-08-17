@@ -38,9 +38,6 @@ LLAMA_RELEASE_BASE_URL = (
 DEFAULT_LLAMA_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "llama"
 LLAMA_RELEASE_MARKER = ".llama_release"
 LLAMA_BACKEND_MARKER = ".llama_backend"
-CUDA_RUNTIME_INSTALL_COMMAND = (
-    "sudo apt install cuda-cudart-12-8 libcublas-12-8"
-)
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_BIND_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
@@ -49,6 +46,7 @@ DETERMINISTIC_SEED = 42
 CONTEXT_SIZE = 16_384
 PID_FILE_NAME = "llama-server.pid"
 DOWNLOAD_TIMEOUT_SECONDS = 600
+LOCAL_REQUEST_TIMEOUT_SECONDS = 600
 
 
 class BonsaiServerError(RuntimeError):
@@ -75,7 +73,7 @@ class BonsaiServer:
     executable: str | None = None
     ready_retries: int = 90
     ready_interval: float = 2.0
-    request_timeout: float = 5.0
+    request_timeout: float = LOCAL_REQUEST_TIMEOUT_SECONDS
     _process: subprocess.Popen[bytes] | None = field(
         default=None,
         init=False,
@@ -178,12 +176,15 @@ class BonsaiServer:
         cuda_version = cls._cuda_version()
         if cuda_version is not None:
             if not cls._cuda_runtime_available():
+                backend = (
+                    "Vulkan" if shutil.which("vulkaninfo") is not None else "CPU"
+                )
                 _log(
                     "CUDA ignorado: runtime ausente "
-                    "(libcudart.so.12/libcublas.so.12). Para habilitar GPU: "
-                    f"{CUDA_RUNTIME_INSTALL_COMMAND}"
+                    "(libcudart.so.12/libcublas.so.12). "
+                    f"Usando backend {backend}; nenhum pacote de sistema será instalado."
                 )
-                if shutil.which("vulkaninfo") is not None:
+                if backend == "Vulkan":
                     return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-vulkan-x64.tar.gz"
                 return f"llama-{LLAMA_RELEASE_TAG}-bin-ubuntu-x64.tar.gz"
             major, minor = cuda_version

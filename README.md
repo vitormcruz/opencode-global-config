@@ -211,15 +211,12 @@ antes de executar a suíte.
 #### Servidor local Bonsai
 
 O servidor requer aproximadamente 4,2 GB livres em
-`~/.cache/opencode-config/models/`. O comando abaixo baixa os dois arquivos
-GGUF quando ainda não existem e inicia o `llama-server` na porta 8080:
-
-Instale o `llama-server` do llama.cpp no WSL/Linux e confirme que ele está no
-`PATH`:
-
-```bash
-llama-server --version
-```
+`~/.cache/opencode-config/models/`. O harness baixa automaticamente o binário
+self-contained do release fixado `prism-b9596-9fcaed7` para
+`~/.cache/opencode-config/llama/` e o único modelo
+`Bonsai-27B-Q1_0.gguf` para o cache de modelos. Não é necessário instalar
+`llama-server` no `PATH` nem baixar um projector: a linha de comando não usa
+`--mmproj`.
 
 ```bash
 python3 tests/integration/model/bonsai_server.py --up
@@ -254,7 +251,7 @@ Pré-requisitos:
 
 - Python >= 3.10 e dependências de `requirements-dev.txt`
 - Docker somente para a integração OpenCode no WSL/Linux
-- llama-server local com os pesos Bonsai 27B 1-bit
+- acesso ao release fixado e aos pesos Bonsai para provisionamento local
 - dependências externas conforme o alvo escolhido
 
 O build da imagem Docker tem acesso à rede apenas para instalar o OpenCode.

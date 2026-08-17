@@ -5,8 +5,9 @@ from __future__ import annotations
 import io
 import shutil
 import tarfile
+import time
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 from urllib.error import URLError
 
 import pytest
@@ -120,7 +121,7 @@ def test_missing_cuda_runtime_rebaixa_to_vulkan_with_one_notice(
     assert "ubuntu-vulkan-x64" in asset
     output = capsys.readouterr().out.strip().splitlines()
     assert len(output) == 1
-    assert "sudo apt install" in output[0]
+    assert "Usando backend Vulkan" in output[0]
 
 
 def test_missing_cuda_runtime_rebaixa_to_cpu_without_vulkan(
@@ -145,7 +146,7 @@ def test_missing_cuda_runtime_rebaixa_to_cpu_without_vulkan(
     assert asset.endswith("bin-ubuntu-x64.tar.gz")
     output = capsys.readouterr().out.strip().splitlines()
     assert len(output) == 1
-    assert "CUDA ignorado" in output[0]
+    assert "Usando backend CPU" in output[0]
 
 
 @pytest.mark.parametrize(
@@ -312,6 +313,29 @@ def test_ensure_up_reuses_an_available_server_without_starting_process(
     assert result is server
     server.require_available.assert_called_once_with()
     server._start_process.assert_not_called()
+
+
+def test_ensure_up_reuses_server_after_slow_health_response(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = BonsaiServer(cache_dir=tmp_path)
+    response = MagicMock(status=200)
+    response.__enter__.return_value = response
+    start_process = Mock(side_effect=AssertionError("server must be reused"))
+
+    def slow_urlopen(url: str, *, timeout: float) -> Mock:
+        time.sleep(0.01)
+        assert timeout == bonsai_server.LOCAL_REQUEST_TIMEOUT_SECONDS
+        return response
+
+    monkeypatch.setattr(bonsai_server, "urlopen", slow_urlopen)
+    server._start_process = start_process
+
+    result = server.ensure_up()
+
+    assert result is server
+    start_process.assert_not_called()
 
 
 def test_ensure_up_downloads_missing_files_and_waits_for_readiness(

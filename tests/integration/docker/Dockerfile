@@ -1,16 +1,6 @@
-FROM ubuntu:24.04
+FROM python:3.12-bookworm
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/root/.opencode/bin:${PATH}"
-
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    jq \
-    bash \
-    python3 \
-    nodejs \
-    && rm -rf /var/lib/apt/lists/*
 
 # Instala OpenCode via script oficial
 RUN curl -fsSL https://opencode.ai/install | bash

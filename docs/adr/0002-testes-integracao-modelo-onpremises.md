@@ -195,13 +195,14 @@ docker exec opencode-config-test curl -s \
 docker exec opencode-config-test curl -s \
   https://api.openai.com
 git grep -n "pytest.skip" -- tests
-git grep -n "OPENCODE_TEST_MODEL" -- tests/integration
+git grep -nE "sudo|apt-get|LD_LIBRARY_PATH" -- tests/
 ```
 
 O primeiro request Docker deve retornar o JSON do Bonsai. A tentativa externa
 deve falhar por DNS ou conexão, e não ser aprovada por uma resposta HTTP.
-`git grep` não deve encontrar `pytest.skip` nem `OPENCODE_TEST_MODEL` na
-integração.
+Além disso, a busca no checkout, excluindo `plan/`, por referências ao seletor
+de modelo legado deve retornar vazia; a integração não deve conter
+`pytest.skip` nem comandos de instalação de sistema.
 
 Para verificar o lifecycle do proxy:
 

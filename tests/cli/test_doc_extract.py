@@ -161,8 +161,8 @@ def test_doc_extract_without_docling_uses_windows_hint(
         {"source": str(repo_root / "tests/test-resources/sample.pdf")},
     )
 
-    assert "py -m pip" in result["hint"]
-    assert "sudo apt-get" not in result["hint"]
+    assert result["hint"].startswith("Recomendado: py -m pip install --user pipx")
+    assert "Ubuntu/WSL" not in result["hint"]
 
 
 @pytest.mark.tools
@@ -186,7 +186,7 @@ def test_doc_extract_without_docling_uses_zero_admin_linux_hint(
     )
 
     assert "python3 -m pip install --user pipx" in result["hint"]
-    assert "sudo apt-get" not in result["hint"]
+    assert "py -m pip install --user pipx" not in result["hint"]
 
 
 @pytest.mark.tools

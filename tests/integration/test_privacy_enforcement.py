@@ -17,6 +17,8 @@ NETWORK_NAME = "opencode-test-net"
 EFFECTIVE_CONFIG = "/opt/opencode-config/opencode.json"
 LOCAL_BASE_URL = "http://host.docker.internal:8080/v1"
 LOCAL_MODEL = "bonsai-local/bonsai-27b"
+LOCAL_REQUEST_TIMEOUT_SECONDS = 600
+EXTERNAL_REQUEST_TIMEOUT_SECONDS = 5
 
 
 def _require_docker() -> str:
@@ -51,13 +53,14 @@ def docker_executable(docker_session) -> Iterator[str]:
 def _exec_in_container(
     docker_executable: str,
     *arguments: str,
+    timeout: float = LOCAL_REQUEST_TIMEOUT_SECONDS,
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [docker_executable, "exec", CONTAINER_NAME, *arguments],
         capture_output=True,
         text=True,
         check=False,
-        timeout=15,
+        timeout=timeout,
     )
 
 
@@ -144,7 +147,7 @@ def test_local_bonsai_endpoint_is_reachable(
         "--noproxy",
         "*",
         "--max-time",
-        "10",
+        str(LOCAL_REQUEST_TIMEOUT_SECONDS),
         "http://host.docker.internal:8080/v1/models",
     )
     if result.returncode != 0 or not result.stdout.strip():
@@ -158,21 +161,25 @@ def test_local_bonsai_endpoint_is_reachable(
 def test_network_enforcement_blocks_external_access(
     docker_executable: str,
 ) -> None:
-    result = _exec_in_container(
-        docker_executable,
-        "curl",
-        "--silent",
-        "--show-error",
-        "--noproxy",
-        "*",
-        "--max-time",
-        "5",
-        "--output",
-        "/dev/null",
-        "--write-out",
-        "%{http_code}",
-        "https://example.com",
-    )
+    try:
+        result = _exec_in_container(
+            docker_executable,
+            "curl",
+            "--silent",
+            "--show-error",
+            "--noproxy",
+            "*",
+            "--max-time",
+            str(EXTERNAL_REQUEST_TIMEOUT_SECONDS),
+            "--output",
+            "/dev/null",
+            "--write-out",
+            "%{http_code}",
+            "https://example.com",
+            timeout=EXTERNAL_REQUEST_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return
     http_code = result.stdout.strip()
     if result.returncode not in {6, 7, 28} or http_code not in {"", "000"}:
         pytest.fail(

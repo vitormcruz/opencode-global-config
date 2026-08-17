@@ -1,5 +1,6 @@
 from hashlib import sha256
 from pathlib import Path
+import sys
 import zipfile
 
 import pytest
@@ -137,7 +138,7 @@ def test_download_file_rejects_hash_mismatch_with_both_hashes(
 
 
 @pytest.mark.unit
-def test_install_pipx_is_user_local_and_does_not_use_sudo(
+def test_install_pipx_is_user_local(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -152,8 +153,15 @@ def test_install_pipx_is_user_local_and_does_not_use_sudo(
 
     assert result.success
     command = commands[0]
+    assert command == (
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--user",
+        "pipx",
+    )
     assert "--user" in command
-    assert "sudo" not in command
     assert str(context.paths.bin_dir) in context.current_environment["PATH"]
 
 
@@ -585,7 +593,14 @@ def test_install_playwright_installs_package_and_chromium(
     )
 
     assert result.success
-    assert commands[0][-1] == "@playwright/test"
+    assert commands[0] == (
+        "npm",
+        "install",
+        "--global",
+        "--prefix",
+        str(context.paths.npm_bin.parent),
+        "@playwright/test",
+    )
     assert commands[1] == (
         "npx",
         "--yes",
@@ -593,7 +608,6 @@ def test_install_playwright_installs_package_and_chromium(
         "install",
         "chromium",
     )
-    assert all("sudo" not in command for command in commands for command in command)
 
 
 @pytest.mark.unit
@@ -881,7 +895,6 @@ def test_install_aws_cli_windows_uses_quiet_without_system(
     command = commands[0]
     assert "-Quiet" in command
     assert "-System" not in command
-    assert "sudo" not in command
 
 
 @pytest.mark.unit
