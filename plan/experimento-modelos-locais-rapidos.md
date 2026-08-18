@@ -18,6 +18,8 @@ telemetria.
   comparada a uma execução-base recente do Bonsai no mesmo ambiente.
 - **D4 — Fallback:** manter o Bonsai durante o experimento e mudar o padrão
   somente após a aprovação integral de um candidato nos gates definidos.
+- **D5 — Escopo:** executar os comparativos e documentar a decisão; não
+  substituir automaticamente o Bonsai neste plano.
 
 ## Task List
 
