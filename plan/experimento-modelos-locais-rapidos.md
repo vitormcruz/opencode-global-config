@@ -16,6 +16,8 @@ telemetria.
   testes e reduzir a duração total de forma mensurável.
 - **D3 — Ganho mínimo:** exigir redução de ao menos 30% na duração total,
   comparada a uma execução-base recente do Bonsai no mesmo ambiente.
+- **D4 — Fallback:** manter o Bonsai durante o experimento e mudar o padrão
+  somente após a aprovação integral de um candidato nos gates definidos.
 
 ## Task List
 
