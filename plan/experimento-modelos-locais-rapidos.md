@@ -26,6 +26,10 @@ telemetria. Needle 2 foi avaliado e rejeitado antes da implementação.
   criar ponte local nem incluí-lo na comparação do OpenCode.
 - **D7 — Modelos de execução:** o executor usará `gpt-5.6-luna`; a revisão
   independente usará `claude-sonnet-5`.
+- **D8 — Evidência de Harness:** este experimento será executado sem Harness,
+  por autorização explícita do humano. A ausência de `docs/README.md` não
+  bloqueia a execução; evidências ficam no relatório do experimento e nos
+  resultados dos testes.
 
 ## Task List
 
@@ -210,3 +214,16 @@ menos 30% da duração. Caso nenhum passe, documentar a rejeição e manter Bons
 ## Open Questions
 
 - Nenhuma. A troca definitiva do provider padrão fica fora deste experimento.
+
+## Registro de execução — bloqueio resolvido
+
+### Política de Harness
+
+- Data: 2026-08-18.
+- `AGENTS.md` não contém uma seção de Harness para este agente.
+- `docs/README.md`, exigido pelo contrato operacional, não existe neste
+  repositório.
+- Por D8, não será criado nem executado Harness neste experimento.
+- Estado: desbloqueado; registrar evidências no relatório e nos resultados dos
+  testes.
+- Não foram alterados código, testes, configuração de provider ou histórico.
