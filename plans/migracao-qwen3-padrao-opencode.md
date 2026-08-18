@@ -193,3 +193,10 @@ apos revisao cruzada entre documentacao e codigo.
 
 - **Executor:** `gpt-5.6-luna`.
 - **Revisor independente:** `gpt-5.6-terra`.
+
+## Execution Harness
+
+- **Gate obrigatório:** no WSL/Linux com Docker, executar
+  `.venv/bin/pytest -m opencode`.
+- **Evidência requerida:** resultado da suíte, incluindo os quatro controles de
+  privacidade, sem provisionamento via bootstrap e sem alteração de timeout.
