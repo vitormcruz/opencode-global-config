@@ -14,6 +14,8 @@ telemetria.
 - **D2 — Gate de substituição:** substituir o Bonsai somente se um candidato
   aprovar 100% da suíte `-m opencode`, não usar rede nem telemetria durante os
   testes e reduzir a duração total de forma mensurável.
+- **D3 — Ganho mínimo:** exigir redução de ao menos 30% na duração total,
+  comparada a uma execução-base recente do Bonsai no mesmo ambiente.
 
 ## Task List
 
