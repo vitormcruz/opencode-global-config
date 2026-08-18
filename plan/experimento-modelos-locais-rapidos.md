@@ -24,6 +24,8 @@ telemetria. Needle 2 foi avaliado e rejeitado antes da implementação.
   offline após provisionamento, sua API oficial é Python, não HTTP
   OpenAI-compatible, e seu contrato não oferece resposta textual livre. Não
   criar ponte local nem incluí-lo na comparação do OpenCode.
+- **D7 — Modelos de execução:** o executor usará `gpt-5.6-luna`; a revisão
+  independente usará `claude-sonnet-5`.
 
 ## Task List
 
