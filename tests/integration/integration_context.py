@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 from typing import Literal
 
+from model.bonsai_server import DEFAULT_MODEL, get_model_spec
+
 
 ContextKind = Literal["agent", "command", "empty", "skill"]
 _CONTEXT_KINDS = {"agent", "command", "empty", "skill"}
@@ -26,6 +28,7 @@ def prepare_test_context(
     *,
     kind: ContextKind | str,
     name: str | None = None,
+    model: str = DEFAULT_MODEL,
 ) -> Path:
     """Copy only the repository artifact required by one integration test."""
 
@@ -50,19 +53,34 @@ def prepare_test_context(
     if not isinstance(config, dict):
         raise ValueError("A configuração de teste do OpenCode deve ser um objeto.")
 
+    model_spec = get_model_spec(model)
     config["plugin"] = []
     config["permission"] = {"skill": {"*": "deny"}}
+    config["provider"] = {
+        model_spec.provider: {
+            "npm": "@ai-sdk/openai-compatible",
+            "options": {"baseURL": "http://host.docker.internal:8080/v1"},
+            "models": {
+                model_spec.model_id: {
+                    "name": model_spec.display_name,
+                    "options": {
+                        "chat_template_kwargs": {"enable_thinking": False}
+                    },
+                }
+            },
+        }
+    }
     tools = {"*": False}
     if kind == "skill":
         tools["skill"] = True
     config["agent"] = {
         "plan": {
-            "model": "bonsai-local/bonsai-27b",
+            "model": f"{model_spec.provider}/{model_spec.model_id}",
             "prompt": "Responda somente ao pedido do teste.",
             "tools": dict(tools),
         },
         "build": {
-            "model": "bonsai-local/bonsai-27b",
+            "model": f"{model_spec.provider}/{model_spec.model_id}",
             "prompt": "Responda somente ao pedido do teste.",
             "tools": dict(tools),
         },

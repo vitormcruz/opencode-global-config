@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import hashlib
+import json
 import os
 import platform
 import re
@@ -26,9 +28,48 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 
-MODEL_REPOSITORY = "prism-ml/Bonsai-27B-gguf"
-MODEL_FILE = "Bonsai-27B-Q1_0.gguf"
-MODEL_BASE_URL = f"https://huggingface.co/{MODEL_REPOSITORY}/resolve/main"
+@dataclass(frozen=True)
+class LocalModelSpec:
+    """Fixed artifact and OpenCode contract for one local model candidate."""
+
+    name: str
+    repository: str
+    file_name: str
+    provider: str
+    model_id: str
+    display_name: str
+    sha256: str | None = None
+
+    @property
+    def base_url(self) -> str:
+        return f"https://huggingface.co/{self.repository}/resolve/main"
+
+
+DEFAULT_MODEL = "bonsai"
+MODEL_SPECS = {
+    "bonsai": LocalModelSpec(
+        name="bonsai",
+        repository="prism-ml/Bonsai-27B-gguf",
+        file_name="Bonsai-27B-Q1_0.gguf",
+        provider="bonsai-local",
+        model_id="bonsai-27b",
+        display_name="Bonsai 27B 1-bit",
+    ),
+    "qwen3-0.6b": LocalModelSpec(
+        name="qwen3-0.6b",
+        repository="Qwen/Qwen3-0.6B-GGUF",
+        file_name="Qwen3-0.6B-Q8_0.gguf",
+        provider="qwen-local",
+        model_id="qwen3-0.6b",
+        display_name="Qwen3 0.6B Q8_0",
+        sha256=(
+            "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+        ),
+    ),
+}
+MODEL_REPOSITORY = MODEL_SPECS[DEFAULT_MODEL].repository
+MODEL_FILE = MODEL_SPECS[DEFAULT_MODEL].file_name
+MODEL_BASE_URL = MODEL_SPECS[DEFAULT_MODEL].base_url
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "models"
 LLAMA_RELEASE_TAG = "prism-b9596-9fcaed7"
 LLAMA_RELEASE_BASE_URL = (
@@ -53,14 +94,27 @@ class BonsaiServerError(RuntimeError):
     """Raised when the local Bonsai server cannot be provisioned or reached."""
 
 
+def get_model_spec(model: str) -> LocalModelSpec:
+    """Return the fixed local-model contract selected by the caller."""
+
+    try:
+        return MODEL_SPECS[model]
+    except KeyError as error:
+        supported = ", ".join(sorted(MODEL_SPECS))
+        raise BonsaiServerError(
+            f"Modelo local desconhecido: {model}. Use: {supported}."
+        ) from error
+
+
 def _log(message: str) -> None:
     print(f"[bonsai-server] {message}")
 
 
 @dataclass
 class BonsaiServer:
-    """Manage a persistent llama-server process for the Bonsai 27B model."""
+    """Manage a persistent llama-server process for one fixed local model."""
 
+    model: str = DEFAULT_MODEL
     cache_dir: Path = field(
         default_factory=lambda: Path.home() / ".cache" / "opencode-config" / "models"
     )
@@ -83,9 +137,15 @@ class BonsaiServer:
 
     @property
     def model_path(self) -> Path:
-        """Return the fixed path of the Bonsai model weights."""
+        """Return the fixed path of the selected model weights."""
 
-        return self.cache_dir / MODEL_FILE
+        return self.cache_dir / get_model_spec(self.model).file_name
+
+    @property
+    def model_spec(self) -> LocalModelSpec:
+        """Return the selected model's immutable contract."""
+
+        return get_model_spec(self.model)
 
     @property
     def pid_path(self) -> Path:
@@ -406,12 +466,25 @@ class BonsaiServer:
             pass
 
     def _ensure_model_files(self) -> None:
-        artifacts = ((MODEL_FILE, self.model_path),)
+        spec = self.model_spec
+        artifacts = ((spec.file_name, self.model_path),)
         for filename, destination in artifacts:
             if destination.is_file() and destination.stat().st_size > 0:
+                self._validate_artifact(destination, spec)
                 continue
             _log(f"Baixando {filename}...")
-            self._download_file(f"{MODEL_BASE_URL}/{filename}", destination)
+            self._download_file(f"{spec.base_url}/{filename}", destination)
+            self._validate_artifact(destination, spec)
+
+    @staticmethod
+    def _validate_artifact(path: Path, spec: LocalModelSpec) -> None:
+        if spec.sha256 is None:
+            return
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if digest != spec.sha256:
+            raise BonsaiServerError(
+                f"Checksum SHA-256 inválido para {spec.file_name}: {digest}."
+            )
 
     def _command(self, executable: str) -> list[str]:
         return [
@@ -463,6 +536,84 @@ class BonsaiServer:
             "  python3 tests/integration/model/bonsai_server.py --up"
         )
 
+    def _endpoint_matches_model(self) -> bool:
+        try:
+            with urlopen(self._models_url(), timeout=self.request_timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (HTTPError, OSError, TimeoutError, URLError, json.JSONDecodeError):
+            return False
+
+        entries = payload.get("data", []) if isinstance(payload, dict) else []
+        if not isinstance(entries, list):
+            return False
+        expected = self.model_spec.file_name
+        return any(
+            isinstance(entry, dict)
+            and expected in {entry.get("id"), entry.get("model"), entry.get("name")}
+            for entry in entries
+        )
+
+    def _pid_file_process_is_owned(self, pid: int) -> bool:
+        """Check that a persisted PID is one of this harness's llama servers."""
+
+        if pid == os.getpid() or not self._pid_is_alive(pid):
+            return False
+        try:
+            command = [
+                argument.decode("utf-8", errors="replace")
+                for argument in (Path("/proc") / str(pid) / "cmdline")
+                .read_bytes()
+                .split(b"\0")
+                if argument
+            ]
+        except OSError:
+            return False
+        if not command or Path(command[0]).name != "llama-server":
+            return False
+
+        try:
+            model_argument = command[command.index("--model") + 1]
+            port_argument = command[command.index("--port") + 1]
+            host_argument = command[command.index("--host") + 1]
+        except (ValueError, IndexError):
+            return False
+
+        model_path = Path(model_argument).resolve()
+        cache_dir = self.cache_dir.resolve()
+        known_model_paths = {
+            (cache_dir / spec.file_name).resolve() for spec in MODEL_SPECS.values()
+        }
+        return (
+            model_path in known_model_paths
+            and port_argument == str(self.port)
+            and host_argument == self.bind_host
+        )
+
+    def _reconcile_mismatched_endpoint(self) -> None:
+        """Stop only an owned server before replacing its model on the fixed port."""
+
+        if self._process is not None and self._owns_process:
+            self.stop()
+        else:
+            pid = self._read_pid()
+            if pid is None or not self._pid_file_process_is_owned(pid):
+                raise BonsaiServerError(
+                    f"llama-server expõe outro modelo em {self._models_url()}, "
+                    "mas o processo não pertence a este harness; "
+                    "não será encerrado nem substituído."
+                )
+            if not self._terminate_pid_file_process():
+                raise BonsaiServerError(
+                    "Não foi possível reconciliar o llama-server persistido "
+                    "com segurança."
+                )
+
+        if self._endpoint_responds():
+            raise BonsaiServerError(
+                f"A porta {self.port} continua ocupada após encerrar o "
+                "llama-server pertencente ao harness."
+            )
+
     def _wait_until_ready(self) -> None:
         for _ in range(self.ready_retries):
             if self._endpoint_responds():
@@ -485,7 +636,9 @@ class BonsaiServer:
         except BonsaiServerError:
             pass
         else:
-            return self
+            if self._endpoint_matches_model():
+                return self
+            self._reconcile_mismatched_endpoint()
 
         executable = self._find_executable()
         self._ensure_model_files()
@@ -523,19 +676,21 @@ class BonsaiServer:
             process.kill()
             process.wait(timeout=10)
 
-    def _terminate_pid_file_process(self) -> None:
+    def _terminate_pid_file_process(self) -> bool:
         pid = self._read_pid()
         if pid is None or pid == os.getpid():
             self._remove_if_exists(self.pid_path)
-            return
-        if self._pid_is_alive(pid):
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError as error:
-                raise BonsaiServerError(
-                    f"Nao foi possivel encerrar o llama-server (PID {pid})."
-                ) from error
+            return False
+        if not self._pid_file_process_is_owned(pid):
+            return False
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError as error:
+            raise BonsaiServerError(
+                f"Nao foi possivel encerrar o llama-server (PID {pid})."
+            ) from error
         self._remove_if_exists(self.pid_path)
+        return True
 
     def stop(self, *, force: bool = False) -> None:
         """Stop a process started here, or a persisted process with ``force``."""
@@ -567,6 +722,12 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Verifica se o endpoint local esta respondendo.",
     )
+    parser.add_argument(
+        "--model",
+        choices=sorted(MODEL_SPECS),
+        default=DEFAULT_MODEL,
+        help="Modelo local fixado para o servidor.",
+    )
     return parser
 
 
@@ -574,7 +735,7 @@ def main(argv: list[str] | None = None) -> int:
     """Run the Bonsai server command-line utility."""
 
     args = _parser().parse_args(argv)
-    server = BonsaiServer()
+    server = BonsaiServer(model=args.model)
     try:
         if args.up:
             server.ensure_up()

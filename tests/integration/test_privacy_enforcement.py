@@ -9,6 +9,8 @@ from collections.abc import Iterator
 
 import pytest
 
+from model.bonsai_server import get_model_spec
+
 
 pytestmark = pytest.mark.opencode
 
@@ -16,7 +18,6 @@ CONTAINER_NAME = "opencode-config-test"
 NETWORK_NAME = "opencode-test-net"
 EFFECTIVE_CONFIG = "/opt/opencode-config/opencode.json"
 LOCAL_BASE_URL = "http://host.docker.internal:8080/v1"
-LOCAL_MODEL = "bonsai-local/bonsai-27b"
 LOCAL_REQUEST_TIMEOUT_SECONDS = 600
 EXTERNAL_REQUEST_TIMEOUT_SECONDS = 5
 
@@ -85,8 +86,9 @@ def test_network_is_internal(docker_executable: str) -> None:
         )
 
 
-def test_config_enforcement_allows_only_bonsai_local(
+def test_config_enforcement_allows_only_selected_local_model(
     docker_executable: str,
+    local_model: str,
 ) -> None:
     result = _exec_in_container(docker_executable, "cat", EFFECTIVE_CONFIG)
     if result.returncode != 0:
@@ -99,22 +101,23 @@ def test_config_enforcement_allows_only_bonsai_local(
     except json.JSONDecodeError as error:
         pytest.fail(f"Violação de privacidade: config efetiva inválida: {error}")
 
+    spec = get_model_spec(local_model)
     providers = config.get("provider") if isinstance(config, dict) else None
     if not isinstance(providers, dict):
         pytest.fail(
             "Violação de privacidade: a config efetiva não declara "
-            "exatamente o provider bonsai-local."
+            "exatamente um provider local."
         )
-    if set(providers) != {"bonsai-local"}:
+    if set(providers) != {spec.provider}:
         pytest.fail(
             "Violação de privacidade: providers externos declarados na config "
             f"efetiva: {sorted(providers)}"
         )
-    provider = providers["bonsai-local"]
+    provider = providers[spec.provider]
     agent_config = config.get("agent") if isinstance(config, dict) else None
     options = provider.get("options") if isinstance(provider, dict) else None
     models = provider.get("models") if isinstance(provider, dict) else None
-    model_config = models.get("bonsai-27b") if isinstance(models, dict) else None
+    model_config = models.get(spec.model_id) if isinstance(models, dict) else None
     plan_config = agent_config.get("plan") if isinstance(agent_config, dict) else None
     build_config = agent_config.get("build") if isinstance(agent_config, dict) else None
     if (
@@ -122,18 +125,18 @@ def test_config_enforcement_allows_only_bonsai_local(
         or not isinstance(options, dict)
         or options.get("baseURL") != LOCAL_BASE_URL
         or not isinstance(models, dict)
-        or set(models) != {"bonsai-27b"}
+        or set(models) != {spec.model_id}
         or not isinstance(model_config, dict)
-        or model_config.get("name") != "Bonsai 27B 1-bit"
+        or model_config.get("name") != spec.display_name
         or not isinstance(agent_config, dict)
         or not isinstance(plan_config, dict)
-        or plan_config.get("model") != LOCAL_MODEL
+        or plan_config.get("model") != f"{spec.provider}/{spec.model_id}"
         or not isinstance(build_config, dict)
-        or build_config.get("model") != LOCAL_MODEL
+        or build_config.get("model") != f"{spec.provider}/{spec.model_id}"
     ):
         pytest.fail(
             "Violação de privacidade: a config efetiva não fixa exclusivamente "
-            "bonsai-local/bonsai-27b em host.docker.internal:8080/v1."
+            f"{spec.provider}/{spec.model_id} em host.docker.internal:8080/v1."
         )
 
 

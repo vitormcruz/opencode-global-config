@@ -204,9 +204,9 @@ No Windows, use o executável da virtualenv pelo PowerShell:
 
 ### Testes de integração (Camada 2)
 
-Os testes comportamentais do OpenCode usam exclusivamente o Bonsai local,
-servido pelo llama-server no WSL/Linux. Consulte a seção de pré-requisitos
-antes de executar a suíte.
+Os testes comportamentais do OpenCode usam o Bonsai local por padrão, servido
+pelo llama-server no WSL/Linux; o Qwen3-0.6B pode ser selecionado
+explicitamente. Consulte a seção de pré-requisitos antes de executar a suíte.
 
 #### Servidor local Bonsai
 
@@ -232,9 +232,16 @@ pytest reaproveita o processo e não o encerra. Para desligamento explícito:
 python3 tests/integration/model/bonsai_server.py --down
 ```
 
+O Bonsai continua sendo o modelo padrão. O experimento Qwen3-0.6B é selecionado
+explicitamente, sem alterar a configuração permanente:
+
 ```bash
-.venv/bin/pytest -m opencode
+.venv/bin/pytest -m opencode --local-model bonsai
+.venv/bin/pytest -m opencode --local-model qwen3-0.6b
 ```
+
+O Qwen usa o artefato fixado `Qwen3-0.6B-Q8_0.gguf` do repositório
+`Qwen/Qwen3-0.6B-GGUF`; o harness valida o SHA-256 antes de iniciar o servidor.
 
 Ao iniciar a suíte, a fixture session-scoped reutiliza o `llama-server` e sobe
 o container OpenCode na porta local `127.0.0.1:4196`. A rede dedicada valida

@@ -117,6 +117,28 @@ def test_prepare_empty_context_contains_no_repository_artifacts(
     assert not (context / "skills").exists()
 
 
+def test_prepare_qwen_context_selects_only_the_experiment_provider(
+    tmp_path: Path,
+) -> None:
+    repository = _repository(tmp_path)
+
+    context = prepare_test_context(
+        repository,
+        tmp_path / "qwen-context",
+        kind="empty",
+        model="qwen3-0.6b",
+    )
+
+    config = json.loads((context / "opencode.json").read_text(encoding="utf-8"))
+    assert set(config["provider"]) == {"qwen-local"}
+    assert config["provider"]["qwen-local"]["models"]["qwen3-0.6b"] == {
+        "name": "Qwen3 0.6B Q8_0",
+        "options": {"chat_template_kwargs": {"enable_thinking": False}},
+    }
+    assert config["agent"]["plan"]["model"] == "qwen-local/qwen3-0.6b"
+    assert config["agent"]["build"]["model"] == "qwen-local/qwen3-0.6b"
+
+
 def test_prepare_context_replaces_artifacts_in_a_reused_directory(
     tmp_path: Path,
 ) -> None:

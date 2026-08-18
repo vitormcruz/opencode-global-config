@@ -43,13 +43,13 @@ usado. Definir o provisionamento local e comprovar que, depois dele, o servidor
 não exige rede, telemetria, chave de API ou cloud handoff.
 
 **Acceptance criteria:**
-- [ ] A documentação registra origem, versão, licença e identificador do GGUF.
-- [ ] O Qwen e o runtime têm licença permissiva aceita e distribuição gratuita.
-- [ ] O provisionamento e a inferência posterior não permitem egress.
+- [x] A documentação registra origem, versão, licença e identificador do GGUF.
+- [x] O Qwen e o runtime têm licença permissiva aceita e distribuição gratuita.
+- [x] O provisionamento e a inferência posterior não permitem egress.
 
 **Verification:**
-- [ ] Revisão manual confirma as licenças nas fontes oficiais fixadas.
-- [ ] Teste de privacidade prova rede Docker interna e ausência de cloud handoff.
+- [x] Revisão manual confirma as licenças nas fontes oficiais fixadas.
+- [x] Teste de privacidade prova rede Docker interna e ausência de cloud handoff.
 
 **Dependencies:** None
 
@@ -71,13 +71,13 @@ permanece o caminho padrão e a execução experimental não pode alterar sua
 configuração permanente.
 
 **Acceptance criteria:**
-- [ ] Cada execução seleciona explicitamente Bonsai ou Qwen3-0.6B.
-- [ ] O teste confirma disponibilidade, tool calling e ausência de acesso externo.
-- [ ] O resultado contém candidato, versão fixada, duração total e status.
+- [x] Cada execução seleciona explicitamente Bonsai ou Qwen3-0.6B.
+- [x] O teste confirma disponibilidade, tool calling e ausência de acesso externo.
+- [x] O resultado contém candidato, versão fixada, duração total e status.
 
 **Verification:**
-- [ ] Testes unitários do controlador e da configuração temporária passam.
-- [ ] O teste de privacidade confirma rede Docker interna e endpoint local.
+- [x] Testes unitários do controlador e da configuração temporária passam.
+- [x] O teste de privacidade confirma rede Docker interna e endpoint local.
 
 **Dependencies:** Task 1
 
@@ -93,8 +93,8 @@ configuração permanente.
 
 ### Checkpoint: Pré-condições
 
-- [ ] Licença e modo offline foram aprovados antes de provisionar o Qwen.
-- [ ] Bonsai permanece disponível como fallback.
+- [x] Licença e modo offline foram aprovados antes de provisionar o Qwen.
+- [x] Bonsai permanece disponível como fallback.
 
 ### Phase 2: Compatibilização do Qwen
 
@@ -106,14 +106,14 @@ thinking e tool calling necessários para produzir respostas compatíveis com o
 provider `@ai-sdk/openai-compatible`.
 
 **Acceptance criteria:**
-- [ ] O servidor Qwen responde localmente a `/v1/models` e chat completions.
-- [ ] A chamada de ferramenta retornada é aceita pelo OpenCode.
-- [ ] Nenhum download ou chamada externa ocorre depois do provisionamento.
+- [x] O servidor Qwen responde localmente a `/v1/models` e chat completions.
+- [x] A chamada de ferramenta retornada é aceita pelo OpenCode.
+- [x] Nenhum download ou chamada externa ocorre depois do provisionamento.
 
 **Verification:**
-- [ ] Testes unitários validam artefato fixado, comando do servidor e modelo
+- [x] Testes unitários validam artefato fixado, comando do servidor e modelo
   exposto.
-- [ ] Smoke test no container chama o endpoint Qwen pelo gateway interno.
+- [x] Smoke test no container chama o endpoint Qwen pelo gateway interno.
 
 **Dependencies:** Task 2
 
@@ -129,9 +129,9 @@ provider `@ai-sdk/openai-compatible`.
 
 ### Checkpoint: Compatibilização do Qwen
 
-- [ ] Bonsai permanece disponível como fallback.
-- [ ] Qwen é selecionável sem modificar a configuração padrão.
-- [ ] Os endpoints e tool calls passam nos testes unitários e de smoke.
+- [x] Bonsai permanece disponível como fallback.
+- [x] Qwen é selecionável sem modificar a configuração padrão.
+- [x] Os endpoints e tool calls passam nos testes unitários e de smoke.
 
 ### Phase 3: Comparação comportamental
 
@@ -143,14 +143,14 @@ relevante e o candidato responsável; não mascarar falhas nem repetir por um
 período arbitrário.
 
 **Acceptance criteria:**
-- [ ] Há uma baseline Bonsai executada no mesmo ambiente antes da comparação.
-- [ ] O Qwen executa a suíte completa em configuração e processo
+- [x] Há uma baseline Bonsai executada no mesmo ambiente antes da comparação.
+- [x] O Qwen executa a suíte completa em configuração e processo
   isolados.
-- [ ] A evidência inclui duração total, contagem de testes e falhas.
+- [x] A evidência inclui duração total, contagem de testes e falhas.
 
 **Verification:**
-- [ ] `pytest -m opencode` é executado para Bonsai e Qwen.
-- [ ] Os testes de privacidade continuam aprovados em cada execução.
+- [x] `pytest -m opencode` é executado para Bonsai e Qwen.
+- [x] Os testes de privacidade continuam aprovados em cada execução.
 
 **Dependencies:** Task 3
 
@@ -165,9 +165,9 @@ período arbitrário.
 
 ### Checkpoint: Comparação comportamental
 
-- [ ] Todos os resultados têm baseline comparável.
-- [ ] Licença, isolamento e egress foram aprovados na pré-condição.
-- [ ] Falhas são registradas sem alterar o fallback Bonsai.
+- [x] Todos os resultados têm baseline comparável.
+- [x] Licença, isolamento e egress foram aprovados na pré-condição.
+- [x] Falhas são registradas sem alterar o fallback Bonsai.
 
 ### Phase 4: Decisão documentada
 
@@ -178,13 +178,13 @@ recomendado se aprovar 100% da suíte, não fizer egress/telemetria e reduzir ao
 menos 30% da duração. Caso nenhum passe, documentar a rejeição e manter Bonsai.
 
 **Acceptance criteria:**
-- [ ] A tabela final compara Bonsai e Qwen por duração e aprovação.
-- [ ] A decisão cita explicitamente cada gate e sua evidência.
-- [ ] O provider padrão continua Bonsai, independentemente do resultado.
+- [x] A tabela final compara Bonsai e Qwen por duração e aprovação.
+- [x] A decisão cita explicitamente cada gate e sua evidência.
+- [x] O provider padrão continua Bonsai, independentemente do resultado.
 
 **Verification:**
-- [ ] Revisão do relatório reproduz os cálculos do ganho percentual.
-- [ ] Diff da configuração padrão confirma que não houve substituição automática.
+- [x] Revisão do relatório reproduz os cálculos do ganho percentual.
+- [x] Diff da configuração padrão confirma que não houve substituição automática.
 
 **Dependencies:** Task 4
 
@@ -198,9 +198,9 @@ menos 30% da duração. Caso nenhum passe, documentar a rejeição e manter Bons
 
 ### Checkpoint: Complete
 
-- [ ] Todos os gates de D2 e D3 foram avaliados.
-- [ ] O Bonsai foi preservado como fallback e padrão.
-- [ ] A decisão está documentada e pronta para revisão humana.
+- [x] Todos os gates de D2 e D3 foram avaliados.
+- [x] O Bonsai foi preservado como fallback e padrão.
+- [x] A decisão está documentada e pronta para revisão humana.
 
 ## Risks and Mitigations
 
@@ -227,3 +227,38 @@ menos 30% da duração. Caso nenhum passe, documentar a rejeição e manter Bons
 - Estado: desbloqueado; registrar evidências no relatório e nos resultados dos
   testes.
 - Não foram alterados código, testes, configuração de provider ou histórico.
+
+### Registro de execução — bloqueio técnico
+
+- Data: 2026-08-18.
+- A licença Apache-2.0 do Qwen3-0.6B/GGUF e a licença MIT do runtime
+  `prism-b9596-9fcaed7` foram conferidas nas fontes oficiais.
+- O artefato Qwen foi fixado por repositório, commit, tamanho, LFS OID e Xet
+  hash; o download não foi realizado neste ambiente.
+- A execução foi bloqueada antes da alteração do harness porque Docker não está
+  disponível, `.venv\Scripts\pytest.exe` não existe, `pytest` não está instalado
+  no Python Windows e os caches Bonsai/Qwen estão ausentes.
+- JSON, sintaxe dos módulos de integração e provider atual Bonsai foram
+  verificados estaticamente.
+- Os gates de egress, `pytest -m opencode`, baseline, comparação Qwen e ganho de
+  duração permanecem não comprovados. O relatório completo está em
+  `docs/experimentos/modelos-locais.md`.
+- Decisão: manter Bonsai como padrão e fallback; não integrar Qwen nem Needle 2
+  e aguardar a correção do ambiente para retomar.
+
+### Registro de execução — conclusão no WSL
+
+- Data: 2026-08-18.
+- Pré-condições aprovadas antes do harness: licenças Apache-2.0/MIT, artefatos
+  Qwen e Bonsai provisionados, hashes conferidos e endpoint Qwen validado com
+  chat completion e tool calling.
+- O teste de privacidade passou 4/4 com Qwen e 4/4 com Bonsai, incluindo rede
+  Docker interna, endpoint local e bloqueio de acesso externo.
+- `pytest -m opencode --local-model bonsai`: 50 passed em 1560,50 s.
+- `pytest -m opencode --local-model qwen3-0.6b`: 50 passed em 558,70 s.
+- Ganho medido: 64,20%, acima do gate de 30%. Testes unitários do contrato:
+  51 passed.
+- O harness agora aceita seleção explícita por `--local-model`; Bonsai segue
+  como padrão e fallback. Não houve integração do Needle 2, substituição
+  automática de provider, commit ou push.
+- Relatório completo: `docs/experimentos/modelos-locais.md`.

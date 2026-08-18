@@ -18,17 +18,40 @@ def test_ensure_up_starts_the_container_without_model_selection(
 ) -> None:
     session = DockerSession()
     check_docker = Mock()
+    image_exists = Mock(return_value=False)
+    build_image = Mock()
     start_container = Mock()
     monkeypatch.setattr(session, "check_docker", check_docker)
     monkeypatch.setattr(session, "network_exists", lambda: True)
     monkeypatch.setattr(session, "network_is_internal", lambda: True)
     monkeypatch.setattr(session, "container_exists", lambda: True)
+    monkeypatch.setattr(session, "image_exists", image_exists)
+    monkeypatch.setattr(session, "build_image", build_image)
     monkeypatch.setattr(session, "start_container", start_container)
 
     session.ensure_up()
 
     check_docker.assert_called_once_with()
+    image_exists.assert_called_once_with()
+    build_image.assert_called_once_with()
     start_container.assert_called_once_with()
+
+
+def test_ensure_up_reuses_a_cached_image_without_rebuilding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = DockerSession()
+    session.check_docker = Mock()
+    session.ensure_test_network = Mock()
+    session.container_exists = Mock(return_value=False)
+    session.image_exists = Mock(return_value=True)
+    session.build_image = Mock()
+    session.start_container = Mock()
+
+    session.ensure_up()
+
+    session.build_image.assert_not_called()
+    session.start_container.assert_called_once_with()
 
 
 def test_cli_has_no_model_listing_action() -> None:

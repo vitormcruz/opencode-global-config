@@ -205,6 +205,12 @@ class DockerSession:
         )
         return result.returncode == 0 and self.container_name in result.stdout.split()
 
+    def image_exists(self) -> bool:
+        """Return whether the fixed test image is already available locally."""
+
+        result = self._run_docker("image", "inspect", self.image_name)
+        return result.returncode == 0
+
     def network_exists(self) -> bool:
         """Return whether the dedicated internal test network exists."""
 
@@ -603,7 +609,7 @@ class DockerSession:
             self.stop_proxy()
             self.remove_container_if_exists()
             self.build_image()
-        elif not self.container_exists():
+        elif not self.image_exists():
             self.build_image()
 
         self.start_container()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import json
 import shutil
 import tarfile
 import time
@@ -13,7 +14,12 @@ from urllib.error import URLError
 import pytest
 
 import bonsai_server
-from bonsai_server import BonsaiServer, BonsaiServerError
+from bonsai_server import (
+    MODEL_SPECS,
+    BonsaiServer,
+    BonsaiServerError,
+    get_model_spec,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -51,6 +57,43 @@ def test_model_paths_use_the_fixed_cache_layout(tmp_path: Path) -> None:
     assert server.model_path == tmp_path / "Bonsai-27B-Q1_0.gguf"
     assert not hasattr(server, "mmproj_path")
     assert server.endpoint_url == "http://127.0.0.1:8080"
+
+
+def test_qwen_model_contract_is_fixed_to_the_approved_gguf() -> None:
+    spec = get_model_spec("qwen3-0.6b")
+
+    assert spec is MODEL_SPECS["qwen3-0.6b"]
+    assert spec.repository == "Qwen/Qwen3-0.6B-GGUF"
+    assert spec.file_name == "Qwen3-0.6B-Q8_0.gguf"
+    assert spec.provider == "qwen-local"
+    assert spec.model_id == "qwen3-0.6b"
+    assert spec.sha256 == (
+        "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+    )
+
+
+def test_qwen_artifact_checksum_is_enforced(tmp_path: Path) -> None:
+    server = BonsaiServer(model="qwen3-0.6b", cache_dir=tmp_path)
+    server.model_path.write_bytes(b"not-the-qwen-artifact")
+
+    with pytest.raises(BonsaiServerError, match="Checksum SHA-256"):
+        server._ensure_model_files()
+
+
+@pytest.mark.parametrize("exposed_model", ["Qwen3-0.6B-Q8_0.gguf", "other.gguf"])
+def test_endpoint_identity_is_checked_before_reusing_server(
+    monkeypatch: pytest.MonkeyPatch,
+    exposed_model: str,
+) -> None:
+    server = BonsaiServer(model="qwen3-0.6b")
+    response = MagicMock()
+    response.read.return_value = json.dumps(
+        {"data": [{"id": exposed_model}]}
+    ).encode("utf-8")
+    response.__enter__.return_value = response
+    monkeypatch.setattr(bonsai_server, "urlopen", lambda *args, **kwargs: response)
+
+    assert server._endpoint_matches_model() is (exposed_model == server.model_spec.file_name)
 
 
 @pytest.mark.parametrize(
@@ -306,6 +349,7 @@ def test_ensure_up_reuses_an_available_server_without_starting_process(
 ) -> None:
     server = BonsaiServer(cache_dir=tmp_path)
     server.require_available = Mock()
+    server._endpoint_matches_model = Mock(return_value=True)
     server._start_process = Mock(side_effect=AssertionError("server must be reused"))
 
     result = server.ensure_up()
@@ -331,11 +375,78 @@ def test_ensure_up_reuses_server_after_slow_health_response(
 
     monkeypatch.setattr(bonsai_server, "urlopen", slow_urlopen)
     server._start_process = start_process
+    server._endpoint_matches_model = Mock(return_value=True)
 
     result = server.ensure_up()
 
     assert result is server
     start_process.assert_not_called()
+
+
+def test_ensure_up_reconciles_an_owned_server_with_a_different_model(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = BonsaiServer(cache_dir=tmp_path)
+    process = FakeProcess()
+    server.require_available = Mock()
+    server._endpoint_matches_model = Mock(return_value=False)
+    server._read_pid = Mock(return_value=process.pid)
+    server._pid_file_process_is_owned = Mock(return_value=True)
+    server._pid_is_alive = Mock(return_value=False)
+    server._endpoint_responds = Mock(return_value=False)
+    server._find_executable = Mock(return_value="llama-server")
+    server._ensure_model_files = Mock()
+    server._start_process = Mock(return_value=process)
+    server._wait_until_ready = Mock()
+    kill = Mock()
+    monkeypatch.setattr(bonsai_server.os, "kill", kill)
+
+    server.ensure_up()
+
+    kill.assert_called_once_with(process.pid, bonsai_server.signal.SIGTERM)
+    server._start_process.assert_called_once_with("llama-server")
+
+
+def test_ensure_up_does_not_kill_or_start_over_an_unowned_server(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = BonsaiServer(cache_dir=tmp_path)
+    server.require_available = Mock()
+    server._endpoint_matches_model = Mock(return_value=False)
+    server._read_pid = Mock(return_value=12345)
+    server._pid_file_process_is_owned = Mock(return_value=False)
+    server._start_process = Mock(
+        side_effect=AssertionError("não deve iniciar sobre porta ocupada")
+    )
+    kill = Mock()
+    monkeypatch.setattr(bonsai_server.os, "kill", kill)
+
+    with pytest.raises(BonsaiServerError, match="não pertence"):
+        server.ensure_up()
+
+    server._pid_file_process_is_owned.assert_called_once_with(12345)
+    kill.assert_not_called()
+
+
+def test_pid_file_ownership_requires_a_known_llama_server_command(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = BonsaiServer(cache_dir=tmp_path)
+    server._pid_is_alive = Mock(return_value=True)
+    command = (
+        f"/opt/llama-server\0--model\0{server.model_path}\0"
+        f"--host\0{server.bind_host}\0--port\0{server.port}\0"
+    ).encode("utf-8")
+    monkeypatch.setattr(Path, "read_bytes", Mock(return_value=command))
+
+    assert server._pid_file_process_is_owned(12345)
+
+    foreign_command = b"/usr/bin/python\0--model\0" + str(server.model_path).encode()
+    monkeypatch.setattr(Path, "read_bytes", Mock(return_value=foreign_command))
+    assert not server._pid_file_process_is_owned(12345)
 
 
 def test_ensure_up_downloads_missing_files_and_waits_for_readiness(
@@ -514,7 +625,7 @@ def test_cli_actions_are_available(
     attribute: str,
 ) -> None:
     fake = FakeCliServer()
-    monkeypatch.setattr(bonsai_server, "BonsaiServer", lambda: fake)
+    monkeypatch.setattr(bonsai_server, "BonsaiServer", lambda **_: fake)
 
     assert bonsai_server.main(arguments) == 0
     assert getattr(fake, attribute) == 1

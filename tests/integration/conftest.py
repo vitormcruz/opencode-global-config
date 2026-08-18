@@ -33,6 +33,7 @@ def isolated_opencode(
     repo_root: Path,
     isolated_opencode_session: DockerSession,
     monkeypatch: pytest.MonkeyPatch,
+    local_model: str,
 ) -> Iterator[OpenCodeClient]:
     """Run OpenCode against only the artifacts declared by the current test."""
 
@@ -51,6 +52,7 @@ def isolated_opencode(
         isolated_opencode_session.context_dir,
         kind=kind,
         name=name,
+        model=local_model,
     )
     try:
         if isolated_opencode_session.container_running():
@@ -91,10 +93,10 @@ def isolated_opencode_session(
 
 
 @pytest.fixture(scope="session")
-def bonsai_server() -> Iterator[BonsaiServer]:
-    """Start or reuse Bonsai once for every OpenCode integration test."""
+def bonsai_server(local_model: str) -> Iterator[BonsaiServer]:
+    """Start or reuse the selected local model for every OpenCode test."""
 
-    server = BonsaiServer()
+    server = BonsaiServer(model=local_model)
     try:
         server.ensure_up()
     except BonsaiServerError as error:
@@ -109,10 +111,21 @@ def bonsai_server() -> Iterator[BonsaiServer]:
 
 
 @pytest.fixture(scope="session")
-def docker_session(bonsai_server: BonsaiServer) -> Iterator[DockerSession]:
-    """Start OpenCode after Bonsai is available and stop only the container."""
+def docker_session(
+    bonsai_server: BonsaiServer,
+    repo_root: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    local_model: str,
+) -> Iterator[DockerSession]:
+    """Start OpenCode with the selected model and stop only the container."""
 
-    session = DockerSession()
+    context_dir = prepare_test_context(
+        repo_root,
+        tmp_path_factory.mktemp("opencode-shared-context"),
+        kind="empty",
+        model=local_model,
+    )
+    session = DockerSession(repo_root=repo_root, context_dir=context_dir)
     try:
         session.ensure_up()
     except ContainerTestError as error:
