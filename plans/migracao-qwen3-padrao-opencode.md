@@ -188,3 +188,8 @@ apos revisao cruzada entre documentacao e codigo.
 ## Open Questions
 
 - Nenhuma para a implementacao.
+
+## Execution Roles
+
+- **Executor:** `gpt-5.6-luna`.
+- **Revisor independente:** `gpt-5.6-terra`.
