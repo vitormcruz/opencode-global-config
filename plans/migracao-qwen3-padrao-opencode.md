@@ -31,8 +31,91 @@ verificado em cache, a execucao permanece offline.
   integracao, as decisoes Bonsai do ADR-0002, sem reescrever o historico
   daquela decisao. O rollback e `git revert` do conjunto de migracao, nao uma
   opcao suportada do harness.
+- **D7 - Runtime OpenMP user-space:** o bootstrap WSL/Linux provisionara a
+  `libgomp.so.1` em cache do usuario com origem, versao e checksum fixados. O
+  harness usara essa runtime para iniciar o Prism sem `sudo`, `apt` ou
+  `LD_LIBRARY_PATH`; a execucao sera offline apos o provisionamento.
+- **D8 - Falha orientada para acao:** se o teste nao encontrar uma runtime
+  valida, deve falhar antes de subir o Prism, informar a dependencia ausente e
+  orientar a executar o bootstrap. Instalacao manual so e necessaria quando o
+  bootstrap reportar falha acionavel de download, integridade ou plataforma.
 
 ## Task List
+
+### Phase 0: Runtime nativa do Prism
+
+## Task 0: Provisionar runtime OpenMP no bootstrap
+
+**Description:** Estender o bootstrap para WSL/Linux a fim de provisionar uma
+runtime OpenMP autocontida no cache do usuario. Fixar a origem, versao,
+checksum, arquitetura e termos de redistribuicao da `libgomp.so.1`, sem
+alteracao global do sistema.
+
+**Acceptance criteria:**
+- [ ] O bootstrap identifica a ausencia da runtime, baixa somente o artefato
+  fixado para o cache do usuario e valida sua integridade.
+- [ ] O bootstrap nao usa `sudo`, `apt`, instalacao global ou modificacao de
+  bibliotecas do sistema.
+- [ ] A documentacao inclui origem, licenca GPLv3 com GCC Runtime Library
+  Exception, avisos de redistribuicao e o limite de plataforma WSL/Linux.
+
+**Verification:**
+- [ ] Executar testes unitarios do registro, download, checksum e erro de
+  runtime ausente com stubs, sem acesso externo.
+- [ ] Em WSL/Linux, executar o bootstrap e confirmar que o Prism inicia sem
+  dependencia de `libgomp1` instalada globalmente.
+- [ ] Repetir `.venv/bin/pytest -m opencode` com cache provisionado e sem novo
+  download.
+
+**Dependencies:** None.
+
+**Files likely touched:**
+- `src/opencode_config/bootstrap/`
+- `tests/bootstrap/`
+- `README.md`
+
+**Estimated scope:** M (3-5 files).
+
+**Local commit checkpoint:** `feat(bootstrap): provisiona runtime openmp local`
+apos testes unitarios e validacao WSL/Linux.
+
+## Task 0.1: Integrar runtime OpenMP ao servidor local
+
+**Description:** Fazer o harness localizar e validar a runtime provisionada
+antes de iniciar Prism. A inicializacao deve usar a copia cacheada sem
+`LD_LIBRARY_PATH`; se estiver ausente, invalida ou incompativel, a falha deve
+informar a dependencia e o comando de bootstrap a executar.
+
+**Acceptance criteria:**
+- [ ] O servidor nao inicia Prism sem runtime OpenMP valida.
+- [ ] A mensagem de erro informa o caminho esperado e como provisionar.
+- [ ] A inicializacao usa a runtime cacheada sem mutar bibliotecas do sistema,
+  variaveis globais ou timeouts.
+
+**Verification:**
+- [ ] Executar testes unitarios do caminho com runtime valida, ausente e
+  checksum invalido.
+- [ ] Em WSL/Linux, confirmar que Prism inicia usando apenas o cache
+  provisionado.
+
+**Dependencies:** Task 0.
+
+**Files likely touched:**
+- `tests/integration/model/local_model_server.py`
+- `tests/integration/model/test_local_model_server.py`
+- `tests/integration/conftest.py`
+
+**Estimated scope:** S (3 files).
+
+**Local commit checkpoint:** `fix(integracao): carrega runtime openmp local`
+apos os testes unitarios e o smoke WSL/Linux.
+
+### Checkpoint: Runtime nativa
+
+- [ ] A runtime e obtida somente pelo bootstrap WSL/Linux e funciona do cache.
+- [ ] A ausencia dela falha com instrucao clara, sem tentar inferencia.
+- [ ] A conformidade de licenca e redistribuicao foi revisada antes de baixar
+  qualquer artefato.
 
 ### Phase 1: Contrato padrao e provisionamento
 
@@ -53,7 +136,7 @@ modulos versionados que ainda citam Bonsai com `git mv`.
 - [ ] Executar os testes unitarios do seletor, contexto e provider local.
 - [ ] Inspecionar a configuracao gerada e confirmar que declara somente Qwen.
 
-**Dependencies:** None.
+**Dependencies:** Task 0.1.
 
 **Files likely touched:**
 - `tests/conftest.py`
@@ -84,7 +167,7 @@ do llama-server.
   `tests/integration/model/`, `tests/integration/test_integration_context.py`
   e `tests/integration/docker/test_local_provider.py`.
 
-**Dependencies:** Task 1.
+**Dependencies:** Tasks 0.1-1.
 
 **Files likely touched:**
 - `tests/integration/model/test_bonsai_server.py` -> `test_local_model_server.py`
@@ -120,7 +203,7 @@ rede interna e bloqueio de egress.
 **Verification:**
 - [ ] Executar `.venv/bin/pytest -m opencode` no WSL/Linux com Docker.
 
-**Dependencies:** Tasks 1-2.
+**Dependencies:** Tasks 0.1-2.
 
 **Files likely touched:**
 - `tests/integration/test_privacy_enforcement.py`
@@ -152,7 +235,7 @@ fora de escopo.
 - [ ] Conferir que nao ha instrucao de cloud, telemetria, Needle 2 ou alteracao
   de timeout.
 
-**Dependencies:** Tasks 1-3.
+**Dependencies:** Tasks 0.1-3.
 
 **Files likely touched:**
 - `README.md`
@@ -168,6 +251,8 @@ apos revisao cruzada entre documentacao e codigo.
 
 - [ ] No WSL/Linux com Docker, `.venv/bin/pytest -m opencode` passa com Qwen
   padrao.
+- [ ] O bootstrap WSL/Linux provisiona a runtime OpenMP cacheada necessaria
+  sem instalacao manual em uma maquina compativel.
 - [ ] Os quatro testes de privacidade passam com Qwen.
 - [ ] O cache permite repetir as execucoes sem download; nao ha egress em
   runtime, telemetria ou handoff em cloud.
@@ -181,6 +266,8 @@ apos revisao cruzada entre documentacao e codigo.
 | Referencia Bonsai permanecer ativa | Medio | Buscar seletor, specs, docs e modulos antigos apos a remocao. |
 | Regressao de isolamento ao inverter provider | Alto | Executar enforcement de config, endpoint e rede para Qwen. |
 | Cache ausente exigir rede | Medio | Separar provisionamento explicito da execucao e documentar a repeticao offline. |
+| Runtime OpenMP nao carregar do cache | Alto | Validar integridade e carregamento antes de iniciar Prism; falhar com instrucao de bootstrap. |
+| Redistribuicao inadequada da libgomp | Alto | Fixar origem e versao, registrar GPLv3 + Runtime Exception e incluir avisos exigidos. |
 | Endpoint antigo Qwen/Bonsai ocupar a porta | Medio | Preservar a reconciliacao segura por identidade existente; nao matar processo externo. |
 | Rollback urgente | Baixo | Reverter o commit da migracao; Bonsai nao permanece como caminho operacional. |
 | Alterar acidentalmente a politica de timeout | Medio | Tratar constantes e argumentos atuais como invariantes e revisar o diff. |
@@ -199,4 +286,5 @@ apos revisao cruzada entre documentacao e codigo.
 - **Gate obrigatório:** no WSL/Linux com Docker, executar
   `.venv/bin/pytest -m opencode`.
 - **Evidência requerida:** resultado da suíte, incluindo os quatro controles de
-  privacidade, sem provisionamento via bootstrap e sem alteração de timeout.
+  privacidade, com runtime provisionada pelo bootstrap e sem alteracao de
+  timeout.
