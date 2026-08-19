@@ -4,7 +4,7 @@
         "@slkiser/opencode-quota"
     ],
     "compaction": {
-        "auto": false,
+        "auto": true,
         "prune": true,
         "reserved": 10000
     },
