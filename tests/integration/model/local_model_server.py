@@ -1,4 +1,4 @@
-"""Provision and manage the local Bonsai model server.
+"""Provision and manage the local Qwen3-0.6B model server.
 
 The utility intentionally uses only Python's standard library.  The model is
 downloaded once to the user's cache and the llama-server process can be reused
@@ -27,10 +27,15 @@ from typing import BinaryIO
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
+from opencode_config.bootstrap.libgomp import (
+    runtime_directory,
+    runtime_validation_error,
+)
+
 
 @dataclass(frozen=True)
 class LocalModelSpec:
-    """Fixed artifact and OpenCode contract for one local model candidate."""
+    """Fixed artifact and OpenCode contract for the Qwen3-0.6B model."""
 
     name: str
     repository: str
@@ -45,31 +50,21 @@ class LocalModelSpec:
         return f"https://huggingface.co/{self.repository}/resolve/main"
 
 
-DEFAULT_MODEL = "bonsai"
-MODEL_SPECS = {
-    "bonsai": LocalModelSpec(
-        name="bonsai",
-        repository="prism-ml/Bonsai-27B-gguf",
-        file_name="Bonsai-27B-Q1_0.gguf",
-        provider="bonsai-local",
-        model_id="bonsai-27b",
-        display_name="Bonsai 27B 1-bit",
+MODEL_SPEC = LocalModelSpec(
+    name="qwen3-0.6b",
+    repository="Qwen/Qwen3-0.6B-GGUF",
+    file_name="Qwen3-0.6B-Q8_0.gguf",
+    provider="qwen-local",
+    model_id="qwen3-0.6b",
+    display_name="Qwen3 0.6B Q8_0",
+    sha256=(
+        "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
     ),
-    "qwen3-0.6b": LocalModelSpec(
-        name="qwen3-0.6b",
-        repository="Qwen/Qwen3-0.6B-GGUF",
-        file_name="Qwen3-0.6B-Q8_0.gguf",
-        provider="qwen-local",
-        model_id="qwen3-0.6b",
-        display_name="Qwen3 0.6B Q8_0",
-        sha256=(
-            "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
-        ),
-    ),
-}
-MODEL_REPOSITORY = MODEL_SPECS[DEFAULT_MODEL].repository
-MODEL_FILE = MODEL_SPECS[DEFAULT_MODEL].file_name
-MODEL_BASE_URL = MODEL_SPECS[DEFAULT_MODEL].base_url
+)
+DEFAULT_MODEL = MODEL_SPEC.model_id
+MODEL_REPOSITORY = MODEL_SPEC.repository
+MODEL_FILE = MODEL_SPEC.file_name
+MODEL_BASE_URL = MODEL_SPEC.base_url
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "opencode-config" / "models"
 LLAMA_RELEASE_TAG = "prism-b9596-9fcaed7"
 LLAMA_RELEASE_BASE_URL = (
@@ -90,31 +85,17 @@ DOWNLOAD_TIMEOUT_SECONDS = 600
 LOCAL_REQUEST_TIMEOUT_SECONDS = 600
 
 
-class BonsaiServerError(RuntimeError):
-    """Raised when the local Bonsai server cannot be provisioned or reached."""
-
-
-def get_model_spec(model: str) -> LocalModelSpec:
-    """Return the fixed local-model contract selected by the caller."""
-
-    try:
-        return MODEL_SPECS[model]
-    except KeyError as error:
-        supported = ", ".join(sorted(MODEL_SPECS))
-        raise BonsaiServerError(
-            f"Modelo local desconhecido: {model}. Use: {supported}."
-        ) from error
+class LocalModelServerError(RuntimeError):
+    """Raised when the local Qwen server cannot be provisioned or reached."""
 
 
 def _log(message: str) -> None:
-    print(f"[bonsai-server] {message}")
+    print(f"[qwen-server] {message}")
 
 
 @dataclass
-class BonsaiServer:
-    """Manage a persistent llama-server process for one fixed local model."""
-
-    model: str = DEFAULT_MODEL
+class LocalModelServer:
+    """Manage a persistent llama-server process for the fixed Qwen model."""
     cache_dir: Path = field(
         default_factory=lambda: Path.home() / ".cache" / "opencode-config" / "models"
     )
@@ -137,15 +118,15 @@ class BonsaiServer:
 
     @property
     def model_path(self) -> Path:
-        """Return the fixed path of the selected model weights."""
+        """Return the fixed path of the Qwen model weights."""
 
-        return self.cache_dir / get_model_spec(self.model).file_name
+        return self.cache_dir / MODEL_SPEC.file_name
 
     @property
     def model_spec(self) -> LocalModelSpec:
-        """Return the selected model's immutable contract."""
+        """Return the immutable Qwen model contract."""
 
-        return get_model_spec(self.model)
+        return MODEL_SPEC
 
     @property
     def pid_path(self) -> Path:
@@ -177,15 +158,15 @@ class BonsaiServer:
                 with temporary_path.open("wb") as output:
                     self._copy_response(response, output)
             if temporary_path.stat().st_size == 0:
-                raise BonsaiServerError(f"Download vazio recebido de {url}")
+                raise LocalModelServerError(f"Download vazio recebido de {url}")
             os.replace(temporary_path, destination)
-        except BonsaiServerError:
+        except LocalModelServerError:
             self._remove_if_exists(temporary_path)
             raise
         except (HTTPError, OSError, TimeoutError, URLError) as error:
             self._remove_if_exists(temporary_path)
-            raise BonsaiServerError(
-                f"Falha ao baixar o artefato do Bonsai: {url}\n"
+            raise LocalModelServerError(
+                f"Falha ao baixar o artefato do Qwen: {url}\n"
                 "Verifique a conectividade e tente novamente."
             ) from error
 
@@ -229,7 +210,7 @@ class BonsaiServer:
     def _select_llama_asset(cls) -> str:
         architecture = platform.machine().lower()
         if architecture not in {"x86_64", "amd64"}:
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"Arquitetura Linux não suportada para o llama-server: {architecture}."
             )
 
@@ -321,7 +302,7 @@ class BonsaiServer:
         for member in members:
             target = (destination / member.name).resolve()
             if target != root and root not in target.parents:
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"Arquivo inseguro no pacote do llama-server: {member.name}"
                 )
             if member.isdir():
@@ -331,7 +312,7 @@ class BonsaiServer:
                 target.parent.mkdir(parents=True, exist_ok=True)
                 source = archive.extractfile(member)
                 if source is None:
-                    raise BonsaiServerError(
+                    raise LocalModelServerError(
                         "Não foi possível extrair o arquivo do llama-server: "
                         f"{member.name}"
                     )
@@ -342,7 +323,7 @@ class BonsaiServer:
             if member.issym() or member.islnk():
                 link_members.append(member)
                 continue
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"Tipo de arquivo não suportado no pacote do llama-server: "
                 f"{member.name}"
             )
@@ -350,30 +331,30 @@ class BonsaiServer:
         for member in link_members:
             target = (destination / member.name).resolve()
             if target.exists() or target.is_symlink():
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"Arquivo duplicado no pacote do llama-server: {member.name}"
                 )
             target.parent.mkdir(parents=True, exist_ok=True)
             link_target = Path(member.linkname)
             if member.issym():
                 if link_target.is_absolute():
-                    raise BonsaiServerError(
+                    raise LocalModelServerError(
                         f"Link absoluto no pacote do llama-server: {member.name}"
                     )
                 resolved_link = (target.parent / link_target).resolve()
                 if resolved_link != root and root not in resolved_link.parents:
-                    raise BonsaiServerError(
+                    raise LocalModelServerError(
                         f"Link inseguro no pacote do llama-server: {member.name}"
                     )
                 target.symlink_to(member.linkname)
                 continue
             resolved_link = (destination / link_target).resolve()
             if resolved_link != root and root not in resolved_link.parents:
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"Hard link inseguro no pacote do llama-server: {member.name}"
                 )
             if not resolved_link.is_file() or resolved_link.is_symlink():
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"Destino ausente para hard link do llama-server: {member.name}"
                 )
             target.hardlink_to(resolved_link)
@@ -398,7 +379,7 @@ class BonsaiServer:
                 self._safe_extract(archive, extraction_dir)
             binary = self._find_binary(extraction_dir)
             if binary is None:
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     "O pacote do llama-server não contém um executável "
                     "`llama-server`."
                 )
@@ -407,7 +388,7 @@ class BonsaiServer:
             os.replace(extraction_dir, self.llama_cache_dir)
             binary = self._find_binary(self.llama_cache_dir)
             if binary is None:
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     "O executável `llama-server` desapareceu após a instalação."
                 )
             binary.chmod(binary.stat().st_mode | stat.S_IXUSR)
@@ -420,10 +401,10 @@ class BonsaiServer:
                 encoding="ascii",
             )
             return str(binary)
-        except BonsaiServerError:
+        except LocalModelServerError:
             raise
         except (OSError, tarfile.TarError, ValueError) as error:
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"Falha ao instalar o binário do llama-server a partir de {url}."
             ) from error
         finally:
@@ -482,7 +463,7 @@ class BonsaiServer:
             return
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if digest != spec.sha256:
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"Checksum SHA-256 inválido para {spec.file_name}: {digest}."
             )
 
@@ -506,13 +487,68 @@ class BonsaiServer:
             str(IDLE_SECONDS),
         ]
 
+    @staticmethod
+    def _dynamic_loader() -> Path:
+        if platform.machine().lower() not in {"x86_64", "amd64"}:
+            raise LocalModelServerError(
+                "O carregador ELF da runtime Prism suporta somente Linux x86_64."
+            )
+        candidates = (
+            Path("/lib64/ld-linux-x86-64.so.2"),
+            Path("/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"),
+        )
+        for candidate in candidates:
+            if candidate.is_file():
+                return candidate
+        raise LocalModelServerError(
+            "Carregador ELF ld-linux-x86-64.so.2 ausente; "
+            "execute o bootstrap em uma distribuicao Linux/WSL suportada."
+        )
+
+    def _ensure_libgomp_runtime(self) -> Path:
+        error = runtime_validation_error()
+        if error is not None:
+            raise LocalModelServerError(
+                "Dependencia libgomp.so.1 ausente, invalida ou incompativel "
+                f"({error}).\n"
+                "Execute o bootstrap WSL/Linux para provisionar a runtime "
+                "user-space:\n"
+                "  opencode-bootstrap --yes"
+            )
+        return runtime_directory()
+
+    def _launch_command(self, executable: str) -> list[str]:
+        """Use the ELF interpreter's library path, never LD_LIBRARY_PATH."""
+
+        runtime = self._ensure_libgomp_runtime()
+        system_paths = (
+            Path(executable).resolve().parent,
+            Path("/lib/x86_64-linux-gnu"),
+            Path("/usr/lib/x86_64-linux-gnu"),
+            Path("/lib64"),
+            Path("/usr/lib64"),
+        )
+        library_paths = [
+            str(path)
+            for path in (runtime, *system_paths)
+            if path.is_dir()
+        ]
+        return [
+            str(self._dynamic_loader()),
+            "--library-path",
+            ":".join(library_paths),
+            executable,
+            *self._command(executable)[1:],
+        ]
+
     def _start_process(self, executable: str) -> subprocess.Popen[bytes]:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         process = subprocess.Popen(
-            self._command(executable),
+            self._launch_command(executable),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
+            cwd=Path(executable).resolve().parent,
             start_new_session=True,
         )
         self.pid_path.write_text(str(process.pid), encoding="ascii")
@@ -530,10 +566,10 @@ class BonsaiServer:
 
         if self._endpoint_responds():
             return
-        raise BonsaiServerError(
+        raise LocalModelServerError(
             f"llama-server nao esta disponivel em {self._models_url()}.\n"
             "Suba o servidor localmente antes dos testes:\n"
-            "  python3 tests/integration/model/bonsai_server.py --up"
+            "  python3 tests/integration/model/local_model_server.py --up"
         )
 
     def _endpoint_matches_model(self) -> bool:
@@ -580,9 +616,7 @@ class BonsaiServer:
 
         model_path = Path(model_argument).resolve()
         cache_dir = self.cache_dir.resolve()
-        known_model_paths = {
-            (cache_dir / spec.file_name).resolve() for spec in MODEL_SPECS.values()
-        }
+        known_model_paths = {(cache_dir / MODEL_SPEC.file_name).resolve()}
         return (
             model_path in known_model_paths
             and port_argument == str(self.port)
@@ -597,19 +631,19 @@ class BonsaiServer:
         else:
             pid = self._read_pid()
             if pid is None or not self._pid_file_process_is_owned(pid):
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"llama-server expõe outro modelo em {self._models_url()}, "
                     "mas o processo não pertence a este harness; "
                     "não será encerrado nem substituído."
                 )
             if not self._terminate_pid_file_process():
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     "Não foi possível reconciliar o llama-server persistido "
                     "com segurança."
                 )
 
         if self._endpoint_responds():
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"A porta {self.port} continua ocupada após encerrar o "
                 "llama-server pertencente ao harness."
             )
@@ -619,21 +653,21 @@ class BonsaiServer:
             if self._endpoint_responds():
                 return
             if self._process is not None and self._process.poll() is not None:
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     "llama-server encerrou antes de responder a /v1/models."
                 )
             time.sleep(self.ready_interval)
-        raise BonsaiServerError(
+        raise LocalModelServerError(
             f"llama-server nao respondeu em {self._models_url()} apos "
             f"{int(self.ready_retries * self.ready_interval)}s."
         )
 
-    def ensure_up(self) -> BonsaiServer:
+    def ensure_up(self) -> LocalModelServer:
         """Reuse a running server or download and start one."""
 
         try:
             self.require_available()
-        except BonsaiServerError:
+        except LocalModelServerError:
             pass
         else:
             if self._endpoint_matches_model():
@@ -646,7 +680,7 @@ class BonsaiServer:
         self._owns_process = True
         try:
             self._wait_until_ready()
-        except BonsaiServerError:
+        except LocalModelServerError:
             self.stop()
             raise
         _log(f"llama-server disponivel em {self._models_url()}")
@@ -686,7 +720,7 @@ class BonsaiServer:
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError as error:
-            raise BonsaiServerError(
+            raise LocalModelServerError(
                 f"Nao foi possivel encerrar o llama-server (PID {pid})."
             ) from error
         self._remove_if_exists(self.pid_path)
@@ -712,7 +746,7 @@ class BonsaiServer:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Gerencia o llama-server local do Bonsai 27B."
+        description="Gerencia o llama-server local do Qwen3-0.6B."
     )
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument("--up", action="store_true", help="Baixa e sobe o servidor.")
@@ -722,20 +756,14 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Verifica se o endpoint local esta respondendo.",
     )
-    parser.add_argument(
-        "--model",
-        choices=sorted(MODEL_SPECS),
-        default=DEFAULT_MODEL,
-        help="Modelo local fixado para o servidor.",
-    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the Bonsai server command-line utility."""
+    """Run the Qwen server command-line utility."""
 
     args = _parser().parse_args(argv)
-    server = BonsaiServer(model=args.model)
+    server = LocalModelServer()
     try:
         if args.up:
             server.ensure_up()
@@ -745,12 +773,12 @@ def main(argv: list[str] | None = None) -> int:
             print("OK: llama-server encerrado.")
         elif args.status:
             if not server.status():
-                raise BonsaiServerError(
+                raise LocalModelServerError(
                     f"llama-server nao esta disponivel em {server._models_url()}."
                 )
             print(f"OK: llama-server disponivel em {server._models_url()}")
-    except BonsaiServerError as error:
-        print(f"[bonsai-server] ERROR: {error}", file=sys.stderr)
+    except LocalModelServerError as error:
+        print(f"[qwen-server] ERROR: {error}", file=sys.stderr)
         return 1
     return 0
 

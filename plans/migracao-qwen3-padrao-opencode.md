@@ -52,19 +52,19 @@ checksum, arquitetura e termos de redistribuicao da `libgomp.so.1`, sem
 alteracao global do sistema.
 
 **Acceptance criteria:**
-- [ ] O bootstrap identifica a ausencia da runtime, baixa somente o artefato
+- [x] O bootstrap identifica a ausencia da runtime, baixa somente o artefato
   fixado para o cache do usuario e valida sua integridade.
-- [ ] O bootstrap nao usa `sudo`, `apt`, instalacao global ou modificacao de
+- [x] O bootstrap nao usa `sudo`, `apt`, instalacao global ou modificacao de
   bibliotecas do sistema.
-- [ ] A documentacao inclui origem, licenca GPLv3 com GCC Runtime Library
+- [x] A documentacao inclui origem, licenca GPLv3 com GCC Runtime Library
   Exception, avisos de redistribuicao e o limite de plataforma WSL/Linux.
 
 **Verification:**
-- [ ] Executar testes unitarios do registro, download, checksum e erro de
+- [x] Executar testes unitarios do registro, download, checksum e erro de
   runtime ausente com stubs, sem acesso externo.
-- [ ] Em WSL/Linux, executar o bootstrap e confirmar que o Prism inicia sem
+- [x] Em WSL/Linux, executar o bootstrap e confirmar que o Prism inicia sem
   dependencia de `libgomp1` instalada globalmente.
-- [ ] Repetir `.venv/bin/pytest -m opencode` com cache provisionado e sem novo
+- [x] Repetir `.venv/bin/pytest -m opencode` com cache provisionado e sem novo
   download.
 
 **Dependencies:** None.
@@ -87,15 +87,15 @@ antes de iniciar Prism. A inicializacao deve usar a copia cacheada sem
 informar a dependencia e o comando de bootstrap a executar.
 
 **Acceptance criteria:**
-- [ ] O servidor nao inicia Prism sem runtime OpenMP valida.
-- [ ] A mensagem de erro informa o caminho esperado e como provisionar.
-- [ ] A inicializacao usa a runtime cacheada sem mutar bibliotecas do sistema,
+- [x] O servidor nao inicia Prism sem runtime OpenMP valida.
+- [x] A mensagem de erro informa o caminho esperado e como provisionar.
+- [x] A inicializacao usa a runtime cacheada sem mutar bibliotecas do sistema,
   variaveis globais ou timeouts.
 
 **Verification:**
-- [ ] Executar testes unitarios do caminho com runtime valida, ausente e
+- [x] Executar testes unitarios do caminho com runtime valida, ausente e
   checksum invalido.
-- [ ] Em WSL/Linux, confirmar que Prism inicia usando apenas o cache
+- [x] Em WSL/Linux, confirmar que Prism inicia usando apenas o cache
   provisionado.
 
 **Dependencies:** Task 0.
@@ -112,9 +112,9 @@ apos os testes unitarios e o smoke WSL/Linux.
 
 ### Checkpoint: Runtime nativa
 
-- [ ] A runtime e obtida somente pelo bootstrap WSL/Linux e funciona do cache.
-- [ ] A ausencia dela falha com instrucao clara, sem tentar inferencia.
-- [ ] A conformidade de licenca e redistribuicao foi revisada antes de baixar
+- [x] A runtime e obtida somente pelo bootstrap WSL/Linux e funciona do cache.
+- [x] A ausencia dela falha com instrucao clara, sem tentar inferencia.
+- [x] A conformidade de licenca e redistribuicao foi revisada antes de baixar
   qualquer artefato.
 
 ### Phase 1: Contrato padrao e provisionamento
@@ -127,14 +127,14 @@ servidor, contexto gerado e JSON-base de integracao. Remover o seletor
 modulos versionados que ainda citam Bonsai com `git mv`.
 
 **Acceptance criteria:**
-- [ ] `pytest -m opencode` usa `qwen-local/qwen3-0.6b` sem argumento extra.
-- [ ] O JSON estatico e os contextos gerados fixam um unico provider local e os
+- [x] `pytest -m opencode` usa `qwen-local/qwen3-0.6b` sem argumento extra.
+- [x] O JSON estatico e os contextos gerados fixam um unico provider local e os
   agentes `plan` e `build` usam Qwen.
-- [ ] Nao resta no harness contrato, provider, seletor ou artefato Bonsai.
+- [x] Nao resta no harness contrato, provider, seletor ou artefato Bonsai.
 
 **Verification:**
-- [ ] Executar os testes unitarios do seletor, contexto e provider local.
-- [ ] Inspecionar a configuracao gerada e confirmar que declara somente Qwen.
+- [x] Executar os testes unitarios do seletor, contexto e provider local.
+- [x] Inspecionar a configuracao gerada e confirmar que declara somente Qwen.
 
 **Dependencies:** Task 0.1.
 
@@ -157,13 +157,13 @@ um endpoint divergente e mantem checksum Qwen, cache e argumentos existentes
 do llama-server.
 
 **Acceptance criteria:**
-- [ ] Os testes verificam o artefato, provider e identidade padrao Qwen.
-- [ ] Os testes rejeitam a antiga selecao `--local-model` e nao referenciam
+- [x] Os testes verificam o artefato, provider e identidade padrao Qwen.
+- [x] Os testes rejeitam a antiga selecao `--local-model` e nao referenciam
   Bonsai.
-- [ ] Nenhum teste ou producao adiciona ou modifica timeout existente.
+- [x] Nenhum teste ou producao adiciona ou modifica timeout existente.
 
 **Verification:**
-- [ ] Executar testes unitarios em `tests/conftest.py`,
+- [x] Executar testes unitarios em `tests/conftest.py`,
   `tests/integration/model/`, `tests/integration/test_integration_context.py`
   e `tests/integration/docker/test_local_provider.py`.
 
@@ -183,8 +183,8 @@ apos a suite unitaria alvo.
 
 ### Checkpoint: Contrato e provisionamento
 
-- [ ] No WSL/Linux, os testes unitarios alvo passam com `.venv/bin/pytest`.
-- [ ] O padrao e a integridade do Qwen estao cobertos sem
+- [x] No WSL/Linux, os testes unitarios alvo passam com `.venv/bin/pytest`.
+- [x] O padrao e a integridade do Qwen estao cobertos sem
   provisionamento pelo bootstrap.
 
 ### Phase 2: Privacidade e documentacao operacional
@@ -196,12 +196,12 @@ ao modelo, mantendo a assercao do unico provider Qwen, endpoint localhost,
 rede interna e bloqueio de egress.
 
 **Acceptance criteria:**
-- [ ] A suite padrao executa os quatro controles de privacidade contra Qwen.
-- [ ] A configuracao efetiva nao contem provider remoto, telemetria, proxy
+- [x] A suite padrao executa os quatro controles de privacidade contra Qwen.
+- [x] A configuracao efetiva nao contem provider remoto, telemetria, proxy
   externo ou handoff em cloud.
 
 **Verification:**
-- [ ] Executar `.venv/bin/pytest -m opencode` no WSL/Linux com Docker.
+- [x] Executar `.venv/bin/pytest -m opencode` no WSL/Linux com Docker.
 
 **Dependencies:** Tasks 0.1-2.
 
@@ -223,16 +223,16 @@ atualizar o experimento com o resultado final, mantendo Needle 2 explicitamente
 fora de escopo.
 
 **Acceptance criteria:**
-- [ ] A documentacao mostra somente o comando padrao Qwen.
-- [ ] Documenta cache local, checksum Qwen, execucao offline apos
+- [x] A documentacao mostra somente o comando padrao Qwen.
+- [x] Documenta cache local, checksum Qwen, execucao offline apos
   provisionamento, ausencia de telemetria e prerequisito Docker no WSL/Linux.
-- [ ] O ADR contem motivacao, escopo, decisoes substituidas, consequencias e
+- [x] O ADR contem motivacao, escopo, decisoes substituidas, consequencias e
   rollback por reversao Git; nao altera o ADR-0002 historico.
 
 **Verification:**
-- [ ] Conferir que todos os comandos documentados usam
+- [x] Conferir que todos os comandos documentados usam
   `.venv/bin/pytest -m opencode` no WSL/Linux.
-- [ ] Conferir que nao ha instrucao de cloud, telemetria, Needle 2 ou alteracao
+- [x] Conferir que nao ha instrucao de cloud, telemetria, Needle 2 ou alteracao
   de timeout.
 
 **Dependencies:** Tasks 0.1-3.
@@ -249,15 +249,15 @@ apos revisao cruzada entre documentacao e codigo.
 
 ### Checkpoint: Complete
 
-- [ ] No WSL/Linux com Docker, `.venv/bin/pytest -m opencode` passa com Qwen
+- [x] No WSL/Linux com Docker, `.venv/bin/pytest -m opencode` passa com Qwen
   padrao.
-- [ ] O bootstrap WSL/Linux provisiona a runtime OpenMP cacheada necessaria
+- [x] O bootstrap WSL/Linux provisiona a runtime OpenMP cacheada necessaria
   sem instalacao manual em uma maquina compativel.
-- [ ] Os quatro testes de privacidade passam com Qwen.
-- [ ] O cache permite repetir as execucoes sem download; nao ha egress em
+- [x] Os quatro testes de privacidade passam com Qwen.
+- [x] O cache permite repetir as execucoes sem download; nao ha egress em
   runtime, telemetria ou handoff em cloud.
-- [ ] Nao ha alteracao de timeout nem escopo relacionado a Needle 2.
-- [ ] A implementacao esta pronta para revisao independente.
+- [x] Nao ha alteracao de timeout nem escopo relacionado a Needle 2.
+- [x] A implementacao esta pronta para revisao independente.
 
 ## Risks and Mitigations
 

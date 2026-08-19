@@ -34,7 +34,7 @@ def test_response_contains_ok_when_requested(isolated_opencode):
 
 
 @pytest.mark.opencode_context(kind="empty")
-def test_specific_agent_uses_local_bonsai(isolated_opencode):
+def test_specific_agent_uses_local_qwen(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão com agente OpenCode — verifique se o serviço está ativo"
 

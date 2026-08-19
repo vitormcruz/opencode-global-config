@@ -38,8 +38,8 @@ def _repository(root: Path) -> Path:
         json.dumps(
             {
                 "plugin": ["external-plugin"],
-                "provider": {"bonsai-local": {"models": {"bonsai-27b": {}}}},
-                "agent": {"build": {"model": "bonsai-local/bonsai-27b"}},
+                "provider": {"qwen-local": {"models": {"qwen3-0.6b": {}}}},
+                "agent": {"build": {"model": "qwen-local/qwen3-0.6b"}},
             }
         ),
         encoding="utf-8",
@@ -117,7 +117,7 @@ def test_prepare_empty_context_contains_no_repository_artifacts(
     assert not (context / "skills").exists()
 
 
-def test_prepare_qwen_context_selects_only_the_experiment_provider(
+def test_prepare_context_fixes_the_qwen_provider(
     tmp_path: Path,
 ) -> None:
     repository = _repository(tmp_path)
@@ -126,7 +126,6 @@ def test_prepare_qwen_context_selects_only_the_experiment_provider(
         repository,
         tmp_path / "qwen-context",
         kind="empty",
-        model="qwen3-0.6b",
     )
 
     config = json.loads((context / "opencode.json").read_text(encoding="utf-8"))

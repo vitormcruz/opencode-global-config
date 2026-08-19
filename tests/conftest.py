@@ -7,24 +7,6 @@ from pathlib import Path
 import pytest
 
 
-def pytest_addoption(parser: pytest.Parser) -> None:
-    """Expose explicit local-model selection for OpenCode integration runs."""
-
-    parser.addoption(
-        "--local-model",
-        choices=("bonsai", "qwen3-0.6b"),
-        default="bonsai",
-        help="Modelo local fixado para a execução OpenCode.",
-    )
-
-
-@pytest.fixture(scope="session")
-def local_model(request: pytest.FixtureRequest) -> str:
-    """Return the model explicitly selected for this pytest process."""
-
-    return str(request.config.getoption("--local-model"))
-
-
 @pytest.fixture(scope="session")
 def repo_root() -> Path:
     """Retorna a raiz do repositorio sob teste."""

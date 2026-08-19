@@ -1,4 +1,4 @@
-"""Unit tests for the fixed local Bonsai OpenCode provider."""
+"""Unit tests for the fixed local Qwen OpenCode provider."""
 
 from __future__ import annotations
 
@@ -24,19 +24,19 @@ def _read_test_config() -> dict:
     return json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
 
 
-def test_test_config_declares_only_the_local_bonsai_provider() -> None:
+def test_test_config_declares_only_the_local_qwen_provider() -> None:
     config = _read_test_config()
 
-    assert set(config["provider"]) == {"bonsai-local"}
-    provider = config["provider"]["bonsai-local"]
+    assert set(config["provider"]) == {"qwen-local"}
+    provider = config["provider"]["qwen-local"]
     assert provider["npm"] == "@ai-sdk/openai-compatible"
     assert provider["options"]["baseURL"] == "http://host.docker.internal:8080/v1"
-    assert provider["models"]["bonsai-27b"]["name"] == "Bonsai 27B 1-bit"
-    assert provider["models"]["bonsai-27b"]["options"] == {
+    assert provider["models"]["qwen3-0.6b"]["name"] == "Qwen3 0.6B Q8_0"
+    assert provider["models"]["qwen3-0.6b"]["options"] == {
         "chat_template_kwargs": {"enable_thinking": False}
     }
-    assert config["agent"]["plan"]["model"] == "bonsai-local/bonsai-27b"
-    assert config["agent"]["build"]["model"] == "bonsai-local/bonsai-27b"
+    assert config["agent"]["plan"]["model"] == "qwen-local/qwen3-0.6b"
+    assert config["agent"]["build"]["model"] == "qwen-local/qwen3-0.6b"
 
 
 def test_start_container_uses_host_gateway_without_model_environment(

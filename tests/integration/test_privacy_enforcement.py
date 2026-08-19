@@ -9,7 +9,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from model.bonsai_server import get_model_spec
+from model.local_model_server import MODEL_SPEC
 
 
 pytestmark = pytest.mark.opencode
@@ -86,9 +86,8 @@ def test_network_is_internal(docker_executable: str) -> None:
         )
 
 
-def test_config_enforcement_allows_only_selected_local_model(
+def test_config_enforcement_allows_only_the_qwen_local_model(
     docker_executable: str,
-    local_model: str,
 ) -> None:
     result = _exec_in_container(docker_executable, "cat", EFFECTIVE_CONFIG)
     if result.returncode != 0:
@@ -101,7 +100,7 @@ def test_config_enforcement_allows_only_selected_local_model(
     except json.JSONDecodeError as error:
         pytest.fail(f"Violação de privacidade: config efetiva inválida: {error}")
 
-    spec = get_model_spec(local_model)
+    spec = MODEL_SPEC
     providers = config.get("provider") if isinstance(config, dict) else None
     if not isinstance(providers, dict):
         pytest.fail(
@@ -140,7 +139,7 @@ def test_config_enforcement_allows_only_selected_local_model(
         )
 
 
-def test_local_bonsai_endpoint_is_reachable(
+def test_local_qwen_endpoint_is_reachable(
     docker_executable: str,
 ) -> None:
     result = _exec_in_container(

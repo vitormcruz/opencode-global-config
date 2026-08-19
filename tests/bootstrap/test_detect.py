@@ -49,6 +49,7 @@ def test_registry_declares_managed_dependencies_and_install_methods() -> None:
         "playwright",
         "pytest",
         "aws-cli",
+        "libgomp-runtime",
         "opencode-config",
         "copilot",
     }

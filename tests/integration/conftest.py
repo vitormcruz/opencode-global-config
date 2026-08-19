@@ -9,7 +9,7 @@ import pytest
 from behavioral_helper import OpenCodeClient
 from docker.container_test_opencode import ContainerTestError, DockerSession
 from integration_context import prepare_test_context
-from model.bonsai_server import BonsaiServer, BonsaiServerError
+from model.local_model_server import LocalModelServer, LocalModelServerError
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,6 @@ def isolated_opencode(
     repo_root: Path,
     isolated_opencode_session: DockerSession,
     monkeypatch: pytest.MonkeyPatch,
-    local_model: str,
 ) -> Iterator[OpenCodeClient]:
     """Run OpenCode against only the artifacts declared by the current test."""
 
@@ -52,7 +51,6 @@ def isolated_opencode(
         isolated_opencode_session.context_dir,
         kind=kind,
         name=name,
-        model=local_model,
     )
     try:
         if isolated_opencode_session.container_running():
@@ -75,7 +73,7 @@ def isolated_opencode(
 def isolated_opencode_session(
     tmp_path_factory: pytest.TempPathFactory,
     repo_root: Path,
-    bonsai_server: BonsaiServer,
+    qwen_server: LocalModelServer,
 ) -> Iterator[DockerSession]:
     """Reuse one container while replacing its mounted context per test."""
 
@@ -93,17 +91,17 @@ def isolated_opencode_session(
 
 
 @pytest.fixture(scope="session")
-def bonsai_server(local_model: str) -> Iterator[BonsaiServer]:
-    """Start or reuse the selected local model for every OpenCode test."""
+def qwen_server() -> Iterator[LocalModelServer]:
+    """Start or reuse the fixed Qwen model for every OpenCode test."""
 
-    server = BonsaiServer(model=local_model)
+    server = LocalModelServer()
     try:
         server.ensure_up()
-    except BonsaiServerError as error:
+    except LocalModelServerError as error:
         pytest.fail(
             f"{error}\n"
             "Confirme o acesso ao release do llama-server e execute novamente:\n"
-            "  python3 tests/integration/model/bonsai_server.py --up",
+            "  python3 tests/integration/model/local_model_server.py --up",
             pytrace=False,
         )
 
@@ -112,18 +110,16 @@ def bonsai_server(local_model: str) -> Iterator[BonsaiServer]:
 
 @pytest.fixture(scope="session")
 def docker_session(
-    bonsai_server: BonsaiServer,
+    qwen_server: LocalModelServer,
     repo_root: Path,
     tmp_path_factory: pytest.TempPathFactory,
-    local_model: str,
 ) -> Iterator[DockerSession]:
-    """Start OpenCode with the selected model and stop only the container."""
+    """Start OpenCode with Qwen and stop only the container."""
 
     context_dir = prepare_test_context(
         repo_root,
         tmp_path_factory.mktemp("opencode-shared-context"),
         kind="empty",
-        model=local_model,
     )
     session = DockerSession(repo_root=repo_root, context_dir=context_dir)
     try:

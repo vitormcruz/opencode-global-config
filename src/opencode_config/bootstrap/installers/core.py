@@ -3,6 +3,7 @@
 from collections.abc import Callable, Iterable, Mapping, MutableMapping
 from dataclasses import dataclass, field
 import hashlib
+import io
 import os
 from pathlib import Path
 import shutil
@@ -19,6 +20,17 @@ from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import UserSpacePaths
 from opencode_config.lib.process import CommandResult, run_command
 from opencode_config.lib.versions import fnm_node_bin_dir
+
+from ..libgomp import (
+    LIBGOMP_ARCHITECTURE,
+    LIBGOMP_LIBRARY_NAME,
+    LIBGOMP_PACKAGE_SHA256,
+    LIBGOMP_PACKAGE_URL,
+    LIBGOMP_VERSION,
+    runtime_directory,
+    runtime_is_valid,
+    write_runtime_metadata,
+)
 
 
 FNM_VERSION = "1.38.1"
@@ -256,6 +268,159 @@ def _extract_archive(archive: Path, destination: Path) -> None:
         return
 
     raise InstallerError(f"Formato de arquivo nao suportado: {archive.name}")
+
+
+def _read_deb_members(package: Path) -> dict[str, bytes]:
+    """Read ar members from a Debian package using only the stdlib."""
+
+    payload = package.read_bytes()
+    if not payload.startswith(b"!<arch>\n"):
+        raise InstallerError("pacote libgomp nao e um arquivo Debian valido")
+    members: dict[str, bytes] = {}
+    offset = 8
+    while offset < len(payload):
+        header = payload[offset : offset + 60]
+        if len(header) != 60 or header[58:60] != b"`\n":
+            raise InstallerError("cabecalho ar invalido no pacote libgomp")
+        name = header[:16].decode("ascii").strip().rstrip("/")
+        try:
+            size = int(header[48:58].decode("ascii").strip())
+        except ValueError as error:
+            raise InstallerError("tamanho invalido no pacote libgomp") from error
+        start = offset + 60
+        end = start + size
+        if end > len(payload):
+            raise InstallerError("membro truncado no pacote libgomp")
+        members[name] = payload[start:end]
+        offset = end + (size % 2)
+    return members
+
+
+def _deb_control_fields(control_archive: bytes) -> dict[str, str]:
+    with tarfile.open(fileobj=io.BytesIO(control_archive), mode="r:*") as archive:
+        control = next(
+            (
+                member
+                for member in archive.getmembers()
+                if member.isfile() and member.name.rsplit("/", 1)[-1] == "control"
+            ),
+            None,
+        )
+        if control is None:
+            raise InstallerError("controle ausente no pacote libgomp")
+        source = archive.extractfile(control)
+        if source is None:
+            raise InstallerError("nao foi possivel ler o controle do libgomp")
+        fields: dict[str, str] = {}
+        for line in source.read().decode("utf-8").splitlines():
+            if ":" in line:
+                name, value = line.split(":", 1)
+                fields[name.strip()] = value.strip()
+        return fields
+
+
+def _extract_libgomp_from_deb(package: Path, destination: Path) -> None:
+    members = _read_deb_members(package)
+    control_name = next(
+        (name for name in members if name.startswith("control.tar")),
+        None,
+    )
+    data_name = next((name for name in members if name.startswith("data.tar")), None)
+    if control_name is None or data_name is None:
+        raise InstallerError("controle ou dados ausentes no pacote libgomp")
+    fields = _deb_control_fields(members[control_name])
+    if (
+        fields.get("Package") != "libgomp1"
+        or fields.get("Version") != LIBGOMP_VERSION
+        or fields.get("Architecture") != LIBGOMP_ARCHITECTURE
+    ):
+        raise InstallerError(
+            "metadados inesperados no pacote libgomp: "
+            f"{fields.get('Package')} {fields.get('Version')} "
+            f"{fields.get('Architecture')}"
+        )
+    with tarfile.open(
+        fileobj=io.BytesIO(members[data_name]),
+        mode="r:*",
+    ) as archive:
+        source_member = next(
+            (
+                member
+                for member in archive.getmembers()
+                if member.isfile() and member.name.endswith(
+                    f"/{LIBGOMP_LIBRARY_NAME}"
+                )
+            ),
+            None,
+        )
+        if source_member is None:
+            raise InstallerError(
+                f"{LIBGOMP_LIBRARY_NAME} ausente no pacote libgomp"
+            )
+        source = archive.extractfile(source_member)
+        if source is None:
+            raise InstallerError("nao foi possivel extrair libgomp.so.1")
+        destination.mkdir(parents=True, exist_ok=True)
+        library = destination / LIBGOMP_LIBRARY_NAME
+        with source, library.open("wb") as output:
+            shutil.copyfileobj(source, output)
+        _make_executable(library)
+    (destination / "libgomp.so.1").symlink_to(LIBGOMP_LIBRARY_NAME)
+    write_runtime_metadata(destination)
+
+
+def install_libgomp_runtime(
+    context: InstallContext,
+    *,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    """Provision the fixed x86_64 libgomp copy without touching system paths."""
+
+    if context.environment not in {EnvironmentKind.LINUX, EnvironmentKind.WSL}:
+        return InstallResult(
+            name="libgomp-runtime",
+            success=True,
+            changed=False,
+            message="runtime libgomp nao se aplica ao Windows",
+        )
+    home = context.paths.home
+    if runtime_is_valid(home):
+        return InstallResult(
+            name="libgomp-runtime",
+            success=True,
+            changed=False,
+            message=f"runtime libgomp ja valida em {runtime_directory(home)}",
+        )
+    runtime_root = runtime_directory(home).parent
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix=".libgomp-install-",
+        dir=runtime_root,
+    ) as temporary:
+        package = Path(temporary) / "libgomp.deb"
+        extracted = Path(temporary) / "runtime"
+        download_file(
+            LIBGOMP_PACKAGE_URL,
+            package,
+            expected_sha256=LIBGOMP_PACKAGE_SHA256,
+            fetcher=fetcher,
+        )
+        _extract_libgomp_from_deb(package, extracted)
+        target = runtime_directory(home)
+        if target.exists():
+            shutil.rmtree(target)
+        os.replace(extracted, target)
+    if not runtime_is_valid(home):
+        shutil.rmtree(target, ignore_errors=True)
+        raise InstallerError(
+            "runtime libgomp extraida, mas falhou a validacao ELF/SHA-256"
+        )
+    return InstallResult(
+        name="libgomp-runtime",
+        success=True,
+        changed=True,
+        message=f"runtime libgomp instalada em {target}",
+    )
 
 
 def _find_file(root: Path, names: Iterable[str]) -> Path:
@@ -1027,6 +1192,7 @@ INSTALLERS: Mapping[str, DependencyInstaller] = {
     "playwright": install_playwright,
     "pytest": install_pytest,
     "aws-cli": install_aws_cli,
+    "libgomp-runtime": install_libgomp_runtime,
 }
 
 

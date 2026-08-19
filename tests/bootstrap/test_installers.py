@@ -22,11 +22,20 @@ from opencode_config.bootstrap.installers import (
     install_node,
     install_npx,
     install_opencode_config,
+    install_libgomp_runtime,
     install_pipx,
     install_playwright,
     install_pytest,
     is_pytest_environment_ready,
     fix_chrondb_lib,
+)
+from opencode_config.bootstrap.libgomp import (
+    LIBGOMP_PACKAGE_SHA256,
+    LIBGOMP_PACKAGE_URL,
+    LIBGOMP_LIBRARY_SHA256,
+    LIBGOMP_VERSION,
+    runtime_validation_error,
+    runtime_directory,
 )
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import resolve_user_space_paths
@@ -135,6 +144,69 @@ def test_download_file_rejects_hash_mismatch_with_both_hashes(
         )
 
     assert not destination.exists()
+
+
+@pytest.mark.unit
+def test_libgomp_runtime_rejects_a_package_checksum_mismatch(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+
+    def fetcher(_url: str, destination: Path) -> None:
+        destination.write_bytes(b"not-the-fixed-debian-package")
+
+    with pytest.raises(InstallerError, match="SHA256 divergente"):
+        install_libgomp_runtime(context, fetcher=fetcher)
+
+
+@pytest.mark.unit
+def test_libgomp_runtime_reuses_a_valid_cache_without_network(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path)
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.runtime_is_valid",
+        lambda _home: True,
+    )
+    result = install_libgomp_runtime(
+        context,
+        fetcher=lambda *_args: pytest.fail("cache valido nao deve baixar"),
+    )
+
+    assert result.success
+    assert not result.changed
+    assert str(runtime_directory(tmp_path)) in result.message
+    assert LIBGOMP_PACKAGE_URL.startswith("https://snapshot.debian.org/")
+    assert len(LIBGOMP_PACKAGE_SHA256) == 64
+    assert LIBGOMP_VERSION in result.message
+
+
+@pytest.mark.unit
+def test_libgomp_runtime_rejects_missing_provenance_metadata(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    library = tmp_path / "libgomp.so.1.0.0"
+    library.write_bytes(b"valid-library-placeholder")
+    (tmp_path / "libgomp.so.1").symlink_to(library)
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.libgomp.runtime_library_path",
+        lambda _home=None: library,
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.libgomp.platform.machine",
+        lambda: "x86_64",
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.libgomp._sha256",
+        lambda _path: LIBGOMP_LIBRARY_SHA256,
+    )
+
+    error = runtime_validation_error(tmp_path, load_library=False)
+
+    assert error is not None
+    assert "metadados ausentes ou invalidos" in error
 
 
 @pytest.mark.unit

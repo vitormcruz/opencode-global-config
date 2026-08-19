@@ -322,6 +322,23 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         minimum_version=(2,),
     ),
     DependencySpec(
+        name="libgomp-runtime",
+        commands=("libgomp-runtime",),
+        supported_environments=frozenset(
+            {EnvironmentKind.LINUX, EnvironmentKind.WSL}
+        ),
+        install_methods=_methods(
+            "pacote Debian oficial extraido no cache user-space",
+            windows="nao aplicavel",
+        ),
+        manual_commands=_commands(
+            "opencode-bootstrap --yes",
+            windows="opencode-bootstrap --yes",
+        ),
+        version_args=(),
+        minimum_version=None,
+    ),
+    DependencySpec(
         name="opencode-config",
         commands=("opencode-config-check",),
         install_methods=_methods(

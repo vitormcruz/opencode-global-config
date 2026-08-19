@@ -92,6 +92,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | Playwright + Chromium | npm + `npx playwright install` | igual ao Linux |
 | pytest | `.venv` + `requirements-dev.txt` | igual ao Linux |
 | AWS CLI v2 | instalador oficial user-local | instalador oficial user-local |
+| `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | cliente externo | npm com prefixo user-space |
 
@@ -204,23 +205,49 @@ No Windows, use o executável da virtualenv pelo PowerShell:
 
 ### Testes de integração (Camada 2)
 
-Os testes comportamentais do OpenCode usam o Bonsai local por padrão, servido
-pelo llama-server no WSL/Linux; o Qwen3-0.6B pode ser selecionado
-explicitamente. Consulte a seção de pré-requisitos antes de executar a suíte.
+Os testes comportamentais do OpenCode usam exclusivamente o Qwen3-0.6B Q8_0,
+servido pelo llama-server no WSL/Linux. O harness provisiona os artefatos no
+cache do usuário quando necessário e reutiliza somente artefatos verificados.
+Consulte a seção de pré-requisitos antes de executar a suíte.
 
-#### Servidor local Bonsai
+#### Servidor local Qwen3-0.6B
 
-O servidor requer aproximadamente 4,2 GB livres em
+O servidor requer aproximadamente 1 GB livre em
 `~/.cache/opencode-config/models/`. O harness baixa automaticamente o binário
 self-contained do release fixado `prism-b9596-9fcaed7` para
-`~/.cache/opencode-config/llama/` e o único modelo
-`Bonsai-27B-Q1_0.gguf` para o cache de modelos. Não é necessário instalar
+`~/.cache/opencode-config/llama/` e o modelo
+`Qwen3-0.6B-Q8_0.gguf` para o cache de modelos. Não é necessário instalar
 `llama-server` no `PATH` nem baixar um projector: a linha de comando não usa
 `--mmproj`.
 
+O Prism precisa de `libgomp.so.1`. No Linux/WSL, o bootstrap provisiona uma
+copia autocontida em
+`~/.cache/opencode-config/runtime/libgomp/12.2.0-14+deb12u1-amd64/`, sem
+`sudo`, `apt`, instalacao global ou `LD_LIBRARY_PATH`. A origem e o artefato
+sao fixados:
+
+- pacote oficial Debian Snapshot:
+  `libgomp1_12.2.0-14+deb12u1_amd64.deb`;
+- URL:
+  `https://snapshot.debian.org/archive/debian/20250415T084322Z/pool/main/g/`
+  `gcc-12/libgomp1_12.2.0-14%2Bdeb12u1_amd64.deb`;
+- SHA-256 do pacote:
+  `48fec46bda7f5b1638b9e959889bfbc20491247d402d120bb152687eb48143d7`;
+- SHA-256 de `libgomp.so.1.0.0`:
+  `f9a9ad78a8dc39c0e90a265ffa551fae6c92a40f360889b44a7e141f9a2adfb1`;
+- arquitetura: `amd64`/Linux x86_64; licença: GPLv3-or-later com GCC Runtime
+  Library Exception 3.1.
+
+O bootstrap valida pacote, metadados, checksum e carregamento ELF. O servidor
+inicia o Prism pelo interpretador ELF `ld-linux-x86-64.so.2`, usando
+`--library-path` para os caches do Prism/libgomp e as bibliotecas do sistema;
+não altera variaveis globais. A redistribuicao deve manter os avisos GPLv3 e a
+Runtime Library Exception e preservar a origem fixada. Depois do bootstrap, o
+servidor e os testes reutilizam o cache e permanecem offline.
+
 ```bash
-python3 tests/integration/model/bonsai_server.py --up
-python3 tests/integration/model/bonsai_server.py --status
+python3 tests/integration/model/local_model_server.py --up
+python3 tests/integration/model/local_model_server.py --status
 ```
 
 O processo usa `--jinja` para tool calling e
@@ -229,19 +256,19 @@ memória e são recarregados automaticamente na próxima requisição. A fixture
 pytest reaproveita o processo e não o encerra. Para desligamento explícito:
 
 ```bash
-python3 tests/integration/model/bonsai_server.py --down
+python3 tests/integration/model/local_model_server.py --down
 ```
 
-O Bonsai continua sendo o modelo padrão. O experimento Qwen3-0.6B é selecionado
-explicitamente, sem alterar a configuração permanente:
+O único comando de integração OpenCode é:
 
 ```bash
-.venv/bin/pytest -m opencode --local-model bonsai
-.venv/bin/pytest -m opencode --local-model qwen3-0.6b
+.venv/bin/pytest -m opencode
 ```
 
 O Qwen usa o artefato fixado `Qwen3-0.6B-Q8_0.gguf` do repositório
 `Qwen/Qwen3-0.6B-GGUF`; o harness valida o SHA-256 antes de iniciar o servidor.
+Depois do provisionamento, a execução usa o cache local e permanece offline,
+sem telemetria, egress ou handoff em cloud.
 
 Ao iniciar a suíte, a fixture session-scoped reutiliza o `llama-server` e sobe
 o container OpenCode na porta local `127.0.0.1:4196`. A rede dedicada valida
@@ -258,7 +285,8 @@ Pré-requisitos:
 
 - Python >= 3.10 e dependências de `requirements-dev.txt`
 - Docker somente para a integração OpenCode no WSL/Linux
-- acesso ao release fixado e aos pesos Bonsai para provisionamento local
+- acesso ao pacote libgomp fixado, ao release Prism e aos pesos Qwen para o
+  primeiro provisionamento local
 - dependências externas conforme o alvo escolhido
 
 O build da imagem Docker tem acesso à rede apenas para instalar o OpenCode.

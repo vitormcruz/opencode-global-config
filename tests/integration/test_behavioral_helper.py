@@ -29,7 +29,7 @@ class FakeResponse:
         return json.dumps({"parts": []}).encode("utf-8")
 
 
-def test_requests_allow_time_for_bonsai_wake_up(
+def test_requests_allow_time_for_qwen_wake_up(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     timeouts: list[float] = []

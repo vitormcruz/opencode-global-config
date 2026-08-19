@@ -218,11 +218,11 @@ nas descrições
   `.venv/bin/pytest -m "unit or tools or opencode"`; no Windows, use
   `.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"`.
 - Execute os testes no ambiente alvo. A integração OpenCode requer Docker e o
-  llama-server local do Bonsai no WSL/Linux; a integração Copilot roda no
+  llama-server local do Qwen3-0.6B no WSL/Linux; a integração Copilot roda no
   Windows.
-- O servidor Bonsai fica em `tests/integration/model/`; a fixture session-scoped
+- O servidor Qwen fica em `tests/integration/model/`; a fixture session-scoped
   inicia ou reutiliza o serviço antes da integração. Para iniciar manualmente:
-  `python3 tests/integration/model/bonsai_server.py --up`.
+  `python3 tests/integration/model/local_model_server.py --up`.
 - Não use `skip`: quando uma dependência externa não estiver disponível,
   use `pytest.fail` com uma mensagem clara e acionável.
 - A estrutura de testes deve espelhar a estrutura do código.

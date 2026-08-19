@@ -11,6 +11,11 @@ import shutil
 from opencode_config.lib.environment import EnvironmentKind, detect_environment
 from opencode_config.lib.process import CommandResult, run_command
 
+from .libgomp import (
+    LIBGOMP_VERSION,
+    runtime_is_valid,
+    runtime_library_path,
+)
 from .registry import DEPENDENCY_REGISTRY, DependencySpec
 
 
@@ -143,6 +148,19 @@ def detect_dependency(
     runner: Runner | None = None,
 ) -> DependencyDetection:
     """Detecta uma dependencia sem instalar ou alterar o ambiente."""
+
+    if spec.name == "libgomp-runtime":
+        home = Path((env or {}).get("HOME") or Path.home())
+        valid = runtime_is_valid(home)
+        return DependencyDetection(
+            spec=spec,
+            status=DependencyStatus.PRESENT if valid else DependencyStatus.MISSING,
+            version=LIBGOMP_VERSION if valid else None,
+            path=runtime_library_path(home) if valid else None,
+            install_method=spec.install_method_for(environment),
+            error="" if valid else "runtime libgomp ausente ou invalida",
+            environment=environment,
+        )
 
     command_environment, path_environment = _command_environment(env)
     executable: str | None = None
