@@ -112,11 +112,14 @@ plano.
 Use também a skill `git-workflow-and-versioning` para decidir
 o momento, o agrupamento e o formato dos commits.
 
-### Commits automáticos após confirmação
+### Checkpoints automáticos de commit
 
-Depois que o humano confirma a modificação do plano, você
-**commita automaticamente** o arquivo de planejamento — sem
-perguntar "posso commitar?" por commit.
+Depois que o humano confirma a modificação do plano, atualize o
+arquivo e mostre o diff. Em seguida, use
+`git-workflow-and-versioning` para decidir se a alteração já
+forma uma unidade lógica ou se deve ser agrupada com a próxima
+decisão coerente. **Não trate cada decisão como checkpoint
+obrigatório de commit.**
 
 Regras de agrupamento e formato:
 
@@ -125,24 +128,25 @@ Regras de agrupamento e formato:
    adicionada (por exemplo: "adicionei D2"). Para arquivo
    novo, mostre o diff contra `/dev/null` ou o conteúdo
    equivalente.
-3. Decida o escopo do commit: você pode commitar uma única
-   modificação ou agrupar modificações coerentes em um
-   mesmo commit. Avalie pela **coerência narrativa** — nem
-   micro-commits ruidosos, nem batches grandes que percam
-   atomicidade.
-4. Use sempre `git commit` normal com mensagem Conventional
+3. Decida o checkpoint conforme a **coerência narrativa**:
+   você pode commitar uma única modificação ou agrupar duas
+   ou três decisões coerentes no mesmo commit. Não reorganize
+   o plano para forçar commits.
+4. Quando o checkpoint for atingido, use sempre `git commit`
+   normal com mensagem Conventional
    Commit **concisa e resumida** em PT-BR. Nunca use
    `git commit --amend`.
 5. Inclua somente o arquivo de planejamento no commit. Nunca
    inclua alterações alheias da worktree.
-6. Execute o commit e confirme ao humano que ele foi
-   concluído (com o SHA).
+6. Execute automaticamente o commit do checkpoint e confirme ao
+   humano que ele foi concluído (com o SHA).
 
-Os commits são automáticos, não opcionais. Não acumule
-decisões além do que faria sentido narrativo, e não trate
-"commit automático" como license para pular a edição do
-arquivo ou a apresentação do diff. Se o commit falhar, pare
-e reporte o erro antes de continuar.
+Os commits são automáticos nos checkpoints escolhidos, não
+opcionais nem obrigatoriamente um por decisão. Não acumule
+decisões além do que fizer sentido narrativo, e não trate o
+agrupamento como licença para pular a edição do plano ou a
+apresentação do diff. Se o commit falhar, pare e reporte o erro
+antes de continuar.
 
 ## Auto-verificação
 
@@ -150,8 +154,8 @@ Antes de fazer a próxima rodada de perguntas:
 - [ ] O arquivo de planejamento reflete todas as decisões
       aprovadas até agora?
 - [ ] A última decisão foi mostrada em diff?
-- [ ] O commit (individual ou agrupado) foi executado com
-      sucesso?
+- [ ] Se um checkpoint foi atingido, o commit (individual ou
+      agrupado) foi executado com sucesso?
 - [ ] O protocolo `question-orchestration` foi aplicado?
 
 Antes de apresentar o plano completo:
@@ -176,9 +180,10 @@ Antes de declarar planejamento completo:
 3. Aplicar o protocolo conversacional.
 4. Criar skeleton do arquivo de planejamento.
 5. Conduzir perguntas conforme `question-orchestration`.
-6. Após cada decisão aprovada: atualizar arquivo, mostrar
-   diff, commitar automaticamente (individual ou agrupado
-   por coerência) e só então avançar.
+6. Após cada decisão aprovada: atualizar arquivo e mostrar
+   diff. Aplicar `git-workflow-and-versioning` para decidir
+   quando o checkpoint de commit foi atingido; então commitar
+   automaticamente e só depois avançar.
 7. Após todos os ramos resolvidos: estruturar plano
    completo seguindo template do
    `planning-and-task-breakdown` e validar pela
