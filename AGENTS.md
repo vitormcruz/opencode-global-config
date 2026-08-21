@@ -172,7 +172,11 @@ As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 Esta regra trata de como o próprio agente decide quanto tempo esperar por uma
 tarefa (execução de ferramenta, comando, processo externo) — diferente da
 seção "Proibição de timeouts genéricos" acima, que trata de timeout em código
-de aplicação.
+de aplicação. Para o código que o agente **escreve** e que depende de
+qualquer operação de duração incerta (processo externo, rede, async/await,
+filas, locks, polling), use a skill `reliable-async-operations` — ela
+define o contrato mínimo (sinal de progresso observável, timeout de
+inatividade separado do total) e o critério de revisão.
 
 1. Timeout é um mecanismo ruim para resolver espera: frequentemente existe
    solução melhor. Não trate timeout como primeira opção.

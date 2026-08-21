@@ -97,6 +97,7 @@ conta própria, seguindo a skill
 |-------|-----------|----------|
 | code-simplification | Simplificar componentes | No gate de refatoração de componentes |
 | performance-optimization | Otimizar performance de UI | Quando há requisitos de Core Web Vitals ou bundle size |
+| reliable-async-operations | Implementar UI | Quando o componente dispara chamada assíncrona (fetch, API, promise, polling) com duração incerta |
 
 ### Transversais (úteis em qualquer capacidade)
 
@@ -198,7 +199,11 @@ Desvios visuais: pare e pergunte.
 skill `frontend-ui-engineering` — ela define padrões
 de acessibilidade, responsividade e boas práticas de
 UI. Carregue também `accessibility-audit` para o
-checklist de conformidade WCAG.
+checklist de conformidade WCAG. Se o componente
+disparar chamada assíncrona de duração incerta (fetch,
+API, promise, polling), carregue
+`reliable-async-operations` **antes** de implementá-lo
+— evita spinner infinito e timeout de número mágico.
 
 ---
 

@@ -40,6 +40,12 @@ Does the code do what it claims to do?
 - Are error paths handled (not just the happy path)?
 - Does it pass all tests? Are the tests actually testing the right things?
 - Are there off-by-one errors, race conditions, or state inconsistencies?
+- Does it depend on an operation of uncertain duration (external process,
+  network call, promise/async-await, queue/job, lock, polling)? If so, it
+  must expose an observable progress/cancellation signal and separate idle
+  timeout from total timeout — never a single clock-based timeout, and
+  never a silently swallowed error. See `reliable-async-operations` for
+  the required pattern and a one-line rejection criterion.
 
 ### 2. Readability & Simplicity
 

@@ -104,6 +104,7 @@ skill `git-workflow-and-versioning`.
 | code-review-and-quality | Aplicar ajustes integrativos | Na capacidade 3 (ajustes de revisão) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham ou build quebra |
 | performance-optimization | Otimizar performance | Quando há requisitos de performance |
+| reliable-async-operations | Construir via TDD | Quando o código escrito dispara processo externo, chamada de rede, async/await, fila, lock ou polling |
 
 ### Transversais (úteis em qualquer capacidade)
 
@@ -213,7 +214,12 @@ desviam do plano: pare e pergunte.
 red-green-refactor e padrões de teste.
 No gate de refatoração, carregue
 `code-simplification` para critérios de
-simplificação.
+simplificação. Se o código a escrever depender de operação
+de duração incerta (processo externo, chamada de rede,
+async/await, fila, lock, polling), carregue
+`reliable-async-operations` **antes** de escrevê-lo —
+evita espera bloqueante sem sinal de progresso e timeout
+de número mágico.
 
 ---
 

@@ -87,6 +87,7 @@ correspondentes por conta própria, seguindo a skill
 | documentation-and-adrs | Avaliar documentação | Quando revisar consistência de docs |
 | code-simplification | Identificar complexidade | Quando revisar qualidade de código |
 | api-and-interface-design | Avaliar interfaces | Quando revisar consistência de API ou interface pública |
+| reliable-async-operations | Revisão multi-eixo | Quando o código revisado dispara processo externo, rede, async/await, fila, lock ou polling |
 
 ## Capacidade: Revisão integrativa
 

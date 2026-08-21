@@ -93,6 +93,7 @@ correspondentes por conta própria, seguindo a skill
 |-------|-----------|----------|
 | code-review-and-quality | Revisar segurança | Na capacidade 3 (revisar e corrigir) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando ferramentas de segurança falham inesperadamente |
+| reliable-async-operations | Executar testes de segurança | Quando escrever script que dispara ferramenta de segurança externa (SAST, DAST, scan) ou chamada assíncrona |
 
 ## Capacidades
 

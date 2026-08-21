@@ -92,6 +92,7 @@ a skill `git-workflow-and-versioning`.
 | debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham inesperadamente |
 | accessibility-audit | Auditar acessibilidade | Quando há UI no escopo de testes |
 | performance-optimization | Testar performance | Quando há RNF de performance |
+| reliable-async-operations | Executar testes | Quando escrever script que dispara suíte de testes, CLI externo ou chamada assíncrona |
 
 ## Capacidades
 
