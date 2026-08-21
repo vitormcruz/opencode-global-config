@@ -97,14 +97,14 @@ def test_smart_planner_has_decision_and_commit_gate(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_smart_planner_uses_coherent_automatic_commit_checkpoints(
+def test_smart_planner_leaves_commit_checkpoints_contextual(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "### Checkpoints automáticos de commit" in content
-    assert "Não trate cada decisão como checkpoint" in content
-    assert "duas\n   ou três decisões coerentes" in content
-    assert "Execute automaticamente o commit do checkpoint" in content
+    assert "### Checkpoints de commit" in content
+    assert "não há quantidade fixa" in content.lower()
+    assert "obrigação de criar um commit após" in content
+    assert "git-workflow-and-versioning" in content
 
 
 @pytest.mark.unit
@@ -117,20 +117,20 @@ def test_smart_planner_creates_skeleton_before_first_question(
 
 
 @pytest.mark.unit
-def test_smart_planner_commits_are_automatic_at_selected_checkpoints(
+def test_smart_planner_does_not_require_automatic_commits(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "automáticos nos checkpoints escolhidos" in content
-    assert "nem obrigatoriamente um por decisão" in content
+    assert "commita automaticamente" not in content
+    assert "commits são automáticos" not in content
 
 
 @pytest.mark.unit
-def test_smart_planner_keeps_its_checkpoint_gate_after_delegating_questions(
+def test_smart_planner_keeps_its_checkpoint_guidance_after_delegating_questions(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert "### Checkpoints automáticos de commit" in content
+    assert "### Checkpoints de commit" in content
     assert "git-workflow-and-versioning" in content
 
 

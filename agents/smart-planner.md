@@ -112,41 +112,25 @@ plano.
 Use também a skill `git-workflow-and-versioning` para decidir
 o momento, o agrupamento e o formato dos commits.
 
-### Checkpoints automáticos de commit
+### Checkpoints de commit
 
 Depois que o humano confirma a modificação do plano, atualize o
-arquivo e mostre o diff. Em seguida, use
-`git-workflow-and-versioning` para decidir se a alteração já
-forma uma unidade lógica ou se deve ser agrupada com a próxima
-decisão coerente. **Não trate cada decisão como checkpoint
-obrigatório de commit.**
-
-Regras de agrupamento e formato:
+arquivo e mostre o diff. Use
+`git-workflow-and-versioning` para decidir, conforme o contexto,
+se é necessário criar um checkpoint, quando criá-lo, quais
+alterações incluir e qual formato usar. Não há quantidade fixa
+de decisões por checkpoint nem obrigação de criar um commit após
+cada decisão.
 
 1. Edite o arquivo de planejamento com a decisão aprovada.
 2. Mostre ao humano o diff produzido e identifique a decisão
    adicionada (por exemplo: "adicionei D2"). Para arquivo
    novo, mostre o diff contra `/dev/null` ou o conteúdo
    equivalente.
-3. Decida o checkpoint conforme a **coerência narrativa**:
-   você pode commitar uma única modificação ou agrupar duas
-   ou três decisões coerentes no mesmo commit. Não reorganize
-   o plano para forçar commits.
-4. Quando o checkpoint for atingido, use sempre `git commit`
-   normal com mensagem Conventional
-   Commit **concisa e resumida** em PT-BR. Nunca use
-   `git commit --amend`.
-5. Inclua somente o arquivo de planejamento no commit. Nunca
-   inclua alterações alheias da worktree.
-6. Execute automaticamente o commit do checkpoint e confirme ao
-   humano que ele foi concluído (com o SHA).
-
-Os commits são automáticos nos checkpoints escolhidos, não
-opcionais nem obrigatoriamente um por decisão. Não acumule
-decisões além do que fizer sentido narrativo, e não trate o
-agrupamento como licença para pular a edição do plano ou a
-apresentação do diff. Se o commit falhar, pare e reporte o erro
-antes de continuar.
+3. Se decidir criar um checkpoint, siga a skill
+   `git-workflow-and-versioning`, incluindo escopo, mensagem,
+   arquivos e necessidade de confirmação. Nunca inclua
+   alterações alheias da worktree.
 
 ## Auto-verificação
 
@@ -154,8 +138,8 @@ Antes de fazer a próxima rodada de perguntas:
 - [ ] O arquivo de planejamento reflete todas as decisões
       aprovadas até agora?
 - [ ] A última decisão foi mostrada em diff?
-- [ ] Se um checkpoint foi atingido, o commit (individual ou
-      agrupado) foi executado com sucesso?
+- [ ] Se um checkpoint foi escolhido, ele seguiu
+      `git-workflow-and-versioning`?
 - [ ] O protocolo `question-orchestration` foi aplicado?
 
 Antes de apresentar o plano completo:
@@ -181,9 +165,8 @@ Antes de declarar planejamento completo:
 4. Criar skeleton do arquivo de planejamento.
 5. Conduzir perguntas conforme `question-orchestration`.
 6. Após cada decisão aprovada: atualizar arquivo e mostrar
-   diff. Aplicar `git-workflow-and-versioning` para decidir
-   quando o checkpoint de commit foi atingido; então commitar
-   automaticamente e só depois avançar.
+   diff. Aplicar `git-workflow-and-versioning` para avaliar se
+   um checkpoint é apropriado antes de avançar.
 7. Após todos os ramos resolvidos: estruturar plano
    completo seguindo template do
    `planning-and-task-breakdown` e validar pela
