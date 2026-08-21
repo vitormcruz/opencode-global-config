@@ -81,3 +81,25 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
             f"{agent}.md: Evidências intro divergiu do baseline "
             "(eng-software.md)"
         )
+
+
+@pytest.mark.unit
+def test_commit_enabled_agents_use_git_workflow_skill(repo_root: Path) -> None:
+    """Agentes que alteram artefatos devem versionar suas próprias mudanças."""
+
+    agents_dir = repo_root / "agents"
+    agents = (
+        "eng-software",
+        "front",
+        "qa",
+        "rev",
+        "sec",
+        "val-harness",
+        "dba",
+        "curador-produto-editor",
+    )
+
+    for agent in agents:
+        content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
+        assert "git-workflow-and-versioning" in content
+        assert "Não propõe commit" not in content

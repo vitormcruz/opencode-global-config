@@ -21,6 +21,15 @@ Dois agentes participam deste processo:
 > nem fases. Este documento é o design do processo;
 > cada agente o implementa como capacidade autônoma.
 
+## Commits do Editor
+
+O `curador-produto-editor` versiona por conta própria as
+alterações nos artefatos sob sua responsabilidade. Deve
+carregar e seguir a skill `git-workflow-and-versioning`,
+fazendo commits atômicos por unidade lógica, sem incluir
+alterações alheias e sem executar `git push` sem confirmação
+explícita do humano.
+
 ## Posicionamento na Sequência de Workflows
 
 Este workflow é executado **antes** do workflow de

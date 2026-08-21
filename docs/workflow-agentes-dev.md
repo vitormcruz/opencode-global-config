@@ -57,6 +57,25 @@ devflow
 | `qa` | Testador | Executor | Planejamento, revisões e testes |
 | `val-harness` | Validador de Harness | Executor | Construção e revisão da construção |
 
+## Commits dos Agentes
+
+Os agentes `eng-software`, `front`, `qa`, `rev`, `sec`,
+`val-harness` e `dba` versionam suas próprias alterações.
+Antes de commitar, devem carregar e seguir a skill
+`git-workflow-and-versioning`.
+
+O agente decide o ponto de commit conforme a skill: uma task
+isolada ou um conjunto coerente de duas ou três tasks pode
+formar uma unidade lógica. O plano não deve ser reorganizado
+para forçar commits. Cada commit deve conter somente arquivos
+sob responsabilidade do agente, passar pela higiene
+pré-commit e usar uma mensagem Conventional Commit descritiva.
+
+Essa autonomia de versionamento não altera a autoridade do
+humano sobre escopo, requisitos, decisões de produto ou
+aprovação do resultado. Agentes não executam `git push` sem
+confirmação explícita do humano.
+
 ### Especialidades
 
 | Agente | Planejamento | Construção | Validação |

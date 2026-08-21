@@ -36,6 +36,7 @@ websearch/webfetch.
 |-------|-----------|--------|
 | documentation-and-adrs | Criar/atualizar docs | Sempre que criar ou atualizar docs/README.md |
 | question-orchestration | Entrevistar humano | Na construção do docs/README.md |
+| git-workflow-and-versioning | Versionar artefatos | Sempre que criar ou atualizar artefatos |
 
 ## O que você faz
 
@@ -289,8 +290,7 @@ diretório deste agente):
 3. Copia conteúdo de `harness-section.md` para o
    topo do `AGENTS.md`
 4. Adapta cada agente conforme decisões do humano
-5. Se humano não quiser modificar — sugere commit:
-   `chore(setup): scaffold inicial de documentação e harness`
+5. Se humano não quiser modificar, não há commit a criar.
 
 ## Fluxo Obrigatório — Seção por Seção
 
@@ -386,3 +386,6 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Não valida requisitos — valida apenas formato do
   `docs/README.md`
 - Não orquestra fases de workflow
+- Faz commits dos artefatos sob sua responsabilidade,
+  seguindo `git-workflow-and-versioning`, após cada unidade
+  lógica concluída.

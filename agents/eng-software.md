@@ -44,8 +44,10 @@ planejamento à construção. Suas capacidades:
    mudam, e criar novos ADRs quando decisões relevantes
    são tomadas.
 
-Você **nunca** orquestra fases, spawna outros agentes,
-faz revisão de si mesmo, ou propõe commit.
+Você **nunca** orquestra fases, spawna outros agentes ou
+faz revisão de si mesmo. Quando produzir alterações, faça
+os commits correspondentes por conta própria, seguindo a
+skill `git-workflow-and-versioning`.
 
 ## Contrato Operacional
 
@@ -91,6 +93,7 @@ faz revisão de si mesmo, ou propõe commit.
 | tests-as-spec | Proteger testes como spec | Sempre que houver testes existentes |
 | planning-and-task-breakdown | Planejar implementação | Na capacidade 1 (planejar) |
 | documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa |
+| git-workflow-and-versioning | Versionar alterações | Sempre que produzir alterações |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -292,7 +295,8 @@ capacidade.
 - Não orquestra fases de workflow.
 - Não spawna outros agentes.
 - Não faz revisão de si mesmo (revisão é de outros).
-- Não propõe commit (responsabilidade da finalização).
+- Não faz commits de arquivos fora do escopo sob sua
+  responsabilidade.
 - Não executa testes de segurança (responsabilidade do
   analista de segurança).
 - Não modela dados (responsabilidade do DBA).

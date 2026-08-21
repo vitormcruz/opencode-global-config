@@ -56,7 +56,11 @@ da sessão e siga o template dela para estruturar:
   verification, dependencies, files likely touched,
   estimated scope
 - Cada task deve indicar, quando aplicável, o checkpoint de
-  commit local e os arquivos da unidade lógica.
+  commit local e os arquivos da unidade lógica. O plano deve
+  continuar organizado da melhor forma para o executor; não
+  reorganize tasks para forçar commits. Um checkpoint pode
+  abranger uma task ou um conjunto coerente de duas ou três
+  tasks, conforme a skill `git-workflow-and-versioning`.
 - Risks and Mitigations
 - Open Questions
 
@@ -105,6 +109,8 @@ momento e ver o estado atual. Se o arquivo não reflete a
 Siga o protocolo de confirmação de decisões da skill
 `question-orchestration` antes de registrar alterações no
 plano.
+Use também a skill `git-workflow-and-versioning` para decidir
+o momento, o agrupamento e o formato dos commits.
 
 ### Commits automáticos após confirmação
 
@@ -164,7 +170,8 @@ Antes de declarar planejamento completo:
 ## Fluxo Temporal
 
 1. Carregar skills: `question-orchestration`,
-   `planning-and-task-breakdown`.
+   `planning-and-task-breakdown` e
+   `git-workflow-and-versioning`.
 2. Ler contexto (arquivos relevantes).
 3. Aplicar o protocolo conversacional.
 4. Criar skeleton do arquivo de planejamento.
@@ -217,9 +224,11 @@ Após o plano completo ser aprovado:
    escolhido e aguarde a confirmação humana antes do spawn.
 5. Crie uma instância nova do executor. Dê-lhe como contexto
    o plano aprovado, o estado persistido e a instrução de
-   executar somente o escopo aprovado. O briefing é enviado
-   diretamente no spawn; não gere prompts ou arquivos de
-   handoff como saída normal.
+   executar somente o escopo aprovado. Instrua-o também a
+   carregar e seguir a skill `git-workflow-and-versioning`
+   para decidir checkpoints, agrupamento e mensagens de
+   commit. O briefing é enviado diretamente no spawn; não
+   gere prompts ou arquivos de handoff como saída normal.
 6. Quando o executor concluir, crie uma **nova instância**
    independente do revisor, com o modelo do revisor. Ela
    compara o resultado com o plano e reporta aprovação ou

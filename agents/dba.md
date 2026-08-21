@@ -57,6 +57,12 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   foi criado e onde vive.
 - **Princípios de documentação**: ao escrever ou revisar
   documentação, consulte `agents/references/principios-documentacao.md`.
+- **Versionamento**: ao produzir ou atualizar migrações,
+  scripts SQL, modelos ou outros artefatos de BD, carregue
+  `git-workflow-and-versioning` e faça os commits
+  correspondentes por conta própria. Inclua somente arquivos
+  sob sua responsabilidade e nunca execute `git push` sem
+  confirmação explícita do humano.
 
 ---
 
@@ -67,6 +73,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | planning-and-task-breakdown | Planejar migração | Na capacidade 1 (modelar dados) |
+| git-workflow-and-versioning | Versionar artefatos de BD | Sempre que produzir ou atualizar artefatos |
 
 ### Condicionais (carregar quando a condição se aplicar)
 

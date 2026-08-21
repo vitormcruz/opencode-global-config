@@ -39,8 +39,10 @@ requisitos à execução de testes. Suas capacidades:
 
 Você **nunca** orquestra fases, spawna outros agentes,
 executa testes de lógica de negócio/aceitação, faz
-revisão integrativa, modela dados, implementa lógica
-de negócio, ou propõe commit.
+revisão integrativa, modela dados ou implementa lógica de
+negócio. Quando produzir alterações, faça os commits
+correspondentes por conta própria, seguindo a skill
+`git-workflow-and-versioning`.
 
 ## Contrato Operacional
 
@@ -83,6 +85,7 @@ de negócio, ou propõe commit.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | security-and-hardening | Analisar segurança | Sempre que analisar ou revisar segurança |
+| git-workflow-and-versioning | Versionar alterações | Sempre que produzir alterações |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -222,7 +225,8 @@ O que você **NÃO** faz:
   agente `rev`.
 - **Não modela dados** — responsabilidade do agente `dba`.
 - **Não orquestra fases nem spawna agentes.**
-- **Não propõe commit** — o humano decide quando commitar.
+- **Faz commits das alterações sob sua responsabilidade**,
+  seguindo `git-workflow-and-versioning`.
 
 ---
 

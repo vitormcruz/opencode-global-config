@@ -182,6 +182,21 @@ def test_smart_planner_references_planning_skill(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
+def test_smart_planner_references_git_workflow_skill(repo_root: Path) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "git-workflow-and-versioning" in content
+
+
+@pytest.mark.unit
+def test_smart_planner_allows_commit_checkpoints_to_group_tasks(
+    repo_root: Path,
+) -> None:
+    content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    assert "duas ou três" in content
+    assert "não\n  reorganize tasks para forçar commits" in content
+
+
+@pytest.mark.unit
 def test_smart_planner_uses_question_orchestration(
     repo_root: Path,
 ) -> None:
