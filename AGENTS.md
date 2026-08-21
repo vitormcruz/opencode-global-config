@@ -167,6 +167,33 @@ As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 - Ao encontrar um timeout existente fora dessas exceções, informe o humano e
   não o altere silenciosamente.
 
+## Espera de tarefas: preferir determinismo a timeout
+
+Esta regra trata de como o próprio agente decide quanto tempo esperar por uma
+tarefa (execução de ferramenta, comando, processo externo) — diferente da
+seção "Proibição de timeouts genéricos" acima, que trata de timeout em código
+de aplicação.
+
+1. Timeout é um mecanismo ruim para resolver espera: frequentemente existe
+   solução melhor. Não trate timeout como primeira opção.
+2. Antes de escolher um timeout, avalie alternativa determinística: callback,
+   evento, pub/sub, polling orientado a condição (`wait-for`), async/await,
+   ou qualquer mecanismo que acorde o agente quando a tarefa realmente
+   terminar, em vez de adivinhar uma duração.
+3. Se o timeout for inevitável, ancore-o a um sinal de vida (streaming, log)
+   em vez de tempo cego:
+   - reduza o timeout ao mínimo necessário;
+   - se a tarefa gera log, configure-o para emitir progresso com frequência
+     curta, para que ausência de nova linha indique trava real (não apenas
+     "tarefa longa");
+   - avalie trava pela ausência de novo sinal, não pelo tempo total decorrido.
+4. Escalonamento: comece com o menor tempo de espera razoável e aumente aos
+   poucos, em incrementos fixos de 30 segundos, sem saltar direto para o teto
+   disponível.
+   - Até 30 segundos de espera, o agente pode decidir sozinho.
+   - Acima de 30 segundos, e em cada novo incremento de +30s subsequente,
+     peça confirmação explícita ao humano antes de aplicar o valor maior.
+
 # Exibição de Texto copie e cola
 - Sempre que for exibir um texto cuja inteção é permitir que ao usuário copiar e
   colar, faça isso em um bloco de código único para facilitar a cópia.
