@@ -186,3 +186,119 @@ def test_editor_does_not_reference_legacy_default_artifacts_path(
         encoding="utf-8"
     )
     assert "agents/default-artifacts" not in content
+
+
+@pytest.mark.unit
+def test_editor_allows_only_harness_specialists(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+
+    for agent in ("eng-software", "dba", "sec", "qa", "front", "rev"):
+        assert f"    {agent}: allow" in content
+    assert '    "*": deny' in content
+
+
+@pytest.mark.unit
+def test_editor_requires_five_questions_per_harness_check(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    for question in (
+        "outro check aprovado não pega",
+        "toolchain",
+        "tempo esperado",
+        "bloqueante ou melhoria",
+        "fingerprint SHA-256",
+    ):
+        assert question.lower() in normalized
+    assert "uma de cada vez" in normalized
+    assert "acumula" in normalized
+    assert "sem criar arquivo" in normalized
+
+
+@pytest.mark.unit
+def test_editor_documents_harness_time_budgets(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+
+    for ceiling in ("< 15s", "< 30s", "< 3 min", "< 10 min"):
+        assert ceiling in content
+
+
+@pytest.mark.unit
+def test_editor_spawns_specialist_before_implementing_check(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "não escreve o check sozinho" in normalized
+    assert "spawn" in normalized
+    for briefing_item in (
+        "interface JSON",
+        "checks aprovados",
+        "orçamento",
+        "bloqueante vs melhoria",
+        "afrouxar o gate",
+    ):
+        assert briefing_item.lower() in normalized
+
+
+@pytest.mark.unit
+def test_editor_documents_harness_interface_safety_contract(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    for requirement in (
+        "UTF-8",
+        "stderr",
+        "retry",
+        "até 3",
+        "failOnViolation=false",
+        "excluir teste",
+        "fail-open",
+        "cache sem fallback",
+    ):
+        assert requirement.lower() in normalized
+
+
+@pytest.mark.unit
+def test_editor_measures_before_recording_harness(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "mede o tempo de parede" in normalized
+    assert "só então grava" in normalized
+    assert "tabela tempo × status" in normalized
+    assert "fingerprint, retry ou retirada" in normalized
+
+
+@pytest.mark.unit
+def test_editor_requires_static_analysis_to_cover_test_code(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "código de teste entra no mesmo scan" in normalized
+    assert "mesmo nível de qualidade que produção" in normalized
+
+
+@pytest.mark.unit
+def test_editor_keeps_harness_catalog_as_reference(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "catálogo é só como referência" in normalized
+    assert "catálogo não grava check sozinho" in normalized
+    assert "agents.md" in normalized

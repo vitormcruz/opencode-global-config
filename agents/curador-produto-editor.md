@@ -13,6 +13,12 @@ permission:
   webfetch: deny
   websearch: deny
   task:
+    eng-software: allow
+    dba: allow
+    sec: allow
+    qa: allow
+    front: allow
+    rev: allow
     "*": deny
 ---
 
@@ -185,6 +191,8 @@ de harness e registra a tabela no `AGENTS.md`.
 Scripts criados por você devem seguir esta interface:
 
 - **Sem argumentos** — paths e configs internos
+- **UTF-8 forçado** em stdout/stderr. Ecoe o progresso em
+  stderr, sem ecoar a linha JSON do resultado.
 - **Saída stdout**: JSON:
   ```json
   {
@@ -201,6 +209,14 @@ Scripts criados por você devem seguir esta interface:
   ```
 - **Exit code**: 0 = pass, 1 = fail
 - **Idempotente**: mesmo script para construção e revisão
+- **Retry**: em falha transitória de rede, até 3 tentativas;
+  esgotado é finding bloqueante com instrução para chamar o
+  humano e resolver a rede.
+- **Proibições**: não bypassar verificações, usar
+  `failOnViolation=false`, excluir teste do scan, usar
+  fail-open em audit ou cache sem fallback. Ferramenta ausente
+  gera finding `melhoria` com instrução de instalação, salvo
+  se o humano retirar o check do escopo.
 
 **Pass-through**: se o humano não definiu ferramentas
 para um agente, o script retorna
@@ -342,7 +358,27 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Mostra o conteúdo padrão de CADA entrada ao humano.
 - Aguarda aprovação ou ajuste de CADA entrada antes de
   avançar.
-- Acumula todas as decisões sem criar nada.
+- Para cada candidato a check, faz cinco perguntas, uma de
+  cada vez:
+  1. Qual risco este check pega que outro check aprovado não
+     pega?
+  2. A ferramenta está no toolchain (wrapper, registry e
+     licença)? Se não puder ser usada ou o bootstrap não a
+     instalar, não entra no caminho feliz.
+  3. Qual o tempo esperado? Se não souber, mede um protótipo
+     antes de gravar no `AGENTS.md`.
+  4. É bloqueante ou melhoria? Finding bloqueante exige
+     caminho de resolução; timeout de rede não vira pass.
+  5. Se for caro e determinístico, prevê fingerprint SHA-256
+     e estado em `harness/target/` (não versionado), com
+     fallback para a suíte completa.
+- O catálogo é só como referência: o catálogo não grava check
+  sozinho. O harness efetivo fica no `AGENTS.md`.
+- Acumula todas as decisões sem criar arquivo.
+- Tetos sugeridos, ajustáveis pelo humano: check isolado
+  barato < 15s; harness quente (cache hit) < 30s; harness
+  frio aceitável < 3 min; soma dos seis no caminho quente
+  < 10 min. Estouro exige aprovação explícita e motivo.
 - Se o humano não quiser harness para um agente, registra
   `SEM HARNESS A PEDIDO DO HUMANO`.
 - Somente após TODOS os itens aprovados, cria os scripts
@@ -353,7 +389,18 @@ após cada seção. Nunca avance sem aprovação da anterior.
 
 - Aplica edições no `docs/README.md` conforme aprovado
   na Fase 2.
-- Cria os scripts de harness conforme aprovado na Fase 3.
+- Não escreve o check sozinho: faz spawn do especialista do
+  domínio (`eng-software`, `dba`, `sec`, `qa`, `front`, `rev`)
+  com briefing contendo interface JSON, checks aprovados,
+  orçamento, classificação bloqueante vs melhoria, cobertura
+  estática do código de teste (D9) e a proibição de afrouxar
+  o gate.
+- Mede o tempo de parede de cada ferramenta e devolve ao
+  humano uma tabela tempo × status; só então grava os scripts
+  e a tabela no `AGENTS.md`. Se estourar o orçamento, propõe
+  fingerprint, retry ou retirada; o humano escolhe.
+- Se houver análise estática, o código de teste entra no mesmo
+  scan e no mesmo nível de qualidade que produção (D9).
 - Atualiza a tabela no `AGENTS.md`.
 - Só declara `docs/README.md` concluído após aprovação
   explícita do humano em cada seção.
@@ -389,3 +436,6 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Faz commits dos artefatos sob sua responsabilidade,
   seguindo `git-workflow-and-versioning`, após cada unidade
   lógica concluída.
+- Não corta check sozinho: qualquer estouro de orçamento ou
+  retirada de check volta ao humano para decisão.
+- Não copia o catálogo sem entrevista e aprovação do humano.
