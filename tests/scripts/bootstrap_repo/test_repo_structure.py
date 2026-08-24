@@ -83,6 +83,13 @@ def test_all_skill_directories_have_skill_file(repo_root: Path) -> None:
     assert not missing, f"SKILL.md ausente em: {missing[0]}"
 
 
+def test_unused_upstream_skills_were_removed(repo_root: Path) -> None:
+    skills_root = repo_root / "skills"
+
+    assert not (skills_root / "caveman").exists()
+    assert not (skills_root / "grill-me").exists()
+
+
 @pytest.mark.parametrize(
     "skill_name",
     (
