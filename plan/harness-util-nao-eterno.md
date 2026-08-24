@@ -8,7 +8,7 @@ entrevista (5 perguntas), spawna o especialista, mede e só então
 grava; o curador continua guardião e valida depois. Sem scripts em
 `harness/` deste repo.
 
-Status: em execução.
+Status: execução concluída — aguardando revisor.
 
 ## Execution Models
 
@@ -94,37 +94,37 @@ testes. Sem timeout genérico novo.
 
 ### Phase 1: Contrato do editor
 
-- [ ] Task 1: Testes do contrato do editor
-- [ ] Task 2: Atualizar `curador-produto-editor.md`
+- [x] Task 1: Testes do contrato do editor
+- [x] Task 2: Atualizar `curador-produto-editor.md`
 
 ### Checkpoint: Editor
 
-- [ ] Testes novos do editor falham no código antigo e
+- [x] Testes novos do editor falham no código antigo e
       passam depois da Task 2
-- [ ] Testes antigos de fase/proibições continuam verdes
-- [ ] Commit local da unidade: testes + editor
+- [x] Testes antigos de fase/proibições continuam verdes
+- [x] Commit local da unidade: testes + editor
 
 ### Phase 2: Guardião
 
-- [ ] Task 3: Testes da validação pós-harness do curador
-- [ ] Task 4: Atualizar `curador-produto.md`
+- [x] Task 3: Testes da validação pós-harness do curador
+- [x] Task 4: Atualizar `curador-produto.md`
 
 ### Checkpoint: Guardião
 
-- [ ] Curador ainda não edita `AGENTS.md` / `harness/*`
-- [ ] Commit local: testes + curador
+- [x] Curador ainda não edita `AGENTS.md` / `harness/*`
+- [x] Commit local: testes + curador
 
 ### Phase 3: Sync e referência
 
-- [ ] Task 5: Sincronizar `docs/workflow-curadoria.md`
-- [ ] Task 6: Atualizar skill e `harness-section.md`
+- [x] Task 5: Sincronizar `docs/workflow-curadoria.md`
+- [x] Task 6: Atualizar skill e `harness-section.md`
 
 ### Checkpoint: Complete
 
 - [ ] `.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"`
-- [ ] Workflow e editor ainda compartilham os elementos
+- [x] Workflow e editor ainda compartilham os elementos
       já cobertos por `test_editor_and_workflow_contain_same_key_elements`
-- [ ] Commit local: workflow + skill + default-artifact
+- [x] Commit local: workflow + skill + default-artifact
 
 ---
 
@@ -137,17 +137,17 @@ antes de editar o agente. Não alterar asserts antigos
 (Fase 1–4, PROIBIDO criar script antes da Fase 3, etc.).
 
 **Acceptance criteria:**
-- [ ] Falham contra o editor atual
-- [ ] Cobrem: `task` allow dos 6 especialistas +
+- [x] Falham contra o editor atual
+- [x] Cobrem: `task` allow dos 6 especialistas +
       `"*": deny`; entrevista das 5 perguntas; tetos
       15s/30s/3 min/10 min; spawn do especialista;
       contrato D6 (UTF-8, stderr, retry 3, sem bypass);
       ciclo D8 (mede antes de gravar); D9 (estático
       cobre teste); D7 (catálogo é referência)
-- [ ] Sem `skip`
+- [x] Sem `skip`
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
       — novos testes FAIL, antigos PASS
 
 **Dependencies:** None
@@ -198,12 +198,12 @@ Passos:
    catálogo sem entrevista.
 
 **Acceptance criteria:**
-- [ ] Task 1 passa
-- [ ] Títulos Fase 3/4 intactos
-- [ ] Continua único a alterar `AGENTS.md` e `harness/*`
+- [x] Task 1 passa
+- [x] Títulos Fase 3/4 intactos
+- [x] Continua único a alterar `AGENTS.md` e `harness/*`
 
 **Verification:**
-- [ ] Mesmo pytest da Task 1 — tudo PASS
+- [x] Mesmo pytest da Task 1 — tudo PASS
 
 **Dependencies:** Task 1
 
@@ -225,17 +225,17 @@ arquivo, funções do `curador-produto`) cobrindo D2: o
 guardião valida depois e não edita.
 
 **Acceptance criteria:**
-- [ ] Texto do curador cita: orçamento aprovado;
+- [x] Texto do curador cita: orçamento aprovado;
       ferramenta morta (sempre `melhoria` por ausência);
       cache com fallback; finding bloqueante com
       instrução acionável
-- [ ] Continua sem validar requisitos e sem "Mapa do
+- [x] Continua sem validar requisitos e sem "Mapa do
       Produto" (asserts antigos)
-- [ ] Continua mandando o humano chamar o editor (não
+- [x] Continua mandando o humano chamar o editor (não
       edita, não entrevista check)
 
 **Verification:**
-- [ ] Novos testes FAIL antes da Task 4
+- [x] Novos testes FAIL antes da Task 4
 
 **Dependencies:** Task 2
 
@@ -256,13 +256,13 @@ docs/harness; mensagem pré-definida; bash só em
 `harness/`, `scripts/` e install de deps.
 
 **Acceptance criteria:**
-- [ ] Task 3 passa
-- [ ] Não ganha `task` de especialistas para criar
+- [x] Task 3 passa
+- [x] Não ganha `task` de especialistas para criar
       script (isso é do editor)
-- [ ] Achado → pedir ao humano chamar o editor
+- [x] Achado → pedir ao humano chamar o editor
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
 
 **Dependencies:** Task 3
 
@@ -284,20 +284,20 @@ Não reescrever Fase 1/2 nem o mermaid além do
 necessário.
 
 **Acceptance criteria:**
-- [ ] Fase 3 descreve as 5 perguntas e "acumula sem
+- [x] Fase 3 descreve as 5 perguntas e "acumula sem
       criar arquivo"
-- [ ] Fase 4 descreve spawn + medição + tabela + só
+- [x] Fase 4 descreve spawn + medição + tabela + só
       então gravar
-- [ ] Interface inclui D6 (UTF-8, stderr, retry, sem
+- [x] Interface inclui D6 (UTF-8, stderr, retry, sem
       bypass)
-- [ ] Catálogo citado como referência, harness efetivo
+- [x] Catálogo citado como referência, harness efetivo
       no `AGENTS.md`
-- [ ] `test_workflow_describes_standard_json_interface`
+- [x] `test_workflow_describes_standard_json_interface`
       e `test_workflow_does_not_contain_old_harness_interface`
       continuam verdes
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py -m unit`
 
 **Dependencies:** Task 4
 
@@ -330,15 +330,15 @@ Passos:
    versionado (fingerprint). Não listar ferramenta nova.
 
 **Acceptance criteria:**
-- [ ] Skill não afirma que harness efetivo fica no
+- [x] Skill não afirma que harness efetivo fica no
       `/doc/README.md`
-- [ ] Template não impõe ferramenta de catálogo
-- [ ] Scaffold/testes de `harness-section` (agentes na
+- [x] Template não impõe ferramenta de catálogo
+- [x] Scaffold/testes de `harness-section` (agentes na
       tabela, interface JSON, sem harness dos
       não-executores) continuam verdes
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py tests/agents/test_curador_produto_editor.py -m unit`
 
 **Dependencies:** Task 5
 
@@ -367,4 +367,3 @@ Passos:
 ## Open Questions
 
 Nenhuma — ramos D1–D9 resolvidos.
-

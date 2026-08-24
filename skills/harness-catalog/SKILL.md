@@ -17,7 +17,7 @@ description: >
 > **Nota importante:** as regras abaixo são referência de
 > domínio para orientar o humano na criação de harness.
 > **Não são regras obrigatórias.** O harness efetivo de
-> cada agente é definido no /doc/README.md de cada
+> cada agente é definido no `AGENTS.md` de cada
 > projeto.
 
 ## Interface Padronizada
@@ -40,6 +40,17 @@ idempotente) que retorna JSON:
 ```
 
 Exit code: 0 = pass, 1 = fail.
+
+### Regras de segurança da interface
+
+- Forçar UTF-8 em stdout/stderr e emitir progresso em stderr,
+  sem ecoar a linha JSON final.
+- Em falha transitória de rede, fazer retry até 3 vezes;
+  esgotado, retornar finding bloqueante com instrução para
+  resolver a rede.
+- Não bypassar verificações, usar `failOnViolation=false`,
+  excluir teste do scan, usar fail-open em audit ou cache sem
+  fallback.
 
 ## eng-software
 
@@ -76,7 +87,7 @@ Exit code: 0 = pass, 1 = fail.
 
 ## sec
 
-> Ferramentas efetivas: as do /doc/README.md. Abaixo
+> Ferramentas efetivas: as do `AGENTS.md`. Abaixo
 > é catálogo de referência.
 
 - **SAST obrigatório** `tool` `build · val`
@@ -143,11 +154,10 @@ Exit code: 0 = pass, 1 = fail.
 
 ## curador-produto
 
-- **Checklist do /doc/README.md** `prompt` `val`
+- **Checklist do AGENTS.md** `prompt` `val`
   Verificar se faltou atualizar documentação.
-
-- **Atualiza /doc/README.md diretamente** `prompt` `val`
-  Alterou estrutura/convenções → atualizar /doc/README.md.
+- **Atualiza AGENTS.md diretamente** `prompt` `val`
+  Alterou estrutura/convenções → atualizar AGENTS.md.
 
 - **Valida existência de harness** `prompt` `val`
   Todos os agentes devem ter harness registrado.

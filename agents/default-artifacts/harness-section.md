@@ -14,6 +14,9 @@
 
 > Ferramentas do projeto. Interface: saída JSON `{ status, findings[], prompt }`;
 > exit 0 = pass, exit 1 = fail.
+> Critérios, orçamento e ferramentas saem da entrevista do
+> editor (D4/D5). O estado de fingerprint/cache fica em
+> `harness/target/` e não é versionado.
 
 > **PROIBIDO/NAO PODE:** bypassar, comentar, remover ou condicionar
 > qualquer verificação do harness. Ferramenta ausente NAO justifica remoção —
@@ -27,7 +30,7 @@
 **Descrição:** Testes backend
 **O que deve conter:**
 - Comandos de teste específicos do projeto (unitários + integração)
-- Critérios de harness: [a definir com humano]
+- Critérios, orçamento e ferramentas: definidos na entrevista do editor (D4/D5)
 
 ### dba
 
@@ -37,7 +40,7 @@
 - Validação de existência de documentos de especificação
 - Validação de sintaxe de modelo de dados (DBML ou equivalente)
 - Prompt instrucional: verificar se o modelo reflete o schema atual e se alterações passaram pela aprovação do dba
-- Critérios de harness: [a definir com humano]
+- Critérios, orçamento e ferramentas: definidos na entrevista do editor (D4/D5)
 
 ### sec
 
@@ -48,7 +51,7 @@
 - Auditoria de dependências
 - Verificação de vulnerabilidades conhecidas
 - Prompt instrucional: revisar OWASP Top 10 aplicável ao projeto
-- Critérios de harness: [a definir com humano]
+- Critérios, orçamento e ferramentas: definidos na entrevista do editor (D4/D5)
 
 ### qa
 
@@ -58,7 +61,7 @@
 - Relatório de cobertura de testes
 - Verificação de acessibilidade
 - Prompt instrucional: revisar cobertura dos critérios de aceitação e resultado dos testes manuais
-- Critérios de harness: [a definir com humano]
+- Critérios, orçamento e ferramentas: definidos na entrevista do editor (D4/D5)
 
 ### front
 
@@ -70,7 +73,7 @@
 - Build
 - Verificação de acessibilidade
 - Prompt instrucional: verificar aderência à identidade visual aprovada
-- Critérios de harness: [a definir com humano]
+- Critérios, orçamento e ferramentas: definidos na entrevista do editor (D4/D5)
 
 ### analista
 

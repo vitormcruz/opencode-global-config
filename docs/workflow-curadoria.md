@@ -274,6 +274,13 @@ documentar e como manter:
   ```
 
 - **Exit code**: 0 = pass, 1 = fail.
+- **UTF-8 forçado** em stdout/stderr; progresso vai para
+  stderr, sem ecoar a linha JSON final.
+- **Retry** de falha transitória de rede: até 3 tentativas;
+  esgotado é finding bloqueante com instrução para chamar o
+  humano e resolver a rede.
+- **Proibições**: bypass, `failOnViolation=false`, excluir
+  teste do scan, fail-open em audit e cache sem fallback.
 - **Versionamento**: scripts entram no git como artefatos
   do projeto.
 - **Idempotente**: o mesmo script roda em construção e
@@ -382,6 +389,15 @@ fluxo em 4 fases com aprovação do humano:
 - Aguarda aprovação ou ajuste de CADA entrada antes de
   avançar.
 - Acumula todas as decisões sem criar nada.
+- Para cada candidato a check, faz cinco perguntas, uma de
+  cada vez: qual risco novo ele cobre; se a ferramenta está
+  no toolchain e pode ser usada; qual o tempo esperado (ou
+  mede um protótipo); se é bloqueante ou melhoria e qual o
+  caminho de resolução; e se, sendo caro e determinístico,
+  precisa de fingerprint SHA-256 em `harness/target/` com
+  fallback para a suíte completa.
+- O catálogo é apenas referência; o harness efetivo será
+  definido pelo humano no `AGENTS.md`.
 - **PROIBIDO criar scripts antes da Fase 3 estar 100%
   concluída.** Somente após TODOS os itens aprovados,
   cria scripts para os harnesses definidos. Entradas
@@ -392,7 +408,15 @@ fluxo em 4 fases com aprovação do humano:
 
 - Aplica edições no `docs/README.md` conforme aprovado
   na Fase 2.
-- Cria os scripts de harness conforme aprovado na Fase 3.
+- Spawna o especialista de cada agente com harness e briefing
+  contendo interface JSON, checks aprovados, orçamento,
+  severidade bloqueante vs melhoria e proibição de afrouxar
+  o gate.
+- Mede o tempo de parede de cada ferramenta, devolve ao
+  humano uma tabela tempo × status e só então grava o script
+  e a tabela no `AGENTS.md`.
+- Se o orçamento estourar, propõe fingerprint, retry ou
+  retirada; o humano decide.
 - Registra tabela no topo do `AGENTS.md`.
 - **Instalação de dependências** — quando todas as
   entradas de harness tiverem decisão explícita, identifica
