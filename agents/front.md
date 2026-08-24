@@ -88,6 +88,8 @@ conta própria, seguindo a skill
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | frontend-ui-engineering | Implementar UI | Sempre que implementar componentes visuais |
+| clean-code | Implementar UI | Sempre que escrever código de UI |
+| code-simplification | Implementar UI | Sempre que escrever código de UI |
 | accessibility-audit | Garantir acessibilidade | Sempre que produzir componentes visuais |
 | git-workflow-and-versioning | Versionar alterações | Sempre que produzir alterações |
 
@@ -95,7 +97,6 @@ conta própria, seguindo a skill
 
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
-| code-simplification | Simplificar componentes | No gate de refatoração de componentes |
 | performance-optimization | Otimizar performance de UI | Quando há requisitos de Core Web Vitals ou bundle size |
 | reliable-async-operations | Implementar UI | Quando o componente dispara chamada assíncrona (fetch, API, promise, polling) com duração incerta |
 
@@ -198,8 +199,10 @@ Desvios visuais: pare e pergunte.
 **ANTES** de implementar componentes, carregue a
 skill `frontend-ui-engineering` — ela define padrões
 de acessibilidade, responsividade e boas práticas de
-UI. Carregue também `accessibility-audit` para o
-checklist de conformidade WCAG. Se o componente
+UI. Carregue `clean-code` e `code-simplification`
+antes de escrever código de UI. Carregue também
+`accessibility-audit` para o checklist de conformidade
+WCAG. Se o componente
 disparar chamada assíncrona de duração incerta (fetch,
 API, promise, polling), carregue
 `reliable-async-operations` **antes** de implementá-lo
@@ -280,7 +283,10 @@ do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
 script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal.
+code + stdout) como evidência principal. **Exceção:**
+se a tarefa for revisão sem alteração de artefatos, não
+executar o script; persistir
+`sem modificações — harness não executado`.
 
 **Se não há scripts** — produzir checklist estruturado:
 

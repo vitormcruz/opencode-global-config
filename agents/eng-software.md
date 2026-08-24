@@ -90,6 +90,8 @@ skill `git-workflow-and-versioning`.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | test-driven-development | Construir via TDD | Sempre que escrever código produtivo |
+| clean-code | Construir via TDD | Sempre que escrever código produtivo |
+| code-simplification | Construir via TDD | Sempre que escrever código produtivo |
 | tests-as-spec | Proteger testes como spec | Sempre que houver testes existentes |
 | planning-and-task-breakdown | Planejar implementação | Na capacidade 1 (planejar) |
 | documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa |
@@ -100,7 +102,6 @@ skill `git-workflow-and-versioning`.
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
 | api-and-interface-design | Planejar implementação | Quando a tarefa envolver API ou interface pública |
-| code-simplification | Refatorar código | No gate de refatoração |
 | code-review-and-quality | Aplicar ajustes integrativos | Na capacidade 3 (ajustes de revisão) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham ou build quebra |
 | performance-optimization | Otimizar performance | Quando há requisitos de performance |
@@ -183,8 +184,8 @@ Implementar código seguindo o ciclo red-green-refactor.
    existentes).
 3. Todos devem passar. Se algum existente falhar, ver
    regra "Testes existentes são intocáveis" (harness).
-4. Aplicar clean code, 12Factor e pirâmide de testes
-   conforme contexto.
+4. Aplicar `clean-code` e `code-simplification`. Também
+   12Factor e pirâmide de testes conforme contexto.
 
 #### Etapa 3 — Gate de refatoração
 
@@ -212,9 +213,10 @@ desviam do plano: pare e pergunte.
 **ANTES** de escrever testes, carregue a skill
 `test-driven-development` — ela define o ciclo
 red-green-refactor e padrões de teste.
-No gate de refatoração, carregue
-`code-simplification` para critérios de
-simplificação. Se o código a escrever depender de operação
+**ANTES** de escrever código produtivo, carregue
+`clean-code` e `code-simplification`. Elas são
+obrigatórias em toda construção. Se o código a
+escrever depender de operação
 de duração incerta (processo externo, chamada de rede,
 async/await, fila, lock, polling), carregue
 `reliable-async-operations` **antes** de escrevê-lo —
@@ -271,7 +273,10 @@ do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
 script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal.
+code + stdout) como evidência principal. **Exceção:**
+se a tarefa for revisão sem alteração de artefatos, não
+executar o script; persistir
+`sem modificações — harness não executado`.
 
 **Se não há scripts** — produzir checklist estruturado:
 
