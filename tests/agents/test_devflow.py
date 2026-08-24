@@ -111,3 +111,13 @@ def test_devflow_contract_does_not_instruct_agents_to_use_grill_me(
 
     contract_window = "\n".join(lines[start : start + 21])
     assert "grill-me" not in contract_window
+
+
+@pytest.mark.unit
+def test_devflow_skips_review_harness_without_modification(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+
+    assert "sem modificações — harness não executado" in content
+    assert "não modificou" in content

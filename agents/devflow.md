@@ -134,7 +134,11 @@ Ao spawnar um agente, instrua-o a:
 3. Persistir evidências de harness na seção
    `## Evidências de Harness — <fase>` do arquivo
    **(apenas nas fases de Construção e
-   Revisão da Construção)**.
+   Revisão da Construção)**. Na Revisão da
+   Construção, se o agente não modificou
+   artefatos, persistir
+   `sem modificações — harness não executado`
+   em vez de executar o script.
 
 4. **Nas fases de planejamento** (PLANEJAMENTO e
    REVISÃO DO PLANO), valide cada decisão não-trivial

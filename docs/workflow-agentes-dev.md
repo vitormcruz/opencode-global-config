@@ -537,8 +537,12 @@ Premissas detalhadas: 21.1–21.3.
     manutenção do harness são responsabilidade do
     `curador-produto-editor` conforme descrito em
     `docs/workflow-curadoria.md`. Harness é **obrigatório
-    na construção e na revisão da construção** para agentes
-    com harness definido. Agentes marcados
+    na construção** para agentes com harness definido. Na
+    **revisão da construção**, o harness só é obrigatório
+    se o agente **modificou** algum artefato. Sem
+    modificação, o agente não executa o script e registra
+    `sem modificações — harness não executado` na seção
+    de evidências. Agentes marcados
     `SEM HARNESS A PEDIDO DO HUMANO` não executam harness.
     **Harness não se aplica ao planejamento nem à revisão
     do plano.** Implementado como
@@ -548,19 +552,24 @@ Premissas detalhadas: 21.1–21.3.
     ao iniciar uma tarefa na construção ou revisão da
     construção, o agente localiza o Harness no AGENTS.md
     do projeto e verifica se há harness configurado para
-    ele. Se houver comando registrado, executa o script.
-    Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-    segue sem harness. Se a seção não existir ou estiver
-    vazia, registra LACUNA e não prossegue até o humano
-    definir a política.
+    ele. Se a seção contiver `SEM HARNESS A PEDIDO DO
+    HUMANO`, segue sem harness. Se a seção não existir ou
+    estiver vazia, registra LACUNA e não prossegue até o
+    humano definir a política. Se houver comando
+    registrado: na construção, executa o script; na
+    revisão da construção, executa somente se modificar
+    algum artefato.
 34. **Evidência de execução do harness** — todo agente
-    que possui harness deve produzir, ao final da sua
-    execução, a saída JSON do script como evidência.
-    O JSON contém `status`, `findings` e `prompt`.
-    A saída é persistida no arquivo de planejamento.
-    Se `fail`: o agente lê `findings`, tenta resolver e
-    roda o harness novamente. Se `pass`: lê `prompt` e
-    executa se houver.
+    que possui harness e o executou deve produzir, ao
+    final da sua execução, a saída JSON do script como
+    evidência. O JSON contém `status`, `findings` e
+    `prompt`. A saída é persistida no arquivo de
+    planejamento. Se `fail`: o agente lê `findings`, tenta
+    resolver e roda o harness novamente. Se `pass`: lê
+    `prompt` e executa se houver. Na revisão da
+    construção, se não houve modificação, persiste
+    `sem modificações — harness não executado` no lugar
+    do JSON.
 35. **Validação de harness pelo `val-harness`** — ao
     final das fases de **Construção** e **Revisão da
     Construção** (quando houve modificações), `devflow`
@@ -569,6 +578,8 @@ Premissas detalhadas: 21.1–21.3.
     planejamento com o AGENTS.md do projeto.
     Para cada agente que atuou na fase:
     - Se harness definido e evidência presente → OK.
+    - Se harness definido e evidência
+      `sem modificações — harness não executado` → OK.
     - Se harness definido e evidência ausente/incompleta
       → FALHA (lista o que falta).
     - Se `SEM HARNESS A PEDIDO DO HUMANO` → OK.
@@ -583,10 +594,11 @@ Premissas detalhadas: 21.1–21.3.
 
 > **Resumo da sequência harness:**
 > agente localiza comando de harness no AGENTS.md (P33) →
-> executa script (sem argumentos, idempotente) →
+> na construção, executa sempre; na revisão da construção,
+> só executa se modificou (P32) →
 > se `fail`: resolve findings e re-executa →
 > se `pass`: lê prompt e executa se houver →
-> persiste saída JSON na seção dedicada do arquivo (P34)
+> persiste saída JSON ou o registro de skip (P34)
 > → `val-harness` valida em lote ao final da Construção
 > e Revisão da Construção, se houve modificações (P35)
 > → `devflow` decide ação sobre falhas.

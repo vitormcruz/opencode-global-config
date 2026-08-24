@@ -82,6 +82,9 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
             "(eng-software.md)"
         )
 
+    assert "sem modificações — harness não executado" in baseline
+    assert "revisão sem alteração de artefatos" in baseline
+
 
 @pytest.mark.unit
 def test_commit_enabled_agents_use_git_workflow_skill(repo_root: Path) -> None:

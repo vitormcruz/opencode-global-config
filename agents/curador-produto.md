@@ -147,8 +147,9 @@ contém as 3 seções obrigatórias.
 
 - **Elementos**: specs seguem formato/destino/agente da
   tabela de Elementos de Especificação?
-- **Harness**: agente executou seu script? Evidência JSON
-  no arquivo de planejamento?
+- **Harness**: se o agente modificou artefatos, executou
+  o script e há evidência JSON? Sem modificação, há o
+  registro `sem modificações — harness não executado`?
 
 > **Nota:** a Definição de Escopo NÃO é verificada pelo
 > curador nas revisões do dev. Ela é usada pelo analista

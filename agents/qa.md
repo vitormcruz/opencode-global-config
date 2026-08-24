@@ -222,7 +222,10 @@ do arquivo de planejamento** (quando houver arquivo).
 
 **Se o harness do projeto define scripts** — executar o
 script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal.
+code + stdout) como evidência principal. **Exceção:**
+se a tarefa for revisão sem alteração de artefatos, não
+executar o script; persistir
+`sem modificações — harness não executado`.
 
 **Se não há scripts** — produzir checklist estruturado:
 

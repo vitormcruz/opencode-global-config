@@ -81,8 +81,10 @@ agentes que atuaram nela produziram evidências completas.
 3. Para cada agente que atuou na fase:
    - **Harness definido** → verificar se há evidência
      correspondente na seção. Evidência presente e
-     completa = OK. Evidência ausente ou incompleta =
-     FALHA (listar o que falta).
+     completa = OK. Evidência
+     `sem modificações — harness não executado` = OK.
+     Evidência ausente ou incompleta = FALHA (listar
+     o que falta).
    - **`SEM HARNESS A PEDIDO DO HUMANO`** → verificar
      apenas que essa decisão foi respeitada = OK.
     - **Seção ausente/vazia no AGENTS.md** → reportar como
@@ -105,6 +107,7 @@ agentes que atuaram nela produziram evidências completas.
 |--------|-----------------|-----------|--------|
 | eng-software | Definido | Presente e completa | ✅ OK |
 | dba | Definido | Ausente | ❌ FALHA |
+| qa | Definido | sem modificações — harness não executado | ✅ OK |
 | sec | SEM HARNESS A PEDIDO DO HUMANO | — | ✅ OK |
 | front | Não definido | — | ⚠️ LACUNA |
 
