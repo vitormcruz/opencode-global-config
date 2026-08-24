@@ -8,7 +8,12 @@ entrevista (5 perguntas), spawna o especialista, mede e só então
 grava; o curador continua guardião e valida depois. Sem scripts em
 `harness/` deste repo.
 
-Status: plano completo — aguardando aprovação humana.
+Status: em execução.
+
+## Execution Models
+
+- Executor: `gpt-5.6-luna`
+- Revisor: `claude-sonnet-4.6`
 
 ## Architecture Decisions
 
