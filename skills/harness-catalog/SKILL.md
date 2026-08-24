@@ -4,7 +4,7 @@ description: >
   Catálogo de referência com sugestões de harness por agente
   (eng-software, dba, sec, qa, rev, front, curador-produto).
   Use quando: criando ou atualizando harness de agentes,
-  definindo regras de contenção para o /doc/README.md,
+  definindo harness efetivo no AGENTS.md,
   configurando ferramentas determinísticas para script
   único por agente. Triggers: "harness", "catálogo de
   harness", "sugestões de harness", "regras de contenção",
