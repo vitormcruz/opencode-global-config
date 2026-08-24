@@ -151,6 +151,25 @@ contém as 3 seções obrigatórias.
   o script e há evidência JSON? Sem modificação, há o
   registro `sem modificações — harness não executado`?
 
+### Validação pós-harness
+
+Depois da construção ou revisão da construção, o curador
+valida a evidência do harness contra o orçamento aprovado:
+
+- Confirma os tetos e o status de cada ferramenta.
+- Ferramenta ausente ou morta é sempre finding `melhoria`,
+  com instrução de instalação ou substituição.
+- Cache só é válido quando existe fingerprint e fallback
+  para a suíte completa.
+- Um finding bloqueante precisa de instrução acionável para
+  resolver o problema; falha de rede esgotada não vira
+  `pass`.
+
+O curador não entrevista sobre checks, não escreve scripts e
+não corta verificações. Não edita `AGENTS.md` nem
+`harness/*`; ao encontrar um achado, pede ao humano chamar
+o `curador-produto-editor` para decidir e aplicar a correção.
+
 > **Nota:** a Definição de Escopo NÃO é verificada pelo
 > curador nas revisões do dev. Ela é usada pelo analista
 > no workflow de Definição de Escopo (início) para

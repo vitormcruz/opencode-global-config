@@ -302,3 +302,37 @@ def test_editor_keeps_harness_catalog_as_reference(repo_root: Path) -> None:
     assert "catálogo é só como referência" in normalized
     assert "catálogo não grava check sozinho" in normalized
     assert "agents.md" in normalized
+
+
+@pytest.mark.unit
+def test_curador_validates_harness_after_construction_without_editing(
+    repo_root: Path,
+) -> None:
+    content = agent_file(repo_root, "curador-produto").read_text(encoding="utf-8")
+    normalized = " ".join(content.split()).lower()
+
+    for requirement in (
+        "orçamento aprovado",
+        "ferramenta ausente",
+        "melhoria",
+        "cache",
+        "fallback",
+        "finding bloqueante",
+        "instrução acionável",
+    ):
+        assert requirement in normalized
+    assert "depois" in normalized
+    assert "não edita" in normalized
+    assert "agents.md" in normalized
+    assert "harness/*" in normalized
+    assert "chamar `curador-produto-editor`" in normalized
+
+
+@pytest.mark.unit
+def test_curador_does_not_interview_or_create_harness_checks(repo_root: Path) -> None:
+    content = agent_file(repo_root, "curador-produto").read_text(encoding="utf-8")
+    normalized = " ".join(content.split()).lower()
+
+    assert "não entrevista" in normalized
+    assert "não escreve scripts" in normalized
+    assert "não corta verificações" in normalized
