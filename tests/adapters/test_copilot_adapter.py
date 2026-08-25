@@ -41,6 +41,108 @@ def test_copilot_adapter_converts_agent_frontmatter(
 
 
 @pytest.mark.unit
+def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "curador-produto-editor.agent.md"
+    ).read_text(encoding="utf-8")
+    assert "name: curador-produto-editor" in agent
+    assert "dba, eng-software, front, qa, rev, sec" in agent
+    assert "agent_type" in agent
+    assert "model` e opcional" in agent
+    assert "gpt-5.6-luna" not in agent
+
+
+@pytest.mark.unit
+def test_copilot_adapter_hides_agent_tool_when_task_allowlist_has_only_model_ids(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    agents = repo / "agents"
+    agents.mkdir(parents=True)
+    (repo / "commands").mkdir()
+    (repo / "skills").mkdir()
+    (repo / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / ".github").mkdir()
+    (agents / "planner.md").write_text(
+        """---
+description: Planner
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  websearch: deny
+  task:
+    gpt-5.6-luna: allow
+    "*": deny
+---
+Planner
+""",
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "planner.agent.md"
+    ).read_text(encoding="utf-8")
+    assert 'tools: ["read", "search"]' in agent
+    assert "gpt-5.6-luna" not in agent
+
+
+@pytest.mark.unit
+def test_copilot_adapter_keeps_builtin_agent_type_in_task_allowlist(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    agents = repo / "agents"
+    agents.mkdir(parents=True)
+    (repo / "commands").mkdir()
+    (repo / "skills").mkdir()
+    (repo / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / ".github").mkdir()
+    (agents / "planner.md").write_text(
+        """---
+description: Planner
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  websearch: deny
+  task:
+    explore: allow
+    gpt-5.6-luna: allow
+    "*": deny
+---
+Planner
+""",
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "planner.agent.md"
+    ).read_text(encoding="utf-8")
+    assert 'tools: ["read", "search", "agent"]' in agent
+    assert "`explore`" in agent
+    assert "gpt-5.6-luna" not in agent
+
+
+@pytest.mark.unit
 def test_copilot_adapter_materializes_inherited_agent_permissions(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
@@ -69,7 +171,10 @@ def test_copilot_adapter_materializes_smart_planner_subagent_capability(
     agent = (
         tmp_path / ".copilot" / "agents" / "smart-planner.agent.md"
     ).read_text(encoding="utf-8")
-    assert 'tools: ["read", "edit", "execute", "search", "agent"]' in agent
+    assert (
+        'tools: ["read", "edit", "execute", "search", "web", "agent"]'
+        in agent
+    )
 
 
 @pytest.mark.unit

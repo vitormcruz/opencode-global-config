@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Collection, Sequence
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime
 import json
@@ -31,7 +31,22 @@ Opcoes:
 """
 
 _SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-_AGENT_PERMISSIONS = ("edit", "bash", "webfetch", "websearch", "task")
+_TOOL_PERMISSIONS = ("edit", "bash", "webfetch", "websearch")
+_COPILOT_BUILTIN_AGENT_TYPES = frozenset(
+    {
+        "code-review",
+        "explore",
+        "general-purpose",
+        "research",
+        "security-review",
+        "task",
+    }
+)
+_MODEL_ID = re.compile(
+    r"^(?:gpt-\d|claude-(?:sonnet|opus|haiku)-|gemini-\d|"
+    r"o\d|kimi-k|grok-\d|mai-code|luna$)",
+    re.IGNORECASE,
+)
 _COMMAND_DESCRIPTIONS = {
     "index-codebase": (
         "Indexa repo no codebase-memory. Ative quando humano pedir "
@@ -56,6 +71,77 @@ def _permission_is_denied(value: str) -> bool:
     """Detecta deny em permissoes simples e regras estruturadas de task."""
 
     return re.search(r"\bdeny\b", value) is not None
+
+
+def _allowed_agent_types(
+    task_rules: dict[str, str],
+    available_agent_types: Collection[str],
+) -> list[str]:
+    """Converte a política OpenCode em uma allowlist de agent_type."""
+
+    wildcard = task_rules.get("*")
+    if wildcard == "deny":
+        allowed = {
+            agent_type
+            for agent_type, decision in task_rules.items()
+            if agent_type != "*"
+            and decision == "allow"
+            and agent_type in available_agent_types
+        }
+    else:
+        allowed = set(available_agent_types)
+        for agent_type, decision in task_rules.items():
+            if agent_type == "*":
+                continue
+            if decision == "deny":
+                allowed.discard(agent_type)
+            elif decision == "allow" and agent_type in available_agent_types:
+                allowed.add(agent_type)
+
+    return sorted(allowed)
+
+
+def _is_agent_type(value: str) -> bool:
+    """Impede que identificadores de modelos entrem no vocabulário de agentes."""
+
+    return not _MODEL_ID.match(value)
+
+
+def _delegation_instructions(allowed_agent_types: Collection[str]) -> list[str]:
+    """Descreve a chamada Copilot task sem confundir agente e modelo."""
+
+    if not allowed_agent_types:
+        return []
+
+    # O frontmatter do Copilot oferece apenas o alias generico `agent`; a
+    # allowlist precisa ser publicada no contrato de delegacao do perfil.
+    agent_types = ", ".join(allowed_agent_types)
+    return [
+        "",
+        "## Delegacao de subagentes",
+        "",
+        "Use a ferramenta `task` somente com estes `agent_type` Copilot:",
+        f"`{agent_types}`.",
+        "",
+        "Os campos `prompt`, `description`, `name` e `mode` "
+        "(`sync` ou `background`) sao separados.",
+        "O campo `model` e opcional: omita-o para usar o modelo padrao "
+        "do agente ou da sessao; quando usado, informe um ID de modelo, "
+        "nunca um `agent_type`.",
+        "",
+        "Formato da chamada:",
+        "```text",
+        "task(",
+        '  agent_type="<um agent_type permitido>",',
+        '  prompt="<instrucoes>",',
+        '  description="<resumo>",',
+        '  name="<nome opcional>",',
+        '  mode="sync",',
+        '  model="<ID de modelo opcional>",',
+        ")",
+        "```",
+        "",
+    ]
 
 
 def _resolve_repo_root(explicit: str | None) -> Path:
@@ -125,8 +211,13 @@ def _write_utf8(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def convert_agent_frontmatter(content: str) -> str:
-    """Converte permissões OpenCode para o campo tools do Copilot."""
+def convert_agent_frontmatter(
+    content: str,
+    *,
+    agent_type: str | None = None,
+    available_agent_types: Collection[str] | None = None,
+) -> str:
+    """Converte o frontmatter OpenCode para um perfil Copilot CLI."""
 
     lines = content.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -142,6 +233,7 @@ def convert_agent_frontmatter(content: str) -> str:
     description: list[str] = []
     in_description = False
     permissions: dict[str, str] = {}
+    task_rules: dict[str, str] = {}
     current_permission: str | None = None
     mode: str | None = None
 
@@ -171,15 +263,42 @@ def convert_agent_frontmatter(content: str) -> str:
             )
             continue
 
-        if current_permission == "task" and re.match(r"^\s{4}", line):
-            permissions["task"] = line.strip().lower()
+        if current_permission == "task":
+            task_match = re.match(
+                r'^\s{4}(?:"([^"]+)"|(\*|[A-Za-z0-9._-]+)):\s*'
+                r"(allow|deny)\s*$",
+                line,
+            )
+            if task_match:
+                task_rules[task_match.group(1) or task_match.group(2)] = (
+                    task_match.group(3)
+                )
+                continue
+
+            scalar_task = permissions.get("task", "")
+            if scalar_task in {"allow", "deny"}:
+                task_rules["*"] = scalar_task
 
     # In OpenCode, omitted permissions inherit the default capability. Copilot
     # needs that capability listed explicitly in `tools`; only explicit deny
     # removes it from the converted agent.
     effective_permissions = {
-        name: permissions.get(name, "allow") for name in _AGENT_PERMISSIONS
+        name: permissions.get(name, "allow") for name in _TOOL_PERMISSIONS
     }
+
+    available_agent_types = (
+        {
+            value
+            for value in available_agent_types
+            if _is_agent_type(value)
+        }
+        if available_agent_types is not None
+        else set(_COPILOT_BUILTIN_AGENT_TYPES)
+    )
+    allowed_agent_types = _allowed_agent_types(
+        task_rules,
+        available_agent_types,
+    )
 
     tools = ["read"]
     if not _permission_is_denied(effective_permissions["edit"]):
@@ -192,7 +311,7 @@ def convert_agent_frontmatter(content: str) -> str:
         or not _permission_is_denied(effective_permissions["websearch"])
     ):
         tools.append("web")
-    if not _permission_is_denied(effective_permissions["task"]):
+    if allowed_agent_types:
         tools.append("agent")
 
     if not description:
@@ -201,15 +320,23 @@ def convert_agent_frontmatter(content: str) -> str:
     converted = [
         "---",
         "\n".join(description).rstrip(),
-        f"tools: {json.dumps(tools)}",
     ]
+    if agent_type:
+        converted.append(f"name: {agent_type}")
+    converted.extend(
+        [
+            f"tools: {json.dumps(tools)}",
+        ]
+    )
     if mode == "subagent":
         converted.append("user-invocable: false")
     converted.append("---")
 
     body = "\n".join(lines[end + 1:])
+    body_lines = _delegation_instructions(allowed_agent_types)
     if body:
-        converted.append(body)
+        body_lines.extend(["", body])
+    converted.extend(body_lines)
     return "\n".join(converted) + "\n"
 
 
@@ -316,14 +443,20 @@ def _sync_agents(
     output("")
     output("--- Agents ---")
     agents_dir.mkdir(parents=True, exist_ok=True)
+    sources = sorted((repository / "agents").glob("*.md"))
+    available_agent_types = _COPILOT_BUILTIN_AGENT_TYPES | {
+        source.stem for source in sources
+    }
     count = 0
-    for source in sorted((repository / "agents").glob("*.md")):
+    for source in sources:
         destination = agents_dir / f"{source.stem}.agent.md"
         _backup_if_exists(destination, backup_dir)
         _write_utf8(
             destination,
             convert_agent_frontmatter(
-                source.read_text(encoding="utf-8")
+                source.read_text(encoding="utf-8"),
+                agent_type=source.stem,
+                available_agent_types=available_agent_types,
             ),
         )
         output(f"OK    {destination.name}")
