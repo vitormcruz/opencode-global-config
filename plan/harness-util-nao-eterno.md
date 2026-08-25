@@ -8,7 +8,7 @@ entrevista (5 perguntas), spawna o especialista, mede e só então
 grava; o curador continua guardião e valida depois. Sem scripts em
 `harness/` deste repo.
 
-Status: incremento 2 em execução (luna / sonnet).
+Status: incremento 2 execução concluída — aguardando revisor.
 
 Incremento 1 (D1–D9, A1) encerrado tecnicamente. Este
 incremento altera o resultado: artefatos auto-contidos,
@@ -153,23 +153,23 @@ testes. Sem timeout genérico novo.
 
 ### Phase 4: Incremento 2 — artefato e Fase 3
 
-- [ ] Task 7: Ajustar testes D10–D12
-- [ ] Task 8: Reescrever Fase 3/4 do editor (e eco no curador se
+- [x] Task 7: Ajustar testes D10–D12
+- [x] Task 8: Reescrever Fase 3/4 do editor (e eco no curador se
       `docs/harness.md` entrar na validação)
 
 ### Checkpoint: Editor incremento 2
 
-- [ ] Sem `D9`/`D4`/`uma de cada vez` nos artefatos produtivos
-- [ ] Commit: testes + editor (+ curador se tocado)
+- [x] Sem `D9`/`D4`/`uma de cada vez` nos artefatos produtivos
+- [x] Commit: testes + editor (+ curador se tocado)
 
 ### Phase 5: Sync incremento 2
 
-- [ ] Task 9: Workflow + skill + template
+- [x] Task 9: Workflow + skill + template
 
 ### Checkpoint: Incremento 2 completo
 
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
-- [ ] Commit: workflow + skill + template
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
+- [x] Commit: workflow + skill + template
 - [ ] Plano deste arquivo sai só no commit final da unidade
       lógica **depois** da aprovação do revisor (D10) — o
       executor **não** remove o plano agora
@@ -409,27 +409,27 @@ apagar cobertura dos 5 pontos, tetos, spawn, D6, estático
 em teste. Trocar o *como* da Fase 3 e a coleta de métrica.
 
 **Acceptance criteria:**
-- [ ] `test_editor_requires_five_questions_per_harness_check`
+- [x] `test_editor_requires_five_questions_per_harness_check`
       deixa de exigir `"uma de cada vez"`. Passa a exigir
       que o editor: (a) se o template foi aceito, não
       reperguntar cada entrada; (b) se o humano oferece
       ferramenta, analisa os 5 pontos e apresenta parecer;
       (c) se pede sugestão, mostra as melhores com essas
       considerações; (d) sugere medir tempos reais
-- [ ] Os 5 pontos continuam no texto (risco, toolchain,
+- [x] Os 5 pontos continuam no texto (risco, toolchain,
       tempo, bloqueante/melhoria, fingerprint)
-- [ ] `test_editor_measures_before_recording_harness` deixa
+- [x] `test_editor_measures_before_recording_harness` deixa
       de exigir `"tabela tempo × status"` inventada na mão.
       Passa a exigir: orientar o humano a criar um coletor
       (script ou equivalente); coletor gera
       `docs/harness.md`; humano aprova o coletor; só então
       grava scripts/`AGENTS.md`
-- [ ] Novo teste: editor, curador, workflow e skill **não**
+- [x] Novo teste: editor, curador, workflow e skill **não**
       contêm IDs `D1`–`D12` nem a frase “ver o plano”
-- [ ] Sem `skip`
+- [x] Sem `skip`
 
 **Verification:**
-- [ ] Pytest do arquivo — novos/ajustados FAIL no editor
+- [x] Pytest do arquivo — novos/ajustados FAIL no editor
       atual; asserts intocados PASS
 
 **Dependencies:** None (incremento 2)
@@ -464,11 +464,11 @@ Passos:
    da evidência de orçamento; **não** virar entrevistador.
 
 **Acceptance criteria:**
-- [ ] Task 7 passa
-- [ ] Sem IDs de plano no editor/curador
+- [x] Task 7 passa
+- [x] Sem IDs de plano no editor/curador
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
 
 **Dependencies:** Task 7
 
@@ -497,13 +497,13 @@ Passos:
    ferramenta nova de catálogo.
 
 **Acceptance criteria:**
-- [ ] Workflow não contém `"uma de cada vez"`
-- [ ] Contém `docs/harness.md` e “coletor”
-- [ ] Nenhum artefato desta task contém `D9`/`D12`
-- [ ] Testes de scaffold e skill continuam verdes
+- [x] Workflow não contém `"uma de cada vez"`
+- [x] Contém `docs/harness.md` e “coletor”
+- [x] Nenhum artefato desta task contém `D9`/`D12`
+- [x] Testes de scaffold e skill continuam verdes
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py tests/agents/test_curador_produto_editor.py -m unit`
 
 **Dependencies:** Task 8
 

@@ -388,14 +388,19 @@ fluxo em 4 fases com aprovação do humano:
 - Mostra o conteúdo padrão de CADA entrada ao humano.
 - Aguarda aprovação ou ajuste de CADA entrada antes de
   avançar.
-- Acumula todas as decisões sem criar nada.
-- Para cada candidato a check, faz cinco perguntas, uma de
-  cada vez: qual risco novo ele cobre; se a ferramenta está
-  no toolchain e pode ser usada; qual o tempo esperado (ou
-  mede um protótipo); se é bloqueante ou melhoria e qual o
-  caminho de resolução; e se, sendo caro e determinístico,
+- Se o humano aceitar o template padrão, registra a
+  aprovação sem reperguntar cada entrada.
+- Se o humano oferece uma ferramenta, analisa os cinco pontos
+  e apresenta o parecer: qual risco outro check aprovado não
+  pega; se está no toolchain (wrapper, registry e licença);
+  qual o tempo esperado; se é bloqueante ou melhoria e qual o
+  caminho de resolução; e se, sendo cara e determinística,
   precisa de fingerprint SHA-256 em `harness/target/` com
   fallback para a suíte completa.
+- Se o humano pede sugestão, mostra as melhores opções do
+  catálogo e do toolchain com essas mesmas considerações.
+- Depois sugere medir os tempos reais dos harnesses escolhidos.
+- Acumula todas as decisões sem criar nada.
 - O catálogo é apenas referência; o harness efetivo será
   definido pelo humano no `AGENTS.md`.
 - **PROIBIDO criar scripts antes da Fase 3 estar 100%
@@ -412,9 +417,13 @@ fluxo em 4 fases com aprovação do humano:
   contendo interface JSON, checks aprovados, orçamento,
   severidade bloqueante vs melhoria e proibição de afrouxar
   o gate.
-- Mede o tempo de parede de cada ferramenta, devolve ao
-  humano uma tabela tempo × status e só então grava o script
-  e a tabela no `AGENTS.md`.
+- Orienta o humano a criar um coletor, como script ou
+  equivalente adequado à stack, para medir os tempos reais e
+  gerar `docs/harness.md`. O editor não inventa métricas:
+  o humano aprova o coletor antes da execução.
+- Após a aprovação, executa o coletor e revisa o relatório
+  gerado. Só então grava os scripts e atualiza a tabela no
+  `AGENTS.md`.
 - Se o orçamento estourar, propõe fingerprint, retry ou
   retirada; o humano decide.
 - Registra tabela no topo do `AGENTS.md`.
