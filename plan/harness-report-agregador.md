@@ -6,7 +6,12 @@ Renomear o relatório gerado pelo coletor e registrar o
 agregador como comando do projeto, com um agente dono da
 chamada no workflow. Sem IDs de plano nos artefatos.
 
-Status: plano completo — aguardando aprovação humana.
+Status: em execução.
+
+## Execution Models
+
+- Executor: `gpt-5.6-luna`
+- Revisor: `claude-sonnet-4.6`
 
 ## Architecture Decisions
 
