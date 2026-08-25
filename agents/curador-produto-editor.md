@@ -373,6 +373,9 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Depois sugere medir os tempos reais dos harnesses escolhidos.
 - O catálogo é só como referência: o catálogo não grava check
   sozinho. O harness efetivo fica no `AGENTS.md`.
+- O agregador do harness é registrado em uma seção própria do
+  `AGENTS.md`, com o comando sem argumentos e o destino
+  `docs/harness-report.md` (por padrão, `harness/agregar`).
 - Acumula todas as decisões sem criar arquivo.
 - Tetos sugeridos, ajustáveis pelo humano: check isolado
   barato < 15s; harness quente (cache hit) < 30s; harness
@@ -397,13 +400,13 @@ após cada seção. Nunca avance sem aprovação da anterior.
   afrouxar o gate.
 - Orienta o humano a criar um coletor, como script ou
   equivalente adequado à stack, para medir os tempos reais e
-  gerar `docs/harness.md`. O editor não inventa métricas:
+  gerar `docs/harness-report.md`. O editor não inventa métricas:
   o humano aprova o coletor antes da execução.
 - Após a aprovação, executa o coletor e revisa o relatório
-  gerado. Só então grava os scripts e atualiza a tabela no
-  `AGENTS.md`. Se estourar o orçamento, propõe fingerprint,
-  retry ou retirada; o humano escolhe.
-- Atualiza a tabela no `AGENTS.md`.
+  gerado. Só então grava os scripts, registra ou atualiza a
+  seção própria do agregador no `AGENTS.md` (comando e destino)
+  e atualiza a tabela. Se estourar o orçamento, propõe
+  fingerprint, retry ou retirada; o humano escolhe.
 - Só declara `docs/README.md` concluído após aprovação
   explícita do humano em cada seção.
 

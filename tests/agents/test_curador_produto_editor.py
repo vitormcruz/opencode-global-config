@@ -283,12 +283,27 @@ def test_editor_measures_before_recording_harness(repo_root: Path) -> None:
 
     assert "coletor" in normalized
     assert "script ou equivalente" in normalized
-    assert "docs/harness.md" in normalized
+    assert "docs/harness-report.md" in normalized
+    assert "docs/" + "harness.md" not in normalized
     assert "humano aprova o coletor" in normalized
     assert "só então grava" in normalized
     assert "scripts" in normalized
     assert "agents.md" in normalized
     assert "fingerprint, retry ou retirada" in normalized
+
+
+@pytest.mark.unit
+def test_editor_registers_harness_aggregator_in_own_section(
+    repo_root: Path,
+) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "seção própria" in normalized
+    assert "harness/agregar" in normalized
+    assert "docs/harness-report.md" in normalized
 
 
 @pytest.mark.unit

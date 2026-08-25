@@ -119,6 +119,15 @@ HARNESS_TEMPLATE = dedent(
     | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
     | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 
+    ## Agregador de Harness
+
+    | Comando | Destino |
+    |---------|---------|
+    | harness/agregar | docs/harness-report.md |
+
+    > O comando é executado sem argumentos e pode ser substituído pelo
+    > comando aprovado pelo humano durante a entrevista.
+
     ### Especificação dos Scripts de Harness
 
     O `curador-produto-editor` usa as especificações abaixo para criar e

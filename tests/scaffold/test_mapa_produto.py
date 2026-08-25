@@ -286,6 +286,10 @@ def test_harness_scaffold_contains_script_specification(tmp_path: Path) -> None:
 
     assert status == 0
     assert "### Especificação dos Scripts de Harness" in content
+    assert "## Agregador de Harness" in content
+    assert "harness/agregar" in content
+    assert "docs/harness-report.md" in content
+    assert "docs/" + "harness.md" not in content
 
 
 @pytest.mark.unit

@@ -17,7 +17,16 @@
 > Critérios, orçamento e ferramentas saem da entrevista do
 > editor. O estado de fingerprint/cache fica em
 > `harness/target/` e não é versionado. A página de métricas
-> gerada pelo coletor aprovado fica em `docs/harness.md`.
+> gerada pelo coletor aprovado fica em `docs/harness-report.md`.
+
+## Agregador de Harness
+
+| Comando | Destino |
+|---------|---------|
+| `harness/agregar` | `docs/harness-report.md` |
+
+> O comando é executado sem argumentos e pode ser substituído
+> pelo comando aprovado pelo humano durante a entrevista.
 
 > **PROIBIDO/NAO PODE:** bypassar, comentar, remover ou condicionar
 > qualquer verificação do harness. Ferramenta ausente NAO justifica remoção —
