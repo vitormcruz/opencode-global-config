@@ -358,20 +358,19 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Mostra o conteúdo padrão de CADA entrada ao humano.
 - Aguarda aprovação ou ajuste de CADA entrada antes de
   avançar.
-- Para cada candidato a check, faz cinco perguntas, uma de
-  cada vez:
-  1. Qual risco este check pega que outro check aprovado não
-     pega?
-  2. A ferramenta está no toolchain (wrapper, registry e
-     licença)? Se não puder ser usada ou o bootstrap não a
-     instalar, não entra no caminho feliz.
-  3. Qual o tempo esperado? Se não souber, mede um protótipo
-     antes de gravar no `AGENTS.md`.
-  4. É bloqueante ou melhoria? Finding bloqueante exige
-     caminho de resolução; timeout de rede não vira pass.
-  5. Se for caro e determinístico, prevê fingerprint SHA-256
-     e estado em `harness/target/` (não versionado), com
-     fallback para a suíte completa.
+- Se o humano aceitar o template padrão, não repergunta cada
+  entrada: registra a aceitação e segue com o conteúdo
+  aprovado.
+- Se o humano oferece uma ferramenta, analisa os cinco pontos
+  e apresenta o parecer: qual risco outro check aprovado não
+  pega; se está no toolchain (wrapper, registry e licença);
+  qual o tempo esperado; se é bloqueante ou melhoria; e se,
+  sendo cara e determinística, precisa de fingerprint
+  SHA-256 em `harness/target/` (não versionado), com fallback
+  para a suíte completa.
+- Se o humano pede sugestão, mostra as melhores opções do
+  catálogo e do toolchain com essas mesmas considerações.
+- Depois sugere medir os tempos reais dos harnesses escolhidos.
 - O catálogo é só como referência: o catálogo não grava check
   sozinho. O harness efetivo fica no `AGENTS.md`.
 - Acumula todas as decisões sem criar arquivo.
@@ -393,14 +392,17 @@ após cada seção. Nunca avance sem aprovação da anterior.
   domínio (`eng-software`, `dba`, `sec`, `qa`, `front`, `rev`)
   com briefing contendo interface JSON, checks aprovados,
   orçamento, classificação bloqueante vs melhoria, cobertura
-  estática do código de teste (D9) e a proibição de afrouxar
-  o gate.
-- Mede o tempo de parede de cada ferramenta e devolve ao
-  humano uma tabela tempo × status; só então grava os scripts
-  e a tabela no `AGENTS.md`. Se estourar o orçamento, propõe
-  fingerprint, retry ou retirada; o humano escolhe.
-- Se houver análise estática, o código de teste entra no mesmo
-  scan e no mesmo nível de qualidade que produção (D9).
+  estática: o código de teste entra no mesmo scan e no
+  mesmo nível de qualidade que produção, e a proibição de
+  afrouxar o gate.
+- Orienta o humano a criar um coletor, como script ou
+  equivalente adequado à stack, para medir os tempos reais e
+  gerar `docs/harness.md`. O editor não inventa métricas:
+  o humano aprova o coletor antes da execução.
+- Após a aprovação, executa o coletor e revisa o relatório
+  gerado. Só então grava os scripts e atualiza a tabela no
+  `AGENTS.md`. Se estourar o orçamento, propõe fingerprint,
+  retry ou retirada; o humano escolhe.
 - Atualiza a tabela no `AGENTS.md`.
 - Só declara `docs/README.md` concluído após aprovação
   explícita do humano em cada seção.

@@ -214,7 +214,13 @@ def test_editor_requires_five_questions_per_harness_check(repo_root: Path) -> No
         "fingerprint SHA-256",
     ):
         assert question.lower() in normalized
-    assert "uma de cada vez" in normalized
+    assert "template" in normalized
+    assert "não repergunta" in normalized
+    assert "oferece uma ferramenta" in normalized
+    assert "apresenta o parecer" in normalized
+    assert "pede sugestão" in normalized
+    assert "melhores opções" in normalized
+    assert "medir os tempos reais" in normalized
     assert "acumula" in normalized
     assert "sem criar arquivo" in normalized
 
@@ -275,9 +281,13 @@ def test_editor_measures_before_recording_harness(repo_root: Path) -> None:
     )
     normalized = " ".join(content.split()).lower()
 
-    assert "mede o tempo de parede" in normalized
+    assert "coletor" in normalized
+    assert "script ou equivalente" in normalized
+    assert "docs/harness.md" in normalized
+    assert "humano aprova o coletor" in normalized
     assert "só então grava" in normalized
-    assert "tabela tempo × status" in normalized
+    assert "scripts" in normalized
+    assert "agents.md" in normalized
     assert "fingerprint, retry ou retirada" in normalized
 
 
@@ -336,3 +346,21 @@ def test_curador_does_not_interview_or_create_harness_checks(repo_root: Path) ->
     assert "não entrevista" in normalized
     assert "não escreve scripts" in normalized
     assert "não corta verificações" in normalized
+
+
+@pytest.mark.unit
+def test_harness_artifacts_do_not_expose_plan_ids_or_plan_reference(
+    repo_root: Path,
+) -> None:
+    artifact_paths = (
+        "agents/curador-produto-editor.md",
+        "agents/curador-produto.md",
+        "docs/workflow-curadoria.md",
+        "skills/harness-catalog/SKILL.md",
+    )
+    plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b", re.IGNORECASE)
+
+    for relative_path in artifact_paths:
+        content = (repo_root / relative_path).read_text(encoding="utf-8")
+        assert plan_id_pattern.search(content) is None, relative_path
+        assert re.search(r"ver o plano", content, re.IGNORECASE) is None, relative_path
