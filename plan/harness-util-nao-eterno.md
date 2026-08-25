@@ -8,7 +8,7 @@ entrevista (5 perguntas), spawna o especialista, mede e só então
 grava; o curador continua guardião e valida depois. Sem scripts em
 `harness/` deste repo.
 
-Status: incremento 2 — plano completo, aguardando aprovação.
+Status: incremento 2 em execução (luna / sonnet).
 
 Incremento 1 (D1–D9, A1) encerrado tecnicamente. Este
 incremento altera o resultado: artefatos auto-contidos,
