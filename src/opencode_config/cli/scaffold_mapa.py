@@ -123,7 +123,7 @@ HARNESS_TEMPLATE = dedent(
 
     | Comando | Destino |
     |---------|---------|
-    | harness/agregar | docs/harness-report.md |
+    | harness/agregar | docs/harness-report/harness-report.md |
 
     > O comando é executado sem argumentos e pode ser substituído pelo
     > comando aprovado pelo humano durante a entrevista.
