@@ -373,10 +373,24 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Depois sugere medir os tempos reais dos harnesses escolhidos.
 - O catálogo é só como referência: o catálogo não grava check
   sozinho. O harness efetivo fica no `AGENTS.md`.
-- O agregador do harness é registrado na seção própria
-  `## Agregador de Harness` do `AGENTS.md`, com o comando sem
-  argumentos e o destino
-  `docs/harness-report.md` (por padrão, `harness/agregar`).
+- Depois das entradas por agente, entrevista o agregador.
+  Confirma com o humano: o agregador é um script coletor, não
+  um gate que reexecuta os harnesses.
+- Confirma a pasta padrão (o humano pode escolher outra):
+  `docs/harness-report/`, MD índice
+  `docs/harness-report/harness-report.md` (único MD na raiz
+  dessa pasta) e subpastas `docs/harness-report/<ferramenta>/`.
+- Para cada check já aprovado: qual artefato a ferramenta
+  emite? Recomenda dados estruturados nativos (JSON/JUnit)
+  para o script montar tabelas no MD — assim não polui o git.
+  HTML (ou report não resumível) só é copiado para a subpasta
+  e linkado. Pacote extra só se o humano pedir.
+- Proibido inventar check que o humano não aprovou.
+- Proibido criar `harness/agregar` nesta fase.
+- O agregador fica na seção própria `## Agregador de Harness`
+  do `AGENTS.md`, comando sem argumentos (por padrão,
+  `harness/agregar`) e destino
+  `docs/harness-report/harness-report.md`.
 - Acumula todas as decisões sem criar arquivo.
 - Tetos sugeridos, ajustáveis pelo humano: check isolado
   barato < 15s; harness quente (cache hit) < 30s; harness
@@ -399,15 +413,19 @@ após cada seção. Nunca avance sem aprovação da anterior.
   estática: o código de teste entra no mesmo scan e no
   mesmo nível de qualidade que produção, e a proibição de
   afrouxar o gate.
-- Orienta o humano a criar um coletor, como script ou
-  equivalente adequado à stack, para medir os tempos reais e
-  gerar `docs/harness-report.md`. O editor não inventa métricas:
-  o humano aprova o coletor antes da execução.
-- Após a aprovação, executa o coletor e revisa o relatório
-  gerado. Só então grava os scripts, registra ou atualiza a
-  seção própria do agregador no `AGENTS.md` (comando e destino)
-  e atualiza a tabela. Se estourar o orçamento, propõe
-  fingerprint, retry ou retirada; o humano escolhe.
+- O spawn dos especialistas por agente (harness individual)
+  permanece. O editor não implementa nem executa o coletor.
+- Após a entrevista, envia briefing ao `eng-software` para
+  implementar o script agregador. O briefing contém: comando,
+  destino `docs/harness-report/harness-report.md`, mapa
+  check→artefato, regra de cópia (de `harness/target/` para
+  `docs/harness-report/<ferramenta>/`; regeneração substitui
+  a subpasta; origem ausente → MD declara ausente) e
+  proibições (não reexecutar harnesses; não linkar path de
+  build nem `target/`; MD solto na raiz de `docs/` é
+  proibido). O editor não inventa métricas.
+- Se estourar o orçamento, propõe fingerprint, retry ou
+  retirada; o humano escolhe.
 - Só declara `docs/README.md` concluído após aprovação
   explícita do humano em cada seção.
 
