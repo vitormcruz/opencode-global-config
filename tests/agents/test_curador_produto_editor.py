@@ -282,11 +282,10 @@ def test_editor_measures_before_recording_harness(repo_root: Path) -> None:
     normalized = " ".join(content.split()).lower()
 
     assert "coletor" in normalized
-    assert "script ou equivalente" in normalized
-    assert "docs/harness-report.md" in normalized
+    assert "docs/harness-report/harness-report.md" in normalized
     assert "docs/" + "harness.md" not in normalized
-    assert "humano aprova o coletor" in normalized
-    assert "só então grava" in normalized
+    assert "não implementa nem executa o coletor" in normalized
+    assert "envia briefing ao `eng-software`" in normalized
     assert "scripts" in normalized
     assert "agents.md" in normalized
     assert "fingerprint, retry ou retirada" in normalized
@@ -303,7 +302,25 @@ def test_editor_registers_harness_aggregator_in_own_section(
 
     assert "seção própria" in normalized
     assert "harness/agregar" in normalized
-    assert "docs/harness-report.md" in normalized
+    assert "docs/harness-report/harness-report.md" in normalized
+
+
+@pytest.mark.unit
+def test_editor_covers_aggregator_interview_and_handoff_rules(
+    repo_root: Path,
+) -> None:
+    content = agent_file(repo_root, "curador-produto-editor").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(content.split()).lower()
+
+    assert "não um gate que reexecuta os harnesses" in normalized
+    assert "json/junit" in normalized
+    assert "html" in normalized
+    assert "subpasta" in normalized
+    assert "proibido inventar check" in normalized
+    assert "envia briefing ao `eng-software`" in normalized
+    assert "não reexecutar harnesses" in normalized
 
 
 @pytest.mark.unit

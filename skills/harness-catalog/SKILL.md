@@ -52,8 +52,8 @@ Exit code: 0 = pass, 1 = fail.
   excluir teste do scan, usar fail-open em audit ou cache sem
   fallback.
 
-O relatório humano fica em `docs/harness-report.md`, gerado pelo
-coletor aprovado, nunca por métricas inventadas. O comando do
+O relatório humano fica em `docs/harness-report/harness-report.md`,
+gerado pelo coletor aprovado, nunca por métricas inventadas. O comando do
 agregador, sem argumentos, deve ser registrado em uma seção
 própria do `AGENTS.md` (por padrão, `harness/agregar`).
 

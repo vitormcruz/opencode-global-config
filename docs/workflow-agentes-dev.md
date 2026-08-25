@@ -586,7 +586,7 @@ Premissas detalhadas: 21.1–21.3.
     - Se seção ausente no AGENTS.md → LACUNA.
     Antes de cruzar as evidências, executa somente o comando
     agregador registrado na seção própria do AGENTS.md para
-    atualizar `docs/harness-report.md`, sem executar harness
+    atualizar `docs/harness-report/harness-report.md`, sem executar harness
     por agente. Se o registro estiver ausente, reporta LACUNA.
     O `val-harness` **não spawna agentes** — apenas
     reporta. O `devflow` recebe o relatório e decide:

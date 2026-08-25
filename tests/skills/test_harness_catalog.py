@@ -26,5 +26,5 @@ def test_harness_catalog_uses_harness_report_destination(repo_root: Path) -> Non
         encoding="utf-8"
     )
 
-    assert "docs/harness-report.md" in content
+    assert "docs/harness-report/harness-report.md" in content
     assert "docs/" + "harness.md" not in content

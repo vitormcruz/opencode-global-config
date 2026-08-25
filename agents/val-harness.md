@@ -44,10 +44,10 @@ Sua capacidade:
 Antes de cruzar evidências, leia no `AGENTS.md` a seção
 `## Agregador de Harness`. Se houver comando registrado,
 execute-o sem argumentos. O efeito esperado é atualizar
-`docs/harness-report.md`; não invente métricas. Se a seção
-estiver ausente ou sem comando, registre LACUNA. Essa é a
-única execução permitida: não execute comandos de harness
-por agente.
+`docs/harness-report/harness-report.md`; não invente métricas.
+Se a seção estiver ausente ou sem comando, registre LACUNA.
+Essa é a única execução permitida: não execute comandos de
+harness por agente.
 
 Você **nunca** spawna agentes, corrige artefatos, executa
 harness por agente, planeja implementação, faz revisão de

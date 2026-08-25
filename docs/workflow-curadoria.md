@@ -250,7 +250,7 @@ sem argumentos do agregador e seu destino:
 
 | Comando | Destino |
 |---------|---------|
-| `harness/agregar` | `docs/harness-report.md` |
+| `harness/agregar` | `docs/harness-report/harness-report.md` |
 
 O comando real pode ser definido pelo humano. O
 `curador-produto-editor` orienta e executa o coletor aprovado
@@ -433,12 +433,12 @@ fluxo em 4 fases com aprovação do humano:
   o gate.
 - Orienta o humano a criar um coletor, como script ou
   equivalente adequado à stack, para medir os tempos reais e
-  gerar `docs/harness-report.md`. O editor não inventa métricas:
+  gerar `docs/harness-report/harness-report.md`. O editor não inventa métricas:
   o humano aprova o coletor antes da execução.
 - Após a aprovação, executa o coletor e revisa o relatório
   gerado. Só então grava os scripts e registra ou atualiza,
   em seção própria do `AGENTS.md`, o comando do agregador e o
-  destino `docs/harness-report.md`, além da tabela.
+  destino `docs/harness-report/harness-report.md`, além da tabela.
 - Se o orçamento estourar, propõe fingerprint, retry ou
   retirada; o humano decide.
 - Registra tabela no topo do `AGENTS.md`.
