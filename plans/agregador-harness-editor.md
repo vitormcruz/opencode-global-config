@@ -289,3 +289,79 @@ Nenhuma. D1–D7 registrados.
 
 - Executor: `gpt-5.6-luna`
 - Revisor: `claude-sonnet-5`
+
+---
+
+## Revisão Integrativa
+
+### Achados
+
+| # | Tipo | Descrição | Partes envolvidas | Severidade |
+|---|------|-----------|-------------------|------------|
+| 1 | Inconsistência | `docs/workflow-curadoria.md` ainda descreve, em dois pontos (linhas ~256–257 e ~438–439), que o `curador-produto-editor` "orienta e executa o coletor aprovado na Fase 4" e que "após a aprovação, executa o coletor e revisa o relatório gerado. Só então grava os scripts". Esse texto contradiz diretamente D4 e o texto já corrigido em `agents/curador-produto-editor.md` Fase 4, que agora diz "O editor não implementa nem executa o coletor" e que, após a entrevista, "envia briefing ao `eng-software`". Apenas o destino (`docs/harness-report/harness-report.md`) foi atualizado nesse arquivo; a narrativa de quem executa o coletor não foi realinhada. O próprio executor sinalizou esse ponto na nota de entrega, mas classificou como coberto por D7 ("só destino"); D7, porém, versa sobre o papel de `val-harness`/`harness-catalog`, não sobre a narrativa de Fase 4 do editor em `docs/workflow-curadoria.md` — nenhuma Task do plano cobriu esse trecho. | `docs/workflow-curadoria.md` ↔ `agents/curador-produto-editor.md` | bloqueante |
+
+### Recomendação
+
+- Achado 1: delegar a `eng-software` (ou ao próprio `curador-produto-editor`,
+  dono do artefato) o ajuste da narrativa de Fase 4 em
+  `docs/workflow-curadoria.md` (linhas ~256–257 e ~438–439) para refletir
+  D4: o editor entrevista, não executa nem implementa o coletor, e envia
+  briefing ao `eng-software`. Recomenda-se abrir uma Task adicional (fora
+  deste plano ou como follow-up) já que D1–D7 não atribuíram esse trecho a
+  nenhuma Task existente.
+
+### Verificações realizadas (sem achados)
+
+- Destino `docs/harness-report/harness-report.md` aplicado de forma
+  consistente em `agents/default-artifacts/harness-section.md`,
+  `src/opencode_config/cli/scaffold_mapa.py`, `agents/curador-produto-editor.md`,
+  `agents/val-harness.md`, `skills/harness-catalog/SKILL.md` e nos três
+  arquivos de teste tocados. Nenhuma ocorrência de `docs/harness-report.md`
+  solto como destino nesses arquivos.
+- Nenhum script/agente `harness/agregar` foi implementado neste repo (busca
+  por arquivos "*agregador*" não retornou artefato de implementação, apenas
+  o próprio plano).
+- `agents/curador-produto-editor.md` Fase 3: entrevista não infere/inventa
+  checks (texto explícito "Proibido inventar check que o humano não
+  aprovou"), recomenda JSON/JUnit para o MD, HTML copiado para subpasta.
+  Fase 4: editor não implementa/executa o agregador; envia briefing ao
+  `eng-software` com comando, destino, mapa check→artefato, regra de cópia
+  e proibições — aderente a D4.
+- `agents/val-harness.md`: mudança restrita ao path do efeito esperado;
+  papel (só executa o comando registrado, nunca harness por agente, nunca
+  spawna) permanece inalterado — aderente a D7.
+- Nenhuma ferramenta de produto (ESLint, Vitest, JaCoCo etc.) foi
+  introduzida como check hardcoded pelos commits revisados; menções
+  pré-existentes a ESLint/ruff/shellcheck em `docs/workflow-curadoria.md`,
+  `skills/harness-catalog/SKILL.md` e `src/opencode_config/cli/scaffold_mapa.py`
+  já existiam como exemplos genéricos antes deste plano e não foram
+  alteradas por ele.
+- Testes: `tests/agents/test_curador_produto_editor.py`,
+  `tests/scaffold/test_mapa_produto.py` e `tests/skills/test_harness_catalog.py`
+  cobrem as novas regras (destino novo, "não implementa nem executa o
+  coletor", "envia briefing ao `eng-software`", JSON/JUnit, HTML, subpasta,
+  proibição de inventar check, "não reexecutar harnesses"). Nenhum `skip`
+  encontrado nesses arquivos.
+- Reexecução de
+  `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py -m "unit or tools or copilot"`
+  confirmou **64 passed** (evidência independente da sessão do executor).
+
+### Veredicto
+
+[ ] Aprovado sem ressalvas
+[ ] Aprovado com melhorias opcionais
+[x] Bloqueado — resolver achados bloqueantes antes de
+    prosseguir
+
+### Evidências (rev)
+
+- [x] Artefato lido: `plans/agregador-harness-editor.md`
+- [x] Plano aprovado consultado: sim
+- [x] Checklist integrativo: 6 dimensões verificadas (destino, papel do
+      agregador/val-harness, entrevista do editor, não implementação,
+      ferramentas hardcoded, cobertura de testes)
+- [x] Achados encontrados: 1 total, 1 bloqueante
+- [x] Harness script: repositório meta (`opencode-config`) sem seção
+      `## Harness` no `AGENTS.md` raiz; usado como evidência o comando de
+      verificação definido na Task 6 do próprio plano, reexecutado com
+      sucesso (64 passed) — ver acima.
