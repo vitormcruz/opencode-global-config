@@ -8,7 +8,11 @@ entrevista (5 perguntas), spawna o especialista, mede e só então
 grava; o curador continua guardião e valida depois. Sem scripts em
 `harness/` deste repo.
 
-Status: execução concluída — aguardando revisor.
+Status: incremento 2 — plano completo, aguardando aprovação.
+
+Incremento 1 (D1–D9, A1) encerrado tecnicamente. Este
+incremento altera o resultado: artefatos auto-contidos,
+Fase 3 menos tediosa, relatório consolidado.
 
 ## Execution Models
 
@@ -82,6 +86,27 @@ Status: execução concluída — aguardando revisor.
 - **D9 — Estático cobre teste:** se o harness tiver análise
   estática, código de teste entra no mesmo scan e no mesmo
   nível de qualidade que produção.
+- **D10 — Artefatos auto-contidos:** agentes, workflow,
+  skill, template e testes não citam IDs de plano (`D9`,
+  `D4`, etc.) nem “ver o plano”. A regra fica escrita por
+  extenso no artefato. `plan/harness-util-nao-eterno.md`
+  sai no commit final desta unidade.
+- **D11 — Fase 3 ajuda a escolher, não interroga em série:**
+  aceitou o template padrão → não reperguntar cada
+  entrada. Humano oferece ferramenta → editor analisa os
+  5 pontos (risco, toolchain, tempo, bloqueante/melhoria,
+  fingerprint) e apresenta o parecer. Humano pede
+  sugestão → editor mostra as melhores do
+  catálogo/toolchain com essas considerações. Depois
+  sugere medir os harness escolhidos (tempos reais). Os
+  5 pontos continuam; o agente faz o trabalho.
+- **D12 — Relatório gerado por coletor:** destino
+  `docs/harness.md` (página Markdown versionada;
+  `AGENTS.md` só a tabela de comando). O editor não
+  inventa métrica na mão. Orienta o humano a criar o
+  coletor (script ou equivalente, por stack) que mede e
+  gera esse Markdown. Humano aprova o coletor; o arquivo
+  sai da execução, não de chute.
 
 ## Task List
 
@@ -125,6 +150,29 @@ testes. Sem timeout genérico novo.
 - [x] Workflow e editor ainda compartilham os elementos
       já cobertos por `test_editor_and_workflow_contain_same_key_elements`
 - [x] Commit local: workflow + skill + default-artifact
+
+### Phase 4: Incremento 2 — artefato e Fase 3
+
+- [ ] Task 7: Ajustar testes D10–D12
+- [ ] Task 8: Reescrever Fase 3/4 do editor (e eco no curador se
+      `docs/harness.md` entrar na validação)
+
+### Checkpoint: Editor incremento 2
+
+- [ ] Sem `D9`/`D4`/`uma de cada vez` nos artefatos produtivos
+- [ ] Commit: testes + editor (+ curador se tocado)
+
+### Phase 5: Sync incremento 2
+
+- [ ] Task 9: Workflow + skill + template
+
+### Checkpoint: Incremento 2 completo
+
+- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
+- [ ] Commit: workflow + skill + template
+- [ ] Plano deste arquivo sai só no commit final da unidade
+      lógica **depois** da aprovação do revisor (D10) — o
+      executor **não** remove o plano agora
 
 ---
 
@@ -353,6 +401,124 @@ Passos:
 
 ---
 
+## Task 7: Ajustar testes D10–D12
+
+**Description:** TDD no mesmo
+`tests/agents/test_curador_produto_editor.py`. Não
+apagar cobertura dos 5 pontos, tetos, spawn, D6, estático
+em teste. Trocar o *como* da Fase 3 e a coleta de métrica.
+
+**Acceptance criteria:**
+- [ ] `test_editor_requires_five_questions_per_harness_check`
+      deixa de exigir `"uma de cada vez"`. Passa a exigir
+      que o editor: (a) se o template foi aceito, não
+      reperguntar cada entrada; (b) se o humano oferece
+      ferramenta, analisa os 5 pontos e apresenta parecer;
+      (c) se pede sugestão, mostra as melhores com essas
+      considerações; (d) sugere medir tempos reais
+- [ ] Os 5 pontos continuam no texto (risco, toolchain,
+      tempo, bloqueante/melhoria, fingerprint)
+- [ ] `test_editor_measures_before_recording_harness` deixa
+      de exigir `"tabela tempo × status"` inventada na mão.
+      Passa a exigir: orientar o humano a criar um coletor
+      (script ou equivalente); coletor gera
+      `docs/harness.md`; humano aprova o coletor; só então
+      grava scripts/`AGENTS.md`
+- [ ] Novo teste: editor, curador, workflow e skill **não**
+      contêm IDs `D1`–`D12` nem a frase “ver o plano”
+- [ ] Sem `skip`
+
+**Verification:**
+- [ ] Pytest do arquivo — novos/ajustados FAIL no editor
+      atual; asserts intocados PASS
+
+**Dependencies:** None (incremento 2)
+
+**Files likely touched:**
+- `tests/agents/test_curador_produto_editor.py`
+
+**Estimated scope:** Small (1-2 files)
+
+**Commit checkpoint:** juntar com Task 8.
+
+---
+
+## Task 8: Reescrever Fase 3/4 no editor
+
+**Description:** Gravar D10–D12 em
+`agents/curador-produto-editor.md`. Título
+`Fase 3 — Revisão do Harness` permanece (teste regex).
+Não mudar Fase 1/2.
+
+Passos:
+1. Tirar `(D9)` e qualquer `D[0-9]+` do arquivo. Manter a
+   regra de estático cobrir teste, por extenso.
+2. Substituir o bloco das 5 perguntas em série pelo fluxo
+   D11 (template aceito / oferece ferramenta / pede
+   sugestão / medir).
+3. Fase 4: spawn do especialista permanece. Medição via
+   coletor aprovado que gera `docs/harness.md` (D12), não
+   tabela inventada. Estouro de orçamento ainda vai ao
+   humano (fingerprint, retry ou retirada).
+4. Curador: só mencionar `docs/harness.md` se for o lugar
+   da evidência de orçamento; **não** virar entrevistador.
+
+**Acceptance criteria:**
+- [ ] Task 7 passa
+- [ ] Sem IDs de plano no editor/curador
+
+**Verification:**
+- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
+
+**Dependencies:** Task 7
+
+**Files likely touched:**
+- `agents/curador-produto-editor.md`
+- `agents/curador-produto.md` (só se a evidência de
+  orçamento passar a citar `docs/harness.md`)
+
+**Estimated scope:** Small (1-2 files)
+
+**Commit checkpoint:** `fix(agents): fase 3 escolhe e relatorio gerado`
+
+---
+
+## Task 9: Workflow, skill e template
+
+**Description:** Eco D11/D12 e D10 (sem IDs de plano).
+
+1. `docs/workflow-curadoria.md` Fase 3/4 iguais ao editor
+   (sem 5 perguntas em série; coletor → `docs/harness.md`).
+2. `skills/harness-catalog/SKILL.md` — uma frase: relatório
+   humano em `docs/harness.md`, gerado por coletor, não
+   chute. Sem `/doc/README.md`. Sem `D12`.
+3. `agents/default-artifacts/harness-section.md` — ponteiro
+   a `docs/harness.md` como página de métricas; sem
+   ferramenta nova de catálogo.
+
+**Acceptance criteria:**
+- [ ] Workflow não contém `"uma de cada vez"`
+- [ ] Contém `docs/harness.md` e “coletor”
+- [ ] Nenhum artefato desta task contém `D9`/`D12`
+- [ ] Testes de scaffold e skill continuam verdes
+
+**Verification:**
+- [ ] `.\.venv\Scripts\pytest.exe tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py tests/agents/test_curador_produto_editor.py -m unit`
+
+**Dependencies:** Task 8
+
+**Files likely touched:**
+- `docs/workflow-curadoria.md`
+- `skills/harness-catalog/SKILL.md`
+- `agents/default-artifacts/harness-section.md`
+
+**Estimated scope:** Small (1-2 files)
+
+**Commit checkpoint:** `docs(workflow): sync fase 3 e docs/harness.md`
+Sem `git push`. Não apagar este plano nesta task.
+
+---
+
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
@@ -363,7 +529,18 @@ Passos:
 | Template copiar catálogo (D7) | Med | Só ponteiro à entrevista; sem ferramenta nova |
 | Timeout genérico em texto de script | Med | Não introduzir; estouro vai a fingerprint/retry/retirada |
 | Escopo vazar para `harness/` deste repo | Low | Overview: produto só, sem scripts locais |
+| Executor apaga o plano antes do revisor | Med | Task 9: não remover o plano agora (D10 só no commit final pós-revisor) |
+| Teste antigo exige `"uma de cada vez"` | High | Task 7 troca o assert antes do editor |
+| Coletor vira script neste repo | Med | Só instrução no editor; script vive no projeto-alvo |
 
 ## Open Questions
 
-Nenhuma — ramos D1–D9 resolvidos.
+Nenhuma — ramos D10–D12 resolvidos.
+
+## Achados da revisão
+
+- **A1 (aceito, melhoria):** frontmatter de
+  `skills/harness-catalog/SKILL.md` ainda cita
+  `/doc/README.md`. Trocar por `AGENTS.md` e cobrir com
+  teste. Commit:
+  `fix(skill): corrige destino stale no frontmatter harness-catalog`.
