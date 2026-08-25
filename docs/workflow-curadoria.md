@@ -253,9 +253,11 @@ sem argumentos do agregador e seu destino:
 | `harness/agregar` | `docs/harness-report/harness-report.md` |
 
 O comando real pode ser definido pelo humano. O
-`curador-produto-editor` orienta e executa o coletor aprovado
-na Fase 4 para gerar o primeiro relatório e mantém esse
-registro.
+`curador-produto-editor` orienta o coletor aprovado na Fase 4,
+mas não o implementa nem o executa. Após a entrevista, envia
+um briefing ao `eng-software` para implementar o agregador e
+gerar o primeiro relatório em
+`docs/harness-report/harness-report.md`.
 
 ### Pré-requisito: `curador-produto-editor`
 
@@ -434,11 +436,14 @@ fluxo em 4 fases com aprovação do humano:
 - Orienta o humano a criar um coletor, como script ou
   equivalente adequado à stack, para medir os tempos reais e
   gerar `docs/harness-report/harness-report.md`. O editor não inventa métricas:
-  o humano aprova o coletor antes da execução.
-- Após a aprovação, executa o coletor e revisa o relatório
-  gerado. Só então grava os scripts e registra ou atualiza,
-  em seção própria do `AGENTS.md`, o comando do agregador e o
-  destino `docs/harness-report/harness-report.md`, além da tabela.
+  o humano aprova o coletor antes da implementação.
+- Após a entrevista, envia briefing ao `eng-software` para
+  implementar o agregador. O briefing inclui o comando, o
+  destino `docs/harness-report/harness-report.md`, o mapa de
+  check para artefato, a regra de cópia e as proibições de não
+  reexecutar harnesses nem linkar paths de build ou `target/`.
+  O editor não implementa nem executa o coletor, nem grava seus
+  scripts.
 - Se o orçamento estourar, propõe fingerprint, retry ou
   retirada; o humano decide.
 - Registra tabela no topo do `AGENTS.md`.
