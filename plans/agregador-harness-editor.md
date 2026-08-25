@@ -40,6 +40,10 @@ Esta entrega não implementa o coletor neste repo.
 - D7: Atualizar menções ao caminho antigo em `val-harness`,
   `harness-catalog` e workflow de curadoria. Só o destino do
   agregador; sem mudar o papel desses agentes.
+- D8: Achado do revisor aceito. Alinhar a narrativa da Fase 4
+  em `docs/workflow-curadoria.md` com D4: o editor não executa
+  nem implementa o coletor; envia briefing ao `eng-software`.
+  Sem mudar o resto do workflow.
 
 ## Task List
 
@@ -269,6 +273,39 @@ cópia HTML, handoff, não reexecutar). Sem `skip`.
 **Commit checkpoint:** `test(harness): destino e regras do
 agregador` (Tasks 5–6)
 
+---
+
+## Task 7: Narrativa Fase 4 no workflow de curadoria
+
+**Description:** Achado 1 do revisor. Em
+`docs/workflow-curadoria.md` (trechos que dizem que o editor
+executa o coletor na Fase 4 e só então grava os scripts),
+alinhar com D4. Não expandir o resto do workflow.
+
+**Acceptance criteria:**
+- [ ] O workflow não afirma que o editor executa o coletor
+- [ ] Afirma que o editor envia briefing ao `eng-software`
+- [ ] Destino do relatório permanece
+      `docs/harness-report/harness-report.md`
+- [ ] Sem outras mudanças de papel no workflow
+
+**Verification:**
+- [ ] Os dois trechos citados pelo revisor (~256 e ~438)
+      estão alinhados ao editor
+- [ ] Testes que assertam o texto antigo do workflow, se
+      existirem, atualizados; pytest alvo verde
+
+**Dependencies:** Task 4 (texto canônico no editor)
+
+**Files likely touched:**
+- `docs/workflow-curadoria.md`
+- testes de workflow, se assertarem o trecho
+
+**Estimated scope:** Small (1–2 files)
+
+**Commit checkpoint:** `docs(workflow): Fase 4 handoff do
+agregador`
+
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
@@ -283,7 +320,7 @@ agregador` (Tasks 5–6)
 
 ## Open Questions
 
-Nenhuma. D1–D7 registrados.
+Nenhuma. D1–D8 registrados. Achado 1 aceito (Task 7).
 
 ## Modelos da execução
 
