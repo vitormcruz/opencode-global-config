@@ -51,6 +51,10 @@ lote das evidências de harness. Se o `val-harness`
 reportar falhas, re-spawna o agente faltante ou consulta
 o humano.
 
+O `val-harness` executa, antes da validação, somente o
+agregador registrado na seção própria do `AGENTS.md`.
+O `devflow` não executa esse script nem qualquer harness.
+
 ## Função de mediação
 
 Além de rotear, você media a comunicação entre agentes

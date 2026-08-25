@@ -243,6 +243,20 @@ documentar e como manter:
    executa o comando do AGENTS.md ao final da sua atividade
    nessas fases. O script é idempotente.
 
+### Agregador de Harness
+
+O `AGENTS.md` também registra, em seção própria, o comando
+sem argumentos do agregador e seu destino:
+
+| Comando | Destino |
+|---------|---------|
+| `harness/agregar` | `docs/harness-report.md` |
+
+O comando real pode ser definido pelo humano. O
+`curador-produto-editor` orienta e executa o coletor aprovado
+na Fase 4 para gerar o primeiro relatório e mantém esse
+registro.
+
 ### Pré-requisito: `curador-produto-editor`
 
 6. **`curador-produto-editor` cria e altera o
@@ -419,11 +433,12 @@ fluxo em 4 fases com aprovação do humano:
   o gate.
 - Orienta o humano a criar um coletor, como script ou
   equivalente adequado à stack, para medir os tempos reais e
-  gerar `docs/harness.md`. O editor não inventa métricas:
+  gerar `docs/harness-report.md`. O editor não inventa métricas:
   o humano aprova o coletor antes da execução.
 - Após a aprovação, executa o coletor e revisa o relatório
-  gerado. Só então grava os scripts e atualiza a tabela no
-  `AGENTS.md`.
+  gerado. Só então grava os scripts e registra ou atualiza,
+  em seção própria do `AGENTS.md`, o comando do agregador e o
+  destino `docs/harness-report.md`, além da tabela.
 - Se o orçamento estourar, propõe fingerprint, retry ou
   retirada; o humano decide.
 - Registra tabela no topo do `AGENTS.md`.

@@ -584,6 +584,10 @@ Premissas detalhadas: 21.1–21.3.
       → FALHA (lista o que falta).
     - Se `SEM HARNESS A PEDIDO DO HUMANO` → OK.
     - Se seção ausente no AGENTS.md → LACUNA.
+    Antes de cruzar as evidências, executa somente o comando
+    agregador registrado na seção própria do AGENTS.md para
+    atualizar `docs/harness-report.md`, sem executar harness
+    por agente. Se o registro estiver ausente, reporta LACUNA.
     O `val-harness` **não spawna agentes** — apenas
     reporta. O `devflow` recebe o relatório e decide:
     re-spawnar o agente faltante ou consultar o humano.
@@ -599,7 +603,8 @@ Premissas detalhadas: 21.1–21.3.
 > se `fail`: resolve findings e re-executa →
 > se `pass`: lê prompt e executa se houver →
 > persiste saída JSON ou o registro de skip (P34)
-> → `val-harness` valida em lote ao final da Construção
+> → `val-harness` executa somente o agregador registrado e
+> valida em lote ao final da Construção
 > e Revisão da Construção, se houve modificações (P35)
 > → `devflow` decide ação sobre falhas.
 

@@ -6,7 +6,7 @@ Renomear o relatório gerado pelo coletor e registrar o
 agregador como comando do projeto, com um agente dono da
 chamada no workflow. Sem IDs de plano nos artefatos.
 
-Status: em execução.
+Status: execução concluída — aguardando revisor.
 
 ## Execution Models
 
@@ -41,23 +41,23 @@ timeout genérico novo. Sem `git push`.
 
 ### Phase 1: Contrato e editor
 
-- [ ] Task 1: Ajustar testes (TDD)
-- [ ] Task 2: Editor + `harness-section.md`
+- [x] Task 1: Ajustar testes (TDD)
+- [x] Task 2: Editor + `harness-section.md`
 
 ### Checkpoint: Editor
 
-- [ ] Nenhum artefato produtivo cita `docs/harness.md`
-- [ ] Commit: testes + editor + template
+- [x] Nenhum artefato produtivo cita `docs/harness.md`
+- [x] Commit: testes + editor + template
 
 ### Phase 2: Caller e sync
 
-- [ ] Task 3: `val-harness` chama o agregador
-- [ ] Task 4: Workflow, skill e (se preciso) `devflow`
+- [x] Task 3: `val-harness` chama o agregador
+- [x] Task 4: Workflow, skill e (se preciso) `devflow`
 
 ### Checkpoint: Complete
 
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
-- [ ] Commit: val-harness + workflow + skill
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
+- [x] Commit: val-harness + workflow + skill
 - [ ] Este plano sai só no commit final **depois** da
       aprovação do revisor — o executor não remove agora
 
@@ -72,18 +72,18 @@ houver teste de `val-harness`, criar
 `tests/agents/test_val_harness.py` no mesmo estilo.
 
 **Acceptance criteria:**
-- [ ] Editor/skill/template/workflow não são exigidos a
+- [x] Editor/skill/template/workflow não são exigidos a
       conter `docs/harness.md`
-- [ ] Exigem `docs/harness-report.md`
-- [ ] Editor registra o agregador no `AGENTS.md` em
+- [x] Exigem `docs/harness-report.md`
+- [x] Editor registra o agregador no `AGENTS.md` em
       seção própria (comando + destino)
-- [ ] `val-harness` executa o comando do agregador no
+- [x] `val-harness` executa o comando do agregador no
       fim da fase; continua sem executar harness por
       agente e sem spawnar
-- [ ] Sem `skip`
+- [x] Sem `skip`
 
 **Verification:**
-- [ ] Pytest dos arquivos tocados — novos FAIL no
+- [x] Pytest dos arquivos tocados — novos FAIL no
       código atual
 
 **Dependencies:** None
@@ -110,12 +110,12 @@ humano escolher na entrevista; destino
 catálogo.
 
 **Acceptance criteria:**
-- [ ] Task 1 (parte editor/template) passa
-- [ ] Zero ocorrências de `docs/harness.md` nesses
+- [x] Task 1 (parte editor/template) passa
+- [x] Zero ocorrências de `docs/harness.md` nesses
       arquivos
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py -m unit`
 
 **Dependencies:** Task 1
 
@@ -142,12 +142,12 @@ agregador. Continua sem spawn, sem corrigir artefato,
 sem rodar `harness/eng-software` etc.
 
 **Acceptance criteria:**
-- [ ] Testes da Task 1 sobre val-harness passam
-- [ ] Texto ainda diz que não executa harness por
+- [x] Testes da Task 1 sobre val-harness passam
+- [x] Texto ainda diz que não executa harness por
       agente
 
 **Verification:**
-- [ ] Pytest de `tests/agents/test_val_harness.py` e/ou
+- [x] Pytest de `tests/agents/test_val_harness.py` e/ou
       o arquivo onde os asserts ficaram
 
 **Dependencies:** Task 2
@@ -176,12 +176,12 @@ sem rodar `harness/eng-software` etc.
    `docs/harness-report.md`; comando no `AGENTS.md`.
 
 **Acceptance criteria:**
-- [ ] Nenhuma ocorrência de `docs/harness.md` no repo
+- [x] Nenhuma ocorrência de `docs/harness.md` no repo
       (exceto histórico git)
-- [ ] Scaffold/skill tests verdes
+- [x] Scaffold/skill tests verdes
 
 **Verification:**
-- [ ] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
+- [x] `.\.venv\Scripts\pytest.exe tests/agents/test_curador_produto_editor.py tests/scaffold/test_mapa_produto.py tests/skills/test_harness_catalog.py -m unit`
 
 **Dependencies:** Task 3
 

@@ -373,8 +373,9 @@ após cada seção. Nunca avance sem aprovação da anterior.
 - Depois sugere medir os tempos reais dos harnesses escolhidos.
 - O catálogo é só como referência: o catálogo não grava check
   sozinho. O harness efetivo fica no `AGENTS.md`.
-- O agregador do harness é registrado em uma seção própria do
-  `AGENTS.md`, com o comando sem argumentos e o destino
+- O agregador do harness é registrado na seção própria
+  `## Agregador de Harness` do `AGENTS.md`, com o comando sem
+  argumentos e o destino
   `docs/harness-report.md` (por padrão, `harness/agregar`).
 - Acumula todas as decisões sem criar arquivo.
 - Tetos sugeridos, ajustáveis pelo humano: check isolado
