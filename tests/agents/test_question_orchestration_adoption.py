@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 
-DIRECT_CONSUMERS = ("analista", "curador-produto-editor")
+DIRECT_CONSUMERS = ("analista",)
 FORMER_GRILL_ME_CONSUMERS = ("dba", "eng-software", "front", "qa", "sec")
 
 

@@ -97,9 +97,7 @@ def test_commit_enabled_agents_use_git_workflow_skill(repo_root: Path) -> None:
         "qa",
         "rev",
         "sec",
-        "val-harness",
         "dba",
-        "curador-produto-editor",
     )
 
     for agent in agents:

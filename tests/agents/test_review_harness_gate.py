@@ -23,11 +23,13 @@ def test_workflow_review_harness_only_if_modified(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_val_harness_accepts_unmodified_skip(repo_root: Path) -> None:
-    content = (repo_root / "agents/val-harness.md").read_text(encoding="utf-8")
+def test_curador_produto_accepts_unmodified_skip(repo_root: Path) -> None:
+    content = (repo_root / "agents/curador-produto.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "sem modificações — harness não executado" in content
-    assert "Evidência ausente ou incompleta = FALHA" in content
+    assert "Ausente ou incompleta = FALHA" in content
 
 
 @pytest.mark.unit
@@ -38,6 +40,6 @@ def test_curador_produto_review_harness_respects_unmodified(
         encoding="utf-8"
     )
 
-    assert "se o agente modificou artefatos" in content
+    assert "Para cada agente que atuou na fase" in content
     assert "sem modificações — harness não executado" in content
     assert "agente executou seu script? Evidência JSON" not in content

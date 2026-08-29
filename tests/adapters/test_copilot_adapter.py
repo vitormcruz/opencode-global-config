@@ -51,9 +51,9 @@ def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
     assert status == 0
     assert error == ""
     agent = (
-        tmp_path / ".copilot" / "agents" / "curador-produto-editor.agent.md"
+        tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).read_text(encoding="utf-8")
-    assert "name: curador-produto-editor" in agent
+    assert "name: curador-produto" in agent
     assert "dba, eng-software, front, qa, rev, sec" in agent
     assert "agent_type" in agent
     assert "model` e opcional" in agent
