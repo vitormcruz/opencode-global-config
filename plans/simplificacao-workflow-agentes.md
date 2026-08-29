@@ -107,6 +107,14 @@ camadas de orquestração.
 - Prompts: âncoras de 1 linha por skill (já existentes) + regras
   invioláveis ≤10 linhas/agente; sem extração de essência longa.
 
+## Modelos do experimento (orquestração)
+
+- **Executor (`worker`)**: `opencode-go/qwen3.7-max` (Qwen3.7 Max)
+- **Revisor (`revisor`)**: `zai-coding-plan/glm-5.3` (GLM 5.3, z.ai)
+- Definidos no frontmatter dos agentes; troca = editar 1 linha + reiniciar
+  OpenCode. Reutilizar estas escolhas em novas instâncias até decisão
+  humana em contrário.
+
 ## Task List
 
 ### Phase 0 — Infra do experimento

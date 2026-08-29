@@ -7,6 +7,7 @@ description: >
   arquivos, nunca reabre decisões humanas. Exclusivo do
   OpenCode — ignorado pelo adapter Copilot. (PT-BR)
 mode: subagent
+model: zai-coding-plan/glm-5.3
 temperature: 0.1
 permission:
   edit: deny

@@ -8,6 +8,7 @@ description: >
   resolvidos por conta propria. Exclusivo do OpenCode —
   ignorado pelo adapter Copilot. (PT-BR)
 mode: subagent
+model: opencode-go/qwen3.7-max
 temperature: 0.2
 permission:
   edit: allow
