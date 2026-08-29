@@ -71,7 +71,7 @@ executa `git push` sem confirmação explícita do humano.
 | `front` | Prototipa telas | Implementa UI | Revisa identidade visual |
 | `rev` | — | — | Revisão solo com skills de domínio |
 
-> **Nota de sequenciamento (P26):** `sec` analisa requisitos
+> **Nota de sequenciamento:** `sec` analisa requisitos
 > de segurança com base no plano do `eng-software` — por
 > isso é spawnado após o engenheiro no planejamento.
 
@@ -312,7 +312,24 @@ sequenceDiagram
     participant rev as rev
 
     Humano ->> devflow: Nova funcionalidade
-    devflow ->> devflow: Cria arquivo<br/>Status: PLANEJAMENTO
+    devflow ->> devflow: Cria arquivo<br/>Status: VALIDAÇÃO
+
+    rect rgb(255, 230, 230)
+    Note over Humano, rev: VALIDAÇÃO (gate D13)
+    devflow ->> prod: Verificar docs/README.md e harness
+    prod -->> devflow: Relatório de lacunas
+    alt Lacuna detectada
+        devflow ->> Humano: Tratar a curadoria agora?
+        alt Sim
+            Note over Humano, rev: Fases de dev conduzem curadoria
+            devflow ->> prod: Revalidar após curadoria
+        else Não
+            devflow ->> devflow: Registra lacuna em Perguntas
+        end
+    else Tudo OK
+        devflow ->> devflow: Status: PLANEJAMENTO
+    end
+    end
 
     rect rgb(230, 245, 255)
     Note over Humano, rev: PLANEJAMENTO
