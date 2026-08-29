@@ -90,7 +90,7 @@ def test_specialists_have_subagent_no_commit_rule(repo_root: Path) -> None:
     """Especialistas têm regra de subagente — não commitar."""
 
     agents_dir = repo_root / "agents"
-    specialists = ("dba", "front", "qa", "sec")
+    specialists = ("dba", "front", "qa", "sec", "rev")
 
     for agent in specialists:
         content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
@@ -147,10 +147,10 @@ def test_commit_enabled_agents_reference_git_workflow_skill(
 def test_specialists_do_not_have_git_workflow_in_mandatory(
     repo_root: Path,
 ) -> None:
-    """Especialistas (T4) não têm git-workflow na tabela de obrigatórias."""
+    """Especialistas não têm git-workflow na tabela de obrigatórias."""
 
     agents_dir = repo_root / "agents"
-    specialists = ("dba", "front", "qa", "sec")
+    specialists = ("dba", "front", "qa", "sec", "rev")
 
     for agent in specialists:
         content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
@@ -178,10 +178,10 @@ def test_specialists_do_not_have_git_workflow_in_mandatory(
 
 @pytest.mark.unit
 def test_specialists_have_regras_inviolaveis_block(repo_root: Path) -> None:
-    """Especialistas (T4) têm bloco Regras Invioláveis com ≤10 linhas."""
+    """Agentes do workflow têm bloco Regras Invioláveis com ≤10 linhas."""
 
     agents_dir = repo_root / "agents"
-    agents = ("dba", "front", "qa", "sec")
+    agents = ("dba", "front", "qa", "sec", "rev")
 
     for agent in agents:
         path = agents_dir / f"{agent}.md"
@@ -207,3 +207,33 @@ def test_dba_references_data_modeling_skill(repo_root: Path) -> None:
 
     content = (repo_root / "agents/dba.md").read_text(encoding="utf-8")
     assert "data-modeling" in content
+
+
+@pytest.mark.unit
+def test_rev_has_domain_skill_anchors(repo_root: Path) -> None:
+    """rev tem âncoras às skills de domínio para revisão."""
+
+    content = (repo_root / "agents/rev.md").read_text(encoding="utf-8")
+    domain_skills = (
+        "security-and-hardening",
+        "data-modeling",
+        "frontend-ui-engineering",
+        "accessibility-audit",
+        "tests-as-spec",
+        "api-and-interface-design",
+        "documentation-and-adrs",
+    )
+
+    for skill in domain_skills:
+        assert skill in content, (
+            f"rev.md: falta âncora à skill '{skill}'"
+        )
+
+
+@pytest.mark.unit
+def test_rev_is_read_only(repo_root: Path) -> None:
+    """rev é read-only — nunca edita código em revisão."""
+
+    content = (repo_root / "agents/rev.md").read_text(encoding="utf-8")
+    assert "Read-only" in content or "read-only" in content
+    assert "nunca editar código" in content or "nunca corrige" in content
