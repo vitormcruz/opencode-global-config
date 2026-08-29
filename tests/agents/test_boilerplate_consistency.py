@@ -181,7 +181,7 @@ def test_specialists_have_regras_inviolaveis_block(repo_root: Path) -> None:
     """Agentes do workflow têm bloco Regras Invioláveis com ≤10 linhas."""
 
     agents_dir = repo_root / "agents"
-    agents = ("dba", "front", "qa", "sec", "rev")
+    agents = ("dba", "front", "qa", "sec", "rev", "eng-software")
 
     for agent in agents:
         path = agents_dir / f"{agent}.md"
@@ -237,3 +237,14 @@ def test_rev_is_read_only(repo_root: Path) -> None:
     content = (repo_root / "agents/rev.md").read_text(encoding="utf-8")
     assert "Read-only" in content or "read-only" in content
     assert "nunca editar código" in content or "nunca corrige" in content
+
+
+@pytest.mark.unit
+def test_eng_software_has_committer_unico_rule(repo_root: Path) -> None:
+    """eng-software é o committer único do workflow."""
+
+    content = (repo_root / "agents/eng-software.md").read_text(
+        encoding="utf-8"
+    )
+    assert "Committer único" in content
+    assert "git-workflow-and-versioning" in content
