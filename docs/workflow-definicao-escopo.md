@@ -8,7 +8,7 @@ humano.
 
 **Premissa:** a curadoria já foi executada antes deste
 workflow (docs/README.md e Harness presentes e válidos).
-Ver [`workflow-curadoria.md`](workflow-curadoria.md).
+Ver gate D13 no `workflow-agentes-dev.md`.
 
 O `devflow` executa este workflow após a curadoria e,
 ao final, transiciona para o workflow de desenvolvimento
@@ -28,8 +28,8 @@ ao final, transiciona para o workflow de desenvolvimento
    não lê, não valida. Recebe resumo curto de volta.
 2. **Curadoria já foi concluída** — docs/README.md e
    Harness existem e estão válidos. Este workflow assume
-   isso como pré-condição. A validação é feita pelo
-   `workflow-curadoria.md`, que rodou antes.
+   isso como pré-condição. A validação é feita pelo gate
+   D13 do `devflow`, que rodou antes.
 3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
@@ -38,10 +38,6 @@ ao final, transiciona para o workflow de desenvolvimento
 5. **Transição para dev** — quando o analista conclui
    a elicitação, `devflow` transiciona para o workflow de
    desenvolvimento, que começa em PLANEJAMENTO.
-6. **Modo Debug** — se o humano ativou o modo debug
-   (`modo debug on`), o `devflow` captura notas e skills
-   durante a elicitação. Ver `agents/devflow.md`, seção
-   "Modo Debug".
 
 ## Fluxo
 
@@ -115,8 +111,8 @@ sequenceDiagram
 ## Regras Críticas
 
 - `analista` **nunca** edita `docs/README.md`
-- `curador-produto-editor` cria a seção Definição de
-  Escopo no `docs/README.md` **antes** do analista atuar
-  (via workflow-curadoria.md)
+- `curador-produto` cria a seção Definição de Escopo no
+  `docs/README.md` **antes** do analista atuar (via gate
+  D13 do devflow)
 - `devflow` é roteador stateless — só spawna, não lê,
   não valida
