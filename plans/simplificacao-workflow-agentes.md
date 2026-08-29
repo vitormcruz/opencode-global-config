@@ -67,17 +67,43 @@ camadas de orquestração.
 - **D12 (aprovada)**: escopo documental incluído — atualizar `README.md`,
   `AGENTS.md` do repo e `docs/workflow-curadoria.md` onde citam agentes
   removidos/modificados.
+- **D13 (aprovada, com refinamentos)**: trabalho de curadoria integrado ao
+  workflow dev (emenda a D9 — fim da mediação direta humano↔curador):
+  - Gate na fase 1: curador verifica docs/README.md + harness; se houver
+    lacuna/problema, `devflow` pergunta ao humano se quer tratar agora.
+    Sim → as fases de dev conduzem o trabalho de curadoria. Não → o
+    desenvolvimento segue com a lacuna registrada no planning file.
+  - Todos os passos de curadoria preservados como conteúdo (bootstrap,
+    revisão item a item, spec de harness) — agora conduzidos pelas fases
+    de dev, antes de qualquer planejamento de funcionalidade.
+  - Curador simplificado: foco em deixar a especificação de produto
+    (docs/README.md) e o harness bem feitos. **Sem orquestração de
+    conversa própria** — a mediação (quando juntar/separar perguntas,
+    ritmo, aprovações) é responsabilidade do `devflow`.
+  - Harness do trabalho de curadoria: `eng-software` roda os harness
+    implementados ao final; o curador verifica o sucesso (verde) —
+    validação objetiva que resolve a regra "não valida o que editou".
+  - `docs/workflow-curadoria.md` **extinto**: conhecimento migra para o
+    prompt do curador + `agents/references/` + skill `harness-catalog`.
+    `docs/workflow-definicao-escopo.md` intacto, só com referências
+    atualizadas (editor → curador-produto; sem modo debug).
+  - Participações posteriores do curador no ciclo inalteradas (D8:
+    validação de evidências; fase 7: revisão final).
 
 ## Visão final aprovada
 
 - Agentes: 14 → 12 (removidos `curador-produto-editor` e `val-harness`;
   `curador-produto` unificado absorve ambos; `devflow` mantido como roteador).
+- Workflows dev: `workflow-curadoria.md` extinto (D13 — trabalho de
+  curadoria conduzido pelas fases de dev, com gate na fase 1); restam
+  `workflow-agentes-dev.md`, `workflow-definicao-escopo.md` e
+  `workflow-agentico-simples.md` (não-dev).
 - Revisões de plano e construção: `rev` sozinho com âncoras às skills de
   domínio; achados voltam via `devflow` ao especialista; rev não corrige.
-- Commits: `eng-software` é o único committer do workflow; subagentes
-  reportam `[arquivos alterados + resumo ≤5 linhas]`. Exceção: agentes em
-  modo direto com o humano (ex.: curador-produto no setup) commitam suas
-  unidades com confirmação humana.
+- Commits: `eng-software` é o único committer do workflow, sem exceções
+  (D13 removeu o modo direto de setup do curador).
+- Curador-produto: foco em conteúdo (especificação de produto e harness);
+  sem orquestração de conversa — mediação é do `devflow`.
 - Prompts: âncoras de 1 linha por skill (já existentes) + regras
   invioláveis ≤10 linhas/agente; sem extração de essência longa.
 
@@ -103,26 +129,29 @@ camadas de orquestração.
   **Files**: `skills/data-modeling/SKILL.md`, `tests/skills/test_data_modeling.py`
   **Estimated scope**: M
 
-- [ ] **Task 2: Unificar curador-produto (absorve editor + val-harness)**
+- [ ] **Task 2: Unificar e simplificar curador-produto (absorve editor + val-harness)**
   **Description**: reescrever `agents/curador-produto.md` como agente
-  unificado: guarda e valida docs/README.md e harness (papel atual), EDITA
-  docs/README.md/harness no setup direto com humano (absorve
-  `curador-produto-editor`, incluindo o template e a interface de harness
-  que hoje vivem no prompt do editor — mover detalhe extenso para
-  `agents/references/` se necessário) e VALIDA evidências de harness em
-  lote (absorve `val-harness`: executar agregador do AGENTS.md e cruzar
-  seção `## Evidências de Harness — <fase>`). Regra de segurança: não
-  valida na mesma fase o que editou. Skills: obrigatória
-  `documentation-and-adrs`; condicional `harness-catalog`. Commits: só em
-  modo direto com humano, com confirmação; como subagente, não commita.
-  Remover `agents/curador-produto-editor.md` e `agents/val-harness.md`
-  (usar `git rm`). Alvo ≤400 linhas.
+  unificado com foco em CONTEÚDO (não em orquestração de conversa —
+  mediação é do devflow, D13): especificar docs/README.md (3 seções) e
+  harness (catálogo `harness-catalog`, tetos, interface de harness que
+  hoje vive no prompt do editor — mover detalhe extenso para
+  `agents/references/`), editar artefatos quando spawnado, validar
+  evidências de harness em lote (absorve `val-harness`: executar
+  agregador do AGENTS.md e cruzar seção `## Evidências de Harness —
+  <fase>`) e verificar sucesso (verde) dos harness implementados no
+  trabalho de curadoria (D13). Regra de segurança: não valida mérito do
+  que editou — validações dele são objetivas (presença/completude de
+  evidências, execução verde de harness). Skills: obrigatória
+  `documentation-and-adrs`; condicional `harness-catalog`. Nunca commita
+  (subagente; eng-software é o committer). Remover
+  `agents/curador-produto-editor.md` e `agents/val-harness.md` (usar
+  `git rm`). Alvo ≤350 linhas.
   **Acceptance criteria**:
-  - [ ] `agents/curador-produto.md` cobre os 3 papéis; ≤400 linhas
+  - [ ] `agents/curador-produto.md` cobre os 3 papéis; ≤350 linhas
   - [ ] `agents/curador-produto-editor.md` e `agents/val-harness.md` removidos via `git rm`
   - [ ] `agents/references/mensagens-curadoria.md` atualizado (editor → curador-produto)
   - [ ] Template docs/README.md e interface de harness preservados (prompt ou `agents/references/`)
-  - [ ] Regra "não valida o que editou na mesma fase" explícita
+  - [ ] Sem roteiro de conversa no prompt (mediação é do devflow)
   **Verification**: grep não encontra `curador-produto-editor|val-harness` em `agents/`
   **Dependencies**: None
   **Files**: `agents/curador-produto.md`, `agents/curador-produto-editor.md`,
@@ -215,15 +244,23 @@ camadas de orquestração.
   deixam de ter comitê: apenas `rev` (revisão solo) + repasse de achados ao
   especialista; validação de evidências de harness passa a spawnar
   `curador-produto` (não `val-harness`); manter seleção de modelo por fase e
-  política de sessão; manter fase VALIDAÇÃO com protocolo de mensagens
-  (D9); permissions: remover `curador-produto-editor` e `val-harness`;
-  corrigir indentação do frontmatter (linha 25). Alvo ≤350 linhas.
+  política de sessão; fase VALIDAÇÃO vira o gate da D13: curador verifica,
+  devflow pergunta ao humano "tratar a curadoria agora?" — se sim, as fases
+  de dev conduzem o trabalho de curadoria (antes de planejar
+  funcionalidade); se não, segue com a lacuna registrada no planning file.
+  Devflow assume a mediação do trabalho de curadoria (decide quando
+  juntar/separar perguntas do curador — blocos adaptativos da
+  `question-orchestration`). Permissions: remover `curador-produto-editor`
+  e `val-harness`; corrigir indentação do frontmatter (linha 25). Alvo
+  ≤380 linhas.
   **Acceptance criteria**:
   - [ ] Sem Modo Debug, sem DevFlowNotes
   - [ ] Fases 3 e 5 com revisão solo do rev + fluxo de repasse de achados
   - [ ] Evidências validadas por `curador-produto`
+  - [ ] Gate da D13 na VALIDAÇÃO documentado (trabalho de curadoria pelas fases de dev)
+  - [ ] Mediação do trabalho de curadoria explícita (blocos de perguntas)
   - [ ] permissions atualizadas e frontmatter válido
-  - [ ] ≤350 linhas
+  - [ ] ≤380 linhas
   **Verification**: `.venv/bin/pytest tests/agents/test_devflow.py` (adaptado) passa
   **Dependencies**: Tasks 2, 5
   **Files**: `agents/devflow.md`
@@ -233,31 +270,44 @@ camadas de orquestração.
   **Description**: refletir: sem comitês (fases 3/5), rev solo com skills,
   fluxo de achados (rev → devflow → especialista → nova revisão), committer
   único (D2), evidências validadas pelo curador-produto (D8), sem modo
-  debug, VALIDAÇÃO com protocolo D9, e o schema do arquivo de planejamento
-  (D10): seções obrigatórias `Status` (valores), `Regras de Produto`,
-  `Evidências de Harness — <fase>`, `Perguntas`, com ordem e formato. Alvo
-  ≤600 linhas (hoje 931).
+  debug, e o schema do arquivo de planejamento (D10): seções obrigatórias
+  `Status` (valores), `Regras de Produto`, `Evidências de Harness — <fase>`,
+  `Perguntas`, com ordem e formato. NOVA seção "Trabalho de curadoria"
+  (D13): como as fases de dev se aplicam aos artefatos de produto —
+  planejamento item a item com aprovação humana via mediação devflow;
+  construção com curador escrevendo docs/spec e eng-software implementando
+  scripts de harness com TDD; ao final eng-software roda os harness e o
+  curador verifica o verde. Alvo ≤650 linhas (hoje 931).
   **Acceptance criteria**:
   - [ ] Fases 3/5 sem comitê; fluxo de achados documentado
   - [ ] Schema do planning file formalizado com seções e formato
+  - [ ] Seção "Trabalho de curadoria" completa (gate fase 1 + fases aplicadas)
   - [ ] Sem referências a editor/val-harness/modo debug
-  - [ ] ≤600 linhas
+  - [ ] ≤650 linhas
   **Verification**: grep sem `val-harness|curador-produto-editor|DevFlowNotes`; teste de consistência (Task 10) passa
   **Dependencies**: Tasks 2, 7
   **Files**: `docs/workflow-agentes-dev.md`
   **Estimated scope**: L
 
-- [ ] **Task 9: Atualizar `docs/workflow-curadoria.md`**
-  **Description**: caller e executor passam a ser `curador-produto`
-  unificado (sem editor); incluir validação de evidências de harness
-  (absorvida do val-harness); manter filosofia, fases e catálogo de
-  sugestões de harness.
+- [ ] **Task 9: Extinguir `docs/workflow-curadoria.md` e atualizar `workflow-definicao-escopo.md`**
+  **Description**: remover `docs/workflow-curadoria.md` via `git rm`
+  (orquestração vira as fases de dev + seção "Trabalho de curadoria" da
+  Task 8). Migrar conhecimento antes de remover: filosofia já vive em
+  `agents/references/principios-documentacao.md` (completar se faltar
+  trecho); template do docs/README.md e interface de harness → prompt do
+  curador ou `agents/references/`; catálogo de sugestões → já é a skill
+  `harness-catalog` (verificar cobertura). Atualizar
+  `docs/workflow-definicao-escopo.md`: referências editor →
+  curador-produto, remover menção a Modo Debug (linhas 41–44) e
+  curador-produto-editor (linha 118), sequência coerente com D13
+  (curadoria conduzida pelo workflow dev).
   **Acceptance criteria**:
-  - [ ] Sem referências a editor/val-harness
-  - [ ] Validação de evidências documentada no fluxo de curadoria
-  **Verification**: grep limpo; leitura de consistência com `agents/curador-produto.md`
-  **Dependencies**: Task 2
-  **Files**: `docs/workflow-curadoria.md`
+  - [ ] `docs/workflow-curadoria.md` removido via `git rm`
+  - [ ] Conhecimento migrado (filosofia, template, interface, catálogo)
+  - [ ] `workflow-definicao-escopo.md` sem referências a editor/modo debug
+  **Verification**: `grep -rn "workflow-curadoria\|curador-produto-editor\|DevFlowNotes" docs/ agents/` sem resultados
+  **Dependencies**: Tasks 2, 8
+  **Files**: `docs/workflow-curadoria.md`, `docs/workflow-definicao-escopo.md`, `agents/references/`
   **Estimated scope**: M
 
 ### Checkpoint: CP3 — commit `docs(workflow): workflow dev sem comites; curadoria unificada`
@@ -317,7 +367,8 @@ camadas de orquestração.
 |------|--------|------------|
 | Falso negativo de domínio na revisão solo do `rev` | Medium | Âncoras explícitas (padrão 95%+ Vercel); loop de correção via especialista; skill `data-modeling` fecha o gap DBA |
 | Perda de conhecimento na fusão do curador (editor tinha 465L) | Medium | Preservar template e interface de harness (prompt ou `agents/references/`); critério de aceitação explícito |
-| Curador unificado inflar (>400L) e sofrer context rot | Medium | Alvo ≤400L; detalhe extenso vai para `agents/references/` com âncora |
+| Curador unificado inflar (>350L) e sofrer context rot | Medium | Alvo ≤350L; detalhe extenso vai para `agents/references/` com âncora |
+| Setup de curadoria mediado ficar lento (hop por pergunta) | Medium | devflow usa blocos adaptativos (`question-orchestration`); decide quando juntar/separar |
 | Trigger da nova skill `data-modeling` falhar | Low | Description com keywords de gatilho; âncora no `dba` e no `rev`; teste de consistência garante existência |
 | Testes legados referenciando agentes removidos | Low | Task 3 dedicada; suíte completa no CP final |
 | Revisor `rev` tentar corrigir em vez de reportar | Medium | Regra read-only como inviolável; `devflow` repassa achados; teste de boilerplate |
