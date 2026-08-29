@@ -109,6 +109,23 @@ camadas de orquestração.
 
 ## Task List
 
+### Phase 0 — Infra do experimento
+
+- [ ] **Task 0: Adapter Copilot ignora `worker` e `revisor`**
+  **Description**: `agents/worker.md` e `agents/revisor.md` já foram criados
+  (infra de orquestração do experimento, globais no OpenCode via symlink,
+  com `model` editável no frontmatter). O adapter Copilot copia
+  `agents/*.md` indiscriminadamente — adicionar mecanismo de exclusão
+  explícito em `src/opencode_config/adapters/copilot.py` (lista de agentes
+  OpenCode-only) + testes em `tests/adapters/`.
+  **Acceptance criteria**:
+  - [ ] `_sync_agents` exclui `worker.md` e `revisor.md` (lista nomeada, não regex genérica)
+  - [ ] Teste cobre: agentes excluídos não copiados; demais inalterados
+  **Verification**: `.venv/bin/pytest tests/adapters/ -k copilot` passa
+  **Dependencies**: None
+  **Files**: `src/opencode_config/adapters/copilot.py`, `tests/adapters/test_copilot_adapter.py`
+  **Estimated scope**: S
+
 ### Phase 1 — Fundação: skill DBA e curador unificado
 
 - [ ] **Task 1: Criar skill `data-modeling` (domínio DBA)**
