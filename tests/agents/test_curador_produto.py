@@ -126,6 +126,43 @@ def test_curador_produto_prohibits_cutting_checks(
 
 
 @pytest.mark.unit
+def test_curador_produto_prohibits_ignoring_default_artifacts(
+    curador_normalized: str,
+) -> None:
+    assert "proibido ignorar os default-artifacts" in curador_normalized
+
+
+@pytest.mark.unit
+def test_curador_produto_prohibits_file_search_for_default_artifacts(
+    curador_normalized: str,
+) -> None:
+    assert "proibido usar file_search" in curador_normalized
+
+
+@pytest.mark.unit
+def test_curador_produto_delegates_harness_implementation(
+    curador_normalized: str,
+) -> None:
+    assert "spawn" in curador_normalized
+    assert "eng-software" in curador_normalized
+    assert "briefing" in curador_normalized
+    assert "coletor" in curador_normalized
+    assert "docs/harness-report/harness-report.md" in curador_normalized
+
+
+@pytest.mark.unit
+def test_curador_produto_requires_static_analysis_to_cover_test_code(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "agents/references/interface-harness.md"
+    ).read_text(encoding="utf-8")
+    normalized = " ".join(content.split()).lower()
+    assert "código de teste entra no mesmo scan" in normalized
+    assert "mesmo nível de qualidade que produção" in normalized
+
+
+@pytest.mark.unit
 def test_curador_produto_requires_approval_per_section(
     curador_normalized: str,
 ) -> None:
