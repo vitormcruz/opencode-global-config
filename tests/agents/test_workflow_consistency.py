@@ -1,10 +1,10 @@
-"""Valida consistencia entre workflow, agentes e skills (D11).
+"""Valida consistência entre workflow, agentes e skills (D11).
 
 Detecta:
 - Agente fantasma: workflow cita agente inexistente em ``agents/``.
-- Skill inexistente: agente ou workflow cita skill sem diretorio em
+- Skill inexistente: agente ou workflow cita skill sem diretório em
   ``skills/``.
-- Permission orfa: ``task: X: allow`` aponta para agente inexistente.
+- Permission órfã: ``task: X: allow`` aponta para agente inexistente.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import pytest
 
 
 # ---------------------------------------------------------------------------
-# Coleta de inventario
+# Coleta de inventário
 # ---------------------------------------------------------------------------
 
 
@@ -55,7 +55,7 @@ def _extract_frontmatter(text: str) -> str:
 
 
 def _extract_task_allow_agents(frontmatter: str) -> list[str]:
-    """Extrai nomes com ``allow`` na secao ``task:`` do frontmatter.
+    """Extrai nomes com ``allow`` na seção ``task:`` do frontmatter.
 
     Ignora a entrada especial ``"*"`` (wildcard).
     """
@@ -66,15 +66,15 @@ def _extract_task_allow_agents(frontmatter: str) -> list[str]:
     for raw_line in frontmatter.splitlines():
         stripped = raw_line.rstrip()
 
-        # Detecta inicio do bloco task (indentacao de 4 espacos sob permission)
+        # Detecta início do bloco task (indentação de 2 espaços sob permission)
         if re.match(r"^\s+task:\s*$", stripped):
             in_task = True
             continue
 
         if in_task:
-            # Linha mais indentada que task: → entrada de task
+            # Linha mais indentada que task: → entrada de task (4 espaços)
             entry_match = re.match(
-                r"^\s{6,}([\w*-]+):\s*(allow|deny)\s*$", stripped
+                r"^\s{4,}([\w*-]+):\s*(allow|deny)\s*$", stripped
             )
             if entry_match:
                 name, value = entry_match.group(1), entry_match.group(2)
@@ -82,15 +82,15 @@ def _extract_task_allow_agents(frontmatter: str) -> list[str]:
                     allowed.append(name)
                 continue
 
-            # Linha com indentacao menor ou igual a task: → fim do bloco
-            if stripped and not stripped.startswith("      "):
+            # Linha com indentação menor ou igual a task: → fim do bloco
+            if stripped and not stripped.startswith("    "):
                 in_task = False
 
     return allowed
 
 
 # ---------------------------------------------------------------------------
-# Parsing de referencias em tabelas de skills
+# Parsing de referências em tabelas de skills
 # ---------------------------------------------------------------------------
 
 _SKILL_TABLE_ROW_RE = re.compile(
@@ -103,7 +103,7 @@ _ANY_HEADING_RE = re.compile(r"^#{1,4}\s+", re.MULTILINE)
 def _extract_skills_from_tables(text: str) -> list[str]:
     """Extrai nomes de skills de tabelas sob headings ``## Skills``.
 
-    Ignora tabelas fora de secoes de skills (ex.: tabelas de agentes
+    Ignora tabelas fora de seções de skills (ex.: tabelas de agentes
     no curador-produto).
     """
 
@@ -113,12 +113,12 @@ def _extract_skills_from_tables(text: str) -> list[str]:
     in_skills_section = False
 
     for line in lines:
-        # Detecta inicio de secao de skills
+        # Detecta início de seção de skills
         if re.match(r"^#{1,4}\s+.*[Ss]kill", line):
             in_skills_section = True
             continue
 
-        # Detecta fim da secao (novo heading de mesmo ou maior nivel)
+        # Detecta fim da seção (novo heading de mesmo ou maior nível)
         if in_skills_section and re.match(r"^#{1,3}\s+", line):
             if not re.match(r"^#{1,4}\s+.*[Ss]kill", line):
                 in_skills_section = False
@@ -128,7 +128,7 @@ def _extract_skills_from_tables(text: str) -> list[str]:
             match = re.match(r"^\|\s*([a-z][a-z-]+)\s*\|", line)
             if match:
                 name = match.group(1)
-                # Ignora linhas de separacao de tabela
+                # Ignora linhas de separação de tabela
                 if not all(c in "-| " for c in line):
                     skills.append(name)
 
@@ -136,21 +136,21 @@ def _extract_skills_from_tables(text: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Parsing de referencias em backticks (workflow docs e agentes)
+# Parsing de referências em backticks (workflow docs e agentes)
 # ---------------------------------------------------------------------------
 
 _BACKTICK_RE = re.compile(r"`([a-z][a-z-]+)`")
 
-# Termos que aparecem em backticks mas NAO sao agentes nem skills.
-# Manutencao: adicionar aqui quando novo termo de codigo aparecer.
+# Termos que aparecem em backticks mas NÃO são agentes nem skills.
+# Manutenção: adicionar aqui quando novo termo de código aparecer.
 _NON_AGENT_NON_SKILL_TERMS: set[str] = {
-    "dev",           # abreviacao de developer/devflow em prosa
+    "dev",           # abreviação de developer/devflow em prosa
     "fail",          # status de teste
     "pass",          # status de teste
-    "findings",      # termo de codigo
-    "prompt",        # termo de codigo
+    "findings",      # termo de código
+    "prompt",        # termo de código
     "status",        # campo de frontmatter
-    "build",         # termo de codigo
+    "build",         # termo de código
     "websearch",     # nome de tool
     "model",         # campo de frontmatter
     "bloqueante",    # severidade de achado (rev)
@@ -162,8 +162,8 @@ _NON_AGENT_NON_SKILL_TERMS: set[str] = {
 def _extract_backtick_references(text: str) -> set[str]:
     """Extrai identificadores em backticks que parecem nomes de agente/skill.
 
-    Filtra termos conhecidos de codigo e identificadores que nao seguem
-    o padrao de nomes de agentes/skills (lowercase com hifens).
+    Filtra termos conhecidos de código e identificadores que não seguem
+    o padrão de nomes de agentes/skills (lowercase com hifens).
     """
 
     raw = set(_BACKTICK_RE.findall(text))
@@ -180,7 +180,7 @@ def _read_text(path: Path) -> str:
 
 
 def _read_workflow_docs(docs_dir: Path) -> dict[str, str]:
-    """Retorna {nome_arquivo: conteudo} dos workflow docs."""
+    """Retorna {nome_arquivo: conteúdo} dos workflow docs."""
 
     return {
         p.name: _read_text(p)
@@ -211,17 +211,44 @@ def test_task_permissions_point_to_existing_agents(repo_root: Path) -> None:
     agents_dir = repo_root / "agents"
     known_agents = _collect_agent_names(agents_dir)
     orphans: list[str] = []
+    total_extracted = 0
 
     for agent_name, content in _read_agent_files(agents_dir).items():
         frontmatter = _extract_frontmatter(content)
-        for target in _extract_task_allow_agents(frontmatter):
+        extracted = _extract_task_allow_agents(frontmatter)
+        total_extracted += len(extracted)
+        for target in extracted:
             if target not in known_agents:
                 orphans.append(f"{agent_name} -> task: {target}: allow")
 
+    # Garante que o parser extraiu permissions reais (devflow tem 7 allows)
+    assert total_extracted >= 7, (
+        f"Parser extraiu apenas {total_extracted} permissions "
+        f"(esperado >= 7); possível regressão à trivialidade"
+    )
+
     assert orphans == [], (
-        f"Permissions orfas (task: allow aponta para agente inexistente):\n"
+        f"Permissions órfãs (task: allow aponta para agente inexistente):\n"
         + "\n".join(f"  - {o}" for o in orphans)
     )
+
+
+@pytest.mark.unit
+def test_extract_task_allow_agents_detects_synthetic_orphan() -> None:
+    """Parser detecta permission sintética com indentação real (4 espaços)."""
+
+    frontmatter = (
+        "mode: primary\n"
+        "permission:\n"
+        "  task:\n"
+        "    agente-fantasma: allow\n"
+        "    eng-software: allow\n"
+    )
+    extracted = _extract_task_allow_agents(frontmatter)
+    assert "agente-fantasma" in extracted, (
+        "Parser não detectou 'agente-fantasma: allow' com 4 espaços"
+    )
+    assert "eng-software" in extracted
 
 
 @pytest.mark.unit
@@ -246,7 +273,7 @@ def test_skill_tables_reference_existing_skills(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_workflow_agent_references_exist(repo_root: Path) -> None:
-    """Workflows nao citam agentes fantasmas (removidos/inexistentes)."""
+    """Workflows não citam agentes fantasmas (removidos/inexistentes)."""
 
     agents_dir = repo_root / "agents"
     skills_dir = repo_root / "skills"
@@ -259,11 +286,11 @@ def test_workflow_agent_references_exist(repo_root: Path) -> None:
     for doc_name, content in _read_workflow_docs(docs_dir).items():
         refs = _extract_backtick_references(content)
         for ref in refs:
-            # Se esta em known_agents ou known_skills, e valido
+            # Se está em known_agents ou known_skills, é válido
             if ref in known_agents or ref in known_skills:
                 continue
-            # Se parece nome de agente/skill (tem hifen ou eh nome
-            # conhecido removido), e referencia orfa
+            # Se parece nome de agente/skill (tem hífen ou é nome
+            # conhecido removido), é referência órfã
             if "-" in ref or ref in {
                 "curador-produto-editor",
                 "val-harness",
@@ -271,7 +298,7 @@ def test_workflow_agent_references_exist(repo_root: Path) -> None:
                 ghosts.append(f"{doc_name} -> `{ref}`")
 
     assert ghosts == [], (
-        f"Referencias fantasmas em workflow docs "
+        f"Referências fantasmas em workflow docs "
         f"(agente/skill inexistente):\n"
         + "\n".join(f"  - {g}" for g in ghosts)
     )
@@ -279,7 +306,7 @@ def test_workflow_agent_references_exist(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_workflow_skill_references_exist(repo_root: Path) -> None:
-    """Workflows nao citam skills inexistentes."""
+    """Workflows não citam skills inexistentes."""
 
     agents_dir = repo_root / "agents"
     skills_dir = repo_root / "skills"
@@ -295,15 +322,15 @@ def test_workflow_skill_references_exist(repo_root: Path) -> None:
             if skill_ref not in known_skills:
                 missing.append(f"{doc_name} (tabela) -> skill: {skill_ref}")
 
-        # Skills referenciadas por backtick que NAO sao agentes
+        # Skills referenciadas por backtick que NÃO são agentes
         refs = _extract_backtick_references(content)
         for ref in refs:
             if ref in known_skills:
                 continue
             if ref in known_agents:
                 continue
-            # Se tem hifen e nao eh agente, pode ser skill orfa
-            # (ja coberto pelo teste de agentes fantasma acima)
+            # Se tem hífen e não é agente, pode ser skill órfã
+            # (já coberto pelo teste de agentes fantasma acima)
 
     assert missing == [], (
         f"Skills inexistentes referenciadas em workflow docs:\n"
@@ -313,7 +340,7 @@ def test_workflow_skill_references_exist(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_agent_backtick_skill_references_exist(repo_root: Path) -> None:
-    """Agentes nao citam skills inexistentes em backticks fora de tabelas."""
+    """Agentes não citam skills inexistentes em backticks fora de tabelas."""
 
     agents_dir = repo_root / "agents"
     skills_dir = repo_root / "skills"
@@ -327,13 +354,13 @@ def test_agent_backtick_skill_references_exist(repo_root: Path) -> None:
         for ref in refs:
             if ref in known_agents or ref in known_skills:
                 continue
-            # Nao e agente nem skill conhecida — se parece skill
-            # (tem hifen), e potencial referencia orfa
+            # Não é agente nem skill conhecida — se parece skill
+            # (tem hífen), é potencial referência órfã
             if "-" in ref:
                 missing.append(f"{agent_name} -> `{ref}`")
 
     assert missing == [], (
-        f"Referencias de skill/agent inexistentes em backticks "
+        f"Referências de skill/agent inexistentes em backticks "
         f"de agentes:\n"
         + "\n".join(f"  - {m}" for m in missing)
     )
@@ -341,7 +368,7 @@ def test_agent_backtick_skill_references_exist(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_removed_agents_not_referenced(repo_root: Path) -> None:
-    """Agentes removidos (D4) nao sao referenciados em nenhum lugar."""
+    """Agentes removidos (D4) não são referenciados em nenhum lugar."""
 
     removed_agents = {"curador-produto-editor", "val-harness"}
     removed_docs = {"workflow-curadoria.md"}
@@ -356,7 +383,7 @@ def test_removed_agents_not_referenced(repo_root: Path) -> None:
         for removed in removed_agents:
             if removed in content:
                 violations.append(
-                    f"agents/{agent_name}.md contem '{removed}'"
+                    f"agents/{agent_name}.md contém '{removed}'"
                 )
 
     # Verifica workflow docs
@@ -364,15 +391,15 @@ def test_removed_agents_not_referenced(repo_root: Path) -> None:
         for removed in removed_agents:
             if removed in content:
                 violations.append(
-                    f"docs/{doc_name} contem '{removed}'"
+                    f"docs/{doc_name} contém '{removed}'"
                 )
         for removed_doc in removed_docs:
             if removed_doc in content:
                 violations.append(
-                    f"docs/{doc_name} contem '{removed_doc}'"
+                    f"docs/{doc_name} contém '{removed_doc}'"
                 )
 
     assert violations == [], (
-        f"Referencias a agentes/docs removidos ainda presentes:\n"
+        f"Referências a agentes/docs removidos ainda presentes:\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
