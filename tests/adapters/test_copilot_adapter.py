@@ -372,3 +372,39 @@ def test_bootstrap_invokes_python_copilot_adapter(repo_root: Path) -> None:
 
     assert "adapters/copilot-cli/copilot-cli-adapter.sh" not in bootstrap
     assert "opencode_config.bootstrap.main" in bootstrap
+
+
+@pytest.mark.unit
+def test_copilot_adapter_skips_opencode_only_agents(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    assert not (
+        tmp_path / ".copilot" / "agents" / "worker.agent.md"
+    ).exists()
+    assert not (
+        tmp_path / ".copilot" / "agents" / "revisor.agent.md"
+    ).exists()
+
+
+@pytest.mark.unit
+def test_copilot_adapter_does_not_skip_regular_agents(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    assert (
+        tmp_path / ".copilot" / "agents" / "eng-software.agent.md"
+    ).is_file()
+    assert (
+        tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
+    ).is_file()

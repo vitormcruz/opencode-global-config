@@ -42,6 +42,12 @@ _COPILOT_BUILTIN_AGENT_TYPES = frozenset(
         "task",
     }
 )
+_OPENCODE_ONLY_AGENTS = frozenset(
+    {
+        "worker",
+        "revisor",
+    }
+)
 _MODEL_ID = re.compile(
     r"^(?:gpt-\d|claude-(?:sonnet|opus|haiku)-|gemini-\d|"
     r"o\d|kimi-k|grok-\d|mai-code|luna$)",
@@ -449,6 +455,9 @@ def _sync_agents(
     }
     count = 0
     for source in sources:
+        if source.stem in _OPENCODE_ONLY_AGENTS:
+            output(f"SKIP  {source.name} (OpenCode-only)")
+            continue
         destination = agents_dir / f"{source.stem}.agent.md"
         _backup_if_exists(destination, backup_dir)
         _write_utf8(
@@ -567,7 +576,11 @@ def _print_plan(
         for path in (repository / "skills").iterdir()
         if path.is_dir() and (path / "SKILL.md").is_file()
     )
-    agent_count = len(list((repository / "agents").glob("*.md")))
+    agent_count = sum(
+        1
+        for path in (repository / "agents").glob("*.md")
+        if path.stem not in _OPENCODE_ONLY_AGENTS
+    )
     command_count = len(list((repository / "commands").glob("*.md")))
     output(f"Repo:         {repository}")
     output(f"Skills:       {skills_dir}")
