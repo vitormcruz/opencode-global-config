@@ -222,7 +222,6 @@ def test_harness_scaffold_lists_all_required_agents(tmp_path: Path) -> None:
         "qa",
         "front",
         "rev",
-        "val-harness",
         "curador-produto",
     ):
         assert f"| {agent} " in content
@@ -238,7 +237,7 @@ def test_harness_scaffold_marks_non_executors_without_harness(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    for agent in ("rev", "val-harness", "curador-produto"):
+    for agent in ("rev", "curador-produto"):
         assert (
             f"| {agent} | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO"
             in content
@@ -352,8 +351,10 @@ def test_workflow_contains_three_doc_template_sections(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_editor_contains_three_doc_template_sections(repo_root: Path) -> None:
-    content = (repo_root / "agents/curador-produto-editor.md").read_text(
+def test_curador_produto_contains_three_doc_template_sections(
+    repo_root: Path,
+) -> None:
+    content = (repo_root / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
 
@@ -363,13 +364,15 @@ def test_editor_contains_three_doc_template_sections(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_editor_and_workflow_contain_same_key_elements(repo_root: Path) -> None:
+def test_default_artifacts_and_workflow_contain_same_key_elements(
+    repo_root: Path,
+) -> None:
     workflow = (repo_root / "docs/workflow-curadoria.md").read_text(
         encoding="utf-8"
     )
-    editor = (repo_root / "agents/curador-produto-editor.md").read_text(
-        encoding="utf-8"
-    )
+    template = (
+        repo_root / "agents/default-artifacts/doc-readme.md"
+    ).read_text(encoding="utf-8")
 
     for element in (
         "Modelo de Dados",
@@ -378,14 +381,16 @@ def test_editor_and_workflow_contain_same_key_elements(repo_root: Path) -> None:
         "ADR (Arquitetura)",
     ):
         assert element in workflow
-        assert element in editor
+        assert element in template
 
 
 @pytest.mark.unit
-def test_editor_contains_specs_destination(repo_root: Path) -> None:
-    content = (repo_root / "agents/curador-produto-editor.md").read_text(
-        encoding="utf-8"
-    )
+def test_default_artifacts_contains_specs_destination(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "agents/default-artifacts/doc-readme.md"
+    ).read_text(encoding="utf-8")
 
     assert "docs/specs/" in content
 
@@ -400,10 +405,10 @@ def test_workflow_contains_specs_destination(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_editor_lists_required_harness_agents(repo_root: Path) -> None:
-    content = (repo_root / "agents/curador-produto-editor.md").read_text(
-        encoding="utf-8"
-    )
+def test_harness_template_lists_required_agents(repo_root: Path) -> None:
+    content = (
+        repo_root / "agents/default-artifacts/harness-section.md"
+    ).read_text(encoding="utf-8")
 
     for agent in (
         "eng-software",
@@ -412,7 +417,6 @@ def test_editor_lists_required_harness_agents(repo_root: Path) -> None:
         "qa",
         "front",
         "rev",
-        "val-harness",
         "curador-produto",
     ):
         assert f"| {agent} " in content

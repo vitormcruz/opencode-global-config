@@ -2,11 +2,11 @@
 name: question-orchestration
 description: >
   Protocolo conversacional para smart-planner, devflow, analista e
-  curador-produto-editor: conduz triagem, perguntas adaptativas e confirmações
+  curador-produto: conduz triagem, perguntas adaptativas e confirmações
   de decisão sem cansar o humano. Use quando precisar planejar por perguntas,
   mediar dúvidas de agentes, rotear decisões ou reduzir carga cognitiva.
   Triggers: "mediação de perguntas", "rotear perguntas", "perguntas de
-  agentes", "devflow", "smart-planner", "analista", "curador-produto-editor",
+  agentes", "devflow", "smart-planner", "analista", "curador-produto",
   "elicitação de escopo", "curadoria de documentação", "organizar dúvidas",
   "escalar decisão", "planejamento interativo".
 ---
