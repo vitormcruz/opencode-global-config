@@ -16,7 +16,7 @@ description: >
 ## Escopo e fonte única
 
 Esta skill é a fonte única do protocolo conversacional compartilhado por
-smart-planner, devflow, analista e curador-produto-editor. Ela define como
+smart-planner, devflow, analista e curador-produto. Ela define como
 triagem, perguntas e decisões são conduzidas; os agentes que a usam não devem
 duplicar essas regras.
 
