@@ -134,8 +134,8 @@ Cada etapa é uma migration separada, deployável independentemente.
 
 | Operação | Lock | Risco | Alternativa |
 |----------|------|-------|-------------|
-| `ALTER TABLE ADD COLUMN` (com DEFAULT) | `ACCESS EXCLUSIVE` breve | Baixo em PG 11+ | — |
-| `ALTER TABLE ADD COLUMN` (sem DEFAULT, NOT NULL) | `ACCESS EXCLUSIVE` longo | Alto em tabela grande | Adicionar nullable, backfill, depois NOT NULL |
+| `ADD COLUMN` (com DEFAULT) | `ACCESS EXCLUSIVE` breve | Baixo em PG 11+ | — |
+| `ADD COLUMN` (sem DEFAULT, NOT NULL) | `ACCESS EXCLUSIVE` longo | Alto, tabela grande | nullable, backfill, NOT NULL |
 | `DROP COLUMN` | `ACCESS EXCLUSIVE` | Médio | Marcar deprecated, remover depois |
 | `RENAME COLUMN` | `ACCESS EXCLUSIVE` breve | Baixo no BD, alto na app | Dual-column durante transição |
 | `CREATE INDEX` | `SHARE` (bloqueia escrita) | Alto em produção | `CREATE INDEX CONCURRENTLY` |
