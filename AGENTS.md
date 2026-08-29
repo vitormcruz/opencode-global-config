@@ -233,7 +233,7 @@ nas descrições
 # Sincronização Workflow ↔ Agentes
 - As definições de agentes ficam em `agents/` e devem estar sempre
   sincronizadas com os workflows em `docs/workflow-agentes-dev.md`
-  e `docs/workflow-curadoria.md`.
+  e `docs/workflow-definicao-escopo.md`.
 - **Ao criar ou modificar um agente em `agents/`:** leia primeiro os
   workflows e verifique se a mudança proposta está alinhada com o que
   o workflow define para aquele agente.
@@ -241,6 +241,9 @@ nas descrições
   precisam ser atualizados para refletir a mudança, e liste-os ao humano.
 - Toda mudança — em workflow **ou** em agentes — **sempre** passa
   pelo humano antes de ser aplicada. Sem exceção.
+- A consistência é verificada automaticamente pelo teste
+  `tests/agents/test_workflow_consistency.py` (D11): agentes fantasmas,
+  skills inexistentes e permissions órfãs são detectados na suíte.
 
 # Regras Obrigatórias Para Testes
 - Toda evolução funcional do repo deve criar ou atualizar testes automatizados.
