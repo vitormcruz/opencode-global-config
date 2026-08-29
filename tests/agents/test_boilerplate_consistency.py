@@ -49,20 +49,54 @@ def extract_evidencias_intro(path: Path) -> str:
     return "\n".join(intro)
 
 
+def extract_regras_inviolaveis(path: Path) -> str:
+    """Extrai o bloco Regras Invioláveis até o próximo heading ou separador."""
+
+    lines = path.read_text(encoding="utf-8").replace("\r", "").splitlines()
+    try:
+        start = lines.index("## Regras Invioláveis")
+    except ValueError:
+        return ""
+
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        line = lines[index]
+        if line.startswith("## ") or line == "---":
+            end = index
+            break
+
+    return "\n".join(lines[start:end])
+
+
 @pytest.mark.unit
-def test_contrato_operacional_is_identical_between_shared_agents(
+def test_contrato_operacional_is_identical_between_specialists(
     repo_root: Path,
 ) -> None:
-    """Contrato Operacional é idêntico entre eng, front, qa e sec."""
+    """Contrato Operacional é idêntico entre especialistas (front, qa, sec)."""
 
     agents_dir = repo_root / "agents"
-    baseline = extract_contrato(agents_dir / "eng-software.md")
+    baseline = extract_contrato(agents_dir / "front.md")
 
-    for agent in ("front", "qa", "sec"):
+    for agent in ("qa", "sec"):
         current = extract_contrato(agents_dir / f"{agent}.md")
         assert current == baseline, (
             f"{agent}.md: Contrato Operacional divergiu do baseline "
-            "(eng-software.md)"
+            "(front.md)"
+        )
+
+
+@pytest.mark.unit
+def test_specialists_have_subagent_no_commit_rule(repo_root: Path) -> None:
+    """Especialistas têm regra de subagente — não commitar."""
+
+    agents_dir = repo_root / "agents"
+    specialists = ("dba", "front", "qa", "sec")
+
+    for agent in specialists:
+        content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
+        assert "Subagente — não commitar" in content, (
+            f"{agent}.md: falta regra 'Subagente — não commitar' "
+            "no Contrato Operacional"
         )
 
 
@@ -87,8 +121,10 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
 
 
 @pytest.mark.unit
-def test_commit_enabled_agents_use_git_workflow_skill(repo_root: Path) -> None:
-    """Agentes que alteram artefatos devem versionar suas próprias mudanças."""
+def test_commit_enabled_agents_reference_git_workflow_skill(
+    repo_root: Path,
+) -> None:
+    """Agentes referenciam git-workflow (obrigatória ou condicional)."""
 
     agents_dir = repo_root / "agents"
     agents = (
@@ -102,5 +138,72 @@ def test_commit_enabled_agents_use_git_workflow_skill(repo_root: Path) -> None:
 
     for agent in agents:
         content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
-        assert "git-workflow-and-versioning" in content
-        assert "Não propõe commit" not in content
+        assert "git-workflow-and-versioning" in content, (
+            f"{agent}.md: não referencia git-workflow-and-versioning"
+        )
+
+
+@pytest.mark.unit
+def test_specialists_do_not_have_git_workflow_in_mandatory(
+    repo_root: Path,
+) -> None:
+    """Especialistas (T4) não têm git-workflow na tabela de obrigatórias."""
+
+    agents_dir = repo_root / "agents"
+    specialists = ("dba", "front", "qa", "sec")
+
+    for agent in specialists:
+        content = (agents_dir / f"{agent}.md").read_text(encoding="utf-8")
+        lines = content.replace("\r", "").splitlines()
+
+        try:
+            start = lines.index(
+                "### Obrigatórias (carregar ANTES da capacidade indicada)"
+            )
+        except ValueError:
+            continue
+
+        end = len(lines)
+        for index in range(start + 1, len(lines)):
+            if lines[index].startswith("### "):
+                end = index
+                break
+
+        mandatory_section = "\n".join(lines[start:end])
+        assert "git-workflow-and-versioning" not in mandatory_section, (
+            f"{agent}.md: git-workflow-and-versioning não deve estar "
+            "na tabela de obrigatórias (especialistas não commitam)"
+        )
+
+
+@pytest.mark.unit
+def test_specialists_have_regras_inviolaveis_block(repo_root: Path) -> None:
+    """Especialistas (T4) têm bloco Regras Invioláveis com ≤10 linhas."""
+
+    agents_dir = repo_root / "agents"
+    agents = ("dba", "front", "qa", "sec")
+
+    for agent in agents:
+        path = agents_dir / f"{agent}.md"
+        block = extract_regras_inviolaveis(path)
+        assert block, (
+            f"{agent}.md: falta bloco '## Regras Invioláveis'"
+        )
+
+        rule_lines = [
+            line
+            for line in block.splitlines()
+            if line.strip() and not line.startswith("## ")
+        ]
+        assert len(rule_lines) <= 10, (
+            f"{agent}.md: Regras Invioláveis tem {len(rule_lines)} "
+            "linhas (máximo 10)"
+        )
+
+
+@pytest.mark.unit
+def test_dba_references_data_modeling_skill(repo_root: Path) -> None:
+    """dba referencia a skill data-modeling."""
+
+    content = (repo_root / "agents/dba.md").read_text(encoding="utf-8")
+    assert "data-modeling" in content

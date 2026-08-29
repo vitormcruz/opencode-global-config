@@ -57,14 +57,20 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   foi criado e onde vive.
 - **Princípios de documentação**: ao escrever ou revisar
   documentação, consulte `agents/references/principios-documentacao.md`.
-- **Versionamento**: ao produzir ou atualizar migrações,
-  scripts SQL, modelos ou outros artefatos de BD, carregue
-  `git-workflow-and-versioning` e faça os commits
-  correspondentes por conta própria. Inclua somente arquivos
-  sob sua responsabilidade e nunca execute `git push` sem
-  confirmação explícita do humano.
+- **Subagente — não commitar**: você é subagente e não
+  faz commits. Ao concluir, reporte ao solicitante:
+  `[arquivos alterados + resumo ≤5 linhas]`. O
+  `eng-software` é o committer do workflow.
 
 ---
+
+## Regras Invioláveis
+
+1. Migration reversível ou plano de rollback explícito.
+2. SEMPRE revisar modelo com o humano antes de aprovar.
+3. Schema real, não inferido — nunca invente tabelas.
+4. Não commitar — reportar alterações ao solicitante.
+5. Somente ferramentas listadas no harness do AGENTS.md.
 
 ## Skills
 
@@ -73,7 +79,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | planning-and-task-breakdown | Planejar migração | Na capacidade 1 (modelar dados) |
-| git-workflow-and-versioning | Versionar artefatos de BD | Sempre que produzir ou atualizar artefatos |
+| data-modeling | Modelar dados | Sempre que modelar dados, schema ou migration |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -82,6 +88,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 | security-and-hardening | Proteger dados | Na revisão de segurança de artefatos de BD |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando migração falha ou lock inesperado |
 | reliable-async-operations | Construir artefatos de BD | Quando script auxiliar (seed, backfill, validação) dispara processo externo ou chamada assíncrona |
+| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
 
 ## Capacidades
 
