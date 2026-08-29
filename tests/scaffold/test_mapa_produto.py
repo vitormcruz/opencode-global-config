@@ -340,17 +340,6 @@ def test_doc_and_harness_flags_create_both_scaffolds(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_workflow_contains_three_doc_template_sections(repo_root: Path) -> None:
-    content = (repo_root / "docs/workflow-curadoria.md").read_text(
-        encoding="utf-8"
-    )
-
-    assert "Definição de Escopo" in content
-    assert "Elementos de Especificação" in content
-    assert "Estratégias de Indexação de Código" in content
-
-
-@pytest.mark.unit
 def test_curador_produto_contains_three_doc_template_sections(
     repo_root: Path,
 ) -> None:
@@ -364,12 +353,9 @@ def test_curador_produto_contains_three_doc_template_sections(
 
 
 @pytest.mark.unit
-def test_default_artifacts_and_workflow_contain_same_key_elements(
+def test_default_artifacts_contains_key_elements(
     repo_root: Path,
 ) -> None:
-    workflow = (repo_root / "docs/workflow-curadoria.md").read_text(
-        encoding="utf-8"
-    )
     template = (
         repo_root / "agents/default-artifacts/doc-readme.md"
     ).read_text(encoding="utf-8")
@@ -380,7 +366,6 @@ def test_default_artifacts_and_workflow_contain_same_key_elements(
         "Plano de Testes",
         "ADR (Arquitetura)",
     ):
-        assert element in workflow
         assert element in template
 
 
@@ -391,15 +376,6 @@ def test_default_artifacts_contains_specs_destination(
     content = (
         repo_root / "agents/default-artifacts/doc-readme.md"
     ).read_text(encoding="utf-8")
-
-    assert "docs/specs/" in content
-
-
-@pytest.mark.unit
-def test_workflow_contains_specs_destination(repo_root: Path) -> None:
-    content = (repo_root / "docs/workflow-curadoria.md").read_text(
-        encoding="utf-8"
-    )
 
     assert "docs/specs/" in content
 
@@ -423,8 +399,10 @@ def test_harness_template_lists_required_agents(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_workflow_does_not_contain_old_harness_interface(repo_root: Path) -> None:
-    content = (repo_root / "docs/workflow-curadoria.md").read_text(
+def test_curador_produto_does_not_contain_old_harness_interface(
+    repo_root: Path,
+) -> None:
+    content = (repo_root / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
 
@@ -432,10 +410,12 @@ def test_workflow_does_not_contain_old_harness_interface(repo_root: Path) -> Non
 
 
 @pytest.mark.unit
-def test_workflow_describes_standard_json_interface(repo_root: Path) -> None:
-    content = (repo_root / "docs/workflow-curadoria.md").read_text(
-        encoding="utf-8"
-    )
+def test_interface_harness_describes_standard_json_interface(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "agents/references/interface-harness.md"
+    ).read_text(encoding="utf-8")
 
     assert '"status"' in content
     assert '"findings"' in content

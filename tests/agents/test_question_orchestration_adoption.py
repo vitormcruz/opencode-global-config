@@ -42,10 +42,10 @@ def test_domain_agents_no_longer_reference_grill_me(
 
 
 @pytest.mark.unit
-def test_curation_workflow_matches_question_orchestration_adoption(
+def test_dev_workflow_matches_question_orchestration_adoption(
     repo_root: Path,
 ) -> None:
-    workflow = (repo_root / "docs/workflow-curadoria.md").read_text(
+    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
         encoding="utf-8"
     )
 

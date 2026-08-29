@@ -121,3 +121,44 @@ def test_devflow_skips_review_harness_without_modification(
 
     assert "sem modificações — harness não executado" in content
     assert "não modificou" in content
+
+
+@pytest.mark.unit
+def test_devflow_gate_d13_curadoria(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+
+    assert "Gate D13" in content
+    assert "Tratar a curadoria agora?" in content
+    assert "curador-produto" in content
+    assert "docs/README.md" in content
+    assert "lacuna" in content.lower()
+
+
+@pytest.mark.unit
+def test_devflow_findings_flow_rev_to_specialist(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+
+    assert "rev" in content
+    assert "especialista" in content
+    assert "achado" in content.lower()
+    assert "nova instância" in content
+
+
+@pytest.mark.unit
+def test_devflow_no_debug_mode_or_legacy_references(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+
+    assert "Modo Debug" not in content
+    assert "DevFlowNotes" not in content
+    assert "val-harness" not in content
+    assert "curador-produto-editor" not in content
+
+
+@pytest.mark.unit
+def test_devflow_evidence_validated_by_curador_produto(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+
+    assert "curador-produto" in content
+    assert "validação em lote" in content
+    assert "evidências de harness" in content
+    assert "val-harness" not in content

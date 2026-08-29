@@ -11,15 +11,11 @@ def test_workflow_review_harness_only_if_modified(repo_root: Path) -> None:
         encoding="utf-8"
     )
 
-    assert "Harness é **obrigatório" in workflow
-    assert "na construção** para agentes" in workflow
-    assert "só é obrigatório" in workflow
-    assert "**modificou** algum artefato" in workflow
+    assert "Obrigatório na construção" in workflow
+    assert "na revisão, só se modificou" in workflow
+    assert "artefato" in workflow
+    assert "construção executa; revisão só se modificou" in workflow
     assert "sem modificações — harness não executado" in workflow
-    assert "executa somente se modificar" in workflow
-    assert "na construção e na revisão da construção** para agentes" not in (
-        workflow
-    )
 
 
 @pytest.mark.unit
