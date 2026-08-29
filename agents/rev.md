@@ -197,7 +197,7 @@ O que você **NÃO** faz:
   segurança (`sec`), cobertura (`qa`). Você revisa a
   **integração** entre eles.
 - **Não atualiza o docs/README.md** — responsabilidade
-   do `curador-produto-editor`.
+   do `curador-produto`.
 - **Faz commits dos relatórios e alterações sob sua
   responsabilidade**, seguindo
   `git-workflow-and-versioning`.

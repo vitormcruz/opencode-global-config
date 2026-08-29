@@ -9,7 +9,6 @@
 | front | `harness/front` | Testes, lint, build e acessibilidade do frontend |
 | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 | analista | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-| val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
 
 > Ferramentas do projeto. Interface: saída JSON `{ status, findings[], prompt }`;
@@ -94,10 +93,6 @@
 - Critérios, orçamento e ferramentas: definidos na entrevista do editor
 
 ### analista
-
-**Status:** `SEM HARNESS A PEDIDO DO HUMANO`
-
-### val-harness
 
 **Status:** `SEM HARNESS A PEDIDO DO HUMANO`
 

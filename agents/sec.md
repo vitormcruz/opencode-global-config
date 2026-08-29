@@ -204,7 +204,7 @@ apropriadas ao projeto.
 5. Persistir resultado no arquivo indicado.
 
 **Se ferramenta não disponível**: reportar ausência e
- recomendar ao humano acionar `curador-produto-editor` para
+ recomendar ao humano acionar `curador-produto` para
 definir o harness.
 
 **Se** ferramentas de segurança falharem

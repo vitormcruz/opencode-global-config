@@ -19,6 +19,6 @@ ferramentas preferencialmente determinísticas. Fica no
 topo do `AGENTS.md` do projeto. Transforma validação em
 verificação reproduzível e automática.
 
-**Recomendação:** interrompa o workflow e chame o agente
-`curador-produto-editor` para o setup inicial — ele guia o
-processo seção por seção com sua aprovação a cada etapa.
+**Recomendação:** interrompa o workflow e trate a curadoria
+com o agente `curador-produto` — ele guia o processo seção
+por seção com sua aprovação a cada etapa.
