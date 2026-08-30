@@ -8,7 +8,7 @@ humano.
 
 **Premissa:** a curadoria já foi executada antes deste
 workflow (docs/README.md e Harness presentes e válidos).
-Ver gate D13 no `workflow-agentes-dev.md`.
+Ver gate de curadoria no `workflow-agentes-dev.md`.
 
 O `devflow` executa este workflow após a curadoria e,
 ao final, transiciona para o workflow de desenvolvimento
@@ -29,7 +29,7 @@ ao final, transiciona para o workflow de desenvolvimento
 2. **Curadoria já foi concluída** — docs/README.md e
    Harness existem e estão válidos. Este workflow assume
    isso como pré-condição. A validação é feita pelo gate
-   D13 do `devflow`, que rodou antes.
+   gate de curadoria do `devflow`, que rodou antes.
 3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
@@ -113,6 +113,6 @@ sequenceDiagram
 - `analista` **nunca** edita `docs/README.md`
 - `curador-produto` cria a seção Definição de Escopo no
   `docs/README.md` **antes** do analista atuar (via gate
-  D13 do devflow)
+  gate de curadoria do devflow)
 - `devflow` é roteador stateless — só spawna, não lê,
   não valida
