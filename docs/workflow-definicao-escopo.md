@@ -28,8 +28,8 @@ ao final, transiciona para o workflow de desenvolvimento
    não lê, não valida. Recebe resumo curto de volta.
 2. **Curadoria já foi concluída** — docs/README.md e
    Harness existem e estão válidos. Este workflow assume
-   isso como pré-condição. A validação é feita pelo gate
-   gate de curadoria do `devflow`, que rodou antes.
+    isso como pré-condição. A validação é feita pelo gate
+    de curadoria do `devflow`, que rodou antes.
 3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
@@ -113,6 +113,6 @@ sequenceDiagram
 - `analista` **nunca** edita `docs/README.md`
 - `curador-produto` cria a seção Definição de Escopo no
   `docs/README.md` **antes** do analista atuar (via gate
-  gate de curadoria do devflow)
+  de curadoria do devflow)
 - `devflow` é roteador stateless — só spawna, não lê,
   não valida
