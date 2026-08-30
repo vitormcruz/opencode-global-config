@@ -19,6 +19,10 @@ ferramentas preferencialmente determinísticas. Fica no
 topo do `AGENTS.md` do projeto. Transforma validação em
 verificação reproduzível e automática.
 
-**Recomendação:** interrompa o workflow e trate a curadoria
-com o agente `curador-produto` — ele guia o processo seção
-por seção com sua aprovação a cada etapa.
+**Recomendação:** trate a curadoria agora, sem sair do workflow —
+responda ao `devflow` que quer tratar, e as fases de desenvolvimento
+conduzirão o trabalho: o `devflow` media o processo seção a seção com
+sua aprovação, o `curador-produto` especifica os artefatos e o
+`eng-software` implementa os scripts de harness. Se preferir seguir
+sem os artefatos agora, a lacuna será registrada no arquivo de
+planejamento e o desenvolvimento continua.

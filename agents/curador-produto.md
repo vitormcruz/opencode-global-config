@@ -190,8 +190,9 @@ o que editou".
 Se `docs/README.md` ou Harness no `AGENTS.md` não existirem,
 exiba a mensagem pré-definida de
 `agents/references/mensagens-curadoria.md` (copiar/colar
-literal, sem alterar). Após exibir, sugira ao humano tratar
-a curadoria antes de seguir.
+literal, sem alterar). Após exibir, reporte a ausência ao
+solicitante (`devflow`) e retorne — a decisão de tratar agora
+é do humano, via gate D13 do `devflow`.
 
 ### 6. Revisão final de documentação
 
