@@ -105,11 +105,14 @@ negócio.
 | code-review-and-quality | Revisar segurança | Na capacidade 3 (revisar e corrigir) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando ferramentas de segurança falham inesperadamente |
 | reliable-async-operations | Executar testes de segurança | Quando escrever script que dispara ferramenta de segurança externa (SAST, DAST, scan) ou chamada assíncrona |
-| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
+
 
 ## Capacidades
 
 ### 1. Analisar requisitos de segurança
+
+ANTES de analisar segurança, carregue a skill
+`security-and-hardening`.
 
 Avaliar o plano de implementação sob a ótica de
 segurança e registrar requisitos.

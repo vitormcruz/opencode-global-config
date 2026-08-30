@@ -88,11 +88,13 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 | security-and-hardening | Proteger dados | Na revisão de segurança de artefatos de BD |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando migração falha ou lock inesperado |
 | reliable-async-operations | Construir artefatos de BD | Quando script auxiliar (seed, backfill, validação) dispara processo externo ou chamada assíncrona |
-| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
+
 
 ## Capacidades
 
 ### 1. Modelar dados
+
+ANTES de modelar dados, carregue a skill `data-modeling`.
 
 Analisar requisitos e produzir modelo conceitual +
 estratégia de migração.

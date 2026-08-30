@@ -124,16 +124,11 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
 def test_commit_enabled_agents_reference_git_workflow_skill(
     repo_root: Path,
 ) -> None:
-    """Agentes referenciam git-workflow (obrigatória ou condicional)."""
+    """Apenas committers referenciam git-workflow."""
 
     agents_dir = repo_root / "agents"
     agents = (
         "eng-software",
-        "front",
-        "qa",
-        "rev",
-        "sec",
-        "dba",
     )
 
     for agent in agents:

@@ -107,9 +107,12 @@ ou spawna outros agentes.
 |-------|-----------|----------|
 | code-simplification | Identificar complexidade | Quando revisar qualidade de código |
 | reliable-async-operations | Revisão multi-eixo | Quando o código revisado dispara processo externo, rede, async/await, fila, lock ou polling |
-| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
+
 
 ## Capacidade: Revisão integrativa
+
+ANTES de qualquer revisão, carregue a skill
+`code-review-and-quality`.
 
 Receber um artefato com seções produzidas por agentes
 diferentes e verificar integridade do conjunto.

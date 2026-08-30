@@ -109,7 +109,7 @@ modela dados ou executa testes de segurança.
 |-------|-----------|----------|
 | performance-optimization | Otimizar performance de UI | Quando há requisitos de Core Web Vitals ou bundle size |
 | reliable-async-operations | Implementar UI | Quando o componente dispara chamada assíncrona (fetch, API, promise, polling) com duração incerta |
-| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
+
 
 ### Transversais (úteis em qualquer capacidade)
 
@@ -170,6 +170,12 @@ ser alterados na construção sem nova aprovação do humano.
 ---
 
 ### 2. Implementar UI
+
+ANTES de escrever código de UI, carregue
+`frontend-ui-engineering`, `clean-code` e
+`code-simplification`. Carregue também
+`accessibility-audit` para o checklist de conformidade
+WCAG.
 
 Implementar componentes visuais conforme identidade
 visual aprovada pelo humano.

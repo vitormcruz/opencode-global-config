@@ -104,11 +104,14 @@ ou faz revisão integrativa.
 | accessibility-audit | Auditar acessibilidade | Quando há UI no escopo de testes |
 | performance-optimization | Testar performance | Quando há RNF de performance |
 | reliable-async-operations | Executar testes | Quando escrever script que dispara suíte de testes, CLI externo ou chamada assíncrona |
-| git-workflow-and-versioning | Entender versionamento | Quando precisar entender convenções de commit do projeto |
+
 
 ## Capacidades
 
 ### 1. Planejar testes
+
+ANTES de planejar testes, carregue `test-driven-development`
+e `tests-as-spec`.
 
 Analisar requisitos e produzir um plano de testes.
 
