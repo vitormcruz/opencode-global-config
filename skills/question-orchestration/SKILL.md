@@ -1,14 +1,15 @@
 ---
 name: question-orchestration
 description: >
-  Protocolo conversacional para smart-planner, devflow, analista e
-  curador-produto: conduz triagem, perguntas adaptativas e confirmações
-  de decisão sem cansar o humano. Use quando precisar planejar por perguntas,
-  mediar dúvidas de agentes, rotear decisões ou reduzir carga cognitiva.
-  Triggers: "mediação de perguntas", "rotear perguntas", "perguntas de
-  agentes", "devflow", "smart-planner", "analista", "curador-produto",
-  "elicitação de escopo", "curadoria de documentação", "organizar dúvidas",
-  "escalar decisão", "planejamento interativo".
+  Protocolo conversacional para agentes que conversam com o humano,
+  direta ou mediadamente: conduz triagem, perguntas adaptativas e
+  confirmações de decisão sem cansar o humano. Use quando precisar
+  planejar por perguntas, mediar dúvidas de agentes, rotear decisões
+  ou reduzir carga cognitiva. Triggers: "mediação de perguntas",
+  "agente mediador", "planejamento interativo", "protocolo
+  conversacional", "elicitação de escopo", "curadoria de documentação",
+  "rotear dúvidas de agentes", "confirmar decisões", "reduzir carga
+  cognitiva", "organizar dúvidas", "escalar decisão".
 ---
 
 # Orquestração de Perguntas
@@ -16,7 +17,7 @@ description: >
 ## Escopo e fonte única
 
 Esta skill é a fonte única do protocolo conversacional compartilhado por
-smart-planner, devflow, analista e curador-produto. Ela define como
+agentes que conversam com o humano, direta ou mediadamente. Ela define como
 triagem, perguntas e decisões são conduzidas; os agentes que a usam não devem
 duplicar essas regras.
 
@@ -26,7 +27,7 @@ revisão.
 
 ## Modo direto
 
-Use quando o agente conversa diretamente com o humano, como o smart-planner.
+Use quando o agente conversa diretamente com o humano.
 
 ### Triagem de Contexto Inicial
 
@@ -44,8 +45,8 @@ prompt inicial.
 
 ## Modo mediado
 
-Use quando um orquestrador recebe perguntas de agentes e as apresenta ao
-humano, como o devflow.
+Use quando um agente orquestrador recebe perguntas de agentes e as apresenta
+ao humano.
 
 1. Preserve a autoria técnica da pergunta: o mediador organiza e apresenta,
    mas não decide nem responde pelo humano.

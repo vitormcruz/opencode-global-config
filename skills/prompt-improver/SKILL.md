@@ -6,8 +6,9 @@ description: >
    ativacao explicita: "melhore este prompt", "reescreva este prompt",
    "me ajude a estruturar este prompt", "qual framework devo usar",
    "improve this prompt", "melhore:", "prompt engineering". Excecao:
-   o devflow pode aciona-la autonomamente apenas para preparar briefing
-   interno para subagente, sem alterar decisoes humanas. Fora dessa
+    um agente orquestrador pode aciona-la autonomamente apenas para
+    preparar briefing interno para subagente, sem alterar decisoes
+    humanas. Fora dessa
    excecao, nunca se autoative por contexto nem aplique o prompt
    melhorado automaticamente.
 license: MIT
@@ -38,10 +39,11 @@ Ative SOMENTE quando o humano pedir explicitamente, com frases como:
 - "melhore:"
 - ou qualquer pedido explicito de engenharia de prompts
 
-### Exceção: briefing interno do devflow
+### Exceção: briefing interno do agente orquestrador
 
-Quando o `devflow` carregar esta skill para preparar o briefing interno de um
-subagente, a ativação autônoma e o uso imediato do briefing são permitidos.
+Quando um agente orquestrador carregar esta skill para preparar o briefing
+interno de um subagente, a ativação autônoma e o uso imediato do briefing
+são permitidos.
 
 1. Preserve o insumo original do humano no handoff como fonte de verdade.
 2. Organize somente objetivo, contexto conhecido, restrições, resultado
@@ -50,7 +52,7 @@ subagente, a ativação autônoma e o uso imediato do briefing são permitidos.
 4. Não apresente o briefing ao humano nem aguarde sua aprovação: ele é um
    artefato interno de roteamento.
 5. Se uma lacuna exigir decisão humana, deixe-a explícita para a mediação do
-   `devflow`; não a preencha.
+    agente orquestrador; não a preencha.
 
 Fora dessa exceção, nunca se autoative por contexto. Se o humano não pediu
 engenharia de prompts explicitamente, responda normalmente. Qualquer uso de
@@ -207,9 +209,9 @@ Com as informacoes coletadas:
 > templates em `assets/templates/`. Carregue-os via ferramenta Read quando
 > precisar de orientacao detalhada sobre um framework especifico.
 
-> Importante: fora da exceção de briefing interno do `devflow`, melhorar um
-> prompt é diferente de usá-lo. Esta skill deve primeiro mostrar a proposta
-> melhorada e aguardar decisão explícita do humano.
+> Importante: fora da exceção de briefing interno do agente orquestrador,
+> melhorar um prompt é diferente de usá-lo. Esta skill deve primeiro mostrar
+> a proposta melhorada e aguardar decisão explícita do humano.
 
 ### 6. Apresentar melhorias
 
@@ -235,8 +237,8 @@ Mostre o prompt melhorado com:
 - Refine com base no feedback
 - Mude ou combine frameworks se necessario
 - Continue ate o usuario aprovar explicitamente a versao final
-- Fora da exceção de briefing interno do `devflow`, depois da aprovacao,
-  ofereca usar o prompt aprovado; nao assuma uso automatico
+- Fora da exceção de briefing interno do agente orquestrador, depois da
+  aprovacao, ofereca usar o prompt aprovado; nao assuma uso automatico
 
 ---
 

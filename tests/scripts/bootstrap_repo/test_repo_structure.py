@@ -101,7 +101,6 @@ def test_unused_upstream_skills_were_removed(repo_root: Path) -> None:
         "debugging-and-error-recovery",
         "git-workflow-and-versioning",
         "spec-driven-development",
-        "planning-and-task-breakdown",
         "api-and-interface-design",
         "performance-optimization",
         "frontend-ui-engineering",

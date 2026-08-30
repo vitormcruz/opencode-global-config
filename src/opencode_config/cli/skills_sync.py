@@ -73,7 +73,6 @@ ADDYOSMANI_SKILLS = (
     "debugging-and-error-recovery",
     "git-workflow-and-versioning",
     "spec-driven-development",
-    "planning-and-task-breakdown",
     "api-and-interface-design",
     "performance-optimization",
     "frontend-ui-engineering",

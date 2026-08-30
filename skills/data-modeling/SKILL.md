@@ -23,16 +23,6 @@ description: >
 Guia para projetar, evoluir e revisar schemas de banco de dados
 relacional. Carregar **antes** de criar ou alterar artefatos de BD.
 
-## Relação com outras skills
-
-| Skill | Papel |
-|---|---|
-| `data-modeling` | Como modelar e evoluir o schema |
-| `api-and-interface-design` | Contratos públicos que o schema sustenta |
-| `security-and-hardening` | Dados sensíveis, criptografia, PII |
-| `clean-code` | Nomes e organização do código de migration |
-| `test-driven-development` | Testes de migration e integridade |
-
 ## Princípios
 
 1. **Schema é contrato** — toda alteração de schema é uma mudança de

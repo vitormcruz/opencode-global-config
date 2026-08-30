@@ -220,6 +220,14 @@ When multiple agents or sessions are available:
 - No checkpoints between tasks
 - Dependency order isn't considered
 
+## Separação plano ↔ artefato
+
+O plano é um artefato de trabalho temporário. TODO artefato de produção
+gerado na execução (código, docs, prompts, testes, configuração) deve ser
+AUTOCONTIDO — jamais referenciar códigos de decisão (D1, D2…), números de
+task, seções ou vocabulário interno do plano. Se o conteúdo de um artefato
+depender do plano para fazer sentido, reformular em linguagem autocontida.
+
 ## Verification
 
 Before starting implementation, confirm:
@@ -230,3 +238,4 @@ Before starting implementation, confirm:
 - [ ] No task touches more than ~5 files
 - [ ] Checkpoints exist between major phases
 - [ ] The human has reviewed and approved the plan
+- [ ] Nenhum artefato de produção cita identificadores do plano
