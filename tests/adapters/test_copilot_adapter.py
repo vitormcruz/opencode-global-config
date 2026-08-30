@@ -54,9 +54,8 @@ def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
         tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).read_text(encoding="utf-8")
     assert "name: curador-produto" in agent
-    assert "dba, eng-software, front, qa, rev, sec" in agent
-    assert "agent_type" in agent
-    assert "model` e opcional" in agent
+    assert "dba, eng-software, front, qa, rev, sec" not in agent
+    assert "Delegacao de subagentes" not in agent
     assert "gpt-5.6-luna" not in agent
 
 
@@ -178,7 +177,7 @@ def test_copilot_adapter_materializes_smart_planner_subagent_capability(
 
 
 @pytest.mark.unit
-def test_copilot_adapter_marks_subagent_not_user_invocable(
+def test_copilot_adapter_revisor_historia_is_primary(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
     tmp_path: Path,
@@ -189,7 +188,7 @@ def test_copilot_adapter_marks_subagent_not_user_invocable(
     agent = (
         tmp_path / ".copilot" / "agents" / "revisor-historia.agent.md"
     ).read_text(encoding="utf-8")
-    assert "user-invocable: false" in agent
+    assert "user-invocable: false" not in agent
 
 
 @pytest.mark.unit

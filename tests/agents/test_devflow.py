@@ -124,10 +124,10 @@ def test_devflow_skips_review_harness_without_modification(
 
 
 @pytest.mark.unit
-def test_devflow_gate_d13_curadoria(repo_root: Path) -> None:
+def test_devflow_gate_curadoria(repo_root: Path) -> None:
     content = devflow_content(repo_root)
 
-    assert "Gate D13" in content
+    assert "gate de curadoria" in content.lower()
     assert "Tratar a curadoria agora?" in content
     assert "curador-produto" in content
     assert "docs/README.md" in content

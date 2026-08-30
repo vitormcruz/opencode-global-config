@@ -37,8 +37,9 @@ Scripts de harness seguem esta interface:
 - Não bypassar verificações, usar `failOnViolation=false`,
   excluir teste do scan, usar fail-open em audit ou cache sem
   fallback.
-- Ferramenta ausente gera finding `melhoria` com instrução de
-  instalação, salvo se o humano retirar o check do escopo.
+- Ferramenta ausente é finding `bloqueante`: instale a
+  ferramenta ou remova-a do harness e ajuste, salvo se o
+  humano retirar o check do escopo.
 
 ## Pass-through
 

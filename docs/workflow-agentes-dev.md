@@ -15,12 +15,12 @@ otimizado para:
 
 ```
 devflow
-  └── VALIDAÇÃO (gate D13)           ← Verifica docs/README.md e Harness
+  └── VALIDAÇÃO (gate de curadoria)  ← Verifica docs/README.md e Harness
   └── workflow-definicao-escopo.md   ← Elicita requisitos
   └── workflow-agentes-dev.md        ← Desenvolvimento (este arquivo)
 ```
 
-- **Gate D13** (fase VALIDAÇÃO) — garante que docs/README.md
+- **Gate de curadoria** (fase VALIDAÇÃO) — garante que docs/README.md
   e Harness existem e estão válidos. Se lacuna, o humano
   decide se trata a curadoria agora (conduzida pelas fases
   de dev) ou segue com lacuna registrada. Ver seção
@@ -45,7 +45,7 @@ devflow
 
 ## Commits
 
-O `eng-software` é o **único committer** do workflow (D2).
+O `eng-software` é o **único committer** do workflow.
 Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
 `curador-produto`) são subagentes: editam arquivos e
 reportam `[arquivos alterados + resumo ≤5 linhas]` ao
@@ -82,7 +82,7 @@ executa `git push` sem confirmação explícita do humano.
 Contrato de documentação do projeto. Contém 3 seções:
 Definição de Escopo, Elementos de Especificação e
 Estratégias de Indexação de Código. Criação e manutenção:
-`curador-produto` (via gate D13 ou trabalho de curadoria).
+`curador-produto` (via gate de curadoria ou trabalho de curadoria).
 
 ### 2. Harness por Agente
 
@@ -201,7 +201,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
     refatoração. Histórico de mudanças registrado.
 20. **Contexto via arquivo** — não via histórico da conversa.
 
-### Schema do arquivo de planejamento (D10)
+### Schema do arquivo de planejamento
 
 Seções obrigatórias na ordem:
 
@@ -233,7 +233,7 @@ Status: <FASE> [— detalhe opcional]
 ### docs/README.md
 
 21. **O workflow exige um docs/README.md** — criação e
-    manutenção pelo `curador-produto`. Gate D13 detecta
+    manutenção pelo `curador-produto`. Gate de curadoria detecta
     ausência ou problema. Se humano decidir tratar agora,
     fases de dev conduzem a curadoria. Se não, lacuna
     registrada e segue.
@@ -315,7 +315,7 @@ sequenceDiagram
     devflow ->> devflow: Cria arquivo<br/>Status: VALIDAÇÃO
 
     rect rgb(255, 230, 230)
-    Note over Humano, rev: VALIDAÇÃO (gate D13)
+    Note over Humano, rev: VALIDAÇÃO (gate de curadoria)
     devflow ->> prod: Verificar docs/README.md e harness
     prod -->> devflow: Relatório de lacunas
     alt Lacuna detectada
@@ -421,14 +421,14 @@ sequenceDiagram
     end
 ```
 
-## Trabalho de curadoria (D13)
+## Trabalho de curadoria
 
 O trabalho de curadoria (criação e manutenção do
 `docs/README.md` e harness por agente) é conduzido pelas
-fases de dev quando o gate D13 da VALIDAÇÃO detecta lacuna
+fases de dev quando o gate de curadoria da VALIDAÇÃO detecta lacuna
 e o humano decide tratar agora.
 
-### Gate D13 na VALIDAÇÃO
+### Gate de curadoria na VALIDAÇÃO
 
 1. `curador-produto` verifica docs/README.md e harness.
 2. Se lacuna: `devflow` pergunta **"Tratar a curadoria
@@ -462,7 +462,7 @@ seção com o humano (mediação via blocos adaptativos da
 1. `eng-software` roda os harness implementados.
 2. `curador-produto` verifica o verde — validação objetiva
    (resolve "não valida o que editou").
-3. Verde → curadoria concluída. `devflow` volta ao gate D13.
+3. Verde → curadoria concluída. `devflow` volta ao gate de curadoria.
 
 ## Notas de Implementação
 

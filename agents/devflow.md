@@ -10,7 +10,7 @@ description: >
   curador-produto para validação em lote das evidências
   de harness. Mediador de comunicação humano-agente
   quando agentes retornam perguntas. Conduz o trabalho
-  de curadoria pelas fases de dev (D13). Entrada:
+  de curadoria pelas fases de dev. Entrada:
   requisitos de nova funcionalidade ou retomada de
   workflow em andamento (PT-BR)
 mode: primary
@@ -88,7 +88,7 @@ responsáveis por formular suas próprias perguntas.
 ### Mediação do trabalho de curadoria
 
 Quando o trabalho de curadoria é conduzido pelas fases de
-dev (D13 — gate da VALIDAÇÃO), você media a interação
+dev (gate da VALIDAÇÃO), você media a interação
 entre o `curador-produto` e o humano:
 
 - **Blocos adaptativos** — decida quando juntar ou separar
@@ -199,9 +199,9 @@ Identificador: `{workflowId}-{fase}-{agente}`.
 | Passo | Agente | Ação |
 |-------|--------|------|
 | 1.1 | `curador-produto` | Verificar docs/README.md e harness |
-| 1.2 | `devflow` | Gate D13 (ver abaixo) |
+| 1.2 | `devflow` | Gate de curadoria (ver abaixo) |
 
-**Gate D13 — trabalho de curadoria:** se o
+**Gate de curadoria — trabalho de curadoria:** se o
 `curador-produto` reportar ausência ou problema:
 1. Pergunte ao humano: **"Tratar a curadoria agora?"**
    - **Sim** → fases de dev conduzem a curadoria

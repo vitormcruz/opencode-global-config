@@ -43,8 +43,8 @@ def test_curador_produto_has_description_frontmatter(
 
 
 @pytest.mark.unit
-def test_curador_produto_is_subagent(curador_content: str) -> None:
-    assert "mode: subagent" in curador_content
+def test_curador_produto_is_primary(curador_content: str) -> None:
+    assert "mode: primary" in curador_content
 
 
 @pytest.mark.unit
@@ -140,12 +140,11 @@ def test_curador_produto_prohibits_file_search_for_default_artifacts(
 
 
 @pytest.mark.unit
-def test_curador_produto_delegates_harness_implementation(
+def test_curador_produto_persists_and_returns_after_approval(
     curador_normalized: str,
 ) -> None:
-    assert "spawn" in curador_normalized
-    assert "eng-software" in curador_normalized
-    assert "briefing" in curador_normalized
+    assert "persista o resultado" in curador_normalized
+    assert "retorne o resumo ao solicitante" in curador_normalized
     assert "coletor" in curador_normalized
     assert "docs/harness-report/harness-report.md" in curador_normalized
 
@@ -194,11 +193,11 @@ def test_curador_produto_documents_harness_time_budgets(
 
 
 @pytest.mark.unit
-def test_curador_produto_spawns_eng_software_for_harness(
+def test_curador_produto_does_not_spawn_agents(
     curador_normalized: str,
 ) -> None:
-    assert "spawn" in curador_normalized
-    assert "eng-software" in curador_normalized
+    assert "persista o resultado" in curador_normalized
+    assert "retorne o resumo" in curador_normalized
 
 
 @pytest.mark.unit
@@ -298,7 +297,7 @@ def test_curador_produto_validates_harness_after_construction(
     for requirement in (
         "orçamento aprovado",
         "ferramenta ausente",
-        "melhoria",
+        "bloqueante",
         "cache",
         "fallback",
         "finding bloqueante",
