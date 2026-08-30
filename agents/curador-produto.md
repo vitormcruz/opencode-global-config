@@ -4,8 +4,9 @@ description: >
   docs/README.md (3 seções) e harness por agente, valida
   evidências de harness em lote e verifica execução verde
   dos harness de curadoria. Foco em conteúdo; mediação de
-  conversa é do devflow. Nunca commita (subagente). (PT-BR)
-mode: subagent
+  conversa é do devflow. Nunca commita no workflow de
+  desenvolvimento (committer é o eng-software). (PT-BR)
+mode: primary
 temperature: 0.2
 permission:
   edit: allow
