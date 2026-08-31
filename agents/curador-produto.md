@@ -165,8 +165,9 @@ produziram evidências completas.
 evidência contra o orçamento aprovado:
 
 - Confirma tetos e status de cada ferramenta.
-- Ferramenta ausente ou morta é finding `bloqueante`:
-  instale a ferramenta ou remova-a do harness e ajuste.
+- Ferramenta ausente ou morta é finding `bloqueante`: verifique
+  com o humano o que fazer, instalar a ferramenta ou removê-la do 
+  harness e ajuste conforme a decisão dele.
 - Cache só é válido com fingerprint e fallback para a suíte
   completa.
 - Finding bloqueante precisa de instrução acionável; falha
