@@ -37,7 +37,7 @@ devflow
 | `devflow` | Orquestrador | Roteador | Todas; apenas roteia |
 | `eng-software` | Engenheiro de Software | Executor/Committer | Planejamento e construção |
 | `front` | Engenheiro Frontend | Executor | Planejamento, construção e revisões |
-| `curador-produto` | Curador de Produto | Executor | Validação, revisões e finalização |
+| `curador-produto` | Curador de Produto | Executor | Validação, testes e finalização |
 | `dba` | Analista de BD | Executor | Planejamento, construção e revisões |
 | `sec` | Analista Cyber | Executor | Planejamento, construção, revisões e testes |
 | `rev` | Revisor Integrativo | Executor | Revisões do plano e da construção |
@@ -390,8 +390,17 @@ sequenceDiagram
     sec -->> devflow: Resultado
     devflow ->> prod: Evidência do orquestrador
     prod -->> devflow: Relatório
-    opt Falhas
-        devflow ->> eng: Corrigir e normalizar
+    opt Falha de suíte
+        alt backend
+            devflow ->> eng: Corrigir
+        else dados
+            devflow ->> dba: Corrigir
+        else segurança automática
+            devflow ->> sec: Corrigir
+        else frontend
+            devflow ->> front: Corrigir
+        end
+        devflow ->> eng: Normalizar e commitar
         eng -->> devflow: Correções
     end
     devflow ->> Humano: Re-executar?

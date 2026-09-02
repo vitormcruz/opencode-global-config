@@ -332,7 +332,6 @@ na Revisão da Construção.
 - [ ] Análise estática: <ferramenta + resultado>
 - [ ] Regressão incremental: <executada a cada passo? sim/não>
 - [ ] Gate de refatoração: <cenário escolhido + decisão>
-- [ ] Harness script: <executado? saída anexada>
 ```
 
 ---

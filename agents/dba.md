@@ -250,7 +250,6 @@ na Revisão da Construção.
 - [ ] Ferramenta executada: <conforme docs/README.md>
 - [ ] Artefatos produzidos: <lista de arquivos>
 - [ ] Guardrails verificados: <itens OK ou exceções>
-- [ ] Harness script: <executado? saída anexada>
 ```
 
 ---

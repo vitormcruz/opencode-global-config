@@ -307,7 +307,6 @@ na Revisão da Construção.
 - [ ] Aderência à identidade visual: <conforme/desvios>
 - [ ] Acessibilidade: <ferramenta + resultado>
 - [ ] Análise estática: <ferramenta + resultado>
-- [ ] Harness script: <executado? saída anexada>
 ```
 
 ---

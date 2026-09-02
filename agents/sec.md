@@ -253,14 +253,13 @@ na Revisão da Construção.
 **Se não há scripts** — produzir checklist estruturado:
 
 ```markdown
-### Evidências (sec)
+### Evidências (sec) — Construção/Revisão
 - [ ] Requisitos analisados: <N riscos identificados>
-- [ ] SAST: <executado? N findings high/critical>
-- [ ] Secrets scan: <executado? resultado>
-- [ ] Dependency audit: <executado? N vulns críticas>
-- [ ] DAST: <executado? N findings high/critical>
 - [ ] Correções aplicadas: <N>
-- [ ] Harness script: <executado? saída anexada>
+
+### Evidências (sec) — Testes
+- [ ] Roteiro manual: <N itens, N passaram, N falharam>
+- [ ] Achados: <N total, N bloqueantes>
 ```
 
 ---

@@ -242,7 +242,6 @@ na Revisão da Construção.
 - [ ] Plano aprovado consultado: <sim/não>
 - [ ] Checklist integrativo: <N dimensões verificadas>
 - [ ] Achados encontrados: <N total, N bloqueantes>
-- [ ] Harness script: <executado? saída anexada>
 ```
 
 ---

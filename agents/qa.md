@@ -246,7 +246,6 @@ na Revisão da Construção.
 - [ ] Testes executados: <N total, N passaram, N falharam>
 - [ ] Cobertura: <delta vs. baseline, se disponível>
 - [ ] Cenários não cobertos: <lista ou "nenhum">
-- [ ] Harness script: <executado? saída anexada>
 ```
 
 ---
