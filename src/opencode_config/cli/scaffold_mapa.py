@@ -106,101 +106,18 @@ DOC_TEMPLATE = dedent(
 
 HARNESS_TEMPLATE = dedent(
     """
-    ## Harness por Agente
+    ## Testes por Especialidade
 
-    | Agente | Comando de Execução | Descrição |
-    |--------|--------------------|-----------|
-    | eng-software | harness/eng-software | Testes, análise estática |
-    | dba | harness/dba | Validação de schema |
-    | sec | harness/sec | OWASP checks, secrets |
-    | qa | harness/qa | Cobertura, aceitação |
-    | front | harness/front | Linting, a11y |
-    | rev | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-    | val-harness | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
-    | curador-produto | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO |
+    | Especialidade | Script |
+    |---------------|--------|
+    | backend | harness/backend |
+    | dados | harness/dados |
+    | segurança | harness/seguranca |
+    | frontend | harness/frontend |
 
-    ## Agregador de Harness
+    Orquestrador: harness/testes
 
-    | Comando | Destino |
-    |---------|---------|
-    | harness/agregar | docs/harness-report/harness-report.md |
-
-    > O comando é executado sem argumentos e pode ser substituído pelo
-    > comando aprovado pelo humano durante a entrevista.
-
-    ### Especificação dos Scripts de Harness
-
-    O `curador-produto-editor` usa as especificações abaixo para criar e
-    manter os scripts de harness. Cada script segue a interface padronizada:
-    sem argumentos, saída JSON (`status`, `findings`, `prompt`), exit code
-    0/1.
-
-    #### harness/eng-software
-
-    **Objetivo:** Validar código — testes automatizados e análise estática.
-
-    **Ferramentas sugeridas:**
-    - Linter da linguagem (ESLint, ruff, shellcheck, etc.)
-    - Type checker (mypy, pyright, tsc, etc.)
-    - Test runner do projeto
-
-    **Critérios de falha (bloqueante):**
-    - Testes quebrados
-    - Erros de lint/type check
-
-    #### harness/dba
-
-    **Objetivo:** Validar schema e migrations.
-
-    **Ferramentas sugeridas:**
-    - SQLFluff (lint SQL)
-    - Ferramenta de schema diff do projeto
-    - checkov/tflint (se houver infra de BD)
-
-    **Critérios de falha (bloqueante):**
-    - SQL inválido (error no linter)
-    - Divergência entre schema e modelo "as code"
-
-    #### harness/sec
-
-    **Objetivo:** Validar segurança do código e dependências.
-
-    **Ferramentas sugeridas:**
-    - Semgrep (SAST)
-    - gitleaks/git-secrets (secrets scan)
-    - Snyk/npm audit/pip-audit (dependency check)
-
-    **Critérios de falha (bloqueante):**
-    - Findings high/critical no SAST
-    - Segredos detectados
-    - Vulnerabilidades críticas em dependências
-
-    #### harness/qa
-
-    **Objetivo:** Validar cobertura de testes e qualidade.
-
-    **Ferramentas sugeridas:**
-    - Test runner com cobertura
-    - axe-core/pa11y (acessibilidade, se frontend)
-
-    **Critérios de falha (bloqueante):**
-    - Cobertura abaixo do baseline
-    - Violations critical de acessibilidade
-
-    #### harness/front
-
-    **Objetivo:** Validar código frontend — lint, acessibilidade e aderência
-    visual.
-
-    **Ferramentas sugeridas:**
-    - stylelint, htmlhint
-    - axe-core, pa11y
-    - Playwright/Cypress snapshot (se aplicável)
-
-    **Critérios de falha (bloqueante):**
-    - Erros de lint CSS/HTML
-    - Violations critical de acessibilidade
-    - Desvios não autorizados da identidade visual
+    Spec: [docs/harness.md](docs/harness.md)
     """
 )
 
@@ -241,7 +158,7 @@ def scaffold_harness(destination: Path) -> str:
 
     return _append_scaffold(
         destination,
-        marker="## Harness por Agente",
+        marker="## Testes por Especialidade",
         template=HARNESS_TEMPLATE,
         created_message="Scaffold do harness criado em: {destination}",
         existing_message=(
@@ -254,7 +171,7 @@ def _usage() -> str:
     return (
         "Uso: opencode-scaffold-mapa [--doc <path>] [--harness <path>]\n"
         "  --doc <path>      Scaffold do /doc/README.md\n"
-        "  --harness <path>  Scaffold da tabela de harness no AGENTS.md\n"
+        "  --harness <path>  Scaffold da tabela de testes no AGENTS.md\n"
         "  (sem flags, caminho posicional = --doc)\n"
     )
 

@@ -1,5 +1,6 @@
 from io import StringIO
 from pathlib import Path
+import re
 
 import pytest
 
@@ -196,6 +197,24 @@ def test_positional_doc_scaffold_is_idempotent(tmp_path: Path) -> None:
     assert content.count("## Definição de Escopo") == 1
 
 
+SPECIALTIES = ("backend", "dados", "segurança", "frontend")
+SPECIALTY_SCRIPTS = (
+    "harness/backend",
+    "harness/dados",
+    "harness/seguranca",
+    "harness/frontend",
+)
+WORKFLOW_AGENTS = (
+    "eng-software",
+    "dba",
+    "front",
+    "sec",
+    "qa",
+    "rev",
+    "curador-produto",
+)
+
+
 @pytest.mark.unit
 def test_harness_scaffold_creates_section(tmp_path: Path) -> None:
     destination = tmp_path / "AGENTS.md"
@@ -204,31 +223,13 @@ def test_harness_scaffold_creates_section(tmp_path: Path) -> None:
     status, _, _ = run_scaffold("--harness", str(destination))
 
     assert status == 0
-    assert "## Harness por Agente" in destination.read_text(encoding="utf-8")
-
-
-@pytest.mark.unit
-def test_harness_scaffold_lists_all_required_agents(tmp_path: Path) -> None:
-    destination = tmp_path / "AGENTS.md"
-
-    status, _, _ = run_scaffold("--harness", str(destination))
     content = destination.read_text(encoding="utf-8")
-
-    assert status == 0
-    for agent in (
-        "eng-software",
-        "dba",
-        "sec",
-        "qa",
-        "front",
-        "rev",
-        "curador-produto",
-    ):
-        assert f"| {agent} " in content
+    assert "## Testes por Especialidade" in content
+    assert "## Harness por Agente" not in content
 
 
 @pytest.mark.unit
-def test_harness_scaffold_marks_non_executors_without_harness(
+def test_harness_scaffold_lists_specialties_and_orchestrator(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
@@ -237,29 +238,26 @@ def test_harness_scaffold_marks_non_executors_without_harness(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    for agent in ("rev", "curador-produto"):
-        assert (
-            f"| {agent} | (sem harness) | SEM HARNESS A PEDIDO DO HUMANO"
-            in content
-        )
+    for specialty in SPECIALTIES:
+        assert f"| {specialty} " in content
+    assert "harness/testes" in content
+    for script in SPECIALTY_SCRIPTS:
+        assert script in content
 
 
 @pytest.mark.unit
-def test_harness_scaffold_contains_default_executor_commands(tmp_path: Path) -> None:
+def test_harness_scaffold_does_not_list_agents_as_suite_owners(
+    tmp_path: Path,
+) -> None:
     destination = tmp_path / "AGENTS.md"
 
     status, _, _ = run_scaffold("--harness", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    for row in (
-        "| eng-software | harness/eng-software | Testes, análise estática",
-        "| dba | harness/dba | Validação de schema",
-        "| sec | harness/sec | OWASP checks, secrets",
-        "| qa | harness/qa | Cobertura, aceitação",
-        "| front | harness/front | Linting, a11y",
-    ):
-        assert row in content
+    for agent in ("eng-software", "dba", "sec", "qa", "front"):
+        assert f"| {agent} " not in content
+    assert "SEM HARNESS A PEDIDO DO HUMANO" not in content
 
 
 @pytest.mark.unit
@@ -273,53 +271,25 @@ def test_harness_scaffold_is_idempotent(tmp_path: Path) -> None:
 
     assert first_status == 0
     assert second_status == 0
-    assert content.count("## Harness por Agente") == 1
+    assert content.count("## Testes por Especialidade") == 1
 
 
 @pytest.mark.unit
-def test_harness_scaffold_contains_script_specification(tmp_path: Path) -> None:
+def test_harness_scaffold_is_short_snippet_with_spec_link(
+    tmp_path: Path,
+) -> None:
     destination = tmp_path / "AGENTS.md"
 
     status, _, _ = run_scaffold("--harness", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    assert "### Especificação dos Scripts de Harness" in content
-    assert "## Agregador de Harness" in content
-    assert "harness/agregar" in content
-    assert "docs/harness-report/harness-report.md" in content
-    assert "docs/" + "harness.md" not in content
-
-
-@pytest.mark.unit
-def test_harness_scaffold_describes_each_executor_script(tmp_path: Path) -> None:
-    destination = tmp_path / "AGENTS.md"
-
-    status, _, _ = run_scaffold("--harness", str(destination))
-    content = destination.read_text(encoding="utf-8")
-
-    assert status == 0
-    for section in (
-        "harness/eng-software",
-        "harness/dba",
-        "harness/sec",
-        "harness/qa",
-        "harness/front",
-    ):
-        assert f"#### {section}" in content
-
-
-@pytest.mark.unit
-def test_harness_scaffold_describes_standard_json_interface(tmp_path: Path) -> None:
-    destination = tmp_path / "AGENTS.md"
-
-    status, _, _ = run_scaffold("--harness", str(destination))
-    content = destination.read_text(encoding="utf-8")
-
-    assert status == 0
-    assert "sem argumentos" in content
-    assert "saída JSON" in content
-    assert "exit code" in content
+    assert "docs/harness.md" in content
+    assert "harness/agregar" not in content
+    assert "## Agregador de Harness" not in content
+    assert "### Especificação dos Scripts de Harness" not in content
+    assert "O que deve conter" not in content
+    assert '"prompt"' not in content
 
 
 @pytest.mark.unit
@@ -336,7 +306,7 @@ def test_doc_and_harness_flags_create_both_scaffolds(tmp_path: Path) -> None:
 
     assert status == 0
     assert "## Definição de Escopo" in doc.read_text(encoding="utf-8")
-    assert "## Harness por Agente" in agents.read_text(encoding="utf-8")
+    assert "## Testes por Especialidade" in agents.read_text(encoding="utf-8")
 
 
 @pytest.mark.unit
@@ -381,21 +351,63 @@ def test_default_artifacts_contains_specs_destination(
 
 
 @pytest.mark.unit
-def test_harness_template_lists_required_agents(repo_root: Path) -> None:
+def test_harness_snippet_lists_specialties_orchestrator_and_spec_link(
+    repo_root: Path,
+) -> None:
     content = (
         repo_root / "agents/default-artifacts/harness-section.md"
     ).read_text(encoding="utf-8")
 
-    for agent in (
-        "eng-software",
-        "dba",
-        "sec",
-        "qa",
-        "front",
-        "rev",
-        "curador-produto",
+    assert "## Testes por Especialidade" in content
+    for specialty in SPECIALTIES:
+        assert f"| {specialty} " in content
+    for script in SPECIALTY_SCRIPTS:
+        assert script in content
+    assert "harness/testes" in content
+    assert "docs/harness.md" in content
+    assert "harness/agregar" not in content
+    assert '"prompt"' not in content
+    assert "O que deve conter" not in content
+
+
+@pytest.mark.unit
+def test_harness_spec_template_has_specialty_subsections(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "agents/default-artifacts/harness.md"
+    ).read_text(encoding="utf-8")
+
+    for specialty in SPECIALTIES:
+        assert f"## {specialty}" in content
+    for heading in (
+        "Ferramentas",
+        "Critérios",
+        "Orçamento",
+        "O que deve conter",
     ):
-        assert f"| {agent} " in content
+        assert heading in content
+    assert "harness/testes" in content
+    assert "harness/agregar" not in content
+    assert "pa11y" in content
+    assert "axe-core" in content
+
+
+@pytest.mark.unit
+def test_instructions_template_covers_workflow_agents(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "agents/default-artifacts/instrucoes-por-agente.md"
+    ).read_text(encoding="utf-8")
+
+    assert "## Instruções por Agente" in content
+    for agent in WORKFLOW_AGENTS:
+        assert f"### {agent}" in content
+    assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content
+    assert "harness/testes" not in content
+    assert "harness/backend" not in content
+    assert "harness/agregar" not in content
 
 
 @pytest.mark.unit
@@ -419,3 +431,22 @@ def test_interface_harness_describes_standard_json_interface(
 
     assert '"status"' in content
     assert '"findings"' in content
+    assert '"prompt"' not in content
+    assert "harness/agregar" not in content
+    assert "harness/testes" in content
+
+
+@pytest.mark.unit
+def test_default_harness_artifacts_do_not_cite_plan_ids(
+    repo_root: Path,
+) -> None:
+    plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
+    artifact_paths = (
+        "agents/default-artifacts/harness-section.md",
+        "agents/default-artifacts/harness.md",
+        "agents/default-artifacts/instrucoes-por-agente.md",
+        "agents/references/interface-harness.md",
+    )
+    for relative_path in artifact_paths:
+        content = (repo_root / relative_path).read_text(encoding="utf-8")
+        assert plan_id_pattern.search(content) is None, relative_path

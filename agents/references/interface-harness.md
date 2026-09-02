@@ -18,13 +18,12 @@ Scripts de harness seguem esta interface:
       "tool": "nome-da-ferramenta",
       "message": "descrição do problema"
     }
-  ],
-  "prompt": "instrução adicional (opcional)"
+  ]
 }
 ```
 
 - **Exit code**: 0 = pass, 1 = fail
-- **Idempotente**: mesmo script para construção e revisão
+- **Idempotente**: repetir o script produz o mesmo veredicto
 
 ## Retry e Falhas
 
@@ -43,8 +42,8 @@ Scripts de harness seguem esta interface:
 
 ## Pass-through
 
-Se o humano não definiu ferramentas para um agente, o script
-retorna `{ "status": "pass", "findings": [], "prompt": "" }`
+Se o humano não definiu ferramentas para uma especialidade,
+o script retorna `{ "status": "pass", "findings": [] }`
 sem verificações.
 
 ## Orçamento de Tempo
@@ -56,7 +55,7 @@ Tetos sugeridos, ajustáveis pelo humano:
 | Check isolado barato | < 15s |
 | Harness quente (cache hit) | < 30s |
 | Harness frio aceitável | < 3 min |
-| Soma dos seis no caminho quente | < 10 min |
+| Soma das suítes no caminho quente | < 10 min |
 
 Estouro exige aprovação explícita e motivo.
 
@@ -72,19 +71,13 @@ Quando o humano oferece uma ferramenta, analise estes pontos:
    SHA-256 em `harness/target/` (não versionado), com fallback
    para a suíte completa
 
-## Agregador de Harness
+## Orquestrador
 
-- Fica na seção própria `## Agregador de Harness` do `AGENTS.md`
-- Comando sem argumentos (padrão: `harness/agregar`)
-- Destino: `docs/harness-report/harness-report.md`
-- É um script coletor, **não** um gate que reexecuta harnesses
-- Artefatos em dados estruturados nativos (JSON/JUnit) para o
-  script montar tabelas no MD
-- HTML (ou report não resumível) é copiado para subpasta
-  `docs/harness-report/<ferramenta>/` e linkado
-- Regeneração substitui a subpasta; origem ausente → MD declara
-  ausente
-- Links só para a cópia; nunca para `target/` nem path de build
+- Comando sem argumentos (padrão: `harness/testes`)
+- Chama as quatro suítes (backend, dados, segurança, frontend)
+  e agrega `findings`
+- `status` é `fail` se qualquer suíte falhar
+- Não substitui a entrevista de ferramentas por especialidade
 
 ## Cobertura Estática
 
