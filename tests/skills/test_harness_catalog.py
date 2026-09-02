@@ -1,16 +1,21 @@
-"""Valida o frontmatter da skill harness-catalog."""
+"""Catálogo de suítes por especialidade, não por executor."""
 
 from pathlib import Path
+import re
 
 import pytest
 
 
 @pytest.fixture
-def skill_frontmatter(repo_root: Path) -> str:
-    skill_content = (
-        repo_root / "skills/harness-catalog/SKILL.md"
-    ).read_text(encoding="utf-8")
-    return skill_content.split("---", 2)[1]
+def catalog(repo_root: Path) -> str:
+    return (repo_root / "skills/harness-catalog/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+
+
+@pytest.fixture
+def skill_frontmatter(catalog: str) -> str:
+    return catalog.split("---", 2)[1]
 
 
 @pytest.mark.unit
@@ -21,10 +26,24 @@ def test_harness_catalog_description_avoids_stale_doc_path(
 
 
 @pytest.mark.unit
-def test_harness_catalog_uses_harness_report_destination(repo_root: Path) -> None:
-    content = (repo_root / "skills/harness-catalog/SKILL.md").read_text(
-        encoding="utf-8"
-    )
+def test_catalog_suggests_tools_by_specialty(catalog: str) -> None:
+    for specialty in ("backend", "dados", "segurança", "frontend"):
+        assert f"## {specialty}" in catalog
+    for agent_heading in ("## eng-software", "## dba", "## qa"):
+        assert agent_heading not in catalog
+    assert re.search(r"^## front\s*$", catalog, re.MULTILINE) is None
+    assert "harness/testes" in catalog
+    assert "harness/agregar" not in catalog
+    assert '"prompt"' not in catalog
+    assert "docs/harness.md" in catalog
 
-    assert "docs/harness-report/harness-report.md" in content
-    assert "docs/" + "harness.md" not in content
+
+@pytest.mark.unit
+def test_catalog_keeps_frontend_a11y_options(catalog: str) -> None:
+    assert "pa11y" in catalog
+    assert "axe-core" in catalog
+
+
+@pytest.mark.unit
+def test_catalog_does_not_cite_plan_ids(catalog: str) -> None:
+    assert re.search(r"\bD(?:[1-9]|1[0-2])\b", catalog) is None

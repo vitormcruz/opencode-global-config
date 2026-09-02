@@ -1,29 +1,28 @@
 ---
 name: harness-catalog
 description: >
-  Catálogo de referência com sugestões de harness por agente
-  (eng-software, dba, sec, qa, rev, front, curador-produto).
-  Use quando: criando ou atualizando harness de agentes,
-  definindo harness efetivo no AGENTS.md,
-  configurando ferramentas determinísticas para script
-  único por agente. Triggers: "harness", "catálogo de
-  harness", "sugestões de harness", "regras de contenção",
-  "ferramentas de harness", "harness catalog",
-  "criar harness", "definir harness".
+  Catálogo de referência com sugestões de ferramentas por
+  especialidade (backend, dados, segurança, frontend) e
+  o orquestrador harness/testes. Use quando: criando ou
+  atualizando suítes, definindo spec em harness.md,
+  configurando ferramentas determinísticas. Triggers:
+  "harness", "catálogo de harness", "sugestões de harness",
+  "regras de contenção", "ferramentas de harness",
+  "harness catalog", "criar harness", "definir harness",
+  "testes por especialidade", "orquestrador".
 ---
 
-# Catálogo de Referência — Sugestões de Harness
+# Catálogo de Referência — Suítes por Especialidade
 
-> **Nota importante:** as regras abaixo são referência de
-> domínio para orientar o humano na criação de harness.
-> **Não são regras obrigatórias.** O harness efetivo de
-> cada agente é definido no `AGENTS.md` de cada
-> projeto.
+> **Nota:** as regras abaixo são referência de domínio.
+> **Não são obrigatórias.** O spec efetivo vive no
+> arquivo apontado pelo `AGENTS.md` (default
+> `docs/harness.md`).
 
 ## Interface Padronizada
 
-Cada agente possui um **script único** (sem argumentos,
-idempotente) que retorna JSON:
+Cada suíte e o orquestrador `harness/testes` são scripts
+sem argumentos, idempotentes, com JSON:
 
 ```json
 {
@@ -34,138 +33,83 @@ idempotente) que retorna JSON:
       "tool": "nome-da-ferramenta",
       "message": "descrição do problema"
     }
-  ],
-  "prompt": "instrução adicional (opcional)"
+  ]
 }
 ```
 
-Exit code: 0 = pass, 1 = fail.
+Exit code: 0 = pass, 1 = fail. O orquestrador chama as
+quatro suítes e agrega `findings`. Falha se qualquer
+suíte falhar.
 
 ### Regras de segurança da interface
 
-- Forçar UTF-8 em stdout/stderr e emitir progresso em stderr,
-  sem ecoar a linha JSON final.
-- Em falha transitória de rede, fazer retry até 3 vezes;
-  esgotado, retornar finding bloqueante com instrução para
-  resolver a rede.
+- Forçar UTF-8 em stdout/stderr e emitir progresso em
+  stderr, sem ecoar a linha JSON final.
+- Em falha transitória de rede, retry até 3 vezes;
+  esgotado, finding bloqueante com instrução de rede.
 - Não bypassar verificações, usar `failOnViolation=false`,
-  excluir teste do scan, usar fail-open em audit ou cache sem
-  fallback.
+  excluir teste do scan, usar fail-open em audit ou cache
+  sem fallback.
 
-O relatório humano fica em `docs/harness-report/harness-report.md`,
-gerado pelo coletor aprovado, nunca por métricas inventadas. O comando do
-agregador, sem argumentos, deve ser registrado em uma seção
-própria do `AGENTS.md` (por padrão, `harness/agregar`).
+## backend
 
-## eng-software
-
-- **Instalação de deps de harness** `tool` `build · val`
-  Executar script de instalação de harness do projeto
-  quando ferramenta ausente.
-
-- **Smoke tests pós-construção** `prompt` `build`
-  Executar todos os testes ao final da construção.
-
-- **Testes existentes são intocáveis** `prompt` `build`
-  Teste não previsto para alteração falhou → registrar
-  e perguntar ao humano.
-
-- **Regressão incremental** `prompt` `build`
-  Após cada modificação, executar testes existentes.
-
-- **Análise estática** `tool` `build · val`
+- **Análise estática** `tool`
   ESLint, ruff, mypy, pyright, shellcheck, hadolint, etc.
 
-## dba
-
-- **Validação de SQL** `tool` `build · val`
-  SQLFluff ou linter SQL do projeto. Error = bloqueante.
-
-- **Schema diff** `tool` `build`
-  Comparar schema resultante com modelo "as code".
-
-- **IaC lint** `tool` `build · val`
-  checkov/tflint se houver infra de BD.
-
-- **Nomenclatura determinística** `prompt` `build · val`
-  Verificar convenção de naming do projeto.
-
-## sec
-
-> Ferramentas efetivas: as do `AGENTS.md`. Abaixo
-> é catálogo de referência.
-
-- **SAST obrigatório** `tool` `build · val`
-  Semgrep ou SAST do projeto. high/critical = bloqueante.
-
-- **Secrets scan** `tool` `build`
-  gitleaks/git-secrets no diff. Segredo = bloqueante.
-
-- **Dependency check** `tool` `val`
-  Snyk/npm audit/pip-audit. Críticas = bloqueante.
-
-- **OWASP Top 10 checklist** `prompt` `val`
-  Verificar riscos OWASP aplicáveis.
-
-- **DAST** `tool` `val`
-  OWASP ZAP ou equivalente. high/critical = bloqueante.
-
-## qa
-
-- **Cobertura mínima** `tool` `val`
+- **Cobertura mínima** `tool`
   Cobertura não pode cair abaixo do baseline.
 
-- **Testes de aceitação** `tool` `val`
-  BDD/Playwright/Cypress. Falhas = bloqueante.
+- **Testes de aceitação** `tool`
+  BDD/Playwright/Cypress quando o fluxo for backend.
+  Falhas = bloqueante.
 
-- **Relatório estruturado** `prompt` `val`
-  Total executados, passaram, falharam, skipped, delta.
+## dados
 
-- **Acessibilidade** `tool` `val`
-  axe-core ou equivalente (frontend). Critical = bloqueante.
+- **Validação de SQL** `tool`
+  SQLFluff ou linter SQL do projeto. Error = bloqueante.
 
-## rev
+- **Schema diff** `tool`
+  Comparar schema resultante com modelo "as code".
 
-- **Markdown lint** `tool` `val`
-  markdownlint em docs produzidas.
+- **IaC lint** `tool`
+  checkov/tflint se houver infra de BD.
 
-- **Link check** `tool` `val`
-  markdown-link-check. Links quebrados = reportar.
+## segurança
 
-- **Consistência cross-artefato** `prompt` `val`
-  Nomes, convenções e referências consistentes.
+- **SAST obrigatório** `tool`
+  Semgrep ou SAST do projeto. high/critical = bloqueante.
 
-- **Aderência ao plano** `prompt` `val`
-  Desvios não autorizados = bloqueante.
+- **Secrets scan** `tool`
+  gitleaks/git-secrets no diff. Segredo = bloqueante.
 
-## front
+- **Dependency check** `tool`
+  Snyk/npm audit/pip-audit. Críticas = bloqueante.
 
-- **Validação do humano (gate visual)** `prompt` `build`
-  Após gerar protótipos, apresentar ao humano para
-  aprovação. Sem aprovação, a construção não avança.
+- **DAST** `tool`
+  OWASP ZAP ou equivalente. high/critical = bloqueante.
 
-- **Lint CSS/HTML** `tool` `build · val`
+## frontend
+
+- **Lint CSS/HTML** `tool`
   stylelint, htmlhint ou equivalente.
 
-- **Acessibilidade** `tool` `build · val`
-  axe-core, pa11y ou equivalente. Critical = bloqueante.
+- **Acessibilidade** `tool`
+  pa11y, axe-core ou ambos: a entrevista decide.
+  Critical = bloqueante.
 
-- **Snapshot visual** `tool` `val`
+- **Snapshot visual** `tool`
   Playwright/Cypress snapshot visual (se aplicável).
 
-- **Aderência à identidade visual** `prompt` `val`
-  Comparar implementação contra protótipos aprovados.
-  Desvios não autorizados = bloqueante.
+- **Cobertura da suíte de UI** `tool`
+  Se houver suíte de UI, a cobertura entra aqui.
 
-## curador-produto
+## Instruções
 
-- **Checklist do AGENTS.md** `prompt` `val`
-  Verificar se faltou atualizar documentação.
-- **Atualiza AGENTS.md diretamente** `prompt` `val`
-  Alterou estrutura/convenções → atualizar AGENTS.md.
+Itens abaixo não são suíte; vivem em
+`## Instruções por Agente` se o humano aprovar.
 
-- **Valida existência de harness** `prompt` `val`
-  Todos os agentes devem ter harness registrado.
-
-- **Delega outros domínios** `prompt` `val`
-  Problemas em código/BD/segurança → instruir delegação.
+- Smoke tests e regressão incremental (construção).
+- Testes existentes são intocáveis.
+- Gate visual e aderência à identidade.
+- Checklist OWASP manual (roteiro do `sec`).
+- Consistência cross-artefato e aderência ao plano.
