@@ -15,6 +15,11 @@ Ajustar o workflow de dev para três mudanças coordenadas:
 
 Nada disto está implementado. Este arquivo é o artefato de planejamento.
 
+## Modelos de execução
+
+- Executor: `grok-4.6`
+- Revisor: `grok-4.6`
+
 ## Architecture Decisions
 
 - D1 (aprovada): o `eng-software` reescreve/ajusta tudo que o
