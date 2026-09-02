@@ -50,17 +50,16 @@ negócio.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Harness**: na construção e na revisão da
-  construção, localize o Harness no AGENTS.md do
-  projeto e verifique se há harness configurado para
-  você. Execute o script indicado no AGENTS.md e
-  persista a saída JSON como evidência. Se `fail`:
-  resolva os findings e re-execute. Se `pass`: leia
-  o prompt e execute se houver.
-  Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção de harness no
-  AGENTS.md, registre LACUNA e não prossiga até o
-  humano definir a política.
+- **Instruções**: no início de qualquer tarefa, leia a
+  subseção própria em `## Instruções por Agente` no
+  `AGENTS.md`. Se constar
+  `SEM INSTRUÇÕES A PEDIDO DO HUMANO`, siga sem
+  instrução extra. Não procure spec de suíte
+  (ferramentas, critérios, orçamento, "o que deve
+  conter") no `AGENTS.md`; o comando está na tabela
+  `## Testes por Especialidade` e o spec no link
+  (default `docs/harness.md`, pasta definida na
+  curadoria). Nunca use path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -134,10 +133,13 @@ segurança e registrar requisitos.
 3. Para cada requisito, definir: risco, mitigação
    recomendada, severidade (bloqueante ou melhoria).
 4. Persistir requisitos no arquivo indicado.
+5. Gravar o roteiro de testes manuais de segurança no
+   planejamento. A suíte automática não é deste agente.
 
 **Saídas**:
 - Lista de requisitos de segurança estruturados.
 - Riscos identificados com severidade.
+- Roteiro manual para a fase Testes.
 - Verificar no docs/README.md se requisitos de
   segurança / threat model devem ser persistidos em
   local permanente. Se sim, incluir no plano.
@@ -200,27 +202,19 @@ define o eixo "security" da revisão multi-eixo.
 
 ### 4. Executar testes de segurança
 
-Planejar e executar testes de segurança com ferramentas
-apropriadas ao projeto.
+Na fase Testes execute apenas o roteiro manual gravado
+no planejamento. A suíte automática de segurança não é
+responsabilidade deste agente.
 
 **O que fazer**:
-1. Identificar ferramentas configuradas no AGENTS.md
-   Produto (harness do `sec`).
-2. Executar conforme disponível:
-   - **SAST** — Semgrep ou equivalente no código alterado.
-   - **Secrets scan** — gitleaks/git-secrets no diff.
-   - **Dependency audit** — npm audit, pip-audit, Snyk,
-     trivy (conforme stack).
-   - **DAST** — OWASP ZAP ou equivalente quando app
-     disponível (staging/local).
-3. Registrar resultado com achados estruturados:
-   - Ferramenta, severidade, localização, descrição.
-4. Achados high/critical são bloqueantes.
-5. Persistir resultado no arquivo indicado.
+1. Ler o roteiro manual no arquivo de planejamento.
+2. Executar só o roteiro, passo a passo, e registrar
+   o resultado de cada item.
+3. Achados high/critical são bloqueantes.
+4. Persistir resultado no arquivo indicado.
 
-**Se ferramenta não disponível**: reportar ausência e
- recomendar ao humano acionar `curador-produto` para
-definir o harness.
+**Se o roteiro estiver ausente**: registrar lacuna e
+não inventar suíte automática no lugar.
 
 **Se** ferramentas de segurança falharem
 inesperadamente, carregue a skill
@@ -233,8 +227,9 @@ sistemático.
 
 O que você **NÃO** faz:
 - **Não executa testes de lógica de negócio ou aceitação**
-  — responsabilidade do agente `qa`. Testes funcionais
-  com foco em segurança (pen testing, DAST) são seus.
+  — responsabilidade do agente `qa`. A suíte automática
+  de segurança também é do orquestrador; este agente
+  executa só o roteiro manual.
 - **Não implementa lógica de negócio** — apenas configs
   e correções de segurança.
 - **Não faz revisão integrativa** — responsabilidade do
@@ -252,12 +247,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 **Persistir na seção `## Evidências de Harness — <fase>`
 do arquivo de planejamento** (quando houver arquivo).
 
-**Se o harness do projeto define scripts** — executar o
-script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal. **Exceção:**
-se a tarefa for revisão sem alteração de artefatos, não
-executar o script; persistir
-`sem modificações — harness não executado`.
+Não execute suítes por especialidade na Construção nem
+na Revisão da Construção.
 
 **Se não há scripts** — produzir checklist estruturado:
 

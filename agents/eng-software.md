@@ -60,17 +60,16 @@ unidades lógicas seguindo `git-workflow-and-versioning`.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Harness**: na construção e na revisão da
-  construção, localize o Harness no AGENTS.md do
-  projeto e verifique se há harness configurado para
-  você. Execute o script indicado no AGENTS.md e
-  persista a saída JSON como evidência. Se `fail`:
-  resolva os findings e re-execute. Se `pass`: leia
-  o prompt e execute se houver.
-  Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção de harness no
-  AGENTS.md, registre LACUNA e não prossiga até o
-  humano definir a política.
+- **Instruções**: no início de qualquer tarefa, leia a
+  subseção própria em `## Instruções por Agente` no
+  `AGENTS.md`. Se constar
+  `SEM INSTRUÇÕES A PEDIDO DO HUMANO`, siga sem
+  instrução extra. Não procure spec de suíte
+  (ferramentas, critérios, orçamento, "o que deve
+  conter") no `AGENTS.md`; o comando está na tabela
+  `## Testes por Especialidade` e o spec no link
+  (default `docs/harness.md`, pasta definida na
+  curadoria). Nunca use path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -263,8 +262,10 @@ multi-eixo de revisão.
 
 ### 4. Revisar e commitar alterações de especialistas
 
-Receber relatórios dos especialistas, revisar o diff
-e commitar unidades lógicas.
+Depois do TDD próprio, normaliza o lote de `dba`/`front`
+(código, SQL, UI, configs) no padrão de construção, sem
+mudar decisão de domínio. Não há normalização entre
+especialistas. Só então commita.
 
 **O que fazer**:
 1. Receber o relatório do especialista:
@@ -275,12 +276,16 @@ e commitar unidades lógicas.
    - Alterações correspondem ao resumo reportado?
    - Há alterações fora do escopo reportado?
    - Testes passam com as alterações aplicadas?
-4. Se houver discrepância: questionar o especialista
+4. Aplicar `clean-code`, `code-simplification` e o
+   padrão de construção ao lote, sem reabrir domínio.
+   Se o padrão exigir decisão de domínio, devolve ao
+   especialista e não commita.
+5. Se houver discrepância: questionar o especialista
    ou o `devflow` antes de commitar.
-5. Commitar unidades lógicas seguindo
+6. Commitar unidades lógicas seguindo
    `git-workflow-and-versioning` (commits atômicos,
    mensagens descritivas).
-6. Incluir somente arquivos sob sua responsabilidade
+7. Incluir somente arquivos sob sua responsabilidade
    ou reportados pelo especialista. Nunca commitar
    alterações alheias não reportadas.
 
@@ -289,8 +294,8 @@ e commitar unidades lógicas.
 ## Regras Internas de Construção
 
 Regras internas do ciclo TDD deste agente (não são
-harness do projeto). **Além destas**, siga o harness
-do docs/README.md, se existir.
+suíte por especialidade). O TDD e o smoke interno
+permanecem.
 
 - **Smoke tests**: executar todos os testes ao final
   da construção. Falha = diagnosticar antes de concluir.
@@ -315,12 +320,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 **Persistir na seção `## Evidências de Harness — <fase>`
 do arquivo de planejamento** (quando houver arquivo).
 
-**Se o harness do projeto define scripts** — executar o
-script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal. **Exceção:**
-se a tarefa for revisão sem alteração de artefatos, não
-executar o script; persistir
-`sem modificações — harness não executado`.
+Não execute suítes por especialidade na Construção nem
+na Revisão da Construção.
 
 **Se não há scripts** — produzir checklist estruturado:
 

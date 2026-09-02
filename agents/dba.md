@@ -27,24 +27,20 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Harness**: na construção e na revisão da
-  construção, localize o Harness no AGENTS.md do
-  projeto e verifique se há harness configurado para
-  você. Execute o script indicado no AGENTS.md e
-  persista a saída JSON como evidência. Se `fail`:
-  resolva os findings e re-execute. Se `pass`: leia
-  o prompt e execute se houver.
-  Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção de harness no
-  AGENTS.md, registre LACUNA e não prossiga até o
-  humano definir a política.
-- **Somente ferramentas do AGENTS.md**: nunca
-  execute ferramentas de linting/análise (squawk,
-  sqlfluff, Atlas, etc.) por conta própria. Só use o
-  que estiver explicitamente listado no harness do
-  AGENTS.md. Checklists, revisões e boas práticas
-  descritas neste agente ou em skills NÃO são harness
-  — são diretrizes intelectuais, não ferramentas.
+- **Instruções**: no início de qualquer tarefa, leia a
+  subseção própria em `## Instruções por Agente` no
+  `AGENTS.md`. Se constar
+  `SEM INSTRUÇÕES A PEDIDO DO HUMANO`, siga sem
+  instrução extra. Não procure spec de suíte
+  (ferramentas, critérios, orçamento, "o que deve
+  conter") no `AGENTS.md`; o comando está na tabela
+  `## Testes por Especialidade` e o spec no link
+  (default `docs/harness.md`, pasta definida na
+  curadoria). Nunca use path hardcoded.
+- **Não execute a suíte de dados**: lint e schema
+  diff da especialidade dados rodam no orquestrador,
+  não na Construção. Checklists e skills são
+  diretrizes intelectuais, não suíte.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -70,7 +66,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
 2. SEMPRE revisar modelo com o humano antes de aprovar.
 3. Schema real, não inferido — nunca invente tabelas.
 4. Não commitar — reportar alterações ao solicitante.
-5. Somente ferramentas listadas no harness do AGENTS.md.
+5. Não executar suíte de especialidade na Construção.
 
 ## Skills
 
@@ -243,12 +239,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 **Persistir na seção `## Evidências de Harness — <fase>`
 do arquivo de planejamento** (quando houver arquivo).
 
-**Se o harness do projeto define scripts** — executar o
-script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal. **Exceção:**
-se a tarefa for revisão sem alteração de artefatos, não
-executar o script; persistir
-`sem modificações — harness não executado`.
+Não execute suítes por especialidade na Construção nem
+na Revisão da Construção.
 
 **Se não há scripts** — produzir checklist estruturado:
 
@@ -299,18 +291,16 @@ Ao gerar ou revisar SQL, verificar SEMPRE:
 
 ---
 
-## Harness — referência para o humano
+## Ferramentas sugeridas para a especialidade dados
 
-Ferramentas que o agente pode **sugerir** ao humano para
-inclusão no docs/README.md, mas que **nunca serão
-executadas** sem estarem listadas lá:
+Sugestões para a entrevista de curadoria (spec no link
+do `AGENTS.md`). Este agente não as executa na
+Construção:
 
 - **squawk** (v2.44+): linting de migrations PostgreSQL,
   focado em downtime prevention.
 - **sqlfluff** (v4.0+): linting multi-dialect.
 - **Atlas** (v1.2+): schema-as-code + analisadores.
-
-O agente só executa o que o docs/README.md autorizar.
 
 ---
 

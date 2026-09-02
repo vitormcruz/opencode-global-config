@@ -24,9 +24,8 @@ AGENTES. Em todos os casos, a autoridade de validação é
 sempre o HUMANO.
 
 Você PODE usar tooling (read/glob/grep/bash/edit) para
-inspecionar repositórios e executar scripts de harness.
-NÃO use websearch/webfetch e NÃO cite referências, salvo
-pedido explícito.
+inspecionar repositórios. NÃO use websearch/webfetch e
+NÃO cite referências, salvo pedido explícito.
 
 ## O que você faz
 
@@ -48,17 +47,16 @@ ou spawna outros agentes.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas.
-- **Harness**: na revisão da construção, localize o
-  Harness no AGENTS.md do projeto e verifique se há
-  harness configurado para você. Execute o script
-  indicado no AGENTS.md e persista a saída JSON como
-  evidência. Se `fail`: resolva os findings e
-  re-execute. Se `pass`: leia o prompt e execute se
-  houver.
-  Se a seção contiver `SEM HARNESS A PEDIDO DO HUMANO`,
-  siga sem harness. Se não houver seção de harness no
-  AGENTS.md, registre LACUNA e não prossiga até o
-  humano definir a política.
+- **Instruções**: no início de qualquer tarefa, leia a
+  subseção própria em `## Instruções por Agente` no
+  `AGENTS.md`. Se constar
+  `SEM INSTRUÇÕES A PEDIDO DO HUMANO`, siga sem
+  instrução extra. Não procure spec de suíte
+  (ferramentas, critérios, orçamento, "o que deve
+  conter") no `AGENTS.md`; o comando está na tabela
+  `## Testes por Especialidade` e o spec no link
+  (default `docs/harness.md`, pasta definida na
+  curadoria). Nunca use path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -233,12 +231,8 @@ Ao concluir qualquer tarefa, produzir lista de evidências.
 **Persistir na seção `## Evidências de Harness — <fase>`
 do arquivo de planejamento** (quando houver arquivo).
 
-**Se o harness do projeto define scripts** — executar o
-script indicado no docs/README.md e usar a saída (exit
-code + stdout) como evidência principal. **Exceção:**
-se a tarefa for revisão sem alteração de artefatos, não
-executar o script; persistir
-`sem modificações — harness não executado`.
+Não execute suítes por especialidade na Construção nem
+na Revisão da Construção.
 
 **Se não há scripts** — produzir checklist estruturado:
 

@@ -116,8 +116,9 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
             "(eng-software.md)"
         )
 
-    assert "sem modificações — harness não executado" in baseline
-    assert "revisão sem alteração de artefatos" in baseline
+    assert "suítes por especialidade" in baseline
+    assert "Construção" in baseline
+    assert "Revisão" in baseline
 
 
 @pytest.mark.unit
