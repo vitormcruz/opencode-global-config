@@ -484,3 +484,15 @@ harness por agente na Construção.
 Nenhum ramo em aberto. `pa11y` vs `axe-core` vs ambos é
 entrevista de curadoria, não deste plano.
 
+## Achados de revisão aceitos
+
+Revisor aprovou com melhorias opcionais. Humano pediu aplicar:
+
+1. Alinhar a tabela-resumo de agentes: curador valida evidência
+   no fim da fase Testes, não nas revisões.
+2. Diagrama da fase Testes deve mostrar o roteamento de falha
+   por especialidade, não só o `eng-software`.
+3. Checklists de evidência: tirar "Harness script" da
+   Construção/Revisão; no `sec`, listar o roteiro manual em vez
+   de SAST/secrets/DAST.
+
