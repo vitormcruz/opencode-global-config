@@ -1,4 +1,4 @@
-"""Geração dos scaffolds de documentação e harness do mapa de produto."""
+"""Geração dos scaffolds de documentação e testes-produto do mapa."""
 
 from __future__ import annotations
 
@@ -104,7 +104,7 @@ DOC_TEMPLATE = dedent(
     """
 )
 
-HARNESS_TEMPLATE = dedent(
+TESTES_PRODUTO_TEMPLATE = dedent(
     """
     ## Testes por Especialidade
 
@@ -153,25 +153,25 @@ def scaffold_doc(destination: Path) -> str:
     )
 
 
-def scaffold_harness(destination: Path) -> str:
-    """Cria o scaffold de harness sem duplicar a tabela."""
+def scaffold_testes_produto(destination: Path) -> str:
+    """Cria o scaffold de testes-produto sem duplicar a tabela."""
 
     return _append_scaffold(
         destination,
         marker="## Testes por Especialidade",
-        template=HARNESS_TEMPLATE,
-        created_message="Scaffold do harness criado em: {destination}",
+        template=TESTES_PRODUTO_TEMPLATE,
+        created_message="Scaffold de testes-produto criado em: {destination}",
         existing_message=(
-            "Scaffold do harness já existe em {destination}. Nada a fazer."
+            "Scaffold de testes-produto já existe em {destination}. Nada a fazer."
         ),
     )
 
 
 def _usage() -> str:
     return (
-        "Uso: opencode-scaffold-mapa [--doc <path>] [--harness <path>]\n"
-        "  --doc <path>      Scaffold do /doc/README.md\n"
-        "  --harness <path>  Scaffold da tabela de testes no AGENTS.md\n"
+        "Uso: opencode-scaffold-mapa [--doc <path>] [--testes-produto <path>]\n"
+        "  --doc <path>             Scaffold do /doc/README.md\n"
+        "  --testes-produto <path>  Scaffold da tabela de testes no AGENTS.md\n"
         "  (sem flags, caminho posicional = --doc)\n"
     )
 
@@ -183,7 +183,7 @@ def run(
     error: TextIO,
 ) -> int:
     doc_destination: str | None = None
-    harness_destination: str | None = None
+    testes_produto_destination: str | None = None
     index = 0
     if arguments and not arguments[0].startswith("--"):
         doc_destination = arguments[0]
@@ -191,7 +191,7 @@ def run(
 
     while index < len(arguments):
         argument = arguments[index]
-        if argument in {"--doc", "--harness"}:
+        if argument in {"--doc", "--testes-produto"}:
             index += 1
             if index >= len(arguments) or arguments[index].startswith("--"):
                 error.write(_usage())
@@ -199,20 +199,22 @@ def run(
             if argument == "--doc":
                 doc_destination = arguments[index]
             else:
-                harness_destination = arguments[index]
+                testes_produto_destination = arguments[index]
         else:
             error.write(_usage())
             return 1
         index += 1
 
-    if doc_destination is None and harness_destination is None:
+    if doc_destination is None and testes_produto_destination is None:
         error.write(_usage())
         return 1
 
     if doc_destination is not None:
         output.write(scaffold_doc(Path(doc_destination)) + "\n")
-    if harness_destination is not None:
-        output.write(scaffold_harness(Path(harness_destination)) + "\n")
+    if testes_produto_destination is not None:
+        output.write(
+            scaffold_testes_produto(Path(testes_produto_destination)) + "\n"
+        )
     return 0
 
 

@@ -61,7 +61,7 @@ arbitrários.
 
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
-| harness-catalog | Sugerir suítes | Quando sugerir ferramentas por especialidade |
+| testes-produto-catalog | Sugerir suítes | Quando sugerir ferramentas por especialidade |
 
 ## O que você faz
 
@@ -95,12 +95,12 @@ da anterior.
 Criar o spec das suítes e gravar no `AGENTS.md` só a
 tabela, o link aprovado e as instruções.
 
-**Defaults**: leia `default-artifacts/harness-section.md`
+**Defaults**: leia `default-artifacts/testes-por-especialidade.md`
 (snippet), `default-artifacts/testes-produto.md` (spec) e
 `default-artifacts/instrucoes-por-agente.md`.
 
 **Interface**: consulte
-`agents/references/interface-harness.md` para JSON
+`agents/references/interface-testes-produto.md` para JSON
 `{ status, findings[] }`, retry, proibições e orçamento.
 
 **Fluxo de entrevista**:
@@ -119,8 +119,8 @@ tabela, o link aprovado e as instruções.
 5. Linguagem/tecnologia dos scripts: pergunte ao humano.
 6. Ferramenta oferecida: analise risco, toolchain, tempo,
    severidade e fingerprint.
-7. Sugestão: catálogo (`harness-catalog`) e toolchain.
-8. Tetos de orçamento (ver `interface-harness.md`).
+7. Sugestão: catálogo (`testes-produto-catalog`) e toolchain.
+8. Tetos de orçamento (ver `interface-testes-produto.md`).
 9. Somente após TODOS os itens aprovados, persista o
    resultado e retorne o resumo ao solicitante.
 

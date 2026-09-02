@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture
 def catalog(repo_root: Path) -> str:
-    return (repo_root / "skills/harness-catalog/SKILL.md").read_text(
+    return (repo_root / "skills/testes-produto-catalog/SKILL.md").read_text(
         encoding="utf-8"
     )
 
@@ -19,9 +19,10 @@ def skill_frontmatter(catalog: str) -> str:
 
 
 @pytest.mark.unit
-def test_harness_catalog_description_avoids_stale_doc_path(
+def test_catalog_description_avoids_stale_doc_path(
     skill_frontmatter: str,
 ) -> None:
+    assert "name: testes-produto-catalog" in skill_frontmatter
     assert "/doc/README.md" not in skill_frontmatter
 
 

@@ -201,7 +201,7 @@ Implementar código seguindo o ciclo red-green-refactor.
 2. Executar **todos** os testes do projeto (novos +
    existentes).
 3. Todos devem passar. Se algum existente falhar, ver
-   regra "Testes existentes são intocáveis" (harness).
+   regra "Testes existentes são intocáveis".
 4. Aplicar `clean-code` e `code-simplification`. Também
    12Factor e pirâmide de testes conforme contexto.
 

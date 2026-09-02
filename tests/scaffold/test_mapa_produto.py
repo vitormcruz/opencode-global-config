@@ -43,8 +43,8 @@ def test_scaffold_fails_when_doc_value_is_missing() -> None:
 
 
 @pytest.mark.unit
-def test_scaffold_fails_when_harness_value_is_missing() -> None:
-    status, _, _ = run_scaffold("--harness")
+def test_scaffold_fails_when_testes_produto_value_is_missing() -> None:
+    status, _, _ = run_scaffold("--testes-produto")
 
     assert status == 1
 
@@ -216,11 +216,11 @@ WORKFLOW_AGENTS = (
 
 
 @pytest.mark.unit
-def test_harness_scaffold_creates_section(tmp_path: Path) -> None:
+def test_testes_produto_scaffold_creates_section(tmp_path: Path) -> None:
     destination = tmp_path / "AGENTS.md"
     destination.touch()
 
-    status, _, _ = run_scaffold("--harness", str(destination))
+    status, _, _ = run_scaffold("--testes-produto", str(destination))
 
     assert status == 0
     content = destination.read_text(encoding="utf-8")
@@ -229,12 +229,12 @@ def test_harness_scaffold_creates_section(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_harness_scaffold_lists_specialties_and_orchestrator(
+def test_testes_produto_scaffold_lists_specialties_and_orchestrator(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
 
-    status, _, _ = run_scaffold("--harness", str(destination))
+    status, _, _ = run_scaffold("--testes-produto", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
@@ -246,12 +246,12 @@ def test_harness_scaffold_lists_specialties_and_orchestrator(
 
 
 @pytest.mark.unit
-def test_harness_scaffold_does_not_list_agents_as_suite_owners(
+def test_testes_produto_scaffold_does_not_list_agents_as_suite_owners(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
 
-    status, _, _ = run_scaffold("--harness", str(destination))
+    status, _, _ = run_scaffold("--testes-produto", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
@@ -261,12 +261,12 @@ def test_harness_scaffold_does_not_list_agents_as_suite_owners(
 
 
 @pytest.mark.unit
-def test_harness_scaffold_is_idempotent(tmp_path: Path) -> None:
+def test_testes_produto_scaffold_is_idempotent(tmp_path: Path) -> None:
     destination = tmp_path / "AGENTS.md"
     destination.touch()
 
-    first_status, _, _ = run_scaffold("--harness", str(destination))
-    second_status, _, _ = run_scaffold("--harness", str(destination))
+    first_status, _, _ = run_scaffold("--testes-produto", str(destination))
+    second_status, _, _ = run_scaffold("--testes-produto", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert first_status == 0
@@ -275,12 +275,12 @@ def test_harness_scaffold_is_idempotent(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_harness_scaffold_is_short_snippet_with_spec_link(
+def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
 
-    status, _, _ = run_scaffold("--harness", str(destination))
+    status, _, _ = run_scaffold("--testes-produto", str(destination))
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
@@ -293,14 +293,14 @@ def test_harness_scaffold_is_short_snippet_with_spec_link(
 
 
 @pytest.mark.unit
-def test_doc_and_harness_flags_create_both_scaffolds(tmp_path: Path) -> None:
+def test_doc_and_testes_produto_flags_create_both_scaffolds(tmp_path: Path) -> None:
     doc = tmp_path / "doc.md"
     agents = tmp_path / "AGENTS.md"
 
     status, _, _ = run_scaffold(
         "--doc",
         str(doc),
-        "--harness",
+        "--testes-produto",
         str(agents),
     )
 
@@ -351,11 +351,11 @@ def test_default_artifacts_contains_specs_destination(
 
 
 @pytest.mark.unit
-def test_harness_snippet_lists_specialties_orchestrator_and_spec_link(
+def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/harness-section.md"
+        repo_root / "agents/default-artifacts/testes-por-especialidade.md"
     ).read_text(encoding="utf-8")
 
     assert "## Testes por Especialidade" in content
@@ -371,7 +371,7 @@ def test_harness_snippet_lists_specialties_orchestrator_and_spec_link(
 
 
 @pytest.mark.unit
-def test_harness_spec_template_has_specialty_subsections(
+def test_testes_produto_spec_template_has_specialty_subsections(
     repo_root: Path,
 ) -> None:
     content = (
@@ -411,7 +411,7 @@ def test_instructions_template_covers_workflow_agents(
 
 
 @pytest.mark.unit
-def test_curador_produto_does_not_contain_old_harness_interface(
+def test_curador_produto_does_not_contain_old_suite_interface(
     repo_root: Path,
 ) -> None:
     content = (repo_root / "agents/curador-produto.md").read_text(
@@ -422,11 +422,11 @@ def test_curador_produto_does_not_contain_old_harness_interface(
 
 
 @pytest.mark.unit
-def test_interface_harness_describes_standard_json_interface(
+def test_interface_testes_produto_describes_standard_json_interface(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/references/interface-harness.md"
+        repo_root / "agents/references/interface-testes-produto.md"
     ).read_text(encoding="utf-8")
 
     assert '"status"' in content
@@ -437,15 +437,15 @@ def test_interface_harness_describes_standard_json_interface(
 
 
 @pytest.mark.unit
-def test_default_harness_artifacts_do_not_cite_plan_ids(
+def test_default_testes_produto_artifacts_do_not_cite_plan_ids(
     repo_root: Path,
 ) -> None:
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
     artifact_paths = (
-        "agents/default-artifacts/harness-section.md",
+        "agents/default-artifacts/testes-por-especialidade.md",
         "agents/default-artifacts/testes-produto.md",
         "agents/default-artifacts/instrucoes-por-agente.md",
-        "agents/references/interface-harness.md",
+        "agents/references/interface-testes-produto.md",
     )
     for relative_path in artifact_paths:
         content = (repo_root / relative_path).read_text(encoding="utf-8")

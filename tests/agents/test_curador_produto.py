@@ -90,10 +90,10 @@ def test_curador_produto_contains_indexing_strategies(
 
 
 @pytest.mark.unit
-def test_curador_produto_references_harness_interface(
+def test_curador_produto_references_testes_produto_interface(
     curador_content: str,
 ) -> None:
-    assert "interface-harness.md" in curador_content
+    assert "interface-testes-produto.md" in curador_content
 
 
 @pytest.mark.unit
@@ -102,7 +102,7 @@ def test_curador_produto_references_default_artifacts(
     curador_content: str,
 ) -> None:
     assert "default-artifacts/doc-readme.md" in curador_content
-    assert "default-artifacts/harness-section.md" in curador_content
+    assert "default-artifacts/testes-por-especialidade.md" in curador_content
     assert "default-artifacts/testes-produto.md" in curador_content
     assert "default-artifacts/instrucoes-por-agente.md" in curador_content
     spec = (repo_root / "agents/default-artifacts/testes-produto.md").read_text(
@@ -120,7 +120,7 @@ def test_curador_produto_prohibits_batch_readme_edits(
 
 
 @pytest.mark.unit
-def test_curador_produto_prohibits_inventing_harness_checks(
+def test_curador_produto_prohibits_inventing_suite_checks(
     curador_normalized: str,
 ) -> None:
     assert "não inventa check" in curador_normalized
@@ -161,7 +161,7 @@ def test_curador_produto_requires_static_analysis_to_cover_test_code(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/references/interface-harness.md"
+        repo_root / "agents/references/interface-testes-produto.md"
     ).read_text(encoding="utf-8")
     normalized = " ".join(content.split()).lower()
     assert "código de teste entra no mesmo scan" in normalized
@@ -181,7 +181,7 @@ def test_curador_produto_requires_approval_per_section(
 
 
 @pytest.mark.unit
-def test_curador_produto_documents_harness_interview(
+def test_curador_produto_documents_suite_interview(
     curador_normalized: str,
 ) -> None:
     for item in (
@@ -195,10 +195,10 @@ def test_curador_produto_documents_harness_interview(
 
 
 @pytest.mark.unit
-def test_curador_produto_documents_harness_time_budgets(
+def test_curador_produto_documents_time_budgets(
     curador_content: str,
 ) -> None:
-    assert "agents/references/interface-harness.md" in curador_content
+    assert "agents/references/interface-testes-produto.md" in curador_content
 
 
 @pytest.mark.unit
@@ -210,18 +210,18 @@ def test_curador_produto_does_not_spawn_agents(
 
 
 @pytest.mark.unit
-def test_curador_produto_harness_catalog_as_reference(
+def test_curador_produto_catalog_as_reference(
     curador_normalized: str,
 ) -> None:
     assert "catálogo" in curador_normalized
-    assert "harness-catalog" in curador_normalized
+    assert "testes-produto-catalog" in curador_normalized
 
 
-# --- Capacidades absorvidas do val-harness ---
+# --- Valida??o de evid?ncia ---
 
 
 @pytest.mark.unit
-def test_curador_produto_validates_harness_evidence(
+def test_curador_produto_validates_orchestrator_evidence(
     curador_normalized: str,
 ) -> None:
     assert "orquestrador" in curador_normalized
@@ -245,7 +245,7 @@ def test_curador_produto_reports_lacuna(
 
 
 @pytest.mark.unit
-def test_curador_produto_has_harness_validation_format(
+def test_curador_produto_has_validation_format(
     curador_content: str,
 ) -> None:
     assert "Validação de Testes" in curador_content
@@ -297,10 +297,10 @@ def test_curador_produto_has_documentation_skill(
 
 
 @pytest.mark.unit
-def test_curador_produto_has_harness_catalog_conditional(
+def test_curador_produto_has_catalog_conditional(
     curador_content: str,
 ) -> None:
-    assert "harness-catalog" in curador_content
+    assert "testes-produto-catalog" in curador_content
 
 
 @pytest.mark.unit
@@ -365,19 +365,19 @@ def test_mensagens_curadoria_references_curador_produto(
 
 
 @pytest.mark.unit
-def test_interface_harness_reference_exists(repo_root: Path) -> None:
+def test_interface_testes_produto_reference_exists(repo_root: Path) -> None:
     assert (
-        repo_root / "agents/references/interface-harness.md"
+        repo_root / "agents/references/interface-testes-produto.md"
     ).is_file()
 
 
 @pytest.mark.unit
-def test_harness_artifacts_do_not_expose_plan_ids(
+def test_testes_produto_artifacts_do_not_expose_plan_ids(
     repo_root: Path,
 ) -> None:
     artifact_paths = (
         "agents/curador-produto.md",
-        "skills/harness-catalog/SKILL.md",
+        "skills/testes-produto-catalog/SKILL.md",
     )
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b", re.IGNORECASE)
 

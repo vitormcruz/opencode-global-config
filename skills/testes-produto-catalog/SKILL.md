@@ -1,15 +1,16 @@
 ---
-name: harness-catalog
+name: testes-produto-catalog
 description: >
   Catálogo de referência com sugestões de ferramentas por
   especialidade (backend, dados, segurança, frontend) e
   o orquestrador testes-produto. Use quando: criando ou
   atualizando suítes, definindo spec em testes-produto.md,
   configurando ferramentas determinísticas. Triggers:
-  "harness", "catálogo de harness", "sugestões de harness",
-  "regras de contenção", "ferramentas de harness",
-  "harness catalog", "criar harness", "definir harness",
-  "testes por especialidade", "orquestrador".
+  "testes-produto", "catálogo de testes-produto",
+  "sugestões de suíte", "regras de contenção",
+  "ferramentas de testes-produto", "criar suítes",
+  "definir suítes", "testes por especialidade",
+  "orquestrador".
 ---
 
 # Catálogo de Referência — Suítes por Especialidade

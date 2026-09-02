@@ -1,6 +1,6 @@
-# Interface Padronizada de Harness
+# Interface Padronizada de Testes de Produto
 
-Scripts de harness seguem esta interface:
+Scripts de testes-produto seguem esta interface:
 
 ## Contrato de Saída
 
@@ -37,7 +37,7 @@ Scripts de harness seguem esta interface:
   excluir teste do scan, usar fail-open em audit ou cache sem
   fallback.
 - Ferramenta ausente é finding `bloqueante`: instale a
-  ferramenta ou remova-a do harness e ajuste, salvo se o
+  ferramenta ou remova-a dos testes-produto e ajuste, salvo se o
   humano retirar o check do escopo.
 
 ## Pass-through
@@ -53,8 +53,8 @@ Tetos sugeridos, ajustáveis pelo humano:
 | Categoria | Teto |
 |-----------|------|
 | Check isolado barato | < 15s |
-| Harness quente (cache hit) | < 30s |
-| Harness frio aceitável | < 3 min |
+| Suíte quente (cache hit) | < 30s |
+| Suíte fria aceitável | < 3 min |
 | Soma das suítes no caminho quente | < 10 min |
 
 Estouro exige aprovação explícita e motivo.

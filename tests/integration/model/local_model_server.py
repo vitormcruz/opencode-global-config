@@ -590,7 +590,7 @@ class LocalModelServer:
         )
 
     def _pid_file_process_is_owned(self, pid: int) -> bool:
-        """Check that a persisted PID is one of this harness's llama servers."""
+        """Check that a persisted PID is one of this runner's llama servers."""
 
         if pid == os.getpid() or not self._pid_is_alive(pid):
             return False
@@ -633,7 +633,7 @@ class LocalModelServer:
             if pid is None or not self._pid_file_process_is_owned(pid):
                 raise LocalModelServerError(
                     f"llama-server expõe outro modelo em {self._models_url()}, "
-                    "mas o processo não pertence a este harness; "
+                    "mas o processo não pertence a este runner; "
                     "não será encerrado nem substituído."
                 )
             if not self._terminate_pid_file_process():
@@ -645,7 +645,7 @@ class LocalModelServer:
         if self._endpoint_responds():
             raise LocalModelServerError(
                 f"A porta {self.port} continua ocupada após encerrar o "
-                "llama-server pertencente ao harness."
+                "llama-server pertencente a este runner."
             )
 
     def _wait_until_ready(self) -> None:
