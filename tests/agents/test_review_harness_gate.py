@@ -16,6 +16,10 @@ def test_workflow_does_not_run_specialty_suites_in_construction(
     assert "Obrigatório na construção" not in workflow
     assert "construção executa; revisão só se modificou" not in workflow
     assert "testes-produto" in workflow
+    assert "scripts de testes-produto" in workflow
+    assert "scripts de harness" not in workflow
+    assert "Evidências de Testes" in workflow
+    assert "Evidências de Harness" not in workflow
 
 
 @pytest.mark.unit

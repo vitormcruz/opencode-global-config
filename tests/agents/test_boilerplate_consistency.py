@@ -119,6 +119,8 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
     assert "suítes por especialidade" in baseline
     assert "Construção" in baseline
     assert "Revisão" in baseline
+    assert "Evidências de Testes" in baseline
+    assert "Evidências de Harness" not in baseline
 
 
 @pytest.mark.unit

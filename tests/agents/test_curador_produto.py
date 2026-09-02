@@ -98,12 +98,18 @@ def test_curador_produto_references_harness_interface(
 
 @pytest.mark.unit
 def test_curador_produto_references_default_artifacts(
+    repo_root: Path,
     curador_content: str,
 ) -> None:
     assert "default-artifacts/doc-readme.md" in curador_content
     assert "default-artifacts/harness-section.md" in curador_content
     assert "default-artifacts/testes-produto.md" in curador_content
     assert "default-artifacts/instrucoes-por-agente.md" in curador_content
+    spec = (repo_root / "agents/default-artifacts/testes-produto.md").read_text(
+        encoding="utf-8"
+    )
+    assert "testes-produto/target/" in spec
+    assert "harness/target/" not in spec
 
 
 @pytest.mark.unit
@@ -160,6 +166,8 @@ def test_curador_produto_requires_static_analysis_to_cover_test_code(
     normalized = " ".join(content.split()).lower()
     assert "código de teste entra no mesmo scan" in normalized
     assert "mesmo nível de qualidade que produção" in normalized
+    assert "testes-produto/target/" in content
+    assert "harness/target/" not in content
 
 
 @pytest.mark.unit
@@ -240,7 +248,10 @@ def test_curador_produto_reports_lacuna(
 def test_curador_produto_has_harness_validation_format(
     curador_content: str,
 ) -> None:
-    assert "Validação de Harness" in curador_content
+    assert "Validação de Testes" in curador_content
+    assert "Validação de Harness" not in curador_content
+    assert "Harness no" not in curador_content
+    assert "`testes-produto/`" in curador_content
     assert "Veredicto" in curador_content
 
 

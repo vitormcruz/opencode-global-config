@@ -30,8 +30,9 @@ websearch/webfetch e NÃO cite referências, salvo pedido
 explícito.
 
 **Restrição de bash** — só execute scripts dentro de
-`harness/`, `scripts/` ou comandos de instalação de
-dependências de harness. Não execute comandos arbitrários.
+`testes-produto/`, `scripts/` ou comandos de instalação de
+dependências de testes-produto. Não execute comandos
+arbitrários.
 
 ## Regras Invioláveis
 
@@ -39,12 +40,12 @@ dependências de harness. Não execute comandos arbitrários.
    responsabilidade do solicitante.
 2. **Não valida mérito do que editou** — validações são
    objetivas: presença/completude de evidências e execução
-   verde de harness.
+   verde de testes-produto.
 3. **Não edita em lote sem aprovação** — cada seção do
    `docs/README.md` requer aprovação explícita do humano
    antes de editar.
-4. **Não inventa check de harness** — apenas o que o humano
-   aprovou na entrevista.
+4. **Não inventa check de testes-produto** — apenas o que o
+   humano aprovou na entrevista.
 5. **Não corta verificação** — qualquer estouro de orçamento
    ou retirada de check volta ao humano para decisão.
 
@@ -165,18 +166,18 @@ orquestrador `testes-produto` rodou.
 - Finding bloqueante precisa de instrução acionável;
   falha de rede esgotada não vira `pass`.
 
-### 4. Verificar execução verde dos harness de curadoria
+### 4. Verificar execução verde dos scripts de testes-produto
 
-Ao final do trabalho de curadoria, os harness
-implementados são executados. Você verifica o sucesso
-(verde) — validação objetiva que resolve a regra "não valida
-o que editou".
+Ao final do trabalho de curadoria, os scripts de
+testes-produto implementados são executados. Você verifica
+o sucesso (verde) — validação objetiva que resolve a regra
+"não valida o que editou".
 
 ### 5. Detectar ausência de artefatos
 
-Se `docs/README.md` ou Harness no `AGENTS.md` não existirem,
-exiba a mensagem pré-definida de
-`agents/references/mensagens-curadoria.md` (copiar/colar
+Se `docs/README.md` ou a seção `## Testes por Especialidade`
+no `AGENTS.md` não existirem, exiba a mensagem pré-definida
+de `agents/references/mensagens-curadoria.md` (copiar/colar
 literal, sem alterar). Após exibir, reporte a ausência ao
 solicitante e retorne — a decisão de tratar agora é do
 humano, via gate de curadoria.
@@ -199,10 +200,10 @@ Ao fim de um ciclo de desenvolvimento:
 
 ## Formato de Saída
 
-### Validação de Harness
+### Validação de Testes
 
 ```markdown
-## Validação de Harness — Testes
+## Validação de Testes — Testes
 
 | Item | Esperado | Evidência | Status |
 |------|----------|-----------|--------|
@@ -260,8 +261,8 @@ do projeto.
   agente orquestrador.
 - Não corrige artefatos de código, BD ou segurança — reporta
   o que precisa ser ajustado e por quem.
-- Bash restrito: só `harness/`, `scripts/` e instalação de
-  dependências de harness.
+- Bash restrito: só `testes-produto/`, `scripts/` e
+  instalação de dependências de testes-produto.
 
 ## Interação com Humano
 

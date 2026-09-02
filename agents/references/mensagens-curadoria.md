@@ -1,6 +1,6 @@
 # Mensagens Pré-definidas — Curadoria
 
-## docs/README.md ou Harness não encontrado(s)
+## docs/README.md ou Testes por Especialidade não encontrado(s)
 
 Este projeto ainda não possui **docs/README.md** e/ou
 **Testes por Especialidade** — os dois artefatos que

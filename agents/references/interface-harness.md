@@ -68,8 +68,8 @@ Quando o humano oferece uma ferramenta, analise estes pontos:
 3. Qual o tempo esperado
 4. Se é bloqueante ou melhoria
 5. Se, sendo cara e determinística, precisa de fingerprint
-   SHA-256 em `harness/target/` (não versionado), com fallback
-   para a suíte completa
+   SHA-256 em `testes-produto/target/` (não versionado), com
+   fallback para a suíte completa
 
 ## Orquestrador
 

@@ -317,7 +317,7 @@ permanecem.
 ## Evidências de Execução
 
 Ao concluir qualquer tarefa, produzir lista de evidências.
-**Persistir na seção `## Evidências de Harness — <fase>`
+**Persistir na seção `## Evidências de Testes — <fase>`
 do arquivo de planejamento** (quando houver arquivo).
 
 Não execute suítes por especialidade na Construção nem

@@ -7,8 +7,9 @@ Planejamento com requisitos e critérios definidos pelo
 humano.
 
 **Premissa:** a curadoria já foi executada antes deste
-workflow (docs/README.md e Harness presentes e válidos).
-Ver gate de curadoria no `workflow-agentes-dev.md`.
+workflow (docs/README.md e Testes por Especialidade
+presentes e válidos). Ver gate de curadoria no
+`workflow-agentes-dev.md`.
 
 O `devflow` executa este workflow após a curadoria e,
 ao final, transiciona para o workflow de desenvolvimento
@@ -27,9 +28,10 @@ ao final, transiciona para o workflow de desenvolvimento
 1. **`devflow` como roteador stateless** — spawna agentes,
    não lê, não valida. Recebe resumo curto de volta.
 2. **Curadoria já foi concluída** — docs/README.md e
-   Harness existem e estão válidos. Este workflow assume
-    isso como pré-condição. A validação é feita pelo gate
-    de curadoria do `devflow`, que rodou antes.
+   Testes por Especialidade existem e estão válidos. Este
+   workflow assume isso como pré-condição. A validação é
+   feita pelo gate de curadoria do `devflow`, que rodou
+   antes.
 3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.

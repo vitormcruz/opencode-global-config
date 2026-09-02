@@ -193,7 +193,7 @@ Identificador: `{workflowId}-{fase}-{agente}`.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 1.1 | `curador-produto` | Verificar docs/README.md e harness |
+| 1.1 | `curador-produto` | Verificar docs/README.md e Testes por Especialidade |
 | 1.2 | `devflow` | Gate de curadoria (ver abaixo) |
 
 **Gate de curadoria — trabalho de curadoria:** se o
@@ -202,7 +202,7 @@ Identificador: `{workflowId}-{fase}-{agente}`.
    - **Sim** → fases de dev conduzem a curadoria
      (planejamento item a item com aprovação humana;
      construção com curador escrevendo docs/spec e
-     `eng-software` implementando harness com TDD;
+     `eng-software` implementando testes-produto com TDD;
      validação final verde). Após concluir, revalide.
    - **Não** → registre lacuna na seção `## Perguntas`
      e siga para PLANEJAMENTO.

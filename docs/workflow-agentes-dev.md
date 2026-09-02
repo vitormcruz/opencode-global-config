@@ -15,16 +15,16 @@ otimizado para:
 
 ```
 devflow
-  └── VALIDAÇÃO (gate de curadoria)  ← Verifica docs/README.md e Harness
+  └── VALIDAÇÃO (gate de curadoria)  ← Verifica docs/README.md e Testes por Especialidade
   └── workflow-definicao-escopo.md   ← Elicita requisitos
   └── workflow-agentes-dev.md        ← Desenvolvimento (este arquivo)
 ```
 
-- **Gate de curadoria** (fase VALIDAÇÃO) — garante que docs/README.md
-  e Harness existem e estão válidos. Se lacuna, o humano
-  decide se trata a curadoria agora (conduzida pelas fases
-  de dev) ou segue com lacuna registrada. Ver seção
-  "Trabalho de curadoria" abaixo.
+- **Gate de curadoria** (fase VALIDAÇÃO) — garante que
+  docs/README.md e Testes por Especialidade existem e estão
+  válidos. Se lacuna, o humano decide se trata a curadoria
+  agora (conduzida pelas fases de dev) ou segue com lacuna
+  registrada. Ver seção "Trabalho de curadoria" abaixo.
 - [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md) —
   elicita requisitos e produz o Arquivo de Planejamento.
 - Este workflow — executa o ciclo completo de desenvolvimento
@@ -64,7 +64,7 @@ executa `git push` sem confirmação explícita do humano.
 |---|---|---|---|
 | `devflow` | Roteia fases e mantém Status | Roteia fases e mantém Status | Roteia fases |
 | `eng-software` | Planeja o código | TDD e ajustes integrativos | — |
-| `curador-produto` | — | — | Valida docs/README.md, harness e evidências |
+| `curador-produto` | — | — | Valida docs/README.md, testes-produto e evidências |
 | `dba` | Modela dados | Atualiza modelo e scripts | Revisa artefatos de BD |
 | `sec` | Analisa segurança | Gera configurações | Revisa segurança e testa |
 | `qa` | Planeja testes | — | Revisa cobertura e executa testes |
@@ -191,7 +191,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 17. **Fonte de verdade temporária** — descartável ao fim.
     `curador-produto` exclui plano e artefatos auxiliares.
 17.1. **Seção de evidências** —
-     `## Evidências de Harness — Testes`. `curador-produto`
+     `## Evidências de Testes — Testes`. `curador-produto`
      lê a evidência do orquestrador no fim da fase Testes.
 18. **Campo `Status` obrigatório** no topo. O agente que
     conclui uma fase atualiza o status antes de retornar.
@@ -213,7 +213,7 @@ Status: <FASE> [— detalhe opcional]
 | Campo | Tam. máx | Tipo/Formato | Máscara | Limite | Obs |
 |-------|----------|-------------|---------|--------|-----|
 
-## Evidências de Harness — <fase>
+## Evidências de Testes — <fase>
 
 (evidências de cada agente que atuou na fase)
 
@@ -226,7 +226,7 @@ Status: <FASE> [— detalhe opcional]
   `CONSTRUÇÃO`, `GATE-REFATORAÇÃO — volta ao planejamento`,
   `REVISÃO DA CONSTRUÇÃO`, `TESTES`, `FINALIZAÇÃO`.
 - **Regras de Produto**: tabela de restrições de domínio.
-- **Evidências de Harness — Testes**: evidência do
+- **Evidências de Testes — Testes**: evidência do
   orquestrador `testes-produto`.
 - **Perguntas**: pendências de decisão humana.
 
@@ -309,7 +309,7 @@ sequenceDiagram
 
     rect rgb(255, 230, 230)
     Note over Humano, rev: VALIDAÇÃO (gate de curadoria)
-    devflow ->> prod: Verificar docs/README.md e harness
+    devflow ->> prod: Verificar docs/README.md e Testes por Especialidade
     prod -->> devflow: Relatório de lacunas
     alt Lacuna detectada
         devflow ->> Humano: Tratar a curadoria agora?
@@ -456,12 +456,13 @@ seção com o humano (mediação via blocos adaptativos da
 
 1. `curador-produto` escreve o `docs/README.md` aprovado.
 2. `curador-produto` spawna `eng-software` com briefing para
-   implementar scripts de harness com TDD.
+   implementar scripts de testes-produto com TDD.
 3. `curador-produto` registra tabela no `AGENTS.md`.
 
 ### Validação da curadoria
 
-1. `eng-software` roda os harness implementados.
+1. `eng-software` roda os scripts de testes-produto
+   implementados.
 2. `curador-produto` verifica o verde — validação objetiva
    (resolve "não valida o que editou").
 3. Verde → curadoria concluída. `devflow` volta ao gate de curadoria.

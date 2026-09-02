@@ -8,7 +8,7 @@ O orquestrador chama as quatro suítes e agrega o relatório.
 Falha se qualquer suíte falhar.
 
 Critérios, orçamento e ferramentas saem da entrevista de
-curadoria. Fingerprint e cache ficam em `harness/target/`
+curadoria. Fingerprint e cache ficam em `testes-produto/target/`
 e não são versionados.
 
 **PROIBIDO:** bypassar, comentar, remover ou condicionar
