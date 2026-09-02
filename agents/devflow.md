@@ -45,7 +45,7 @@ workflow.
 a fase pelo campo `Status`, spawna o agente adequado
 e contextualiza-o corretamente. Ao final da fase
 **Testes**, spawna `curador-produto` para validar a
-evidência do orquestrador `harness/testes`. Se o
+evidência do orquestrador `testes-produto`. Se o
 `curador-produto` reportar falhas, re-spawna o agente
 faltante ou consulta o humano. O `devflow` não executa
 o orquestrador nem suítes de especialidade.
@@ -131,7 +131,7 @@ Ao spawnar um agente, instrua-o a:
 2. Retornar apenas um **resumo curto (≤ 5 linhas)**.
 3. Não executar suítes por especialidade na Construção
    nem na Revisão da Construção. Na fase Testes, o `qa`
-   persiste a evidência de `harness/testes`.
+   persiste a evidência de `testes-produto`.
 4. **Nas fases de planejamento**, valide cada decisão
    não-trivial com o humano antes de persistir. Dúvidas
    que dependem de decisão → salve progresso parcial,
@@ -275,7 +275,7 @@ Mesmo fluxo de achados da fase 3.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 6.1 | `qa` | Orquestrador `harness/testes` + manuais do plano |
+| 6.1 | `qa` | Orquestrador `testes-produto` + manuais do plano |
 | 6.2 | `sec` | Executar só o roteiro manual |
 | 6.3 | `curador-produto` | Validar evidência do orquestrador |
 

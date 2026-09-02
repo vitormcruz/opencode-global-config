@@ -15,7 +15,7 @@ não tenho critério objetivo para validar aderência.
 
 Os **Testes por Especialidade** traduzem regras de
 qualidade em suítes (backend, dados, segurança, frontend)
-e no orquestrador `harness/testes`. A tabela e o link do
+e no orquestrador `testes-produto`. A tabela e o link do
 spec ficam no `AGENTS.md`; o spec detalhado vive na pasta
 de docs aprovada.
 

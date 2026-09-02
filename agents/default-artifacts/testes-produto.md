@@ -1,6 +1,6 @@
 # Testes por Especialidade
 
-Scripts por especialidade e o orquestrador `harness/testes`.
+Scripts por especialidade e o orquestrador `testes-produto`.
 Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
 exit 1 = fail. Sem argumentos.
 
@@ -17,7 +17,7 @@ remoção — reporte finding com instrução de instalação.
 
 ## backend
 
-**Arquivo:** `harness/backend`
+**Arquivo:** `testes-produto/backend`
 
 **Descrição:** Testes e análise do backend.
 
@@ -34,7 +34,7 @@ remoção — reporte finding com instrução de instalação.
 
 ## dados
 
-**Arquivo:** `harness/dados`
+**Arquivo:** `testes-produto/dados`
 
 **Descrição:** Validação de schema e modelo de dados.
 
@@ -51,7 +51,7 @@ remoção — reporte finding com instrução de instalação.
 
 ## segurança
 
-**Arquivo:** `harness/seguranca`
+**Arquivo:** `testes-produto/seguranca`
 
 **Descrição:** Segurança — secrets, dependências, OWASP.
 
@@ -68,7 +68,7 @@ remoção — reporte finding com instrução de instalação.
 
 ## frontend
 
-**Arquivo:** `harness/frontend`
+**Arquivo:** `testes-produto/frontend`
 
 **Descrição:** Testes, lint, build e acessibilidade do
 frontend.
@@ -88,9 +88,10 @@ frontend.
 
 ## Orquestrador
 
-**Arquivo:** `harness/testes`
+**Arquivo:** `testes-produto`
 
-Chama as quatro suítes (`harness/backend`, `harness/dados`,
-`harness/seguranca`, `harness/frontend`) e agrega o
+Chama as quatro suítes (`testes-produto/backend`,
+`testes-produto/dados`, `testes-produto/seguranca`,
+`testes-produto/frontend`) e agrega o
 relatório no fim. `status` é `fail` se qualquer suíte
 falhar. Não reabre entrevista nem inventa check.

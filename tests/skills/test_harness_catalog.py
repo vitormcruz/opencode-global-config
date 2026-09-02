@@ -32,10 +32,10 @@ def test_catalog_suggests_tools_by_specialty(catalog: str) -> None:
     for agent_heading in ("## eng-software", "## dba", "## qa"):
         assert agent_heading not in catalog
     assert re.search(r"^## front\s*$", catalog, re.MULTILINE) is None
-    assert "harness/testes" in catalog
+    assert "testes-produto" in catalog
     assert "harness/agregar" not in catalog
     assert '"prompt"' not in catalog
-    assert "docs/harness.md" in catalog
+    assert "docs/testes-produto.md" in catalog
 
 
 @pytest.mark.unit

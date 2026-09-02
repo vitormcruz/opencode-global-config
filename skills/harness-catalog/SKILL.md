@@ -3,8 +3,8 @@ name: harness-catalog
 description: >
   Catálogo de referência com sugestões de ferramentas por
   especialidade (backend, dados, segurança, frontend) e
-  o orquestrador harness/testes. Use quando: criando ou
-  atualizando suítes, definindo spec em harness.md,
+  o orquestrador testes-produto. Use quando: criando ou
+  atualizando suítes, definindo spec em testes-produto.md,
   configurando ferramentas determinísticas. Triggers:
   "harness", "catálogo de harness", "sugestões de harness",
   "regras de contenção", "ferramentas de harness",
@@ -17,11 +17,11 @@ description: >
 > **Nota:** as regras abaixo são referência de domínio.
 > **Não são obrigatórias.** O spec efetivo vive no
 > arquivo apontado pelo `AGENTS.md` (default
-> `docs/harness.md`).
+> `docs/testes-produto.md`).
 
 ## Interface Padronizada
 
-Cada suíte e o orquestrador `harness/testes` são scripts
+Cada suíte e o orquestrador `testes-produto` são scripts
 sem argumentos, idempotentes, com JSON:
 
 ```json

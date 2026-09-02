@@ -30,6 +30,6 @@ def test_sec_executes_only_manual_script_in_test_phase(sec_content: str) -> None
 @pytest.mark.unit
 def test_sec_does_not_own_automatic_security_suite(sec_content: str) -> None:
     assert "harness do `sec`" not in sec_content
-    assert "harness/seguranca" not in sec_content
+    assert "testes-produto/seguranca" not in sec_content
     lower = sec_content.lower()
     assert "suíte automática" in lower or "suite automatica" in lower

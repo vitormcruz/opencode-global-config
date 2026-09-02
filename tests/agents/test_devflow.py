@@ -167,7 +167,7 @@ def test_devflow_evidence_validated_at_end_of_test_phase(
     lower = " ".join(content.lower().split())
 
     assert "curador-produto" in content
-    assert "harness/testes" in content
+    assert "testes-produto" in content
     assert "orquestrador" in lower
     assert "val-harness" not in content
     assert "re-executar" in lower

@@ -52,7 +52,7 @@ analisa código de produção ou faz revisão integrativa.
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
   `## Testes por Especialidade` e o spec no link
-  (default `docs/harness.md`, pasta definida na
+  (default `docs/testes-produto.md`, pasta definida na
   curadoria). Nunca use path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
@@ -185,12 +185,12 @@ especificação imutável e suas implicações.
 
 ### 3. Executar testes
 
-Na fase Testes, execute só `harness/testes` e os
+Na fase Testes, execute só `testes-produto` e os
 manuais do plano. Não chama scripts de especialidade
 um a um.
 
 **O que fazer**:
-1. Executar o orquestrador `harness/testes` (comando
+1. Executar o orquestrador `testes-produto` (comando
    na tabela `## Testes por Especialidade`).
 2. Executar testes manuais planejados (quando aplicável):
    - Seguir roteiro definido no plano de testes.
@@ -219,7 +219,7 @@ O que você **NÃO** faz:
   não a implementação.
 - **Não executa o roteiro manual de segurança** —
   responsabilidade do agente `sec`. A suíte automática
-  entra no orquestrador `harness/testes`.
+  entra no orquestrador `testes-produto`.
 - **Não corrige código de produção** — apenas reporta
   falhas e corrige/cria testes.
 - **Não faz revisão integrativa** — responsabilidade do

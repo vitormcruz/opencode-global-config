@@ -50,6 +50,6 @@ def test_executors_resolve_suite_spec_via_agents_link(
         content = _agent_text(repo_root, name)
         lower = _flat(content)
         assert "Testes por Especialidade" in content, name
-        assert "docs/harness.md" in content, name
+        assert "docs/testes-produto.md" in content, name
         assert "path hardcoded" in lower, name
         assert "o que deve conter" in lower, name

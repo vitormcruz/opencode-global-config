@@ -110,14 +110,14 @@ HARNESS_TEMPLATE = dedent(
 
     | Especialidade | Script |
     |---------------|--------|
-    | backend | harness/backend |
-    | dados | harness/dados |
-    | segurança | harness/seguranca |
-    | frontend | harness/frontend |
+    | backend | testes-produto/backend |
+    | dados | testes-produto/dados |
+    | segurança | testes-produto/seguranca |
+    | frontend | testes-produto/frontend |
 
-    Orquestrador: harness/testes
+    Orquestrador: testes-produto
 
-    Spec: [docs/harness.md](docs/harness.md)
+    Spec: [docs/testes-produto.md](docs/testes-produto.md)
     """
 )
 

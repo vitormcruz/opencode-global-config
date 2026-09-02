@@ -95,7 +95,7 @@ Criar o spec das suítes e gravar no `AGENTS.md` só a
 tabela, o link aprovado e as instruções.
 
 **Defaults**: leia `default-artifacts/harness-section.md`
-(snippet), `default-artifacts/harness.md` (spec) e
+(snippet), `default-artifacts/testes-produto.md` (spec) e
 `default-artifacts/instrucoes-por-agente.md`.
 
 **Interface**: consulte
@@ -105,10 +105,10 @@ tabela, o link aprovado e as instruções.
 **Fluxo de entrevista**:
 
 1. Confirme a pasta de documentação (default `docs/`).
-   O spec fica em `<pasta>/harness.md` (default
-   `docs/harness.md`).
+   O spec fica em `<pasta>/testes-produto.md` (default
+   `docs/testes-produto.md`).
 2. Entreviste especialidades (backend, dados, segurança,
-   frontend) e o orquestrador `harness/testes` no spec.
+   frontend) e o orquestrador `testes-produto` no spec.
    pa11y, axe-core ou ambos: a entrevista decide.
 3. Depois, `## Instruções por Agente` no `AGENTS.md`,
    item a item. Sem instrução:
@@ -142,7 +142,7 @@ link do `AGENTS.md`.
 
 Não valida evidências na Construção nem na Revisão da
 Construção. Valida no fim da fase Testes se o
-orquestrador `harness/testes` rodou.
+orquestrador `testes-produto` rodou.
 
 **O que fazer**:
 
@@ -206,11 +206,11 @@ Ao fim de um ciclo de desenvolvimento:
 
 | Item | Esperado | Evidência | Status |
 |------|----------|-----------|--------|
-| orquestrador | harness/testes | Presente e completa | OK |
+| orquestrador | testes-produto | Presente e completa | OK |
 
 ### Falhas
 - **orquestrador**: evidência ausente.
-  Ação: re-executar `harness/testes` e persistir.
+  Ação: re-executar `testes-produto` e persistir.
 
 ### Lacunas
 - Comando ou spec ausente no `AGENTS.md`.

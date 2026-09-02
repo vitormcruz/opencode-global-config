@@ -15,7 +15,7 @@ def test_workflow_does_not_run_specialty_suites_in_construction(
 
     assert "Obrigatório na construção" not in workflow
     assert "construção executa; revisão só se modificou" not in workflow
-    assert "harness/testes" in workflow
+    assert "testes-produto" in workflow
 
 
 @pytest.mark.unit
@@ -27,7 +27,7 @@ def test_curador_produto_validates_orchestrator_at_test_phase(
     )
     lower = " ".join(content.lower().split())
 
-    assert "harness/testes" in content
+    assert "testes-produto" in content
     assert "fase testes" in lower
     assert "após as fases de construção e revisão da construção" not in lower
     assert "sem modificações — harness não executado" not in content

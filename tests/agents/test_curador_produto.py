@@ -102,7 +102,7 @@ def test_curador_produto_references_default_artifacts(
 ) -> None:
     assert "default-artifacts/doc-readme.md" in curador_content
     assert "default-artifacts/harness-section.md" in curador_content
-    assert "default-artifacts/harness.md" in curador_content
+    assert "default-artifacts/testes-produto.md" in curador_content
     assert "default-artifacts/instrucoes-por-agente.md" in curador_content
 
 
@@ -147,7 +147,7 @@ def test_curador_produto_persists_and_returns_after_approval(
 ) -> None:
     assert "persista o resultado" in curador_normalized
     assert "retorne o resumo ao solicitante" in curador_normalized
-    assert "docs/harness.md" in curador_normalized
+    assert "docs/testes-produto.md" in curador_normalized
 
 
 @pytest.mark.unit
@@ -217,7 +217,7 @@ def test_curador_produto_validates_harness_evidence(
     curador_normalized: str,
 ) -> None:
     assert "orquestrador" in curador_normalized
-    assert "harness/testes" in curador_normalized
+    assert "testes-produto" in curador_normalized
     assert "fase testes" in curador_normalized
 
 
@@ -225,7 +225,7 @@ def test_curador_produto_validates_harness_evidence(
 def test_curador_produto_runs_aggregator_before_validation(
     curador_normalized: str,
 ) -> None:
-    assert "harness/testes" in curador_normalized
+    assert "testes-produto" in curador_normalized
     assert "evidência" in curador_normalized
 
 

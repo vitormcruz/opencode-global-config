@@ -87,7 +87,7 @@ Estratégias de Indexação de Código. Criação e manutenção:
 ### 2. Testes por Especialidade
 
 Suítes (backend, dados, segurança, frontend) e o
-orquestrador `harness/testes`. Tabela e link no
+orquestrador `testes-produto`. Tabela e link no
 `AGENTS.md`; spec na pasta de docs. Criação e
 manutenção: `curador-produto`.
 
@@ -99,7 +99,7 @@ Ver schema na seção "Schema do arquivo de planejamento".
 
 ### 4. Verificação das suítes
 
-Evidência do orquestrador `harness/testes`. O
+Evidência do orquestrador `testes-produto`. O
 `curador-produto` valida no fim da fase **Testes**.
 O `devflow` decide a ação sobre falhas.
 
@@ -227,7 +227,7 @@ Status: <FASE> [— detalhe opcional]
   `REVISÃO DA CONSTRUÇÃO`, `TESTES`, `FINALIZAÇÃO`.
 - **Regras de Produto**: tabela de restrições de domínio.
 - **Evidências de Harness — Testes**: evidência do
-  orquestrador `harness/testes`.
+  orquestrador `testes-produto`.
 - **Perguntas**: pendências de decisão humana.
 
 ### docs/README.md
@@ -267,9 +267,9 @@ Status: <FASE> [— detalhe opcional]
 ### Testes por Especialidade
 
 32. **Tabela e link no AGENTS.md** — criação pelo
-    `curador-produto`. Spec em `<pasta-docs>/harness.md`.
+    `curador-produto`. Spec em `<pasta-docs>/testes-produto.md`.
     Suítes não rodam na Construção nem na Revisão.
-33. **Fase Testes** — `qa` executa só `harness/testes` e
+33. **Fase Testes** — `qa` executa só `testes-produto` e
     manuais do plano. `sec` executa só o roteiro manual.
 34. **Evidência** — JSON `{ status, findings[] }` do
     orquestrador, persistida na fase Testes.
@@ -384,7 +384,7 @@ sequenceDiagram
 
     rect rgb(245, 230, 255)
     Note over Humano, rev: TESTES
-    devflow ->> qa: harness/testes + manuais
+    devflow ->> qa: testes-produto + manuais
     qa -->> devflow: Resultado
     devflow ->> sec: Roteiro manual
     sec -->> devflow: Resultado
@@ -448,7 +448,7 @@ seção com o humano (mediação via blocos adaptativos da
 - **docs/README.md** — Definição de Escopo, Elementos de
   Especificação, Regras de Documentação, Estratégias de
   Indexação. Cada seção requer aprovação explícita.
-- **Suítes** — pasta de docs, spec em `harness.md`,
+- **Suítes** — pasta de docs, spec em `testes-produto.md`,
   especialidades, orquestrador, depois instruções.
   Cada entrada requer aprovação explícita.
 

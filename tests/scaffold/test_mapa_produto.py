@@ -199,10 +199,10 @@ def test_positional_doc_scaffold_is_idempotent(tmp_path: Path) -> None:
 
 SPECIALTIES = ("backend", "dados", "segurança", "frontend")
 SPECIALTY_SCRIPTS = (
-    "harness/backend",
-    "harness/dados",
-    "harness/seguranca",
-    "harness/frontend",
+    "testes-produto/backend",
+    "testes-produto/dados",
+    "testes-produto/seguranca",
+    "testes-produto/frontend",
 )
 WORKFLOW_AGENTS = (
     "eng-software",
@@ -240,7 +240,7 @@ def test_harness_scaffold_lists_specialties_and_orchestrator(
     assert status == 0
     for specialty in SPECIALTIES:
         assert f"| {specialty} " in content
-    assert "harness/testes" in content
+    assert "testes-produto" in content
     for script in SPECIALTY_SCRIPTS:
         assert script in content
 
@@ -284,7 +284,7 @@ def test_harness_scaffold_is_short_snippet_with_spec_link(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    assert "docs/harness.md" in content
+    assert "docs/testes-produto.md" in content
     assert "harness/agregar" not in content
     assert "## Agregador de Harness" not in content
     assert "### Especificação dos Scripts de Harness" not in content
@@ -363,8 +363,8 @@ def test_harness_snippet_lists_specialties_orchestrator_and_spec_link(
         assert f"| {specialty} " in content
     for script in SPECIALTY_SCRIPTS:
         assert script in content
-    assert "harness/testes" in content
-    assert "docs/harness.md" in content
+    assert "testes-produto" in content
+    assert "docs/testes-produto.md" in content
     assert "harness/agregar" not in content
     assert '"prompt"' not in content
     assert "O que deve conter" not in content
@@ -375,7 +375,7 @@ def test_harness_spec_template_has_specialty_subsections(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/harness.md"
+        repo_root / "agents/default-artifacts/testes-produto.md"
     ).read_text(encoding="utf-8")
 
     for specialty in SPECIALTIES:
@@ -387,7 +387,7 @@ def test_harness_spec_template_has_specialty_subsections(
         "O que deve conter",
     ):
         assert heading in content
-    assert "harness/testes" in content
+    assert "testes-produto" in content
     assert "harness/agregar" not in content
     assert "pa11y" in content
     assert "axe-core" in content
@@ -405,8 +405,8 @@ def test_instructions_template_covers_workflow_agents(
     for agent in WORKFLOW_AGENTS:
         assert f"### {agent}" in content
     assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content
-    assert "harness/testes" not in content
-    assert "harness/backend" not in content
+    assert "testes-produto" not in content
+    assert "testes-produto/backend" not in content
     assert "harness/agregar" not in content
 
 
@@ -433,7 +433,7 @@ def test_interface_harness_describes_standard_json_interface(
     assert '"findings"' in content
     assert '"prompt"' not in content
     assert "harness/agregar" not in content
-    assert "harness/testes" in content
+    assert "testes-produto" in content
 
 
 @pytest.mark.unit
@@ -443,7 +443,7 @@ def test_default_harness_artifacts_do_not_cite_plan_ids(
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
     artifact_paths = (
         "agents/default-artifacts/harness-section.md",
-        "agents/default-artifacts/harness.md",
+        "agents/default-artifacts/testes-produto.md",
         "agents/default-artifacts/instrucoes-por-agente.md",
         "agents/references/interface-harness.md",
     )

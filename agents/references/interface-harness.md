@@ -73,7 +73,7 @@ Quando o humano oferece uma ferramenta, analise estes pontos:
 
 ## Orquestrador
 
-- Comando sem argumentos (padrão: `harness/testes`)
+- Comando sem argumentos (padrão: `testes-produto`)
 - Chama as quatro suítes (backend, dados, segurança, frontend)
   e agrega `findings`
 - `status` é `fail` se qualquer suíte falhar

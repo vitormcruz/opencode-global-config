@@ -156,6 +156,7 @@ _NON_AGENT_NON_SKILL_TERMS: set[str] = {
     "bloqueante",    # severidade de achado (rev)
     "melhoria",      # severidade de achado (rev)
     "nenhum",        # severidade de achado (rev)
+    "testes-produto",  # orquestrador das suítes por especialidade
 }
 
 
