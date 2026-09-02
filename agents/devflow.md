@@ -3,16 +3,15 @@ description: >
   Orquestrador stateless do workflow multi-agente.
   Lê o arquivo de planejamento, identifica a fase pelo
   campo Status, spawna o agente adequado e recebe resumo
-  curto. Nunca executa tarefas de domínio. Único agente
+  curto.   Nunca executa tarefas de domínio. Único agente
   que conhece o workflow e a sequência de fases. Ao
-  final das fases de Construção e Revisão da
-  Construção (quando houve modificações), spawna
-  curador-produto para validação em lote das evidências
-  de harness. Mediador de comunicação humano-agente
-  quando agentes retornam perguntas. Conduz o trabalho
-  de curadoria pelas fases de dev. Entrada:
-  requisitos de nova funcionalidade ou retomada de
-  workflow em andamento (PT-BR)
+  final da fase Testes, spawna curador-produto para
+  validar a evidência do orquestrador. Mediador de
+  comunicação humano-agente quando agentes retornam
+  perguntas. Conduz o trabalho de curadoria pelas
+  fases de dev. Entrada: requisitos de nova
+  funcionalidade ou retomada de workflow em andamento
+  (PT-BR)
 mode: primary
 temperature: 0.1
 permission:
@@ -44,15 +43,12 @@ workflow.
 
 **Rotear** — lê o arquivo de planejamento, identifica
 a fase pelo campo `Status`, spawna o agente adequado
-e contextualiza-o corretamente. Ao final das fases de
-**Construção** e **Revisão da Construção** (quando houve
-modificações), spawna `curador-produto` para validação em
-lote das evidências de harness. Se o `curador-produto`
-reportar falhas, re-spawna o agente faltante ou consulta
-o humano. O `curador-produto` executa, antes da validação,
-somente o agregador registrado na seção própria do
-`AGENTS.md`. O `devflow` não executa esse script nem
-qualquer harness.
+e contextualiza-o corretamente. Ao final da fase
+**Testes**, spawna `curador-produto` para validar a
+evidência do orquestrador `harness/testes`. Se o
+`curador-produto` reportar falhas, re-spawna o agente
+faltante ou consulta o humano. O `devflow` não executa
+o orquestrador nem suítes de especialidade.
 
 ## Função de mediação
 
@@ -94,13 +90,14 @@ entre o `curador-produto` e o humano:
 - **Blocos adaptativos** — decida quando juntar ou separar
   perguntas do curador. Perguntas de seções diferentes do
   `docs/README.md` podem ser agrupadas se curtas e
-  relacionadas; perguntas complexas (harness por agente,
-  Elementos de Especificação) são apresentadas uma a uma.
+  relacionadas; perguntas complexas (suítes por
+  especialidade, instruções, Elementos de Especificação)
+  são apresentadas uma a uma.
 - **Ritmo** — o curador retorna perguntas e achados; você
   avalia, reformula se necessário e apresenta ao humano.
 - **Aprovações** — cada seção do `docs/README.md` e cada
-  entrada de harness requerem aprovação explícita antes de
-  persistir.
+  entrada de suíte e cada instrução requerem aprovação
+  explícita antes de persistir.
 
 ---
 
@@ -132,11 +129,9 @@ Valores: `VALIDAÇÃO`, `PLANEJAMENTO`, `REVISÃO DO PLANO`,
 Ao spawnar um agente, instrua-o a:
 1. Persistir resultado completo no arquivo de planejamento.
 2. Retornar apenas um **resumo curto (≤ 5 linhas)**.
-3. Persistir evidências de harness na seção
-   `## Evidências de Harness — <fase>` **(apenas nas fases
-   de Construção e Revisão da Construção)**. Na Revisão,
-   se não modificou artefatos, persistir
-   `sem modificações — harness não executado`.
+3. Não executar suítes por especialidade na Construção
+   nem na Revisão da Construção. Na fase Testes, o `qa`
+   persiste a evidência de `harness/testes`.
 4. **Nas fases de planejamento**, valide cada decisão
    não-trivial com o humano antes de persistir. Dúvidas
    que dependem de decisão → salve progresso parcial,
@@ -255,9 +250,7 @@ resolução.
 |-------|--------|------|
 | 4.1 | `dba` | Criar/atualizar modelo, scripts, migrações |
 | 4.2 | `front` | Implementar UI (protótipos aprovados) |
-| 4.3 | `eng-software` | TDD: testes → código → refatoração |
-| 4.4 | `curador-produto` | Validar evidências da fase |
-| 4.5 | `devflow` | Se falhas → re-spawnar ou consultar humano |
+| 4.3 | `eng-software` | TDD próprio, normaliza o lote e commita |
 
 - **Concluído** → `Status: REVISÃO DA CONSTRUÇÃO`
 - **Gate de refatoração** → `Status: REVISÃO DO PLANO`
@@ -269,8 +262,6 @@ Instâncias limpas.
 | Passo | Agente | Ação |
 |-------|--------|------|
 | 5.1 | `rev` | Revisão solo com skills de domínio |
-| 5.2 | `curador-produto` | Validar evidências da fase |
-| 5.3 | `devflow` | Se falhas → re-spawnar ou consultar humano |
 
 Mesmo fluxo de achados da fase 3.
 
@@ -284,12 +275,15 @@ Mesmo fluxo de achados da fase 3.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
-| 6.1 | `qa` | Executar testes automatizados + manuais |
-| 6.2 | `sec` | Executar testes de segurança |
+| 6.1 | `qa` | Orquestrador `harness/testes` + manuais do plano |
+| 6.2 | `sec` | Executar só o roteiro manual |
+| 6.3 | `curador-produto` | Validar evidência do orquestrador |
 
-Se testes falharem: spawnar `eng-software` → corrigir →
-**"Re-executar testes?"** → Sim: repetir. Não: seguir.
-`Status: FINALIZAÇÃO`.
+Falha de suíte roteia por especialidade: backend →
+`eng-software`; dados → `dba`; segurança automática →
+`sec`; frontend → `front`. Depois o `eng-software`
+normaliza e commita. Então **"Re-executar?"** → Sim:
+repetir fase 6. Não: seguir. `Status: FINALIZAÇÃO`.
 
 ### 7. FINALIZAÇÃO
 

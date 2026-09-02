@@ -1,4 +1,4 @@
-"""Valida que harness na revisão só roda após modificação."""
+"""Valida que suítes por especialidade não rodam na Construção."""
 
 from pathlib import Path
 
@@ -6,36 +6,28 @@ import pytest
 
 
 @pytest.mark.unit
-def test_workflow_review_harness_only_if_modified(repo_root: Path) -> None:
+def test_workflow_does_not_run_specialty_suites_in_construction(
+    repo_root: Path,
+) -> None:
     workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
         encoding="utf-8"
     )
 
-    assert "Obrigatório na construção" in workflow
-    assert "na revisão, só se modificou" in workflow
-    assert "artefato" in workflow
-    assert "construção executa; revisão só se modificou" in workflow
-    assert "sem modificações — harness não executado" in workflow
+    assert "Obrigatório na construção" not in workflow
+    assert "construção executa; revisão só se modificou" not in workflow
+    assert "harness/testes" in workflow
 
 
 @pytest.mark.unit
-def test_curador_produto_accepts_unmodified_skip(repo_root: Path) -> None:
-    content = (repo_root / "agents/curador-produto.md").read_text(
-        encoding="utf-8"
-    )
-
-    assert "sem modificações — harness não executado" in content
-    assert "Ausente ou incompleta = FALHA" in content
-
-
-@pytest.mark.unit
-def test_curador_produto_review_harness_respects_unmodified(
+def test_curador_produto_validates_orchestrator_at_test_phase(
     repo_root: Path,
 ) -> None:
     content = (repo_root / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
+    lower = " ".join(content.lower().split())
 
-    assert "Para cada agente que atuou na fase" in content
-    assert "sem modificações — harness não executado" in content
-    assert "agente executou seu script? Evidência JSON" not in content
+    assert "harness/testes" in content
+    assert "fase testes" in lower
+    assert "após as fases de construção e revisão da construção" not in lower
+    assert "sem modificações — harness não executado" not in content

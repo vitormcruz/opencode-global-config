@@ -102,6 +102,8 @@ def test_curador_produto_references_default_artifacts(
 ) -> None:
     assert "default-artifacts/doc-readme.md" in curador_content
     assert "default-artifacts/harness-section.md" in curador_content
+    assert "default-artifacts/harness.md" in curador_content
+    assert "default-artifacts/instrucoes-por-agente.md" in curador_content
 
 
 @pytest.mark.unit
@@ -145,8 +147,7 @@ def test_curador_produto_persists_and_returns_after_approval(
 ) -> None:
     assert "persista o resultado" in curador_normalized
     assert "retorne o resumo ao solicitante" in curador_normalized
-    assert "coletor" in curador_normalized
-    assert "docs/harness-report/harness-report.md" in curador_normalized
+    assert "docs/harness.md" in curador_normalized
 
 
 @pytest.mark.unit
@@ -215,16 +216,17 @@ def test_curador_produto_harness_catalog_as_reference(
 def test_curador_produto_validates_harness_evidence(
     curador_normalized: str,
 ) -> None:
-    assert "evidências de harness" in curador_normalized
-    assert "agregador de harness" in curador_normalized
+    assert "orquestrador" in curador_normalized
+    assert "harness/testes" in curador_normalized
+    assert "fase testes" in curador_normalized
 
 
 @pytest.mark.unit
 def test_curador_produto_runs_aggregator_before_validation(
     curador_normalized: str,
 ) -> None:
-    assert "agregador de harness" in curador_normalized
-    assert "execute-o" in curador_normalized or "execute" in curador_normalized
+    assert "harness/testes" in curador_normalized
+    assert "evidência" in curador_normalized
 
 
 @pytest.mark.unit
@@ -291,19 +293,29 @@ def test_curador_produto_has_harness_catalog_conditional(
 
 
 @pytest.mark.unit
-def test_curador_produto_validates_harness_after_construction(
+def test_curador_produto_does_not_validate_after_construction(
     curador_normalized: str,
 ) -> None:
-    for requirement in (
-        "orçamento aprovado",
-        "ferramenta ausente",
-        "bloqueante",
-        "cache",
-        "fallback",
-        "finding bloqueante",
-        "instrução acionável",
-    ):
-        assert requirement in curador_normalized
+    assert "fase testes" in curador_normalized
+    assert "não valida evidências na construção" in curador_normalized or (
+        "não valida" in curador_normalized
+        and "construção" in curador_normalized
+    )
+
+
+@pytest.mark.unit
+def test_curador_produto_interviews_spec_then_instructions(
+    curador_content: str,
+) -> None:
+    assert "Instruções por Agente" in curador_content
+    assert "pasta" in curador_content.lower()
+    assert "docs/" in curador_content
+    assert "pa11y" in curador_content
+    assert "axe-core" in curador_content
+    assert "o harness efetivo fica no" not in curador_content.lower()
+    assert "não copia" in curador_content.lower() or (
+        "não é copiado" in curador_content.lower()
+    )
 
 
 # --- Remoção dos agentes antigos ---

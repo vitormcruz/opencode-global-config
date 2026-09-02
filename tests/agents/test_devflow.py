@@ -114,13 +114,18 @@ def test_devflow_contract_does_not_instruct_agents_to_use_grill_me(
 
 
 @pytest.mark.unit
-def test_devflow_skips_review_harness_without_modification(
+def test_devflow_construction_has_no_curator_or_suite_evidence(
     repo_root: Path,
 ) -> None:
     content = devflow_content(repo_root)
+    lower = " ".join(content.lower().split())
 
-    assert "sem modificações — harness não executado" in content
-    assert "não modificou" in content
+    assert "evidências de harness" not in lower or "fase testes" in lower
+    assert "sem modificações — harness não executado" not in content
+    assert "4.1" in content
+    assert "`dba`" in content
+    assert "`front`" in content
+    assert "normaliza" in lower
 
 
 @pytest.mark.unit
@@ -155,10 +160,25 @@ def test_devflow_no_debug_mode_or_legacy_references(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_devflow_evidence_validated_by_curador_produto(repo_root: Path) -> None:
+def test_devflow_evidence_validated_at_end_of_test_phase(
+    repo_root: Path,
+) -> None:
     content = devflow_content(repo_root)
+    lower = " ".join(content.lower().split())
 
     assert "curador-produto" in content
-    assert "validação em lote" in content
-    assert "evidências de harness" in content
+    assert "harness/testes" in content
+    assert "orquestrador" in lower
     assert "val-harness" not in content
+    assert "re-executar" in lower
+
+
+@pytest.mark.unit
+def test_devflow_routes_suite_failure_by_specialty(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+    lower = " ".join(content.lower().split())
+
+    assert "backend" in lower and "eng-software" in lower
+    assert "dados" in lower and "dba" in lower
+    assert "segurança" in lower and "sec" in lower
+    assert "frontend" in lower and "front" in lower

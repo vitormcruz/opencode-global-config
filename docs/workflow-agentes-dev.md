@@ -84,12 +84,12 @@ Definição de Escopo, Elementos de Especificação e
 Estratégias de Indexação de Código. Criação e manutenção:
 `curador-produto` (via gate de curadoria ou trabalho de curadoria).
 
-### 2. Harness por Agente
+### 2. Testes por Especialidade
 
-Regras de contenção de cada agente — ativadas como regras
-de prompt, ferramentas ou scripts. Listado no AGENTS.md.
-Criação e manutenção: `curador-produto` (via trabalho de
-curadoria).
+Suítes (backend, dados, segurança, frontend) e o
+orquestrador `harness/testes`. Tabela e link no
+`AGENTS.md`; spec na pasta de docs. Criação e
+manutenção: `curador-produto`.
 
 ### 3. Arquivo de Planejamento
 
@@ -97,12 +97,11 @@ Fonte de verdade temporária durante o workflow. Gerado pelos
 agentes, é entrada e saída de cada um. Descartável ao fim.
 Ver schema na seção "Schema do arquivo de planejamento".
 
-### 4. Verificação de Harness
+### 4. Verificação das suítes
 
-Evidências de execução do harness (logs ou artefatos).
-O `curador-produto` valida em lote ao final das fases de
-**Construção** e **Revisão da Construção** (quando houve
-modificações). O `devflow` decide a ação sobre falhas.
+Evidência do orquestrador `harness/testes`. O
+`curador-produto` valida no fim da fase **Testes**.
+O `devflow` decide a ação sobre falhas.
 
 ### 5. Elementos de Especificação
 
@@ -126,10 +125,10 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 1. **`devflow` como roteador stateless** — lê o arquivo,
    identifica a fase pelo `Status`, spawna o agente adequado
    e recebe resumo curto. **Nunca executa** tarefas de
-   domínio. Ao final das fases de Construção e Revisão da
-   Construção (quando houve modificações), spawna
-   `curador-produto` para validação em lote das evidências
-   de harness. Se falhas, re-spawna agente ou consulta humano.
+   domínio. Ao final da fase Testes, spawna
+   `curador-produto` para validar a evidência do
+   orquestrador. Se falhas, re-spawna agente ou consulta
+   humano.
 2. **Contrato de retorno** — todo agente persiste resultado
    no arquivo e retorna resumo curto (≤ 5 linhas). Ultima
    linha: `Skills: skill1, skill2` ou `Skills: nenhuma`.
@@ -184,15 +183,16 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 16. **Formato do resumo:** achado · ação · severidade
     (bloqueante ou melhoria).
 27. **`qa` não analisa código** — foca em execução de testes.
-28. **Testes de segurança são do `sec`**, não do `qa`.
+28. **Roteiro manual de segurança é do `sec`**. A suíte
+    automática entra no orquestrador executado pelo `qa`.
 
 ### Arquivo de planejamento
 
 17. **Fonte de verdade temporária** — descartável ao fim.
     `curador-produto` exclui plano e artefatos auxiliares.
-17.1. **Seção de evidências de harness** —
-     `## Evidências de Harness — <fase>`. `curador-produto`
-     lê esta seção + AGENTS.md para validação em lote.
+17.1. **Seção de evidências** —
+     `## Evidências de Harness — Testes`. `curador-produto`
+     lê a evidência do orquestrador no fim da fase Testes.
 18. **Campo `Status` obrigatório** no topo. O agente que
     conclui uma fase atualiza o status antes de retornar.
 19. **Regras de escrita:** na construção, apenas marca
@@ -226,8 +226,8 @@ Status: <FASE> [— detalhe opcional]
   `CONSTRUÇÃO`, `GATE-REFATORAÇÃO — volta ao planejamento`,
   `REVISÃO DA CONSTRUÇÃO`, `TESTES`, `FINALIZAÇÃO`.
 - **Regras de Produto**: tabela de restrições de domínio.
-- **Evidências de Harness — <fase>**: uma seção por fase
-  (Construção e Revisão da Construção).
+- **Evidências de Harness — Testes**: evidência do
+  orquestrador `harness/testes`.
 - **Perguntas**: pendências de decisão humana.
 
 ### docs/README.md
@@ -264,29 +264,22 @@ Status: <FASE> [— detalhe opcional]
     humano: nada muda, ajuste mínimo (propõe e registra),
     ou mudança significativa (volta ao planejamento).
 
-### Harness por Agente
+### Testes por Especialidade
 
-32. **Harness no AGENTS.md** — criação pelo `curador-produto`.
-    Obrigatório na construção; na revisão, só se modificou
-    artefato. `SEM HARNESS A PEDIDO DO HUMANO` = decisão
-    explícita. Script único por harness, idempotente.
-33. **Agente localiza harness antes de executar** — se
-    `SEM HARNESS`, segue. Se ausente/vazio, registra LACUNA.
-    Se presente: construção executa; revisão só se modificou.
-34. **Evidência** — saída JSON (`status`, `findings`, `prompt`)
-    persistida no arquivo. `fail` → resolve e re-executa.
-    `pass` → lê prompt. Sem modificação na revisão:
-    `sem modificações — harness não executado`.
-35. **Validação pelo `curador-produto`** — cruza seção de
-    evidências com AGENTS.md. Executa agregador antes de
-    cruzar. Reporta OK/FALHA/LACUNA. `devflow` decide ação.
-36. **Instalação de harness** — agente com `bash: allow` pode
-    executar script de instalação para avançar.
-
-> **Resumo harness:** localiza (P33) → executa (P32) →
-> fail: resolve e re-executa → pass: lê prompt →
-> persiste evidência (P34) → `curador-produto` valida (P35)
-> → `devflow` decide.
+32. **Tabela e link no AGENTS.md** — criação pelo
+    `curador-produto`. Spec em `<pasta-docs>/harness.md`.
+    Suítes não rodam na Construção nem na Revisão.
+33. **Fase Testes** — `qa` executa só `harness/testes` e
+    manuais do plano. `sec` executa só o roteiro manual.
+34. **Evidência** — JSON `{ status, findings[] }` do
+    orquestrador, persistida na fase Testes.
+35. **Validação pelo `curador-produto`** — no fim da fase
+    Testes, confere se o orquestrador rodou. Reporta
+    OK/FALHA/LACUNA. `devflow` decide ação.
+36. **Falha de suíte** — backend → `eng-software`; dados →
+    `dba`; segurança automática → `sec`; frontend →
+    `front`. Depois `eng-software` normaliza e commita.
+    Então "re-executar?".
 
 ## Fluxo — Diagrama de Sequência
 
@@ -368,14 +361,12 @@ sequenceDiagram
         devflow ->> front: Implementar telas
         front -->> devflow: UI (resumo curto)
     end
-    devflow ->> eng: TDD (testes → código → refatoração)
+    devflow ->> eng: TDD, normaliza lote e commita
     alt Gate de refatoração
         eng -->> devflow: Gate → volta ao planejamento
     else Concluído
         eng -->> devflow: Construção concluída
     end
-    devflow ->> prod: Validar evidências
-    prod -->> devflow: Relatório harness
     end
 
     rect rgb(255, 245, 230)
@@ -387,22 +378,23 @@ sequenceDiagram
         eng -->> devflow: Correções
         devflow ->> rev: Verifica resolução
     end
-    devflow ->> prod: Validar evidências
-    prod -->> devflow: Relatório harness
     devflow ->> Humano: Resubmeter?
     devflow ->> devflow: Status: TESTES
     end
 
     rect rgb(245, 230, 255)
     Note over Humano, rev: TESTES
-    devflow ->> qa: Testes automatizados + manuais
+    devflow ->> qa: harness/testes + manuais
     qa -->> devflow: Resultado
+    devflow ->> sec: Roteiro manual
+    sec -->> devflow: Resultado
+    devflow ->> prod: Evidência do orquestrador
+    prod -->> devflow: Relatório
     opt Falhas
-        devflow ->> eng: Corrigir
+        devflow ->> eng: Corrigir e normalizar
         eng -->> devflow: Correções
     end
-    devflow ->> sec: Testes de segurança
-    sec -->> devflow: Resultado
+    devflow ->> Humano: Re-executar?
     devflow ->> devflow: Status: FINALIZAÇÃO
     end
 
@@ -424,13 +416,13 @@ sequenceDiagram
 ## Trabalho de curadoria
 
 O trabalho de curadoria (criação e manutenção do
-`docs/README.md` e harness por agente) é conduzido pelas
+`docs/README.md` e testes por especialidade) é conduzido pelas
 fases de dev quando o gate de curadoria da VALIDAÇÃO detecta lacuna
 e o humano decide tratar agora.
 
 ### Gate de curadoria na VALIDAÇÃO
 
-1. `curador-produto` verifica docs/README.md e harness.
+1. `curador-produto` verifica docs/README.md e suítes.
 2. Se lacuna: `devflow` pergunta **"Tratar a curadoria
    agora?"**
    - **Sim** → fases de dev conduzem a curadoria. Após
@@ -447,8 +439,9 @@ seção com o humano (mediação via blocos adaptativos da
 - **docs/README.md** — Definição de Escopo, Elementos de
   Especificação, Regras de Documentação, Estratégias de
   Indexação. Cada seção requer aprovação explícita.
-- **Harness** — linguagem, ferramenta por agente, orçamento,
-  agregador. Cada entrada requer aprovação explícita.
+- **Suítes** — pasta de docs, spec em `harness.md`,
+  especialidades, orquestrador, depois instruções.
+  Cada entrada requer aprovação explícita.
 
 ### Construção da curadoria
 
