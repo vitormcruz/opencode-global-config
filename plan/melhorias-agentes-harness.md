@@ -99,6 +99,17 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   aplicada a TODA comunicação (chat incluso — objetivo declarado do
   humano: comunicação não maçante); `portugues-tecnico-controlado`
   carregada para texto técnico (specs, docs, explicações densas).
+- **D10 (modelo de camadas, curadoria da base)**: o AGENTS.base.md é
+  GLOBAL e também vige neste repo; o `AGENTS.md` raiz não duplica
+  conteúdo da base — mantém apenas o específico do repo. Princípio da
+  curadoria: na base fica **somente o estritamente necessário**;
+  detalhe mora em skills, com gatilho de carregamento. Fechados até
+  aqui: seção "Comunicação" completa; "Commits" mínima (Conventional
+  Commits + carregar git-workflow-and-versioning ao versionar; push só
+  com confirmação; git mv obrigatório); "Ação" perde o bullet de
+  confirmação prévia para editar; regras de timeout de CÓDIGO saem da
+  base (a proibição sintetizada migra para a skill
+  reliable-async-operations — nova task).
 
 ## Task List
 
@@ -409,9 +420,9 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
 ## Open Questions
 
 - **Q1 (conteúdo do AGENTS.base.md)**: curadoria em andamento (opção "a"
-  escolhida). Concluídas: Língua, Perfil do Humano. Em discussão:
-  Concisão + Tom natural. Restam: autonomia/segurança, git, descoberta
-  de código, seções cinzentas.
+  escolhida). Concluídas: seção "Comunicação" completa (Língua, Perfil
+  do Humano, Concisão, Tom natural com skills no chat). Restam:
+  autonomia/segurança, git, descoberta de código, seções cinzentas.
 - **Q2 (humanizer-br)**: RESOLVIDA — importar `humanizer-br` (MIT
   confirmado) com revisão de segurança; fallback `phardoom/humanizador`.
 
