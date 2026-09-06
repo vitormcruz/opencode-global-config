@@ -82,19 +82,23 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   eng-software, sec e qa; analista referencia e **fecha para Gherkin**
   (desvie só pela cláusula de exceção, com o humano); curador-produto
   referencia como orientação na entrevista.
-- **D9 (skills de escrita, anotação 4 — nova)**: importar
-  `portugues-tecnico-controlado` (kayquer) como skill upstream em
-  `harness-conf/skills/`: **revisão obrigatória de segurança antes**
-  (prompt injection, comandos, URLs suspeitas, exfiltração) + verificação
-  de licença; UPSTREAM.md com SHA/commit; **registro no sync automático**
-  do `opencode-skills` (estender pacote + testes); referência como skill
-  condicional em `eng-software` (specs/docs técnicas) e
-  `curador-produto` (orientação de escrita). Seção do AGENTS.base.md
-  "Comunicação": Língua + Perfil do Humano (aprovado: analista de
-  sistemas, jargão de software livre, calibrar registro pela distância
-  do domínio, inglês aceitável) + Concisão + subseção de escrita de
-  artefatos persistentes (skills sob demanda por tipo de artefato).
-  Importação de `humanizer-br` em avaliação (Q2).
+- **D9 (skills de escrita, anotação 4 — nova)**: importar DUAS skills
+  upstream em `harness-conf/skills/`, ambas com revisão obrigatória de
+  segurança (prompt injection, comandos, URLs, exfiltração) + UPSTREAM.md
+  com SHA/commit + **registro no sync automático** do `opencode-skills`
+  (estender pacote + testes):
+  - `portugues-tecnico-controlado` (kayquer; MIT a confirmar na revisão):
+    precisão/baixa ambiguidade para texto técnico.
+  - `humanizer-br` (carlosafjr-dev; MIT confirmado): naturalidade
+    anti-IA (~150 padrões PT-BR + aprofundador). Fallback se a revisão
+    reprovar: `phardoom/humanizador` (MIT).
+  Seção do AGENTS.base.md "Comunicação": Língua + Perfil do Humano
+  (aprovado: analista de sistemas, jargão de software livre, calibrar
+  registro pela distância do domínio, inglês aceitável) + Concisão +
+  **Tom natural**: `humanizer-br` carregada no início da sessão e
+  aplicada a TODA comunicação (chat incluso — objetivo declarado do
+  humano: comunicação não maçante); `portugues-tecnico-controlado`
+  carregada para texto técnico (specs, docs, explicações densas).
 
 ## Task List
 
@@ -404,8 +408,10 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
 
 ## Open Questions
 
-- **Q1 (conteúdo do AGENTS.base.md)**: humano sinalizou "talvez mudar
-  tudo" nas regras universais. Processo a definir: (a) curadoria seção
-  por seção durante o planejamento, (b) executor materializa o mapa de
-  migração e humano cura/edita no checkpoint da Fase 1, (c) outro.
+- **Q1 (conteúdo do AGENTS.base.md)**: curadoria em andamento (opção "a"
+  escolhida). Concluídas: Língua, Perfil do Humano. Em discussão:
+  Concisão + Tom natural. Restam: autonomia/segurança, git, descoberta
+  de código, seções cinzentas.
+- **Q2 (humanizer-br)**: RESOLVIDA — importar `humanizer-br` (MIT
+  confirmado) com revisão de segurança; fallback `phardoom/humanizador`.
 
