@@ -82,6 +82,19 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   eng-software, sec e qa; analista referencia e **fecha para Gherkin**
   (desvie só pela cláusula de exceção, com o humano); curador-produto
   referencia como orientação na entrevista.
+- **D9 (skills de escrita, anotação 4 — nova)**: importar
+  `portugues-tecnico-controlado` (kayquer) como skill upstream em
+  `harness-conf/skills/`: **revisão obrigatória de segurança antes**
+  (prompt injection, comandos, URLs suspeitas, exfiltração) + verificação
+  de licença; UPSTREAM.md com SHA/commit; **registro no sync automático**
+  do `opencode-skills` (estender pacote + testes); referência como skill
+  condicional em `eng-software` (specs/docs técnicas) e
+  `curador-produto` (orientação de escrita). Seção do AGENTS.base.md
+  "Comunicação": Língua + Perfil do Humano (aprovado: analista de
+  sistemas, jargão de software livre, calibrar registro pela distância
+  do domínio, inglês aceitável) + Concisão + subseção de escrita de
+  artefatos persistentes (skills sob demanda por tipo de artefato).
+  Importação de `humanizer-br` em avaliação (Q2).
 
 ## Task List
 
