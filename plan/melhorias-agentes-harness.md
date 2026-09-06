@@ -53,7 +53,10 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   `question-orchestration` (fonte única): quando existir artefato de
   planejamento/estado persistido, toda interação com o humano carrega o
   contexto relevante do plano (fase, decisões que afetam a pergunta,
-  escopo). Smart-planner, devflow e analista herdam pela skill, sem
+  escopo). **Motivação central**: o plano é artefato do AGENTE — o humano
+  não está necessariamente olhando-o; a informação do plano precisa vir
+  até o humano na conversa, nunca ser presumida como conhecida.
+  Smart-planner, devflow e analista herdam pela skill, sem
   duplicação em cada agente.
 - **D7 (devflow flexível em modelos, anotação 6)**: substituir o menu
   rígido de seleção de modelo por sugestão de padrão (ex: um modelo por
@@ -135,6 +138,31 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
     Copilot exigir path diferente de `~/.copilot/AGENTS.md` para
     instruções globais, reportar bloqueio ao revisor em vez de
     improvisar.
+    **Mapa de migração seção-por-seção** (migrar sem reescrever
+    semântica; conteúdo final pode ser curado pelo humano — ver Open
+    Questions):
+    - Do `AGENTS.md` raiz → base: Idioma (PT-BR+acentuação); Concisão;
+      Geração de arquivos MD (wrap 120); Proibição de timeouts genéricos;
+      Espera de tarefas (determinismo, +30s); Texto copiável (bloco
+      único); Ação (confirmação explícita); Commits (Conventional
+      Commits, tipos, push com confirmação, git mv).
+    - Do `copilot-specific.instructions.md` → base: Prioridade de
+      descoberta codebase-memory (proibições, fluxo seguro, recovery);
+      Busca em docs Markdown (query_graph/Section); CLIs nativos
+      (codebase-memory, crwl); Separação por ambiente (WSL/Linux vs
+      Windows); Comunicação do bootstrap (docling, TLS); Fallback
+      estrito.
+    - Ficam no `AGENTS.md` raiz: descoberta de código/doc (aponta para a
+      base + tabela por cliente), atalho "configure este repo", links
+      simbólicos (paths `harness-conf/`), bootstrap, upstream de skills,
+      sincronização workflow↔agentes, regras de testes do repo,
+      dependências do README, restrição SmartPlanner.
+    **Investigação obrigatória**: `~/.config/opencode/AGENTS.md` já
+    existe e é gerenciado pelo `codebase-memory-mcp` (bloco
+    `codebase-memory-mcp:start`). Definir convivência antes do symlink:
+    se a base absorve os marcadores da ferramenta, se o bootstrap
+    concatena, ou se a ferramenta gerencia outro caminho. Sem decisão
+    segura aqui, reportar bloqueio — não substituir o arquivo gerado.
   - **Acceptance criteria**:
     - Base contém as regras universais; `AGENTS.md` raiz sem duplicá-las.
     - `.github/copilot-specific.instructions.md` removido; testes do
@@ -314,7 +342,9 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
     `harness-conf/skills/question-orchestration/SKILL.md` cláusula:
     quando existir artefato de planejamento/estado persistido, toda
     interação com o humano carrega o contexto relevante (fase, decisões
-    que afetam a pergunta, escopo). Atualizar
+    que afetam a pergunta, escopo). Motivação explícita na cláusula:
+    o plano é artefato do agente; o humano não o está lendo; nunca
+    presumir conhecimento do plano. Atualizar
     `tests/agents/test_question_orchestration_adoption.py`.
   - **Acceptance criteria**: cláusula presente na skill (fonte única);
     testes de adoção verdes.
@@ -357,9 +387,12 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
 | Adapter Copilot só validável no Windows | Med | Testes copilot rodam no ambiente alvo (humano executa); pytest.fail sem skip |
 | doc-readme.md maior após fusão | Low | Leitura por seção (agents leem seções específicas) |
 | Skill nova não ser ativada corretamente | Med | Description rica em triggers; teste de consistência D11 |
+| `~/.config/opencode/AGENTS.md` já gerenciado pelo codebase-memory-mcp conflitar com o symlink da base | High | Investigação obrigatória na Task 3; sem decisão segura, reportar bloqueio em vez de substituir arquivo gerado |
 
 ## Open Questions
 
-- Nenhuma bloqueante. Ações pós-implementação (já no Checkpoint Complete):
-  re-executar bootstrap nos dois ambientes e reindexar codebase-memory.
+- **Q1 (conteúdo do AGENTS.base.md)**: humano sinalizou "talvez mudar
+  tudo" nas regras universais. Processo a definir: (a) curadoria seção
+  por seção durante o planejamento, (b) executor materializa o mapa de
+  migração e humano cura/edita no checkpoint da Fase 1, (c) outro.
 
