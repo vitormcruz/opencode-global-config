@@ -8,6 +8,8 @@ Ajustes no repo opencode-global-config a partir de 6 anotações do humano:
 contextualização do plano na conversa, especificação executável na curadoria,
 skill de spec executável extraída do analista, AGENTS.md global para harnesses,
 distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
+A curadoria do AGENTS.base.md foi conduzida no planejamento (decisões D9-D11 +
+Anexo A aprovado); o executor materializa copiando.
 
 ## Architecture Decisions
 
@@ -30,14 +32,12 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   A distinção deve ficar clara nos agentes, nos templates default-artifacts
   e no doc gerado no projeto-alvo.
 - **D4 (AGENTS.md base, anotação 4)**: criar `harness-conf/AGENTS.base.md`
-  com as regras universais do humano (idioma/concisão, proibição de timeouts,
-  espera determinística, Conventional Commits, codebase-memory, CLIs nativos,
-  separação por ambiente, confirmação para ação, etc.). Entrega: OpenCode
-  via symlink `~/.config/opencode/AGENTS.md`; Copilot via cópia para
+  com as regras universais do humano. Entrega: OpenCode via symlink
+  `~/.config/opencode/AGENTS.md`; Copilot via cópia para
   `~/.copilot/AGENTS.md`. Extinção do
-  `.github/copilot-specific.instructions.md`, com conteúdo absorvido pela
-  base. `AGENTS.md` raiz fica só com regras específicas do repo + aponta
-  para a base.
+  `.github/copilot-specific.instructions.md`. `AGENTS.md` raiz fica só com
+  regras específicas do repo + aponta para a base. Conteúdo final definido
+  pela curadoria (D10/D11) e materializado do **Anexo A**.
 - **D5 (reestruturação harness-conf/, anotações 4 e 5)**: mover para
   `harness-conf/` (via `git mv`): `agents/`, `skills/`, `commands/`,
   `opencode.json` + novo `AGENTS.base.md`. Ficam na raiz (infra do repo):
@@ -103,18 +103,13 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   GLOBAL e também vige neste repo; o `AGENTS.md` raiz não duplica
   conteúdo da base — mantém apenas o específico do repo. Princípio da
   curadoria: na base fica **somente o estritamente necessário**;
-  detalhe mora em skills, com gatilho de carregamento. Fechados até
-  aqui: seção "Comunicação" completa; "Commits" mínima (Conventional
-  Commits + carregar git-workflow-and-versioning ao versionar; push só
-  com confirmação; git mv obrigatório); "Ação" perde o bullet de
-  confirmação prévia para editar; regras de timeout de CÓDIGO saem da
-  base (a proibição sintetizada migra para a skill
-  reliable-async-operations — nova task). "Ação" sai INTEIRA da base
-  (incluindo o bullet de perguntas-não-são-ordens — agentes livres para
-  agir ao responder). Fica na base, em versão mínima (~3 linhas), apenas
-  a espera do AGENTE por tarefas: preferir determinismo a tempo cego;
-  escalonar +30s; acima de 30s confirmar com o humano; para código que
-  espera, carregar reliable-async-operations.
+  detalhe mora em skills, com gatilho de carregamento. Fechados:
+  seção "Comunicação" completa; "Commits" mínima; "Ação" sai INTEIRA da
+  base (agentes livres para agir ao responder); regras de timeout de
+  CÓDIGO saem da base (proibição sintetizada migra para
+  `reliable-async-operations`); na base fica, em versão mínima (~3
+  linhas), apenas a espera do AGENTE por tarefas. Redação final
+  aprovada com as skills de escrita aplicadas = **Anexo A**.
 - **D11 (descoberta de código é do repo, não da base)**: a regra
   codebase-memory e a referência à skill `code-explorer-priority` ficam
   no `AGENTS.md` raiz (cada repo decide usar codebase-memory). A skill
@@ -124,41 +119,37 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   codebase-memory. A tabela "Acesso por cliente" sai (comando idêntico
   nos dois harnesses). "Criação de Skills" entra na base (2 bullets).
   Comunicação do bootstrap fica no raiz; seção SmartPlanner sai do raiz
-  (restrição vive no corpo do agente).
+  (restrição vive no corpo do agente). Linha `crwl` sai da base (a skill
+  `web-research-exa-crawl4ai` cobre). Linha "sem prefixo wsl" vai como
+  1 linha na seção de descoberta do `AGENTS.md` raiz.
 
 ## Task List
 
-### Phase 1: Reestruturação harness-conf/ e AGENTS.md base (D4, D5)
+### Phase 1: Reestruturação, skills de escrita e base (D4, D5, D9, D10, D11)
 
 - [ ] **Task 1: Mover artefatos copiáveis para `harness-conf/`**
   - **Description**: criar `harness-conf/` e mover com `git mv`:
-    `agents/`, `skills/`, `commands/`, `opencode.json`. Atualizar todas as
-    referências de path em `src/` (bootstrap, symlinks, adapter, scaffold)
-    e `tests/` — buscar por `agents/`, `skills/`, `commands/`,
-    `opencode.json` e redirecionar para `harness-conf/...`. NUNCA
-    simular move como delete+create: sempre `git mv`.
+    `agents/`, `skills/`, `commands/`, `opencode.json`. Atualizar
+    referências de path em `src/` (bootstrap, symlinks, adapter,
+    scaffold) e `tests/`. NUNCA simular move como delete+create.
   - **Acceptance criteria**:
     - `harness-conf/{agents,skills,commands,opencode.json}` existem e o
       histórico git preserva renames (`git log --follow` funciona).
-    - Nenhuma referência a `agents/`, `skills/`, `commands/` na raiz em
-      `src/` e `tests/` (exceto `harness-conf/`).
+    - Zero path antigo em `src/`+`tests/` (exceto `harness-conf/`).
     - Suíte verde: `.venv/bin/pytest -m "unit or tools or opencode"`.
   - **Verification**: `git log --follow harness-conf/agents/devflow.md`;
-    grep de paths antigos em `src/`+`tests/`; suíte pytest.
+    grep de paths antigos; suíte pytest.
   - **Dependencies**: None
   - **Files likely touched**: `harness-conf/**` (move),
     `src/opencode_config/**`, `tests/**`, `scripts/bootstrap_repo/**`
-  - **Estimated scope**: Large (mecânico, sem mudança de comportamento)
+  - **Estimated scope**: Large (mecânico)
   - **Commit**: `refactor: mover artefatos copiáveis para harness-conf/`
-    com **body obrigatório** explicando: "harness" passa a significar
-    plataforma de agentes (OpenCode, Copilot); o antigo harness de testes
-    chama-se `testes-produto` (ver commits 771b31a/1c9ef66).
+    com body conceitual obrigatório (D5).
 
 - [ ] **Task 2: Adapter Copilot — origens em `harness-conf/`**
-  - **Description**: ajustar `src/opencode_config/adapters/copilot.py`
-    para ler agentes/skills/comandos/default-artifacts de `harness-conf/`.
-    Atualizar testes do adapter.
-  - **Acceptance criteria**: adapter aponta para `harness-conf/`; testes
+  - **Description**: `src/opencode_config/adapters/copilot.py` lê de
+    `harness-conf/`. Atualizar testes do adapter.
+  - **Acceptance criteria**: adapter aponta para `harness-conf/`;
     `tests/adapters/` verdes.
   - **Verification**: `.venv/bin/pytest tests/adapters -m "unit or tools"`.
   - **Dependencies**: Task 1
@@ -166,143 +157,147 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
     `tests/adapters/**`
   - **Estimated scope**: Small
 
-- [ ] **Task 3: `harness-conf/AGENTS.base.md` + extinção do copilot-specific**
-  - **Description**: criar `harness-conf/AGENTS.base.md` com as regras
-    universais migradas do `AGENTS.md` raiz (idioma, concisão, word-wrap
-    120 col, proibição de timeouts, espera determinística, texto
-    copiável, confirmação para ação, Conventional Commits) + conteúdo do
-    `.github/copilot-specific.instructions.md` (codebase-memory, CLIs
-    nativos, separação por ambiente, comunicação de bootstrap). Extinção:
-    `git rm .github/copilot-specific.instructions.md`. Adapter passa a
-    copiar `AGENTS.base.md` → `~/.copilot/AGENTS.md`. Bootstrap cria
-    symlink `~/.config/opencode/AGENTS.md` → `harness-conf/AGENTS.base.md`.
-    `AGENTS.md` raiz fica somente com regras específicas do repo + link
-    para a base. Arquivo autocontido — não citar plano/decisões. Se o
-    Copilot exigir path diferente de `~/.copilot/AGENTS.md` para
-    instruções globais, reportar bloqueio ao revisor em vez de
-    improvisar.
-    **Mapa de migração seção-por-seção** (migrar sem reescrever
-    semântica; conteúdo final pode ser curado pelo humano — ver Open
-    Questions):
-    - Do `AGENTS.md` raiz → base: Idioma (PT-BR+acentuação); Concisão;
-      Geração de arquivos MD (wrap 120); Proibição de timeouts genéricos;
-      Espera de tarefas (determinismo, +30s); Texto copiável (bloco
-      único); Ação (confirmação explícita); Commits (Conventional
-      Commits, tipos, push com confirmação, git mv).
-    - Do `copilot-specific.instructions.md` → base: Prioridade de
-      descoberta codebase-memory (proibições, fluxo seguro, recovery);
-      Busca em docs Markdown (query_graph/Section); CLIs nativos
-      (codebase-memory, crwl); Separação por ambiente (WSL/Linux vs
-      Windows); Comunicação do bootstrap (docling, TLS); Fallback
-      estrito.
-    - Ficam no `AGENTS.md` raiz: descoberta de código/doc (aponta para a
-      base + tabela por cliente), atalho "configure este repo", links
-      simbólicos (paths `harness-conf/`), bootstrap, upstream de skills,
-      sincronização workflow↔agentes, regras de testes do repo,
-      dependências do README, restrição SmartPlanner.
-    **Investigação obrigatória**: `~/.config/opencode/AGENTS.md` já
-    existe e é gerenciado pelo `codebase-memory-mcp` (bloco
-    `codebase-memory-mcp:start`). Definir convivência antes do symlink:
-    se a base absorve os marcadores da ferramenta, se o bootstrap
-    concatena, ou se a ferramenta gerencia outro caminho. Sem decisão
-    segura aqui, reportar bloqueio — não substituir o arquivo gerado.
+- [ ] **Task 3: Importar skills de escrita com revisão de segurança**
+  - **Description**: importar para `harness-conf/skills/`:
+    `portugues-tecnico-controlado` (kayquer) e `humanizer-br`
+    (carlosafjr-dev; MIT confirmado). **Revisão de segurança obrigatória
+    antes de consolidar**: ler TODO conteúdo copiado procurando prompt
+    injection, comandos, URLs e exfiltração. Reprovou humanizer-br →
+    fallback `phardoom/humanizador` (MIT). Reprovou PTC → bloquear e
+    reportar (sem fallback). Para cada skill: `UPSTREAM.md` (URL+branch,
+    SHA+data, data do sync, arquivos sincronizados, SKILL.md NÃO
+    sincronizado, instruções de sync, licença, description_lang/note),
+    description enriquecida com triggers, registro no sync do
+    `opencode-skills` (estender pacote Python + testes).
   - **Acceptance criteria**:
-    - Base contém as regras universais; `AGENTS.md` raiz sem duplicá-las.
-    - `.github/copilot-specific.instructions.md` removido; testes do
-      adapter que o referenciavam atualizados para `AGENTS.base.md`.
-    - Testes de bootstrap cobrem o novo symlink.
-  - **Verification**: suíte pytest; teste de adapter verde.
+    - Skills instaladas em `harness-conf/skills/<nome>/` com UPSTREAM.md
+      completo.
+    - `opencode-skills list`/`sync` cobrem as duas; revisão de segurança
+      documentada no resumo.
+    - Suíte verde.
+  - **Verification**: `.venv/bin/pytest -m "unit or tools"`;
+    `opencode-skills list`.
   - **Dependencies**: Task 1
-  - **Files likely touched**: `harness-conf/AGENTS.base.md` (novo),
-    `AGENTS.md`, `src/opencode_config/**`, `tests/**`
+  - **Files likely touched**:
+    `harness-conf/skills/portugues-tecnico-controlado/`,
+    `harness-conf/skills/humanizer-br/`, `src/opencode_config/**`,
+    `tests/skills_mgmt/**`
   - **Estimated scope**: Medium
 
-- [ ] **Task 4: Mapa de estrutura no README e docs**
-  - **Description**: `README.md` ganha seção de estrutura distinguindo
-    `harness-conf/` (copiado para os harnesses) vs infra do repo
-    (`scripts/`, `src/`, `tests/`, `docs/`, `adapters/`, `plan/`).
-    Atualizar paths textuais em `docs/workflow-*.md` e no `AGENTS.md`
-    raiz (seções "Sincronização de Adaptadores" e "Links Simbólicos").
-  - **Acceptance criteria**: README descreve a divisão; nenhum path
-    antigo solto em docs/AGENTS.md.
-  - **Verification**: grep de `agents/`/`skills/` em `README.md`,
-    `AGENTS.md`, `docs/*.md` sem falso positivo.
-  - **Dependencies**: Task 1
-  - **Files likely touched**: `README.md`, `AGENTS.md`, `docs/*.md`
-  - **Estimated scope**: Small
+- [ ] **Task 4: `harness-conf/AGENTS.base.md` do Anexo A + extinção copilot-specific**
+  - **Description**: criar `harness-conf/AGENTS.base.md` **copiando
+    literalmente o Anexo A** deste plano (autocontido, sem citar o
+    plano). Extinção: `git rm .github/copilot-specific.instructions.md`.
+    Adapter copia a base → `~/.copilot/AGENTS.md` (se o Copilot exigir
+    outro path global, reportar bloqueio em vez de improvisar).
+    Bootstrap cria symlink `~/.config/opencode/AGENTS.md` → base.
+    **Investigação obrigatória antes do symlink**:
+    `~/.config/opencode/AGENTS.md` é gerenciado pelo codebase-memory-mcp;
+    definir convivência (base absorve marcadores, bootstrap concatena,
+    ou outro caminho). Sem decisão segura, bloquear — não substituir o
+    arquivo gerado.
+  - **Acceptance criteria**:
+    - Base idêntica ao Anexo A; copilot-specific removido.
+    - Testes do adapter/bootstrap verdes; symlink sem conflito com o
+      codebase-memory-mcp.
+  - **Verification**: diff base↔Anexo A vazio; suíte pytest.
+  - **Dependencies**: Task 3 (a base referencia as skills)
+  - **Files likely touched**: `harness-conf/AGENTS.base.md` (novo),
+    `.github/copilot-specific.instructions.md` (rm),
+    `src/opencode_config/**`, `tests/**`
+  - **Estimated scope**: Medium
+
+- [ ] **Task 5: `AGENTS.md` raiz reescrito + mapa no README**
+  - **Description**: raiz remove as regras que foram para a base e fica
+    com: descoberta de código SINTETIZADA (codebase-memory antes de
+    grep/glob, recovery `list_projects`, referência à skill
+    `code-explorer-priority`, linha "no Windows, execute os CLIs sem
+    prefixo `wsl`"; SEM tabela por cliente); atalho "configure este
+    repo"; links simbólicos com paths `harness-conf/`; bootstrap +
+    comunicação do bootstrap (docling/TLS) nesta seção; upstream de
+    skills (com as duas novas no sync); sincronização
+    workflow↔agentes; regras de testes; dependências do README;
+    sincronização dos adaptadores. **Remover** a seção SmartPlanner
+    (restrição vive no corpo do agente). `README.md`: seção de
+    estrutura `harness-conf/` vs infra do repo. Paths textuais em
+    `docs/workflow-*.md` atualizados.
+  - **Acceptance criteria**:
+    - Raiz sem duplicar a base; descoberta sintetizada sem tabela
+      cliente; SmartPlanner removido.
+    - README com mapa de estrutura; sem path antigo em docs.
+  - **Verification**: grep de duplicações/paths antigos em `AGENTS.md`,
+    `README.md`, `docs/*.md`.
+  - **Dependencies**: Task 4
+  - **Files likely touched**: `AGENTS.md`, `README.md`, `docs/*.md`
+  - **Estimated scope**: Medium
 
 ### Checkpoint: Phase 1
 - [ ] Suíte completa verde (WSL): `.venv/bin/pytest -m "unit or tools or opencode"`
-- [ ] Bootstrap re-executado com sucesso (symlinks novos funcionam)
-- [ ] Commits criados (Task 1 com body conceitual)
+- [ ] Skills de escrita importadas com revisão de segurança documentada
+- [ ] Base entregue nos dois harnesses sem conflito com codebase-memory-mcp
+- [ ] Bootstrap re-executado com sucesso
 - [ ] Review com humano antes de prosseguir
 
 ### Phase 2: Curadoria unificada no docs/README.md (D2, D3)
 
-- [ ] **Task 5: Fundir templates default-artifacts**
-  - **Description**: `doc-readme.md` absorve o conteúdo de
-    `testes-produto.md` como seção "Testes por Especialidade" (suítes,
-    orquestrador, interface JSON, proibições). O template declara: o doc
-    é meta-informação que ajuda o agente a criar os scripts; os scripts
-    têm testes próprios cobrindo o que o doc especifica (spec executável
-    dos scripts), executados SOMENTE quando os scripts mudam; testes da
-    aplicação rodam nas fases de Testes do workflow. `git rm` do
-    `testes-produto.md`.
-  - **Acceptance criteria**: seção completa no `doc-readme.md`; distinção
-    dois-níveis explícita; arquivo antigo removido com `git rm`.
-  - **Verification**: leitura do template; grep sem referências ao
-    arquivo removido.
-  - **Dependencies**: Task 1 (paths)
+- [ ] **Task 6: Fundir templates default-artifacts**
+  - **Description**: `doc-readme.md` absorve `testes-produto.md` como
+    seção "Testes por Especialidade" (suítes, orquestrador, interface
+    JSON, proibições). O template declara os dois níveis de teste (D3) e
+    o papel do doc como meta-informação que vira spec executável dos
+    scripts (testes deles rodam SOMENTE quando os scripts mudam).
+    `git rm` do `testes-produto.md`.
+  - **Acceptance criteria**: seção completa no `doc-readme.md`; dois
+    níveis explícitos; arquivo removido com `git rm`.
+  - **Verification**: leitura; grep sem referências ao removido.
+  - **Dependencies**: Task 1
   - **Files likely touched**:
     `harness-conf/agents/default-artifacts/doc-readme.md`,
     `harness-conf/agents/default-artifacts/testes-produto.md` (rm)
   - **Estimated scope**: Small
 
-- [ ] **Task 6: Curador e mensagens de curadoria**
-  - **Description**: `curador-produto.md`: entrevista sem spec separado —
-    docs/README.md com a seção; `AGENTS.md` do projeto-alvo mantém tabela
-    + link âncora; curador orienta o humano sobre spec executável dos
-    scripts e os dois níveis de teste (D3). `mensagens-curadoria.md`
-    atualizada (um artefato só).
-  - **Acceptance criteria**: nenhum fluxo gravando `docs/testes-produto.md`;
-    orientação de spec executável presente; mensagens coerentes.
-  - **Verification**: `tests/agents/test_curador_produto.py` atualizado e
-    verde.
-  - **Dependencies**: Task 5
+- [ ] **Task 7: Curador e mensagens de curadoria**
+  - **Description**: `curador-produto.md`: entrevista sem spec separado
+    (docs/README.md com a seção; `AGENTS.md` do projeto-alvo com tabela +
+    link âncora); orienta o humano sobre spec executável dos scripts e
+    os dois níveis de teste (D3). `mensagens-curadoria.md` atualizada
+    (um artefato só).
+  - **Acceptance criteria**: nenhum fluxo gravando
+    `docs/testes-produto.md`; orientação presente; mensagens coerentes.
+  - **Verification**: `.venv/bin/pytest tests/agents/test_curador_produto.py`.
+  - **Dependencies**: Task 6
   - **Files likely touched**:
     `harness-conf/agents/curador-produto.md`,
     `harness-conf/agents/references/mensagens-curadoria.md`,
     `tests/agents/test_curador_produto.py`
   - **Estimated scope**: Medium
 
-- [ ] **Task 7: Scaffold unificado**
+- [ ] **Task 8: Scaffold unificado**
   - **Description**: `scaffold_mapa.py`: `DOC_TEMPLATE` ganha a seção
     "Testes por Especialidade"; `TESTES_PRODUTO_TEMPLATE` (tabela do
-    AGENTS.md) linka para âncora da seção no `docs/README.md` (não mais
-    arquivo próprio). Atualizar `tests/scaffold/test_mapa_produto.py`.
-  - **Acceptance criteria**: scaffold gera doc com a seção; tabela do
-    AGENTS.md aponta para `docs/README.md#testes-por-especialidade`;
-    testes verdes.
+    AGENTS.md) linka âncora `docs/README.md#testes-por-especialidade`
+    (não mais arquivo próprio). Atualizar
+    `tests/scaffold/test_mapa_produto.py`.
+  - **Acceptance criteria**: scaffold gera doc com a seção; tabela
+    aponta âncora; `tests/scaffold/` verdes.
   - **Verification**: `.venv/bin/pytest tests/scaffold -m "unit or tools"`.
-  - **Dependencies**: Task 5
+  - **Dependencies**: Task 6
   - **Files likely touched**: `src/opencode_config/cli/scaffold_mapa.py`,
     `tests/scaffold/test_mapa_produto.py`
   - **Estimated scope**: Medium
 
-- [ ] **Task 8: Referências nos agentes e workflows**
-  - **Description**: substituir leituras de `docs/testes-produto.md` por
-    "seção Testes por Especialidade do docs/README.md" em:
-    `devflow.md`, `eng-software.md`, `qa.md`, `sec.md`, `dba.md`,
-    `rev.md`, `front.md` e em `docs/workflow-agentes-dev.md` +
-    `workflow-definicao-escopo.md`. Explicitar os dois níveis de teste
-    (D3) em `devflow.md`, `qa.md`, `eng-software.md` e
-    `curador-produto.md`. Verificar coerência de
-    `agents/references/interface-testes-produto.md`.
+- [ ] **Task 9: Referências nos agentes e workflows**
+  - **Description**: trocar leituras de `docs/testes-produto.md` pela
+    seção no `docs/README.md` em `devflow.md`, `eng-software.md`,
+    `qa.md`, `sec.md`, `dba.md`, `rev.md`, `front.md` e
+    `docs/workflow-*.md`. Dois níveis (D3) explícitos em `devflow.md`,
+    `qa.md`, `eng-software.md`, `curador-produto.md`. Verificar
+    `harness-conf/agents/references/interface-testes-produto.md`.
   - **Acceptance criteria**: zero referências ao arquivo extinto; dois
-    níveis descritos nos agentes-chave; `tests/agents/` verde.
+    níveis descritos nos agentes-chave; `tests/agents/` verdes.
   - **Verification**: grep `testes-produto.md` (sem falso positivo);
     `.venv/bin/pytest tests/agents -m "unit or tools"`.
-  - **Dependencies**: Task 5
+  - **Dependencies**: Task 6
   - **Files likely touched**: `harness-conf/agents/*.md`,
     `docs/workflow-*.md`, `tests/agents/**`
   - **Estimated scope**: Medium
@@ -312,20 +307,11 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
 - [ ] Curadoria coerente end-to-end (templates, curador, scaffold, agentes)
 - [ ] Review com humano antes de prosseguir
 
-### Phase 3: Skill spec-executavel (D8)
+### Phase 3: Skills — spec-executavel e migrações (D8, D10, D11)
 
-- [ ] **Task 9: Criar a skill `spec-executavel`**
-  - **Description**: criar
-    `harness-conf/skills/spec-executavel/SKILL.md`, autocontido (sem
-    citar plano/decisões): princípio central do item 8 (spec é ótima
-    quando o humano mexe no texto e o teste quebra — linkar valores das
-    regras ao código de teste); itens 1-10; Gherkin como recomendação
-    forte com cláusula de exceção (avaliar adequação, propor alternativa
-    ao humano; ex.: tabela para permissionamento); MD favorecido;
-    rastreabilidade por link à origem; agnóstica de ferramenta
-    (Concordion apenas como exemplo). Description da skill rica em
-    triggers (regra de ativação do repo). Conteúdo dos itens (lista
-    canônica, redigir em linguagem autocontida na skill):
+- [ ] **Task 10: Criar a skill `spec-executavel`**
+  - **Description**: criar `harness-conf/skills/spec-executavel/SKILL.md`,
+    autocontido (sem citar plano/decisões). Conteúdo canônico:
     1. Estrutura canônica do cenário: `Cenário` + `Dado que` + `E` +
        exatamente 1 `Quando tento` + `Então` (+ `E`)
     2. `Então` sempre verificável — estado/registro/mensagem/regra
@@ -339,75 +325,113 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
     6. Consistência contextual — steps formam um todo coeso
     7. Concisão — só o indispensável por passo
     8. **Princípio central** — a spec é ótima quando o humano mexe no
-       texto e o teste quebra; linkar ao máximo os valores definidos nas
-       regras ao código de teste (valores concretos e aspas duplas
+       texto e o teste quebra; linkar ao máximo os valores definidos
+       nas regras ao código de teste (valores concretos e aspas duplas
        apenas para literais que mudam o veredito)
     9. Persona/perfil — só quando o foco é permissão/acesso
     10. `Esquema do Cenário` + `Exemplos` para variações da mesma regra
-    FORA da skill (permanece no analista): rejeição/erro e casos limite
-    só por regra de negócio/legal; INVEST; escrita/classificação de
-    RF/RNF.
-  - **Acceptance criteria**: SKILL.md completo e autocontido; nome
-    válido (mesmo padrão das existentes); registra no comando
-    `opencode-skills list` se aplicável.
-  - **Verification**: teste de boilerplate/consistência de skills verde.
+    Gherkin = recomendação forte com cláusula de exceção (avaliar
+    adequação por caso; formato melhor → propõe ao humano e discute;
+    ex.: tabela para permissionamento); MD favorecido; rastreabilidade
+    por link à origem; agnóstica de ferramenta (Concordion só como
+    exemplo). FORA da skill (permanece no analista): rejeição/erro e
+    casos limite só por regra de negócio/legal; INVEST;
+    escrita/classificação de RF/RNF. Description rica em triggers.
+  - **Acceptance criteria**: SKILL.md completo e autocontido; teste de
+    consistência/boilerplate verde.
+  - **Verification**: `.venv/bin/pytest tests/skills* -m "unit or tools"`.
   - **Dependencies**: Task 1
-  - **Files likely touched**: `harness-conf/skills/spec-executavel/SKILL.md`
+  - **Files likely touched**:
+    `harness-conf/skills/spec-executavel/SKILL.md`
   - **Estimated scope**: Medium
 
-- [ ] **Task 10: Referenciar a skill nos agentes**
+- [ ] **Task 11: Referenciar a skill nos agentes**
   - **Description**: `analista.md`: seção 3B e "Padrão de qualidade"
-    passam a referenciar a skill + **fechamento para Gherkin** (desvio só
-    pela cláusula de exceção, com o humano); INVEST, RF/RNF e item 11
+    referenciam a skill + **fechamento para Gherkin** (desvio só pela
+    cláusula de exceção, com o humano); INVEST, RF/RNF e item 11
     permanecem no corpo. `eng-software.md`, `sec.md`, `qa.md`: skill
     obrigatória na capacidade de criar specs executáveis.
-    `curador-produto.md`: referência de orientação na entrevista.
-    Atualizar `tests/agents/test_workflow_consistency.py` e afins.
-  - **Acceptance criteria**: todos os agentes referenciam a skill e ela
-    existe; analista mantém regras próprias (RF/RNF, item 11); testes de
-    consistência verdes.
+    `curador-produto.md`: orientação na entrevista. Atualizar testes de
+    consistência.
+  - **Acceptance criteria**: agentes referenciam a skill existente;
+    analista mantém regras próprias; `tests/agents/` verdes.
   - **Verification**: `.venv/bin/pytest tests/agents -m "unit or tools"`.
-  - **Dependencies**: Task 9
+  - **Dependencies**: Task 10
   - **Files likely touched**: `harness-conf/agents/analista.md`,
     `harness-conf/agents/eng-software.md`, `harness-conf/agents/sec.md`,
-    `harness-conf/agents/qa.md`, `harness-conf/agents/curador-produto.md`,
-    `tests/agents/**`
+    `harness-conf/agents/qa.md`,
+    `harness-conf/agents/curador-produto.md`, `tests/agents/**`
+  - **Estimated scope**: Medium
+
+- [ ] **Task 12: `reliable-async-operations` absorve a proibição de timeouts**
+  - **Description**: incluir na skill os 3 bullets sintetizados da
+    proibição: (1) PROIBIDO definir/ajustar timeouts genéricos ou por
+    conveniência; timeout não mascara travamento, não impõe desempenho
+    e não vira critério de falha; (2) exceções: recurso contínuo com
+    inatividade já comprovada, ou confirmação explícita prévia do humano
+    com justificativa do recurso e do valor; (3) não troque timeout
+    proibido por valor alto: remova ou consulte o humano; timeout
+    existente fora das exceções: informe, não altere silenciosamente.
+    Ajustar description para cobrir o gatilho.
+  - **Acceptance criteria**: skill contém a proibição; base não a
+    duplica; testes correspondentes verdes.
+  - **Verification**: leitura da skill; `.venv/bin/pytest -m "unit or tools"`.
+  - **Dependencies**: Task 4
+  - **Files likely touched**:
+    `harness-conf/skills/reliable-async-operations/SKILL.md`, `tests/**`
+  - **Estimated scope**: Small
+
+- [ ] **Task 13: `code-explorer-priority` absorve detalhes do CLI**
+  - **Description**: mover para a skill o conteúdo operacional do
+    extinto copilot-specific: comandos com JSON posicional único
+    (`list_projects`, `index_repository`, `search_graph`, `trace_path`,
+    `get_code_snippet`, `query_graph`, `search_code`,
+    `get_architecture`), ordem search_graph→trace_path→
+    get_code_snippet→query_graph→get_architecture, busca em docs via
+    nós `Section` (Cypher), fallback estrito grep/glob. Description
+    condicionada: ativar apenas quando o AGENTS.md do repo indicar
+    codebase-memory.
+  - **Acceptance criteria**: skill contém os detalhes; description
+    condicionada; base/raiz sem duplicar; testes verdes.
+  - **Verification**: leitura; `.venv/bin/pytest -m "unit or tools"`.
+  - **Dependencies**: Task 4
+  - **Files likely touched**:
+    `harness-conf/skills/code-explorer-priority/SKILL.md`, `tests/**`
   - **Estimated scope**: Medium
 
 ### Checkpoint: Phase 3
-- [ ] Skill criada e referenciada; consistência verde
+- [ ] Skills criadas/importadas/migradas; consistência verde
 - [ ] Review com humano antes de prosseguir
 
 ### Phase 4: Protocolo conversacional e devflow (D6, D7)
 
-- [ ] **Task 11: Cláusula de contextualização na question-orchestration**
-  - **Description**: adicionar à
-    `harness-conf/skills/question-orchestration/SKILL.md` cláusula:
-    quando existir artefato de planejamento/estado persistido, toda
-    interação com o humano carrega o contexto relevante (fase, decisões
-    que afetam a pergunta, escopo). Motivação explícita na cláusula:
-    o plano é artefato do agente; o humano não o está lendo; nunca
-    presumir conhecimento do plano. Atualizar
-    `tests/agents/test_question_orchestration_adoption.py`.
+- [ ] **Task 14: Cláusula de contextualização na question-orchestration**
+  - **Description**: cláusula na skill: quando existir artefato de
+    planejamento/estado persistido, toda interação com o humano carrega
+    o contexto relevante (fase, decisões que afetam a pergunta,
+    escopo). Motivação explícita: o plano é artefato do agente; o
+    humano não o está lendo; nunca presumir conhecimento do plano.
+    Atualizar `tests/agents/test_question_orchestration_adoption.py`.
   - **Acceptance criteria**: cláusula presente na skill (fonte única);
-    testes de adoção verdes.
-  - **Verification**: `.venv/bin/pytest tests/agents/test_question_orchestration_adoption.py`.
+    testes verdes.
+  - **Verification**:
+    `.venv/bin/pytest tests/agents/test_question_orchestration_adoption.py`.
   - **Dependencies**: Task 1
   - **Files likely touched**:
     `harness-conf/skills/question-orchestration/SKILL.md`,
     `tests/agents/test_question_orchestration_adoption.py`
   - **Estimated scope**: Small
 
-- [ ] **Task 12: Devflow flexível na seleção de modelo**
-  - **Description**: reescrever a seção "Seleção de modelo por fase" de
+- [ ] **Task 15: Devflow flexível na seleção de modelo**
+  - **Description**: reescrever "Seleção de modelo por fase" do
     `devflow.md`: devflow **sugere** padrão (um modelo por etapa —
     planejamento, execução, testes, revisão) e avisa que o humano define
-    como preferir (um modelo, por fase granular, arranjo próprio);
-    registra o mapa combinado no plano; continua pausando antes de fases
-    com modelo diferente do atual. Atualizar premissa 7 de
-    `docs/workflow-agentes-dev.md` e `tests/agents/test_devflow.py`.
-  - **Acceptance criteria**: sem menu rígido numerado; sugestão + liberdade
-    explícitas; mapa registrado no plano; pausa mantida; testes verdes.
+    como preferir (um modelo só, por fase granular, arranjo próprio);
+    registra o mapa combinado no plano; pausa antes de fases com modelo
+    diferente do atual mantida. Atualizar premissa 7 do
+    `workflow-agentes-dev.md` e `tests/agents/test_devflow.py`.
+  - **Acceptance criteria**: sem menu rígido numerado; sugestão +
+    liberdade explícitas; mapa no plano; pausa mantida; testes verdes.
   - **Verification**: `.venv/bin/pytest tests/agents/test_devflow.py`.
   - **Dependencies**: Task 1
   - **Files likely touched**: `harness-conf/agents/devflow.md`,
@@ -425,19 +449,92 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Reestruturação quebra symlinks/instalações existentes | High | Re-executar bootstrap pós-merge; instruir no commit |
-| Termo "harness" confundir agentes (histórico) | Med | Body conceitual no commit da Task 1; AGENTS.base.md define o termo |
+| Termo "harness" confundir agentes (histórico) | Med | Body conceitual no commit da Task 1; base define o termo |
+| `~/.config/opencode/AGENTS.md` gerenciado pelo codebase-memory-mcp conflitar com o symlink | High | Investigação obrigatória na Task 4; sem decisão segura, bloquear |
+| Skills upstream com prompt injection | High | Revisão de segurança obrigatória na Task 3; fallback definido; SHA no UPSTREAM.md |
 | Índice codebase-memory desatualizado após o move | Med | Reindexar (checkpoint final); testes não dependem do índice |
-| Adapter Copilot só validável no Windows | Med | Testes copilot rodam no ambiente alvo (humano executa); pytest.fail sem skip |
+| Adapter Copilot só validável no Windows | Med | Testes copilot no ambiente alvo (humano executa); pytest.fail sem skip |
+| Base referenciar skills ainda não importadas | Med | Task 3 (importação) é dependência da Task 4 (base) |
 | doc-readme.md maior após fusão | Low | Leitura por seção (agents leem seções específicas) |
-| Skill nova não ser ativada corretamente | Med | Description rica em triggers; teste de consistência D11 |
-| `~/.config/opencode/AGENTS.md` já gerenciado pelo codebase-memory-mcp conflitar com o symlink da base | High | Investigação obrigatória na Task 3; sem decisão segura, reportar bloqueio em vez de substituir arquivo gerado |
+| Skill nova não ser ativada corretamente | Med | Description rica em triggers; teste de consistência |
 
 ## Open Questions
 
-- **Q1 (conteúdo do AGENTS.base.md)**: curadoria em andamento (opção "a"
-  escolhida). Concluídas: seção "Comunicação" completa (Língua, Perfil
-  do Humano, Concisão, Tom natural com skills no chat). Restam:
-  autonomia/segurança, git, descoberta de código, seções cinzentas.
-- **Q2 (humanizer-br)**: RESOLVIDA — importar `humanizer-br` (MIT
-  confirmado) com revisão de segurança; fallback `phardoom/humanizador`.
+- Nenhuma. Curadoria da base concluída (Anexo A aprovado). Ações
+  pós-implementação (Checkpoint Complete): re-executar bootstrap nos
+  dois ambientes e reindexar codebase-memory.
 
+## Anexo A — Conteúdo final do `harness-conf/AGENTS.base.md`
+
+> Executor: copiar literalmente (sem os marcadores de citação), sem citar
+> o plano.
+
+```markdown
+# Regras Globais
+
+## Comunicação
+
+### Língua
+- Escreva em PT-BR (ASCII aceitável). Use acentuação em todo texto em
+  PT-BR.
+
+### Perfil do Humano
+- O humano é analista de sistemas com foco em desenvolvimento de
+  software. Use terminologia técnica e jargão da área sem cerimônia
+  (código, arquitetura, testes, git, LLMs). Não explique conceitos
+  básicos desses domínios.
+- Ajuste o registro pela distância do domínio: em áreas adjacentes
+  (infra, dados, segurança aplicada), mantenha o jargão com breve
+  contexto. Em áreas afastadas (negócio, jurídico, outras engenharias),
+  use linguagem menos técnica e defina termos específicos no primeiro
+  uso.
+- O humano lê inglês fluentemente: cite termos, mensagens de erro e
+  trechos em inglês sem traduzir. A conversa permanece em PT-BR.
+
+### Concisão
+- Responda curto por padrão. Detalhe apenas quando o humano pedir ou
+  quando houver risco de ambiguidade ou erro.
+- Prefira bullets a parágrafos longos.
+- Passou de 20-30 linhas? Resuma e pergunte se o humano quer se
+  aprofundar em algum ponto.
+- Texto explicativo: no máximo 30 linhas, salvo importância evidente ou
+  pedido explícito do humano.
+- Pode passar desse limite com bullets, desde que o total de palavras
+  fique equivalente ao de 20-30 linhas corridas.
+
+### Tom natural
+- Carregue a skill `humanizer-br` no início da sessão e siga as regras
+  dela em toda comunicação, inclusive nas respostas de chat.
+- Carregue a skill `portugues-tecnico-controlado` ao produzir texto
+  técnico (specs, docs, explicações densas).
+
+## Geração de arquivos MD
+- Limite cada linha a 120 colunas. Use word-wrap para garantir.
+
+## Exibição de texto para copiar
+- Coloque em um único bloco de código qualquer texto que o humano deva
+  copiar e colar.
+
+## Espera por tarefas
+- Espere por um sinal de conclusão (evento, callback, polling de
+  condição) em vez de estimar um tempo total.
+- Aumente a espera em incrementos de 30 segundos. Antes de esperar mais
+  de 30 segundos, peça confirmação ao humano.
+- Para código que depende de uma espera, carregue a skill
+  `reliable-async-operations`.
+
+## Commits
+- Siga Conventional Commits. Ao versionar, carregue a skill
+  `git-workflow-and-versioning`.
+- Execute `git push` apenas com confirmação explícita do humano, nunca
+  de forma automática.
+- Para mover ou renomear arquivo versionado, use sempre `git mv`, nunca
+  delete seguido de create. Se precisar mover e editar, faça o `git mv`
+  primeiro e edite depois. Sem exceção.
+
+## Criação de Skills
+- Escreva todas as instruções de ativação na description da skill.
+  Ativação descrita apenas no corpo não funciona.
+- Não descreva no corpo formas de ativação que não constem na
+  description.
+```
