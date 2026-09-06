@@ -29,6 +29,26 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   ferramentas/critérios por orientação do humano); nunca no ciclo normal.
   A distinção deve ficar clara nos agentes, nos templates default-artifacts
   e no doc gerado no projeto-alvo.
+- **D4 (AGENTS.md base, anotação 4)**: criar `harness-conf/AGENTS.base.md`
+  com as regras universais do humano (idioma/concisão, proibição de timeouts,
+  espera determinística, Conventional Commits, codebase-memory, CLIs nativos,
+  separação por ambiente, confirmação para ação, etc.). Entrega: OpenCode
+  via symlink `~/.config/opencode/AGENTS.md`; Copilot via cópia para
+  `~/.copilot/AGENTS.md`. Extinção do
+  `.github/copilot-specific.instructions.md`, com conteúdo absorvido pela
+  base. `AGENTS.md` raiz fica só com regras específicas do repo + aponta
+  para a base.
+- **D5 (reestruturação harness-conf/, anotações 4 e 5)**: mover para
+  `harness-conf/` (via `git mv`): `agents/`, `skills/`, `commands/`,
+  `opencode.json` + novo `AGENTS.base.md`. Ficam na raiz (infra do repo):
+  `AGENTS.md` (repo), `scripts/`, `src/`, `tests/`, `docs/`, `adapters/`,
+  `plan/`, `README.md`. Sentido do termo **harness** a partir daqui:
+  plataforma de agentes (OpenCode, Copilot CLI) — NÃO o antigo "harness"
+  de testes (hoje `testes-produto`). **Requisito de commit:** o commit da
+  reestruturação DEVE ter body detalhado explicando a mudança de conceito
+  (harness antigo = agregador de testes renomeado para testes-produto;
+  harness novo = plataforma de agentes) para desambiguar o log para
+  agentes que consultarem o histórico.
 
 ## Task List
 
