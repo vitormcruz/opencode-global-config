@@ -109,7 +109,22 @@ distinção repo vs artefatos copiados, e flexibilidade de modelos no devflow.
   com confirmação; git mv obrigatório); "Ação" perde o bullet de
   confirmação prévia para editar; regras de timeout de CÓDIGO saem da
   base (a proibição sintetizada migra para a skill
-  reliable-async-operations — nova task).
+  reliable-async-operations — nova task). "Ação" sai INTEIRA da base
+  (incluindo o bullet de perguntas-não-são-ordens — agentes livres para
+  agir ao responder). Fica na base, em versão mínima (~3 linhas), apenas
+  a espera do AGENTE por tarefas: preferir determinismo a tempo cego;
+  escalonar +30s; acima de 30s confirmar com o humano; para código que
+  espera, carregar reliable-async-operations.
+- **D11 (descoberta de código é do repo, não da base)**: a regra
+  codebase-memory e a referência à skill `code-explorer-priority` ficam
+  no `AGENTS.md` raiz (cada repo decide usar codebase-memory). A skill
+  `code-explorer-priority` absorve os detalhes operacionais do CLI
+  (comandos JSON, ordem das ferramentas, busca em docs) e ganha
+  description condicionada: só ativar quando o AGENTS.md do repo indicar
+  codebase-memory. A tabela "Acesso por cliente" sai (comando idêntico
+  nos dois harnesses). "Criação de Skills" entra na base (2 bullets).
+  Comunicação do bootstrap fica no raiz; seção SmartPlanner sai do raiz
+  (restrição vive no corpo do agente).
 
 ## Task List
 
