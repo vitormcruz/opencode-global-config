@@ -199,7 +199,7 @@ Anexo A aprovado); o executor materializa copiando.
     `tests/skills_mgmt/**`
   - **Estimated scope**: Medium
 
-- [ ] **Task 4: `harness-conf/AGENTS.base.md` do Anexo A + extinção copilot-specific**
+- [x] **Task 4: `harness-conf/AGENTS.base.md` do Anexo A + extinção copilot-specific**
   - **Description**: criar `harness-conf/AGENTS.base.md` **copiando
     literalmente o Anexo A** deste plano (autocontido, sem citar o
     plano). Extinção: `git rm .github/copilot-specific.instructions.md`.
@@ -211,6 +211,13 @@ Anexo A aprovado); o executor materializa copiando.
     definir convivência (base absorve marcadores, bootstrap concatena,
     ou outro caminho). Sem decisão segura, bloquear — não substituir o
     arquivo gerado.
+  - **Resultado da investigação (execução)**: o codebase-memory-mcp
+    injeta/remove apenas o bloco entre marcadores e preserva o resto do
+    arquivo, mas escreve ATRAVÉS de symlinks (mutaria a base versionada;
+    comprovado em HOME isolado). Convivência adotada: **concatenação** —
+    o adapter OpenCode gera `~/.config/opencode/AGENTS.md` como arquivo
+    regular (base + blocos marcados de terceiros preservados, com
+    backup); sem symlink para AGENTS.md.
   - **Acceptance criteria**:
     - Base idêntica ao Anexo A; copilot-specific removido.
     - Testes do adapter/bootstrap verdes; symlink sem conflito com o

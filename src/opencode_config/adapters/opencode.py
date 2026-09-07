@@ -122,6 +122,35 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+_MARKED_BLOCK = re.compile(
+    r"<!-- (?P<marker>[A-Za-z0-9_.-]+):start -->.*?<!-- (?P=marker):end -->",
+    flags=re.DOTALL,
+)
+
+
+def _managed_blocks(content: str) -> list[str]:
+    """Extrai blocos `<!-- ferramenta:start -->...<!-- ferramenta:end -->`."""
+
+    return [match.group(0).strip() for match in _MARKED_BLOCK.finditer(content)]
+
+
+def _desired_agents_content(repository: Path, existing: str) -> str | None:
+    """Base global + blocos gerenciados por ferramentas externas.
+
+    O destino e arquivo regular, nunca symlink: ferramentas como o
+    codebase-memory-mcp escrevem no path atraves de symlinks e mutariam
+    a base versionada do repositorio.
+    """
+
+    base = repository / HARNESS_CONF_DIR / "AGENTS.base.md"
+    if not base.is_file():
+        return None
+    desired = base.read_text(encoding="utf-8").strip() + "\n"
+    for block in _managed_blocks(existing):
+        desired += f"\n{block}\n"
+    return desired
+
+
 def _append_block(path: Path, content: str) -> None:
     existing = _read_text(path)
     separator = "" if not existing or existing.endswith("\n\n") else "\n"
@@ -190,6 +219,27 @@ def _setup_bashrc(home: Path, environment: Mapping[str, str]) -> None:
             )
 
 
+def _sync_agents_base(
+    repository: Path,
+    config_dir: Path,
+    backup_dir: Path,
+    output: Callable[[str], None],
+) -> None:
+    destination = config_dir / "AGENTS.md"
+    existing = _read_text(destination)
+    desired = _desired_agents_content(repository, existing)
+    if desired is None:
+        return
+    if existing == desired:
+        output(f"OK    {destination}")
+        return
+    if existing:
+        _backup_if_exists(destination, backup_dir)
+    destination.write_text(desired, encoding="utf-8")
+    blocks = len(_managed_blocks(existing))
+    output(f"CP    {destination} (base + {blocks} bloco(s) gerenciado(s))")
+
+
 def _status_line(
     source: Path,
     destination: Path,
@@ -227,6 +277,18 @@ def _print_plan(
 
     for source, destination in _DESTINATIONS:
         _status_line(repository / source, config_dir / destination, output)
+
+    agents_md = config_dir / "AGENTS.md"
+    desired_agents = _desired_agents_content(
+        repository,
+        _read_text(agents_md),
+    )
+    if desired_agents is not None:
+        if _read_text(agents_md) == desired_agents:
+            output(f"OK    {agents_md}")
+        else:
+            base = repository / HARNESS_CONF_DIR / "AGENTS.base.md"
+            output(f"CP    {agents_md} << {base}")
 
     if _bashrc_has(
         bashrc,
@@ -320,6 +382,7 @@ def configure(
             config_dir / destination,
             backup_dir,
         )
+    _sync_agents_base(resolved_repository, config_dir, backup_dir, write)
     _setup_bashrc(resolved_home, os.environ)
     write("Pronto.")
 

@@ -407,3 +407,23 @@ def test_copilot_adapter_does_not_skip_regular_agents(
     assert (
         tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).is_file()
+
+
+@pytest.mark.unit
+def test_copilot_adapter_copies_agents_base_as_global_agents_md(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    global_agents = (tmp_path / ".copilot" / "AGENTS.md").read_text(
+        encoding="utf-8"
+    )
+    base = (
+        repo_root / "harness-conf" / "AGENTS.base.md"
+    ).read_text(encoding="utf-8")
+    assert global_agents.rstrip("\n") == base.rstrip("\n")
+    assert "# Regras Globais" in global_agents

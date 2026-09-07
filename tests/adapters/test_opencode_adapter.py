@@ -11,6 +11,10 @@ def make_repository(root: Path) -> Path:
         (harness / directory).mkdir(parents=True)
     (repository / "scripts").mkdir()
     (harness / "opencode.json").write_text("{}", encoding="utf-8")
+    (harness / "AGENTS.base.md").write_text(
+        "# Regras Globais\n\nConteudo da base.\n",
+        encoding="utf-8",
+    )
     return repository
 
 
@@ -57,8 +61,66 @@ def test_opencode_adapter_creates_canonical_symlinks(
     assert (config_dir / "scripts").resolve() == (
         repository / "scripts"
     ).resolve()
-    assert not (config_dir / "AGENTS.md").exists()
+    agents_md = config_dir / "AGENTS.md"
+    assert agents_md.is_file()
+    assert not agents_md.is_symlink()
+    assert (
+        agents_md.read_text(encoding="utf-8") == "# Regras Globais\n\n"
+        "Conteudo da base.\n"
+    )
     assert "Pronto." in output
+
+
+@pytest.mark.opencode
+def test_opencode_adapter_agents_md_preserves_managed_blocks(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repository = make_repository(tmp_path)
+    home = tmp_path / "home"
+    config_dir = home / ".config" / "opencode"
+    config_dir.mkdir(parents=True)
+    managed_block = (
+        "<!-- codebase-memory-mcp:start -->\n"
+        "conteudo gerenciado pela ferramenta\n"
+        "<!-- codebase-memory-mcp:end -->"
+    )
+    (config_dir / "AGENTS.md").write_text(
+        "BASE ANTIGA\n\n" + managed_block + "\n",
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repository, home)
+
+    assert status == 0
+    assert error == ""
+    content = (config_dir / "AGENTS.md").read_text(encoding="utf-8")
+    assert content.startswith("# Regras Globais\n\nConteudo da base.\n")
+    assert "BASE ANTIGA" not in content
+    assert managed_block in content
+    backups = list((home / ".config" / "opencode-backup").iterdir())
+    assert len(backups) == 1
+    assert "BASE ANTIGA" in (backups[0] / "AGENTS.md").read_text(
+        encoding="utf-8"
+    )
+
+
+@pytest.mark.opencode
+def test_opencode_adapter_agents_md_is_idempotent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repository = make_repository(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+
+    first = run_adapter(monkeypatch, repository, home)
+    second = run_adapter(monkeypatch, repository, home)
+
+    assert first[0] == 0
+    assert second[0] == 0
+    backup_root = home / ".config" / "opencode-backup"
+    assert not backup_root.exists() or not any(backup_root.iterdir())
 
 
 @pytest.mark.opencode

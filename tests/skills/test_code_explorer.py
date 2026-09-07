@@ -5,7 +5,6 @@ import pytest
 
 DISCOVERY_DOCS = (
     "AGENTS.md",
-    ".github/copilot-specific.instructions.md",
     "harness-conf/skills/code-explorer-priority/SKILL.md",
     "harness-conf/commands/index-codebase.md",
     "harness-conf/commands/bench-indexing.md",
@@ -106,10 +105,10 @@ def test_index_command_has_no_linux_path_for_copilot(repo_root: Path):
 @pytest.mark.unit
 def test_client_matrix_uses_same_cli_on_wsl_and_windows(repo_root: Path):
     agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
-    instructions = (
-        repo_root / ".github/copilot-specific.instructions.md"
+    skill = (
+        repo_root / "harness-conf/skills/code-explorer-priority/SKILL.md"
     ).read_text(encoding="utf-8")
-    combined = f"{agents}\n{instructions}"
+    combined = f"{agents}\n{skill}"
 
     assert "OpenCode" in combined
     assert "WSL" in combined

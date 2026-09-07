@@ -176,10 +176,12 @@ def test_repo_state_scripts_symlink_points_to_repo(
     ).resolve()
 
 
-def test_repo_state_global_agents_file_does_not_exist(
+def test_repo_state_global_agents_file_is_not_a_symlink(
     bootstrapped_repo_state: RepoState,
 ) -> None:
-    assert not (bootstrapped_repo_state.config_dir / "AGENTS.md").exists()
+    destination = bootstrapped_repo_state.config_dir / "AGENTS.md"
+    assert destination.exists()
+    assert not destination.is_symlink()
 
 
 def test_repo_state_bashrc_enables_exa(
@@ -213,6 +215,18 @@ def test_repo_state_opencode_json_is_readable_via_symlink(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     assert (bootstrapped_repo_state.config_dir / "opencode.json").is_file()
+
+
+def test_repo_state_agents_md_is_regular_file_with_base_content(
+    bootstrapped_repo_state: RepoState,
+) -> None:
+    agents_md = bootstrapped_repo_state.config_dir / "AGENTS.md"
+
+    assert agents_md.is_file()
+    assert not agents_md.is_symlink()
+    content = agents_md.read_text(encoding="utf-8")
+    assert content.startswith("# Regras Globais")
+    assert "## Comunicação" in content
 
 
 def _strip_jsonc_line_comments(source: str) -> str:

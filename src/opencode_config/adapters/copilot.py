@@ -549,30 +549,30 @@ def _sync_default_artifacts(
     output(f"OK    default-artifacts ({count} arquivo(s))")
 
 
-def _sync_instructions(
+def _sync_agents_base(
     repository: Path,
-    instructions_dir: Path,
+    copilot_dir: Path,
     backup_dir: Path,
     output: Callable[[str], None],
 ) -> None:
     output("")
-    output("--- Instructions ---")
-    source = repository / ".github" / "copilot-specific.instructions.md"
+    output("--- AGENTS.md base ---")
+    source = repository / HARNESS_CONF_DIR / "AGENTS.base.md"
     if not source.is_file():
-        output("AVISO .github/copilot-specific.instructions.md nao encontrado")
+        output("AVISO harness-conf/AGENTS.base.md nao encontrado")
         return
 
-    destination = instructions_dir / "copilot-specific.instructions.md"
-    instructions_dir.mkdir(parents=True, exist_ok=True)
+    destination = copilot_dir / "AGENTS.md"
     _backup_if_exists(destination, backup_dir)
+    if destination.exists() or destination.is_symlink():
+        _remove_path(destination)
     _copy_path(source, destination)
-    output("OK    copilot-specific.instructions.md (user global)")
+    output("OK    AGENTS.md (base global)")
 
 
 def _print_plan(
     repository: Path,
     skills_dir: Path,
-    instructions_dir: Path,
     agents_dir: Path,
     output: Callable[[str], None],
 ) -> None:
@@ -591,7 +591,6 @@ def _print_plan(
     )
     output(f"Repo:         {repository}")
     output(f"Skills:       {skills_dir}")
-    output(f"Instructions: {instructions_dir}")
     output(f"Agents:       {agents_dir}")
     output("")
     output("Plano:")
@@ -603,8 +602,7 @@ def _print_plan(
         ".copilot/agents/default-artifacts/"
     )
     output(
-        "  - Copiar .github/copilot-specific.instructions.md para "
-        ".copilot/instructions/"
+        "  - Copiar harness-conf/AGENTS.base.md para .copilot/AGENTS.md"
     )
 
 
@@ -647,7 +645,6 @@ def synchronize(
     resolved_dest_root = dest_root.expanduser().resolve()
     copilot_dir = resolved_dest_root / ".copilot"
     skills_dir = copilot_dir / "skills"
-    instructions_dir = copilot_dir / "instructions"
     agents_dir = copilot_dir / "agents"
     backup_name = timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_dir = (
@@ -657,7 +654,6 @@ def synchronize(
     _print_plan(
         resolved_repository,
         skills_dir,
-        instructions_dir,
         agents_dir,
         say,
     )
@@ -671,9 +667,9 @@ def synchronize(
         backup_dir,
         say,
     )
-    _sync_instructions(
+    _sync_agents_base(
         resolved_repository,
-        instructions_dir,
+        copilot_dir,
         backup_dir,
         say,
     )
