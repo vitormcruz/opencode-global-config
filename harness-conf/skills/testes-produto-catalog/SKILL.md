@@ -4,8 +4,9 @@ description: >
   Catálogo de referência com sugestões de ferramentas por
   especialidade (backend, dados, segurança, frontend) e
   o orquestrador testes-produto. Use quando: criando ou
-  atualizando suítes, definindo spec em testes-produto.md,
-  configurando ferramentas determinísticas. Triggers:
+  atualizando suítes, definindo a seção "Testes por
+  Especialidade" no docs/README.md, configurando
+  ferramentas determinísticas. Triggers:
   "testes-produto", "catálogo de testes-produto",
   "sugestões de suíte", "regras de contenção",
   "ferramentas de testes-produto", "criar suítes",
@@ -16,9 +17,9 @@ description: >
 # Catálogo de Referência — Suítes por Especialidade
 
 > **Nota:** as regras abaixo são referência de domínio.
-> **Não são obrigatórias.** O spec efetivo vive no
-> arquivo apontado pelo `AGENTS.md` (default
-> `docs/testes-produto.md`).
+> **Não são obrigatórias.** O spec efetivo é a seção
+> "Testes por Especialidade" do `docs/README.md`
+> (o `AGENTS.md` mantém só a tabela com link âncora).
 
 ## Interface Padronizada
 

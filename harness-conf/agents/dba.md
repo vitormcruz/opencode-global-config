@@ -34,9 +34,10 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
-  `## Testes por Especialidade` e o spec no link
-  (default `docs/testes-produto.md`, pasta definida na
-  curadoria). Nunca use path hardcoded.
+  `## Testes por Especialidade` e o spec na seção
+  "Testes por Especialidade" do `docs/README.md`
+  (default; pasta definida na curadoria). Nunca use
+  path hardcoded.
 - **Não execute a suíte de dados**: lint e schema
   diff da especialidade dados rodam no orquestrador,
   não na Construção. Checklists e skills são

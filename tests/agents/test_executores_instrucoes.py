@@ -52,6 +52,17 @@ def test_executors_resolve_suite_spec_via_agents_link(
         content = _agent_text(repo_root, name)
         lower = _flat(content)
         assert "Testes por Especialidade" in content, name
-        assert "docs/testes-produto.md" in content, name
+        assert "docs/README.md" in content, name
+        assert "docs/testes-produto.md" not in content, name
         assert "path hardcoded" in lower, name
         assert "o que deve conter" in lower, name
+
+
+@pytest.mark.unit
+def test_key_agents_declare_two_test_levels(repo_root: Path) -> None:
+    for name in ("devflow", "qa", "eng-software", "curador-produto"):
+        lower = _flat(_agent_text(repo_root, name))
+        assert "dois níveis de teste" in lower, name
+        assert "testes da aplicação" in lower, name
+        assert "testes dos scripts" in lower, name
+        assert "somente quando os scripts mudam" in lower, name

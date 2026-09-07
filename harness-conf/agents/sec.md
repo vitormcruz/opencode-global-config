@@ -57,9 +57,10 @@ negócio.
   instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
-  `## Testes por Especialidade` e o spec no link
-  (default `docs/testes-produto.md`, pasta definida na
-  curadoria). Nunca use path hardcoded.
+  `## Testes por Especialidade` e o spec na seção
+  "Testes por Especialidade" do `docs/README.md`
+  (default; pasta definida na curadoria). Nunca use
+  path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.

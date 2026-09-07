@@ -51,9 +51,10 @@ analisa código de produção ou faz revisão integrativa.
   instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
-  `## Testes por Especialidade` e o spec no link
-  (default `docs/testes-produto.md`, pasta definida na
-  curadoria). Nunca use path hardcoded.
+  `## Testes por Especialidade` e o spec na seção
+  "Testes por Especialidade" do `docs/README.md`
+  (default; pasta definida na curadoria). Nunca use
+  path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -188,6 +189,15 @@ especificação imutável e suas implicações.
 Na fase Testes, execute só `testes-produto` e os
 manuais do plano. Não chama scripts de especialidade
 um a um.
+
+**Dois níveis de teste**: (1) testes da aplicação — os
+que você executa aqui via suítes/orquestrador
+`testes-produto`, sempre que se desenvolve
+funcionalidade; (2) testes dos scripts de teste — os
+scripts de suíte/orquestrador são código, têm testes
+próprios com base na seção "Testes por Especialidade"
+do `docs/README.md` (a spec executável deles) e rodam
+SOMENTE quando os scripts mudam, nunca no ciclo normal.
 
 **O que fazer**:
 1. Executar o orquestrador `testes-produto` (comando

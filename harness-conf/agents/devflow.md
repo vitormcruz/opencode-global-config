@@ -279,6 +279,15 @@ Mesmo fluxo de achados da fase 3.
 | 6.2 | `sec` | Executar só o roteiro manual |
 | 6.3 | `curador-produto` | Validar evidência do orquestrador |
 
+**Dois níveis de teste**: (1) testes da aplicação —
+rodam via suítes/orquestrador `testes-produto` nesta
+fase, sempre que se desenvolve funcionalidade;
+(2) testes dos scripts de teste — os scripts de
+suíte/orquestrador são código, têm testes próprios com
+base na seção "Testes por Especialidade" do
+`docs/README.md` (a spec executável deles) e rodam
+SOMENTE quando os scripts mudam, nunca no ciclo normal.
+
 Falha de suíte roteia por especialidade: backend →
 `eng-software`; dados → `dba`; segurança automática →
 `sec`; frontend → `front`. Depois o `eng-software`

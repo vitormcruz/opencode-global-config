@@ -36,7 +36,8 @@ def test_catalog_suggests_tools_by_specialty(catalog: str) -> None:
     assert "testes-produto" in catalog
     assert "harness/agregar" not in catalog
     assert '"prompt"' not in catalog
-    assert "docs/testes-produto.md" in catalog
+    assert "docs/README.md" in catalog
+    assert "docs/testes-produto.md" not in catalog
 
 
 @pytest.mark.unit

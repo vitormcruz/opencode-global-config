@@ -67,9 +67,10 @@ unidades lógicas seguindo `git-workflow-and-versioning`.
   instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
-  `## Testes por Especialidade` e o spec no link
-  (default `docs/testes-produto.md`, pasta definida na
-  curadoria). Nunca use path hardcoded.
+  `## Testes por Especialidade` e o spec na seção
+  "Testes por Especialidade" do `docs/README.md`
+  (default; pasta definida na curadoria). Nunca use
+  path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o
   solicitante.
@@ -240,6 +241,17 @@ async/await, fila, lock, polling), carregue
 `reliable-async-operations` **antes** de escrevê-lo —
 evita espera bloqueante sem sinal de progresso e timeout
 de número mágico.
+
+**Scripts de testes-produto**: quando a tarefa for
+implementar ou alterar scripts de suíte/orquestrador
+`testes-produto`, a seção "Testes por Especialidade" do
+`docs/README.md` é a especificação executável deles —
+construa com TDD cobrindo exatamente o que a seção
+define. Dois níveis de teste: (1) testes da aplicação
+rodam via suítes/orquestrador na fase Testes, sempre
+que se desenvolve funcionalidade; (2) testes dos
+scripts de teste rodam SOMENTE quando os scripts mudam,
+nunca no ciclo normal de desenvolvimento.
 
 ---
 

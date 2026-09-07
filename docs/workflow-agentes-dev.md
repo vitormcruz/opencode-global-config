@@ -267,7 +267,9 @@ Status: <FASE> [— detalhe opcional]
 ### Testes por Especialidade
 
 32. **Tabela e link no AGENTS.md** — criação pelo
-    `curador-produto`. Spec em `<pasta-docs>/testes-produto.md`.
+    `curador-produto`. Spec na seção "Testes por
+    Especialidade" do `<pasta-docs>/README.md`; o
+    `AGENTS.md` mantém só a tabela com link âncora.
     Suítes não rodam na Construção nem na Revisão.
 33. **Fase Testes** — `qa` executa só `testes-produto` e
     manuais do plano. `sec` executa só o roteiro manual.
@@ -448,9 +450,10 @@ seção com o humano (mediação via blocos adaptativos da
 - **docs/README.md** — Definição de Escopo, Elementos de
   Especificação, Regras de Documentação, Estratégias de
   Indexação. Cada seção requer aprovação explícita.
-- **Suítes** — pasta de docs, spec em `testes-produto.md`,
-  especialidades, orquestrador, depois instruções.
-  Cada entrada requer aprovação explícita.
+- **Suítes** — pasta de docs, seção "Testes por
+  Especialidade" no `docs/README.md`, especialidades,
+  orquestrador, depois instruções. Cada entrada requer
+  aprovação explícita.
 
 ### Construção da curadoria
 
