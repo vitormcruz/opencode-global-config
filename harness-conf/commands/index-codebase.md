@@ -91,32 +91,39 @@ Siga este fluxo estritamente.
 **Condicao de encerramento da etapa:**
 - a indexacao no `codebase-memory` terminou e o resultado foi exibido.
 
-## Etapa 3 - Gerar instrucoes locais
+## Etapa 3 - Verificar instrucoes de codebase-memory no AGENTS.md
 
 **Dependencia obrigatoria:**
 - so pode comecar apos o encerramento da **Etapa 2**.
 
-**Objetivo:** criar arquivo de instrucoes para uso do codebase-memory neste repo.
+**Objetivo:** garantir que o AGENTS.md do repositorio documenta a
+descoberta de codigo via codebase-memory.
 
 **Acoes permitidas nesta etapa:**
-- verificar se `.github/copilot-specific.instructions.md` existe
-- verificar se as instrucoes de codebase-memory estao documentadas
+- verificar se o `AGENTS.md` do repositorio documenta o uso do
+  codebase-memory para descoberta de codigo
+- informar ao humano o estado dessas instrucoes
 
 **Execucao:**
-- Verifique se o arquivo `.github/copilot-specific.instructions.md` ja existe.
-- Este arquivo ja contem as instrucoes de uso do codebase-memory (consolidado).
-- Se nao existir, informe que o arquivo padrao deve ser criado.
-- Se o arquivo ja existir, verifique se precisa de atualizacao e pergunte ao humano.
+- Verifique se o `AGENTS.md` do repo contem uma secao de descoberta de
+  codigo mencionando o codebase-memory (regra de usar o CLI antes de
+  grep/glob).
+- Se nao existir, informe ao humano e sugira o texto da secao. Nao edite
+  o `AGENTS.md` sem confirmacao explicita.
+- Se existir, verifique se a regra esta coerente com o fluxo deste
+  comando e pergunte ao humano se precisa de atualizacao.
 
 **Condicao de encerramento da etapa:**
-- as instrucoes locais foram verificadas.
+- o estado das instrucoes de codebase-memory no `AGENTS.md` foi
+  determinado e comunicado ao humano.
 
 ## Resumo final
 
 Ao finalizar todas as etapas, informe ao humano:
 
 1. **Status da indexacao:** numero de nos e arestas no grafo
-2. **Instrucoes locais:** caminho do arquivo criado/atualizado
+2. **Instrucoes locais:** estado das instrucoes de codebase-memory no
+   `AGENTS.md` do repositorio
 3. **Auto-index:** confirmacao de que o auto-index global esta habilitado - o
    grafo sera mantido automaticamente atualizado via background watcher
 4. **Uso:** exemplos de comandos para explorar codigo e documentacao

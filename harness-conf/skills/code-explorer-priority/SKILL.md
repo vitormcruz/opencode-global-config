@@ -1,18 +1,26 @@
 ---
 name: code-explorer-priority
 description: >
-  REGRA ABSOLUTA: use codebase-memory-mcp cli para buscas em CÓDIGO e
-  DOCUMENTAÇÃO. NUNCA use grep/glob antes de esgotar o CLI. Se o CLI retornar
-  "project not found", execute list_projects e retente. Triggers: pesquisar,
-  procurar, buscar, encontrar, explorar, investigar, search, find, look for,
-  locate, explore, investigate, onde está, onde estão, procura, busca, code
-  discovery, how does, como funciona.
+  Ativação condicionada: use esta skill APENAS quando o AGENTS.md do
+  repositório indicar codebase-memory na descoberta de código; sem essa
+  indicação, não a aplique. Quando ativa, REGRA ABSOLUTA: use o CLI
+  codebase-memory-mcp para buscas em CÓDIGO e DOCUMENTAÇÃO; NUNCA use
+  grep/glob antes de esgotar o CLI. Se o CLI retornar "project not found",
+  execute list_projects e retente. Triggers (quando o repo usa
+  codebase-memory): pesquisar, procurar, buscar, encontrar, explorar,
+  investigar, search, find, look for, locate, explore, investigate, onde
+  está, onde estão, procura, busca, code discovery, how does, como
+  funciona.
 ---
 
 # Descoberta CLI-first
 
-Ao receber QUALQUER pedido de busca, siga esta ordem. Nunca pule para
-grep/glob sem antes esgotar o `codebase-memory-mcp cli`.
+Esta skill vale somente para repositórios cujo `AGENTS.md` indica
+codebase-memory na descoberta de código. Fora desse caso, use as
+ferramentas de busca padrão da plataforma.
+
+Ao receber QUALQUER pedido de busca nesses repositórios, siga esta ordem.
+Nunca pule para grep/glob sem antes esgotar o `codebase-memory-mcp cli`.
 
 ## Papel de cada ferramenta
 
@@ -22,71 +30,67 @@ grep/glob sem antes esgotar o `codebase-memory-mcp cli`.
 | `grep` | Strings literais, erros e configs — SOMENTE fallback | Busca estrutural |
 | `glob` | Arquivos por nome ou padrão — SOMENTE fallback | Conteúdo de arquivos |
 
-## Acesso por Cliente
+## Invocação do CLI (idêntica em qualquer ambiente)
 
-### OpenCode
-
-No OpenCode, execute o CLI nativo no WSL:
-`codebase-memory-mcp cli <tool> '<json>'`.
-
-### GitHub Copilot
-
-No Copilot, execute o mesmo CLI nativo no Windows:
-`codebase-memory-mcp cli <tool> '<json>'`.
-
-Exemplos:
+O comando é o mesmo no WSL e no Windows (no Windows, execute os CLIs sem
+prefixo `wsl`): `codebase-memory-mcp cli <tool> '<json>'`. Use sempre um
+único argumento JSON posicional, sem flags como `--query`,
+`--function_name` ou `--project`:
 
 ```bash
 codebase-memory-mcp cli list_projects '{}'
-codebase-memory-mcp cli search_graph '{"project":"<nome>","query":"termos"}'
+codebase-memory-mcp cli index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'
+codebase-memory-mcp cli search_graph '{"project":"<nome>","query":"descrição"}'
 codebase-memory-mcp cli trace_path '{"project":"<nome>","function_name":"Foo"}'
+codebase-memory-mcp cli get_code_snippet '{"project":"<nome>","qualified_name":"pkg.Foo"}'
 codebase-memory-mcp cli query_graph '{"project":"<nome>","query":"MATCH ..."}'
+codebase-memory-mcp cli search_code '{"project":"<nome>","pattern":"termo"}'
+codebase-memory-mcp cli get_architecture '{"project":"<nome>"}'
 ```
+
+Notas:
+
+- Em `search_code`, use `pattern`, não `query`.
+- Em `index_repository`, use `repo_path` absoluto para evitar ambiguidades.
+- O CLI é execução local — não configure nem inicie servidor MCP para
+  buscas.
+
+## Ordem das ferramentas
+
+1. `search_graph` — localizar função, classe, rota, variável, documento,
+   workflow, spec ou ADR pelo nome/padrão.
+2. `trace_path` — descobrir quem chama e o que é chamado (chamadores e
+   chamadas do símbolo localizado).
+3. `get_code_snippet` — ler o conteúdo da função, classe ou seção de
+   documento localizada.
+4. `query_graph` (Cypher) — padrões complexos multi-entidade e busca em
+   documentação (abaixo).
+5. `get_architecture` — visão geral da arquitetura antes de detalhar
+   símbolos.
 
 ## Passo 0: confirmar projeto indexado
 
 Execute `codebase-memory-mcp cli list_projects '{}'` e anote o nome exato.
-Se o CLI retornar `"project not found"`, use `list_projects` novamente,
-confirme o projeto e retente a consulta.
+Passe `{"project":"<nome>", ...}` nas consultas.
 
-O codebase-memory indexa código e documentação em uma única base. Documentos
-Markdown tornam-se nós do tipo `Section`.
+Se o CLI retornar `"project not found"`, execute `list_projects`
+novamente, confirme o nome exato do projeto indexado e retente a consulta.
+Só então caia para grep/glob se o projeto não estiver indexado.
 
-## Passo 1: classificar a busca
+## Busca em documentação
 
-| Tipo de busca | Ferramenta |
-|---|---|
-| Função, classe, rota ou variável | `search_graph` |
-| Quem chama ou é chamado | `trace_path` |
-| Documento, workflow, spec, ADR ou agente | `search_graph` ou `query_graph` |
-| Conteúdo de função ou classe | `get_code_snippet` |
-| Conteúdo de documento específico | `get_code_snippet` após localizar |
-| Padrão complexo multi-entidade | `query_graph` |
-| Visão geral da arquitetura | `get_architecture` |
-| String literal ou mensagem de erro | `grep` somente após esgotar o CLI |
-| Arquivo por nome | `glob` somente após esgotar o CLI |
-
-### Busca em documentação
-
-Como o codebase-memory indexa Markdown como nós `Section`, use:
+O codebase-memory indexa código e documentação em uma única base: arquivos
+Markdown tornam-se nós do tipo `Section`. Para buscar seções, use Cypher no
+`query_graph`:
 
 ```bash
 codebase-memory-mcp cli query_graph \
   '{"project":"<nome>","query":"MATCH (s:Section) WHERE s.name CONTAINS \"termo\" RETURN s.file, s.name"}'
 ```
 
-## Passo 2: executar com recovery
+## Fallback estrito: grep/glob
 
-1. Execute `search_graph` com o projeto confirmado.
-2. Se houver `"project not found"`, execute
-   `codebase-memory-mcp cli list_projects '{}'`.
-3. Retente `search_graph` com o nome exato retornado.
-4. Se o CLI falhar ou o projeto não estiver indexado, use grep/glob como
-   fallback e registre essa limitação.
-
-## Passo 3: navegar resultados
-
-- `search_graph` → `get_code_snippet` para ler o símbolo localizado.
-- `trace_path` → siga a trilha de chamadas até o limite necessário.
-- `query_graph` → refine a consulta Cypher quando houver muitas entidades.
-- `get_architecture` → use para uma visão geral antes de detalhar símbolos.
+grep e glob são fallback SOMENTE para: strings literais, mensagens de erro
+e valores de config (grep); arquivos por nome ou padrão (glob). Use-os
+apenas após esgotar o CLI — incluindo o recovery de `list_projects`.
+Nunca inicie uma investigação por grep/glob em repo com codebase-memory.
