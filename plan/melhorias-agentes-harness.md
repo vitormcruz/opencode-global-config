@@ -1,6 +1,6 @@
 # Plano: Melhorias em Agentes, Curadoria e Estrutura de Harness
 
-Status: EM PLANEJAMENTO
+Status: EXECUÇÃO CONCLUÍDA — aguardando revisão final do humano
 
 ## Overview
 
@@ -166,6 +166,10 @@ Anexo A aprovado); o executor materializa copiando.
   `tests/skills/test_reliable_async_operations.py`,
   `tests/agents/test_spec_executavel_adoption.py` e
   `tests/skills/test_code_explorer.py`.
+- **Fase 4 CONCLUÍDA** (commits `f279d69`, `9f74e61`). Suíte completa
+  verde (675 passed, 2 deselected copilot, WSL, integração OpenCode
+  incluída). Bootstrap re-executado com sucesso no WSL. Pendências para
+  o humano: suíte Copilot no Windows e reindexação do codebase-memory.
 - **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
   Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
 - **Worker**: agente `worker`, modelo `opencode-go/gpt-5.6-luna`
@@ -305,7 +309,7 @@ Anexo A aprovado); o executor materializa copiando.
   (convivência por concatenação — ver nota na Task 4)
 - [x] Bootstrap re-executado com sucesso (home real: links harness-conf +
   AGENTS.md = base + bloco do mcp preservado)
-- [ ] Review com humano antes de prosseguir
+- [x] Review com humano antes de prosseguir
 
 ### Phase 2: Curadoria unificada no docs/README.md (D2, D3)
 
@@ -374,7 +378,7 @@ Anexo A aprovado); o executor materializa copiando.
 ### Checkpoint: Phase 2
 - [x] Suíte agents+scaffold+adapters verde
 - [x] Curadoria coerente end-to-end (templates, curador, scaffold, agentes)
-- [ ] Review com humano antes de prosseguir
+- [x] Review com humano antes de prosseguir
 
 - [x] **Task 9b (adicionada no checkpoint da Fase 1, aprovada)**: na seção
   Bootstrap do `AGENTS.md` raiz, adicionar 1-2 linhas apontando os fluxos
@@ -483,11 +487,11 @@ Anexo A aprovado); o executor materializa copiando.
 
 ### Checkpoint: Phase 3
 - [x] Skills criadas/importadas/migradas; consistência verde
-- [ ] Review com humano antes de prosseguir
+- [x] Review com humano antes de prosseguir
 
 ### Phase 4: Protocolo conversacional e devflow (D6, D7)
 
-- [ ] **Task 14: Cláusula de contextualização na question-orchestration**
+- [x] **Task 14: Cláusula de contextualização na question-orchestration**
   - **Description**: cláusula na skill: quando existir artefato de
     planejamento/estado persistido, toda interação com o humano carrega
     o contexto relevante (fase, decisões que afetam a pergunta,
@@ -504,7 +508,7 @@ Anexo A aprovado); o executor materializa copiando.
     `tests/agents/test_question_orchestration_adoption.py`
   - **Estimated scope**: Small
 
-- [ ] **Task 15: Devflow flexível na seleção de modelo**
+- [x] **Task 15: Devflow flexível na seleção de modelo**
   - **Description**: reescrever "Seleção de modelo por fase" do
     `devflow.md`: devflow **sugere** padrão (um modelo por etapa —
     planejamento, execução, testes, revisão) e avisa que o humano define
@@ -521,10 +525,12 @@ Anexo A aprovado); o executor materializa copiando.
   - **Estimated scope**: Small
 
 ### Checkpoint: Complete
-- [ ] Suíte completa verde (WSL): `.venv/bin/pytest -m "unit or tools or opencode"`
+- [x] Suíte completa verde (WSL): `.venv/bin/pytest -m "unit or tools or opencode"`
+  (675 passed, 2 deselected copilot)
 - [ ] Suíte Copilot executada no Windows pelo humano
-- [ ] Bootstrap re-executado; codebase-memory reindexado
-- [ ] Pronto para revisão final
+- [x] Bootstrap re-executado com sucesso (WSL: links + AGENTS.md gerados);
+  reindexação do codebase-memory fica como pendência para o humano
+- [x] Pronto para revisão final
 
 ## Risks and Mitigations
 
