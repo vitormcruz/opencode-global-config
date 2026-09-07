@@ -142,7 +142,7 @@ Anexo A aprovado); o executor materializa copiando.
 
 ### Phase 1: Reestruturação, skills de escrita e base (D4, D5, D9, D10, D11)
 
-- [ ] **Task 1: Mover artefatos copiáveis para `harness-conf/`**
+- [x] **Task 1: Mover artefatos copiáveis para `harness-conf/`**
   - **Description**: criar `harness-conf/` e mover com `git mv`:
     `agents/`, `skills/`, `commands/`, `opencode.json`. Atualizar
     referências de path em `src/` (bootstrap, symlinks, adapter,
@@ -161,7 +161,7 @@ Anexo A aprovado); o executor materializa copiando.
   - **Commit**: `refactor: mover artefatos copiáveis para harness-conf/`
     com body conceitual obrigatório (D5).
 
-- [ ] **Task 2: Adapter Copilot — origens em `harness-conf/`**
+- [x] **Task 2: Adapter Copilot — origens em `harness-conf/`**
   - **Description**: `src/opencode_config/adapters/copilot.py` lê de
     `harness-conf/`. Atualizar testes do adapter.
   - **Acceptance criteria**: adapter aponta para `harness-conf/`;
@@ -172,7 +172,7 @@ Anexo A aprovado); o executor materializa copiando.
     `tests/adapters/**`
   - **Estimated scope**: Small
 
-- [ ] **Task 3: Importar skills de escrita com revisão de segurança**
+- [x] **Task 3: Importar skills de escrita com revisão de segurança**
   - **Description**: importar para `harness-conf/skills/`:
     `portugues-tecnico-controlado` (kayquer) e `humanizer-br`
     (carlosafjr-dev; MIT confirmado). **Revisão de segurança obrigatória
@@ -229,7 +229,7 @@ Anexo A aprovado); o executor materializa copiando.
     `src/opencode_config/**`, `tests/**`
   - **Estimated scope**: Medium
 
-- [ ] **Task 5: `AGENTS.md` raiz reescrito + mapa no README**
+- [x] **Task 5: `AGENTS.md` raiz reescrito + mapa no README**
   - **Description**: raiz remove as regras que foram para a base e fica
     com: descoberta de código SINTETIZADA (codebase-memory antes de
     grep/glob, recovery `list_projects`, referência à skill
@@ -257,10 +257,13 @@ Anexo A aprovado); o executor materializa copiando.
   - **Estimated scope**: Medium
 
 ### Checkpoint: Phase 1
-- [ ] Suíte completa verde (WSL): `.venv/bin/pytest -m "unit or tools or opencode"`
-- [ ] Skills de escrita importadas com revisão de segurança documentada
-- [ ] Base entregue nos dois harnesses sem conflito com codebase-memory-mcp
-- [ ] Bootstrap re-executado com sucesso
+- [x] Suíte completa verde (WSL): `.venv/bin/pytest -m "unit or tools or opencode"`
+- [x] Skills de escrita importadas com revisão de segurança documentada
+  (APROVADAS; detalhes nos UPSTREAM.md de cada skill)
+- [x] Base entregue nos dois harnesses sem conflito com codebase-memory-mcp
+  (convivência por concatenação — ver nota na Task 4)
+- [x] Bootstrap re-executado com sucesso (home real: links harness-conf +
+  AGENTS.md = base + bloco do mcp preservado)
 - [ ] Review com humano antes de prosseguir
 
 ### Phase 2: Curadoria unificada no docs/README.md (D2, D3)
