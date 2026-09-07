@@ -5,12 +5,19 @@ import pytest
 
 DIRECT_CONSUMERS = ("analista",)
 FORMER_GRILL_ME_CONSUMERS = ("dba", "eng-software", "front", "qa", "sec")
+CONTEXTUALIZATION_MARKER = "Nunca presuma que o humano conhece"
 
 
 def agent_content(repo_root: Path, name: str) -> str:
     return (repo_root / "harness-conf/agents" / f"{name}.md").read_text(
         encoding="utf-8"
     )
+
+
+def skill_content(repo_root: Path) -> str:
+    return (
+        repo_root / "harness-conf/skills/question-orchestration/SKILL.md"
+    ).read_text(encoding="utf-8")
 
 
 @pytest.mark.unit
@@ -65,3 +72,31 @@ def test_scope_definition_workflow_references_question_orchestration(
     )
 
     assert "question-orchestration" in workflow
+
+
+@pytest.mark.unit
+def test_question_protocol_has_persisted_artifact_context_clause(
+    repo_root: Path,
+) -> None:
+    content = skill_content(repo_root)
+
+    assert "artefato de planejamento" in content
+    assert "contexto relevante" in content
+    assert "fase atual" in content
+    assert "escopo" in content
+    assert "não está lendo" in content
+    assert CONTEXTUALIZATION_MARKER in content
+
+
+@pytest.mark.unit
+def test_persisted_artifact_context_clause_is_single_sourced(
+    repo_root: Path,
+) -> None:
+    agents_dir = repo_root / "harness-conf/agents"
+
+    for agent_file in sorted(agents_dir.glob("*.md")):
+        content = agent_file.read_text(encoding="utf-8")
+        assert CONTEXTUALIZATION_MARKER not in content, (
+            f"{agent_file.name} duplica a cláusula de contextualização "
+            "que pertence à skill question-orchestration"
+        )

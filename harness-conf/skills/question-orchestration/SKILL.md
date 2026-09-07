@@ -25,6 +25,18 @@ Não define a estrutura do plano nem a política de Git. Também não define
 tarefas de domínio, persistência do plano, commits, handoff, replan ou
 revisão.
 
+## Contextualização com artefato persistido
+
+Quando existir artefato de planejamento ou de estado persistido (plano,
+arquivo de estado, registro de decisões), toda interação com o humano —
+pergunta, confirmação ou decisão — carrega o contexto relevante do artefato:
+a fase atual, as decisões já registradas que afetam a pergunta e o escopo em
+que a pergunta se insere.
+
+Motivação: o artefato é do agente. O humano não está lendo-o; a informação
+precisa vir até ele na conversa. Nunca presuma que o humano conhece o
+conteúdo do artefato — traga o trecho relevante ao perguntar.
+
 ## Modo direto
 
 Use quando o agente conversa diretamente com o humano.
