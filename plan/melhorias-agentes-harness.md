@@ -138,7 +138,9 @@ Anexo A aprovado); o executor materializa copiando.
      revisor sugere 1-2 linhas na seção Bootstrap do AGENTS.md raiz.
 - Nota operacional: a tool `task` não está disponível para o subagente
   executor (encadeamento executor→worker não suportado nesta
-  plataforma). Modalidade das próximas fases pendente de decisão.
+  plataforma). **Modalidade A aprovada**: o orquestrador spawna workers
+  (luna) diretamente, em paralelo ao executor, para lotes mecânicos
+  identificados; executor solo quando não houver lote mecânico claro.
 
 - **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
   Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
@@ -350,6 +352,16 @@ Anexo A aprovado); o executor materializa copiando.
 - [ ] Curadoria coerente end-to-end (templates, curador, scaffold, agentes)
 - [ ] Review com humano antes de prosseguir
 
+- [ ] **Task 9b (adicionada no checkpoint da Fase 1, aprovada)**: na seção
+  Bootstrap do `AGENTS.md` raiz, adicionar 1-2 linhas apontando os fluxos
+  docling/TLS detalhados no `README.md`.
+  - **Acceptance criteria**: seção Bootstrap referencia os fluxos; sem
+    duplicar o conteúdo do README.
+  - **Verification**: leitura do trecho.
+  - **Dependencies**: Task 9
+  - **Files likely touched**: `AGENTS.md`
+  - **Estimated scope**: XS
+
 ### Phase 3: Skills — spec-executavel e migrações (D8, D10, D11)
 
 - [ ] **Task 10: Criar a skill `spec-executavel`**
@@ -431,9 +443,12 @@ Anexo A aprovado); o executor materializa copiando.
     `get_code_snippet`, `query_graph`, `search_code`,
     `get_architecture`), ordem search_graph→trace_path→
     get_code_snippet→query_graph→get_architecture, busca em docs via
-    nós `Section` (Cypher), fallback estrito grep/glob. Description
-    condicionada: ativar apenas quando o AGENTS.md do repo indicar
-    codebase-memory.
+    nós `Section` (Cypher), fallback estrito grep/glob. Description da
+    skill `code-explorer-priority` condicionada: ativar apenas
+    quando o AGENTS.md do repo indicar codebase-memory.
+    **Adendo (aprovado no checkpoint da Fase 1)**: reescrever a Etapa 3
+    de `harness-conf/commands/index-codebase.md` para remover a
+    referência ao extinto `.github/copilot-specific.instructions.md`.
   - **Acceptance criteria**: skill contém os detalhes; description
     condicionada; base/raiz sem duplicar; testes verdes.
   - **Verification**: leitura; `.venv/bin/pytest -m "unit or tools"`.
