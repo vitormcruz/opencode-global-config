@@ -65,11 +65,11 @@ def test_copilot_adapter_hides_agent_tool_when_task_allowlist_has_only_model_ids
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    agents = repo / "agents"
+    agents = repo / "harness-conf" / "agents"
     agents.mkdir(parents=True)
-    (repo / "commands").mkdir()
-    (repo / "skills").mkdir()
-    (repo / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills").mkdir()
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
     (repo / ".github").mkdir()
     (agents / "planner.md").write_text(
         """---
@@ -105,11 +105,11 @@ def test_copilot_adapter_keeps_builtin_agent_type_in_task_allowlist(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    agents = repo / "agents"
+    agents = repo / "harness-conf" / "agents"
     agents.mkdir(parents=True)
-    (repo / "commands").mkdir()
-    (repo / "skills").mkdir()
-    (repo / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills").mkdir()
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
     (repo / ".github").mkdir()
     (agents / "planner.md").write_text(
         """---
@@ -252,7 +252,7 @@ def test_copilot_adapter_preserves_skill_content_without_path_rewrite(
 
     assert status == 0
     source = (
-        repo_root / "skills" / "web-research-exa-crawl4ai" / "SKILL.md"
+        repo_root / "harness-conf" / "skills" / "web-research-exa-crawl4ai" / "SKILL.md"
     )
     copied = (
         tmp_path
@@ -323,14 +323,14 @@ def test_copilot_adapter_rejects_invalid_skill_name(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    (repo / "agents").mkdir(parents=True)
-    (repo / "commands").mkdir()
-    (repo / "skills" / "Invalid_Name").mkdir(parents=True)
-    (repo / "skills" / "Invalid_Name" / "SKILL.md").write_text(
+    (repo / "harness-conf" / "agents").mkdir(parents=True)
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills" / "Invalid_Name").mkdir(parents=True)
+    (repo / "harness-conf" / "skills" / "Invalid_Name" / "SKILL.md").write_text(
         "# Invalid",
         encoding="utf-8",
     )
-    (repo / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
     (repo / ".github").mkdir()
 
     status, _, error = run_adapter(monkeypatch, repo, tmp_path)

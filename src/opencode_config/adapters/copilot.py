@@ -14,6 +14,8 @@ import shutil
 import sys
 from typing import TextIO
 
+from opencode_config.lib.paths import HARNESS_CONF_DIR
+
 HELP_TEXT = """opencode-copilot-adapter
 
 Sincroniza a fonte canonica deste repositorio com o Copilot CLI.
@@ -164,10 +166,11 @@ def _resolve_repo_root(explicit: str | None) -> Path:
 
     for candidate in candidates:
         root = candidate.expanduser().resolve()
+        harness = root / HARNESS_CONF_DIR
         if (
-            (root / "agents").is_dir()
-            and (root / "commands").is_dir()
-            and (root / "skills").is_dir()
+            (harness / "agents").is_dir()
+            and (harness / "commands").is_dir()
+            and (harness / "skills").is_dir()
         ):
             return root
 
@@ -431,7 +434,7 @@ def _sync_skills(
     output("--- Skills ---")
     skills_dir.mkdir(parents=True, exist_ok=True)
     count = 0
-    for source in sorted((repository / "skills").iterdir()):
+    for source in sorted((repository / HARNESS_CONF_DIR / "skills").iterdir()):
         if not source.is_dir() or not (source / "SKILL.md").is_file():
             continue
         _copy_skill(source, skills_dir / source.name, backup_dir)
@@ -449,7 +452,7 @@ def _sync_agents(
     output("")
     output("--- Agents ---")
     agents_dir.mkdir(parents=True, exist_ok=True)
-    sources = sorted((repository / "agents").glob("*.md"))
+    sources = sorted((repository / HARNESS_CONF_DIR / "agents").glob("*.md"))
     available_agent_types = _COPILOT_BUILTIN_AGENT_TYPES | {
         source.stem for source in sources
     }
@@ -503,7 +506,9 @@ def _sync_commands(
     output("--- Commands ---")
     skills_dir.mkdir(parents=True, exist_ok=True)
     count = 0
-    for source in sorted((repository / "commands").glob("*.md")):
+    for source in sorted(
+        (repository / HARNESS_CONF_DIR / "commands").glob("*.md")
+    ):
         name = source.stem
         destination = skills_dir / name
         _backup_if_exists(destination, backup_dir)
@@ -529,7 +534,7 @@ def _sync_default_artifacts(
 ) -> None:
     output("")
     output("--- Default Artifacts ---")
-    source = repository / "agents" / "default-artifacts"
+    source = repository / HARNESS_CONF_DIR / "agents" / "default-artifacts"
     if not source.is_dir():
         output("AVISO agents/default-artifacts nao encontrado")
         return
@@ -573,15 +578,17 @@ def _print_plan(
 ) -> None:
     skill_count = sum(
         1
-        for path in (repository / "skills").iterdir()
+        for path in (repository / HARNESS_CONF_DIR / "skills").iterdir()
         if path.is_dir() and (path / "SKILL.md").is_file()
     )
     agent_count = sum(
         1
-        for path in (repository / "agents").glob("*.md")
+        for path in (repository / HARNESS_CONF_DIR / "agents").glob("*.md")
         if path.stem not in _OPENCODE_ONLY_AGENTS
     )
-    command_count = len(list((repository / "commands").glob("*.md")))
+    command_count = len(
+        list((repository / HARNESS_CONF_DIR / "commands").glob("*.md"))
+    )
     output(f"Repo:         {repository}")
     output(f"Skills:       {skills_dir}")
     output(f"Instructions: {instructions_dir}")
