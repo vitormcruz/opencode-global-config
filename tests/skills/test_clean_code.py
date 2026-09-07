@@ -7,14 +7,14 @@ import pytest
 
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
-    return (repo_root / "skills/clean-code/SKILL.md").read_text(
+    return (repo_root / "harness-conf" / "skills/clean-code/SKILL.md").read_text(
         encoding="utf-8"
     )
 
 
 @pytest.mark.unit
 def test_clean_code_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/clean-code/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/clean-code/SKILL.md").is_file()
 
 
 @pytest.mark.unit

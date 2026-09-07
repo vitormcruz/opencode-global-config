@@ -19,7 +19,9 @@ REVIEWER_AGENTS = (
 
 
 def frontmatter(repo_root: pytest.FixtureRequest, agent: str) -> str:
-    content = (repo_root / "agents" / f"{agent}.md").read_text(encoding="utf-8")
+    content = (repo_root / "harness-conf/agents" / f"{agent}.md").read_text(
+        encoding="utf-8"
+    )
     return content.split("---", 2)[1]
 
 

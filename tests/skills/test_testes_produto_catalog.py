@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture
 def catalog(repo_root: Path) -> str:
-    return (repo_root / "skills/testes-produto-catalog/SKILL.md").read_text(
+    return (repo_root / "harness-conf/skills/testes-produto-catalog/SKILL.md").read_text(
         encoding="utf-8"
     )
 

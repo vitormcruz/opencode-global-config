@@ -16,10 +16,10 @@ _CONTEXT_KINDS = {"agent", "command", "empty", "skill"}
 
 def _artifact_source(repository: Path, kind: str, name: str) -> Path:
     if kind == "agent":
-        return repository / "agents" / f"{name}.md"
+        return repository / "harness-conf" / "agents" / f"{name}.md"
     if kind == "command":
-        return repository / "commands" / f"{name}.md"
-    return repository / "skills" / name
+        return repository / "harness-conf" / "commands" / f"{name}.md"
+    return repository / "harness-conf" / "skills" / name
 
 
 def prepare_test_context(

@@ -15,11 +15,19 @@ import sys
 import tempfile
 from typing import TextIO
 
+from opencode_config.lib.paths import HARNESS_CONF_DIR
+
 SKILL_COMMAND_TIMEOUT_SECONDS = 300
 
 
 class SyncError(RuntimeError):
     """Indica que um upstream não pode ser sincronizado com segurança."""
+
+
+def _skills_root(repo_root: Path) -> Path:
+    """Retorna a raiz das skills dentro de harness-conf/."""
+
+    return repo_root / HARNESS_CONF_DIR / "skills"
 
 
 @dataclass(frozen=True)
@@ -89,7 +97,7 @@ ADDYOSMANI_REFERENCES = {
 def list_updatable(repo_root: Path) -> list[str]:
     """Lista, em ordem alfabética, as skills com metadados de upstream."""
 
-    skills_root = repo_root / "skills"
+    skills_root = _skills_root(repo_root)
     return sorted(
         upstream.parent.name
         for upstream in skills_root.glob("*/UPSTREAM.md")
@@ -225,7 +233,7 @@ def _sync_accessibility(
     if not (upstream_skill / "SKILL.md").is_file():
         raise SyncError("Path upstream da accessibility-audit nao encontrado.")
 
-    local_skill = repo_root / "skills" / "accessibility-audit"
+    local_skill = _skills_root(repo_root) / "accessibility-audit"
     _copy_skill_md(upstream_skill, local_skill)
     playbook = upstream_skill / "resources" / "implementation-playbook.md"
     if playbook.is_file():
@@ -263,7 +271,7 @@ def _sync_addyosmani(
         if not (upstream_skill / "SKILL.md").is_file():
             continue
 
-        local_skill = repo_root / "skills" / skill_name
+        local_skill = _skills_root(repo_root) / skill_name
         _copy_skill_md(upstream_skill, local_skill)
         files = [f"skills/{skill_name}/SKILL.md  (copiado apenas na criacao inicial)"]
 
@@ -314,7 +322,7 @@ def _sync_prompt_improver(
     if not (upstream_skill / "SKILL.md").is_file():
         raise SyncError("SKILL.md da prompt-improver nao encontrado.")
 
-    local_skill = repo_root / "skills" / "prompt-improver"
+    local_skill = _skills_root(repo_root) / "prompt-improver"
     _copy_skill_md(upstream_skill, local_skill)
     for directory in ("references", "assets", "scripts"):
         _replace_directory(
@@ -511,7 +519,7 @@ def update_skill(
 ) -> UpdateResult:
     """Executa o fluxo documentado de atualização de uma skill."""
 
-    upstream_file = repo_root / "skills" / skill_name / "UPSTREAM.md"
+    upstream_file = _skills_root(repo_root) / skill_name / "UPSTREAM.md"
     if not upstream_file.is_file():
         return _format_update_result(
             skill_name,

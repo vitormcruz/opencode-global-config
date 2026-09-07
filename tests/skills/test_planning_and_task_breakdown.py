@@ -8,7 +8,7 @@ import pytest
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
     return (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/planning-and-task-breakdown/SKILL.md"
     ).read_text(encoding="utf-8")
 
@@ -16,7 +16,7 @@ def skill_content(repo_root: Path) -> str:
 @pytest.mark.unit
 def test_planning_skill_exists(repo_root: Path) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/planning-and-task-breakdown/SKILL.md"
     ).is_file()
 

@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture
 def sec_content(repo_root: Path) -> str:
-    return (repo_root / "agents/sec.md").read_text(encoding="utf-8")
+    return (repo_root / "harness-conf" / "agents/sec.md").read_text(encoding="utf-8")
 
 
 @pytest.mark.unit

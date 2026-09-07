@@ -7,13 +7,15 @@ import pytest
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
     return (
-        repo_root / "skills/question-orchestration/SKILL.md"
+        repo_root / "harness-conf" / "skills/question-orchestration/SKILL.md"
     ).read_text(encoding="utf-8")
 
 
 @pytest.mark.unit
 def test_question_orchestration_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/question-orchestration/SKILL.md").is_file()
+    assert (
+        repo_root / "harness-conf/skills/question-orchestration/SKILL.md"
+    ).is_file()
 
 
 @pytest.mark.unit

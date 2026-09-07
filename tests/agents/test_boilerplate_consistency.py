@@ -74,7 +74,7 @@ def test_contrato_operacional_is_identical_between_specialists(
 ) -> None:
     """Contrato Operacional é idêntico entre especialistas (front, qa, sec)."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     baseline = extract_contrato(agents_dir / "front.md")
 
     for agent in ("qa", "sec"):
@@ -89,7 +89,7 @@ def test_contrato_operacional_is_identical_between_specialists(
 def test_specialists_have_subagent_no_commit_rule(repo_root: Path) -> None:
     """Especialistas têm regra de subagente — não commitar."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     specialists = ("dba", "front", "qa", "sec", "rev")
 
     for agent in specialists:
@@ -106,7 +106,7 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
 ) -> None:
     """Introdução de Evidências é idêntica entre os seis agentes."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     baseline = extract_evidencias_intro(agents_dir / "eng-software.md")
 
     for agent in ("front", "qa", "sec", "dba", "rev"):
@@ -129,7 +129,7 @@ def test_commit_enabled_agents_reference_git_workflow_skill(
 ) -> None:
     """Apenas committers referenciam git-workflow."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     agents = (
         "eng-software",
     )
@@ -147,7 +147,7 @@ def test_specialists_do_not_have_git_workflow_in_mandatory(
 ) -> None:
     """Especialistas não têm git-workflow na tabela de obrigatórias."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     specialists = ("dba", "front", "qa", "sec", "rev")
 
     for agent in specialists:
@@ -178,7 +178,7 @@ def test_specialists_do_not_have_git_workflow_in_mandatory(
 def test_specialists_have_regras_inviolaveis_block(repo_root: Path) -> None:
     """Agentes do workflow têm bloco Regras Invioláveis com ≤10 linhas."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     agents = ("dba", "front", "qa", "sec", "rev", "eng-software")
 
     for agent in agents:
@@ -203,7 +203,7 @@ def test_specialists_have_regras_inviolaveis_block(repo_root: Path) -> None:
 def test_dba_references_data_modeling_skill(repo_root: Path) -> None:
     """dba referencia a skill data-modeling."""
 
-    content = (repo_root / "agents/dba.md").read_text(encoding="utf-8")
+    content = (repo_root / "harness-conf" / "agents/dba.md").read_text(encoding="utf-8")
     assert "data-modeling" in content
 
 
@@ -211,7 +211,7 @@ def test_dba_references_data_modeling_skill(repo_root: Path) -> None:
 def test_rev_has_domain_skill_anchors(repo_root: Path) -> None:
     """rev tem âncoras às skills de domínio para revisão."""
 
-    content = (repo_root / "agents/rev.md").read_text(encoding="utf-8")
+    content = (repo_root / "harness-conf" / "agents/rev.md").read_text(encoding="utf-8")
     domain_skills = (
         "security-and-hardening",
         "data-modeling",
@@ -232,7 +232,7 @@ def test_rev_has_domain_skill_anchors(repo_root: Path) -> None:
 def test_rev_is_read_only(repo_root: Path) -> None:
     """rev é read-only — nunca edita código em revisão."""
 
-    content = (repo_root / "agents/rev.md").read_text(encoding="utf-8")
+    content = (repo_root / "harness-conf" / "agents/rev.md").read_text(encoding="utf-8")
     assert "Read-only" in content or "read-only" in content
     assert "nunca editar código" in content or "nunca corrige" in content
 
@@ -241,7 +241,7 @@ def test_rev_is_read_only(repo_root: Path) -> None:
 def test_eng_software_has_committer_unico_rule(repo_root: Path) -> None:
     """eng-software é o committer único do workflow."""
 
-    content = (repo_root / "agents/eng-software.md").read_text(
+    content = (repo_root / "harness-conf" / "agents/eng-software.md").read_text(
         encoding="utf-8"
     )
     assert "Committer único" in content

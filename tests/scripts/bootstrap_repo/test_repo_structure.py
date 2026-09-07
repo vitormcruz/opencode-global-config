@@ -17,7 +17,7 @@ def test_agents_file_exists(repo_root: Path) -> None:
 
 
 def test_opencode_json_exists(repo_root: Path) -> None:
-    assert (repo_root / "opencode.json").is_file()
+    assert (repo_root / "harness-conf" / "opencode.json").is_file()
 
 
 def test_readme_file_exists(repo_root: Path) -> None:
@@ -25,15 +25,15 @@ def test_readme_file_exists(repo_root: Path) -> None:
 
 
 def test_agents_directory_exists(repo_root: Path) -> None:
-    assert (repo_root / "agents").is_dir()
+    assert (repo_root / "harness-conf" / "agents").is_dir()
 
 
 def test_commands_directory_exists(repo_root: Path) -> None:
-    assert (repo_root / "commands").is_dir()
+    assert (repo_root / "harness-conf" / "commands").is_dir()
 
 
 def test_skills_directory_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills").is_dir()
+    assert (repo_root / "harness-conf" / "skills").is_dir()
 
 
 def test_scripts_directory_exists(repo_root: Path) -> None:
@@ -41,37 +41,37 @@ def test_scripts_directory_exists(repo_root: Path) -> None:
 
 
 def test_doc_extract_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/doc-extract/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/doc-extract/SKILL.md").is_file()
 
 
 def test_md_export_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/md-export/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/md-export/SKILL.md").is_file()
 
 
 def test_svg_to_image_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/svg-to-image/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/svg-to-image/SKILL.md").is_file()
 
 
 def test_prompt_improver_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/prompt-improver/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/prompt-improver/SKILL.md").is_file()
 
 
 def test_web_research_skill_exists(repo_root: Path) -> None:
     assert (
-        repo_root / "skills/web-research-exa-crawl4ai/SKILL.md"
+        repo_root / "harness-conf" / "skills/web-research-exa-crawl4ai/SKILL.md"
     ).is_file()
 
 
 def test_aws_add_account_sso_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/aws-add-account-sso/SKILL.md").is_file()
+    assert (repo_root / "harness-conf/skills/aws-add-account-sso/SKILL.md").is_file()
 
 
 def test_aws_sso_login_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/aws-sso-login/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/aws-sso-login/SKILL.md").is_file()
 
 
 def test_all_skill_directories_have_skill_file(repo_root: Path) -> None:
-    skill_directories = list((repo_root / "skills").glob("*/"))
+    skill_directories = list((repo_root / "harness-conf" / "skills").glob("*/"))
     missing = [
         skill_dir
         for skill_dir in skill_directories
@@ -79,12 +79,12 @@ def test_all_skill_directories_have_skill_file(repo_root: Path) -> None:
     ]
 
     if not skill_directories:
-        missing.append(repo_root / "skills/*/")
+        missing.append(repo_root / "harness-conf" / "skills/*/")
     assert not missing, f"SKILL.md ausente em: {missing[0]}"
 
 
 def test_unused_upstream_skills_were_removed(repo_root: Path) -> None:
-    skills_root = repo_root / "skills"
+    skills_root = repo_root / "harness-conf" / "skills"
 
     assert not (skills_root / "caveman").exists()
     assert not (skills_root / "grill-me").exists()
@@ -110,21 +110,21 @@ def test_addyosmani_skill_has_skill_and_upstream_files(
     repo_root: Path,
     skill_name: str,
 ) -> None:
-    skill_dir = repo_root / "skills" / skill_name
+    skill_dir = repo_root / "harness-conf" / "skills" / skill_name
     assert (skill_dir / "SKILL.md").is_file()
     assert (skill_dir / "UPSTREAM.md").is_file()
 
 
 def test_test_driven_development_has_testing_patterns(repo_root: Path) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/test-driven-development/references/testing-patterns.md"
     ).is_file()
 
 
 def test_security_hardening_has_security_checklist(repo_root: Path) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/security-and-hardening/references/security-checklist.md"
     ).is_file()
 
@@ -133,7 +133,7 @@ def test_performance_optimization_has_performance_checklist(
     repo_root: Path,
 ) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/performance-optimization/references/performance-checklist.md"
     ).is_file()
 
@@ -142,7 +142,7 @@ def test_frontend_ui_engineering_has_accessibility_checklist(
     repo_root: Path,
 ) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/frontend-ui-engineering/references/accessibility-checklist.md"
     ).is_file()
 
@@ -150,7 +150,7 @@ def test_frontend_ui_engineering_has_accessibility_checklist(
 def test_accessibility_audit_has_skill_and_upstream_files(
     repo_root: Path,
 ) -> None:
-    skill_dir = repo_root / "skills/accessibility-audit"
+    skill_dir = repo_root / "harness-conf" / "skills/accessibility-audit"
     assert (skill_dir / "SKILL.md").is_file()
     assert (skill_dir / "UPSTREAM.md").is_file()
 
@@ -159,7 +159,7 @@ def test_accessibility_audit_has_implementation_playbook(
     repo_root: Path,
 ) -> None:
     assert (
-        repo_root
+        repo_root / "harness-conf"
         / "skills/accessibility-audit/resources/implementation-playbook.md"
     ).is_file()
 
@@ -181,23 +181,23 @@ def _assert_frontmatter(path: Path) -> None:
 
 
 def test_dba_agent_has_frontmatter(repo_root: Path) -> None:
-    _assert_frontmatter(repo_root / "agents/dba.md")
+    _assert_frontmatter(repo_root / "harness-conf" / "agents/dba.md")
 
 
 def test_analista_agent_has_frontmatter(repo_root: Path) -> None:
-    _assert_frontmatter(repo_root / "agents/analista.md")
+    _assert_frontmatter(repo_root / "harness-conf" / "agents/analista.md")
 
 
 def test_aws_analista_agent_has_frontmatter(repo_root: Path) -> None:
-    _assert_frontmatter(repo_root / "agents/aws-analista.md")
+    _assert_frontmatter(repo_root / "harness-conf" / "agents/aws-analista.md")
 
 
 def test_revisor_historia_agent_has_frontmatter(repo_root: Path) -> None:
-    _assert_frontmatter(repo_root / "agents/revisor-historia.md")
+    _assert_frontmatter(repo_root / "harness-conf" / "agents/revisor-historia.md")
 
 
 def test_all_agents_have_description(repo_root: Path) -> None:
-    agent_files = list((repo_root / "agents").glob("*.md"))
+    agent_files = list((repo_root / "harness-conf" / "agents").glob("*.md"))
     missing = [
         agent
         for agent in agent_files
@@ -208,7 +208,7 @@ def test_all_agents_have_description(repo_root: Path) -> None:
     ]
 
     if not agent_files:
-        missing.append(repo_root / "agents/*.md")
+        missing.append(repo_root / "harness-conf" / "agents/*.md")
     assert not missing, f"description ausente em: {missing[0]}"
 
 
@@ -259,7 +259,9 @@ def _jsonc_validation_output(path: Path) -> tuple[bool, str]:
 
 
 def test_opencode_json_is_valid_jsonc(repo_root: Path) -> None:
-    success, output = _jsonc_validation_output(repo_root / "opencode.json")
+    success, output = _jsonc_validation_output(
+        repo_root / "harness-conf" / "opencode.json"
+    )
 
     assert success
     assert output == "valid"
@@ -288,7 +290,7 @@ def test_copilot_python_adapter_exists(repo_root: Path) -> None:
 
 def test_code_explorer_priority_skill_exists(repo_root: Path) -> None:
     assert (
-        repo_root / "skills/code-explorer-priority/SKILL.md"
+        repo_root / "harness-conf" / "skills/code-explorer-priority/SKILL.md"
     ).is_file()
 
 
@@ -296,7 +298,7 @@ def test_code_explorer_priority_skill_has_frontmatter(
     repo_root: Path,
 ) -> None:
     _assert_frontmatter(
-        repo_root / "skills/code-explorer-priority/SKILL.md"
+        repo_root / "harness-conf" / "skills/code-explorer-priority/SKILL.md"
     )
 
 

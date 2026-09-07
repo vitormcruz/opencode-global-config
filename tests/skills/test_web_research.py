@@ -9,13 +9,15 @@ import pytest
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
     return (
-        repo_root / "skills/web-research-exa-crawl4ai/SKILL.md"
+        repo_root / "harness-conf" / "skills/web-research-exa-crawl4ai/SKILL.md"
     ).read_text(encoding="utf-8")
 
 
 @pytest.mark.unit
 def test_skill_file_exists(repo_root: Path):
-    assert (repo_root / "skills/web-research-exa-crawl4ai/SKILL.md").is_file()
+    assert (
+        repo_root / "harness-conf/skills/web-research-exa-crawl4ai/SKILL.md"
+    ).is_file()
 
 
 @pytest.mark.unit

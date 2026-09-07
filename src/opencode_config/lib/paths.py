@@ -7,6 +7,8 @@ from pathlib import Path
 
 from .environment import EnvironmentKind
 
+HARNESS_CONF_DIR = "harness-conf"
+
 
 @dataclass(frozen=True)
 class UserSpacePaths:

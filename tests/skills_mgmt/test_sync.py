@@ -173,25 +173,31 @@ def test_sync_yes_skips_interactive_confirmation(
 
 @pytest.mark.unit
 def test_accessibility_skill_file_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/accessibility-audit/SKILL.md").is_file()
+    assert (
+        repo_root / "harness-conf" / "skills/accessibility-audit/SKILL.md"
+    ).is_file()
 
 
 @pytest.mark.unit
 def test_accessibility_upstream_file_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/accessibility-audit/UPSTREAM.md").is_file()
+    assert (
+        repo_root / "harness-conf" / "skills/accessibility-audit/UPSTREAM.md"
+    ).is_file()
 
 
 @pytest.mark.unit
 def test_accessibility_playbook_exists(repo_root: Path) -> None:
     assert (
-        repo_root / "skills/accessibility-audit/resources/implementation-playbook.md"
+        repo_root
+        / "harness-conf"
+        / "skills/accessibility-audit/resources/implementation-playbook.md"
     ).is_file()
 
 
 @pytest.mark.unit
 def test_accessibility_upstream_references_expected_repository(repo_root: Path) -> None:
     metadata = (
-        repo_root / "skills/accessibility-audit/UPSTREAM.md"
+        repo_root / "harness-conf" / "skills/accessibility-audit/UPSTREAM.md"
     ).read_text(encoding="utf-8")
 
     assert "sickn33/antigravity-awesome-skills" in metadata
@@ -200,7 +206,7 @@ def test_accessibility_upstream_references_expected_repository(repo_root: Path) 
 @pytest.mark.unit
 def test_accessibility_upstream_documents_license(repo_root: Path) -> None:
     metadata = (
-        repo_root / "skills/accessibility-audit/UPSTREAM.md"
+        repo_root / "harness-conf" / "skills/accessibility-audit/UPSTREAM.md"
     ).read_text(encoding="utf-8")
 
     assert "CC BY" in metadata
@@ -208,7 +214,9 @@ def test_accessibility_upstream_documents_license(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_accessibility_skill_contains_portuguese_triggers(repo_root: Path) -> None:
-    skill = (repo_root / "skills/accessibility-audit/SKILL.md").read_text(
+    skill = (
+        repo_root / "harness-conf" / "skills/accessibility-audit/SKILL.md"
+    ).read_text(
         encoding="utf-8"
     )
 
@@ -220,7 +228,7 @@ def test_accessibility_metadata_preserves_description_adaptation(
     repo_root: Path,
 ) -> None:
     metadata = (
-        repo_root / "skills/accessibility-audit/UPSTREAM.md"
+        repo_root / "harness-conf" / "skills/accessibility-audit/UPSTREAM.md"
     ).read_text(encoding="utf-8")
 
     assert "Adaptacao da description" in metadata
@@ -231,11 +239,15 @@ def test_list_updatable_returns_sorted_skills_with_upstream_metadata(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    (repo / "skills/without-upstream").mkdir(parents=True)
-    (repo / "skills/with-z/UPSTREAM.md").parent.mkdir(parents=True)
-    (repo / "skills/with-z/UPSTREAM.md").write_text("metadata", encoding="utf-8")
-    (repo / "skills/with-a/UPSTREAM.md").parent.mkdir(parents=True)
-    (repo / "skills/with-a/UPSTREAM.md").write_text("metadata", encoding="utf-8")
+    (repo / "harness-conf/skills/without-upstream").mkdir(parents=True)
+    (repo / "harness-conf/skills/with-z/UPSTREAM.md").parent.mkdir(parents=True)
+    (repo / "harness-conf/skills/with-z/UPSTREAM.md").write_text(
+        "metadata", encoding="utf-8"
+    )
+    (repo / "harness-conf/skills/with-a/UPSTREAM.md").parent.mkdir(parents=True)
+    (repo / "harness-conf/skills/with-a/UPSTREAM.md").write_text(
+        "metadata", encoding="utf-8"
+    )
 
     assert skills_sync.list_updatable(repo) == ["with-a", "with-z"]
 
@@ -253,13 +265,17 @@ def test_addyosmani_help_mentions_target(
 @pytest.mark.unit
 def test_addyosmani_skill_files_exist(repo_root: Path) -> None:
     for skill_name in skills_sync.ADDYOSMANI_SKILLS:
-        assert (repo_root / "skills" / skill_name / "SKILL.md").is_file()
+        assert (
+            repo_root / "harness-conf" / "skills" / skill_name / "SKILL.md"
+        ).is_file()
 
 
 @pytest.mark.unit
 def test_addyosmani_upstream_files_exist(repo_root: Path) -> None:
     for skill_name in skills_sync.ADDYOSMANI_SKILLS:
-        assert (repo_root / "skills" / skill_name / "UPSTREAM.md").is_file()
+        assert (
+            repo_root / "harness-conf" / "skills" / skill_name / "UPSTREAM.md"
+        ).is_file()
 
 
 @pytest.mark.unit
@@ -269,7 +285,7 @@ def test_addyosmani_metadata_references_expected_repository(repo_root: Path) -> 
         "security-and-hardening",
     ):
         metadata = (
-            repo_root / "skills" / skill_name / "UPSTREAM.md"
+            repo_root / "harness-conf" / "skills" / skill_name / "UPSTREAM.md"
         ).read_text(encoding="utf-8")
         assert "addyosmani/agent-skills" in metadata
 
@@ -278,7 +294,12 @@ def test_addyosmani_metadata_references_expected_repository(repo_root: Path) -> 
 def test_addyosmani_reference_files_exist(repo_root: Path) -> None:
     for skill_name, reference_name in skills_sync.ADDYOSMANI_REFERENCES.items():
         assert (
-            repo_root / "skills" / skill_name / "references" / reference_name
+            repo_root
+            / "harness-conf"
+            / "skills"
+            / skill_name
+            / "references"
+            / reference_name
         ).is_file()
 
 
@@ -288,7 +309,7 @@ def test_addyosmani_metadata_preserves_description_adaptation(
 ) -> None:
     for skill_name in skills_sync.ADDYOSMANI_SKILLS:
         metadata = (
-            repo_root / "skills" / skill_name / "UPSTREAM.md"
+            repo_root / "harness-conf" / "skills" / skill_name / "UPSTREAM.md"
         ).read_text(encoding="utf-8")
         assert "Adaptacao da description" in metadata
 
@@ -296,7 +317,7 @@ def test_addyosmani_metadata_preserves_description_adaptation(
 @pytest.mark.unit
 def test_check_only_does_not_change_local_skill_files(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
-    local_skill = repo / "skills/accessibility-audit"
+    local_skill = repo / "harness-conf/skills/accessibility-audit"
     local_skill.mkdir(parents=True)
     (local_skill / "SKILL.md").write_text("local skill", encoding="utf-8")
     (local_skill / "UPSTREAM.md").write_text(
@@ -343,7 +364,7 @@ def test_accessibility_sync_preserves_skill_and_description_adaptation(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    local_skill = repo / "skills/accessibility-audit"
+    local_skill = repo / "harness-conf/skills/accessibility-audit"
     local_skill.mkdir(parents=True)
     (local_skill / "SKILL.md").write_text("adapted skill", encoding="utf-8")
     (local_skill / "UPSTREAM.md").write_text(
@@ -384,7 +405,7 @@ def test_addyosmani_sync_copies_references_without_overwriting_skill(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    local_skill = repo / "skills/test-driven-development"
+    local_skill = repo / "harness-conf/skills/test-driven-development"
     local_skill.mkdir(parents=True)
     (local_skill / "SKILL.md").write_text("adapted skill", encoding="utf-8")
     (local_skill / "UPSTREAM.md").write_text(
@@ -417,7 +438,7 @@ def test_prompt_improver_sync_copies_assets_references_scripts_and_license(
     tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
-    local_skill = repo / "skills/prompt-improver"
+    local_skill = repo / "harness-conf/skills/prompt-improver"
     local_skill.mkdir(parents=True)
     (local_skill / "SKILL.md").write_text("adapted skill", encoding="utf-8")
     upstream = git_upstream(

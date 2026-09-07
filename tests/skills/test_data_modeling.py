@@ -7,14 +7,14 @@ import pytest
 
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
-    return (repo_root / "skills/data-modeling/SKILL.md").read_text(
+    return (repo_root / "harness-conf" / "skills/data-modeling/SKILL.md").read_text(
         encoding="utf-8"
     )
 
 
 @pytest.mark.unit
 def test_data_modeling_skill_exists(repo_root: Path) -> None:
-    assert (repo_root / "skills/data-modeling/SKILL.md").is_file()
+    assert (repo_root / "harness-conf" / "skills/data-modeling/SKILL.md").is_file()
 
 
 @pytest.mark.unit
@@ -80,7 +80,7 @@ def test_data_modeling_covers_expand_migrate_contract(
 
 @pytest.mark.unit
 def test_data_modeling_under_400_lines(repo_root: Path) -> None:
-    lines = (repo_root / "skills/data-modeling/SKILL.md").read_text(
+    lines = (repo_root / "harness-conf" / "skills/data-modeling/SKILL.md").read_text(
         encoding="utf-8"
     ).splitlines()
     assert len(lines) <= 400

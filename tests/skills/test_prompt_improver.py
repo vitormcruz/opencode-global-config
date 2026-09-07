@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
-    return (repo_root / "skills/prompt-improver/SKILL.md").read_text(
+    return (repo_root / "harness-conf" / "skills/prompt-improver/SKILL.md").read_text(
         encoding="utf-8"
     )
 

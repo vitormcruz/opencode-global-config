@@ -26,7 +26,7 @@ def test_workflow_does_not_run_specialty_suites_in_construction(
 def test_curador_produto_validates_orchestrator_at_test_phase(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "agents/curador-produto.md").read_text(
+    content = (repo_root / "harness-conf" / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
     lower = " ".join(content.lower().split())

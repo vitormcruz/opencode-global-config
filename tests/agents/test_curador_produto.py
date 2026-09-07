@@ -9,7 +9,7 @@ import pytest
 def agent_file(repo_root: Path, name: str) -> Path:
     """Retorna o arquivo de agente solicitado."""
 
-    return repo_root / "agents" / f"{name}.md"
+    return repo_root / "harness-conf" / "agents" / f"{name}.md"
 
 
 @pytest.fixture
@@ -105,7 +105,9 @@ def test_curador_produto_references_default_artifacts(
     assert "default-artifacts/testes-por-especialidade.md" in curador_content
     assert "default-artifacts/testes-produto.md" in curador_content
     assert "default-artifacts/instrucoes-por-agente.md" in curador_content
-    spec = (repo_root / "agents/default-artifacts/testes-produto.md").read_text(
+    spec = (
+        repo_root / "harness-conf/agents/default-artifacts/testes-produto.md"
+    ).read_text(
         encoding="utf-8"
     )
     assert "testes-produto/target/" in spec
@@ -161,7 +163,7 @@ def test_curador_produto_requires_static_analysis_to_cover_test_code(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/references/interface-testes-produto.md"
+        repo_root / "harness-conf" / "agents/references/interface-testes-produto.md"
     ).read_text(encoding="utf-8")
     normalized = " ".join(content.split()).lower()
     assert "código de teste entra no mesmo scan" in normalized
@@ -358,7 +360,7 @@ def test_mensagens_curadoria_references_curador_produto(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/references/mensagens-curadoria.md"
+        repo_root / "harness-conf" / "agents/references/mensagens-curadoria.md"
     ).read_text(encoding="utf-8")
     assert "curador-produto" in content
     assert "curador-produto-editor" not in content
@@ -367,7 +369,7 @@ def test_mensagens_curadoria_references_curador_produto(
 @pytest.mark.unit
 def test_interface_testes_produto_reference_exists(repo_root: Path) -> None:
     assert (
-        repo_root / "agents/references/interface-testes-produto.md"
+        repo_root / "harness-conf" / "agents/references/interface-testes-produto.md"
     ).is_file()
 
 
@@ -376,8 +378,8 @@ def test_testes_produto_artifacts_do_not_expose_plan_ids(
     repo_root: Path,
 ) -> None:
     artifact_paths = (
-        "agents/curador-produto.md",
-        "skills/testes-produto-catalog/SKILL.md",
+        "harness-conf/agents/curador-produto.md",
+        "harness-conf/skills/testes-produto-catalog/SKILL.md",
     )
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b", re.IGNORECASE)
 

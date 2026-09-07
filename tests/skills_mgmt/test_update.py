@@ -13,7 +13,7 @@ def write_upstream_metadata(
     update_command: str | None = "opencode-skills sync prompt-improver",
     check_command: str | None = "opencode-skills sync prompt-improver --check-only",
 ) -> Path:
-    skill_dir = repo / "skills" / skill
+    skill_dir = repo / "harness-conf" / "skills" / skill
     skill_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "# Metadados do Upstream",
@@ -75,7 +75,9 @@ def test_list_excludes_skills_without_upstream_metadata(repo_root: Path) -> None
 
 @pytest.mark.unit
 def test_list_count_matches_upstream_metadata_files(repo_root: Path) -> None:
-    expected = len(list((repo_root / "skills").glob("*/UPSTREAM.md")))
+    expected = len(
+        list((repo_root / "harness-conf" / "skills").glob("*/UPSTREAM.md"))
+    )
 
     assert len(skills_sync.list_updatable(repo_root)) == expected
 
@@ -94,7 +96,7 @@ def test_list_outputs_only_upstream_skills_in_alphabetical_order(
 ) -> None:
     for skill in ("prompt-improver", "accessibility-audit", "test-driven-development"):
         write_upstream_metadata(tmp_path, skill)
-    (tmp_path / "skills/doc-extract").mkdir(parents=True)
+    (tmp_path / "harness-conf/skills/doc-extract").mkdir(parents=True)
 
     output = StringIO()
     status = skills_sync.run(
@@ -177,7 +179,7 @@ def test_update_without_documented_command_reports_no_clear_update_flow(
 
 @pytest.mark.unit
 def test_update_with_multiple_commands_reports_ambiguous_flow(tmp_path: Path) -> None:
-    skill_dir = tmp_path / "skills/prompt-improver"
+    skill_dir = tmp_path / "harness-conf/skills/prompt-improver"
     skill_dir.mkdir(parents=True)
     (skill_dir / "UPSTREAM.md").write_text(
         "\n".join(

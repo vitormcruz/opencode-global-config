@@ -20,7 +20,7 @@ def _section_until(content: str, heading: str, end: str) -> str:
 def test_eng_software_requires_clean_code_skills_on_build(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "agents/eng-software.md").read_text(
+    content = (repo_root / "harness-conf" / "agents/eng-software.md").read_text(
         encoding="utf-8"
     )
     required = _section_until(
@@ -43,7 +43,9 @@ def test_eng_software_requires_clean_code_skills_on_build(
 
 @pytest.mark.unit
 def test_front_requires_clean_code_skills_on_build(repo_root: Path) -> None:
-    content = (repo_root / "agents/front.md").read_text(encoding="utf-8")
+    content = (repo_root / "harness-conf/agents/front.md").read_text(
+        encoding="utf-8"
+    )
     required = _section_until(
         content,
         "### Obrigatórias (carregar ANTES da capacidade indicada)",
@@ -65,7 +67,7 @@ def test_front_requires_clean_code_skills_on_build(repo_root: Path) -> None:
 def test_simplification_description_activates_on_construction(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "skills/code-simplification/SKILL.md").read_text(
+    content = (repo_root / "harness-conf/skills/code-simplification/SKILL.md").read_text(
         encoding="utf-8"
     )
     frontmatter = content.split("---", 2)[1]

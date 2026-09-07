@@ -6,16 +6,16 @@ import pytest
 DISCOVERY_DOCS = (
     "AGENTS.md",
     ".github/copilot-specific.instructions.md",
-    "skills/code-explorer-priority/SKILL.md",
-    "commands/index-codebase.md",
-    "commands/bench-indexing.md",
+    "harness-conf/skills/code-explorer-priority/SKILL.md",
+    "harness-conf/commands/index-codebase.md",
+    "harness-conf/commands/bench-indexing.md",
 )
 
 
 @pytest.fixture
 def skill_content(repo_root: Path) -> str:
     return (
-        repo_root / "skills/code-explorer-priority/SKILL.md"
+        repo_root / "harness-conf" / "skills/code-explorer-priority/SKILL.md"
     ).read_text(encoding="utf-8")
 
 
@@ -29,7 +29,9 @@ def discovery_content(repo_root: Path) -> str:
 
 @pytest.mark.unit
 def test_code_explorer_skill_exists(repo_root: Path):
-    assert (repo_root / "skills/code-explorer-priority/SKILL.md").is_file()
+    assert (
+        repo_root / "harness-conf/skills/code-explorer-priority/SKILL.md"
+    ).is_file()
 
 
 @pytest.mark.unit
@@ -94,7 +96,7 @@ def test_project_not_found_recovery_is_preserved(discovery_content: str):
 
 @pytest.mark.unit
 def test_index_command_has_no_linux_path_for_copilot(repo_root: Path):
-    command = (repo_root / "commands/index-codebase.md").read_text(
+    command = (repo_root / "harness-conf" / "commands/index-codebase.md").read_text(
         encoding="utf-8"
     )
 

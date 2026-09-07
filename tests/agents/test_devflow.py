@@ -9,13 +9,15 @@ import pytest
 def devflow_content(repo_root: Path) -> str:
     """Lê o agente devflow como texto UTF-8."""
 
-    return (repo_root / "agents" / "devflow.md").read_text(encoding="utf-8")
+    return (repo_root / "harness-conf/agents/devflow.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def question_protocol_content(repo_root: Path) -> str:
     """Lê o protocolo compartilhado de perguntas."""
 
-    return (repo_root / "skills/question-orchestration/SKILL.md").read_text(
+    return (repo_root / "harness-conf/skills/question-orchestration/SKILL.md").read_text(
         encoding="utf-8"
     )
 

@@ -8,7 +8,9 @@ FORMER_GRILL_ME_CONSUMERS = ("dba", "eng-software", "front", "qa", "sec")
 
 
 def agent_content(repo_root: Path, name: str) -> str:
-    return (repo_root / "agents" / f"{name}.md").read_text(encoding="utf-8")
+    return (repo_root / "harness-conf/agents" / f"{name}.md").read_text(
+        encoding="utf-8"
+    )
 
 
 @pytest.mark.unit

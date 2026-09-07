@@ -6,9 +6,11 @@ import pytest
 
 def make_repository(root: Path) -> Path:
     repository = root / "repo"
-    for directory in ("agents", "commands", "skills", "scripts"):
-        (repository / directory).mkdir(parents=True)
-    (repository / "opencode.json").write_text("{}", encoding="utf-8")
+    harness = repository / "harness-conf"
+    for directory in ("agents", "commands", "skills"):
+        (harness / directory).mkdir(parents=True)
+    (repository / "scripts").mkdir()
+    (harness / "opencode.json").write_text("{}", encoding="utf-8")
     return repository
 
 
@@ -46,9 +48,15 @@ def test_opencode_adapter_creates_canonical_symlinks(
     assert status == 0
     assert error == ""
     config_dir = home / ".config" / "opencode"
-    for name in ("agents", "commands", "skills", "scripts", "opencode.json"):
+    for name in ("agents", "commands", "skills", "opencode.json"):
         assert (config_dir / name).is_symlink()
-        assert (config_dir / name).resolve() == (repository / name).resolve()
+        assert (config_dir / name).resolve() == (
+            repository / "harness-conf" / name
+        ).resolve()
+    assert (config_dir / "scripts").is_symlink()
+    assert (config_dir / "scripts").resolve() == (
+        repository / "scripts"
+    ).resolve()
     assert not (config_dir / "AGENTS.md").exists()
     assert "Pronto." in output
 

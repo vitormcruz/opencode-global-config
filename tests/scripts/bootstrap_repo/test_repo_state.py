@@ -136,7 +136,7 @@ def test_repo_state_agents_symlink_points_to_repo(
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "agents"
     assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "agents"
+        bootstrapped_repo_state.repository / "harness-conf" / "agents"
     ).resolve()
 
 
@@ -145,7 +145,7 @@ def test_repo_state_commands_symlink_points_to_repo(
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "commands"
     assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "commands"
+        bootstrapped_repo_state.repository / "harness-conf" / "commands"
     ).resolve()
 
 
@@ -154,7 +154,7 @@ def test_repo_state_opencode_json_symlink_points_to_repo(
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "opencode.json"
     assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "opencode.json"
+        bootstrapped_repo_state.repository / "harness-conf" / "opencode.json"
     ).resolve()
 
 
@@ -163,7 +163,7 @@ def test_repo_state_skills_symlink_points_to_repo(
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "skills"
     assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "skills"
+        bootstrapped_repo_state.repository / "harness-conf" / "skills"
     ).resolve()
 
 

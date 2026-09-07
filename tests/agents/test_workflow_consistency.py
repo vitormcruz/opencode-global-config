@@ -209,7 +209,7 @@ def _read_agent_files(agents_dir: Path) -> dict[str, str]:
 def test_task_permissions_point_to_existing_agents(repo_root: Path) -> None:
     """Agentes com ``task: X: allow`` apontam para agente existente."""
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     known_agents = _collect_agent_names(agents_dir)
     orphans: list[str] = []
     total_extracted = 0
@@ -256,8 +256,8 @@ def test_extract_task_allow_agents_detects_synthetic_orphan() -> None:
 def test_skill_tables_reference_existing_skills(repo_root: Path) -> None:
     """Tabelas de skills em agentes referenciam skills existentes."""
 
-    agents_dir = repo_root / "agents"
-    skills_dir = repo_root / "skills"
+    agents_dir = repo_root / "harness-conf" / "agents"
+    skills_dir = repo_root / "harness-conf" / "skills"
     known_skills = _collect_skill_names(skills_dir)
     missing: list[str] = []
 
@@ -276,8 +276,8 @@ def test_skill_tables_reference_existing_skills(repo_root: Path) -> None:
 def test_workflow_agent_references_exist(repo_root: Path) -> None:
     """Workflows não citam agentes fantasmas (removidos/inexistentes)."""
 
-    agents_dir = repo_root / "agents"
-    skills_dir = repo_root / "skills"
+    agents_dir = repo_root / "harness-conf" / "agents"
+    skills_dir = repo_root / "harness-conf" / "skills"
     docs_dir = repo_root / "docs"
 
     known_agents = _collect_agent_names(agents_dir)
@@ -309,8 +309,8 @@ def test_workflow_agent_references_exist(repo_root: Path) -> None:
 def test_workflow_skill_references_exist(repo_root: Path) -> None:
     """Workflows não citam skills inexistentes."""
 
-    agents_dir = repo_root / "agents"
-    skills_dir = repo_root / "skills"
+    agents_dir = repo_root / "harness-conf" / "agents"
+    skills_dir = repo_root / "harness-conf" / "skills"
     docs_dir = repo_root / "docs"
 
     known_agents = _collect_agent_names(agents_dir)
@@ -343,8 +343,8 @@ def test_workflow_skill_references_exist(repo_root: Path) -> None:
 def test_agent_backtick_skill_references_exist(repo_root: Path) -> None:
     """Agentes não citam skills inexistentes em backticks fora de tabelas."""
 
-    agents_dir = repo_root / "agents"
-    skills_dir = repo_root / "skills"
+    agents_dir = repo_root / "harness-conf" / "agents"
+    skills_dir = repo_root / "harness-conf" / "skills"
 
     known_agents = _collect_agent_names(agents_dir)
     known_skills = _collect_skill_names(skills_dir)
@@ -374,7 +374,7 @@ def test_removed_agents_not_referenced(repo_root: Path) -> None:
     removed_agents = {"curador-produto-editor", "val-harness"}
     removed_docs = {"workflow-curadoria.md"}
 
-    agents_dir = repo_root / "agents"
+    agents_dir = repo_root / "harness-conf" / "agents"
     docs_dir = repo_root / "docs"
 
     violations: list[str] = []

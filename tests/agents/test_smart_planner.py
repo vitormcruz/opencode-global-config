@@ -9,7 +9,7 @@ import pytest
 def smart_planner_file(repo_root: Path) -> Path:
     """Retorna o arquivo do agente smart-planner."""
 
-    return repo_root / "agents" / "smart-planner.md"
+    return repo_root / "harness-conf" / "agents" / "smart-planner.md"
 
 
 def collapsed(text: str) -> str:

@@ -313,7 +313,7 @@ def test_doc_and_testes_produto_flags_create_both_scaffolds(tmp_path: Path) -> N
 def test_curador_produto_contains_three_doc_template_sections(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "agents/curador-produto.md").read_text(
+    content = (repo_root / "harness-conf" / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
 
@@ -327,7 +327,7 @@ def test_default_artifacts_contains_key_elements(
     repo_root: Path,
 ) -> None:
     template = (
-        repo_root / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
     ).read_text(encoding="utf-8")
 
     for element in (
@@ -344,7 +344,7 @@ def test_default_artifacts_contains_specs_destination(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
     ).read_text(encoding="utf-8")
 
     assert "docs/specs/" in content
@@ -355,7 +355,8 @@ def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/testes-por-especialidade.md"
+        repo_root
+        / "harness-conf/agents/default-artifacts/testes-por-especialidade.md"
     ).read_text(encoding="utf-8")
 
     assert "## Testes por Especialidade" in content
@@ -375,7 +376,7 @@ def test_testes_produto_spec_template_has_specialty_subsections(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/testes-produto.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/testes-produto.md"
     ).read_text(encoding="utf-8")
 
     for specialty in SPECIALTIES:
@@ -398,7 +399,7 @@ def test_instructions_template_covers_workflow_agents(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/default-artifacts/instrucoes-por-agente.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/instrucoes-por-agente.md"
     ).read_text(encoding="utf-8")
 
     assert "## Instruções por Agente" in content
@@ -414,7 +415,7 @@ def test_instructions_template_covers_workflow_agents(
 def test_curador_produto_does_not_contain_old_suite_interface(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "agents/curador-produto.md").read_text(
+    content = (repo_root / "harness-conf" / "agents/curador-produto.md").read_text(
         encoding="utf-8"
     )
 
@@ -426,7 +427,7 @@ def test_interface_testes_produto_describes_standard_json_interface(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "agents/references/interface-testes-produto.md"
+        repo_root / "harness-conf" / "agents/references/interface-testes-produto.md"
     ).read_text(encoding="utf-8")
 
     assert '"status"' in content
@@ -442,10 +443,10 @@ def test_default_testes_produto_artifacts_do_not_cite_plan_ids(
 ) -> None:
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
     artifact_paths = (
-        "agents/default-artifacts/testes-por-especialidade.md",
-        "agents/default-artifacts/testes-produto.md",
-        "agents/default-artifacts/instrucoes-por-agente.md",
-        "agents/references/interface-testes-produto.md",
+        "harness-conf/agents/default-artifacts/testes-por-especialidade.md",
+        "harness-conf/agents/default-artifacts/testes-produto.md",
+        "harness-conf/agents/default-artifacts/instrucoes-por-agente.md",
+        "harness-conf/agents/references/interface-testes-produto.md",
     )
     for relative_path in artifact_paths:
         content = (repo_root / relative_path).read_text(encoding="utf-8")

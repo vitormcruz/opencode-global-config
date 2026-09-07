@@ -7,7 +7,7 @@ import pytest
 @pytest.mark.unit
 def test_opencode_configs_have_no_mcp_block(repo_root: Path):
     config_paths = (
-        repo_root / "opencode.json",
+        repo_root / "harness-conf" / "opencode.json",
         repo_root / "tests/integration/config/opencode.test.json",
     )
 

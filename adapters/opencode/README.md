@@ -12,7 +12,8 @@ opencode-adapter --yes
 ```
 
 O adapter cria ou atualiza links em `~/.config/opencode/` para os agentes,
-comandos, skills, scripts e `opencode.json` deste repositório.
+comandos, skills e `opencode.json` de `harness-conf/` (e para `scripts/`,
+que fica na raiz do repo) deste repositório.
 
 O adapter funciona em Linux e WSL. No Windows, use o adapter do Copilot.
 

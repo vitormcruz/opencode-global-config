@@ -17,6 +17,7 @@ from opencode_config.lib.environment import (
     UnsupportedEnvironmentError,
     detect_environment,
 )
+from opencode_config.lib.paths import HARNESS_CONF_DIR
 from opencode_config.lib.versions import fnm_node_bin_dir
 
 HELP_TEXT = """opencode-adapter
@@ -34,11 +35,11 @@ Opcoes:
 """
 
 _DESTINATIONS = (
-    ("agents", True),
-    ("commands", True),
-    ("opencode.json", False),
-    ("skills", True),
-    ("scripts", True),
+    (f"{HARNESS_CONF_DIR}/agents", "agents"),
+    (f"{HARNESS_CONF_DIR}/commands", "commands"),
+    (f"{HARNESS_CONF_DIR}/opencode.json", "opencode.json"),
+    (f"{HARNESS_CONF_DIR}/skills", "skills"),
+    ("scripts", "scripts"),
 )
 
 
@@ -60,11 +61,12 @@ def _resolve_repo_root(explicit: str | None) -> Path:
 
     for candidate in candidates:
         root = candidate.expanduser().resolve()
+        harness = root / HARNESS_CONF_DIR
         if (
-            (root / "agents").is_dir()
-            and (root / "commands").is_dir()
-            and (root / "skills").is_dir()
-            and (root / "opencode.json").is_file()
+            (harness / "agents").is_dir()
+            and (harness / "commands").is_dir()
+            and (harness / "skills").is_dir()
+            and (harness / "opencode.json").is_file()
         ):
             return root
 
@@ -223,8 +225,8 @@ def _print_plan(
     if not config_dir.is_dir():
         output(f"MKDIR {config_dir}")
 
-    for name, _ in _DESTINATIONS:
-        _status_line(repository / name, config_dir / name, output)
+    for source, destination in _DESTINATIONS:
+        _status_line(repository / source, config_dir / destination, output)
 
     if _bashrc_has(
         bashrc,
@@ -312,10 +314,10 @@ def configure(
 
     write("Aplicando...")
     config_dir.mkdir(parents=True, exist_ok=True)
-    for name, _ in _DESTINATIONS:
+    for source, destination in _DESTINATIONS:
         _link_one(
-            resolved_repository / name,
-            config_dir / name,
+            resolved_repository / source,
+            config_dir / destination,
             backup_dir,
         )
     _setup_bashrc(resolved_home, os.environ)

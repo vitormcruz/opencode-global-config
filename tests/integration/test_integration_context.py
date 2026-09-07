@@ -16,22 +16,26 @@ pytestmark = pytest.mark.unit
 def _repository(root: Path) -> Path:
     repository = root / "repository"
     (repository / "tests" / "integration" / "config").mkdir(parents=True)
-    (repository / "agents").mkdir()
-    (repository / "commands").mkdir()
-    (repository / "skills" / "target-skill").mkdir(parents=True)
-    (repository / "skills" / "other-skill").mkdir(parents=True)
-    (repository / "agents" / "target-agent.md").write_text("target", encoding="utf-8")
-    (repository / "agents" / "other-agent.md").write_text("other", encoding="utf-8")
-    (repository / "commands" / "target-command.md").write_text(
+    (repository / "harness-conf" / "agents").mkdir(parents=True)
+    (repository / "harness-conf" / "commands").mkdir(parents=True)
+    (repository / "harness-conf" / "skills" / "target-skill").mkdir(parents=True)
+    (repository / "harness-conf" / "skills" / "other-skill").mkdir(parents=True)
+    (repository / "harness-conf/agents/target-agent.md").write_text(
         "target", encoding="utf-8"
     )
-    (repository / "commands" / "other-command.md").write_text(
+    (repository / "harness-conf/agents/other-agent.md").write_text(
         "other", encoding="utf-8"
     )
-    (repository / "skills" / "target-skill" / "SKILL.md").write_text(
+    (repository / "harness-conf" / "commands" / "target-command.md").write_text(
         "target", encoding="utf-8"
     )
-    (repository / "skills" / "other-skill" / "SKILL.md").write_text(
+    (repository / "harness-conf" / "commands" / "other-command.md").write_text(
+        "other", encoding="utf-8"
+    )
+    (repository / "harness-conf" / "skills" / "target-skill" / "SKILL.md").write_text(
+        "target", encoding="utf-8"
+    )
+    (repository / "harness-conf" / "skills" / "other-skill" / "SKILL.md").write_text(
         "other", encoding="utf-8"
     )
     (repository / "tests" / "integration" / "config" / "opencode.test.json").write_text(

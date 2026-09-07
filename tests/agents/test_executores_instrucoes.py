@@ -8,7 +8,9 @@ EXECUTORS = ("dba", "front", "rev", "eng-software", "qa", "sec")
 
 
 def _agent_text(repo_root: Path, name: str) -> str:
-    return (repo_root / "agents" / f"{name}.md").read_text(encoding="utf-8")
+    return (repo_root / "harness-conf/agents" / f"{name}.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def _flat(text: str) -> str:
