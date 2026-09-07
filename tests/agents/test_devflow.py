@@ -184,3 +184,57 @@ def test_devflow_routes_suite_failure_by_specialty(repo_root: Path) -> None:
     assert "dados" in lower and "dba" in lower
     assert "segurança" in lower and "sec" in lower
     assert "frontend" in lower and "front" in lower
+
+
+def model_selection_window(repo_root: Path) -> str:
+    """Extrai a janela da seção 'Seleção de modelo por fase'."""
+
+    lines = devflow_content(repo_root).splitlines()
+    try:
+        start = next(
+            index
+            for index, line in enumerate(lines)
+            if "Seleção de modelo por fase" in line
+        )
+    except StopIteration:
+        pytest.fail("seção 'Seleção de modelo por fase' ausente no devflow")
+    return "\n".join(lines[start : start + 30])
+
+
+@pytest.mark.unit
+def test_devflow_model_selection_suggests_pattern_and_allows_choice(
+    repo_root: Path,
+) -> None:
+    window = model_selection_window(repo_root)
+    lower = " ".join(window.lower().split())
+
+    assert "sugere um padrão" in lower
+    assert "planejamento, execução, testes e revisão" in lower
+    assert "define como preferir" in lower
+    assert "arranjo próprio" in lower
+    assert "mapa combinado" in lower
+
+
+@pytest.mark.unit
+def test_devflow_model_selection_has_no_rigid_numbered_menu(
+    repo_root: Path,
+) -> None:
+    window = model_selection_window(repo_root)
+
+    assert "1-VALIDAÇÃO" not in window
+    assert "7-FINALIZAÇÃO" not in window
+    assert "Modelo atual para todas as fases" not in window
+    assert re.search(r"^1\. ", window, re.MULTILINE) is None
+
+
+@pytest.mark.unit
+def test_devflow_model_selection_keeps_pause_before_model_change(
+    repo_root: Path,
+) -> None:
+    window = model_selection_window(repo_root)
+    lower = " ".join(window.lower().split())
+
+    assert "pausa antes de fases" in lower
+    assert "`/model`" in window
+    assert "`model`" in window
+    assert "solicite a troca ao humano" in lower

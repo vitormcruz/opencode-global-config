@@ -148,8 +148,11 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    capacidades, nunca fases. Apenas `devflow` conhece o
    workflow.
 7. **Seleção de modelo por fase** — ao iniciar, `devflow`
-   pergunta ao humano: modelo atual para todas as fases ou
-   definir por fase. Mapa registrado no arquivo. Política de
+   sugere um padrão (um modelo por etapa — planejamento,
+   execução, testes, revisão) e o humano define como
+   preferir: um modelo só, por fase granular ou arranjo
+   próprio. Mapa combinado registrado no arquivo. Pausa
+   antes de fases cujo modelo difere do atual. Política de
    sessão: `{workflowId}-{fase}-{agente}`; retomada dentro
    da fase, sessão nova entre fases.
 

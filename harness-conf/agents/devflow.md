@@ -161,18 +161,21 @@ no arquivo e retorna resumo. Você consulta o humano:
 
 ## Seleção de modelo por fase
 
-No início do workflow, pergunte ao humano qual modelo usar:
-1. **Modelo atual para todas as fases** — sem paradas.
-2. **Definir por fase** — formato `<nº>. <modelo>`:
-   `1-VALIDAÇÃO 2-PLANEJAMENTO 3-REVISÃO DO PLANO
-   4-CONSTRUÇÃO 5-REVISÃO DA CONSTRUÇÃO 6-TESTES
-   7-FINALIZAÇÃO`. Fases omitidas usam modelo atual.
+No início do workflow, combine com o humano o mapa de
+modelos do workflow. Você **sugere um padrão**: um modelo
+por etapa do trabalho — planejamento, execução, testes e
+revisão — arranjo que costuma equilibrar custo e qualidade.
 
-Registre o mapa no arquivo de planejamento.
+O humano **define como preferir**: um modelo só para todo o
+workflow, um modelo por fase granular, ou arranjo próprio.
+Apresente a sugestão, aceite a preferência dele e registre o
+mapa combinado no arquivo de planejamento.
+
+Pausa antes de fases cujo modelo combinado difere do atual:
 - **Copilot CLI**: `/model` antes da fase ou `model` na
   criação da sessão via SDK.
-- **OpenCode**: pare antes de fases com modelo diferente e
-  solicite troca ao humano.
+- **OpenCode**: pare antes da fase e solicite a troca ao
+  humano.
 
 ## Política de sessão por fase
 
