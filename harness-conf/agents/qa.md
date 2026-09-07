@@ -93,6 +93,7 @@ analisa código de produção ou faz revisão integrativa.
 | test-driven-development | Planejar testes | Sempre que planejar ou revisar testes |
 | tests-as-spec | Proteger cobertura como spec | Na revisão de testabilidade e cobertura |
 | browser-testing | Testes funcionais de UI | Quando houver UI no escopo de testes |
+| spec-executavel | Planejar testes | Sempre que criar ou avaliar specs executáveis (critérios de aceitação automatizáveis) |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -134,7 +135,10 @@ Analisar requisitos e produzir um plano de testes.
 4. Para cada cenário, definir: pré-condição, ação
    esperada, resultado esperado.
 5. Avaliar se critérios de aceitação são testáveis. Se
-   algum não for, reportar ao solicitante/humano.
+    algum não for, reportar ao solicitante/humano. Ao
+    criar ou avaliar specs executáveis desses critérios,
+    carregue a skill `spec-executavel` e aplique o
+    checklist dela.
 6. Persistir plano de testes no arquivo indicado.
 7. Verificar no docs/README.md se o plano de testes
    deve ser persistido em arquivo permanente. Se sim,

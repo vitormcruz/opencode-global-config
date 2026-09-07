@@ -115,6 +115,7 @@ unidades lógicas seguindo `git-workflow-and-versioning`.
 | planning-and-task-breakdown | Planejar implementação | Na capacidade 1 (planejar) |
 | documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa |
 | git-workflow-and-versioning | Versionar alterações | Sempre que produzir alterações |
+| spec-executavel | Construir via TDD | Sempre que criar specs executáveis (critérios de aceitação automatizáveis) |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -189,7 +190,9 @@ Implementar código seguindo o ciclo red-green-refactor.
    Se o docs/README.md exigir specs executáveis
    (Concordion, BDD, etc.) como forma de documentar
    critérios de aceitação, criá-las aqui como parte
-   dos testes.
+   dos testes — carregue antes a skill
+   `spec-executavel`, que define como escrever e
+   revisar esses critérios.
 2. Executar — **todos devem falhar**.
 3. Se algum teste passar sem código produtivo, o teste
    está errado. Corrigir antes de prosseguir.

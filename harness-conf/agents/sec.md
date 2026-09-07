@@ -97,6 +97,7 @@ negócio.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | security-and-hardening | Analisar segurança | Sempre que analisar ou revisar segurança |
+| spec-executavel | Escrever specs executáveis | Sempre que criar specs executáveis (ex.: requisitos/threat model como cenários automatizáveis) |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -143,7 +144,9 @@ segurança e registrar requisitos.
 - Roteiro manual para a fase Testes.
 - Verificar no docs/README.md se requisitos de
   segurança / threat model devem ser persistidos em
-  local permanente. Se sim, incluir no plano.
+  local permanente. Se sim, incluir no plano. Ao
+  expressá-los como specs executáveis, carregue a
+  skill `spec-executavel` e aplique o checklist dela.
 - Riscos identificados com severidade.
 
 **ANTES** de avaliar requisitos de segurança,

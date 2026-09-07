@@ -62,6 +62,7 @@ arbitrários.
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
 | testes-produto-catalog | Sugerir suítes | Quando sugerir ferramentas por especialidade |
+| spec-executavel | Orientar na entrevista | Quando especificar elementos de spec executável na seção Elementos de Especificação |
 
 ## O que você faz
 
@@ -77,8 +78,12 @@ obrigatórias:
    deve elicitar (requisitos, critérios de aceitação,
    histórias de usuário).
 2. **Elementos de Especificação** — tabela com Elemento,
-   Formato/Ferramenta, Agente Responsável, Destino +
-   Regras de Documentação por elemento.
+    Formato/Ferramenta, Agente Responsável, Destino +
+    Regras de Documentação por elemento. Quando um
+    elemento for spec executável (critérios de aceitação
+    automatizáveis), oriente a entrevista pela skill
+    `spec-executavel` (formato, cláusula de exceção
+    discutida com o humano).
 3. **Estratégias de Indexação de Código** — técnicas para
    agentes IA encontrarem informação rapidamente.
 4. **Testes por Especialidade** — spec das suítes e do
