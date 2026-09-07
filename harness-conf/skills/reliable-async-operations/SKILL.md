@@ -14,15 +14,17 @@ description: >
   escrever polling, retry, backoff, lock, mutex, semáforo, fila/job
   assíncrono, WebSocket ou stream; investigar operação que trava, não
   responde ou não emite progresso; decidir timeout para qualquer chamada
-  assíncrona. Triggers: "processo externo", "subprocess", "child_process",
-  "ProcessBuilder", "execSync", "waitFor", "spawn", "async", "await",
-  "Promise", "asyncio", "fetch sem timeout", "AbortController", "race
-  condition", "polling", "retry", "backoff", "fila assíncrona", "job em
-  background", "lock", "mutex", "WebSocket", "stream", "chamada de rede",
-  "timeout de rede", "processo travado", "sem saída", "hang", "timeout
-  mágico", "número mágico de timeout", "espera bloqueante", "promise
-    pendurada", "spinner infinito", "loading infinito", "heartbeat",
-    "sinal de vida", "keep-alive".
+  assíncrona; definir, ajustar ou aumentar timeout em código existente;
+  revisar código que cria ou altera timeouts. Triggers: "processo externo",
+  "subprocess", "child_process", "ProcessBuilder", "execSync", "waitFor",
+  "spawn", "async", "await", "Promise", "asyncio", "fetch sem timeout",
+  "AbortController", "race condition", "polling", "retry", "backoff",
+  "fila assíncrona", "job em background", "lock", "mutex", "WebSocket",
+  "stream", "chamada de rede", "timeout de rede", "timeout genérico",
+  "definir timeout", "ajustar timeout", "aumentar timeout", "processo
+  travado", "sem saída", "hang", "timeout mágico", "número mágico de
+  timeout", "espera bloqueante", "promise pendurada", "spinner infinito",
+  "loading infinito", "heartbeat", "sinal de vida", "keep-alive".
 ---
 
 # Operações Assíncronas Confiáveis
@@ -51,6 +53,18 @@ callback de conclusão, locks sem prazo, polling sem teto.
 sempre um sinal de progresso, cancelamento ou conclusão (stream, callback,
 evento, `AbortSignal`, poll de status) antes de decidir quanto tempo esperar
 por ela — em qualquer linguagem, backend ou frontend.
+
+## Proibição de definir ou ajustar timeouts
+
+- **PROIBIDO definir ou ajustar timeouts genéricos ou por conveniência**:
+  timeout não mascara travamento, não impõe desempenho e não vira critério
+  de falha.
+- **Exceções** — as únicas: recurso contínuo com inatividade já comprovada,
+  ou confirmação explícita prévia do humano, com justificativa do recurso e
+  do valor.
+- **Não troque timeout proibido por valor alto**: remova o timeout ou
+  consulte o humano. Timeout existente fora das exceções: informe ao humano;
+  não altere silenciosamente.
 
 ## Ordem de preferência (do melhor para o pior)
 
