@@ -154,10 +154,36 @@ def test_curador_produto_prohibits_file_search_for_default_artifacts(
 @pytest.mark.unit
 def test_curador_produto_persists_and_returns_after_approval(
     curador_normalized: str,
+    curador_content: str,
 ) -> None:
     assert "persista o resultado" in curador_normalized
     assert "retorne o resumo ao solicitante" in curador_normalized
-    assert "docs/testes-produto.md" in curador_normalized
+    assert "docs/README.md#testes-por-especialidade" in curador_content
+    assert "docs/testes-produto.md" not in curador_content.split(
+        "PROIBIDO gravar spec de suíte em arquivo separado"
+    )[0]
+
+
+@pytest.mark.unit
+def test_curador_produto_documents_two_test_levels(
+    curador_normalized: str,
+) -> None:
+    assert "dois níveis de teste" in curador_normalized
+    assert "testes da aplicação" in curador_normalized
+    assert "testes dos scripts de teste" in curador_normalized
+    assert "especificação executável" in curador_normalized
+    assert "somente quando os scripts mudam" in curador_normalized
+    assert "nunca no ciclo normal" in curador_normalized
+
+
+@pytest.mark.unit
+def test_curador_produto_forbids_separate_spec_file(
+    curador_content: str,
+) -> None:
+    assert "PROIBIDO gravar spec de suíte em arquivo separado" in (
+        curador_content
+    )
+    assert "único spec" in curador_content
 
 
 @pytest.mark.unit
@@ -328,9 +354,7 @@ def test_curador_produto_interviews_spec_then_instructions(
     assert "pa11y" in curador_content
     assert "axe-core" in curador_content
     assert "o harness efetivo fica no" not in curador_content.lower()
-    assert "não copia" in curador_content.lower() or (
-        "não é copiado" in curador_content.lower()
-    )
+    assert "não é copiada para o" in curador_content.lower()
 
 
 # --- Remoção dos agentes antigos ---
@@ -362,10 +386,24 @@ def test_mensagens_curadoria_references_curador_produto(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/references/mensagens-curadoria.md"
+        repo_root / "harness-conf/agents/references/mensagens-curadoria.md"
     ).read_text(encoding="utf-8")
     assert "curador-produto" in content
     assert "curador-produto-editor" not in content
+
+
+@pytest.mark.unit
+def test_mensagens_curadoria_documents_single_artifact(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "harness-conf/agents/references/mensagens-curadoria.md"
+    ).read_text(encoding="utf-8")
+
+    assert "4 seções obrigatórias" in content
+    assert "Testes por Especialidade" in content
+    assert "tabela índice" in content
+    assert "docs/testes-produto.md" not in content
 
 
 @pytest.mark.unit

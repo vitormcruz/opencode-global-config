@@ -2,22 +2,20 @@
 
 ## docs/README.md ou Testes por Especialidade não encontrado(s)
 
-Este projeto ainda não possui **docs/README.md** e/ou
-**Testes por Especialidade** — os dois artefatos que
-sustentam este workflow de desenvolvimento.
+Este projeto ainda não possui o **docs/README.md** e/ou a
+seção **Testes por Especialidade** — o artefato que
+sustenta este workflow de desenvolvimento.
 
 O **docs/README.md** é o contrato mínimo de especificação
-e documentação do projeto: define o quê deve existir, como é
-confeccionado e onde fica. Contém 3 seções obrigatórias:
-Definição de Escopo, Elementos de Especificação e
-Estratégias de Indexação de Código. Sem ele, eu (curador)
-não tenho critério objetivo para validar aderência.
-
-Os **Testes por Especialidade** traduzem regras de
-qualidade em suítes (backend, dados, segurança, frontend)
-e no orquestrador `testes-produto`. A tabela e o link do
-spec ficam no `AGENTS.md`; o spec detalhado vive na pasta
-de docs aprovada.
+e documentação do projeto: define o quê deve existir, como
+é confeccionado e onde fica. Contém 4 seções obrigatórias:
+Definição de Escopo, Elementos de Especificação,
+Estratégias de Indexação de Código e **Testes por
+Especialidade** — que traduz regras de qualidade em suítes
+(backend, dados, segurança, frontend) e no orquestrador
+`testes-produto`. O `AGENTS.md` mantém só a tabela índice
+com link para a seção. Sem esse artefato, eu (curador) não
+tenho critério objetivo para validar aderência.
 
 **Recomendação:** trate a curadoria agora, sem sair do workflow —
 responda ao `devflow` que quer tratar, e as fases de desenvolvimento
