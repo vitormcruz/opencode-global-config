@@ -123,6 +123,21 @@ Anexo A aprovado); o executor materializa copiando.
   `web-research-exa-crawl4ai` cobre). Linha "sem prefixo wsl" vai como
   1 linha na seção de descoberta do `AGENTS.md` raiz.
 
+## Execução — configuração aprovada
+
+- **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
+  Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
+- **Worker**: agente `worker`, modelo `opencode-go/gpt-5.6-luna`
+  (trocado no frontmatter com autorização humana; edição de 1 linha,
+  sem commit — será incluída em commit da execução). Mecanismo:
+  `model:` no frontmatter de `agents/worker.md` contorna a limitação
+  da tool `task` (não aceita modelo no spawn); trocar + reiniciar o
+  OpenCode quando precisar.
+- **Revisor**: agente `revisor`, modelo da sessão (GLM), instância nova
+  e independente por revisão.
+- **Documentação do mecanismo**: incluída na Task 5 (uma linha no
+  `AGENTS.md` raiz).
+
 ## Task List
 
 ### Phase 1: Reestruturação, skills de escrita e base (D4, D5, D9, D10, D11)
@@ -220,7 +235,10 @@ Anexo A aprovado); o executor materializa copiando.
     sincronização dos adaptadores. **Remover** a seção SmartPlanner
     (restrição vive no corpo do agente). `README.md`: seção de
     estrutura `harness-conf/` vs infra do repo. Paths textuais em
-    `docs/workflow-*.md` atualizados.
+    `docs/workflow-*.md` atualizados. Incluir linha documentando o
+    mecanismo do worker: modelo definido no frontmatter de
+    `agents/worker.md` (contorna a limitação da tool `task`); trocar
+    e reiniciar quando precisar.
   - **Acceptance criteria**:
     - Raiz sem duplicar a base; descoberta sintetizada sem tabela
       cliente; SmartPlanner removido.
