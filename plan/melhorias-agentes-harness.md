@@ -151,6 +151,21 @@ Anexo A aprovado); o executor materializa copiando.
   teste `tests/skills/test_testes_produto_catalog.py`
   também foram atualizados (referências ativas ao arquivo
   extinto, exigidas pela verificação final da fase).
+- **Fase 3 CONCLUÍDA** (commits `5b8320f`, `be50655`, `24202e4`,
+  `578a440`). Suíte completa verde (670 passed, 2 deselected copilot,
+  WSL, integração OpenCode incluída). Skills criadas/migradas:
+  `spec-executavel` (autocontida, description rica em triggers);
+  `reliable-async-operations` absorveu a proibição de timeouts (3
+  bullets + triggers na description); `code-explorer-priority` absorveu
+  os comandos JSON posicionais, a ordem das ferramentas, a busca via
+  `Section`/Cypher e o fallback estrito, com description condicionada ao
+  AGENTS.md. Adendo da Task 13 aplicado: Etapa 3 do
+  `harness-conf/commands/index-codebase.md` sem o copilot-specific
+  extinto. Testes novos/atualizados:
+  `tests/skills/test_spec_executavel.py`,
+  `tests/skills/test_reliable_async_operations.py`,
+  `tests/agents/test_spec_executavel_adoption.py` e
+  `tests/skills/test_code_explorer.py`.
 - **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
   Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
 - **Worker**: agente `worker`, modelo `opencode-go/gpt-5.6-luna`
@@ -373,7 +388,7 @@ Anexo A aprovado); o executor materializa copiando.
 
 ### Phase 3: Skills — spec-executavel e migrações (D8, D10, D11)
 
-- [ ] **Task 10: Criar a skill `spec-executavel`**
+- [x] **Task 10: Criar a skill `spec-executavel`**
   - **Description**: criar `harness-conf/skills/spec-executavel/SKILL.md`,
     autocontido (sem citar plano/decisões). Conteúdo canônico:
     1. Estrutura canônica do cenário: `Cenário` + `Dado que` + `E` +
@@ -409,7 +424,7 @@ Anexo A aprovado); o executor materializa copiando.
     `harness-conf/skills/spec-executavel/SKILL.md`
   - **Estimated scope**: Medium
 
-- [ ] **Task 11: Referenciar a skill nos agentes**
+- [x] **Task 11: Referenciar a skill nos agentes**
   - **Description**: `analista.md`: seção 3B e "Padrão de qualidade"
     referenciam a skill + **fechamento para Gherkin** (desvio só pela
     cláusula de exceção, com o humano); INVEST, RF/RNF e item 11
@@ -427,7 +442,7 @@ Anexo A aprovado); o executor materializa copiando.
     `harness-conf/agents/curador-produto.md`, `tests/agents/**`
   - **Estimated scope**: Medium
 
-- [ ] **Task 12: `reliable-async-operations` absorve a proibição de timeouts**
+- [x] **Task 12: `reliable-async-operations` absorve a proibição de timeouts**
   - **Description**: incluir na skill os 3 bullets sintetizados da
     proibição: (1) PROIBIDO definir/ajustar timeouts genéricos ou por
     conveniência; timeout não mascara travamento, não impõe desempenho
@@ -445,7 +460,7 @@ Anexo A aprovado); o executor materializa copiando.
     `harness-conf/skills/reliable-async-operations/SKILL.md`, `tests/**`
   - **Estimated scope**: Small
 
-- [ ] **Task 13: `code-explorer-priority` absorve detalhes do CLI**
+- [x] **Task 13: `code-explorer-priority` absorve detalhes do CLI**
   - **Description**: mover para a skill o conteúdo operacional do
     extinto copilot-specific: comandos com JSON posicional único
     (`list_projects`, `index_repository`, `search_graph`, `trace_path`,
@@ -467,7 +482,7 @@ Anexo A aprovado); o executor materializa copiando.
   - **Estimated scope**: Medium
 
 ### Checkpoint: Phase 3
-- [ ] Skills criadas/importadas/migradas; consistência verde
+- [x] Skills criadas/importadas/migradas; consistência verde
 - [ ] Review com humano antes de prosseguir
 
 ### Phase 4: Protocolo conversacional e devflow (D6, D7)
