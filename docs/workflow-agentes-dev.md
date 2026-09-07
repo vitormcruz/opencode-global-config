@@ -140,7 +140,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    `devflow`, que media (skill `question-orchestration`,
    fonte única). Controles: Checklist estrutural,
    Continuidade da mediação, Prompt-improver para handoff
-   — ver `agents/devflow.md` para detalhes.
+   — ver `harness-conf/agents/devflow.md` para detalhes.
 5. **Falha de agente** — registra impedimento e retorna.
    `devflow` consulta humano: corrigir e retentar, ajustar
    escopo, ou pular com registro.

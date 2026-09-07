@@ -260,12 +260,14 @@ def test_smart_planner_uses_accented_portuguese(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_agents_md_contains_smart_planner_behavioral_restriction(
+def test_smart_planner_restriction_lives_in_agent_not_in_agents_md(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
-    pattern = r"smart-planner.*nunca.*edita codigo|SmartPlanner.*Restricao"
-    assert re.search(pattern, content, re.IGNORECASE) is not None
+    agent = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    agents_md = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert re.search(r"## Restri", agent) is not None
+    assert "SmartPlanner" not in agents_md
 
 
 @pytest.mark.unit
@@ -417,12 +419,15 @@ def test_simple_agentic_workflow_documents_the_same_contract(
 
 
 @pytest.mark.unit
-def test_agents_md_allows_local_commits_and_requires_push_confirmation(
+def test_base_requires_push_confirmation_and_agents_md_stays_silent(
     repo_root: Path,
 ) -> None:
-    content = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    base = (
+        repo_root / "harness-conf" / "AGENTS.base.md"
+    ).read_text(encoding="utf-8")
+    agents_md = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
 
-    assert "`git push` exige confirmação explícita do humano" in content
-    assert "NUNCA realize o commit independentemente." not in content
-    assert "SÓ realize o commit quando o humano autorizar" not in content
-    assert "Exceção — smart-planner" not in content
+    assert "confirmação explícita do humano" in base
+    assert "NUNCA realize o commit independentemente." not in agents_md
+    assert "SÓ realize o commit quando o humano autorizar" not in agents_md
+    assert "Exceção — smart-planner" not in agents_md

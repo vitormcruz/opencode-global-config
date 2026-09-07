@@ -10,6 +10,22 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 - No Windows, o bootstrap copia os artefatos para
   `%USERPROFILE%\.copilot`.
 
+## Estrutura do repositório
+
+O que é copiado/sincronizado para os harnesses (OpenCode, Copilot CLI)
+vive em `harness-conf/`:
+
+- `harness-conf/agents/` — definições de agentes (+ `default-artifacts/`
+  e `references/`)
+- `harness-conf/skills/` — skills (locais e importadas de upstream)
+- `harness-conf/commands/` — comandos
+- `harness-conf/opencode.json` — configuração do OpenCode
+- `harness-conf/AGENTS.base.md` — regras globais para todos os harnesses
+
+A infraestrutura do próprio repo fica na raiz: `scripts/`, `src/`,
+`tests/`, `docs/`, `adapters/`, `plan/`, `README.md` e o `AGENTS.md`
+(regras específicas deste repo, que complementam a base).
+
 ## Bootstrap
 
 Depois de clonar este repositório, use o entrypoint correspondente ao sistema
@@ -46,13 +62,17 @@ configura o OpenCode.
 
 O `configurar-repo.sh` cria links simbolicos em `~/.config/opencode`:
 
-- `~/.config/opencode/agents` -> `agents`
-- `~/.config/opencode/commands` -> `commands`
-- `~/.config/opencode/opencode.json` -> `opencode.json`
-- `~/.config/opencode/skills` -> `skills`
-- `~/.config/opencode/scripts` -> `scripts`
+- `~/.config/opencode/agents` -> `harness-conf/agents`
+- `~/.config/opencode/commands` -> `harness-conf/commands`
+- `~/.config/opencode/opencode.json` -> `harness-conf/opencode.json`
+- `~/.config/opencode/skills` -> `harness-conf/skills`
+- `~/.config/opencode/scripts` -> `scripts` (infra do repo, fica na raiz)
 
-O arquivo `AGENTS.md` e local a este repo e **nao** e linkado globalmente.
+O `~/.config/opencode/AGENTS.md` e um arquivo regular gerado pelo
+adapter: conteudo de `harness-conf/AGENTS.base.md` + blocos gerenciados
+por ferramentas de terceiros (como o codebase-memory-mcp), que sao
+preservados entre execucoes. Nunca e symlink e nunca deve ser editado a
+mao.
 
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um
 backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
@@ -180,11 +200,12 @@ skills upstream é uma operação separada: `opencode-skills sync NOME`.
 
 Destinos sincronizados pelo Copilot CLI:
 
-- `agents/*.md` → `~/.copilot/agents/*.agent.md`
-- `commands/*.md` → `~/.copilot/skills/*/SKILL.md`
-- `skills/*/` → `~/.copilot/skills/`
-- `agents/default-artifacts/` → `~/.copilot/agents/default-artifacts/`
-- `.github/copilot-specific.instructions.md` → `~/.copilot/instructions/`
+- `harness-conf/agents/*.md` → `~/.copilot/agents/*.agent.md`
+- `harness-conf/commands/*.md` → `~/.copilot/skills/*/SKILL.md`
+- `harness-conf/skills/*/` → `~/.copilot/skills/`
+- `harness-conf/agents/default-artifacts/` →
+  `~/.copilot/agents/default-artifacts/`
+- `harness-conf/AGENTS.base.md` → `~/.copilot/AGENTS.md`
 
 ## Testes
 

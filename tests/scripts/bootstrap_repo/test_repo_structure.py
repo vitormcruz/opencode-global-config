@@ -320,10 +320,31 @@ def test_agents_mentions_codebase_memory_cli(repo_root: Path) -> None:
     assert count >= 1
 
 
-def test_agents_mentions_client_access(repo_root: Path) -> None:
-    count = _count_matching_lines(repo_root / "AGENTS.md", "Acesso por cliente")
-    assert count >= 1
-    assert count >= 1
+def test_agents_documents_windows_cli_without_wsl_prefix(
+    repo_root: Path,
+) -> None:
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "sem prefixo `wsl`" in agents
+
+
+def test_agents_has_no_per_client_access_table(repo_root: Path) -> None:
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "Acesso por cliente" not in agents
+
+
+def test_agents_has_no_smartplanner_section(repo_root: Path) -> None:
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "SmartPlanner" not in agents
+
+
+def test_agents_documents_worker_model_mechanism(repo_root: Path) -> None:
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "harness-conf/agents/worker.md" in agents
+    assert "reinicie o OpenCode" in agents
 
 
 def test_agents_mentions_required_recovery(repo_root: Path) -> None:
