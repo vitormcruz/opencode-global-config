@@ -66,6 +66,10 @@ aplicar no shell atual:
 source ~/.bashrc
 ```
 
+Fluxos de provisionamento do docling (modelos locais, modo offline) e
+de erros de certificado TLS (CA PEM/mirror, sem desativar validação)
+estão detalhados na seção de dependências do `README.md`.
+
 As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 `OPENCODE_SKIP_*`, estão documentadas na seção "Variáveis de ambiente"
 do `README.md`. Não use esses overrides em uma validação completa.
