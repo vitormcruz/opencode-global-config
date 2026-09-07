@@ -65,6 +65,16 @@ SPECS = {
         "https://github.com/addyosmani/agent-skills.git",
         "main",
     ),
+    "humanizer-br": SyncSpec(
+        "humanizer-br",
+        "https://github.com/carlosafjr-dev/humanizer-br.git",
+        "master",
+    ),
+    "portugues-tecnico-controlado": SyncSpec(
+        "portugues-tecnico-controlado",
+        "https://github.com/kayquer/portugues-tecnico-controlado.git",
+        "main",
+    ),
     "prompt-improver": SyncSpec(
         "prompt-improver",
         "https://github.com/ckelsoe/prompt-architect.git",
@@ -360,6 +370,82 @@ def _sync_prompt_improver(
     )
 
 
+def _sync_humanizer_br(
+    repo_root: Path,
+    upstream_dir: Path,
+    metadata: dict[str, str],
+) -> None:
+    upstream_skill = upstream_dir / "skills" / "humanizer-br"
+    if not (upstream_skill / "SKILL.md").is_file():
+        raise SyncError("SKILL.md da humanizer-br nao encontrado.")
+
+    local_skill = _skills_root(repo_root) / "humanizer-br"
+    _copy_skill_md(upstream_skill, local_skill)
+
+    aprofundador = upstream_dir / "skills" / "aprofundador" / "SKILL.md"
+    references = local_skill / "references"
+    if aprofundador.is_file():
+        references.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(aprofundador, references / "aprofundador.md")
+
+    license_file = upstream_dir / "LICENSE"
+    if license_file.is_file():
+        shutil.copy2(license_file, local_skill / "LICENSE")
+
+    files = ["references/aprofundador.md", "LICENSE"]
+    files = [file for file in files if (local_skill / file).is_file()]
+    _write_upstream(
+        local_skill,
+        metadata=metadata,
+        repository=SPECS["humanizer-br"].repository,
+        branch=SPECS["humanizer-br"].branch,
+        files=files,
+        update_command="opencode-skills sync humanizer-br",
+        license_text=(
+            "MIT License - Copyright (c) 2026 carlosafjr-dev\n"
+            "https://github.com/carlosafjr-dev/humanizer-br/blob/master/LICENSE"
+        ),
+        extra_fields=["description_lang: pt-br"],
+    )
+
+
+def _sync_portugues_tecnico_controlado(
+    repo_root: Path,
+    upstream_dir: Path,
+    metadata: dict[str, str],
+) -> None:
+    if not (upstream_dir / "SKILL.md").is_file():
+        raise SyncError("SKILL.md da portugues-tecnico-controlado nao encontrado.")
+
+    local_skill = _skills_root(repo_root) / "portugues-tecnico-controlado"
+    _copy_skill_md(upstream_dir, local_skill)
+
+    references = local_skill / "references"
+    files: list[str] = []
+    for reference in sorted((upstream_dir / "references").glob("*.md")):
+        references.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(reference, references / reference.name)
+        files.append(f"references/{reference.name}")
+
+    if not files:
+        raise SyncError("References da portugues-tecnico-controlado nao encontradas.")
+
+    _write_upstream(
+        local_skill,
+        metadata=metadata,
+        repository=SPECS["portugues-tecnico-controlado"].repository,
+        branch=SPECS["portugues-tecnico-controlado"].branch,
+        files=files,
+        update_command="opencode-skills sync portugues-tecnico-controlado",
+        license_text=(
+            "MIT License - Copyright (c) 2026 Kayque Rotondo (kayquer)\n"
+            "https://github.com/kayquer/portugues-tecnico-controlado/"
+            "blob/main/LICENSE"
+        ),
+        extra_fields=["description_lang: pt-br"],
+    )
+
+
 def sync_skill(
     name: str,
     repo_root: Path,
@@ -380,6 +466,10 @@ def sync_skill(
         _sync_accessibility(repo_root, upstream_dir, metadata)
     elif name == "addyosmani":
         _sync_addyosmani(repo_root, upstream_dir, metadata)
+    elif name == "humanizer-br":
+        _sync_humanizer_br(repo_root, upstream_dir, metadata)
+    elif name == "portugues-tecnico-controlado":
+        _sync_portugues_tecnico_controlado(repo_root, upstream_dir, metadata)
     else:
         _sync_prompt_improver(repo_root, upstream_dir, metadata)
     return SyncResult("success")

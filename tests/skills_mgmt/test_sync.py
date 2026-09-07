@@ -475,3 +475,160 @@ def test_sync_rejects_upstream_without_mit_license(tmp_path: Path) -> None:
 
     with pytest.raises(skills_sync.SyncError, match="MIT"):
         skills_sync.sync_skill("accessibility-audit", repo, upstream)
+
+
+@pytest.mark.unit
+def test_sync_help_mentions_writing_skills_targets(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        skills_sync.main(["sync", "--help"])
+
+    output = capsys.readouterr().out
+    assert "humanizer-br" in output
+    assert "portugues-tecnico-controlado" in output
+
+
+@pytest.mark.unit
+def test_list_includes_writing_skills(repo_root: Path) -> None:
+    listed = skills_sync.list_updatable(repo_root)
+
+    assert "humanizer-br" in listed
+    assert "portugues-tecnico-controlado" in listed
+
+
+@pytest.mark.unit
+def test_portugues_tecnico_controlado_files_exist(repo_root: Path) -> None:
+    skill_dir = (
+        repo_root / "harness-conf" / "skills" / "portugues-tecnico-controlado"
+    )
+
+    assert (skill_dir / "SKILL.md").is_file()
+    assert (skill_dir / "UPSTREAM.md").is_file()
+    for reference in ("ingles.md", "lexico.md", "ortografia-ptbr.md"):
+        assert (skill_dir / "references" / reference).is_file()
+
+
+@pytest.mark.unit
+def test_portugues_tecnico_controlado_upstream_documents_repository(
+    repo_root: Path,
+) -> None:
+    metadata = (
+        repo_root
+        / "harness-conf"
+        / "skills"
+        / "portugues-tecnico-controlado"
+        / "UPSTREAM.md"
+    ).read_text(encoding="utf-8")
+
+    assert "kayquer/portugues-tecnico-controlado" in metadata
+    assert "MIT" in metadata
+    assert "description_lang: pt-br" in metadata
+
+
+@pytest.mark.unit
+def test_portugues_tecnico_controlado_sync_copies_references(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    local_skill = (
+        repo / "harness-conf" / "skills" / "portugues-tecnico-controlado"
+    )
+    local_skill.mkdir(parents=True)
+    (local_skill / "SKILL.md").write_text("adapted skill", encoding="utf-8")
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License",
+            "SKILL.md": "upstream skill",
+            "references/lexico.md": "lexico",
+            "references/ortografia-ptbr.md": "ortografia",
+            "references/ingles.md": "ingles",
+        },
+    )
+
+    result = skills_sync.sync_skill(
+        "portugues-tecnico-controlado",
+        repo,
+        upstream,
+    )
+
+    assert result.status == "success"
+    assert (local_skill / "SKILL.md").read_text(encoding="utf-8") == (
+        "adapted skill"
+    )
+    for reference in ("ingles.md", "lexico.md", "ortografia-ptbr.md"):
+        assert (local_skill / "references" / reference).is_file()
+    metadata = (local_skill / "UPSTREAM.md").read_text(encoding="utf-8")
+    assert "opencode-skills sync portugues-tecnico-controlado" in metadata
+    assert "references/lexico.md" in metadata
+
+
+@pytest.mark.unit
+def test_humanizer_br_files_exist(repo_root: Path) -> None:
+    skill_dir = repo_root / "harness-conf" / "skills" / "humanizer-br"
+
+    assert (skill_dir / "SKILL.md").is_file()
+    assert (skill_dir / "UPSTREAM.md").is_file()
+    assert (skill_dir / "LICENSE").is_file()
+    assert (skill_dir / "references" / "aprofundador.md").is_file()
+
+
+@pytest.mark.unit
+def test_humanizer_br_upstream_documents_repository(
+    repo_root: Path,
+) -> None:
+    metadata = (
+        repo_root / "harness-conf" / "skills" / "humanizer-br" / "UPSTREAM.md"
+    ).read_text(encoding="utf-8")
+
+    assert "carlosafjr-dev/humanizer-br" in metadata
+    assert "MIT" in metadata
+    assert "description_lang: pt-br" in metadata
+
+
+@pytest.mark.unit
+def test_humanizer_br_description_has_explicit_triggers(
+    repo_root: Path,
+) -> None:
+    skill = (
+        repo_root / "harness-conf" / "skills" / "humanizer-br" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "humanizar" in skill
+    assert "anti-IA" in skill
+    assert "texto parece IA" in skill
+
+
+@pytest.mark.unit
+def test_humanizer_br_sync_copies_aprofundador_and_license(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    local_skill = repo / "harness-conf" / "skills" / "humanizer-br"
+    local_skill.mkdir(parents=True)
+    (local_skill / "SKILL.md").write_text("adapted skill", encoding="utf-8")
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License",
+            "skills/humanizer-br/SKILL.md": "upstream skill",
+            "skills/aprofundador/SKILL.md": "aprofundador content",
+        },
+    )
+
+    result = skills_sync.sync_skill("humanizer-br", repo, upstream)
+
+    assert result.status == "success"
+    assert (local_skill / "SKILL.md").read_text(encoding="utf-8") == (
+        "adapted skill"
+    )
+    assert (
+        local_skill / "references" / "aprofundador.md"
+    ).read_text(encoding="utf-8") == "aprofundador content"
+    assert (local_skill / "LICENSE").read_text(encoding="utf-8") == (
+        "MIT License"
+    )
+    metadata = (local_skill / "UPSTREAM.md").read_text(encoding="utf-8")
+    assert "opencode-skills sync humanizer-br" in metadata
+    assert "references/aprofundador.md" in metadata
