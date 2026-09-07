@@ -101,6 +101,45 @@ DOC_TEMPLATE = dedent(
     ## Estratégias de Indexação de Código
 
     - (preencher com ferramentas selecionadas)
+
+    ## Testes por Especialidade
+
+    Scripts por especialidade e o orquestrador `testes-produto`.
+    Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
+    exit 1 = fail. Sem argumentos. O orquestrador chama as
+    quatro suítes e agrega o relatório; falha se qualquer
+    suíte falhar. Critérios, orçamento e ferramentas saem da
+    entrevista de curadoria. Fingerprint e cache ficam em
+    `testes-produto/target/` e não são versionados.
+
+    **PROIBIDO:** bypassar, comentar, remover ou condicionar
+    qualquer verificação. Ferramenta ausente não justifica
+    remoção — reporte finding com instrução de instalação.
+
+    ### Dois níveis de teste
+
+    1. **Testes da aplicação** — validam o produto em
+       desenvolvimento. Rodam via suítes/orquestrador
+       `testes-produto` na fase Testes do workflow, sempre
+       que se desenvolve funcionalidade.
+    2. **Testes dos scripts de teste** — os scripts de suíte
+       e o orquestrador são código e têm testes próprios.
+       Esta seção é a especificação executável deles: os
+       testes dos scripts cobrem exatamente o que ela define.
+       Rodam SOMENTE quando os scripts mudam, nunca no ciclo
+       normal de desenvolvimento.
+
+    O `AGENTS.md` do projeto mantém apenas a tabela índice das
+    suítes com link para esta seção
+    (`docs/README.md#testes-por-especialidade`).
+
+    ### Suítes
+
+    - backend: `testes-produto/backend`
+    - dados: `testes-produto/dados`
+    - segurança: `testes-produto/seguranca`
+    - frontend: `testes-produto/frontend`
+    - Orquestrador: `testes-produto`
     """
 )
 
@@ -117,7 +156,7 @@ TESTES_PRODUTO_TEMPLATE = dedent(
 
     Orquestrador: testes-produto
 
-    Spec: [docs/testes-produto.md](docs/testes-produto.md)
+    Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
     """
 )
 

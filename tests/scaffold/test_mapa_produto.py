@@ -284,12 +284,48 @@ def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    assert "docs/testes-produto.md" in content
+    assert "docs/README.md#testes-por-especialidade" in content
+    assert "docs/testes-produto.md" not in content
     assert "harness/agregar" not in content
     assert "## Agregador de Harness" not in content
     assert "### Especificação dos Scripts de Harness" not in content
     assert "O que deve conter" not in content
     assert '"prompt"' not in content
+
+
+@pytest.mark.unit
+def test_doc_scaffold_contains_testes_por_especialidade_section(
+    tmp_path: Path,
+) -> None:
+    destination = tmp_path / "test-doc.md"
+
+    status, _, _ = run_scaffold("--doc", str(destination))
+    content = destination.read_text(encoding="utf-8")
+
+    assert status == 0
+    assert "## Testes por Especialidade" in content
+    assert "{ status, findings[] }" in content
+    assert "testes-produto/target/" in content
+    assert "PROIBIDO" in content
+    assert "docs/README.md#testes-por-especialidade" in content
+    assert "docs/testes-produto.md" not in content
+
+
+@pytest.mark.unit
+def test_doc_scaffold_declares_two_test_levels(tmp_path: Path) -> None:
+    destination = tmp_path / "test-doc.md"
+
+    status, _, _ = run_scaffold("--doc", str(destination))
+    content = destination.read_text(encoding="utf-8")
+    normalized = " ".join(content.split()).lower()
+
+    assert status == 0
+    assert "dois níveis de teste" in normalized
+    assert "testes da aplicação" in normalized
+    assert "testes dos scripts de teste" in normalized
+    assert "especificação executável" in normalized
+    assert "somente quando os scripts mudam" in normalized
+    assert "fase testes do workflow" in normalized
 
 
 @pytest.mark.unit
