@@ -125,6 +125,21 @@ Anexo A aprovado); o executor materializa copiando.
 
 ## Execução — configuração aprovada
 
+### Progresso
+- **Fase 1 CONCLUÍDA** (commits `b580f55`, `30b5958`, `3dc552c`,
+  `47292b4`, `516a9ad`, `742895e`). Revisor independente: **APROVADO**
+  (suíte 632 passed; base = Anexo A; auditoria de segurança das skills
+  refeita pelo revisor com confiança zero — limpa; codebase-memory-mcp
+  resolvido por concatenação, symlink rejeitado com evidência).
+- Achados não-bloqueantes do revisor (decisão humana pendente):
+  1. `harness-conf/commands/index-codebase.md` ainda referencia o
+     copilot-specific extinto (sugerido vincular à Task 13).
+  2. Comunicação do bootstrap (docling/TLS) ficou só no README;
+     revisor sugere 1-2 linhas na seção Bootstrap do AGENTS.md raiz.
+- Nota operacional: a tool `task` não está disponível para o subagente
+  executor (encadeamento executor→worker não suportado nesta
+  plataforma). Modalidade das próximas fases pendente de decisão.
+
 - **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
   Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
 - **Worker**: agente `worker`, modelo `opencode-go/gpt-5.6-luna`
