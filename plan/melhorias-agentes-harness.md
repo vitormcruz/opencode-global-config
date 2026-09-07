@@ -1,6 +1,26 @@
 # Plano: Melhorias em Agentes, Curadoria e Estrutura de Harness
 
-Status: EXECUÇÃO CONCLUÍDA — aguardando revisão final do humano
+Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
+
+## Fechamento
+
+- Fases 1-4 executadas; cada fase revisada por instância independente
+  (todas APROVADAS); revisão final global APROVADA sem divergências.
+- Suíte completa: 675 passed, 2 deselected (copilot/Windows).
+- Bootstrap re-executado com sucesso no WSL.
+- Pendências do humano: suíte Copilot no Windows; reindexar
+  codebase-memory; `git push` somente com confirmação explícita.
+- Notas pós-plano (melhorias não-bloqueantes, fora do escopo,
+  coletadas pelos revisores):
+  1. Fixture do servidor Qwen validar saúde antes do lote (ambiente).
+  2. `reliable-async-operations` cita seção do AGENTS global com título
+     antigo ("Espera de tarefas" vs "Espera por tarefas").
+  3. Frase amarrando a tensão "PROIBIDO timeouts" vs "toda chamada de
+     rede precisa de timeout" na própria skill.
+  4. `index-codebase.md` Etapas 1-2 ainda bifurcam por cliente.
+  5. Bullet residual com ordem das ferramentas no AGENTS.md raiz.
+  6. Cabeçalho de 1 linha em `testes-por-especialidade.md` explicando
+     seu papel de tabela-índice.
 
 ## Overview
 
