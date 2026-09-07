@@ -103,15 +103,17 @@ def test_curador_produto_references_default_artifacts(
 ) -> None:
     assert "default-artifacts/doc-readme.md" in curador_content
     assert "default-artifacts/testes-por-especialidade.md" in curador_content
-    assert "default-artifacts/testes-produto.md" in curador_content
     assert "default-artifacts/instrucoes-por-agente.md" in curador_content
     spec = (
-        repo_root / "harness-conf/agents/default-artifacts/testes-produto.md"
+        repo_root / "harness-conf/agents/default-artifacts/doc-readme.md"
     ).read_text(
         encoding="utf-8"
     )
     assert "testes-produto/target/" in spec
     assert "harness/target/" not in spec
+    assert not (
+        repo_root / "harness-conf/agents/default-artifacts/testes-produto.md"
+    ).exists()
 
 
 @pytest.mark.unit

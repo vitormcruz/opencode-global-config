@@ -135,3 +135,122 @@ O analista deve elicitar:
 | Ferramenta | Uso | Instalação |
 |-----------|-----|-----------|
 | codebase-memory CLI | Grafo de código e docs; navegação estrutural e consulta de seções. | `codebase-memory-mcp cli` |
+
+---
+
+## Testes por Especialidade
+
+Scripts por especialidade e o orquestrador `testes-produto`.
+Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
+exit 1 = fail. Sem argumentos.
+
+O orquestrador chama as quatro suítes e agrega o relatório.
+Falha se qualquer suíte falhar.
+
+Critérios, orçamento e ferramentas saem da entrevista de
+curadoria. Fingerprint e cache ficam em `testes-produto/target/`
+e não são versionados.
+
+**PROIBIDO:** bypassar, comentar, remover ou condicionar
+qualquer verificação. Ferramenta ausente não justifica
+remoção — reporte finding com instrução de instalação.
+
+### Dois níveis de teste
+
+1. **Testes da aplicação** — validam o produto em
+   desenvolvimento. Rodam via suítes/orquestrador
+   `testes-produto` na fase Testes do workflow, sempre que
+   se desenvolve funcionalidade.
+2. **Testes dos scripts de teste** — os scripts de suíte e
+   o orquestrador são código e têm testes próprios. Esta
+   seção é a especificação executável deles: os testes dos
+   scripts cobrem exatamente o que ela define (suítes,
+   interface JSON, orçamento, proibições). Rodam SOMENTE
+   quando os scripts mudam — por exemplo, curadoria
+   alterando ferramentas ou critérios por orientação do
+   humano —, nunca no ciclo normal de desenvolvimento.
+
+O `AGENTS.md` do projeto mantém apenas a tabela índice das
+suítes com link para esta seção
+(`docs/README.md#testes-por-especialidade`).
+
+### backend
+
+**Arquivo:** `testes-produto/backend`
+
+**Descrição:** Testes e análise do backend.
+
+**O que deve conter:**
+- Comandos de teste do projeto (unitários + integração)
+- Relatório de cobertura de testes
+- Análise estática, se o projeto tiver
+
+**Ferramentas:** definidas na entrevista
+
+**Critérios:** definidos na entrevista
+
+**Orçamento:** tetos da entrevista; ver interface padronizada
+
+### dados
+
+**Arquivo:** `testes-produto/dados`
+
+**Descrição:** Validação de schema e modelo de dados.
+
+**O que deve conter:**
+- Validação de existência de documentos de especificação
+- Validação de sintaxe do modelo (DBML ou equivalente)
+- Conferência entre modelo e schema atual
+
+**Ferramentas:** definidas na entrevista
+
+**Critérios:** definidos na entrevista
+
+**Orçamento:** tetos da entrevista; ver interface padronizada
+
+### segurança
+
+**Arquivo:** `testes-produto/seguranca`
+
+**Descrição:** Segurança — secrets, dependências, OWASP.
+
+**O que deve conter:**
+- Secrets scan no repositório
+- Auditoria de dependências
+- Verificação de vulnerabilidades conhecidas
+
+**Ferramentas:** definidas na entrevista
+
+**Critérios:** definidos na entrevista
+
+**Orçamento:** tetos da entrevista; ver interface padronizada
+
+### frontend
+
+**Arquivo:** `testes-produto/frontend`
+
+**Descrição:** Testes, lint, build e acessibilidade do
+frontend.
+
+**O que deve conter:**
+- Testes frontend
+- Lint e build
+- Verificação de acessibilidade
+- Cobertura da suíte de UI, se houver
+- `pa11y`, `axe-core` ou ambos: a entrevista decide
+
+**Ferramentas:** definidas na entrevista
+
+**Critérios:** definidos na entrevista
+
+**Orçamento:** tetos da entrevista; ver interface padronizada
+
+### Orquestrador
+
+**Arquivo:** `testes-produto`
+
+Chama as quatro suítes (`testes-produto/backend`,
+`testes-produto/dados`, `testes-produto/seguranca`,
+`testes-produto/frontend`) e agrega o
+relatório no fim. `status` é `fail` se qualquer suíte
+falhar. Não reabre entrevista nem inventa check.

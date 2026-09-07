@@ -9,4 +9,4 @@
 
 Orquestrador: `testes-produto`
 
-Spec: [docs/testes-produto.md](docs/testes-produto.md)
+Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)

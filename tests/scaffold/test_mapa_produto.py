@@ -365,22 +365,24 @@ def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
     for script in SPECIALTY_SCRIPTS:
         assert script in content
     assert "testes-produto" in content
-    assert "docs/testes-produto.md" in content
+    assert "docs/README.md#testes-por-especialidade" in content
+    assert "docs/testes-produto.md" not in content
     assert "harness/agregar" not in content
     assert '"prompt"' not in content
     assert "O que deve conter" not in content
 
 
 @pytest.mark.unit
-def test_testes_produto_spec_template_has_specialty_subsections(
+def test_doc_readme_template_absorbed_testes_produto_spec(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/testes-produto.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
     ).read_text(encoding="utf-8")
 
+    assert "## Testes por Especialidade" in content
     for specialty in SPECIALTIES:
-        assert f"## {specialty}" in content
+        assert f"### {specialty}" in content
     for heading in (
         "Ferramentas",
         "Critérios",
@@ -392,6 +394,28 @@ def test_testes_produto_spec_template_has_specialty_subsections(
     assert "harness/agregar" not in content
     assert "pa11y" in content
     assert "axe-core" in content
+    assert "testes-produto/target/" in content
+    assert "harness/target/" not in content
+    assert "{ status, findings[] }" in content
+    assert "PROIBIDO" in content
+
+
+@pytest.mark.unit
+def test_doc_readme_template_declares_two_test_levels(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
+    ).read_text(encoding="utf-8")
+    normalized = " ".join(content.split()).lower()
+
+    assert "dois níveis de teste" in normalized
+    assert "testes da aplicação" in normalized
+    assert "testes dos scripts de teste" in normalized
+    assert "especificação executável" in normalized
+    assert "somente quando os scripts mudam" in normalized
+    assert "fase testes do workflow" in normalized
+    assert "docs/readme.md#testes-por-especialidade" in normalized
 
 
 @pytest.mark.unit
@@ -443,8 +467,8 @@ def test_default_testes_produto_artifacts_do_not_cite_plan_ids(
 ) -> None:
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
     artifact_paths = (
+        "harness-conf/agents/default-artifacts/doc-readme.md",
         "harness-conf/agents/default-artifacts/testes-por-especialidade.md",
-        "harness-conf/agents/default-artifacts/testes-produto.md",
         "harness-conf/agents/default-artifacts/instrucoes-por-agente.md",
         "harness-conf/agents/references/interface-testes-produto.md",
     )
