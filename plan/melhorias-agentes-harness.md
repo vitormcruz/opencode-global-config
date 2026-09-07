@@ -142,6 +142,15 @@ Anexo A aprovado); o executor materializa copiando.
   (luna) diretamente, em paralelo ao executor, para lotes mecânicos
   identificados; executor solo quando não houver lote mecânico claro.
 
+- **Fase 2 CONCLUÍDA** (commits `91abdbe`, `4ef59fa`,
+  `7841b79`, `3d5959a`, `3d50728`). Suíte completa verde
+  (639 passed, WSL, integração OpenCode incluída); grep
+  `docs/testes-produto.md` sem referências ativas (só
+  plano, asserções negativas e a proibição no curador).
+  Nota da execução: a skill `testes-produto-catalog` e o
+  teste `tests/skills/test_testes_produto_catalog.py`
+  também foram atualizados (referências ativas ao arquivo
+  extinto, exigidas pela verificação final da fase).
 - **Executor**: subagente genérico (`general`), modelo da sessão (GLM).
   Instruído a delegar ao `worker` os lotes grandes/mecânicos via `task`.
 - **Worker**: agente `worker`, modelo `opencode-go/gpt-5.6-luna`
@@ -285,7 +294,7 @@ Anexo A aprovado); o executor materializa copiando.
 
 ### Phase 2: Curadoria unificada no docs/README.md (D2, D3)
 
-- [ ] **Task 6: Fundir templates default-artifacts**
+- [x] **Task 6: Fundir templates default-artifacts**
   - **Description**: `doc-readme.md` absorve `testes-produto.md` como
     seção "Testes por Especialidade" (suítes, orquestrador, interface
     JSON, proibições). O template declara os dois níveis de teste (D3) e
@@ -301,7 +310,7 @@ Anexo A aprovado); o executor materializa copiando.
     `harness-conf/agents/default-artifacts/testes-produto.md` (rm)
   - **Estimated scope**: Small
 
-- [ ] **Task 7: Curador e mensagens de curadoria**
+- [x] **Task 7: Curador e mensagens de curadoria**
   - **Description**: `curador-produto.md`: entrevista sem spec separado
     (docs/README.md com a seção; `AGENTS.md` do projeto-alvo com tabela +
     link âncora); orienta o humano sobre spec executável dos scripts e
@@ -317,7 +326,7 @@ Anexo A aprovado); o executor materializa copiando.
     `tests/agents/test_curador_produto.py`
   - **Estimated scope**: Medium
 
-- [ ] **Task 8: Scaffold unificado**
+- [x] **Task 8: Scaffold unificado**
   - **Description**: `scaffold_mapa.py`: `DOC_TEMPLATE` ganha a seção
     "Testes por Especialidade"; `TESTES_PRODUTO_TEMPLATE` (tabela do
     AGENTS.md) linka âncora `docs/README.md#testes-por-especialidade`
@@ -331,7 +340,7 @@ Anexo A aprovado); o executor materializa copiando.
     `tests/scaffold/test_mapa_produto.py`
   - **Estimated scope**: Medium
 
-- [ ] **Task 9: Referências nos agentes e workflows**
+- [x] **Task 9: Referências nos agentes e workflows**
   - **Description**: trocar leituras de `docs/testes-produto.md` pela
     seção no `docs/README.md` em `devflow.md`, `eng-software.md`,
     `qa.md`, `sec.md`, `dba.md`, `rev.md`, `front.md` e
@@ -348,11 +357,11 @@ Anexo A aprovado); o executor materializa copiando.
   - **Estimated scope**: Medium
 
 ### Checkpoint: Phase 2
-- [ ] Suíte agents+scaffold+adapters verde
-- [ ] Curadoria coerente end-to-end (templates, curador, scaffold, agentes)
+- [x] Suíte agents+scaffold+adapters verde
+- [x] Curadoria coerente end-to-end (templates, curador, scaffold, agentes)
 - [ ] Review com humano antes de prosseguir
 
-- [ ] **Task 9b (adicionada no checkpoint da Fase 1, aprovada)**: na seção
+- [x] **Task 9b (adicionada no checkpoint da Fase 1, aprovada)**: na seção
   Bootstrap do `AGENTS.md` raiz, adicionar 1-2 linhas apontando os fluxos
   docling/TLS detalhados no `README.md`.
   - **Acceptance criteria**: seção Bootstrap referencia os fluxos; sem
