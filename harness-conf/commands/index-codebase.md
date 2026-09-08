@@ -56,9 +56,9 @@ Siga este fluxo estritamente.
 - informar ao humano se o repo ja estava indexado ou nao
 
 **Execucao:**
-- No **GitHub Copilot**, execute: `codebase-memory-mcp cli list_projects '{}'`
-- No **OpenCode**, execute o mesmo CLI no WSL:
+- Execute o CLI uma unica vez, em qualquer cliente (OpenCode ou Copilot):
   `codebase-memory-mcp cli list_projects '{}'`
+- Nota de ambiente: no Windows rode o CLI nativo (sem prefixo `wsl`).
 - Se o repositorio atual ja estiver indexado, informe isso ao usuario antes de reindexar.
 
 **Condicao de encerramento da etapa:**
@@ -76,11 +76,11 @@ Siga este fluxo estritamente.
 - capturar e exibir o resultado da indexacao
 
 **Execucao:**
-- No **GitHub Copilot**, execute com JSON posicional unico e `repo_path` absoluto, por exemplo:
-  `codebase-memory-mcp cli index_repository '{"repo_path":"C:\\Users\\<usuario>\\Projetos\\opencode-config"}'`
-- Use `repo_path` absoluto em ambos os ambientes para evitar ambiguidades.
-- No **OpenCode** ou em hooks/scripts locais, use o mesmo CLI:
-  `codebase-memory-mcp cli index_repository '{"repo_path": "."}'`
+- Execute com JSON posicional unico e `repo_path` absoluto:
+  `codebase-memory-mcp cli index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'`
+- Nota de ambiente: o formato do caminho absoluto varia — `/home/...`
+  no WSL/Linux, `C:\\Users\\...` no Windows (ex.:
+  `C:\\Users\\<usuario>\\Projetos\\repo`). Nunca use `repo_path` relativo.
 - Exiba o resultado da indexacao.
 
 **O que e indexado:**

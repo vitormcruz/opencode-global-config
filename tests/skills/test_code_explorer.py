@@ -196,3 +196,24 @@ def test_index_command_no_longer_references_copilot_specific(
     assert "copilot-specific" not in command
     # Etapa 3 agora verifica instrucoes no AGENTS.md do repo.
     assert "AGENTS.md" in command
+
+
+@pytest.mark.unit
+def test_index_command_steps_1_and_2_are_single_flow(
+    repo_root: Path,
+):
+    """Etapas 1-2 sem bifurcacao por cliente; diferenca de ambiente e
+    nota curta."""
+
+    command = (repo_root / "harness-conf/commands/index-codebase.md").read_text(
+        encoding="utf-8"
+    )
+    steps_1_2 = command.split("## Etapa 3", 1)[0]
+
+    assert "No **GitHub Copilot**" not in steps_1_2
+    assert "No **OpenCode**" not in steps_1_2
+    # Nota curta de ambiente no lugar da bifurcacao.
+    assert "Nota de ambiente" in steps_1_2
+    assert "sem prefixo `wsl`" in steps_1_2
+    # repo_path relativo saiu: sempre absoluto.
+    assert '\'"repo_path": "."\' ' not in steps_1_2
