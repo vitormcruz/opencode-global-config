@@ -97,6 +97,7 @@ def qwen_server() -> Iterator[LocalModelServer]:
     server = LocalModelServer()
     try:
         server.ensure_up()
+        server.ensure_healthy()
     except LocalModelServerError as error:
         pytest.fail(
             f"{error}\n"

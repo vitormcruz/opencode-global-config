@@ -83,6 +83,9 @@ CONTEXT_SIZE = 16_384
 PID_FILE_NAME = "llama-server.pid"
 DOWNLOAD_TIMEOUT_SECONDS = 600
 LOCAL_REQUEST_TIMEOUT_SECONDS = 600
+# Health local responde em milissegundos; um teto curto detecta servidor
+# doente sem herdar o timeout longo de inferência.
+HEALTH_TIMEOUT_SECONDS = 10
 
 
 class LocalModelServerError(RuntimeError):
@@ -142,6 +145,9 @@ class LocalModelServer:
 
     def _models_url(self) -> str:
         return f"{self.endpoint_url}/v1/models"
+
+    def _health_url(self) -> str:
+        return f"{self.endpoint_url}/health"
 
     def _find_executable(self) -> str:
         if self.executable is not None:
@@ -560,6 +566,38 @@ class LocalModelServer:
                 return response.status == 200
         except (HTTPError, OSError, TimeoutError, URLError):
             return False
+
+    def _health_responds(self) -> bool:
+        """Simple liveness call: a health endpoint must answer quickly."""
+
+        try:
+            with urlopen(self._health_url(), timeout=HEALTH_TIMEOUT_SECONDS) as response:
+                return response.status == 200
+        except (HTTPError, OSError, TimeoutError, URLError):
+            return False
+
+    def ensure_healthy(self) -> LocalModelServer:
+        """Restart an unhealthy owned server once, then fail actionable.
+
+        ``ensure_up`` proves the ``/v1/models`` contract; this extra
+        health-check catches servers that answer models but are broken
+        for serving, before the OpenCode batch starts.
+        """
+
+        if self._health_responds():
+            return self
+
+        _log("health-check falhou; reiniciando o llama-server...")
+        self.stop(force=True)
+        self.ensure_up()
+        if self._health_responds():
+            return self
+        raise LocalModelServerError(
+            f"llama-server nao esta saudavel em {self._health_url()} "
+            "mesmo apos reinicio automatico.\n"
+            "Verifique/suba o servidor manualmente antes dos testes:\n"
+            "  python3 tests/integration/model/local_model_server.py --up"
+        )
 
     def require_available(self) -> None:
         """Raise an actionable error unless ``/v1/models`` returns HTTP 200."""

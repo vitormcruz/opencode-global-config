@@ -616,6 +616,96 @@ def test_wait_until_ready_returns_after_models_endpoint_responds(
     server._wait_until_ready()
 
 
+# --- Health-check antes do lote opencode (item 5.6) ---
+
+
+def test_ensure_healthy_returns_without_restart_when_health_responds(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = LocalModelServer(cache_dir=tmp_path)
+    restart = Mock(side_effect=AssertionError("servidor saudável não reinicia"))
+    monkeypatch.setattr(server, "_health_responds", Mock(return_value=True))
+    monkeypatch.setattr(server, "stop", restart)
+    monkeypatch.setattr(server, "ensure_up", restart)
+
+    result = server.ensure_healthy()
+
+    assert result is server
+
+
+def test_ensure_healthy_restarts_once_and_recovers(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = LocalModelServer(cache_dir=tmp_path)
+    health_results = iter([False, True])
+    monkeypatch.setattr(
+        server, "_health_responds", lambda: next(health_results)
+    )
+    stop = Mock()
+    ensure_up = Mock()
+    monkeypatch.setattr(server, "stop", stop)
+    monkeypatch.setattr(server, "ensure_up", ensure_up)
+
+    result = server.ensure_healthy()
+
+    assert result is server
+    stop.assert_called_once_with(force=True)
+    ensure_up.assert_called_once_with()
+
+
+def test_ensure_healthy_fails_fast_with_actionable_error_when_still_sick(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = LocalModelServer(cache_dir=tmp_path)
+    monkeypatch.setattr(server, "_health_responds", Mock(return_value=False))
+    monkeypatch.setattr(server, "stop", Mock())
+    monkeypatch.setattr(server, "ensure_up", Mock())
+
+    with pytest.raises(LocalModelServerError, match="--up") as failure:
+        server.ensure_healthy()
+
+    assert "local_model_server.py --up" in str(failure.value)
+
+
+def test_health_check_uses_short_justified_timeout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Health local responde em milissegundos; o teto curto detecta
+    servidor doente sem esperar o timeout de inferência."""
+
+    server = LocalModelServer(cache_dir=tmp_path)
+    observed: dict[str, object] = {}
+
+    def fake_urlopen(url: str, *, timeout: float) -> MagicMock:
+        observed["url"] = url
+        observed["timeout"] = timeout
+        response = MagicMock(status=200)
+        response.__enter__.return_value = response
+        return response
+
+    monkeypatch.setattr(local_model_server, "urlopen", fake_urlopen)
+
+    assert server._health_responds()
+    assert observed["url"] == f"{server.endpoint_url}/health"
+    assert observed["timeout"] == local_model_server.HEALTH_TIMEOUT_SECONDS
+    assert observed["timeout"] < local_model_server.LOCAL_REQUEST_TIMEOUT_SECONDS
+
+
+def test_qwen_fixture_health_checks_before_yield(repo_root: Path) -> None:
+    """A fixture session-scoped valida a saúde ANTES de servir o lote."""
+
+    conftest = (repo_root / "tests" / "integration" / "conftest.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "ensure_healthy()" in conftest
+    assert conftest.index("ensure_healthy()") < conftest.index("yield server")
+
+
 def test_stop_terminates_only_a_process_started_by_this_instance(
     tmp_path: Path,
 ) -> None:
