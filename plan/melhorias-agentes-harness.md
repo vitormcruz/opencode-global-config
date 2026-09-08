@@ -32,6 +32,10 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
   1-2 frases explicando que a proibição mira o número chute como
   desencargo, e o timeout exigido é rede de segurança ancorada a sinal
   de vida (inatividade) com valor justificado.
+- **5.5**: `harness-conf/commands/index-codebase.md` — reescrever as
+  Etapas 1-2 como fluxo único, sem bifurcação por cliente (OpenCode/
+  Copilot); diferenças pontuais de ambiente viram nota curta (padrão da
+  linha "sem prefixo wsl"); manter a Etapa 3 já corrigida.
 - (demais correções em aprovação individual com o humano)
 
 
