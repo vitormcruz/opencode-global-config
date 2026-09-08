@@ -19,8 +19,13 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
   instrucoes-por-agente-template.md); comentário `<!-- TEMPLATE: ... -->`
   no topo de cada um especificando o papel; corpo do
   `curador-produto.md` explica o papel de cada template (não só os
-  paths); atualizar referências (curador, adapter copilot, scaffold,
-  testes).
+  paths); varredura grep por TODAS as referências aos nomes antigos
+  (curador, adapter copilot, scaffold, testes, comandos, agentes) e
+  ajuste.
+- **5.3**: `AGENTS.md` raiz — remover o bullet residual com a ordem das
+  ferramentas do codebase-memory e a dica de `Section` (fica só a
+  prioridade do CLI + gatilho da skill `code-explorer-priority`);
+  verificar testes associados.
 - (demais correções em aprovação individual com o humano)
 
 
