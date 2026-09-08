@@ -36,6 +36,13 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
   Etapas 1-2 como fluxo único, sem bifurcação por cliente (OpenCode/
   Copilot); diferenças pontuais de ambiente viram nota curta (padrão da
   linha "sem prefixo wsl"); manter a Etapa 3 já corrigida.
+- **5.6**: fixture do servidor Qwen (`tests/integration/model/`) —
+  health-check antes do lote `opencode` (chamada simples ao servidor);
+  servidor doente → reiniciar ou falhar de imediato com mensagem
+  acionável (`python3 tests/integration/model/local_model_server.py
+  --up`); sem skip (pytest.fail com instrução).
+- Execução: todas as 6 aprovadas individualmente pelo humano; executor
+  + revisor independente ao final.
 - (demais correções em aprovação individual com o humano)
 
 
