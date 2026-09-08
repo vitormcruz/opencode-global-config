@@ -37,6 +37,10 @@ consistência.
 - **D4 (aprovada): estender `tests/agents/test_workflow_consistency.py`** com
   checagem: agente que referencia `question-orchestration` deve ter
   `question: allow` no frontmatter. Sem arquivo de teste novo.
+- **D5 (aprovada): modelos por papel na execução.** Executor: `worker`
+  (`opencode-go/gpt-5.6-luna`, já no frontmatter). Revisor: `revisor`
+  (`zai-coding-plan/glm-5.3`, já no frontmatter). Nenhuma edição de modelo
+  necessária; a tool `task` usa os frontmatters.
 
 ## Task List
 
