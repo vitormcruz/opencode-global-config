@@ -84,9 +84,12 @@ alto nesta lista que estiver disponível — nunca pule direto para timeout:
    rede de segurança (timeout de inatividade/total) por trás de um dos
    mecanismos acima, nunca como único instrumento de decisão.
 
-Esta ordem espelha a regra "Espera de tarefas: preferir determinismo a
-timeout" do AGENTS.md global — lá para como o agente espera por *suas*
-chamadas de ferramenta, aqui para o código que o agente **escreve**.
+A distinção de escopo importa: esta skill rege o **código que o agente
+escreve** para lidar com operações de duração incerta. Quando for o
+próprio agente esperando por *suas* chamadas de ferramenta, vale o mesmo
+princípio — espere por um sinal determinístico de conclusão (evento,
+callback, polling de condição, resultado observável), nunca por uma
+estimativa de tempo.
 
 ## Contrato mínimo (qualquer linguagem, qualquer tipo de operação)
 
@@ -336,9 +339,4 @@ erro/timeout engolido silenciosamente.**
 
 - `debugging-and-error-recovery` — diagnóstico quando a operação já
   travou em produção.
-- Seção "Espera de tarefas: preferir determinismo a timeout" no
-  AGENTS.md global — trata de como o próprio agente espera por *suas*
-  chamadas de ferramenta; esta skill trata do código que o agente
-  **escreve** para lidar com qualquer operação assíncrona ou de duração
-  incerta.
 

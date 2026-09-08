@@ -91,6 +91,36 @@ def test_description_covers_timeout_trigger(skill_content: str) -> None:
 
 
 @pytest.mark.unit
+def test_skill_is_self_contained_without_harness_artifacts(
+    skill_content: str,
+) -> None:
+    """D12: a skill não cita paths ou títulos de artefatos internos."""
+
+    for forbidden in (
+        "AGENTS.md",
+        "AGENTS.base.md",
+        "harness-conf",
+        "Espera de tarefas",
+        "Espera por tarefas",
+    ):
+        assert forbidden not in skill_content, f"referência externa: {forbidden}"
+
+
+@pytest.mark.unit
+def test_skill_keeps_agent_vs_written_code_distinction(
+    skill_content: str,
+) -> None:
+    """A divisão agente-espera vs código-escrito permanece como conceito."""
+
+    normalized = " ".join(skill_content.split())
+
+    assert "código que o agente" in normalized
+    assert "**código que o agente escreve**" in normalized
+    assert "chamadas de ferramenta" in normalized
+    assert "sinal determinístico de conclusão" in normalized
+
+
+@pytest.mark.unit
 def test_base_does_not_duplicate_the_prohibition(repo_root: Path) -> None:
     base = (repo_root / "harness-conf" / "AGENTS.base.md").read_text(
         encoding="utf-8"
