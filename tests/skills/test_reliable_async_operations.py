@@ -121,6 +121,23 @@ def test_skill_keeps_agent_vs_written_code_distinction(
 
 
 @pytest.mark.unit
+def test_prohibition_bridges_to_network_timeout_requirement(
+    skill_content: str,
+) -> None:
+    """Ponte explícita: proibição mira o número-chute; rede exige rede de
+    segurança ancorada a sinal de vida."""
+
+    section = _prohibition_section(skill_content)
+
+    assert "não revoga o requisito de timeout explícito" in section
+    assert "número chutado como desencargo de consciência" in section
+    assert "rede de segurança" in section
+    assert "sinal de vida" in section
+    assert "inatividade" in section
+    assert "valor justificado" in section
+
+
+@pytest.mark.unit
 def test_base_does_not_duplicate_the_prohibition(repo_root: Path) -> None:
     base = (repo_root / "harness-conf" / "AGENTS.base.md").read_text(
         encoding="utf-8"

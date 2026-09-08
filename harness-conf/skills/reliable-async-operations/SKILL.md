@@ -66,6 +66,12 @@ por ela — em qualquer linguagem, backend ou frontend.
   consulte o humano. Timeout existente fora das exceções: informe ao humano;
   não altere silenciosamente.
 
+Essa proibição não revoga o requisito de timeout explícito em toda chamada
+de rede (seção "Padrões por categoria" abaixo) — os dois se completam: o
+alvo da proibição é o número chutado como desencargo de consciência; o
+timeout exigido é rede de segurança ancorada a sinal de vida — tempo de
+inatividade — com valor justificado pelo recurso e pela operação.
+
 ## Ordem de preferência (do melhor para o pior)
 
 Ao integrar com uma operação de duração incerta, escolha o mecanismo mais
