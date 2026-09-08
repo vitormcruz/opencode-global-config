@@ -43,6 +43,12 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
   --up`); sem skip (pytest.fail com instrução).
 - Execução: todas as 6 aprovadas individualmente pelo humano; executor
   + revisor independente ao final.
+- **RESULTADO**: Fase 5 executada (commits `55706aa`, `0c15d7b`,
+  `e210a6d`, `7362e08`, `ee5b722`, `81bef96`) e revisada por instância
+  independente — **APROVADA** sem divergências. Suíte: 686 passed,
+  2 deselected. Notas remanescentes (não-bloqueantes, cosmeticas):
+  PTC skill linha 11 ("Leia AGENTS.md antes" sem dizer qual — upstream);
+  commit `7362e08` sem escopo no tipo.
 - (demais correções em aprovação individual com o humano)
 
 
