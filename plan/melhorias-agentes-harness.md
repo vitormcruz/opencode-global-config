@@ -4,6 +4,26 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
 
 ## Fechamento
 
+### Fase 5 — correções pós-revisão (aprovadas pelo humano, em definição)
+
+- **D12 (skills autocontidas)**: skill não referencia paths ou títulos
+  de artefatos internos do harness; pode mencionar convenções do
+  ecossistema (AGENTS.md do projeto-alvo, docs/README.md criado pelo
+  workflow) e as próprias `references/`.
+- **5.1**: `reliable-async-operations` — remover as 2 referências ao
+  AGENTS.md global (nome de seção renomeado na base); reescrever os
+  trechos de forma autocontida.
+- **5.2**: templates `default-artifacts/` — renomear com sufixo
+  `-template` (`git mv`: doc-readme-template.md,
+  testes-por-especialidade-template.md,
+  instrucoes-por-agente-template.md); comentário `<!-- TEMPLATE: ... -->`
+  no topo de cada um especificando o papel; corpo do
+  `curador-produto.md` explica o papel de cada template (não só os
+  paths); atualizar referências (curador, adapter copilot, scaffold,
+  testes).
+- (demais correções em aprovação individual com o humano)
+
+
 - Fases 1-4 executadas; cada fase revisada por instância independente
   (todas APROVADAS); revisão final global APROVADA sem divergências.
 - Suíte completa: 675 passed, 2 deselected (copilot/Windows).
