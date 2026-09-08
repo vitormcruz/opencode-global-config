@@ -351,3 +351,19 @@ def test_agents_mentions_required_recovery(repo_root: Path) -> None:
     count = _count_matching_lines(repo_root / "AGENTS.md", "Recovery obrigatório")
     assert count >= 1
     assert count >= 1
+
+
+def test_agents_root_defers_tool_order_to_code_explorer_skill(
+    repo_root: Path,
+) -> None:
+    """Ordem das ferramentas e dica de `Section` saem do raiz: vivem na
+    skill `code-explorer-priority`."""
+
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    skill = (
+        repo_root / "harness-conf" / "skills/code-explorer-priority/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "search_graph" not in agents
+    assert "`Section`" not in agents
+    assert "search_graph" in skill

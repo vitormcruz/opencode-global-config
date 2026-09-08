@@ -9,11 +9,8 @@ deste repo.
 - Use SEMPRE o codebase-memory CLI (CÓDIGO) antes de grep/glob. Ele
   retorna resultados estruturados, consome menos tokens e entende a
   arquitetura do projeto.
-- Ordem: `search_graph` → `trace_path` → `get_code_snippet` →
-  `query_graph` (Cypher) → `get_architecture`. Documentos `.md` são
-  indexados como nós `Section`.
-- Detalhes operacionais (comandos JSON, busca em docs, fallback)
-  vivem na skill `code-explorer-priority`.
+- Detalhes operacionais (comandos JSON, ordem das ferramentas, busca em
+  docs, fallback) vivem na skill `code-explorer-priority`.
 - Recovery obrigatório: se o CLI retornar `"project not found"`,
   execute `list_projects`, copie o nome exato do projeto indexado e
   retente. Caia para grep/glob somente se o projeto não estiver
