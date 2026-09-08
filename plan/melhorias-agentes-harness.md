@@ -46,6 +46,15 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
 - (demais correções em aprovação individual com o humano)
 
 
+- **Fase 5 CONCLUÍDA** (commits `55706aa`, `0c15d7b`, `e210a6d`,
+  `7362e08`, `ee5b722`, `81bef96`). Suíte completa verde (686 passed,
+  2 deselected copilot, WSL, integração OpenCode incluída; `/health`
+  do llama-server validado empiricamente). Grep sem referências ativas
+  aos nomes antigos dos templates. 5.2: `git mv` com rename 100%,
+  comentários `<!-- TEMPLATE: -->`, curador explicando papéis, testes
+  do curador/scaffold/adapter copilot atualizados. 5.6: TDD com
+  servidor doente simulado; `ensure_healthy` (uma tentativa de restart
+  + `pytest.fail` acionável) na fixture session-scoped.
 - Fases 1-4 executadas; cada fase revisada por instância independente
   (todas APROVADAS); revisão final global APROVADA sem divergências.
 - Suíte completa: 675 passed, 2 deselected (copilot/Windows).
