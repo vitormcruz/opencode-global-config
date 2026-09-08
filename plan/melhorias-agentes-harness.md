@@ -26,6 +26,12 @@ Status: EXECUÇÃO CONCLUÍDA — REVISÃO FINAL APROVADA
   ferramentas do codebase-memory e a dica de `Section` (fica só a
   prioridade do CLI + gatilho da skill `code-explorer-priority`);
   verificar testes associados.
+- **5.4**: `reliable-async-operations` — ponte explícita entre a
+  proibição ("PROIBIDO timeouts genéricos/conveniência") e o requisito
+  do contrato ("toda chamada de rede precisa de timeout explícito"):
+  1-2 frases explicando que a proibição mira o número chute como
+  desencargo, e o timeout exigido é rede de segurança ancorada a sinal
+  de vida (inatividade) com valor justificado.
 - (demais correções em aprovação individual com o humano)
 
 
