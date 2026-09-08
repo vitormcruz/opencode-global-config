@@ -1,3 +1,6 @@
+<!-- TEMPLATE: snippet da seção "Instruções por Agente" colado no
+     AGENTS.md do projeto-alvo, com uma subseção por agente do
+     workflow. -->
 ## Instruções por Agente
 
 Cada agente lê a própria subseção no início de qualquer

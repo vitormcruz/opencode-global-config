@@ -363,7 +363,7 @@ def test_default_artifacts_contains_key_elements(
     repo_root: Path,
 ) -> None:
     template = (
-        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
     ).read_text(encoding="utf-8")
 
     for element in (
@@ -380,7 +380,7 @@ def test_default_artifacts_contains_specs_destination(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
     ).read_text(encoding="utf-8")
 
     assert "docs/specs/" in content
@@ -392,7 +392,7 @@ def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
 ) -> None:
     content = (
         repo_root
-        / "harness-conf/agents/default-artifacts/testes-por-especialidade.md"
+        / "harness-conf/agents/default-artifacts/testes-por-especialidade-template.md"
     ).read_text(encoding="utf-8")
 
     assert "## Testes por Especialidade" in content
@@ -413,7 +413,7 @@ def test_doc_readme_template_absorbed_testes_produto_spec(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
     ).read_text(encoding="utf-8")
 
     assert "## Testes por Especialidade" in content
@@ -441,7 +441,7 @@ def test_doc_readme_template_declares_two_test_levels(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
     ).read_text(encoding="utf-8")
     normalized = " ".join(content.split()).lower()
 
@@ -459,7 +459,7 @@ def test_instructions_template_covers_workflow_agents(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/instrucoes-por-agente.md"
+        repo_root / "harness-conf" / "agents/default-artifacts/instrucoes-por-agente-template.md"
     ).read_text(encoding="utf-8")
 
     assert "## Instruções por Agente" in content
@@ -498,14 +498,44 @@ def test_interface_testes_produto_describes_standard_json_interface(
 
 
 @pytest.mark.unit
+def test_default_artifact_templates_declare_their_role(
+    repo_root: Path,
+) -> None:
+    roles = {
+        "harness-conf/agents/default-artifacts/doc-readme-template.md": (
+            "spec completa que vira o docs/readme.md do projeto-alvo"
+        ),
+        (
+            "harness-conf/agents/default-artifacts/"
+            "testes-por-especialidade-template.md"
+        ): (
+            "tabela-índice das suítes colada no agents.md do projeto-alvo"
+        ),
+        (
+            "harness-conf/agents/default-artifacts/"
+            "instrucoes-por-agente-template.md"
+        ): (
+            'snippet da seção "instruções por agente"'
+        ),
+    }
+    for relative_path, role in roles.items():
+        content = (repo_root / relative_path).read_text(encoding="utf-8")
+        first_line = content.splitlines()[0]
+        assert first_line.startswith("<!-- TEMPLATE:"), relative_path
+        header = " ".join(content.splitlines()[:6])
+        assert "<!-- TEMPLATE:" in header and "-->" in header, relative_path
+        assert role in " ".join(header.split()).lower(), relative_path
+
+
+@pytest.mark.unit
 def test_default_testes_produto_artifacts_do_not_cite_plan_ids(
     repo_root: Path,
 ) -> None:
     plan_id_pattern = re.compile(r"\bD(?:[1-9]|1[0-2])\b")
     artifact_paths = (
-        "harness-conf/agents/default-artifacts/doc-readme.md",
-        "harness-conf/agents/default-artifacts/testes-por-especialidade.md",
-        "harness-conf/agents/default-artifacts/instrucoes-por-agente.md",
+        "harness-conf/agents/default-artifacts/doc-readme-template.md",
+        "harness-conf/agents/default-artifacts/testes-por-especialidade-template.md",
+        "harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md",
         "harness-conf/agents/references/interface-testes-produto.md",
     )
     for relative_path in artifact_paths:

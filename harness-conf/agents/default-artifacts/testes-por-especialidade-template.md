@@ -1,3 +1,6 @@
+<!-- TEMPLATE: tabela-índice das suítes colada no AGENTS.md do
+     projeto-alvo; aponta por âncora para a seção "Testes por
+     Especialidade" do docs/README.md, que é o único spec. -->
 ## Testes por Especialidade
 
 | Especialidade | Script |

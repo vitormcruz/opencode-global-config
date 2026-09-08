@@ -1,3 +1,7 @@
+<!-- TEMPLATE: spec completa que vira o docs/README.md do projeto-alvo
+     (Definição de Escopo, Elementos de Especificação, Estratégias de
+     Indexação de Código e Testes por Especialidade). Ponto de partida
+     da curadoria; copie e adapte seção por seção com o humano. -->
 # Mapa do Produto
 
 Este documento é a fonte de verdade do produto. Define o escopo do que será

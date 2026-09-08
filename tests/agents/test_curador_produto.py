@@ -101,11 +101,23 @@ def test_curador_produto_references_default_artifacts(
     repo_root: Path,
     curador_content: str,
 ) -> None:
-    assert "default-artifacts/doc-readme.md" in curador_content
-    assert "default-artifacts/testes-por-especialidade.md" in curador_content
-    assert "default-artifacts/instrucoes-por-agente.md" in curador_content
+    assert "default-artifacts/doc-readme-template.md" in curador_content
+    assert (
+        "default-artifacts/testes-por-especialidade-template.md"
+        in curador_content
+    )
+    assert (
+        "default-artifacts/instrucoes-por-agente-template.md"
+        in curador_content
+    )
+    # O curador explica o papel de cada template, não só os paths.
+    normalized = " ".join(curador_content.split()).lower()
+    assert "spec completa que vira o" in normalized
+    assert "tabela-índice colada no" in normalized
+    assert "snippet das instruções por agente" in normalized
     spec = (
-        repo_root / "harness-conf/agents/default-artifacts/doc-readme.md"
+        repo_root
+        / "harness-conf/agents/default-artifacts/doc-readme-template.md"
     ).read_text(
         encoding="utf-8"
     )

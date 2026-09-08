@@ -90,9 +90,11 @@ obrigatórias:
    orquestrador `testes-produto` (suítes, interface
    JSON, orçamento, proibições).
 
-**Template default**: leia `default-artifacts/doc-readme.md`
-(mesmo diretório deste agente) como ponto de partida. Copie
-e adapte com o humano seção por seção.
+**Template default**: leia
+`default-artifacts/doc-readme-template.md` (mesmo diretório deste
+agente) como ponto de partida. Ele é a spec completa que se torna o
+`docs/README.md` do projeto-alvo. Copie e adapte com o humano seção por
+seção.
 
 **Fluxo**: percorra cada seção com o humano (aprova/ajusta).
 Nunca avance para a próxima seção sem aprovação explícita
@@ -106,10 +108,15 @@ só a tabela índice com o link âncora
 (`docs/README.md#testes-por-especialidade`) e as
 instruções. Sem arquivo de spec separado.
 
-**Defaults**: leia `default-artifacts/doc-readme.md`
-(seção "Testes por Especialidade" incluída),
-`default-artifacts/testes-por-especialidade.md` (snippet
-da tabela) e `default-artifacts/instrucoes-por-agente.md`.
+**Defaults**: leia `default-artifacts/doc-readme-template.md`
+(spec completa que vira o `docs/README.md` do projeto-alvo, já com a
+seção "Testes por Especialidade"),
+`default-artifacts/testes-por-especialidade-template.md`
+(tabela-índice colada no `AGENTS.md` do projeto-alvo, com link âncora
+para a seção do `docs/README.md`) e
+`default-artifacts/instrucoes-por-agente-template.md` (snippet das
+Instruções por Agente gravado no `AGENTS.md`, com uma subseção por
+agente do workflow).
 
 **Interface**: consulte
 `agents/references/interface-testes-produto.md` para JSON

@@ -277,7 +277,7 @@ def test_copilot_adapter_copies_default_artifacts_and_avoids_legacy_targets(
     assert status == 0
     assert (
         tmp_path / ".copilot" / "agents" / "default-artifacts" /
-        "doc-readme.md"
+        "doc-readme-template.md"
     ).is_file()
     assert not (tmp_path / ".vscode-server").exists()
     assert not (tmp_path / ".copilot" / "agents" / "eng-software.md").exists()
