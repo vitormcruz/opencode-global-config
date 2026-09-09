@@ -12,6 +12,11 @@ from opencode_config.harnesses import (
     criar_adapters,
     selecionar_harnesses,
 )
+from opencode_config.harnesses.opencode import (
+    OpenCodeAdapter,
+    OpenCodePosix,
+    OpenCodeWindows,
+)
 from opencode_config.lib.environment import EnvironmentKind, UnsupportedEnvironmentError
 
 
@@ -180,3 +185,25 @@ def test_fake_adapter_does_not_receive_environment() -> None:
     )
 
     assert isinstance(adapters[0], FakeCopilotAdapter)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("environment", "expected_strategy"),
+    (
+        (EnvironmentKind.LINUX, OpenCodePosix),
+        (EnvironmentKind.WSL, OpenCodePosix),
+        (EnvironmentKind.WINDOWS, OpenCodeWindows),
+    ),
+)
+def test_factory_registry_real_injects_opencode_strategy(
+    environment: EnvironmentKind,
+    expected_strategy: type,
+) -> None:
+    adapters = criar_adapters(environment, ["opencode"])
+
+    assert len(adapters) == 1
+    adapter = adapters[0]
+    assert adapter.name == "opencode"
+    assert isinstance(adapter, OpenCodeAdapter)
+    assert isinstance(adapter.strategy, expected_strategy)

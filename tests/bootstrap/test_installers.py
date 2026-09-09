@@ -5,6 +5,7 @@ import zipfile
 
 import pytest
 
+from fake_winreg import FakeWinreg
 from opencode_config.bootstrap.installers import (
     InstallContext,
     InstallResult,
@@ -285,6 +286,57 @@ def test_windows_path_entry_is_persisted_for_future_processes(
         f"{tmp_path / 'bin'};C:\\Windows\\System32"
     )
     assert "PATH" not in environment
+
+
+@pytest.mark.unit
+def test_windows_path_persistence_broadcasts_after_write(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_winreg: FakeWinreg,
+) -> None:
+    """Gravacao do PATH em HKCU notifica o Explorer sem exigir logoff."""
+
+    import os
+
+    from opencode_config.bootstrap.installers import core
+
+    monkeypatch.setattr(os, "name", "nt")
+    broadcasts: list[str] = []
+    monkeypatch.setattr(
+        core,
+        "broadcast_environment_change",
+        lambda: broadcasts.append("WM_SETTINGCHANGE"),
+    )
+
+    core._persist_windows_user_path(r"C:\Users\eu\.local\bin")
+
+    assert fake_winreg.values["Path"] == r"C:\Users\eu\.local\bin"
+    assert broadcasts == ["WM_SETTINGCHANGE"]
+
+
+@pytest.mark.unit
+def test_windows_path_persistence_skips_broadcast_when_present(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_winreg: FakeWinreg,
+) -> None:
+    import os
+
+    from opencode_config.bootstrap.installers import core
+
+    monkeypatch.setattr(os, "name", "nt")
+    fake_winreg.values["Path"] = (
+        r"C:\Users\eu\.local\bin;C:\Windows\System32"
+    )
+    broadcasts: list[str] = []
+    monkeypatch.setattr(
+        core,
+        "broadcast_environment_change",
+        lambda: broadcasts.append("WM_SETTINGCHANGE"),
+    )
+
+    core._persist_windows_user_path(r"C:\Users\eu\.local\bin")
+
+    assert broadcasts == []
+    assert fake_winreg.set_calls == []
 
 
 @pytest.mark.unit

@@ -20,6 +20,7 @@ from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import UserSpacePaths
 from opencode_config.lib.process import CommandResult, run_command
 from opencode_config.lib.versions import fnm_node_bin_dir
+from opencode_config.lib.windows_env import broadcast_environment_change
 
 from ..libgomp import (
     LIBGOMP_ARCHITECTURE,
@@ -137,6 +138,8 @@ def _persist_windows_user_path(target: str) -> None:
             value_type,
             ";".join([target, *entries]),
         )
+
+    broadcast_environment_change()
 
 
 def ensure_path_entry(

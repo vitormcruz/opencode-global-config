@@ -2,11 +2,47 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 
 from opencode_config.harnesses import HarnessAdapter, HarnessDefinition
+from opencode_config.harnesses.opencode import (
+    OpenCodeAdapter,
+    OpenCodeEnvStrategy,
+    OpenCodePosix,
+    OpenCodeWindows,
+)
+from opencode_config.lib.environment import (
+    EnvironmentKind,
+    UnsupportedEnvironmentError,
+)
 
-HARNESSES: tuple[HarnessDefinition, ...] = ()
+_OPENCODE_STRATEGIES: Mapping[
+    EnvironmentKind,
+    Callable[[], OpenCodeEnvStrategy],
+] = {
+    EnvironmentKind.LINUX: OpenCodePosix,
+    EnvironmentKind.WSL: OpenCodePosix,
+    EnvironmentKind.WINDOWS: OpenCodeWindows,
+}
+
+
+def _create_opencode(environment: EnvironmentKind) -> HarnessAdapter:
+    strategy_class = _OPENCODE_STRATEGIES.get(environment)
+    if strategy_class is None:
+        raise UnsupportedEnvironmentError(
+            "O harness opencode nao possui strategy para o ambiente "
+            f"{environment.name}"
+        )
+    return OpenCodeAdapter(strategy=strategy_class())
+
+
+HARNESSES: tuple[HarnessDefinition, ...] = (
+    HarnessDefinition(
+        name="opencode",
+        create=_create_opencode,
+        skip_variable="OPENCODE_SKIP_OPENCODE_ADAPTER",
+    ),
+)
 
 
 def selecionar_harnesses(
@@ -34,14 +70,12 @@ def selecionar_harnesses(
 
 
 def criar_adapters(
-    environment,
+    environment: EnvironmentKind,
     selecao: Sequence[str] | None = None,
     *,
     registry: Sequence[HarnessDefinition] = HARNESSES,
 ) -> list[HarnessAdapter]:
     """Instancia os adapters selecionados com a strategy do ambiente."""
-
-    from opencode_config.lib.environment import EnvironmentKind
 
     if environment not in set(EnvironmentKind):
         raise ValueError(f"Ambiente nao suportado: {environment}")

@@ -11,6 +11,10 @@ from typing import Protocol, TextIO, runtime_checkable
 from opencode_config.lib.environment import EnvironmentKind
 
 
+class HarnessError(RuntimeError):
+    """Erro esperado durante a aplicacao de um harness."""
+
+
 @dataclass(frozen=True)
 class ApplyOptions:
     """Parametros de aplicacao de um harness sobre a home do usuario."""

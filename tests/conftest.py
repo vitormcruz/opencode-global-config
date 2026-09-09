@@ -3,8 +3,11 @@
 from collections.abc import Callable, Mapping
 import os
 from pathlib import Path
+import sys
 
 import pytest
+
+from fake_winreg import FakeWinreg
 
 
 @pytest.fixture(scope="session")
@@ -12,6 +15,15 @@ def repo_root() -> Path:
     """Retorna a raiz do repositorio sob teste."""
 
     return Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def fake_winreg(monkeypatch: pytest.MonkeyPatch) -> FakeWinreg:
+    """Injeta um winreg falso em sys.modules; nenhum registro real e tocado."""
+
+    fake = FakeWinreg()
+    monkeypatch.setitem(sys.modules, "winreg", fake)
+    return fake
 
 
 @pytest.fixture(autouse=True)
