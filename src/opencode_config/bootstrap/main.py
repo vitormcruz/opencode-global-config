@@ -102,7 +102,7 @@ def _apply_harnesses(
     output: TextIO,
     error: TextIO,
 ) -> int:
-    """Configura cada harness selecionado, instalado e nao-pulado (D2)."""
+    """Configura cada harness selecionado, instalado e nao-pulado (ADR-0004)."""
 
     status = 0
     for definition in selecionar_harnesses(selecao):

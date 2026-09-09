@@ -2,7 +2,7 @@
 
 O adapter envolve o synchronize (skills, agents convertidos, commands em
 skills, default-artifacts, AGENTS.md base) e nao varia por sistema
-operacional: a materializacao e sempre copia sincronizada (D1).
+operacional: a materializacao e sempre copia sincronizada (ADR-0004).
 """
 
 from __future__ import annotations

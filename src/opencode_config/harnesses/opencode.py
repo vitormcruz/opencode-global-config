@@ -44,7 +44,7 @@ _POSIX_DESTINATIONS: tuple[tuple[str, str], ...] = (
 )
 
 # No Windows nao ha link para scripts/: a infra do repo fica acessivel
-# pelo proprio clone (D1); os 4 destinos de harness-conf bastam.
+# pelo proprio clone (ADR-0004); os 4 destinos de harness-conf bastam.
 _WINDOWS_DESTINATIONS: tuple[tuple[str, str], ...] = (
     (f"{HARNESS_CONF_DIR}/agents", "agents"),
     (f"{HARNESS_CONF_DIR}/commands", "commands"),
@@ -221,7 +221,7 @@ class OpenCodePosix:
 
 
 class OpenCodeWindows:
-    """Strategy Windows: copia sincronizada e env vars em HKCU (D1/D4)."""
+    """Strategy Windows: copia sincronizada e env vars em HKCU (ADR-0004)."""
 
     def config_dir(self, home: Path) -> Path:
         return home / ".config" / "opencode"
