@@ -49,10 +49,17 @@ consistência.
   convertido. Inofensivo nos dois cenários: se o filtro for allowlist,
   habilita; se a tool for do loop interativo, nome ignorado não causa erro
   ("All unrecognized tool names are ignored").
-- **D7 (aprovada, pós-revisão): skill harness-agnóstica.** A seção "Alternativa
-  de escape obrigatória" passa a citar os nomes das tools nos dois harnesses
+- **D7 (aprovada, pós-revisão — revogada por D8): skill harness-agnóstica.**
+  A seção "Alternativa de escape obrigatória" passa a citar os nomes das tools nos dois harnesses
   (`question` no OpenCode, `ask_user` no Copilot CLI) em vez de citar só
   `question`.
+- **D8 (aprovada, reformula D7): skill sem referência a harness específico.**
+  A skill é multi-harness por design; nomear tools de harnesses específicos
+  cria manutenção a cada harness novo e o agente de cada harness já conhece o
+  nome da própria tool. O parágrafo da seção passa a dizer apenas "via tool de
+  perguntas do harness ou em texto", sem citar `question` nem `ask_user`.
+  A D6 (adapter Copilot) não muda — referência por harness é o lugar certo
+  no código do adapter.
 
 ## Task List
 
@@ -243,14 +250,49 @@ consistência.
   - `harness-conf/skills/question-orchestration/SKILL.md`
   **Estimated scope:** XS (1 arquivo)
 
+- [ ] **Task 6: Remover referências a harnesses do parágrafo da skill (D8)**
+
+  **Description:** Correção da Task 5. Editar apenas o parágrafo da seção
+  `## Alternativa de escape obrigatória` em
+  `harness-conf/skills/question-orchestration/SKILL.md`, substituindo por:
+
+  ```
+  Toda pergunta ao humano — via tool de perguntas do harness ou em texto —
+  oferece sempre um caminho de escape: resposta livre por texto, opção
+  explícita do tipo "Outro (responder por texto)" ou "Nenhuma das opções —
+  quero dar mais contexto". Nunca formule pergunta cujas únicas saídas sejam
+  as opções apresentadas. Quando a UI da tool aceitar resposta custom, o
+  escape ainda deve estar visível no enunciado ou nas opções — nunca
+  pressuposto.
+  ```
+
+  O resto da seção permanece idêntico. Linhas ≤ 120 colunas.
+
+  **Acceptance criteria:**
+  - [ ] Parágrafo não cita `question`, `ask_user`, OpenCode nem Copilot.
+  - [ ] `grep -n 'OpenCode\|Copilot\|ask_user' SKILL.md` não retorna
+        ocorrências no corpo (apenas `name: question-orchestration` no
+        frontmatter).
+  - [ ] `git diff` restrito a esse parágrafo.
+
+  **Verification:**
+  - [ ] Suíte `-m "unit or tools"` verde.
+
+  **Dependencies:** Task 5 (corrige a redação produzida lá).
+  **Files likely touched:**
+  - `harness-conf/skills/question-orchestration/SKILL.md`
+  **Estimated scope:** XS (1 arquivo)
+
 ### Checkpoint: Fase 2 completa
 
 - [ ] Suíte `.venv/bin/pytest -m "unit or tools"` verde (WSL/Linux).
-- [ ] Dois commits (concerns separados), sem o arquivo do plano:
+- [ ] Três commits no total (concerns separados), sem o arquivo do plano:
       1. `feat(adapters): mapear question allow para ask_user no copilot`
          (copilot.py + testes)
       2. `docs(skills): citar ask_user do copilot na regra de escape`
-         (SKILL.md)
+         (SKILL.md — revogado pelo item 3)
+      3. `docs(skills): regra de escape sem citar harnesses especificos`
+         (SKILL.md — Task 6 / D8)
 - [ ] Nenhum push.
 
 ## Risks and Mitigations
