@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping, Sequence
 
 from opencode_config.harnesses import HarnessAdapter, HarnessDefinition
+from opencode_config.harnesses.copilot import CopilotAdapter
 from opencode_config.harnesses.opencode import (
     OpenCodeAdapter,
     OpenCodeEnvStrategy,
@@ -36,11 +37,20 @@ def _create_opencode(environment: EnvironmentKind) -> HarnessAdapter:
     return OpenCodeAdapter(strategy=strategy_class())
 
 
+def _create_copilot(_environment: EnvironmentKind) -> HarnessAdapter:
+    return CopilotAdapter()
+
+
 HARNESSES: tuple[HarnessDefinition, ...] = (
     HarnessDefinition(
         name="opencode",
         create=_create_opencode,
         skip_variable="OPENCODE_SKIP_OPENCODE_ADAPTER",
+    ),
+    HarnessDefinition(
+        name="copilot",
+        create=_create_copilot,
+        skip_variable="OPENCODE_SKIP_COPILOT_ADAPTER",
     ),
 )
 

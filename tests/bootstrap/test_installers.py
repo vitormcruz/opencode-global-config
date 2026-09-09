@@ -705,6 +705,33 @@ def test_install_copilot_uses_user_npm_prefix(
 
 
 @pytest.mark.unit
+def test_install_copilot_uses_user_npm_prefix_on_wsl(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = make_context(tmp_path, EnvironmentKind.WSL)
+    commands: list[tuple[str, ...]] = []
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.installers.core.shutil.which",
+        lambda command, path=None: (
+            str(context.paths.npm_bin / "copilot")
+            if command == "copilot"
+            else None
+        ),
+    )
+
+    result = install_copilot(
+        context,
+        runner=successful_runner(commands),
+    )
+
+    assert result.success
+    assert commands[0][-1] == "@github/copilot"
+    # No POSIX o prefix user-space e ~/.local; o binario cai em .local/bin.
+    assert str(context.paths.npm_bin.parent) in commands[0]
+
+
+@pytest.mark.unit
 def test_install_playwright_installs_package_and_chromium(
     tmp_path: Path,
 ) -> None:

@@ -108,6 +108,24 @@ def test_registry_declares_copilot_cli_entrypoint() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "environment",
+    (EnvironmentKind.LINUX, EnvironmentKind.WSL),
+)
+def test_registry_declares_copilot_installable_via_npm_user_space(
+    environment: EnvironmentKind,
+) -> None:
+    spec = next(item for item in DEPENDENCY_REGISTRY if item.name == "copilot")
+
+    assert environment in (spec.supported_environments or frozenset())
+    method = spec.install_method_for(environment)
+    assert "npm install" in method
+    assert "user-space" in method
+    manual = spec.manual_command_for(environment)
+    assert manual.startswith("npm install --global --prefix")
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize("environment", tuple(EnvironmentKind))
 @pytest.mark.parametrize(
     ("stdout", "expected_status"),

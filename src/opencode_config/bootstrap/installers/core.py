@@ -722,9 +722,6 @@ def install_copilot(
     *,
     runner: Runner | None = None,
 ) -> InstallResult:
-    if context.environment is not EnvironmentKind.WINDOWS:
-        raise InstallerError("Copilot CLI user-space e suportado somente no Windows")
-
     result = install_npm_global(
         context,
         "@github/copilot",

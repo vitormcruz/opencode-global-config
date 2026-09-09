@@ -353,9 +353,15 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
     DependencySpec(
         name="copilot",
         commands=("copilot",),
-        supported_environments=frozenset({EnvironmentKind.WINDOWS}),
+        supported_environments=frozenset(
+            {
+                EnvironmentKind.LINUX,
+                EnvironmentKind.WSL,
+                EnvironmentKind.WINDOWS,
+            }
+        ),
         install_methods=_methods(
-            "cliente Copilot externo",
+            "npm install --global --prefix user-space @github/copilot",
             windows="npm install --global --prefix user-space @github/copilot",
         ),
         manual_commands=_commands(

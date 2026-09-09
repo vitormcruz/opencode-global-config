@@ -7,6 +7,11 @@ import re
 import sys
 from typing import TextIO
 
+from opencode_config.harnesses import (
+    ApplyOptions,
+    HarnessError,
+    selecionar_harnesses,
+)
 from opencode_config.lib.environment import (
     EnvironmentKind,
     UnsupportedEnvironmentError,
@@ -22,23 +27,34 @@ HELP_TEXT = """opencode-bootstrap
 
 Uso:
   opencode-bootstrap [--yes] [--quiet] [--check-only] [--repo-root PATH]
+                     [--harness LISTA]
 
 Opcoes:
   --yes             Instala dependencias ausentes sem perguntar
   --quiet           Suprime a tabela e o progresso
   --check-only      Detecta e exibe comandos manuais sem instalar
   --repo-root PATH  Define a raiz do repositorio
+  --harness LISTA   Configura apenas os harnesses listados
+                    (ex.: opencode,copilot); default: todos os instalados
   --help            Mostra esta ajuda
 """
 
 
+def _parse_harness_selection(raw: str) -> list[str]:
+    selection = [name.strip() for name in raw.split(",") if name.strip()]
+    if not selection:
+        raise ValueError("--harness exige ao menos um nome de harness")
+    return selection
+
+
 def _parse_arguments(
     arguments: Sequence[str],
-) -> tuple[bool, bool, bool, str | None, bool]:
+) -> tuple[bool, bool, bool, str | None, list[str] | None, bool]:
     assume_yes = False
     quiet = False
     check_only = False
     repo_root: str | None = None
+    harness_selection: list[str] | None = None
     index = 0
     while index < len(arguments):
         argument = arguments[index]
@@ -49,7 +65,7 @@ def _parse_arguments(
         elif argument == "--check-only":
             check_only = True
         elif argument in {"--help", "-h"}:
-            return assume_yes, quiet, check_only, None, True
+            return assume_yes, quiet, check_only, None, None, True
         elif argument == "--repo-root":
             index += 1
             if index >= len(arguments):
@@ -57,41 +73,62 @@ def _parse_arguments(
             repo_root = arguments[index]
         elif argument.startswith("--repo-root="):
             repo_root = argument.split("=", 1)[1]
+        elif argument == "--harness":
+            index += 1
+            if index >= len(arguments):
+                raise ValueError("--harness exige uma lista")
+            harness_selection = _parse_harness_selection(arguments[index])
+        elif argument.startswith("--harness="):
+            harness_selection = _parse_harness_selection(
+                argument.split("=", 1)[1]
+            )
         else:
             raise ValueError(f"Opcao desconhecida: {argument}")
         index += 1
-    return assume_yes, quiet, check_only, repo_root, False
+    return assume_yes, quiet, check_only, repo_root, harness_selection, False
 
 
 def _default_repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def _adapter_arguments(
+def _apply_harnesses(
+    environment: EnvironmentKind,
     repo_root: Path,
+    selecao: Sequence[str] | None,
     *,
     assume_yes: bool,
     quiet: bool,
-) -> list[str]:
-    arguments: list[str] = []
-    if assume_yes:
-        arguments.append("--yes")
-    if quiet:
-        arguments.append("--quiet")
-    arguments.extend(["--repo-root", str(repo_root)])
-    return arguments
+    output: TextIO,
+    error: TextIO,
+) -> int:
+    """Configura cada harness selecionado, instalado e nao-pulado (D2)."""
 
-
-def _run_opencode_adapter(repo_root: Path, arguments: Sequence[str]) -> int:
-    from opencode_config.adapters.opencode import main as adapter_main
-
-    return adapter_main(arguments)
-
-
-def _run_copilot_adapter(repo_root: Path, arguments: Sequence[str]) -> int:
-    from opencode_config.adapters.copilot import main as adapter_main
-
-    return adapter_main(arguments)
+    status = 0
+    for definition in selecionar_harnesses(selecao):
+        if os.environ.get(definition.skip_variable) == "1":
+            continue
+        adapter = definition.create(environment)
+        if not adapter.installed(environment):
+            output.write(
+                f"AVISO: harness {definition.name} nao instalado; pulando\n"
+            )
+            continue
+        try:
+            adapter.apply(
+                repo_root,
+                ApplyOptions(
+                    home=Path.home(),
+                    assume_yes=assume_yes,
+                    quiet=quiet,
+                    output=output,
+                    error=error,
+                ),
+            )
+        except (HarnessError, OSError) as problem:
+            error.write(f"ERRO: harness {definition.name}: {problem}\n")
+            status = 1
+    return status
 
 
 def _read_windows_user_path() -> str:
@@ -219,8 +256,8 @@ def run(
     error: TextIO,
 ) -> int:
     try:
-        assume_yes, quiet, check_only, repo_arg, show_help = _parse_arguments(
-            arguments
+        assume_yes, quiet, check_only, repo_arg, harness_selection, show_help = (
+            _parse_arguments(arguments)
         )
     except ValueError as problem:
         error.write(f"ERRO: {problem}\n{HELP_TEXT}")
@@ -267,19 +304,15 @@ def run(
     if check_only:
         return status
 
-    adapter_args = _adapter_arguments(
+    adapter_status = _apply_harnesses(
+        environment,
         repo_root,
+        harness_selection,
         assume_yes=assume_yes,
         quiet=quiet,
+        output=output,
+        error=error,
     )
-    if environment is EnvironmentKind.WINDOWS:
-        if os.environ.get("OPENCODE_SKIP_COPILOT_ADAPTER") == "1":
-            return status
-        adapter_status = _run_copilot_adapter(repo_root, adapter_args)
-    else:
-        if os.environ.get("OPENCODE_SKIP_OPENCODE_ADAPTER") == "1":
-            return status
-        adapter_status = _run_opencode_adapter(repo_root, adapter_args)
     return max(status, adapter_status)
 
 

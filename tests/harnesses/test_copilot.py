@@ -1,6 +1,10 @@
+"""Testes do harness Copilot CLI: adapter, conversoes e wrapper CLI."""
+
 from pathlib import Path
 
 import pytest
+
+from opencode_config.harnesses.copilot import CopilotAdapter
 
 
 def run_adapter(
@@ -471,3 +475,39 @@ def test_copilot_adapter_copies_agents_base_as_global_agents_md(
     ).read_text(encoding="utf-8")
     assert global_agents.rstrip("\n") == base.rstrip("\n")
     assert "# Regras Globais" in global_agents
+
+
+@pytest.mark.unit
+def test_factory_returns_both_adapters_when_selected() -> None:
+    from opencode_config.harnesses import criar_adapters
+    from opencode_config.harnesses.opencode import OpenCodeAdapter
+    from opencode_config.lib.environment import EnvironmentKind
+
+    adapters = criar_adapters(
+        EnvironmentKind.LINUX,
+        ["opencode", "copilot"],
+    )
+
+    assert [adapter.name for adapter in adapters] == ["opencode", "copilot"]
+    assert isinstance(adapters[0], OpenCodeAdapter)
+    assert isinstance(adapters[1], CopilotAdapter)
+
+
+@pytest.mark.unit
+def test_copilot_installed_uses_path_lookup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from opencode_config.lib.environment import EnvironmentKind
+
+    adapter = CopilotAdapter()
+    monkeypatch.setattr(
+        "opencode_config.harnesses.copilot.shutil.which",
+        lambda command, **_kwargs: f"/usr/bin/{command}",
+    )
+    assert adapter.installed(EnvironmentKind.WSL) is True
+
+    monkeypatch.setattr(
+        "opencode_config.harnesses.copilot.shutil.which",
+        lambda _command, **_kwargs: None,
+    )
+    assert adapter.installed(EnvironmentKind.WSL) is False
