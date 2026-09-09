@@ -171,9 +171,53 @@ def test_copilot_adapter_materializes_smart_planner_subagent_capability(
         tmp_path / ".copilot" / "agents" / "smart-planner.agent.md"
     ).read_text(encoding="utf-8")
     assert (
-        'tools: ["read", "edit", "execute", "search", "web", "agent"]'
+        'tools: ["read", "edit", "execute", "search", "web", "agent", '
+        '"ask_user"]'
         in agent
     )
+
+
+@pytest.mark.parametrize("question_permission", ["allow", None, "deny"])
+@pytest.mark.unit
+def test_copilot_adapter_maps_question_permission_to_ask_user(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    question_permission: str | None,
+) -> None:
+    repo = tmp_path / "repo"
+    agents = repo / "harness-conf" / "agents"
+    agents.mkdir(parents=True)
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills").mkdir()
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / ".github").mkdir()
+    question_line = (
+        f"  question: {question_permission}\n"
+        if question_permission is not None
+        else ""
+    )
+    (agents / "planner.md").write_text(
+        """---
+description: Planner
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  websearch: deny
+{question_line}---
+Planner
+""".format(question_line=question_line),
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (tmp_path / ".copilot" / "agents" / "planner.agent.md").read_text(
+        encoding="utf-8"
+    )
+    assert ("ask_user" in agent) is (question_permission == "allow")
 
 
 @pytest.mark.unit

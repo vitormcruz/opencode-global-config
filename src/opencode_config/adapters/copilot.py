@@ -262,7 +262,7 @@ def convert_agent_frontmatter(
             continue
 
         permission_match = re.match(
-            r"^  (edit|bash|webfetch|websearch|task):\s*(.*)$",
+            r"^  (edit|bash|webfetch|websearch|task|question):\s*(.*)$",
             line,
         )
         if permission_match:
@@ -322,6 +322,8 @@ def convert_agent_frontmatter(
         tools.append("web")
     if allowed_agent_types:
         tools.append("agent")
+    if permissions.get("question") == "allow":
+        tools.append("ask_user")
 
     if not description:
         description = ["description: Agent OpenCode convertido para Copilot CLI"]
