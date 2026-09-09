@@ -41,6 +41,18 @@ consistência.
   (`opencode-go/gpt-5.6-luna`, já no frontmatter). Revisor: `revisor`
   (`zai-coding-plan/glm-5.3`, já no frontmatter). Nenhuma edição de modelo
   necessária; a tool `task` usa os frontmatters.
+- **D6 (aprovada, pós-revisão): adapter Copilot defensivo.** O Copilot CLI tem
+  tool equivalente `ask_user` (changelog oficial 13/05/2026 + CLI reference;
+  switch `--no-ask-user`). Como a doc é ambígua sobre se o filtro `tools:`
+  explícito do `.agent.md` remove a `ask_user`, o adapter passa a mapear
+  `question: allow` → incluir `"ask_user"` na lista `tools` do perfil
+  convertido. Inofensivo nos dois cenários: se o filtro for allowlist,
+  habilita; se a tool for do loop interativo, nome ignorado não causa erro
+  ("All unrecognized tool names are ignored").
+- **D7 (aprovada, pós-revisão): skill harness-agnóstica.** A seção "Alternativa
+  de escape obrigatória" passa a citar os nomes das tools nos dois harnesses
+  (`question` no OpenCode, `ask_user` no Copilot CLI) em vez de citar só
+  `question`.
 
 ## Task List
 
@@ -155,6 +167,92 @@ consistência.
       habilitação) ou separar `test(agents):` se o agrupamento ficar grande.
 - [ ] README não é afetado (sem mudança de bootstrap/dependências).
 
+### Phase 2: Adapter Copilot e skill harness-agnóstica (D6–D7)
+
+- [ ] **Task 4: Mapear `question: allow` → `"ask_user"` no adapter Copilot**
+
+  **Description:** Editar `src/opencode_config/adapters/copilot.py`:
+
+  1. Estender o regex de permissões (atual `^  (edit|bash|webfetch|websearch|
+     task):\s*(.*)$`) para casar também `question`. Assim a linha
+     `  question: allow` é capturada em `permissions["question"]`.
+  2. NÃO adicionar `question` ao tuple `_TOOL_PERMISSIONS` —
+     `effective_permissions` materializa default `"allow"` para as chaves
+     desse tuple, e o default correto de `question` é deny/ausente (não
+     emitir `ask_user`).
+  3. Após montar a lista `tools`, se `permissions.get("question")` for
+     exatamente `"allow"`, adicionar `"ask_user"` ao final da lista
+     (após `"agent"`). `deny`, ausente ou qualquer outro valor → não
+     adicionar, comportamento atual preservado.
+  4. Atualizar `tests/adapters/test_copilot_adapter.py`:
+     - `test_copilot_adapter_materializes_smart_planner_subagent_capability`:
+       como `smart-planner` agora tem `question: allow`, a asserção da lista
+       tools passa a incluir `"ask_user"` no final.
+     - Novo teste sintético no padrão do arquivo: frontmatter com
+       `question: allow` → tools contém `ask_user`; sem a chave e com
+       `question: deny` → não contém. Usar perfil sintético (padrão dos
+       testes existentes com `planner.agent.md`).
+
+  **Acceptance criteria:**
+  - [ ] Perfil convertido de smart-planner, devflow e analista contém
+        `"ask_user"` na lista `tools`.
+  - [ ] Perfis sem `question: allow` (ex.: eng-software, aws-analista) não
+        contêm `ask_user` (diff desses perfis inalterado).
+  - [ ] Teste sintético cobre allow/ausente/deny.
+  - [ ] Suíte `-m "unit or tools"` verde.
+
+  **Verification:**
+  - [ ] `.venv/bin/pytest tests/adapters/test_copilot_adapter.py -m unit`
+        verde.
+  - [ ] `.venv/bin/pytest -m "unit or tools"` verde.
+
+  **Dependencies:** Task 1 (frontmatters com `question: allow` já existem).
+  **Files likely touched:**
+  - `src/opencode_config/adapters/copilot.py`
+  - `tests/adapters/test_copilot_adapter.py`
+  **Estimated scope:** S (2 arquivos)
+
+- [ ] **Task 5: Redação harness-agnóstica da seção na skill**
+
+  **Description:** Editar apenas o segundo parágrafo da seção
+  `## Alternativa de escape obrigatória` em
+  `harness-conf/skills/question-orchestration/SKILL.md`, substituindo por:
+
+  ```
+  Toda pergunta ao humano — via tool de perguntas do harness (`question` no
+  OpenCode, `ask_user` no Copilot CLI) ou em texto — oferece sempre um
+  caminho de escape: resposta livre por texto, opção explícita do tipo "Outro
+  (responder por texto)" ou "Nenhuma das opções — quero dar mais contexto".
+  Nunca formule pergunta cujas únicas saídas sejam as opções apresentadas.
+  Quando a UI da tool aceitar resposta custom, o escape ainda deve estar
+  visível no enunciado ou nas opções — nunca pressuposto.
+  ```
+
+  O resto da seção permanece idêntico. Linhas ≤ 120 colunas.
+
+  **Acceptance criteria:**
+  - [ ] Seção cita os dois nomes de tool (`question` e `ask_user`).
+  - [ ] `git diff` restrito a esse parágrafo.
+  - [ ] Texto autocontido, sem citar este plano.
+
+  **Verification:**
+  - [ ] Suíte `-m "unit or tools"` verde (nada deve quebrar).
+
+  **Dependencies:** None
+  **Files likely touched:**
+  - `harness-conf/skills/question-orchestration/SKILL.md`
+  **Estimated scope:** XS (1 arquivo)
+
+### Checkpoint: Fase 2 completa
+
+- [ ] Suíte `.venv/bin/pytest -m "unit or tools"` verde (WSL/Linux).
+- [ ] Dois commits (concerns separados), sem o arquivo do plano:
+      1. `feat(adapters): mapear question allow para ask_user no copilot`
+         (copilot.py + testes)
+      2. `docs(skills): citar ask_user do copilot na regra de escape`
+         (SKILL.md)
+- [ ] Nenhum push.
+
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
@@ -163,7 +261,11 @@ consistência.
 | Tool `question` chamada em modo non-interactive (`opencode run`) pendura ou é negada | Baixo | Agentes do escopo são primary, uso interativo; upstream já trata deny com "best judgment" (fix #14607) |
 | Modelo formula pergunta fechada mesmo com a regra na skill | Médio | Regra visível na fonte única (D3) + revisão independente ao final |
 | Edição da skill propagar imediatamente via symlink global | Baixo | Comportamento desejado; sem reinstalação necessária |
+| Doc do Copilot ambígua sobre filtro `tools:` × `ask_user` | Baixo | Inclusão defensiva de `ask_user` é inofensiva nos dois cenários (D6); validar na prática quando o humano usar o Copilot app |
+| Upstream renomear a tool `ask_user` do Copilot | Baixo | Nome ignorado não quebra perfis; testes do adapter detectam na suíte |
 
 ## Open Questions
 
-(nenhuma — todos os ramos resolvidos: D1–D4)
+(nenhuma — Fase 1 concluída e aprovada; Fase 2 decidida em D6–D7. Teste
+empírico da `ask_user` no ambiente Copilot do humano ficou como validação
+natural de uso, sem bloquear a entrega.)
