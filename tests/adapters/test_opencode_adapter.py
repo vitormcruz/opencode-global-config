@@ -83,7 +83,7 @@ def test_opencode_adapter_help_returns_success(
     assert captured.err == ""
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_adapter_creates_destinations_via_cli(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

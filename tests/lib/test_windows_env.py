@@ -45,7 +45,13 @@ def test_get_user_env_returns_none_for_missing_value(
 
 
 @pytest.mark.unit
-def test_broadcast_environment_change_requires_windows() -> None:
+def test_broadcast_environment_change_requires_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """ctypes falso sem windll: recusa o broadcast em qualquer SO."""
+
+    monkeypatch.setitem(sys.modules, "ctypes", types.ModuleType("ctypes"))
+
     with pytest.raises(RuntimeError, match="Windows"):
         windows_env.broadcast_environment_change()
 

@@ -57,7 +57,7 @@ def apply_adapter(
     return output.getvalue(), error.getvalue()
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -85,7 +85,7 @@ def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
     assert "Pronto." in output
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_agents_md_preserves_managed_blocks(
     tmp_path: Path,
 ) -> None:
@@ -116,7 +116,7 @@ def test_opencode_agents_md_preserves_managed_blocks(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_agents_md_is_idempotent(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -129,7 +129,7 @@ def test_opencode_agents_md_is_idempotent(tmp_path: Path) -> None:
     assert not backup_root.exists() or not any(backup_root.iterdir())
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_backs_up_existing_destination(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -148,7 +148,7 @@ def test_opencode_backs_up_existing_destination(tmp_path: Path) -> None:
     assert (config_dir / "skills").is_symlink()
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_is_idempotent_without_spurious_backup(
     tmp_path: Path,
 ) -> None:
@@ -166,7 +166,7 @@ def test_opencode_is_idempotent_without_spurious_backup(
     assert "LIB_PATH" not in bashrc
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_does_not_mutate_repository(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -202,7 +202,7 @@ def test_opencode_does_not_mutate_repository(
     assert not marker.exists()
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_removes_legacy_test_library_block(
     tmp_path: Path,
 ) -> None:
@@ -223,7 +223,7 @@ def test_opencode_removes_legacy_test_library_block(
     ).read_text(encoding="utf-8")
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_removes_legacy_local_binary_comment(
     tmp_path: Path,
 ) -> None:
@@ -243,7 +243,7 @@ def test_opencode_removes_legacy_local_binary_comment(
     ).read_text(encoding="utf-8")
 
 
-@pytest.mark.unit
+@pytest.mark.opencode
 def test_opencode_accepts_quiet(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
