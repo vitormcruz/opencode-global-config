@@ -86,18 +86,18 @@ Layout de código decidido:
 
 ### Fase 1 — Fundação
 
-- [ ] Task 1: Extrair utilitários de sincronização para `lib/sync.py`
+- [x] Task 1: Extrair utilitários de sincronização para `lib/sync.py`
   - Description: mover `_backup_if_exists`, `_copy_path`, `_remove_path`,
     cópia idempotente de diretórios e criação de symlink (com verificação de
     destino já correto) de `adapters/copilot.py` e `adapters/opencode.py`
     para `lib/sync.py`, como funções puras. Os dois adapters passam a
     chamar os utilitários; nenhum comportamento muda.
   - Acceptance criteria:
-    - [ ] `lib/sync.py` expõe backup, cópia sincronizada (arquivo e
+    - [x] `lib/sync.py` expõe backup, cópia sincronizada (arquivo e
           árvore, apagando extras), remoção e link com os contratos atuais.
-    - [ ] `opencode-adapter` e `opencode-copilot-adapter` produzem os
+    - [x] `opencode-adapter` e `opencode-copilot-adapter` produzem os
           mesmos destinos de antes (diff vazio num diretório de teste).
-    - [ ] `tests/lib/test_sync.py` cobre backup de arquivo existente,
+    - [x] `tests/lib/test_sync.py` cobre backup de arquivo existente,
           idempotência da cópia e link já-apontando-pra-fonte.
   - Verification: `.venv/bin/pytest tests/lib/test_sync.py
     tests/adapters -m "unit or tools"` verde no WSL.
@@ -107,7 +107,7 @@ Layout de código decidido:
     `src/opencode_config/adapters/copilot.py`,
     `tests/lib/test_sync.py` (novo).
   - Estimated scope: Medium
-- [ ] Task 2: Contrato `HarnessAdapter` + registry + factory com mapa
+- [x] Task 2: Contrato `HarnessAdapter` + registry + factory com mapa
   - Description: criar `harnesses/__init__.py` com o contrato (name,
     installed(env), apply(repo, opts)) e a lista `HARNESSES`; criar
     `harnesses/factory.py` com `criar_adapters(env, selecao)` que instancia
@@ -115,11 +115,11 @@ Layout de código decidido:
     construtor; adapters não conhecem SO). Por enquanto a factory só
     enxerga fakes/stubs — os adapters reais entram nas fases seguintes.
   - Acceptance criteria:
-    - [ ] Factory filtra por seleção (`--harness`) e injeta a strategy
+    - [x] Factory filtra por seleção (`--harness`) e injeta a strategy
           certa por ambiente (LINUX/WSL→Posix, WINDOWS→Windows) usando o
           mapa, sem `if` espalhado.
-    - [ ] Adapter fake de teste não recebe `env` nem escolhe strategy.
-    - [ ] `tests/harnesses/test_factory.py` cobre os 3 ambientes e a
+    - [x] Adapter fake de teste não recebe `env` nem escolhe strategy.
+    - [x] `tests/harnesses/test_factory.py` cobre os 3 ambientes e a
           seleção por nomes.
   - Verification: `.venv/bin/pytest tests/harnesses -m unit` verde.
   - Dependencies: None
@@ -130,13 +130,13 @@ Layout de código decidido:
 
 ### Checkpoint: Fase 1
 
-- [ ] `.venv/bin/pytest -m "unit or tools"` verde no WSL.
-- [ ] Commit `refactor(harnesses): extrair sync para lib e criar factory`
+- [x] `.venv/bin/pytest -m "unit or tools"` verde no WSL.
+- [x] Commit `refactor(harnesses): extrair sync para lib e criar factory`
       (tasks 1-2).
 
 ### Fase 2 — OpenCode multi-SO
 
-- [ ] Task 3: `OpenCodePosix` + `OpenCodeAdapter` consumindo strategy
+- [x] Task 3: `OpenCodePosix` + `OpenCodeAdapter` consumindo strategy
   - Description: mover a lógica atual de `adapters/opencode.py`
     (symlinks dos 4 destinos, `_sync_agents_base`, `_setup_bashrc`,
     plano/confirmação/backup) para `harnesses/opencode.py`, separando o que
@@ -147,11 +147,11 @@ Layout de código decidido:
     (linhas 350-361) sai deste módulo — a recusa por SO passa a não
     existir no adapter.
   - Acceptance criteria:
-    - [ ] `opencode-adapter --yes` no WSL produz exatamente os mesmos
+    - [x] `opencode-adapter --yes` no WSL produz exatamente os mesmos
           links/AGENTS.md/.bashrc de antes (comparar com estado pré-task).
-    - [ ] `OpenCodeAdapter` não referencia `EnvironmentKind` nem escolhe
+    - [x] `OpenCodeAdapter` não referencia `EnvironmentKind` nem escolhe
           strategy; recebe no construtor.
-    - [ ] Testes de `tests/adapters/test_opencode_adapter.py` migrados
+    - [x] Testes de `tests/adapters/test_opencode_adapter.py` migrados
           para `tests/harnesses/test_opencode.py` e verdes (exceto o caso
           Windows-lança-erro, que a Task 4 inverte).
   - Verification: `.venv/bin/pytest tests/harnesses -m unit` verde;
@@ -163,7 +163,7 @@ Layout de código decidido:
     `tests/harnesses/test_opencode.py` (novo, migração).
   - Estimated scope: Large (migração de módulo; dividir em dois commits
     se passar de ~300 linhas: extração strategy / wrapper)
-- [ ] Task 4: `OpenCodeWindows` (cópia + HKCU + broadcast)
+- [x] Task 4: `OpenCodeWindows` (cópia + HKCU + broadcast)
   - Description: implementar a strategy Windows em `harnesses/opencode.py`:
     `config_dir` = `Path.home()/".config"/"opencode"` (home do Windows),
     `materialize` = cópia sincronizada dos 4 destinos via `lib/sync.py`
@@ -172,13 +172,13 @@ Layout de código decidido:
     broadcastar. Registrar no mapa da factory (WINDOWS→OpenCodeWindows).
     Inverter o teste de recusa: agora Windows configura com cópia.
   - Acceptance criteria:
-    - [ ] Mapa da factory retorna `OpenCodeWindows` para WINDOWS e
+    - [x] Mapa da factory retorna `OpenCodeWindows` para WINDOWS e
           `OpenCodePosix` para LINUX/WSL.
-    - [ ] `setup_env` grava a variável e broadcasta; a gravação usa
+    - [x] `setup_env` grava a variável e broadcasta; a gravação usa
           `winreg` importado de forma lazy (módulo importável no Linux).
-    - [ ] Teste unitário com fake de registro valida valor gravado e
+    - [x] Teste unitário com fake de registro valida valor gravado e
           chamada de broadcast, sem tocar no registro real.
-    - [ ] Teste antigo `WINDOWS levanta erro` substituído por
+    - [x] Teste antigo `WINDOWS levanta erro` substituído por
           `WINDOWS materializa com cópia` (verificando destinos em
           diretório temporário como home).
   - Verification: `.venv/bin/pytest tests/harnesses -m unit` verde no
@@ -190,13 +190,13 @@ Layout de código decidido:
     `tests/harnesses/test_opencode.py`, `tests/lib/test_windows_env.py`
     (novo).
   - Estimated scope: Medium
-- [ ] Task 5: Broadcast na persistência existente do PATH
+- [x] Task 5: Broadcast na persistência existente do PATH
   - Description: `_persist_windows_user_path` (installers/core.py) passa a
     broadcastar `WM_SETTINGCHANGE` via `lib/windows_env.py` após gravar.
   - Acceptance criteria:
-    - [ ] Persistência do PATH reusa a mesma função de broadcast da
+    - [x] Persistência do PATH reusa a mesma função de broadcast da
           lib (sem duplicar ctypes).
-    - [ ] Teste unit com monkeypatch confirma broadcast após gravação.
+    - [x] Teste unit com monkeypatch confirma broadcast após gravação.
   - Verification: `.venv/bin/pytest tests/bootstrap tests/lib -m unit`.
   - Dependencies: Task 4 (usa `lib/windows_env.py`)
   - Files likely touched:
@@ -206,24 +206,24 @@ Layout de código decidido:
 
 ### Checkpoint: Fase 2
 
-- [ ] `.venv/bin/pytest -m "unit or tools"` verde no WSL.
-- [ ] `.venv/bin/pytest -m opencode` verde no WSL (integração OpenCode
+- [x] `.venv/bin/pytest -m "unit or tools"` verde no WSL.
+- [x] `.venv/bin/pytest -m opencode` verde no WSL (integração OpenCode
       inalterada).
-- [ ] Commit `feat(harnesses): opencode adapter multi-SO com strategy`
+- [x] Commit `feat(harnesses): opencode adapter multi-SO com strategy`
       (tasks 3-5).
 
 ### Fase 3 — Copilot no registry + bootstrap multi-harness
 
-- [ ] Task 6: `CopilotAdapter` implementando o contrato
+- [x] Task 6: `CopilotAdapter` implementando o contrato
   - Description: envolver o `synchronize` atual em `harnesses/copilot.py`
     como `CopilotAdapter` (name="copilot", installed via
     `shutil.which("copilot")`, apply delega ao synchronize com os mesmos
     argumentos/`--dest-root`). `adapters/copilot.py` vira wrapper.
     Registrar na factory (sem strategy — não varia por SO).
   - Acceptance criteria:
-    - [ ] `opencode-copilot-adapter` comporta-se igual (21 testes atuais
+    - [x] `opencode-copilot-adapter` comporta-se igual (21 testes atuais
           migrados/adaptados verdes em `tests/harnesses/test_copilot.py`).
-    - [ ] Factory retorna 2 adapters quando ambos selecionados.
+    - [x] Factory retorna 2 adapters quando ambos selecionados.
   - Verification: `.venv/bin/pytest tests/harnesses -m unit` verde.
   - Dependencies: Task 2
   - Files likely touched: `src/opencode_config/harnesses/copilot.py`
@@ -231,7 +231,7 @@ Layout de código decidido:
     `src/opencode_config/adapters/copilot.py`,
     `tests/harnesses/test_copilot.py` (migração).
   - Estimated scope: Medium
-- [ ] Task 7: Bootstrap itera sobre a factory
+- [x] Task 7: Bootstrap itera sobre a factory
   - Description: `bootstrap/main.py` remove a seleção por SO (linhas
     275-283) e passa a chamar `criar_adapters(env, selecao)`; nova flag
     `--harness a,b` (default: todos); para cada adapter, `installed()`
@@ -240,12 +240,12 @@ Layout de código decidido:
     continuam pulando o harness correspondente (compat com
     test_crawl4ai_cleanup e test_repo_state).
   - Acceptance criteria:
-    - [ ] No WSL com opencode+copilot instalados: `opencode-bootstrap
+    - [x] No WSL com opencode+copilot instalados: `opencode-bootstrap
           --yes` configura `~/.config/opencode` e `~/.copilot` e reporta
           ambos.
-    - [ ] Harness ausente no PATH: aviso e exit code não-erro.
-    - [ ] `--harness copilot` configura só o Copilot.
-    - [ ] `--help` documenta a flag; teste do crawl4ai_cleanup e
+    - [x] Harness ausente no PATH: aviso e exit code não-erro.
+    - [x] `--harness copilot` configura só o Copilot.
+    - [x] `--help` documenta a flag; teste do crawl4ai_cleanup e
           test_repo_state seguem verdes sem edição (ou com edição mínima
           justificada).
   - Verification: `.venv/bin/pytest tests/bootstrap
@@ -256,15 +256,15 @@ Layout de código decidido:
     `src/opencode_config/bootstrap/interactive.py` (se o help/tabela
     mencionar harnesses), `tests/bootstrap/test_entrypoints.py`.
   - Estimated scope: Medium
-- [ ] Task 8: Dependência copilot instalável em Linux/WSL
+- [x] Task 8: Dependência copilot instalável em Linux/WSL
   - Description: `bootstrap/registry.py` — `copilot` ganha
     `supported_environments={LINUX, WSL, WINDOWS}` com install method npm
     user-space para POSIX (`npm install --global --prefix ~/.local
     @github/copilot`), mantendo o método Windows atual.
   - Acceptance criteria:
-    - [ ] `spec.install_method_for(WSL)` retorna comando npm user-space.
-    - [ ] Tabela do `--check-only` exibe o copilot nos 3 ambientes.
-    - [ ] Testes em `tests/bootstrap/test_detect.py` cobrem LINUX/WSL.
+    - [x] `spec.install_method_for(WSL)` retorna comando npm user-space.
+    - [x] Tabela do `--check-only` exibe o copilot nos 3 ambientes.
+    - [x] Testes em `tests/bootstrap/test_detect.py` cobrem LINUX/WSL.
   - Verification: `.venv/bin/pytest tests/bootstrap -m "unit or tools"`.
   - Dependencies: None
   - Files likely touched: `src/opencode_config/bootstrap/registry.py`,
@@ -273,14 +273,14 @@ Layout de código decidido:
 
 ### Checkpoint: Fase 3
 
-- [ ] `.venv/bin/pytest -m "unit or tools or opencode"` verde no WSL.
-- [ ] Smoke do bootstrap configurou os dois harnesses no WSL.
-- [ ] Commit `feat(bootstrap): orquestra harnesses via factory`
+- [x] `.venv/bin/pytest -m "unit or tools or opencode"` verde no WSL.
+- [x] Smoke do bootstrap configurou os dois harnesses no WSL.
+- [x] Commit `feat(bootstrap): orquestra harnesses via factory`
       (tasks 6-8).
 
 ### Fase 4 — ADR, docs e validação cruzada
 
-- [ ] Task 9: ADR-0004 + atualização de docs
+- [x] Task 9: ADR-0004 + atualização de docs
   - Description: criar `docs/adr/0004-adapters-harness-multiplataforma.md`
     (contexto, decisões D1-D7 em linguagem autocontida, consequências,
     revogação de AD-5/AD-6 do ADR-0001); adicionar nota de revogação nas
@@ -289,9 +289,9 @@ Layout de código decidido:
     Testes, Sincronização dos Adaptadores), `adapters/opencode/README.md`,
     `adapters/copilot-cli/README.md` e `scripts/bootstrap_repo/README.md`.
   - Acceptance criteria:
-    - [ ] ADR-0004 autocontida (sem citar códigos D1-D7 do plano).
-    - [ ] ADR-0001 aponta a revogação de AD-5/AD-6.
-    - [ ] README/AGENTS sem menção a "exclusivo de Linux/WSL" /
+    - [x] ADR-0004 autocontida (sem citar códigos D1-D7 do plano).
+    - [x] ADR-0001 aponta a revogação de AD-5/AD-6.
+    - [x] README/AGENTS sem menção a "exclusivo de Linux/WSL" /
           "exclusivo do Windows" fora do contexto histórico.
   - Verification: revisão textual + `grep -rn "exclusivo" README.md
     AGENTS.md adapters/ docs/adr/0001*` só em contexto histórico.
@@ -305,11 +305,13 @@ Layout de código decidido:
   - Description: rodar as suítes completas nos dois ambientes e um smoke
     do bootstrap em cada um; registrar resultado no plano.
   - Acceptance criteria:
-    - [ ] WSL: `.venv/bin/pytest -m "unit or tools or opencode"` verde.
+    - [x] WSL: `.venv/bin/pytest -m "unit or tools or opencode"` verde.
     - [ ] Windows: `.\.venv\Scripts\pytest.exe -m "unit or tools or
           copilot"` verde (valida winreg/broadcast de verdade).
+          **Pendente:** execucao no Windows nativo.
     - [ ] Smoke Windows: bootstrap configura OpenCode (cópia em
-          `%USERPROFILE%\.config\opencode`) e Copilot.
+          `%USERPROFILE%\.config\opencode`) e Copilot. **Pendente:**
+          execucao no Windows nativo.
   - Verification: resultados anotados nesta seção; achados viram correção
     ou replan.
   - Dependencies: Task 9
@@ -319,9 +321,11 @@ Layout de código decidido:
 
 ### Checkpoint: Fase 4 (final)
 
-- [ ] Suítes verdes nos dois SOs.
-- [ ] Commit `docs(adr): adapters de harness multiplataforma` (task 9).
+- [ ] Suítes verdes nos dois SOs. **Parcial:** WSL verde; Windows
+      pendente (task 10).
+- [x] Commit `docs(adr): adapters de harness multiplataforma` (task 9).
 - [ ] Plano marcado como executado e aprovado pelo revisor.
+      **Pendente:** revisao do orquestrador/humano.
 
 ## Risks and Mitigations
 
@@ -343,6 +347,36 @@ Layout de código decidido:
   separadamente, ex.: `~/.opencode/bin`): fora do escopo; avaliar depois.
 - Copilot variando por SO no futuro: ganha strategy própria simétrica à do
   OpenCode quando houver variação real.
+
+## Registro de execução (2026-09-09)
+
+| Fase | Commit | Conteúdo | Verificação |
+|---|---|---|---|
+| 1 | `f7b3174` `refactor(harnesses): extrair sync para lib e criar factory` | tasks 1-2 | unit/tools verde |
+| 2 | `1fec812` `feat(harnesses): opencode adapter multi-SO com strategy` | tasks 3-5 | `-m "unit or tools"` 690 passed; `-m opencode` 44 passed; smoke `opencode-adapter --yes` com paridade de destinos |
+| 3 | `e4e5829` `feat(bootstrap): orquestra harnesses via factory` | tasks 6-8 | `-m "unit or tools or opencode"` 743 passed; smoke `opencode-bootstrap --yes` aplicou OpenCode + Copilot no WSL |
+| 4 | `54221cb` `docs(adr): adapters de harness multiplataforma` | task 9 (ADR-0004 + docs) | grep "exclusivo" só em contexto histórico; unit/tools 699 passed |
+| 4 | task 10 parcial | validação WSL | `-m "unit or tools or opencode"` 743 passed; smoke bootstrap WSL ok |
+
+Notas da execução:
+
+- Task 4: `setup_env` da strategy Windows verifica o valor atual antes de
+  gravar (idempotência, paridade com o `.bashrc` POSIX); grava e broadcasta
+  apenas quando ausente.
+- Task 7: falha de `apply` em um harness escreve `ERRO: harness <nome>`,
+  marca exit code 1 e continua nos demais harnesses (agregação de status).
+- Task 7: teste do wrapper Windows usa `Path.home` monkeypatchado com HOME
+  venenoso, cobrindo o risco "home do Windows resolver errado".
+- Task 8: em POSIX o prefix npm user-space é `~/.local` (binário em
+  `~/.local/bin`); no Windows o prefixo é o próprio `npm_bin`.
+
+Pendências:
+
+- Task 10 (Windows): rodar `.\.venv\Scripts\pytest.exe -m "unit or tools or
+  copilot"` e o smoke do bootstrap (`configurar-repo.ps1 --yes`) no Windows
+  nativo; valida winreg/broadcast reais e a cópia em
+  `%USERPROFILE%\.config\opencode`.
+- Aprovação do revisor (checkpoint final da Fase 4).
 
 ## Configuração de Execução
 
