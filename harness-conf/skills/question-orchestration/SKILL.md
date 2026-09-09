@@ -86,12 +86,13 @@ minimizar a carga cognitiva do humano.
 
 ## Alternativa de escape obrigatória
 
-Toda pergunta ao humano — via tool `question` ou em texto — oferece sempre
-um caminho de escape: resposta livre por texto, opção explícita do tipo
-"Outro (responder por texto)" ou "Nenhuma das opções — quero dar mais
-contexto". Nunca formule pergunta cujas únicas saídas sejam as opções
-apresentadas. A UI da tool aceita resposta custom por padrão, mas o escape
-deve estar visível no enunciado ou nas opções — nunca pressuposto.
+Toda pergunta ao humano — via tool de perguntas do harness (`question` no
+OpenCode, `ask_user` no Copilot CLI) ou em texto — oferece sempre um
+caminho de escape: resposta livre por texto, opção explícita do tipo "Outro
+(responder por texto)" ou "Nenhuma das opções — quero dar mais contexto".
+Nunca formule pergunta cujas únicas saídas sejam as opções apresentadas.
+Quando a UI da tool aceitar resposta custom, o escape ainda deve estar
+visível no enunciado ou nas opções — nunca pressuposto.
 
 ## Confirmação e continuidade de decisões
 
