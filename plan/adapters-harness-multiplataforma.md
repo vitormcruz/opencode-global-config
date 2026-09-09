@@ -343,3 +343,12 @@ Layout de código decidido:
   separadamente, ex.: `~/.opencode/bin`): fora do escopo; avaliar depois.
 - Copilot variando por SO no futuro: ganha strategy própria simétrica à do
   OpenCode quando houver variação real.
+
+## Configuração de Execução
+
+- **Executor:** subagente `worker`, modelo `zai-coding-plan/glm-5.3`
+  (frontmatter de `harness-conf/agents/worker.md`).
+- **Revisor:** subagente `revisor`, modelo `zai-coding-plan/glm-5.3`
+  (frontmatter de `harness-conf/agents/revisor.md`).
+- Plataforma: OpenCode (agentes nativos `worker` e `revisor`; a tool `task`
+  não aceita modelo no spawn — o modelo vem do frontmatter do agente).
