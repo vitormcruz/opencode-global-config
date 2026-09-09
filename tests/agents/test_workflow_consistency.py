@@ -89,6 +89,12 @@ def _extract_task_allow_agents(frontmatter: str) -> list[str]:
     return allowed
 
 
+def _has_question_allow_permission(frontmatter: str) -> bool:
+    """Detecta a permissão shorthand ``question: allow`` no frontmatter."""
+
+    return re.search(r"^\s{2}question:\s*allow\s*$", frontmatter, re.MULTILINE) is not None
+
+
 # ---------------------------------------------------------------------------
 # Parsing de referências em tabelas de skills
 # ---------------------------------------------------------------------------
@@ -250,6 +256,41 @@ def test_extract_task_allow_agents_detects_synthetic_orphan() -> None:
         "Parser não detectou 'agente-fantasma: allow' com 4 espaços"
     )
     assert "eng-software" in extracted
+
+
+@pytest.mark.unit
+def test_question_orchestration_agents_allow_question_tool(repo_root: Path) -> None:
+    """Agentes que usam question-orchestration permitem a tool question."""
+
+    agents_dir = repo_root / "harness-conf" / "agents"
+    missing: list[str] = []
+
+    for agent_name, content in _read_agent_files(agents_dir).items():
+        references_skill = (
+            "question-orchestration" in content
+            and (
+                "`question-orchestration`" in content
+                or "| question-orchestration |" in content
+            )
+        )
+        if references_skill and not _has_question_allow_permission(
+            _extract_frontmatter(content)
+        ):
+            missing.append(agent_name)
+
+    assert missing == [], (
+        "Agentes que referenciam question-orchestration sem "
+        "question: allow:\n"
+        + "\n".join(f"  - {agent_name}" for agent_name in missing)
+    )
+
+
+@pytest.mark.unit
+def test_question_permission_parser_detects_synthetic_missing() -> None:
+    """Parser detecta ausência sintética de ``question: allow``."""
+
+    frontmatter = "mode: primary\npermission:\n  edit: allow\n"
+    assert not _has_question_allow_permission(frontmatter)
 
 
 @pytest.mark.unit

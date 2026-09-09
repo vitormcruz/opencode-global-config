@@ -8,6 +8,7 @@ description: >
 mode: primary
 temperature: 0.2
 permission:
+  question: allow
   edit: allow
   bash: allow
   webfetch: deny

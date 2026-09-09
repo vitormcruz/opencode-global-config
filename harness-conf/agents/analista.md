@@ -11,6 +11,7 @@ description: >
 mode: primary
 temperature: 0.3
 permission:
+  question: allow
   task:
     "*": deny
     revisor-historia: allow

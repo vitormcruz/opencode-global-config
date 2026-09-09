@@ -84,6 +84,15 @@ Pense explicitamente em como apresentar as perguntas para que a discussão
 nem por rodadas densas e confusas com várias perguntas complexas. O objetivo é
 minimizar a carga cognitiva do humano.
 
+## Alternativa de escape obrigatória
+
+Toda pergunta ao humano — via tool `question` ou em texto — oferece sempre
+um caminho de escape: resposta livre por texto, opção explícita do tipo
+"Outro (responder por texto)" ou "Nenhuma das opções — quero dar mais
+contexto". Nunca formule pergunta cujas únicas saídas sejam as opções
+apresentadas. A UI da tool aceita resposta custom por padrão, mas o escape
+deve estar visível no enunciado ou nas opções — nunca pressuposto.
+
 ## Confirmação e continuidade de decisões
 
 - Não repita decisão já registrada no artefato de contexto aplicável.
