@@ -22,8 +22,8 @@ comportamento. O plano de migração aprovado registra as seguintes decisões:
 | AD-2 | Skills invocam `crwl` diretamente, sem wrapper intermediário. |
 | AD-3 | Instalar CLIs nativamente em WSL/Linux e Windows. |
 | AD-4 | Migrar scripts para Python e testes para pytest. |
-| AD-5 | OpenCode permanece exclusivo de WSL/Linux. |
-| AD-6 | Copilot CLI fica exclusivo do Windows; clientes não são misturados. |
+| AD-5 | ~~OpenCode permanece exclusivo de WSL/Linux.~~ Revogada pela ADR-0004. |
+| AD-6 | ~~Copilot CLI fica exclusivo do Windows; clientes não são misturados.~~ Revogada pela ADR-0004. |
 | AD-7 (rev.) | `websearch` como busca padrão única; busca do ambiente como fallback. |
 | AD-8 | Remover o Makefile ao final e usar marcadores/fixtures pytest. |
 | AD-9 | Instalar dependências em user-space, sem sudo ou administrador. |
@@ -42,6 +42,8 @@ comportamento. O plano de migração aprovado registra as seguintes decisões:
   entrypoints finos de bootstrap `configurar-repo.sh` e
   `configurar-repo.ps1`.
 - Linux/WSL configura o OpenCode; Windows configura somente o Copilot CLI.
+  (Suplantado pela ADR-0004: o bootstrap configura todos os harnesses
+  instalados no SO corrente.)
 - As dependências são detectadas e instaladas em user-space. O AWS CLI v2 usa
   os instaladores oficiais em modo user-local nos dois sistemas.
 

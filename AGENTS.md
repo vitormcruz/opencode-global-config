@@ -32,15 +32,22 @@ bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
 .\scripts\bootstrap_repo\configurar-repo.ps1 --yes
 ```
 
-## Configuração Global via Links Simbólicos
+## Configuração Global dos Harnesses
 
-- Este repo é o fonte de verdade das configs globais do OpenCode.
-- O bootstrap/adapter cria links em `~/.config/opencode` apontando para
-  `harness-conf/` (`agents`, `commands`, `skills`, `opencode.json`) e
-  para `scripts/` (que fica na raiz por ser infra do repo).
-- O `~/.config/opencode/AGENTS.md` é gerado pelo adapter (arquivo
-  regular: base + blocos gerenciados por terceiros, como o
-  codebase-memory-mcp) — nunca symlink, nunca editado à mão.
+- Este repo é o fonte de verdade das configs globais dos harnesses
+  (OpenCode, Copilot CLI).
+- No Linux/WSL, o adapter OpenCode cria links em `~/.config/opencode`
+  apontando para `harness-conf/` (`agents`, `commands`, `skills`,
+  `opencode.json`) e para `scripts/` (que fica na raiz por ser infra do
+  repo). No Windows, materializa cópia sincronizada dos quatro destinos
+  de `harness-conf/` em `%USERPROFILE%\.config\opencode` a cada
+  execução.
+- O `AGENTS.md` global é gerado pelo adapter (arquivo regular: base +
+  blocos gerenciados por terceiros, como o codebase-memory-mcp) — nunca
+  symlink, nunca editado à mão.
+- No Windows, env vars de usuário (ex.: `OPENCODE_ENABLE_EXA`) são
+  persistidas em `HKCU\Environment` com broadcast de
+  `WM_SETTINGCHANGE`.
 
 ## Bootstrap
 
@@ -56,8 +63,12 @@ no PowerShell. O bootstrap detecta e instala dependências em user-space
 use os comandos user-space exibidos pelo próprio bootstrap e aguarde o
 humano executá-los. Não introduza instruções que exijam elevação.
 
-Ele também garante `export OPENCODE_ENABLE_EXA=1` em `~/.bashrc`; para
-aplicar no shell atual:
+O bootstrap configura todos os harnesses instalados no SO corrente
+(OpenCode e Copilot CLI); harness ausente é ignorado com aviso. A flag
+`--harness a,b` restringe a subconjunto.
+
+No Linux/WSL ele garante `export OPENCODE_ENABLE_EXA=1` em `~/.bashrc`;
+para aplicar no shell atual:
 
 ```bash
 source ~/.bashrc
@@ -170,17 +181,23 @@ Todos suportam `--yes` e `--check-only`.
 - A fonte canônica fica em `harness-conf/` (agentes, skills, commands,
   `opencode.json`, `AGENTS.base.md`); infra do repo fica na raiz
   (`scripts/`, `src/`, `tests/`, `docs/`, `adapters/`, `plan/`).
-- O adapter OpenCode cria links simbólicos em `~/.config/opencode` e
-  gera o `AGENTS.md` global (base + blocos gerenciados).
-- O adapter Copilot converte e copia artefatos para `~/.copilot/`,
-  incluindo o `AGENTS.md` global copiado da base.
-- O comportamento canônico fica em `src/opencode_config/adapters/`, com o
-  mesmo comando em Linux, WSL e Windows.
+- O comportamento canônico fica em `src/opencode_config/harnesses/`:
+  contrato `HarnessAdapter`, registry e factory com injeção de strategy
+  por SO. `adapters/opencode.py` e `adapters/copilot.py` são wrappers
+  finos dos entrypoints de console.
+- O harness OpenCode varia por SO via strategy (`OpenCodePosix`:
+  symlink + `.bashrc`; `OpenCodeWindows`: cópia sincronizada + env vars
+  em `HKCU\Environment`). O harness Copilot não varia e materializa
+  cópia sincronizada em `~/.copilot/` em qualquer SO.
+- O adapter nunca decide SO: a strategy vem injetida no construtor.
+- Utilitários compartilhados ficam em `src/opencode_config/lib/`
+  (`sync.py`, `windows_env.py`); não duplique cópia sincronizada,
+  backup ou broadcast entre harnesses.
 - Os entrypoints finos `configurar-repo.sh` e `configurar-repo.ps1`
   apenas verificam Python e delegam ao pacote.
-- Ao alterar o comportamento de um adapter, atualize o módulo Python e
-  seus testes. Verifique também o outro adapter quando a mudança afetar
-  o contrato entre plataformas.
+- Ao alterar o comportamento de um harness, atualize o módulo Python e
+  seus testes (`tests/harnesses/`, `tests/lib/`). Verifique também o
+  outro harness quando a mudança afetar o contrato entre plataformas.
 
 ## Commits
 

@@ -4,11 +4,14 @@ Repo com as configuracoes globais do OpenCode para este usuario/maquina.
 
 ## Como funciona
 
+- Este repo e a fonte de verdade das configuracoes globais dos harnesses
+  (OpenCode, Copilot CLI) e pode ficar em qualquer caminho local.
 - No Linux/WSL, o OpenCode le as configuracoes globais a partir de
   `~/.config/opencode`.
-- Este repo e a fonte de verdade e pode ficar em qualquer caminho local.
-- No Windows, o bootstrap copia os artefatos para
-  `%USERPROFILE%\.copilot`.
+- No Windows, o OpenCode recebe copia sincronizada em
+  `%USERPROFILE%\.config\opencode`.
+- O Copilot CLI recebe copia sincronizada em `~/.copilot` /
+  `%USERPROFILE%\.copilot` em todos os sistemas.
 
 ## Estrutura do repositório
 
@@ -39,28 +42,34 @@ operacional:
 .\scripts\bootstrap_repo\configurar-repo.ps1 --yes
 ```
 
-O bootstrap verifica Python >= 3.10, detecta as dependências e configura o
-adapter correto: OpenCode no Linux/WSL e Copilot CLI no Windows. A instalação
-é sempre em user-space; não usa `sudo` nem exige administrador. Use
-`--yes`, `--quiet` ou `--check-only` conforme a necessidade.
+O bootstrap verifica Python >= 3.10, detecta as dependências e configura
+todos os harnesses instalados no sistema corrente (OpenCode e Copilot CLI);
+harness ausente no PATH é ignorado com aviso. A flag `--harness a,b`
+restringe a subconjunto (ex.: `--harness copilot`). A instalação é sempre
+em user-space; não usa `sudo` nem exige administrador. Use `--yes`,
+`--quiet` ou `--check-only` conforme a necessidade.
 
 `--check-only` apenas detecta dependências e exibe os comandos manuais
 pendentes. Não instala, não executa adapters e não altera configurações.
 
-No Linux/WSL, o adapter cria links simbólicos em `~/.config/opencode` e
-garante `OPENCODE_ENABLE_EXA=1` no `~/.bashrc`. Para aplicar a variável no
-shell atual:
+No Linux/WSL, o OpenCode usa links simbólicos em `~/.config/opencode` e o
+adapter garante `OPENCODE_ENABLE_EXA=1` no `~/.bashrc`. Para aplicar a
+variável no shell atual:
 
 ```bash
 source ~/.bashrc
 ```
 
-No Windows, o adapter copia os artefatos para `%USERPROFILE%\.copilot` e não
-configura o OpenCode.
+No Windows, o OpenCode recebe cópia sincronizada em
+`%USERPROFILE%\.config\opencode` e `OPENCODE_ENABLE_EXA` é persistida em
+`HKCU\Environment` com broadcast de `WM_SETTINGCHANGE` — novos processos
+enxergam a variável sem logoff. O Copilot CLI recebe cópia sincronizada em
+`%USERPROFILE%\.copilot` em qualquer sistema.
 
 ## O que o script faz
 
-O `configurar-repo.sh` cria links simbolicos em `~/.config/opencode`:
+No Linux/WSL, o `configurar-repo.sh` cria links simbolicos em
+`~/.config/opencode`:
 
 - `~/.config/opencode/agents` -> `harness-conf/agents`
 - `~/.config/opencode/commands` -> `harness-conf/commands`
@@ -76,6 +85,12 @@ mao.
 
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um
 backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
+
+No Windows, os quatro destinos de `harness-conf/` (agents, commands, skills,
+`opencode.json`) sao materializados como copia sincronizada em
+`%USERPROFILE%\.config\opencode` a cada execucao do bootstrap, com backup do
+conteudo divergente. Divergencias entre execucoes sao realinhadas no proximo
+sync.
 
 ## Variaveis de ambiente
 
@@ -114,7 +129,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | AWS CLI v2 | instalador oficial user-local | instalador oficial user-local |
 | `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
-| Copilot CLI | cliente externo | npm com prefixo user-space |
+| Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
 
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
@@ -166,34 +181,30 @@ Para rodar so a verificacao de dependencias:
 
 ## Adapters
 
-O repositório mantém uma fonte canônica e adapters por plataforma:
+O repositório mantém uma fonte canônica e adapters de harness multi-SO,
+orquestrados pelo bootstrap via factory:
 
 | Adapter | Entrada | Destino |
 |---|---|---|
-| `adapters/opencode/` | agents, skills, commands e configuração | links em `~/.config/opencode/` |
-| `src/opencode_config/adapters/copilot.py` | fonte canônica transformada | `~/.copilot/` |
+| `harnesses/opencode.py` (CLI: `opencode-adapter`) | agents, skills, commands e configuração | Linux/WSL: links em `~/.config/opencode/`; Windows: cópia sincronizada em `%USERPROFILE%\.config\opencode` |
+| `harnesses/copilot.py` (CLI: `opencode-copilot-adapter`) | fonte canônica transformada | `~/.copilot/` em qualquer sistema |
 
-O adapter OpenCode cria links simbólicos. O adapter Copilot CLI converte
-frontmatter de agentes, transforma commands em skills, valida skills no padrão
-agentskills.io e copia artefatos auxiliares.
+No Linux/WSL o adapter OpenCode cria links simbólicos. No Windows usa cópia
+sincronizada e persiste env vars de usuário em `HKCU\Environment` com
+broadcast de `WM_SETTINGCHANGE`. O adapter Copilot CLI converte frontmatter
+de agentes, transforma commands em skills, valida skills no padrão
+agentskills.io e copia artefatos auxiliares, em qualquer sistema.
 
 Use diretamente:
 
-Linux/WSL:
-
 ```bash
 opencode-adapter --yes
-```
-
-Windows:
-
-```powershell
 opencode-copilot-adapter --yes
 ```
 
-O pacote Python é compartilhado entre os sistemas, mas cada adapter respeita
-seu cliente: `opencode-adapter` é exclusivo de Linux/WSL e
-`opencode-copilot-adapter` é o adapter do Windows.
+Os dois comandos funcionam em Linux, WSL e Windows; cada adapter configura
+seu harness no formato do sistema corrente. O bootstrap executa ambos
+automaticamente quando os harnesses estão instalados.
 
 O adapter OpenCode não altera arquivos da fonte canônica. A sincronização de
 skills upstream é uma operação separada: `opencode-skills sync NOME`.
