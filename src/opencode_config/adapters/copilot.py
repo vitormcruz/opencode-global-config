@@ -10,11 +10,11 @@ from io import StringIO
 import os
 from pathlib import Path
 import re
-import shutil
 import sys
 from typing import TextIO
 
 from opencode_config.lib.paths import HARNESS_CONF_DIR
+from opencode_config.lib.sync import backup_copy, copy_path, remove_path
 
 HELP_TEXT = """opencode-copilot-adapter
 
@@ -177,42 +177,6 @@ def _resolve_repo_root(explicit: str | None) -> Path:
     raise AdapterError(
         "Raiz do repositorio nao encontrada; use --repo-root PATH"
     )
-
-
-def _remove_path(path: Path) -> None:
-    if path.is_symlink() or path.is_file():
-        path.unlink()
-    elif path.is_dir():
-        shutil.rmtree(path)
-
-
-def _copy_path(source: Path, destination: Path) -> None:
-    if source.is_symlink():
-        destination.symlink_to(
-            os.readlink(source),
-            target_is_directory=source.is_dir(),
-        )
-    elif source.is_dir():
-        shutil.copytree(source, destination, symlinks=True)
-    else:
-        shutil.copy2(source, destination)
-
-
-def _backup_if_exists(
-    path: Path,
-    backup_dir: Path,
-) -> None:
-    if not path.exists() and not path.is_symlink():
-        return
-
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    base = backup_dir / path.name
-    output = base
-    index = 1
-    while output.exists() or output.is_symlink():
-        output = backup_dir / f"{path.name}.{index}"
-        index += 1
-    _copy_path(path, output)
 
 
 def _write_utf8(path: Path, content: str) -> None:
@@ -413,10 +377,10 @@ def _copy_skill(
     destination: Path,
     backup_dir: Path,
 ) -> None:
-    _backup_if_exists(destination, backup_dir)
+    backup_copy(destination, backup_dir)
     if destination.exists() or destination.is_symlink():
-        _remove_path(destination)
-    _copy_path(source, destination)
+        remove_path(destination)
+    copy_path(source, destination)
 
     skill_md = destination / "SKILL.md"
     if skill_md.is_file():
@@ -464,7 +428,7 @@ def _sync_agents(
             output(f"SKIP  {source.name} (OpenCode-only)")
             continue
         destination = agents_dir / f"{source.stem}.agent.md"
-        _backup_if_exists(destination, backup_dir)
+        backup_copy(destination, backup_dir)
         _write_utf8(
             destination,
             convert_agent_frontmatter(
@@ -513,9 +477,9 @@ def _sync_commands(
     ):
         name = source.stem
         destination = skills_dir / name
-        _backup_if_exists(destination, backup_dir)
+        backup_copy(destination, backup_dir)
         if destination.exists() or destination.is_symlink():
-            _remove_path(destination)
+            remove_path(destination)
         destination.mkdir(parents=True, exist_ok=True)
         skill = (
             f"---\nname: {name}\n"
@@ -543,10 +507,10 @@ def _sync_default_artifacts(
 
     destination = agents_dir / "default-artifacts"
     agents_dir.mkdir(parents=True, exist_ok=True)
-    _backup_if_exists(destination, backup_dir)
+    backup_copy(destination, backup_dir)
     if destination.exists() or destination.is_symlink():
-        _remove_path(destination)
-    _copy_path(source, destination)
+        remove_path(destination)
+    copy_path(source, destination)
     count = sum(1 for path in destination.rglob("*") if path.is_file())
     output(f"OK    default-artifacts ({count} arquivo(s))")
 
@@ -565,10 +529,10 @@ def _sync_agents_base(
         return
 
     destination = copilot_dir / "AGENTS.md"
-    _backup_if_exists(destination, backup_dir)
+    backup_copy(destination, backup_dir)
     if destination.exists() or destination.is_symlink():
-        _remove_path(destination)
-    _copy_path(source, destination)
+        remove_path(destination)
+    copy_path(source, destination)
     output("OK    AGENTS.md (base global)")
 
 

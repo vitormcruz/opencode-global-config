@@ -18,6 +18,12 @@ from opencode_config.lib.environment import (
     detect_environment,
 )
 from opencode_config.lib.paths import HARNESS_CONF_DIR
+from opencode_config.lib.sync import (
+    backup_move,
+    link_one,
+    link_target,
+    resolve_target,
+)
 from opencode_config.lib.versions import fnm_node_bin_dir
 
 HELP_TEXT = """opencode-adapter
@@ -76,44 +82,11 @@ def _resolve_repo_root(explicit: str | None) -> Path:
 
 
 def _resolve_path(path: Path) -> Path:
-    return path.resolve(strict=False)
+    return resolve_target(path)
 
 
 def _current_target(destination: Path) -> Path | None:
-    if not destination.is_symlink():
-        return None
-    try:
-        return _resolve_path(destination)
-    except OSError:
-        return None
-
-
-def _backup_if_exists(destination: Path, backup_dir: Path) -> None:
-    if not destination.exists() and not destination.is_symlink():
-        return
-
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    base = backup_dir / destination.name
-    output = base
-    index = 1
-    while output.exists() or output.is_symlink():
-        output = backup_dir / f"{destination.name}.{index}"
-        index += 1
-    destination.rename(output)
-
-
-def _link_one(source: Path, destination: Path, backup_dir: Path) -> None:
-    source_resolved = _resolve_path(source)
-    current = _current_target(destination)
-    if current is not None and current == source_resolved:
-        return
-
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    _backup_if_exists(destination, backup_dir)
-    destination.symlink_to(
-        source_resolved,
-        target_is_directory=source_resolved.is_dir(),
-    )
+    return link_target(destination)
 
 
 def _read_text(path: Path) -> str:
@@ -234,7 +207,7 @@ def _sync_agents_base(
         output(f"OK    {destination}")
         return
     if existing:
-        _backup_if_exists(destination, backup_dir)
+        backup_move(destination, backup_dir)
     destination.write_text(desired, encoding="utf-8")
     blocks = len(_managed_blocks(existing))
     output(f"CP    {destination} (base + {blocks} bloco(s) gerenciado(s))")
@@ -377,7 +350,7 @@ def configure(
     write("Aplicando...")
     config_dir.mkdir(parents=True, exist_ok=True)
     for source, destination in _DESTINATIONS:
-        _link_one(
+        link_one(
             resolved_repository / source,
             config_dir / destination,
             backup_dir,
