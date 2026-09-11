@@ -7,7 +7,7 @@ import subprocess
 import pytest
 
 
-pytestmark = pytest.mark.copilot
+pytestmark = pytest.mark.integration
 
 
 COPILOT_INSTALL_ERROR = (

@@ -28,9 +28,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-    "unit: testes unitarios sem dependencias externas",
-    "tools: testes que requerem ferramentas instaladas",
-    "opencode: testes de integracao do OpenCode",
-    "opencode_context: contexto minimo de um teste OpenCode",
-    "copilot: testes de integracao do Copilot CLI",
+    "unit: testes unitarios sem premissas externas",
+    "integration: testes com premissas externas (ferramenta no PATH, binario de harness, capacidade do SO)",
+    "agent_eval: avaliacao de agente com modelo local llama-server+Qwen",
+    "agent_eval_context: contexto minimo de um teste de avaliacao de agente",
+    "all: atalho de selecao traduzido pelo conftest para unit or integration (nao usar como decorator)",
 ]

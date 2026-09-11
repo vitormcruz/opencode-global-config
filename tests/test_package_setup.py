@@ -33,8 +33,18 @@ def test_dev_requirements_include_pytest():
 def test_project_registers_required_pytest_markers(pytestconfig):
     registered_markers = set(pytestconfig.getini("markers"))
 
-    for marker in ("unit", "tools", "opencode", "copilot"):
+    for marker in ("unit", "integration", "agent_eval", "all"):
         assert any(entry.startswith(f"{marker}:") for entry in registered_markers)
+
+
+@pytest.mark.unit
+def test_project_does_not_register_revoked_markers(pytestconfig):
+    registered_markers = set(pytestconfig.getini("markers"))
+
+    for revoked in ("tools", "opencode", "copilot", "opencode_context"):
+        assert not any(
+            entry.startswith(f"{revoked}:") for entry in registered_markers
+        )
 
 
 @pytest.mark.unit

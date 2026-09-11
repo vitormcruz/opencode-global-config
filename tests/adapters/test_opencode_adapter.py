@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from fake_winreg import FakeWinreg
+from platform_requirements import requires_symlink
 from opencode_config.lib import windows_env
 
 
@@ -83,7 +84,8 @@ def test_opencode_adapter_help_returns_success(
     assert captured.err == ""
 
 
-@pytest.mark.opencode
+@pytest.mark.integration
+@requires_symlink
 def test_opencode_adapter_creates_destinations_via_cli(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -44,7 +44,7 @@ def install_fake_docling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setenv("PATH", str(fake_bin))
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_source_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -55,7 +55,7 @@ def test_doc_extract_without_source_returns_failure(
     assert "obrigatorio" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_source_includes_required_message(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -66,7 +66,7 @@ def test_doc_extract_without_source_includes_required_message(
     assert "Campo 'source'" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_invalid_format_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -84,7 +84,7 @@ def test_doc_extract_invalid_format_returns_failure(
     assert "invalido" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_missing_source_file_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -100,7 +100,7 @@ def test_doc_extract_missing_source_file_returns_failure(
     assert result["ok"] is False
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_docling_returns_install_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -121,7 +121,7 @@ def test_doc_extract_without_docling_returns_install_hint(
     assert "hint" in result
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_docling_includes_install_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -141,7 +141,7 @@ def test_doc_extract_without_docling_includes_install_hint(
     assert "pipx" in result["hint"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_docling_uses_windows_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -165,7 +165,7 @@ def test_doc_extract_without_docling_uses_windows_hint(
     assert "Ubuntu/WSL" not in result["hint"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_without_docling_uses_zero_admin_linux_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -189,7 +189,7 @@ def test_doc_extract_without_docling_uses_zero_admin_linux_hint(
     assert "py -m pip install --user pipx" not in result["hint"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_with_empty_pdf_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -215,7 +215,7 @@ def test_doc_extract_with_empty_pdf_returns_failure(
     assert "artefato" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_with_markdown_returns_success(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -240,7 +240,7 @@ def test_doc_extract_with_markdown_returns_success(
     assert result["ok"] is True
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_with_markdown_generates_non_empty_artifact(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -267,7 +267,7 @@ def test_doc_extract_with_markdown_generates_non_empty_artifact(
     assert all(path.is_file() and path.stat().st_size > 0 for path in artifacts)
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_doc_extract_error_output_is_valid_json(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

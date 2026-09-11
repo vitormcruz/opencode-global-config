@@ -6,6 +6,7 @@ import zipfile
 import pytest
 
 from fake_winreg import FakeWinreg
+from platform_requirements import requires_symlink
 from opencode_config.bootstrap.installers import (
     InstallContext,
     InstallResult,
@@ -183,7 +184,8 @@ def test_libgomp_runtime_reuses_a_valid_cache_without_network(
     assert LIBGOMP_VERSION in result.message
 
 
-@pytest.mark.unit
+@pytest.mark.integration
+@requires_symlink
 def test_libgomp_runtime_rejects_missing_provenance_metadata(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

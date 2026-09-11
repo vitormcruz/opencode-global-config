@@ -90,7 +90,7 @@ def test_skill_has_executable_crwl_example_for_each_operation(skill_content: str
         assert example in skill_content
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_published_crwl_examples_execute(
     tmp_path: Path,
 ) -> None:

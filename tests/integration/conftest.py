@@ -36,7 +36,7 @@ def isolated_opencode(
 ) -> Iterator[OpenCodeClient]:
     """Run OpenCode against only the artifacts declared by the current test."""
 
-    marker = request.node.get_closest_marker("opencode_context")
+    marker = request.node.get_closest_marker("agent_eval_context")
     if marker is None:
         kind = "empty"
         name = None
@@ -44,7 +44,7 @@ def isolated_opencode(
         kind = marker.kwargs.get("kind")
         name = marker.kwargs.get("name")
     if not isinstance(kind, str):
-        pytest.fail("O marcador opencode_context exige kind textual.")
+        pytest.fail("O marcador agent_eval_context exige kind textual.")
 
     context_dir = prepare_test_context(
         repo_root,

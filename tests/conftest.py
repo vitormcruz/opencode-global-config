@@ -8,6 +8,18 @@ import sys
 import pytest
 
 from fake_winreg import FakeWinreg
+from taxonomy import translate_all_alias
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Traduz o atalho `-m all` antes da selecao de testes.
+
+    A traducao e literal (ver `taxonomy.translate_all_alias`): o token
+    `all` vira `unit or integration` e o restante da expressao pedida
+    permanece inalterado.
+    """
+
+    config.option.markexpr = translate_all_alias(config.option.markexpr)
 
 
 @pytest.fixture(scope="session")

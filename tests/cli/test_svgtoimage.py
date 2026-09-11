@@ -12,6 +12,8 @@ import sys
 
 import pytest
 
+from platform_requirements import requires_symlink
+
 
 def invoke_cli(
     monkeypatch: pytest.MonkeyPatch,
@@ -65,7 +67,7 @@ def png_dimensions(path: Path) -> tuple[int, int]:
     return struct.unpack(">II", data[16:24])
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_svgtoimage_with_unsupported_override_fails(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -84,7 +86,7 @@ def test_svgtoimage_with_unsupported_override_fails(
     assert "Conversor nao suportado" in error
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_svgtoimage_without_playwright_fails_with_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -105,7 +107,8 @@ def test_svgtoimage_without_playwright_fails_with_hint(
     assert "Playwright" in error
 
 
-@pytest.mark.tools
+@pytest.mark.integration
+@requires_symlink
 def test_svgtoimage_generates_png_with_correct_dimensions(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -129,7 +132,7 @@ def test_svgtoimage_generates_png_with_correct_dimensions(
     assert png_dimensions(image_path) == (100, 100)
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_svgtoimage_returns_markdown_path(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -148,7 +151,7 @@ def test_svgtoimage_returns_markdown_path(
     assert result["markdown"] == f"![]({result['imagePath']})"
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_svgtoimage_output_is_valid_json(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

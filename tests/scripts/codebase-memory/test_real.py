@@ -8,7 +8,7 @@ import subprocess
 import pytest
 
 
-pytestmark = pytest.mark.tools
+pytestmark = pytest.mark.integration
 
 
 def _require_codebase_memory() -> str:

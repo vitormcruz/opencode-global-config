@@ -36,7 +36,7 @@ def assert_browser_runtime_available() -> None:
         )
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_help_returns_success(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -48,7 +48,7 @@ def test_browser_test_help_returns_success(
     assert not error
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_without_argument_returns_json_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -61,7 +61,7 @@ def test_browser_test_without_argument_returns_json_error(
     assert "Uso:" in result["error"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_with_missing_file_returns_json_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -78,7 +78,7 @@ def test_browser_test_with_missing_file_returns_json_error(
     assert "nao encontrado" in result["error"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_rejects_non_javascript_file(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -96,7 +96,7 @@ def test_browser_test_rejects_non_javascript_file(
     assert script.is_file()
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_without_node_returns_json_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -118,7 +118,7 @@ def test_browser_test_without_node_returns_json_error(
     assert not script.exists()
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_deletes_script_after_success(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -140,7 +140,7 @@ def test_browser_test_deletes_script_after_success(
     assert not script.exists()
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_deletes_script_after_node_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -161,7 +161,7 @@ def test_browser_test_deletes_script_after_node_failure(
     assert not script.exists()
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_browser_test_runs_real_playwright_script(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

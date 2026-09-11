@@ -3,10 +3,10 @@
 import pytest
 
 
-pytestmark = pytest.mark.opencode
+pytestmark = pytest.mark.agent_eval
 
 
-@pytest.mark.opencode_context(kind="skill", name="doc-extract")
+@pytest.mark.agent_eval_context(kind="skill", name="doc-extract")
 def test_prompt_mentions_doc_extract_with_coherent_response(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
@@ -19,7 +19,7 @@ def test_prompt_mentions_doc_extract_with_coherent_response(isolated_opencode):
     assert "sim" in result.stdout.lower()
 
 
-@pytest.mark.opencode_context(kind="skill", name="md-export")
+@pytest.mark.agent_eval_context(kind="skill", name="md-export")
 def test_prompt_mentions_md_export_with_coherent_response(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
@@ -32,7 +32,7 @@ def test_prompt_mentions_md_export_with_coherent_response(isolated_opencode):
     assert "sim" in result.stdout.lower()
 
 
-@pytest.mark.opencode_context(kind="skill", name="svg-to-image")
+@pytest.mark.agent_eval_context(kind="skill", name="svg-to-image")
 def test_svg_to_image_skill_can_be_mentioned_without_error(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
@@ -45,7 +45,7 @@ def test_svg_to_image_skill_can_be_mentioned_without_error(isolated_opencode):
     assert "sim" in result.stdout.lower()
 
 
-@pytest.mark.opencode_context(kind="skill", name="test-driven-development")
+@pytest.mark.agent_eval_context(kind="skill", name="test-driven-development")
 def test_test_driven_development_skill_has_tdd_trigger(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"
@@ -58,7 +58,7 @@ def test_test_driven_development_skill_has_tdd_trigger(isolated_opencode):
     assert "sim" in result.stdout.lower()
 
 
-@pytest.mark.opencode_context(kind="skill", name="accessibility-audit")
+@pytest.mark.agent_eval_context(kind="skill", name="accessibility-audit")
 def test_accessibility_audit_skill_can_be_mentioned(isolated_opencode):
     session = isolated_opencode.create_session().stdout
     assert session, "Não foi possível criar sessão OpenCode — verifique se o serviço está ativo"

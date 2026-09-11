@@ -12,7 +12,7 @@ import pytest
 from model.local_model_server import MODEL_SPEC
 
 
-pytestmark = pytest.mark.opencode
+pytestmark = pytest.mark.agent_eval
 
 CONTAINER_NAME = "opencode-config-test"
 NETWORK_NAME = "opencode-test-net"

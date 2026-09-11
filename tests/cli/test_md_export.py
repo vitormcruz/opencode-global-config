@@ -53,7 +53,7 @@ def install_fake_pandoc(
     return executable
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_without_source_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -64,7 +64,7 @@ def test_md_export_without_source_returns_failure(
     assert "obrigatorio" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_without_to_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -80,7 +80,7 @@ def test_md_export_without_to_returns_failure(
     assert "obrigatorio" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_invalid_format_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -98,7 +98,7 @@ def test_md_export_invalid_format_returns_failure(
     assert "invalido" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_missing_source_file_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -114,7 +114,7 @@ def test_md_export_missing_source_file_returns_failure(
     assert result["ok"] is False
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_without_pandoc_returns_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -134,7 +134,7 @@ def test_md_export_without_pandoc_returns_failure(
     assert result["ok"] is False
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_without_pandoc_includes_install_hint(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -154,7 +154,7 @@ def test_md_export_without_pandoc_includes_install_hint(
     assert "pandoc" in result["hint"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_does_not_overwrite_without_overwrite(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -179,7 +179,7 @@ def test_md_export_does_not_overwrite_without_overwrite(
     assert "ja existe" in result["stderr"]
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_with_markdown_generates_docx(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -205,7 +205,7 @@ def test_md_export_with_markdown_generates_docx(
     assert result["ok"] is True
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_artifact_exists_on_disk(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -232,7 +232,7 @@ def test_md_export_artifact_exists_on_disk(
     assert Path(result["artifacts"][0]).is_file()
 
 
-@pytest.mark.tools
+@pytest.mark.integration
 def test_md_export_error_output_is_valid_json(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

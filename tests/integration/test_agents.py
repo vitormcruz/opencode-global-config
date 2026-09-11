@@ -5,73 +5,73 @@ import json
 import pytest
 
 
-pytestmark = pytest.mark.opencode
+pytestmark = pytest.mark.agent_eval
 
 
-@pytest.mark.opencode_context(kind="agent", name="dba")
+@pytest.mark.agent_eval_context(kind="agent", name="dba")
 def test_get_agent_returns_status_200(isolated_opencode):
     result = isolated_opencode.get_status("/agent")
     assert result.returncode == 0
     assert result.stdout == "200"
 
 
-@pytest.mark.opencode_context(kind="agent", name="dba")
+@pytest.mark.agent_eval_context(kind="agent", name="dba")
 def test_get_agent_lists_dba(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "dba" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="revisor-historia")
+@pytest.mark.agent_eval_context(kind="agent", name="revisor-historia")
 def test_get_agent_lists_revisor_historia(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "revisor-historia" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="analista")
+@pytest.mark.agent_eval_context(kind="agent", name="analista")
 def test_get_agent_lists_analista(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "analista" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="aws-analista")
+@pytest.mark.agent_eval_context(kind="agent", name="aws-analista")
 def test_get_agent_lists_aws_analista(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "aws-analista" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="curador-produto")
+@pytest.mark.agent_eval_context(kind="agent", name="curador-produto")
 def test_get_agent_lists_curador_produto(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "curador-produto" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="eng-software")
+@pytest.mark.agent_eval_context(kind="agent", name="eng-software")
 def test_get_agent_lists_eng_software(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "eng-software" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="sec")
+@pytest.mark.agent_eval_context(kind="agent", name="sec")
 def test_get_agent_lists_sec(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "sec" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="devflow")
+@pytest.mark.agent_eval_context(kind="agent", name="devflow")
 def test_get_agent_lists_devflow(isolated_opencode):
     result = isolated_opencode.get("/agent")
     assert result.returncode == 0
     assert "devflow" in result.stdout
 
 
-@pytest.mark.opencode_context(kind="agent", name="dba")
+@pytest.mark.agent_eval_context(kind="agent", name="dba")
 def test_each_returned_agent_has_name_field(isolated_opencode):
     result = isolated_opencode.get("/agent")
     if result.returncode == 0:
