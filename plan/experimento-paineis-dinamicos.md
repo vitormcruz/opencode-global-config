@@ -252,11 +252,11 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ## Execução
 
-- **Executor:** agente `worker` (nativo do OpenCode), modelo definido no
-  frontmatter de `harness-conf/agents/worker.md` — atualmente
-  `zai-coding-plan/glm-5.3`, temperature 0.2.
-- **Revisor:** agente `revisor` (nativo do OpenCode), modelo definido no
-  frontmatter de `harness-conf/agents/revisor.md` — atualmente
+- **Executor:** agente `worker` (nativo do OpenCode) com modelo
+  `gpt-5.6-luna`, variante `max` (esforço MAX — não `high`, não `xhigh`).
+  Referência no frontmatter: `opencode/gpt-5.6-luna#max` (provider Zen;
+  alternativa `opencode-go` pendente de confirmação do humano).
+- **Revisor:** agente `revisor` (nativo do OpenCode), modelo mantido:
   `zai-coding-plan/glm-5.3`, temperature 0.1, sem permissão de edição.
 - A tool `task` não aceita modelo no spawn: os modelos vêm dos frontmatters.
   Para trocar, editar o frontmatter e reiniciar o OpenCode.
