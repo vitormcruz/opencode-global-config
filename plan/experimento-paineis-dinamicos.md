@@ -1,7 +1,9 @@
 # Plano: Experimento — Plataformas e Frameworks para UI com Painéis Dinâmicos
 
-> STATUS: APROVADO pelo humano (2026-09-11). Pronto para execução do
-> spike 1. Executor e revisor registrados na seção Execução.
+> STATUS: SPIKE 1 CONCLUÍDO E APROVADO (2026-09-11: executor concluiu,
+> revisor independente aprovou sem achados, humano validou visualmente
+> no browser — "ficou tudo muito bom"). Decisão de rumo pendente:
+> spikes 2-4 do backlog ou aprovação do Dockview como base do cockpit.
 
 ## Overview
 
@@ -121,7 +123,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 1 — Fundação
 
-- [ ] **Task 1: Criar repo e scaffold Vite + React + TS**
+- [x] **Task 1: Criar repo e scaffold Vite + React + TS**
   - **Description:** criar repo público `vitormcruz/painel-dinamico-lab`
     via `gh repo create` (o gh já está autenticado), clonar em diretório
     de trabalho do humano (fora do repo de configs), scaffold
@@ -139,7 +141,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/App.tsx`, `src/main.tsx`), `README.md`
   - **Estimated scope:** S
 
-- [ ] **Task 2: Integrar Dockview com docking básico**
+- [x] **Task 2: Integrar Dockview com docking básico**
   - **Description:** instalar `dockview-react`, trocar o `App` por
     `DockviewReact` com registry de componentes, criar 2 painéis demo
     (texto estático), tema dark, altura 100vh.
@@ -160,7 +162,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 2 — Renderers de conteúdo
 
-- [ ] **Task 3: Painéis Texto e Markdown**
+- [x] **Task 3: Painéis Texto e Markdown**
   - **Description:** componente `PainelTexto` (bloco monoespaçado) e
     `PainelMarkdown` com `react-markdown` e conteúdo demo rico (headings,
     listas, code block, tabela, blockquote).
@@ -174,7 +176,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/paineis/Markdown.tsx`, registry em `src/App.tsx`
   - **Estimated scope:** S
 
-- [ ] **Task 4: Painel Mermaid**
+- [x] **Task 4: Painel Mermaid**
   - **Description:** `PainelMermaid` usando o pacote `mermaid` npm.
     Render assíncrono (`mermaid.render` ou `mermaid.initialize` + API),
     diagrama demo (flowchart), tema dark, cuidado com re-render
@@ -188,7 +190,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Files likely touched:** `src/paineis/Mermaid.tsx`
   - **Estimated scope:** S
 
-- [ ] **Task 5: Painéis SVG e Imagem**
+- [x] **Task 5: Painéis SVG e Imagem**
   - **Description:** `PainelSvg` (SVG inline demo, escalável) e
     `PainelImagem` (img com asset LOCAL — sem dependência de rede).
   - **Acceptance criteria:**
@@ -201,7 +203,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/assets/` (imagem demo)
   - **Estimated scope:** S
 
-- [ ] **Task 6: Painel HTML arbitrário (iframe sandbox)**
+- [x] **Task 6: Painel HTML arbitrário (iframe sandbox)**
   - **Description:** `PainelHtml` com `iframe sandbox` (`srcdoc`),
     conteúdo demo com CSS + JS simples (ex.: botão que muda cor). Sandbox
     SEM `allow-same-origin` para isolar do app host; `allow-scripts` ok
@@ -221,7 +223,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 3 — Dinâmica de painéis
 
-- [ ] **Task 7: Criar/remover painéis em runtime**
+- [x] **Task 7: Criar/remover painéis em runtime**
   - **Description:** toolbar (dropdown "+ Adicionar painel") que chama
     `api.addPanel` com o tipo escolhido e conteúdo demo; remoção pelo
     fechar nativo do painel. Registry central
@@ -239,10 +241,13 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Estimated scope:** M
 
 ### Checkpoint: Spike 1 completo (commit + push)
-- [ ] Fluxo completo: adicionar painéis de qualquer tipo, misturar,
+- [x] Fluxo completo: adicionar painéis de qualquer tipo, misturar,
       arrastar, fechar
-- [ ] Humano avalia o resultado e decide: aprovar, ajustar ou tentar
+- [x] Humano avalia o resultado e decide: aprovar, ajustar ou tentar
       abordagem diferente (processo iterativo, D5)
+      → VALIDADO EM 2026-09-11: revisor aprovou sem achados; humano
+      aprovou visualmente ("ficou tudo muito bom").
+      Repo: https://github.com/vitormcruz/painel-dinamico-lab
 
 ### Spikes futuros (backlog — detalhar após avaliação do spike 1)
 - Spike 2: persistência de layout (`toJSON`/`fromJSON`, localStorage)
