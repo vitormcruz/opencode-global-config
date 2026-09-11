@@ -30,9 +30,38 @@
 - Pode passar desse limite com bullets, desde que o total de palavras
   fique equivalente ao de 20-30 linhas corridas.
 
+### Escrita natural (essencial)
+- Proibido travessão: use vírgula, ponto ou parênteses.
+- Frases curtas (máx. ~25 palavras), com ritmo variado.
+- Sem trios mecânicos de adjetivos nem adjetivos vagos ("robusto",
+  "essencial", "abrangente").
+- Sem conectivos de enchimento ("além disso", "portanto" iniciando
+  frase) nem gerúndio conclusivo.
+- Sem frases de chatbot ("espero que ajude", "ótima pergunta").
+- Conclua com fato concreto, não com frase genérica.
+- Para textos densos (specs, docs, comunicações importantes), carregue
+  a skill `humanizer-br`.
+
+### Conversa sobre plano
+- Plano e artefatos de estado são do agente: o humano não os lê.
+- Toda pergunta, decisão ou discussão é autocontida: traga a fase atual,
+  o trecho relevante do artefato e o escopo da questão.
+- Na conversa, nunca referencie códigos internos (decisões, tasks, IDs)
+  sem dizer o que são: nome e descrição valem mais que identificador.
+
+### Jargão técnico
+- Termos consagrados permanecem em inglês, sem tradução literal nem
+  aportuguesamento, inclusive ao introduzir o conceito: pipe (nunca
+  "cano"), socket (nunca "tomada"), symlink, commit (nunca
+  "consolidação"), branch (nunca "ramo"), build, deploy, wrapper,
+  fallback, checkpoint, staging.
+- Quando houver tradução comum ("link simbólico", "variável de
+  ambiente"), qualquer forma serve.
+- Prosa em PT-BR; jargão em inglês.
+
 ### Tom natural
-- Carregue a skill `humanizer-br` no início da sessão e siga as regras
-  dela em toda comunicação, inclusive nas respostas de chat.
+- Siga "Escrita natural (essencial)" em toda comunicação, inclusive nas
+  respostas de chat.
 - Carregue a skill `portugues-tecnico-controlado` ao produzir texto
   técnico (specs, docs, explicações densas).
 
