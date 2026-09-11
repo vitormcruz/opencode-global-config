@@ -35,7 +35,7 @@ falham com frequência. Correção: mover o essencial para o AGENTS.base.md.
 
 ### Fase 1 — Conteúdo
 
-- [ ] Task 1: Três blocos novos no AGENTS.base.md
+- [x] Task 1: Três blocos novos no AGENTS.base.md
   - Description: adicionar à seção Comunicação de
     `harness-conf/AGENTS.base.md`:
     (a) "### Escrita natural (essencial)" — condensado da humanizer-br:
@@ -63,24 +63,24 @@ falham com frequência. Correção: mover o essencial para o AGENTS.base.md.
     natural") para apontar ao condensado: o corpo segue com a regra de
     carga para textos densos. Linhas com no máximo 120 colunas.
   - Acceptance criteria:
-    - [ ] Os três blocos existem com os pontos acima, sem citar códigos
+    - [x] Os três blocos existem com os pontos acima, sem citar códigos
           de decisão deste plano.
-    - [ ] Nenhuma linha passa de 120 colunas.
-    - [ ] Regras existentes (língua, perfil, concisão) intactas.
+    - [x] Nenhuma linha passa de 120 colunas.
+    - [x] Regras existentes (língua, perfil, concisão) intactas.
   - Verification: leitura do diff + verificação de 120 colunas.
   - Dependencies: None
   - Files likely touched: `harness-conf/AGENTS.base.md`.
   - Estimated scope: Small
-- [ ] Task 2: Alcance de discussão na question-orchestration
+- [x] Task 2: Alcance de discussão na question-orchestration
   - Description: em `harness-conf/skills/question-orchestration/SKILL.md`,
     seção "Contextualização com artefato persistido", estender "toda
     interação com o humano — pergunta, confirmação ou decisão" para
     incluir "ou discussão". Sem outras alterações; description da skill
     intocada.
   - Acceptance criteria:
-    - [ ] A seção cobre explicitamente discussão livre, não só perguntas
+    - [x] A seção cobre explicitamente discussão livre, não só perguntas
           formais.
-    - [ ] Nada mais mudou na skill.
+    - [x] Nada mais mudou na skill.
   - Verification: diff do arquivo.
   - Dependencies: None
   - Files likely touched:
@@ -89,10 +89,12 @@ falham com frequência. Correção: mover o essencial para o AGENTS.base.md.
 
 ### Checkpoint: Fase 1
 
-- [ ] `.venv/bin/pytest -m all` verde no WSL (ajustes em
+- [x] `.venv/bin/pytest -m all` verde no WSL (ajustes em
       `tests/test_agents_md.py` ou de consistência, se algum teste cobrir
       o conteúdo, são permitidos — registrados no relatório).
-- [ ] Commits: `docs(agents): regras de comunicacao essenciais no AGENTS
+      Resultado: 724 passed, 28 deselected (agent_eval), 0 failed,
+      0 ajustes de teste necessários.
+- [x] Commits: `docs(agents): regras de comunicacao essenciais no AGENTS
       base` (task 1) e `docs(skills): contextualizacao cobre discussao`
       (task 2).
 
