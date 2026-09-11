@@ -48,7 +48,7 @@ presente em fixtures da integração.
 
 ### Fase 1 — Infraestrutura de markers
 
-- [ ] Task 1: Registrar markers novos e alias `all`
+- [x] Task 1: Registrar markers novos e alias `all`
   - Description: em `pyproject.toml`, registrar `integration`, `agent_eval`,
     `all` (e renomear `opencode_context` para o vocabulário novo, mantendo as
     fixtures funcionando); remover `tools`, `opencode`, `copilot` do registro.
@@ -57,27 +57,32 @@ presente em fixtures da integração.
     atalho; não altera seleção além do que o usuário pediu; nada de exclusões
     escondidas).
   - Acceptance criteria:
-    - [ ] `.venv/bin/pytest -m all --collect-only -q` seleciona exatamente a
+    - [x] `.venv/bin/pytest -m all --collect-only -q` seleciona exatamente a
           união de `-m unit` e `-m integration` (teste automatizado com
           subprocess compara as contagens).
-    - [ ] `-m all` não inclui testes `agent_eval`.
-    - [ ] Comando desconhecido em `-m` continua com erro do pytest.
+    - [x] `-m all` não inclui testes `agent_eval`.
+    - [x] Comando desconhecido em `-m` continua com erro do pytest.
   - Verification: `.venv/bin/pytest tests/ -m all --collect-only -q` e teste
     novo do alias.
   - Dependencies: None
   - Files likely touched: `pyproject.toml`, `tests/conftest.py`,
     `tests/test_taxonomy.py` (novo).
   - Estimated scope: Small
-- [ ] Task 2: Migrar markers para a taxonomia nova
+  - Resultado: `tests/test_taxonomy.py` (6 testes) + `tests/taxonomy.py`
+    (`translate_all_alias`) + hook `pytest_configure` no `tests/conftest.py`.
+    Renomeação `opencode_context` → `agent_eval_context` no
+    `tests/integration/conftest.py` e nos 4 módulos de teste. Coleta
+    `-m all`: 652/751 no estado intermediário. Verde.
+- [x] Task 2: Migrar markers para a taxonomia nova
   - Description: `tools` → `integration` (37 testes, 6 arquivos); suíte
     `copilot` → `integration`; `opencode` → `agent_eval` nos módulos de
     integração de agente; `tests/scripts/bootstrap_repo/test_repo_state.py`:
     `opencode` → `integration` (é teste de bootstrap/CLI). Ajustar fixtures e
     `pytestmark` correspondentes (incluindo o antigo `opencode_context`).
   - Acceptance criteria:
-    - [ ] Nenhum teste marcado `tools`, `opencode` ou `copilot` restante
+    - [x] Nenhum teste marcado `tools`, `opencode` ou `copilot` restante
           (grep em tests/ limpo).
-    - [ ] `.venv/bin/pytest -m unit` verde; `.venv/bin/pytest -m integration`
+    - [x] `.venv/bin/pytest -m unit` verde; `.venv/bin/pytest -m integration`
           verde no WSL; `.venv/bin/pytest -m agent_eval --collect-only -q`
           lista os testes de avaliação de agente.
   - Verification: `.venv/bin/pytest -m "unit or integration"` verde no WSL.
@@ -85,17 +90,21 @@ presente em fixtures da integração.
   - Files likely touched: 6 arquivos tools + `tests/integration/` +
     `tests/scripts/bootstrap_repo/test_repo_state.py` + fixtures.
   - Estimated scope: Medium
-- [ ] Task 3: Requisito de SO declarado nos testes de symlink
+  - Resultado: `unit` 653 passed; `integration` 56 passed (pré-Task 3);
+    `agent_eval --collect-only` lista 28. Spec do registro atualizada em
+    `tests/test_package_setup.py` (markers novos exigidos + guarda de
+    revogação dos antigos, como teste separado).
+- [x] Task 3: Requisito de SO declarado nos testes de symlink
   - Description: os 17 testes com symlink real (15 marcados `opencode` na
     rodada anterior + `tests/bootstrap/test_installers.py` e
     `tests/cli/test_svgtoimage.py`) passam a `integration` com
     `skipif` de plataforma (reason "exige symlink (POSIX)"). Sem hook, sem
     seleção mágica.
   - Acceptance criteria:
-    - [ ] No WSL, os 17 rodam e passam dentro de `-m integration`.
-    - [ ] `skipif` presente e com reason claro; nenhum outro mecanismo de
+    - [x] No WSL, os 17 rodam e passam dentro de `-m integration`.
+    - [x] `skipif` presente e com reason claro; nenhum outro mecanismo de
           exclusão.
-    - [ ] `.venv/bin/pytest -m integration` no WSL não relata skip dos 17.
+    - [x] `.venv/bin/pytest -m integration` no WSL não relata skip dos 17.
   - Verification: `.venv/bin/pytest -m integration` verde; inspeção dos
     decorators.
   - Dependencies: Task 2
@@ -103,15 +112,22 @@ presente em fixtures da integração.
     `tests/adapters/test_opencode_adapter.py`, `tests/lib/test_lib_sync.py`,
     `tests/bootstrap/test_installers.py`, `tests/cli/test_svgtoimage.py`.
   - Estimated scope: Small
+  - Resultado: `tests/platform_requirements.py` define `requires_symlink`
+    (skipif `os.name != "posix"`, reason "exige symlink (POSIX)"), aplicado
+    como decorator nos 17 testes (9+1+5 ex-`opencode`; libgomp em
+    `test_installers.py` migrou de `unit` para `integration`; dimensions em
+    `test_svgtoimage.py` já era `integration`). `-m integration` no WSL:
+    72 passed, 0 skipped.
 
 ### Checkpoint: Fase 1
 
-- [ ] `.venv/bin/pytest -m unit` e `-m integration` verdes no WSL.
-- [ ] Commit `test(pytest): taxonomia unit/integration/agent_eval com alias all`.
+- [x] `.venv/bin/pytest -m unit` e `-m integration` verdes no WSL.
+- [x] Commit `test(pytest): taxonomia unit/integration/agent_eval com alias all`
+  (`b74e5e1`).
 
 ### Fase 2 — Registro e documentação
 
-- [ ] Task 4: ADR-0005 + docs com a redação da regra do agente preservada
+- [x] Task 4: ADR-0005 + docs com a redação da regra do agente preservada
   - Description: criar `docs/adr/0005-taxonomia-testes.md` autocontida
     (contexto, decisões da taxonomia, revogação dos markers antigos, mecanismo
     de requisito de SO, fronteira suíte/agente). Atualizar README.md e
@@ -123,10 +139,10 @@ presente em fixtures da integração.
     (registro histórico); atualizar apenas menções operacionais em
     README/AGENTS.
   - Acceptance criteria:
-    - [ ] ADR-0005 não cita códigos de decisão deste plano.
-    - [ ] README e AGENTS.md sem menção operacional a `-m opencode`,
+    - [x] ADR-0005 não cita códigos de decisão deste plano.
+    - [x] README e AGENTS.md sem menção operacional a `-m opencode`,
           `-m copilot` ou `-m tools` (grep limpo fora de docs/adr).
-    - [ ] AGENTS.md preserva a regra "nenhum skip pelo agente" com a fronteira
+    - [x] AGENTS.md preserva a regra "nenhum skip pelo agente" com a fronteira
           suíte/agente explícita.
   - Verification: grep de `-m opencode|-m copilot|-m tools` em README.md,
     AGENTS.md, scripts/, docs/ (fora docs/adr) sem ocorrências operacionais.
@@ -134,22 +150,41 @@ presente em fixtures da integração.
   - Files likely touched: `docs/adr/0005-taxonomia-testes.md` (novo),
     `README.md`, `AGENTS.md`.
   - Estimated scope: Medium
-- [ ] Task 5: Verificação final no WSL e registro
+  - Resultado: ADR-0005 criada (revoga a decisão 5 da ADR-0004). README
+    (seção Testes, comando agent_eval, suíte Copilot em integration,
+    pré-requisitos) e AGENTS.md (framework, ambiente alvo, fronteira
+    suíte/agente antes da regra intacta "nenhum skip", checklist pós-sync
+    `-m all`) atualizados. Correção adicional da varredura:
+    `docs/experimentos/modelos-locais.md` e mensagens de erro de
+    `tests/integration/docker/container_test_opencode.py` apontavam
+    `pytest -m opencode` → `-m agent_eval`. Ocorrências restantes de
+    `-m opencode...` em scripts/ e Dockerfile são módulo Python
+    (`opencode_config.bootstrap.main`, `opencode_config.adapters.opencode`),
+    não marker.
+- [x] Task 5: Verificação final no WSL e registro
   - Description: rodar `-m unit`, `-m integration`, `-m all` e `-m
     agent_eval` (demorado; se Docker/llama-server indisponíveis, reportar
     bloqueio, não silenciar); anotar resultados no plano; marcar checkboxes.
   - Acceptance criteria:
-    - [ ] Os 4 comandos verdes no WSL (ou bloqueio reportado para agent_eval).
-    - [ ] Plano atualizado com resultados.
+    - [x] Os 4 comandos verdes no WSL (ou bloqueio reportado para agent_eval).
+    - [x] Plano atualizado com resultados.
   - Verification: saídas anotadas nesta seção.
   - Dependencies: Task 4
   - Files likely touched: `plan/taxonomia-testes.md`.
   - Estimated scope: Small
+  - Resultado (WSL, `.venv/bin/pytest`):
+    - `-m unit`: 652 passed, 100 deselected, 0 skipped (94s).
+    - `-m integration`: 72 passed, 680 deselected, 0 skipped (86s) — os 17
+      testes de symlink rodaram (skipif POSIX não dispara no WSL).
+    - `-m all`: 724 passed, 28 deselected, 0 skipped (177s).
+    - `-m agent_eval`: 28 passed, 724 deselected, 0 skipped (586s;
+      Docker + llama-server locais disponíveis).
 
 ### Checkpoint: Fase 2 (final)
 
-- [ ] Commit `docs(adr): taxonomia de testes agnostica de SO e harness`.
-- [ ] Plano marcado executado; revisão independente a seguir.
+- [x] Commit `docs(adr): taxonomia de testes agnostica de SO e harness`
+  (`4f40610`).
+- [x] Plano marcado executado; revisão independente a seguir.
 
 ## Risks and Mitigations
 
