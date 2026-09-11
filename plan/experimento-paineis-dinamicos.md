@@ -1,9 +1,11 @@
 # Plano: Experimento — Plataformas e Frameworks para UI com Painéis Dinâmicos
 
-> STATUS: SPIKE 1 CONCLUÍDO E APROVADO (2026-09-11: executor concluiu,
-> revisor independente aprovou sem achados, humano validou visualmente
-> no browser — "ficou tudo muito bom"). Decisão de rumo pendente:
-> spikes 2-4 do backlog ou aprovação do Dockview como base do cockpit.
+> STATUS: SPIKES 1, 2 E 3 CONCLUÍDOS E APROVADOS (2026-09-11: executor
+> concluiu, revisor independente aprovou sem achados bloqueantes, humano
+> validou visualmente no browser — persistência e painéis dinâmicos com
+> backend real confirmados). Decisão de rumo pendente: encerrar o
+> experimento declarando o Dockview aprovado como base do cockpit, ou
+> spike 4 (challenger).
 
 ## Overview
 
@@ -251,7 +253,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 4 — Spike 2: persistência de layout
 
-- [ ] **Task 8: Persistir e restaurar layout**
+- [x] **Task 8: Persistir e restaurar layout**
   - **Description:** serializar o layout (`api.toJSON`) no localStorage a
     cada mudança (`onDidLayoutChange`, com debounce leve); no boot, se
     houver layout salvo, aplicar via `fromJSON`; senão, layout default.
@@ -272,11 +274,13 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Estimated scope:** M
 
 ### Checkpoint: Spike 2 (commit + push)
-- [ ] Persistência validada; commits atômicos; push (D10)
+- [x] Persistência validada; commits atômicos; push (D10)
+      → VALIDADO EM 2026-09-11: reload do browser e restart do dev
+      server preservam o layout (humano confirmou).
 
 ### Phase 5 — Spike 3: backend dinâmico real (FastAPI)
 
-- [ ] **Task 9: Backend FastAPI com dados reais do contexto opencode**
+- [x] **Task 9: Backend FastAPI com dados reais do contexto opencode**
   - **Description:** criar `backend/` no repo do lab com FastAPI +
     uvicorn. Endpoints: `GET /api/estado` (contagens REAIS lidas em
     runtime do repo `opencode-global-config`: skills, agents, commands,
@@ -299,7 +303,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `vite.config.ts`
   - **Estimated scope:** M
 
-- [ ] **Task 10: Painéis dinâmicos consumindo o backend**
+- [x] **Task 10: Painéis dinâmicos consumindo o backend**
   - **Description:** 3 novos tipos no registry: `PainelEstado` (fetch
     `/api/estado`, render em tabela/JSON, botão atualizar), `PainelDoc`
     (fetch `/api/markdown`, render via react-markdown) e `PainelLive`
@@ -320,9 +324,13 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Estimated scope:** M
 
 ### Checkpoint: Spikes 2+3 completos (commit + push)
-- [ ] Reload preserva layout; painéis consomem backend real
-- [ ] Revisão única do revisor (ritmo escolhido pelo humano: uma tacada)
-- [ ] Humano avalia no browser
+- [x] Reload preserva layout; painéis consomem backend real
+- [x] Revisão única do revisor (ritmo escolhido pelo humano: uma tacada)
+      → APROVADO sem achados bloqueantes (2026-09-11)
+- [x] Humano avalia no browser
+      → VALIDADO EM 2026-09-11: "funcionou, perfeito". Painéis Estado,
+      Doc e Live operando com backend FastAPI real; persistência
+      confirmada após restart do dev server.
 
 ### Spikes futuros (backlog)
 - Spike 4 (condicional): challenger (FlexLayout ou novatas) se algo
