@@ -125,8 +125,8 @@ Todos suportam `--yes` e `--check-only`.
    sobrescreve; ele só copia na criação inicial)
 4. Confirmar que o `UPSTREAM.md` foi atualizado com o novo SHA
 5. Rodar os testes no executável pytest do SO: WSL/Linux com
-   `.venv/bin/pytest -m "unit or tools"`, Windows com
-   `.\.venv\Scripts\pytest.exe -m "unit or tools"`.
+   `.venv/bin/pytest -m all`, Windows com
+   `.\.venv\Scripts\pytest.exe -m all`.
 
 ## Sincronização Workflow ↔ Agentes
 
@@ -149,16 +149,23 @@ Todos suportam `--yes` e `--check-only`.
   automatizados.
 - Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no
   bootstrap.
-- Framework: `pytest` em `tests/`. No WSL/Linux, use
-  `.venv/bin/pytest -m "unit or tools or opencode"`; no Windows, use
-  `.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"`.
-- Execute os testes no ambiente alvo. A integração OpenCode requer Docker
-  e o llama-server local do Qwen3-0.6B no WSL/Linux; a integração Copilot
-  roda no Windows.
+- Framework: `pytest` em `tests/` com a taxonomia de markers da ADR-0005
+  (`unit`, `integration`, `agent_eval`; `-m all` é atalho traduzido pelo
+  conftest para `unit or integration`). No WSL/Linux, use
+  `.venv/bin/pytest -m all`; no Windows, use
+  `.\.venv\Scripts\pytest.exe -m all`.
+- Execute os testes no ambiente alvo. `-m agent_eval` requer Docker e o
+  llama-server local do Qwen3-0.6B no WSL/Linux; `-m integration` exige as
+  ferramentas e binários que cada teste declara como premissa.
 - O servidor Qwen fica em `tests/integration/model/`; a fixture
   session-scoped inicia ou reutiliza o serviço antes da integração. Para
   iniciar manualmente:
   `python3 tests/integration/model/local_model_server.py --up`.
+- O agente roda sempre a suíte completa do ambiente corrente, sem deixar
+  teste de fora. `skipif` por plataforma (ex.: "exige symlink (POSIX)") é
+  mecanismo da suíte, declarado no próprio teste, que o relatório mostra
+  como skip com motivo onde a capacidade não se aplica — não é autorização
+  para o agente deixar de rodar teste nem reduzir a seleção.
 - Nenhum teste pode usar `skip`: quando um pré-requisito externo não
   estiver disponível, use `pytest.fail` com mensagem clara e acionável.
   Silenciar testes esconde problemas de ambiente.

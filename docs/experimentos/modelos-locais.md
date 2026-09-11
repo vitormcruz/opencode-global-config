@@ -74,7 +74,7 @@ no cache local do usuário.
 A suíte padrão é executada com:
 
 ```bash
-.venv/bin/pytest -m opencode
+.venv/bin/pytest -m agent_eval
 ```
 
 O harness usa proxy limitado a `127.0.0.1`, não aceita overlays externos e não

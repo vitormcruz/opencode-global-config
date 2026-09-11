@@ -220,19 +220,26 @@ Destinos sincronizados pelo Copilot CLI:
 
 ## Testes
 
-Comandos disponiveis:
+Taxonomia de markers agnóstica de SO e harness (detalhes em
+`docs/adr/0005-taxonomia-testes.md`):
 
 ```bash
-.venv/bin/pytest -m unit
-.venv/bin/pytest -m tools
-.venv/bin/pytest -m "unit or tools or opencode"
-.venv/bin/pytest -m "unit or tools or copilot"
+.venv/bin/pytest -m unit          # sem premissas externas
+.venv/bin/pytest -m integration   # ferramenta no PATH, binario de harness, Docker, capacidade do SO
+.venv/bin/pytest -m all           # atalho traduzido para unit or integration
+.venv/bin/pytest -m agent_eval    # avaliacao de agente com modelo local (demorada)
 ```
+
+`-m all` é tradução literal de atalho feita pelo conftest antes da seleção;
+nunca inclui `agent_eval` e não acrescenta nem remove nada além do token
+`all`. Teste que exige capacidade de SO declara `skipif` no próprio teste
+(ex.: "exige symlink (POSIX)"): a suíte não o executa onde a capacidade não
+se aplica e o relatório mostra o skip com o motivo.
 
 No Windows, use o executável da virtualenv pelo PowerShell:
 
 ```powershell
-.\.venv\Scripts\pytest.exe -m "unit or tools or copilot"
+.\.venv\Scripts\pytest.exe -m all
 ```
 
 ### Testes de integração (Camada 2)
@@ -291,10 +298,10 @@ pytest reaproveita o processo e não o encerra. Para desligamento explícito:
 python3 tests/integration/model/local_model_server.py --down
 ```
 
-O único comando de integração OpenCode é:
+O único comando da avaliação de agente (OpenCode + Qwen local) é:
 
 ```bash
-.venv/bin/pytest -m opencode
+.venv/bin/pytest -m agent_eval
 ```
 
 O Qwen usa o artefato fixado `Qwen3-0.6B-Q8_0.gguf` do repositório
@@ -307,16 +314,13 @@ o container OpenCode na porta local `127.0.0.1:4196`. A rede dedicada valida
 `Internal=true` e calcula o gateway real antes de criar
 `host.docker.internal`, sem aceitar overlays externos de configuração.
 
-Para executar a integração Copilot:
-
-```bash
-.venv/bin/pytest -m copilot
-```
+A suíte do Copilot CLI faz parte de `-m integration` (o binário `copilot` é
+a premissa externa declarada pelo próprio teste).
 
 Pré-requisitos:
 
 - Python >= 3.10 e dependências de `requirements-dev.txt`
-- Docker somente para a integração OpenCode no WSL/Linux
+- Docker somente para `-m agent_eval` no WSL/Linux
 - acesso ao pacote libgomp fixado, ao release Prism e aos pesos Qwen para o
   primeiro provisionamento local
 - dependências externas conforme o alvo escolhido
