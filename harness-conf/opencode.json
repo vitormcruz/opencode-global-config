@@ -15,6 +15,9 @@
                     "aws-*": "allow"
                 }
             }
+        },
+        "worker": {
+            "reasoningEffort": "max"
         }
     },
     "permission": {
