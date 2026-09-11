@@ -249,9 +249,82 @@ aplicam aqui — a validação do spike é visual/manual + build.
       aprovou visualmente ("ficou tudo muito bom").
       Repo: https://github.com/vitormcruz/painel-dinamico-lab
 
-### Spikes futuros (backlog — detalhar após avaliação do spike 1)
-- Spike 2: persistência de layout (`toJSON`/`fromJSON`, localStorage)
-- Spike 3: conteúdo dinâmico de backend (fetch/SSE, painel atualizando)
+### Phase 4 — Spike 2: persistência de layout
+
+- [ ] **Task 8: Persistir e restaurar layout**
+  - **Description:** serializar o layout (`api.toJSON`) no localStorage a
+    cada mudança (`onDidLayoutChange`, com debounce leve); no boot, se
+    houver layout salvo, aplicar via `fromJSON`; senão, layout default.
+    Botão "Restaurar padrão" que limpa o storage e aplica o default.
+    Fallback: se `fromJSON` falhar (schema mudou / JSON corrompido),
+    cair no default sem quebrar o app.
+  - **Acceptance criteria:**
+    - [ ] layout (posição/tamanho/tabs) sobrevive ao reload do browser
+    - [ ] conteúdo dos painéis recriado correto após reload (params
+          preservados no JSON serializado)
+    - [ ] "Restaurar padrão" volta ao layout inicial
+    - [ ] JSON corrompido/incompatível não quebra o app (fallback)
+    - [ ] `npm run build` passa
+  - **Verification:** reload do browser recria o layout; build.
+  - **Dependencies:** Task 7
+  - **Files likely touched:** `src/App.tsx` (ou hook de persistência),
+    `src/paineis/registry.ts`
+  - **Estimated scope:** M
+
+### Checkpoint: Spike 2 (commit + push)
+- [ ] Persistência validada; commits atômicos; push (D10)
+
+### Phase 5 — Spike 3: backend dinâmico real (FastAPI)
+
+- [ ] **Task 9: Backend FastAPI com dados reais do contexto opencode**
+  - **Description:** criar `backend/` no repo do lab com FastAPI +
+    uvicorn. Endpoints: `GET /api/estado` (contagens REAIS lidas em
+    runtime do repo `opencode-global-config`: skills, agents, commands,
+    testes — leitura de diretórios, nada hardcoded), `GET /api/markdown`
+    (serve um .md real do repo de configs, ex.: README, como texto) e
+    `GET /api/stream` (SSE empurrando payload com timestamp + resumo do
+    estado a cada 2s). Acesso do frontend via proxy do Vite
+    (`server.proxy` `/api` → `localhost:8000`), sem hack de CORS.
+    Dependências pinadas em `backend/requirements.txt`.
+  - **Acceptance criteria:**
+    - [ ] uvicorn sobe na porta 8000 e os 3 endpoints respondem
+    - [ ] `/api/estado` retorna contagens reais do repo de configs
+    - [ ] `/api/stream` mantém conexão SSE e emite eventos periódicos
+    - [ ] proxy do Vite encaminha `/api` sem CORS manual
+    - [ ] `npm run build` passa
+  - **Verification:** `curl` nos endpoints com uvicorn no ar (SSE com
+    timeout curto); build.
+  - **Dependencies:** Task 8
+  - **Files likely touched:** `backend/main.py`, `backend/requirements.txt`,
+    `vite.config.ts`
+  - **Estimated scope:** M
+
+- [ ] **Task 10: Painéis dinâmicos consumindo o backend**
+  - **Description:** 3 novos tipos no registry: `PainelEstado` (fetch
+    `/api/estado`, render em tabela/JSON, botão atualizar), `PainelDoc`
+    (fetch `/api/markdown`, render via react-markdown) e `PainelLive`
+    (EventSource `/api/stream`, atualização em tempo real do último
+    evento). Todos entram na toolbar de adicionar (total: 9 tipos).
+    Erros de rede (backend fora do ar) com estado de erro amigável.
+  - **Acceptance criteria:**
+    - [ ] painel estado mostra contagens reais e atualiza sob demanda
+    - [ ] painel doc renderiza o MD servido pelo backend
+    - [ ] painel live atualiza em tempo real sem refresh manual (SSE)
+    - [ ] backend fora do ar → estado de erro amigável nos painéis
+    - [ ] 3 novos tipos na toolbar; `npm run build` passa
+  - **Verification:** uvicorn + dev server no ar; validação manual no
+    browser + build.
+  - **Dependencies:** Task 9
+  - **Files likely touched:** `src/paineis/Estado.tsx`, `src/paineis/Doc.tsx`,
+    `src/paineis/Live.tsx`, `src/paineis/registry.ts`, `src/App.tsx`
+  - **Estimated scope:** M
+
+### Checkpoint: Spikes 2+3 completos (commit + push)
+- [ ] Reload preserva layout; painéis consomem backend real
+- [ ] Revisão única do revisor (ritmo escolhido pelo humano: uma tacada)
+- [ ] Humano avalia no browser
+
+### Spikes futuros (backlog)
 - Spike 4 (condicional): challenger (FlexLayout ou novatas) se algo
   incomodar no Dockview
 
@@ -266,6 +339,10 @@ aplicam aqui — a validação do spike é visual/manual + build.
 - A tool `task` não aceita modelo no spawn: os modelos vêm dos frontmatters.
   Para trocar, editar o frontmatter e reiniciar o OpenCode.
 - Reutilizar estas escolhas em novas instâncias até o humano alterá-las.
+- **LLM no lab (condicional):** se qualquer parte do lab precisar chamar
+  um modelo (não há necessidade no escopo dos spikes 2-3), usar
+  `opencode-go/deepseek-v4-flash` (provider `opencode-go`, escolha e
+  confirmação do humano).
 
 ## Risks and Mitigations
 
