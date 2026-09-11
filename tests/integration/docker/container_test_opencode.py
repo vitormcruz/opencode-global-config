@@ -149,7 +149,7 @@ class DockerSession:
                 "Docker não encontrado no PATH.\n"
                 "Instale Docker Desktop (ou Docker Engine) e execute novamente:\n"
                 "  docker --version\n"
-                "  pytest -m opencode"
+                "  pytest -m agent_eval"
             )
         return self._docker
 
@@ -176,7 +176,7 @@ class DockerSession:
                 "Docker daemon não está em execução.\n"
                 "Inicie Docker Desktop (ou o serviço Docker) e execute:\n"
                 "  docker info\n"
-                "  pytest -m opencode"
+                "  pytest -m agent_eval"
                 f"{suffix}"
             )
 
