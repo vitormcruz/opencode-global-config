@@ -19,6 +19,7 @@ from opencode_config.bootstrap.installers import (
     install_crwl,
     install_dependencies,
     install_fnm,
+    install_git,
     install_npm,
     install_npm_global,
     install_node,
@@ -565,6 +566,30 @@ def test_node_runtime_entrypoint_installers_report_missing_entrypoint(
 
 
 @pytest.mark.unit
+def test_install_git_builds_windows_portable_asset_url(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path, environment=EnvironmentKind.WINDOWS)
+    captured_urls: list[str] = []
+
+    def fetcher(url: str, destination: Path) -> None:
+        captured_urls.append(url)
+        destination.write_bytes(b"")
+
+    result = install_git(
+        context,
+        fetcher=fetcher,
+        runner=successful_runner([]),
+    )
+
+    assert result.success
+    assert captured_urls == [
+        "https://github.com/git-for-windows/git/releases/download/"
+        "v2.55.0.windows.5/PortableGit-2.55.0.5-64-bit.7z.exe"
+    ]
+
+
+@pytest.mark.unit
 def test_install_opencode_config_uses_editable_repo_with_pipx(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -612,7 +637,7 @@ def test_install_codebase_memory_enables_auto_index(
 
     assert result.success
     assert result.name == "codebase-memory-mcp"
-    assert commands[0][-1] == "codebase-memory-mcp@0.9.0"
+    assert commands[0][-1] == "codebase-memory-mcp@0.10.8"
     assert commands[-1] == (
         "codebase-memory-mcp",
         "config",

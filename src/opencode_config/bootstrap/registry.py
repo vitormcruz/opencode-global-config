@@ -180,10 +180,10 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         ),
         manual_commands=_commands(
             "npm install --global --prefix \"$HOME/.local\" "
-            "codebase-memory-mcp@0.9.0",
+            "codebase-memory-mcp@0.10.8",
             windows=(
                 'npm install --global --prefix "$env:APPDATA\\npm" '
-                "codebase-memory-mcp@0.9.0"
+                "codebase-memory-mcp@0.10.8"
             ),
         ),
         minimum_version=(0, 9, 0),
@@ -201,8 +201,8 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
                     'mkdir -p "$HOME/.local"',
                     (
                         'curl -fL "https://github.com/jgm/pandoc/releases/'
-                        'download/3.7.0.2/'
-                        'pandoc-3.7.0.2-linux-amd64.tar.gz" '
+                        'download/3.11/'
+                        'pandoc-3.11-linux-amd64.tar.gz" '
                         '-o "/tmp/pandoc.tar.gz"'
                     ),
                     (
@@ -226,7 +226,7 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
                     (
                         'Invoke-WebRequest -Uri '
                         '"https://github.com/jgm/pandoc/releases/download/'
-                        '3.7.0.2/pandoc-3.7.0.2-windows-x86_64.zip" '
+                        '3.11/pandoc-3.11-windows-x86_64.zip" '
                         '-OutFile $archive'
                     ),
                     (
@@ -236,7 +236,7 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
                     'Expand-Archive -Force $archive $extract',
                     (
                         'Copy-Item (Join-Path $extract '
-                        '"pandoc-3.7.0.2\\pandoc.exe") $destination'
+                        '"pandoc-3.11\\pandoc.exe") $destination'
                     ),
                     'Remove-Item -Recurse -Force $extract, $archive',
                 )
@@ -256,13 +256,13 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
                 (
                     (
                         '$archive = Join-Path $env:TEMP '
-                        '"PortableGit-2.53.0-64-bit.7z.exe"'
+                        '"PortableGit-2.55.0.5-64-bit.7z.exe"'
                     ),
                     (
                         'Invoke-WebRequest -Uri '
                         '"https://github.com/git-for-windows/git/releases/'
-                        'download/v2.53.0.windows.1/'
-                        'PortableGit-2.53.0-64-bit.7z.exe" '
+                        'download/v2.55.0.windows.5/'
+                        'PortableGit-2.55.0.5-64-bit.7z.exe" '
                         '-OutFile $archive'
                     ),
                     (

@@ -35,9 +35,9 @@ from ..libgomp import (
 
 
 FNM_VERSION = "1.38.1"
-PANDOC_VERSION = "3.7.0.2"
-PORTABLE_GIT_VERSION = "2.53.0"
-CODEBASE_MEMORY_VERSION = "0.9.0"
+PANDOC_VERSION = "3.11"
+PORTABLE_GIT_VERSION = "2.55.0.windows.5"
+CODEBASE_MEMORY_VERSION = "0.10.8"
 AWS_LINUX_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.sh"
 AWS_WINDOWS_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.ps1"
 INSTALL_COMMAND_TIMEOUT_SECONDS = 1800
@@ -958,8 +958,9 @@ def install_git(
 
     archive_url = url or (
         "https://github.com/git-for-windows/git/releases/download/"
-        f"v{PORTABLE_GIT_VERSION}.windows.1/"
-        f"PortableGit-{PORTABLE_GIT_VERSION}-64-bit.7z.exe"
+        f"v{PORTABLE_GIT_VERSION}/"
+        f"PortableGit-{PORTABLE_GIT_VERSION.replace('.windows.', '.')}"
+        "-64-bit.7z.exe"
     )
     with tempfile.TemporaryDirectory(prefix="opencode-git-") as temporary:
         archive = Path(temporary) / Path(archive_url).name

@@ -121,7 +121,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | pipx | `pip install --user pipx` | `py -m pip install --user pipx` |
 | `crwl` | `pipx install crawl4ai` + `crawl4ai-setup` | igual ao Linux |
 | docling | `pipx install docling` | igual ao Linux |
-| codebase-memory-mcp 0.9.0 | npm com prefixo user-space | npm com prefixo user-space |
+| codebase-memory-mcp 0.10.8 | npm com prefixo user-space | npm com prefixo user-space |
 | pandoc | arquivo portátil oficial | arquivo portátil oficial |
 | git | pré-existente ou pacote do sistema | PortableGit |
 | Playwright + Chromium | npm + `npx playwright install` | igual ao Linux |
