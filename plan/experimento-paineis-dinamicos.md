@@ -435,8 +435,11 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 - **Executor:** agente `worker` (nativo do OpenCode) com modelo
   `gpt-5.6-luna`, variante `max` (esforço MAX — não `high`, não `xhigh`).
-  Referência no frontmatter: `opencode/gpt-5.6-luna#max` (provider Zen;
-  alternativa `opencode-go` pendente de confirmação do humano).
+  Referência no frontmatter: `opencode-go/gpt-5.6-luna` (provider
+  OpenCode Go, correção confirmada pelo humano em 2026-09-11 após ciclo
+  inicial rodar no provider `opencode`/Zen por equívoco de roteamento;
+  `reasoningEffort: max` via opencode.json, pois o sufixo `#max` não é
+  aceito nesta versão do OpenCode).
 - **Revisor:** agente `revisor` (nativo do OpenCode), modelo mantido:
   `zai-coding-plan/glm-5.3`, temperature 0.1, sem permissão de edição.
 - A tool `task` não aceita modelo no spawn: os modelos vêm dos frontmatters.
