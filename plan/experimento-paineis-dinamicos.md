@@ -420,8 +420,9 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Files likely touched:** `src/fab/CardTab.tsx`, `src/fab/som.ts`,
     `src/App.tsx`, `src/App.css`
   - **Estimated scope:** S
-
-### Checkpoint: Spike 4 completo (commit + push)
+  - **Refinamento R1 (validação humana 2026-09-11):** X deve ficar no
+    canto direito do header do card (título à esquerda, `space-between`,
+    largura total da barra) — não grudado ao título como "arquivo".
 - [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
 - [ ] Revisão única do revisor (ritmo padrão reutilizado)
 - [ ] Humano avalia no browser
