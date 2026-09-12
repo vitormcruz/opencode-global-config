@@ -470,15 +470,102 @@ aplicam aqui — a validação do spike é visual/manual + build.
       aprovados pelo revisor e pelo humano. Repo em
       https://github.com/vitormcruz/painel-dinamico-lab (HEAD 25a2967).
 
+- **D12 — Canal do agente (spike 5):** WebSocket dedicado (`/ws/agente`)
+  para o diálogo e comandos de UI; o SSE existente continua só para dados
+  (stream 1s).
+- **D13 — Agente real (spike 5):** backend chama o LLM via subprocess
+  `opencode run -m opencode-go/deepseek-v4-flash` (validado:
+  ~13s/call, JSON na saída). Resposta parseada como JSON de comandos com
+  whitelist no backend.
+- **D14 — Servidores ativos (spike 5):** lista REAL detectada pelo
+  backend (portas/processos via `ss`/`ps`), não fictícia.
+
+### Phase 7 — Spike 5: server-driven UI com agente LLM
+
+- [ ] **Task 16: Backend — inventário de serviços reais**
+  - **Description:** endpoint `GET /api/servicos` detectando serviços
+    escutando no ambiente (parse de `ss -tlnp`; mapear portas conhecidas
+    para nomes amigáveis: 5176 → Vite do lab, 8000 → FastAPI etc.;
+    genérico para as demais). Sem exigir root.
+  - **Acceptance criteria:**
+    - [ ] retorna lista `{nome, porta, estado}` com os serviços do lab
+    - [ ] serviços indo/voltando refletem no endpoint
+    - [ ] build/lint do front intactos; curl OK
+  - **Verification:** curl (subir/derrubar um serviço e conferir).
+  - **Dependencies:** Task 10
+  - **Files likely touched:** `backend/main.py` (ou `backend/servicos.py`)
+  - **Estimated scope:** S
+
+- [ ] **Task 17: Backend — WS do agente com LLM via subprocess**
+  - **Description:** WebSocket `/ws/agente`: cliente envia `{texto}`;
+    backend monta prompt (system fixo com o schema de comandos e o
+    contexto: tipos de painel disponíveis + serviços ativos), chama
+    `opencode run -m opencode-go/deepseek-v4-flash` por subprocess com
+    timeout (~110s) e kill do grupo em timeout, parseia o stdout de
+    forma tolerante (ignorar header `> build · ...`, extrair primeiro
+    JSON válido; 1 retry se inválido), valida contra whitelist
+    (`open_panel`, `close_panel`, `notify`, `message`,
+    `update_servicos`) e emite pela WS: `thinking` → `command`* →
+    `message`. Erros viram evento `message` amigável (WS não cai).
+    Proxy do Vite com `ws: true` para `/ws`.
+  - **Acceptance criteria:**
+    - [ ] WS aceita conexão e o ciclo mensagem → thinking → resposta
+          funciona (testado com script/cliente de teste)
+    - [ ] pedido de "servidores ativos" produz comando `open_panel`
+          do painel de serviços (validável em teste)
+    - [ ] subprocess com timeout; JSON inválido não derruba a conexão
+    - [ ] `npm run build`/`lint` OK; curl/WS OK
+  - **Verification:** script de teste WS (python websockets ou wscat)
+    com asserts dos eventos.
+  - **Dependencies:** Task 16
+  - **Files likely touched:** `backend/agente.py`, `backend/main.py`,
+    `vite.config.ts`
+  - **Estimated scope:** M
+  - **Nota:** carregar a skill `reliable-async-operations` antes de
+    escrever o código do subprocess (timeout, cancelamento, kill do
+    grupo de processo).
+
+- [ ] **Task 18: Frontend — executor de comandos de UI**
+  - **Description:** hook `useAgente` (cliente WS com reconnect leve) +
+    executor que mapeia os comandos da whitelist para ações Dockview:
+    `open_panel` (addPanel com tipo/título/params; floating quando o
+    agente pedir), `close_panel`, `notify` (toast existente), `message`
+    (chat do agente), `update_servicos` (painel de serviços re-renderiza
+    com animação). Cleanup correto no unmount.
+  - **Acceptance criteria:**
+    - [ ] cada comando da whitelist executa a ação correspondente
+    - [ ] comando inválido/erro não quebra o app
+    - [ ] reconnect do WS restaura o funcionamento sem reload
+    - [ ] build/lint OK
+  - **Verification:** validação manual + build.
+  - **Dependencies:** Task 17
+  - **Files likely touched:** `src/agente/useAgente.ts`,
+    `src/agente/executor.ts`, `src/App.tsx`
+  - **Estimated scope:** M
+
+- [ ] **Task 19: Frontend — painel Agente (chat) + Serviços animado**
+  - **Description:** painel "Agente": histórico, input, indicador
+    "pensando...", 3 botões de intenção ("Mostrar servidores ativos",
+    "Explique o que você pode fazer", "Feche o que você abriu"). Painel
+    "Serviços": lista viva de `/api/servicos` com animação de
+    entrada/saída de itens e botão atualizar. Registry/toolbar: 13 tipos.
+  - **Acceptance criteria:**
+    - [ ] conversa flui (mensagem → pensando → resposta/comandos)
+    - [ ] botões de intenção disparam o ciclo completo
+    - [ ] painel de Serviços lista serviços reais com animação
+    - [ ] 2 novos tipos na toolbar; build/lint OK
+  - **Verification:** validação manual no browser + build.
+  - **Dependencies:** Task 18
+  - **Files likely touched:** `src/paineis/Agente.tsx`,
+    `src/paineis/Servicos.tsx`, `src/paineis/registry.ts`, `src/App.css`
+  - **Estimated scope:** M
+
+### Checkpoint: Spike 5 completo (commit + push)
+- [ ] Agente LLM dirigindo a UI via WS; serviços reais animados
+- [ ] Revisão única do revisor (ritmo padrão)
+- [ ] Humano conversa com o agente no browser e avalia
+
 ### Spikes futuros (backlog)
-- Spike 5 (EM PLANEJAMENTO — pedido do humano 2026-09-12): servidor
-  altera o frontend (server-driven UI). Botões do usuário → backend
-  decide qual widget abrir e com que conteúdo; conteúdo animado dentro
-  do widget (ex.: lista de servidores ativos); visão de futuro: um
-  agente no backend se exibindo ao usuário por meio de widgets,
-  moldando a tela conforme julgar melhor. Decisões pendentes: canal
-  (SSE tipado + REST vs WebSocket), natureza do "agente" (roteiro mock
-  vs LLM), fonte da lista de servidores (real vs fictícia).
 - Spike 6 (condicional): challenger (FlexLayout ou novatas) se algo
   incomodar no Dockview
 
