@@ -332,8 +332,78 @@ aplicam aqui — a validação do spike é visual/manual + build.
       Doc e Live operando com backend FastAPI real; persistência
       confirmada após restart do dev server.
 
+### Phase 6 — Spike 4: interatividade e visualização
+
+- [ ] **Task 11: Streaming de 1s com passo do pipeline**
+  - **Description:** ajustar `/api/stream` para emitir a cada 1s (era 2s) e
+    incluir campo `passo` (1-4, ciclando) no payload SSE. PainelLive
+    existente passa a atualizar a 1s e a exibir o passo atual.
+  - **Acceptance criteria:**
+    - [ ] `/api/stream` emite evento a cada ~1s com `passo` no payload
+    - [ ] PainelLive atualiza no novo ritmo e mostra o passo
+    - [ ] `npm run build` passa
+  - **Verification:** curl SSE com `--max-time` curto (contar eventos);
+    build.
+  - **Dependencies:** Task 10
+  - **Files likely touched:** `backend/main.py`, `src/paineis/Live.tsx`
+  - **Estimated scope:** S
+
+- [ ] **Task 12: FAB redondo + 6 formas de widget flutuante**
+  - **Description:** FAB (botão redondo fixo, canto inferior direito,
+    z-index sobre o dockview). Clique abre **popover** ancorado (portal)
+    com informação adicional do backend (`/api/estado`) e botões para as
+    demais formas: **floating group** do Dockview (painel flutuante
+    arrastável), **popout window** (janela browser separada via API do
+    Dockview), **modal** (overlay central com backdrop, ESC fecha),
+    **drawer** (painel lateral deslizante) e **toast** (efêmero, ~3s).
+    Todas mostram a mesma informação adicional.
+  - **Acceptance criteria:**
+    - [ ] FAB redondo visível sobre o layout em qualquer configuração
+    - [ ] popover abre/fecha no clique do FAB
+    - [ ] floating group abre flutuante, arrastável e fechável
+    - [ ] popout abre em janela separada sem ser bloqueado (gesto do
+          usuário) e pode voltar ao layout
+    - [ ] modal abre centralizado, ESC e clique no backdrop fecham
+    - [ ] drawer desliza da direita e fecha
+    - [ ] toast aparece e some sozinho (~3s)
+    - [ ] `npm run build` passa
+  - **Verification:** validação manual no browser + build.
+  - **Dependencies:** Task 11
+  - **Files likely touched:** `src/fab/Fab.tsx`, `src/fab/Popover.tsx`,
+    `src/fab/Modal.tsx`, `src/fab/Drawer.tsx`, `src/fab/Toast.tsx`,
+    `src/App.tsx`, `src/App.css`
+  - **Estimated scope:** M
+
+- [ ] **Task 13: Workflow animado em dois renderers**
+  - **Description:** mesmo pipeline (4 caixas numeradas com setas,
+    passo ativo = borda azul escura, inativo = branco) implementado
+    duas vezes: (a) `PainelWorkflowSvg` — SVG custom desenhado no React,
+    números embaixo das caixas, classe CSS da caixa ativa dirigida pelo
+    campo `passo` do SSE; (b) `PainelWorkflowFlow` — React Flow
+    (`@xyflow/react`), mesmos nós/edges, highlight do nó ativo via
+    classe CSS, dirigido pelo mesmo stream. Ambos no registry/toolbar
+    (total: 11 tipos).
+  - **Acceptance criteria:**
+    - [ ] workflow SVG: 4 caixas, setas, número embaixo de cada caixa
+    - [ ] workflow React Flow: mesmos nós e edges com @xyflow/react
+    - [ ] nos dois, a borda da caixa do passo atual fica azul escuro e
+          avança a cada tick do stream (1s); inativas ficam brancas
+    - [ ] dois novos tipos na toolbar; `npm run build` passa
+  - **Verification:** validação manual no browser (transição andando nos
+    dois painéis simultâneos) + build.
+  - **Dependencies:** Task 11
+  - **Files likely touched:** `src/paineis/WorkflowSvg.tsx`,
+    `src/paineis/WorkflowFlow.tsx`, `src/paineis/registry.ts`,
+    `package.json` (nova dep `@xyflow/react`), `src/App.tsx`
+  - **Estimated scope:** M
+
+### Checkpoint: Spike 4 completo (commit + push)
+- [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
+- [ ] Revisão única do revisor (ritmo padrão reutilizado)
+- [ ] Humano avalia no browser
+
 ### Spikes futuros (backlog)
-- Spike 4 (condicional): challenger (FlexLayout ou novatas) se algo
+- Spike 5 (condicional): challenger (FlexLayout ou novatas) se algo
   incomodar no Dockview
 
 ## Execução
