@@ -562,6 +562,13 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Checkpoint: Spike 5 completo (commit + push)
 - [ ] Agente LLM dirigindo a UI via WS; serviços reais animados
+- [ ] **Achados da revisão (2026-09-12, a corrigir):**
+  R1 — idle de 45s do subprocess aborta chamadas legítimas (silêncio
+  entre header e resposta é normal); alinhar ao timeout total ~110s ou
+  aplicar idle só até o primeiro output. Severidade média.
+  R2 — disconnect do cliente durante processamento não cancela o
+  subprocess; emit em socket fechado gera exceção (checar client_state
+  antes de emitir / task cancelável). Severidade baixa.
 - [ ] Revisão única do revisor (ritmo padrão)
 - [ ] Humano conversa com o agente no browser e avalia
 
