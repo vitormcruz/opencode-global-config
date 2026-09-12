@@ -13,8 +13,8 @@ temperature: 0.2
 permission:
   edit: allow
   bash: allow
-  webfetch: deny
-  websearch: deny
+  webfetch: allow
+  websearch: allow
   task:
     "*": deny
 ---
