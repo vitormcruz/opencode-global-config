@@ -471,7 +471,15 @@ aplicam aqui — a validação do spike é visual/manual + build.
       https://github.com/vitormcruz/painel-dinamico-lab (HEAD 25a2967).
 
 ### Spikes futuros (backlog)
-- Spike 5 (condicional): challenger (FlexLayout ou novatas) se algo
+- Spike 5 (EM PLANEJAMENTO — pedido do humano 2026-09-12): servidor
+  altera o frontend (server-driven UI). Botões do usuário → backend
+  decide qual widget abrir e com que conteúdo; conteúdo animado dentro
+  do widget (ex.: lista de servidores ativos); visão de futuro: um
+  agente no backend se exibindo ao usuário por meio de widgets,
+  moldando a tela conforme julgar melhor. Decisões pendentes: canal
+  (SSE tipado + REST vs WebSocket), natureza do "agente" (roteiro mock
+  vs LLM), fonte da lista de servidores (real vs fictícia).
+- Spike 6 (condicional): challenger (FlexLayout ou novatas) se algo
   incomodar no Dockview
 
 ## Execução
