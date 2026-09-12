@@ -397,6 +397,30 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `package.json` (nova dep `@xyflow/react`), `src/App.tsx`
   - **Estimated scope:** M
 
+- [ ] **Task 14: Floating card minimal (header custom + sombra + som)**
+  - **Description:** nova forma de flutuante no popover do FAB: "Floating
+    card". Floating group do Dockview com **tab component customizado**
+    (`defaultTabComponent` ou `tabComponent` do painel): header fino com
+    apenas título + botão X (`panel.api.close()`). CSS de card: cantos
+    arredondados generosos e **sombra** (`box-shadow`). **Som ao abrir**:
+    Web Audio API (pop/beep curto sintetizado, sem asset externo),
+    disparado no clique (user gesture, autoplay policy não bloqueia).
+    Informação adicional do backend dentro do card, como nas demais
+    formas.
+  - **Acceptance criteria:**
+    - [ ] botão "Floating card" no popover do FAB
+    - [ ] card abre flutuante e arrastável, com header só título + X
+    - [ ] X fecha o card; fechar não afeta os demais tipos de painel
+    - [ ] cantos arredondados + sombra visíveis
+    - [ ] som curto sintetizado toca ao abrir (sem asset externo)
+    - [ ] `npm run build` e `npm run lint` passam
+  - **Verification:** validação manual no browser (card, sombra, som) +
+    build/lint.
+  - **Dependencies:** Task 12
+  - **Files likely touched:** `src/fab/CardTab.tsx`, `src/fab/som.ts`,
+    `src/App.tsx`, `src/App.css`
+  - **Estimated scope:** S
+
 ### Checkpoint: Spike 4 completo (commit + push)
 - [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
 - [ ] Revisão única do revisor (ritmo padrão reutilizado)
