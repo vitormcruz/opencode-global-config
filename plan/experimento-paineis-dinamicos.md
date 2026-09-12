@@ -456,6 +456,9 @@ aplicam aqui — a validação do spike é visual/manual + build.
     (`src/fab/`), novo `src/fab/Tooltip.tsx`, `src/App.tsx`,
     `src/App.css`
   - **Estimated scope:** M
+  - **Refinamento R3 (pedido do humano 2026-09-11):** tooltip do "!"
+    passa a aparecer/sumir com HOVER do mouse (mouseenter/mouseleave),
+    não por clique.
 
 ### Checkpoint: Spike 4 completo (commit + push)
 - [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
