@@ -40,8 +40,8 @@ prefixo `wsl`): `codebase-memory-mcp cli <tool> '<json>'`. Use sempre um
 ```bash
 codebase-memory-mcp cli list_projects '{}'
 codebase-memory-mcp cli index_repository '{"repo_path":"/caminho/absoluto/do/repo"}'
-codebase-memory-mcp cli search_graph '{"project":"<nome>","query":"descrição"}'
-codebase-memory-mcp cli trace_path '{"project":"<nome>","function_name":"Foo"}'
+codebase-memory-mcp cli search_graph '{"project":"<nome>","name_pattern":".*Foo.*"}'
+codebase-memory-mcp cli trace_path '{"project":"<nome>","function_name":"Foo","direction":"inbound"}'
 codebase-memory-mcp cli get_code_snippet '{"project":"<nome>","qualified_name":"pkg.Foo"}'
 codebase-memory-mcp cli query_graph '{"project":"<nome>","query":"MATCH ..."}'
 codebase-memory-mcp cli search_code '{"project":"<nome>","pattern":"termo"}'
@@ -50,6 +50,9 @@ codebase-memory-mcp cli get_architecture '{"project":"<nome>"}'
 
 Notas:
 
+- Em `search_graph`, use `name_pattern` com uma expressão regular.
+- Em `trace_path`, informe `direction` como `inbound` (chamadores) ou
+  `outbound` (chamadas).
 - Em `search_code`, use `pattern`, não `query`.
 - Em `index_repository`, use `repo_path` absoluto para evitar ambiguidades.
 - O CLI é execução local — não configure nem inicie servidor MCP para

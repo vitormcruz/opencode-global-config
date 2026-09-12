@@ -15,9 +15,9 @@ CLI_COMMANDS = (
     "codebase-memory-mcp cli index_repository "
     "'{\"repo_path\":\"/caminho/absoluto/do/repo\"}'",
     "codebase-memory-mcp cli search_graph "
-    "'{\"project\":\"<nome>\",\"query\":\"descrição\"}'",
+    "'{\"project\":\"<nome>\",\"name_pattern\":\".*Foo.*\"}'",
     "codebase-memory-mcp cli trace_path "
-    "'{\"project\":\"<nome>\",\"function_name\":\"Foo\"}'",
+    "'{\"project\":\"<nome>\",\"function_name\":\"Foo\",\"direction\":\"inbound\"}'",
     "codebase-memory-mcp cli get_code_snippet "
     "'{\"project\":\"<nome>\",\"qualified_name\":\"pkg.Foo\"}'",
     "codebase-memory-mcp cli query_graph "
