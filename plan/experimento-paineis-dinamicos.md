@@ -1,11 +1,12 @@
 # Plano: Experimento — Plataformas e Frameworks para UI com Painéis Dinâmicos
 
-> STATUS: SPIKES 1, 2 E 3 CONCLUÍDOS E APROVADOS (2026-09-11: executor
-> concluiu, revisor independente aprovou sem achados bloqueantes, humano
-> validou visualmente no browser — persistência e painéis dinâmicos com
-> backend real confirmados). Decisão de rumo pendente: encerrar o
-> experimento declarando o Dockview aprovado como base do cockpit, ou
-> spike 4 (challenger).
+> STATUS: SPIKES 1 A 4 CONCLUÍDOS E APROVADOS (2026-09-12: todos com
+> executor + revisor independente + validação humana no browser).
+> Capacidades validadas: docking, 11 tipos de conteúdo, persistência,
+> backend real (FastAPI/SSE 1s), FAB com 7 formas de flutuante,
+> floating card refinado (R1-R3), workflows animados em 2 renderers.
+> Decisão de rumo pendente: encerrar experimento (Dockview aprovado),
+> spike 5 challenger, ou evoluir o lab em direção ao cockpit real.
 
 ## Overview
 
@@ -334,7 +335,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 6 — Spike 4: interatividade e visualização
 
-- [ ] **Task 11: Streaming de 1s com passo do pipeline**
+- [x] **Task 11: Streaming de 1s com passo do pipeline**
   - **Description:** ajustar `/api/stream` para emitir a cada 1s (era 2s) e
     incluir campo `passo` (1-4, ciclando) no payload SSE. PainelLive
     existente passa a atualizar a 1s e a exibir o passo atual.
@@ -348,7 +349,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Files likely touched:** `backend/main.py`, `src/paineis/Live.tsx`
   - **Estimated scope:** S
 
-- [ ] **Task 12: FAB redondo + 6 formas de widget flutuante**
+- [x] **Task 12: FAB redondo + 6 formas de widget flutuante**
   - **Description:** FAB (botão redondo fixo, canto inferior direito,
     z-index sobre o dockview). Clique abre **popover** ancorado (portal)
     com informação adicional do backend (`/api/estado`) e botões para as
@@ -374,7 +375,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/App.tsx`, `src/App.css`
   - **Estimated scope:** M
 
-- [ ] **Task 13: Workflow animado em dois renderers**
+- [x] **Task 13: Workflow animado em dois renderers**
   - **Description:** mesmo pipeline (4 caixas numeradas com setas,
     passo ativo = borda azul escura, inativo = branco) implementado
     duas vezes: (a) `PainelWorkflowSvg` — SVG custom desenhado no React,
@@ -397,7 +398,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `package.json` (nova dep `@xyflow/react`), `src/App.tsx`
   - **Estimated scope:** M
 
-- [ ] **Task 14: Floating card minimal (header custom + sombra + som)**
+- [x] **Task 14: Floating card minimal (header custom + sombra + som)**
   - **Description:** nova forma de flutuante no popover do FAB: "Floating
     card". Floating group do Dockview com **tab component customizado**
     (`defaultTabComponent` ou `tabComponent` do painel): header fino com
@@ -430,7 +431,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     implementar movimento manual da janela (posição via API do floating
     group ou overlay próprio arrastável).
 
-- [ ] **Task 15: Botões "?" e "!" dentro do floating card**
+- [x] **Task 15: Botões "?" e "!" dentro do floating card**
   - **Description:** dois mini-botões circulares no canto inferior
     direito do CORPO do floating card (mesmo estilo visual do FAB):
     **"?"** abre um SEGUNDO floating card com a resposta da dúvida
@@ -461,9 +462,13 @@ aplicam aqui — a validação do spike é visual/manual + build.
     não por clique.
 
 ### Checkpoint: Spike 4 completo (commit + push)
-- [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
-- [ ] Revisão única do revisor (ritmo padrão reutilizado)
-- [ ] Humano avalia no browser
+- [x] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
+- [x] Revisão única do revisor (ritmo padrão reutilizado)
+- [x] Humano avalia no browser
+      → VALIDADO (2026-09-11/12): Tasks 11-15 + refinamentos R1 (X no
+      canto direito), R2 (card always-floating) e R3 (tooltip por hover)
+      aprovados pelo revisor e pelo humano. Repo em
+      https://github.com/vitormcruz/painel-dinamico-lab (HEAD 25a2967).
 
 ### Spikes futuros (backlog)
 - Spike 5 (condicional): challenger (FlexLayout ou novatas) se algo
