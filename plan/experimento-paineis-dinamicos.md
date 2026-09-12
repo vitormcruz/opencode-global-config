@@ -423,6 +423,12 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Refinamento R1 (validação humana 2026-09-11):** X deve ficar no
     canto direito do header do card (título à esquerda, `space-between`,
     largura total da barra) — não grudado ao título como "arquivo".
+  - **Refinamento R2 (validação humana 2026-09-11):** o floating card
+    deve permanecer floating SEMPRE — arrastar move a janela livremente,
+    sem oferecer docking em abas do layout. Investigar mecanismo nativo
+    v8 (locked group, opções de floating group); se a lib não oferecer,
+    implementar movimento manual da janela (posição via API do floating
+    group ou overlay próprio arrastável).
 - [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
 - [ ] Revisão única do revisor (ritmo padrão reutilizado)
 - [ ] Humano avalia no browser
