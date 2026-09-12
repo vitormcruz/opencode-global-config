@@ -429,6 +429,35 @@ aplicam aqui — a validação do spike é visual/manual + build.
     v8 (locked group, opções de floating group); se a lib não oferecer,
     implementar movimento manual da janela (posição via API do floating
     group ou overlay próprio arrastável).
+
+- [ ] **Task 15: Botões "?" e "!" dentro do floating card**
+  - **Description:** dois mini-botões circulares no canto inferior
+    direito do CORPO do floating card (mesmo estilo visual do FAB):
+    **"?"** abre um SEGUNDO floating card com a resposta da dúvida
+    (conteúdo demo relevante, ex.: explicação do que o card mostra),
+    herdando todo o comportamento validado (CardTab título+X, sombra,
+    radius, som ao abrir, always-floating do R2); **"!"** mostra um
+    tooltip estilizado ancorado ao botão (abre no clique; fecha ao
+    clicar fora ou no próprio botão; NÃO abre card). Tooltip custom
+    via CSS/portal, não o `title` nativo.
+  - **Acceptance criteria:**
+    - [ ] dois mini-botões circulares (?, !) no canto inferior direito
+          do corpo do card
+    - [ ] "?" abre segundo floating card com a resposta; herda
+          visual/comportamento (always-floating, X fecha, som)
+    - [ ] "!" mostra tooltip estilizado ancorado; fecha ao clicar fora
+          ou no botão; não interfere com drag do card
+    - [ ] comportamentos anteriores preservados (R1, R2, FAB, 11 tipos,
+          floating group da Task 12)
+    - [ ] `npm run build` e `npm run lint` passam
+  - **Verification:** validação manual no browser + build/lint.
+  - **Dependencies:** Task 14 (com R1 e R2)
+  - **Files likely touched:** componente do corpo do card
+    (`src/fab/`), novo `src/fab/Tooltip.tsx`, `src/App.tsx`,
+    `src/App.css`
+  - **Estimated scope:** M
+
+### Checkpoint: Spike 4 completo (commit + push)
 - [ ] Streaming 1s, 6 formas de flutuante, workflow em 2 renderers
 - [ ] Revisão única do revisor (ritmo padrão reutilizado)
 - [ ] Humano avalia no browser
