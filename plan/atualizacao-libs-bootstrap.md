@@ -45,6 +45,17 @@ codebase-memory-mcp.
 - **D6 — Entrega da revisão arquitetural (D4)**: relatório com veredito por
   ferramenta + proposta do mecanismo de fallback; implementação só após
   aprovação humana, virando tasks novas.
+- **D7 — Web no worker**: `websearch` e `webfetch` liberados no frontmatter do
+  worker (antes deny). Pré-condição para a Fase 3 (levantamento com fontes
+  oficiais). Suíte completa verde após a mudança (724 passed).
+- **D8 — Modelos por fase**: executor é o agente `worker`; revisor é o agente
+  `revisor` (glm-5.3, nativo). Fases 1-2 rodam com o padrão atual do worker:
+  `opencode-go/gpt-5.6-luna`, reasoningEffort max. Tasks 6-7 (Fase 3) rodam
+  com o worker em `zai-coding-plan/glm-5.3` (HIGH - Z-AI). A tool de spawn
+  não aceita modelo, então a troca exige editar o frontmatter do worker e
+  reiniciar o OpenCode; o plano commitado é o estado persistido que permite
+  retomar em nova sessão. Ao final da Fase 3, reverter o worker para
+  `opencode-go/gpt-5.6-luna` (padrão) e reiniciar novamente.
 
 ## Task List
 
@@ -226,6 +237,9 @@ real da lib e consolidar um relatório de oportunidades para o humano.
 - [ ] Relatório entregue e correções aplicadas
 - [ ] Commits: correção da skill (docs/config) e remoção do workaround
       (refactor) como unidades lógicas separadas
+- [ ] Revisão do revisor sobre as Fases 1-2
+- [ ] Troca do worker para `zai-coding-plan/glm-5.3` (frontmatter) e reinício
+      do OpenCode pelo humano; retomar o plano (este arquivo) na nova sessão
 
 ### Phase 3: Revisão arquitetural multi-harness (D4)
 
@@ -254,6 +268,8 @@ evidência.
 
 **Dependencies:** Fase 2 (insumos do codebase-memory real)
 
+**Executor:** worker com `zai-coding-plan/glm-5.3` (HIGH - Z-AI), conforme D8
+
 **Files likely touched:**
 - Nenhum (relatório)
 
@@ -280,6 +296,8 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 
 **Dependencies:** Task 6
 
+**Executor:** worker com `zai-coding-plan/glm-5.3` (HIGH - Z-AI), conforme D8
+
 **Files likely touched:**
 - Nenhum (proposta)
 
@@ -288,6 +306,8 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 ### Checkpoint: Fase 3 concluída
 - [ ] Relatório + proposta entregues; decisão humana registrada no plano
 - [ ] Implementação aprovada (se houver) vira plano/tasks novas
+- [ ] Reverter o worker para `opencode-go/gpt-5.6-luna` (padrão) e reiniciar o
+      OpenCode pelo humano (D8)
 
 ## Risks and Mitigations
 
