@@ -179,3 +179,11 @@ comparação no resultado para o humano.
 ## Open Questions
 
 Nenhuma pendente. Decisões D1-D5 aprovadas pelo humano.
+
+## Estado de Execução
+
+- **Executor:** agente `worker` (modelo `opencode-go/gpt-5.6-luna`,
+  definido no frontmatter de `harness-conf/agents/worker.md`)
+- **Revisor:** agente `revisor` (modelo `zai-coding-plan/glm-5.3`,
+  definido no frontmatter de `harness-conf/agents/revisor.md`)
+- Aprovado pelo humano em 2026-09-13.
