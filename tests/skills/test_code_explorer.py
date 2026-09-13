@@ -15,16 +15,16 @@ CLI_COMMANDS = (
     "codebase-memory-mcp cli index_repository "
     "'{\"repo_path\":\"/caminho/absoluto/do/repo\"}'",
     "codebase-memory-mcp cli search_graph "
-    "'{\"project\":\"<nome>\",\"name_pattern\":\".*Foo.*\"}'",
+    "'{\"project\":\"<nome-exato>\",\"name_pattern\":\".*Foo.*\"}'",
     "codebase-memory-mcp cli trace_path "
-    "'{\"project\":\"<nome>\",\"function_name\":\"Foo\",\"direction\":\"inbound\"}'",
+    "'{\"project\":\"<nome-exato>\",\"function_name\":\"Foo\",\"direction\":\"inbound\"}'",
     "codebase-memory-mcp cli get_code_snippet "
-    "'{\"project\":\"<nome>\",\"qualified_name\":\"pkg.Foo\"}'",
+    "'{\"project\":\"<nome-exato>\",\"qualified_name\":\"pkg.Foo\"}'",
     "codebase-memory-mcp cli query_graph "
-    "'{\"project\":\"<nome>\",\"query\":\"MATCH ...\"}'",
+    "'{\"project\":\"<nome-exato>\",\"query\":\"MATCH ...\"}'",
     "codebase-memory-mcp cli search_code "
-    "'{\"project\":\"<nome>\",\"pattern\":\"termo\"}'",
-    "codebase-memory-mcp cli get_architecture '{\"project\":\"<nome>\"}'",
+    "'{\"project\":\"<nome-exato>\",\"pattern\":\"termo\"}'",
+    "codebase-memory-mcp cli get_architecture '{\"project\":\"<nome-exato>\"}'",
 )
 
 
@@ -62,13 +62,26 @@ def test_code_explorer_frontmatter_has_name_and_description(
 
 
 @pytest.mark.unit
-def test_description_is_conditioned_on_agents_md(skill_content: str):
-    """Ativação só quando o AGENTS.md do repo indicar codebase-memory."""
+def test_description_uses_global_detection_and_discovery_triggers(
+    skill_content: str,
+):
+    """A ativação ocorre por pedido de descoberta, não por configuração local."""
 
     frontmatter = skill_content.split("---", 2)[1]
 
-    assert "APENAS quando o AGENTS.md" in frontmatter
-    assert "não a aplique" in frontmatter
+    assert "APENAS quando o AGENTS.md" not in frontmatter
+    assert "não a aplique" not in frontmatter
+    assert "list_projects" in frontmatter
+    for trigger in (
+        "pesquisar",
+        "procurar",
+        "localizar",
+        "onde está",
+        "quem chama",
+        "como funciona",
+        "code discovery",
+    ):
+        assert trigger in frontmatter
 
 
 @pytest.mark.unit
@@ -78,10 +91,42 @@ def test_code_explorer_keeps_operational_sections(skill_content: str):
         "Invocação do CLI",
         "Ordem das ferramentas",
         "Passo 0",
+        "Receita anti-erro",
         "Busca em documentação",
         "Fallback estrito",
     ):
         assert section in skill_content
+
+
+@pytest.mark.unit
+def test_skill_detects_indexed_repository_before_tool_order(skill_content: str):
+    step_zero = skill_content.index("## Passo 0")
+    list_projects = skill_content.index("list_projects", step_zero)
+
+    assert list_projects > step_zero
+    assert "repo atual" in skill_content
+    assert "não está indexado" in skill_content
+    assert "use grep/glob normalmente" in skill_content
+
+
+@pytest.mark.unit
+def test_skill_documents_correct_parameters_for_each_cli_tool(
+    skill_content: str,
+):
+    assert '"name_pattern":".*Foo.*"' in skill_content
+    assert '"direction":"inbound"' in skill_content
+    assert '"direction":"outbound"' in skill_content
+    assert '"query":"MATCH' in skill_content
+    assert '"pattern":"termo"' in skill_content
+
+
+@pytest.mark.unit
+def test_skill_documents_shell_and_json_quote_rules(skill_content: str):
+    normalized = " ".join(skill_content.split()).lower()
+
+    assert "aspas simples" in normalized
+    assert "aspas duplas" in normalized
+    assert "não use aspas simples" in normalized
 
 
 @pytest.mark.unit
