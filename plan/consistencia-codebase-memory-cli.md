@@ -210,3 +210,11 @@ Nenhuma pendente. Decisões D1-D5 aprovadas pelo humano.
   (`tests/integration/test_commands.py:17`), fora do escopo do plano.
   Isolado passou em 22s no diagnóstico; transitório ou sensível à
   ordem do conjunto.
+- **Task 4 fechada com limitação aceita pelo humano**: reexecução
+  completa `-m agent_eval -v` em 619s: 30 passed, 1 failed (sem hang).
+  Falha flaky no prompt "chamadores": resposta do Qwen menciona
+  fallback ao CLI ("vou tentar novamente com a versão mais recente do
+  CLI"), mas sem marcador da lista. Risco previsto (Qwen3-0.6B)
+  concretizado. Antes/depois registrado como variável: baseline 2/3,
+  pós-mudança 2/3 (conjunto completo) a 3/3 (isolado). Aceite final
+  pela suíte unit/integration (`-m all`: 725 passed).
