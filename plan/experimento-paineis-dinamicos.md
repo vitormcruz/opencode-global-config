@@ -1,12 +1,11 @@
 # Plano: Experimento — Plataformas e Frameworks para UI com Painéis Dinâmicos
 
-> STATUS: SPIKES 1 A 4 CONCLUÍDOS E APROVADOS (2026-09-12: todos com
-> executor + revisor independente + validação humana no browser).
-> Capacidades validadas: docking, 11 tipos de conteúdo, persistência,
-> backend real (FastAPI/SSE 1s), FAB com 7 formas de flutuante,
-> floating card refinado (R1-R3), workflows animados em 2 renderers.
+> STATUS: SPIKES 1 A 5 CONCLUÍDOS E APROVADOS (2026-09-12). Tese central
+> validada: SERVIDOR molda o frontend — agente LLM (deepseek-v4-flash via
+> opencode-go) conversa por WebSocket, decide e abre painéis/cards com
+> conteúdo que ele mesmo gera; dados reais do ambiente animados na tela.
 > Decisão de rumo pendente: encerrar experimento (Dockview aprovado),
-> spike 5 challenger, ou evoluir o lab em direção ao cockpit real.
+> spike 6 challenger, ou evoluir o lab em direção ao cockpit real.
 
 ## Overview
 
@@ -482,7 +481,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
 
 ### Phase 7 — Spike 5: server-driven UI com agente LLM
 
-- [ ] **Task 16: Backend — inventário de serviços reais**
+- [x] **Task 16: Backend — inventário de serviços reais**
   - **Description:** endpoint `GET /api/servicos` detectando serviços
     escutando no ambiente (parse de `ss -tlnp`; mapear portas conhecidas
     para nomes amigáveis: 5176 → Vite do lab, 8000 → FastAPI etc.;
@@ -496,7 +495,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Files likely touched:** `backend/main.py` (ou `backend/servicos.py`)
   - **Estimated scope:** S
 
-- [ ] **Task 17: Backend — WS do agente com LLM via subprocess**
+- [x] **Task 17: Backend — WS do agente com LLM via subprocess**
   - **Description:** WebSocket `/ws/agente`: cliente envia `{texto}`;
     backend monta prompt (system fixo com o schema de comandos e o
     contexto: tipos de painel disponíveis + serviços ativos), chama
@@ -525,7 +524,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     escrever o código do subprocess (timeout, cancelamento, kill do
     grupo de processo).
 
-- [ ] **Task 18: Frontend — executor de comandos de UI**
+- [x] **Task 18: Frontend — executor de comandos de UI**
   - **Description:** hook `useAgente` (cliente WS com reconnect leve) +
     executor que mapeia os comandos da whitelist para ações Dockview:
     `open_panel` (addPanel com tipo/título/params; floating quando o
@@ -543,7 +542,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/agente/executor.ts`, `src/App.tsx`
   - **Estimated scope:** M
 
-- [ ] **Task 19: Frontend — painel Agente (chat) + Serviços animado**
+- [x] **Task 19: Frontend — painel Agente (chat) + Serviços animado**
   - **Description:** painel "Agente": histórico, input, indicador
     "pensando...", 3 botões de intenção ("Mostrar servidores ativos",
     "Explique o que você pode fazer", "Feche o que você abriu"). Painel
@@ -560,7 +559,7 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/paineis/Servicos.tsx`, `src/paineis/registry.ts`, `src/App.css`
   - **Estimated scope:** M
 
-- [ ] **Task 20: Conteúdo dinâmico dirigido pelo agente (E1)**
+- [x] **Task 20: Conteúdo dinâmico dirigido pelo agente (E1)**
   - **Description:** dar ao agente a capacidade de ESCREVER o conteúdo
     dos painéis (hoje só escolhe o tipo, com demo fixo): (a) prompt do
     backend documenta campos de conteúdo por tipo (`definition` para
@@ -588,16 +587,20 @@ aplicam aqui — a validação do spike é visual/manual + build.
   - **Estimated scope:** M
 
 ### Checkpoint: Spike 5 completo (commit + push)
-- [ ] Agente LLM dirigindo a UI via WS; serviços reais animados
-- [ ] **Achados da revisão (2026-09-12, a corrigir):**
+- [x] Agente LLM dirigindo a UI via WS; serviços reais animados
+- [x] **Achados da revisão (2026-09-12, a corrigir):**
   R1 — idle de 45s do subprocess aborta chamadas legítimas (silêncio
   entre header e resposta é normal); alinhar ao timeout total ~110s ou
   aplicar idle só até o primeiro output. Severidade média.
   R2 — disconnect do cliente durante processamento não cancela o
   subprocess; emit em socket fechado gera exceção (checar client_state
   antes de emitir / task cancelável). Severidade baixa.
-- [ ] Revisão única do revisor (ritmo padrão)
-- [ ] Humano conversa com o agente no browser e avalia
+  → CORRIGIDOS em `f677e1f` e aprovados por nova revisão independente.
+- [x] Revisão única do revisor (ritmo padrão)
+- [x] Humano conversa com o agente no browser e avalia
+      → VALIDADO (2026-09-12): "Ficou muito legal" + teste do pedido
+      original (mermaid do padrão Composer em flutuante) aprovado após
+      E1 (conteúdo dinâmico). HEAD `b45b2ff`.
 
 ### Spikes futuros (backlog)
 - Spike 6 (condicional): challenger (FlexLayout ou novatas) se algo
