@@ -560,6 +560,33 @@ aplicam aqui — a validação do spike é visual/manual + build.
     `src/paineis/Servicos.tsx`, `src/paineis/registry.ts`, `src/App.css`
   - **Estimated scope:** M
 
+- [ ] **Task 20: Conteúdo dinâmico dirigido pelo agente (E1)**
+  - **Description:** dar ao agente a capacidade de ESCREVER o conteúdo
+    dos painéis (hoje só escolhe o tipo, com demo fixo): (a) prompt do
+    backend documenta campos de conteúdo por tipo (`definition` para
+    mermaid; `content` para markdown/texto/html) e instrui o LLM a
+    gerá-los; (b) validador repassa `definition`/`content` com limite
+    de tamanho (~8KB); (c) novo comando `open_card` abre o floating
+    card validado com título + conteúdo dinâmicos; (d) painéis
+    renderizam o conteúdo do comando (merge de params já existe no
+    executor). Serviços continuam com dados reais do ambiente.
+  - **Acceptance criteria:**
+    - [ ] prompt documenta os campos de conteúdo e instrui a geração
+    - [ ] validador repassa `definition`/`content` com limite ~8KB
+    - [ ] `open_card` abre floating card com título e conteúdo gerados
+    - [ ] pedido de mermaid abre painel Mermaid com diagrama GERADO
+          (não o demo fixo)
+    - [ ] pedido de texto abre painel texto/markdown com texto GERADO
+    - [ ] serviços seguem com dados reais; `npm run build`/`lint` OK
+  - **Verification:** script WS com 2 pedidos distintos (mermaid +
+    texto) conferindo conteúdo diferente do demo; validação manual no
+    browser.
+  - **Dependencies:** Task 19 (com fixes R1/R2)
+  - **Files likely touched:** `backend/agente.py` (prompt + validador),
+    `src/agente/executor.ts`, `src/App.tsx`, `src/fab/` (reuso do
+    card), painéis conforme necessário
+  - **Estimated scope:** M
+
 ### Checkpoint: Spike 5 completo (commit + push)
 - [ ] Agente LLM dirigindo a UI via WS; serviços reais animados
 - [ ] **Achados da revisão (2026-09-12, a corrigir):**
