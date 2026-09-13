@@ -234,12 +234,36 @@ real da lib e consolidar um relatório de oportunidades para o humano.
 **Estimated scope:** Medium (4-5 arquivos)
 
 ### Checkpoint: Fase 2 concluída
-- [ ] Relatório entregue e correções aplicadas
-- [ ] Commits: correção da skill (docs/config) e remoção do workaround
+- [x] Relatório entregue e correções aplicadas
+- [x] Commits: correção da skill (docs/config) e remoção do workaround
       (refactor) como unidades lógicas separadas
-- [ ] Revisão do revisor sobre as Fases 1-2
+- [x] Revisão do revisor sobre as Fases 1-2 (aprovada com 1 achado de registro
+      do plano, corrigido pelo orquestrador nesta seção)
 - [ ] Troca do worker para `zai-coding-plan/glm-5.3` (frontmatter) e reinício
       do OpenCode pelo humano; retomar o plano (este arquivo) na nova sessão
+
+### Insumos para a Fase 3 (conclusões da Task 4, verificação empírica)
+
+Registradas após a instalação real da 0.10.8 em user-space:
+
+- Versão confirmada: `codebase-memory-mcp 0.10.8`.
+- API real do cli: `search_graph` aceita `name_pattern` (regex); o parâmetro
+  legado `query` ainda funciona (retrocompatível); `trace_path` aceita
+  `direction` inbound/outbound. Skill já corrigida (commit `918a094`).
+- Tools disponíveis no cli: 15, incluindo `detect_changes` e
+  `get_graph_schema`.
+- Configs observadas (`config list`): `auto_index=true`, `auto_watch=true`,
+  `auto_index_limit=50000`, `ui-lang=auto`, `ui_enabled=true`,
+  `ui_port=9749`. Nota: `watcher_enabled`, documentado no README upstream,
+  NÃO existe nesta build.
+- Indexação do repo: `status=indexed`, 3.921 nodes, 10.821 edges.
+- `.chrondb`: a 0.10.8 não cria mais o diretório em HOME; workaround
+  `fix_chrondb_lib` confirmado obsoleto e removido (commit `7f4a40f`).
+- Recomendação do executor a ponderar na Task 7: daemon persistente para
+  reduzir custo de inicialização por comando cli. Ressalva: o modo cli é
+  documentado upstream como intencionalmente local (nunca conecta ao daemon);
+  o design do fallback deve decidir se o custo de inicialização justifica
+  mudar esse princípio.
 
 ### Phase 3: Revisão arquitetural multi-harness (D4)
 
