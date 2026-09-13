@@ -63,14 +63,20 @@ codebase-memory-mcp.
   Server quando da implementação (blog GA da AWS; veredito decorre de G3,
   independe dela). Reavaliação futura do docling: NÃO registrar (decisão do
   humano).
-- **D10 — Mecanismo de adoção do MCP**: completo nos dois harnesses. O repo
-  (bootstrap/adapter) escreve a entrada MCP no `harness-conf/opencode.json`
-  (seção `mcp`) e no `~/.copilot/mcp-config.json` (merge gerenciado que
-  preserva servers definidos manualmente pelo humano). O subcomando `install`
-  nativo do codebase-memory NÃO roda (fonte de verdade única do repo). A
-  skill mantém o caminho CLI como plano B permanente (hierarquia: tools MCP >
-  cli > grep/glob). Implementação vira plano novo após fechamento das
-  pendências restantes.
+- **D10 — (REVOGADA por D11)** Mecanismo de adoção do MCP: completo nos dois
+  harnesses. Revogada antes da implementação após medição de custo.
+- **D11 — MCP adiado; foco na consistência do CLI (decisão final)**: NÃO
+  implementar MCP agora. Motivo: medição local mostrou que o MCP não
+  economiza contexto no OpenCode 1.x atual (custo fixo de ~5.100 tokens por
+  sessão no perfil analysis vs ~100-150 tokens por busca via CLI, com
+  break-even em ~40 buscas/sessão; saídas do CLI já são JSON compacto). O
+  ganho do MCP é tempo (daemon, cold start de 1-3s por comando) e
+  confiabilidade de schema, não tokens. Reavaliar quando o OpenCode 2.x
+  (Code Mode, custo fixo baixo) estiver em uso; no Copilot CLI o custo é
+  baixo por deferral, mas a decisão é adiar em ambos para manter paridade.
+  Nova diretriz aprovada: otimizar o uso do codebase-memory CLI para que o
+  agente o utilize de forma mais consistente (esforço a planejar; insumos:
+  D9, medições desta seção, infra de agent_eval do repo).
 
 ## Task List
 
@@ -346,10 +352,15 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 **Estimated scope:** Medium
 
 ### Checkpoint: Fase 3 concluída
-- [ ] Relatório + proposta entregues; decisão humana registrada no plano
-- [ ] Implementação aprovada (se houver) vira plano/tasks novas
+- [x] Relatório + proposta entregues; decisão humana registrada no plano
+      (D9, D10 revogada por D11)
+- [x] Revisão independente da Fase 3: aprovada
 - [ ] Reverter o worker para `opencode-go/gpt-5.6-luna` (padrão) e reiniciar o
       OpenCode pelo humano (D8)
+- [x] Pendência do perfil de tools: caducou (sem MCP, não há perfil a
+      escolher; medições registradas em D11 para uso futuro)
+- [x] Implementação aprovada: nenhuma (D11 adia o MCP); esforço seguinte é
+      a consistência do CLI, a planejar em artefato próprio
 
 ## Risks and Mitigations
 
@@ -366,6 +377,6 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 
 ## Open Questions
 
-- Escopo de tools expostas do codebase-memory (perfil analysis vs completo;
-  custo real de contexto por sessão em cada harness): aguardando decisão do
-  humano após explicação de como cada harness injeta tools MCP.
+Nenhuma pendente. Decisões finais: D9 (vereditos), D11 (MCP adiado; foco na
+consistência do CLI). Esforço de consistência do CLI será planejado em
+artefato próprio.
