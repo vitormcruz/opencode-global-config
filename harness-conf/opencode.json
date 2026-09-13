@@ -17,7 +17,7 @@
             }
         },
         "worker": {
-            "reasoningEffort": "max"
+            "reasoningEffort": "high"
         }
     },
     "permission": {
