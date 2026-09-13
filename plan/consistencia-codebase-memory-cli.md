@@ -187,3 +187,26 @@ Nenhuma pendente. Decisões D1-D5 aprovadas pelo humano.
 - **Revisor:** agente `revisor` (modelo `zai-coding-plan/glm-5.3`,
   definido no frontmatter de `harness-conf/agents/revisor.md`)
 - Aprovado pelo humano em 2026-09-13.
+
+### Progresso (2026-09-13)
+
+- Tasks 1-3 concluídas pelo executor (commits `b7b07d4`, `85f1771`,
+  `351488b`, `93255e4`): teste agent_eval novo, skill reescrita, regra no
+  `AGENTS.base.md`, command revisado, testes atualizados.
+- Verificações: Task 2 (20 passed), Task 3 (220 passed), suíte `-m all`
+  (725 passed, 31 deselected).
+- Adesão: baseline 2/3, pós-mudança 3/3 no teste novo.
+- Task 4 pendente de verificação formal `-m agent_eval -v` completa (ver
+  mediação abaixo).
+
+### Mediações (2026-09-13)
+
+- **Prompts diretivos no teste de aderência** (desvio do executor):
+  aceitos pelo humano com registro de limitação. Os prompts mencionam
+  "CLI-first" e restrição a grep/glob, portanto a métrica 3/3 mede
+  adesão induzida, não espontânea.
+- **Hang em `test_get_command_lists_sync_upstream_skills`** durante o
+  `-m agent_eval -v` completo (>300s): teste preexistente
+  (`tests/integration/test_commands.py:17`), fora do escopo do plano.
+  Isolado passou em 22s no diagnóstico; transitório ou sensível à
+  ordem do conjunto.
