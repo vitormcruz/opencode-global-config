@@ -63,6 +63,14 @@ codebase-memory-mcp.
   Server quando da implementação (blog GA da AWS; veredito decorre de G3,
   independe dela). Reavaliação futura do docling: NÃO registrar (decisão do
   humano).
+- **D10 — Mecanismo de adoção do MCP**: completo nos dois harnesses. O repo
+  (bootstrap/adapter) escreve a entrada MCP no `harness-conf/opencode.json`
+  (seção `mcp`) e no `~/.copilot/mcp-config.json` (merge gerenciado que
+  preserva servers definidos manualmente pelo humano). O subcomando `install`
+  nativo do codebase-memory NÃO roda (fonte de verdade única do repo). A
+  skill mantém o caminho CLI como plano B permanente (hierarquia: tools MCP >
+  cli > grep/glob). Implementação vira plano novo após fechamento das
+  pendências restantes.
 
 ## Task List
 
@@ -358,7 +366,6 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 
 ## Open Questions
 
-- Mecanismo de fallback (adapter como escritor único das configs MCP):
-  em discussão com o humano.
-- Escopo de tools expostas do codebase-memory (perfil analysis vs 15
-  completas): aguardando decisão do humano após explicação de contexto.
+- Escopo de tools expostas do codebase-memory (perfil analysis vs completo;
+  custo real de contexto por sessão em cada harness): aguardando decisão do
+  humano após explicação de como cada harness injeta tools MCP.
