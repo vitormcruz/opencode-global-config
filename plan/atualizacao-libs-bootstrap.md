@@ -56,6 +56,13 @@ codebase-memory-mcp.
   reiniciar o OpenCode; o plano commitado é o estado persistido que permite
   retomar em nova sessão. Ao final da Fase 3, reverter o worker para
   `opencode-go/gpt-5.6-luna` (padrão) e reiniciar novamente.
+- **D9 — Vereditos da revisão de ferramentas (Fase 3)**: aprovado que só o
+  codebase-memory-mcp entra na camada MCP (único que passa nos gates G1-G4).
+  Playwright, crwl/crawl4ai, docling, pandoc e aws-cli permanecem no fluxo
+  atual via CLI. Nota do revisor: registrar a URL exata da fonte do AWS MCP
+  Server quando da implementação (blog GA da AWS; veredito decorre de G3,
+  independe dela). Reavaliação futura do docling: NÃO registrar (decisão do
+  humano).
 
 ## Task List
 
@@ -351,4 +358,7 @@ adapter próprio vs install nativo da ferramenta). Trade-offs multi-SO incluído
 
 ## Open Questions
 
-Nenhuma pendente.
+- Mecanismo de fallback (adapter como escritor único das configs MCP):
+  em discussão com o humano.
+- Escopo de tools expostas do codebase-memory (perfil analysis vs 15
+  completas): aguardando decisão do humano após explicação de contexto.
