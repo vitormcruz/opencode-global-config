@@ -91,39 +91,38 @@ Siga este fluxo estritamente.
 **Condicao de encerramento da etapa:**
 - a indexacao no `codebase-memory` terminou e o resultado foi exibido.
 
-## Etapa 3 - Verificar instrucoes de codebase-memory no AGENTS.md
+## Etapa 3 - Verificação opcional de consistência local
 
 **Dependencia obrigatoria:**
 - so pode comecar apos o encerramento da **Etapa 2**.
 
-**Objetivo:** garantir que o AGENTS.md do repositorio documenta a
-descoberta de codigo via codebase-memory.
+**Objetivo:** verificar opcionalmente se as instruções locais são coerentes
+com o contrato global de descoberta por detecção.
 
-**Acoes permitidas nesta etapa:**
-- verificar se o `AGENTS.md` do repositorio documenta o uso do
-  codebase-memory para descoberta de codigo
-- informar ao humano o estado dessas instrucoes
+**Ações permitidas nesta etapa:**
+- verificar opcionalmente se o `AGENTS.md` do repositório contradiz o contrato
+  global ou a skill `code-explorer-priority`
+- informar ao humano o estado dessa consistência
 
-**Execucao:**
-- Verifique se o `AGENTS.md` do repo contem uma secao de descoberta de
-  codigo mencionando o codebase-memory (regra de usar o CLI antes de
-  grep/glob).
-- Se nao existir, informe ao humano e sugira o texto da secao. Nao edite
-  o `AGENTS.md` sem confirmacao explicita.
-- Se existir, verifique se a regra esta coerente com o fluxo deste
-  comando e pergunte ao humano se precisa de atualizacao.
+**Execução:**
+- A indicação de codebase-memory no `AGENTS.md` do repo não é requisito para
+  concluir o fluxo. O Passo 0 já determinou a indexação.
+- Se o arquivo existir, verifique apenas se as instruções contradizem a regra
+  global ou a skill. Não edite o `AGENTS.md` sem confirmação explícita.
+- Se o arquivo não existir, registre que a verificação local não foi feita e
+  prossiga. Não sugira adicionar a indicação como condição de indexação.
 
-**Condicao de encerramento da etapa:**
-- o estado das instrucoes de codebase-memory no `AGENTS.md` foi
-  determinado e comunicado ao humano.
+**Condição de encerramento da etapa:**
+- a consistência local foi verificada, quando aplicável, e o estado foi
+  comunicado ao humano.
 
 ## Resumo final
 
 Ao finalizar todas as etapas, informe ao humano:
 
 1. **Status da indexacao:** numero de nos e arestas no grafo
-2. **Instrucoes locais:** estado das instrucoes de codebase-memory no
-   `AGENTS.md` do repositorio
+2. **Instruções locais:** resultado da verificação opcional de consistência;
+   a indicação no `AGENTS.md` não é requisito
 3. **Auto-index:** confirmacao de que o auto-index global esta habilitado - o
    grafo sera mantido automaticamente atualizado via background watcher
 4. **Uso:** exemplos de comandos para explorar codigo e documentacao

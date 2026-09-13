@@ -65,6 +65,11 @@
 - Carregue a skill `portugues-tecnico-controlado` ao produzir texto
   técnico (specs, docs, explicações densas).
 
+## Descoberta de Código
+- Se o repo estiver indexado no codebase-memory, faça descoberta CLI-first
+  antes de grep/glob. Carregue `code-explorer-priority` para detectar o índice
+  e seguir o fallback.
+
 ## Geração de arquivos MD
 - Limite cada linha a 120 colunas. Use word-wrap para garantir.
 

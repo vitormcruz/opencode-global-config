@@ -353,6 +353,26 @@ def test_agents_mentions_required_recovery(repo_root: Path) -> None:
     assert count >= 1
 
 
+def test_agents_base_documents_conditional_code_discovery(repo_root: Path) -> None:
+    base = (repo_root / "harness-conf" / "AGENTS.base.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "repo estiver indexado no codebase-memory" in base
+    assert "CLI-first" in base
+    assert "grep/glob" in base
+    assert "code-explorer-priority" in base
+    for tool in (
+        "search_graph",
+        "trace_path",
+        "get_code_snippet",
+        "query_graph",
+        "search_code",
+        "get_architecture",
+    ):
+        assert tool not in base
+
+
 def test_agents_root_defers_tool_order_to_code_explorer_skill(
     repo_root: Path,
 ) -> None:

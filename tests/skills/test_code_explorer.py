@@ -229,17 +229,18 @@ def test_index_command_has_no_linux_path_for_copilot(repo_root: Path):
 
 
 @pytest.mark.unit
-def test_index_command_no_longer_references_copilot_specific(
+def test_index_command_keeps_optional_local_instruction_check(
     repo_root: Path,
 ):
-    """O copilot-specific foi extinto: nenhuma referencia sobra."""
+    """A indicação local deixou de ser requisito para a indexação."""
 
     command = (repo_root / "harness-conf/commands/index-codebase.md").read_text(
         encoding="utf-8"
     )
 
     assert "copilot-specific" not in command
-    # Etapa 3 agora verifica instrucoes no AGENTS.md do repo.
+    assert "verificação opcional" in command
+    assert "não é requisito" in command
     assert "AGENTS.md" in command
 
 
