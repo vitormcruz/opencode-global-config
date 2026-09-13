@@ -151,6 +151,9 @@ def test_skill_documents_all_cli_commands_with_positional_json(
 
 @pytest.mark.unit
 def test_skill_documents_tool_order(skill_content: str):
+    order_section = skill_content.split("## Ordem das ferramentas", 1)[1].split(
+        "## Passo 0", 1
+    )[0]
     order = (
         "search_graph",
         "trace_path",
@@ -158,7 +161,7 @@ def test_skill_documents_tool_order(skill_content: str):
         "query_graph",
         "get_architecture",
     )
-    positions = [skill_content.index(f"`{tool}`") for tool in order]
+    positions = [order_section.index(f"`{tool}`") for tool in order]
 
     assert positions == sorted(positions), (
         "Ordem documentada das ferramentas diverge do padrão aprovado"
