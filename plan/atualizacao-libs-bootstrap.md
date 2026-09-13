@@ -239,8 +239,11 @@ real da lib e consolidar um relatório de oportunidades para o humano.
       (refactor) como unidades lógicas separadas
 - [x] Revisão do revisor sobre as Fases 1-2 (aprovada com 1 achado de registro
       do plano, corrigido pelo orquestrador nesta seção)
-- [ ] Troca do worker para `zai-coding-plan/glm-5.3` (frontmatter) e reinício
-      do OpenCode pelo humano; retomar o plano (este arquivo) na nova sessão
+- [x] Troca do worker para `zai-coding-plan/glm-5.3` (frontmatter +
+      reasoningEffort high) aplicada no commit `158fd73`; falta o reinício do
+      OpenCode pelo humano e a retomada deste plano na nova sessão
+      (instrução de retomada: "continue o plano
+      plan/atualizacao-libs-bootstrap.md na Fase 3")
 
 ### Insumos para a Fase 3 (conclusões da Task 4, verificação empírica)
 
