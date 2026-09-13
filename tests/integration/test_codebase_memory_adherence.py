@@ -11,20 +11,23 @@ DISCOVERY_PROMPTS = (
         "função",
         "Preciso descobrir onde a função `prepare_test_context` está definida "
         "neste repositório e entender sua implementação. Faça a descoberta "
-        "de código antes de responder e informe a primeira ferramenta usada "
-        "e a sequência de investigação.",
+        "de código CLI-first antes de responder, sem usar grep/glob antes da "
+        "detecção, e informe a primeira ferramenta usada e a sequência de "
+        "investigação.",
     ),
     (
         "chamadores",
         "Preciso saber quem chama `OpenCodeClient.send_message` neste "
-        "repositório. Explique a sequência de descoberta que você usaria "
-        "para localizar os chamadores antes de responder.",
+        "repositório. Use descoberta CLI-first, sem grep/glob antes de "
+        "detectar o projeto. Explique a sequência usada para localizar os "
+        "chamadores antes de responder.",
     ),
     (
         "documentação",
         "Preciso localizar na documentação deste repositório a regra que "
-        "define o fallback para grep/glob. Faça a descoberta antes de "
-        "responder e explique qual ferramenta usaria primeiro.",
+        "define o fallback para grep/glob. Faça a descoberta CLI-first, sem "
+        "usar grep/glob antes da detecção, e explique qual ferramenta usaria "
+        "primeiro.",
     ),
 )
 

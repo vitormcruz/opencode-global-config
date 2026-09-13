@@ -5,12 +5,19 @@ description: >
   arquitetura. Ao ativar, detecte o projeto com list_projects; se o repo estiver
   indexado, use o codebase-memory CLI antes de grep/glob. Em repo não indexado,
   use grep/glob normalmente após a detecção. Triggers: pesquisar, procurar,
-  buscar, encontrar, localizar, explorar, investigar, search, find, look for,
-  locate, explore, investigate, onde está, onde estão, procura, busca, quem chama,
-  como funciona, code discovery, how does.
+  buscar, descobrir, descoberta, encontrar, localizar, explorar, investigar,
+  search, find, look for, locate, explore, investigate, onde está, onde fica,
+  onde estão, procura, busca, quem chama, como funciona, code discovery, how does.
 ---
 
 # Descoberta por detecção
+
+Para qualquer pedido sobre onde algo está, quem chama ou como algo funciona,
+comece a resposta com `codebase-memory-mcp cli list_projects '{}'`. Não comece
+com `find`, `grep`, `ripgrep` ou `glob`.
+
+Para localizar quem chama uma função, use `trace_path` com `direction` igual a
+`inbound`, depois de confirmar o projeto.
 
 O caminho de descoberta depende do estado de indexação do repo atual. A
 indicação no `AGENTS.md` local não substitui essa detecção.
@@ -18,6 +25,10 @@ indicação no `AGENTS.md` local não substitui essa detecção.
 ## Regra operacional
 
 REGRA ABSOLUTA: em repo indexado, use o codebase-memory CLI antes de grep/glob.
+
+Se o pedido for de descoberta, a primeira ferramenta e a primeira indicação na
+resposta devem ser `codebase-memory-mcp cli list_projects '{}'`. Não proponha
+grep/glob antes dessa detecção, mesmo quando não puder executar o CLI.
 
 Quando o pedido exigir localizar código ou documentação:
 
