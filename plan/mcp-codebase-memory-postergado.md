@@ -67,33 +67,13 @@ harness) nos dois harnesses (OpenCode e Copilot CLI).
 - Se ativar no OpenCode 1.x: considerar restrição por glob (`tools` na config)
   ou por agente (`agent.<nome>.tools`).
 
-## Como avaliar novas ferramentas via MCP (processo permanente)
+## Como avaliar novas ferramentas via MCP
 
-Princípio aprovado no ciclo de 13/09/2026: o padrão-arquitetura é MCP com
-fallback CLI garantido, mas TODA adição de ferramenta à camada MCP depende de
-decisão humana explícita, após avaliação de prós e contras. Nenhuma adição é
-automática. Passos obrigatórios:
-
-1. **Gates G1-G4** (reprovado em qualquer um = fica só CLI):
-   G1 suporte oficial (mantido pelo próprio projeto, não comunidade);
-   G2 instalação user-space fácil (sem containers/sidecars);
-   G3 uso pelo menos tão bom quanto o CLI atual;
-   G4 Windows e WSL/Linux nativos, ou ponte simples.
-2. **Medição local de custo/benefício** antes de decidir (modelo aplicado ao
-   CBM em 13/09/2026, reutilizar): custo fixo de contexto por sessão com
-   schemas (ou catálogo/deferral, conforme o harness), custo por uso via
-   CLI, break-even em número de usos por sessão, ganhos de tempo
-   (daemon/cold start) e de confiabilidade (schema validado).
-3. **Veredito com fonte oficial** citada por ferramenta (repo/docs do
-   projeto, não fontes secundárias).
-4. **Se aprovada pelo humano**, aplicar o design já validado: fallback
-   híbrido com o adapter/bootstrap como escritor único das entradas MCP
-   (`harness-conf/opencode.json` seção `mcp`; merge gerenciado em
-   `~/.copilot/mcp-config.json` preservando servers manuais); instalador
-   nativo da ferramenta não roda; a skill da ferramenta mantém o CLI
-   documentado como plano B permanente (hierarquia: MCP > cli > grep/glob).
-5. **Registrar a decisão** (neste artefato ou em plano próprio) com
-   veredito, medições, data e gatilhos de reavaliação.
+Processo permanente registrado na ADR-0006
+(`docs/adr/0006-camada-mcp-opcional-com-fallback-cli.md`): gates G1-G4,
+medição local de custo/benefício, veredito com fonte oficial, decisão humana
+explícita e, se aprovada, adapter como escritor único com fallback CLI
+garantido.
 
 ## Insumos técnicos úteis
 
