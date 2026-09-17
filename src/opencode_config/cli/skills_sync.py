@@ -643,14 +643,12 @@ def update_skill(
         )
 
     update_command = update_commands[0]
-    check_summary = "nao executado"
     if check_commands:
         check_code, check_output = _run_documented_command(
             check_commands[0],
             repo_root,
         )
         if check_code == 0 and "Ja esta atualizado" in check_output:
-            check_summary = "ja estava atualizada"
             if dry_run:
                 return _format_update_result(
                     skill_name,
@@ -664,10 +662,6 @@ def update_skill(
                 "nenhuma atualizacao necessaria",
                 details=check_output,
             )
-        if check_code == 0 and "Atualizacao disponivel" in check_output:
-            check_summary = "ha atualizacao disponivel"
-        else:
-            check_summary = "check-only falhou; update sera tentado mesmo assim"
 
     if not _supports_assume_yes(update_command, repo_root):
         return _format_update_result(
