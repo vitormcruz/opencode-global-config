@@ -135,10 +135,10 @@ DOC_TEMPLATE = dedent(
 
     **Arquivo:** `testes-produto`
 
-    Chama backend e segurança, consolida `findings` e não chama Concordion
-    diretamente. O agente `qa` executa o agregador na fase Testes; o
-    `curador-produto` valida a evidência. A suíte meta vive em
-    `testes-produto/tests/`.
+    Chama as suítes definidas nesta seção, conforme a curadoria do
+    projeto-alvo, consolida `findings` e não chama Concordion diretamente.
+    O agente `qa` executa o agregador na fase Testes; o `curador-produto`
+    valida a evidência. A suíte meta vive em `testes-produto/tests/`.
     Artefatos temporários de uma instalação genérica ficam em
     `testes-produto/target/` e não são versionados.
 
@@ -149,7 +149,7 @@ DOC_TEMPLATE = dedent(
        `testes-produto` na fase Testes do workflow, sempre
        que se desenvolve funcionalidade.
     2. **Testes dos scripts de teste** — os scripts de suíte
-        e o agregador são código e têm testes próprios.
+       e o agregador são código e têm testes próprios.
        Esta seção é a especificação executável deles: os
        testes dos scripts cobrem exatamente o que ela define.
        Rodam SOMENTE quando os scripts mudam, nunca no ciclo
@@ -182,14 +182,9 @@ TESTES_PRODUTO_TEMPLATE = dedent(
 
     Agregador: `testes-produto`
 
-    Chama as suítes backend e segurança e consolida o relatório. O agente `qa`
-    executa; o `curador-produto` valida a evidência. Testes dos scripts:
-    `testes-produto/tests/`.
-
-    | Especialidade | Script |
-    |---------------|--------|
-    | backend | `testes-produto/backend` |
-    | segurança | `testes-produto/seguranca` |
+    Chama as suítes definidas na tabela, conforme a curadoria do projeto-alvo,
+    e consolida o relatório. O agente `qa` executa; o `curador-produto` valida
+    a evidência. Testes dos scripts: `testes-produto/tests/`.
 
     Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
     """

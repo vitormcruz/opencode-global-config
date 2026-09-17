@@ -18,7 +18,7 @@ def run_scaffold(*arguments: str) -> tuple[int, str, str]:
 
 
 @pytest.mark.unit
-def test_curated_test_index_mentions_roles_meta_suite_and_selected_suites(
+def test_curated_test_index_mentions_roles_meta_suite_and_one_table(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
@@ -27,8 +27,11 @@ def test_curated_test_index_mentions_roles_meta_suite_and_selected_suites(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    assert "| backend | `testes-produto/backend` |" in content
-    assert "| segurança | `testes-produto/seguranca` |" in content
+    assert "| backend |" in content
+    assert "testes-produto/backend" in content
+    assert content.count("| Especialidade | Script |") == 1
+    assert "Chama as suítes backend e segurança" not in content
+    assert "conforme a curadoria do projeto-alvo" in content
     assert "Agregador: `testes-produto`" in content
     assert "agente `qa`" in content
     assert "`curador-produto`" in content
@@ -49,3 +52,4 @@ def test_curated_doc_scaffold_describes_specialty_specs_and_concordion(
     assert "Specs executáveis da especialidade backend" in content
     assert "Specs executáveis da especialidade segurança" in content
     assert "tradutor Python" in content
+    assert "Chama backend e segurança" not in content
