@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
 from pathlib import Path
-import sys
 from textwrap import dedent
 from typing import TextIO
-
 
 DOC_TEMPLATE = dedent(
     """
@@ -104,26 +103,53 @@ DOC_TEMPLATE = dedent(
 
     ## Testes por Especialidade
 
-    Scripts por especialidade e o orquestrador `testes-produto`.
+    Scripts por especialidade e o agregador `testes-produto`.
     Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
-    exit 1 = fail. Sem argumentos. O orquestrador chama as
-    quatro suítes e agrega o relatório; falha se qualquer
-    suíte falhar. Critérios, orçamento e ferramentas saem da
-    entrevista de curadoria. Fingerprint e cache ficam em
-    `testes-produto/target/` e não são versionados.
+    exit 1 = fail. Sem argumentos. O agregador chama as suítes
+    definidas nesta seção e consolida o relatório; falha se qualquer
+    suíte falhar. Critérios e ferramentas saem da entrevista de
+    curadoria.
 
     **PROIBIDO:** bypassar, comentar, remover ou condicionar
     qualquer verificação. Ferramenta ausente não justifica
     remoção — reporte finding com instrução de instalação.
 
+    ### backend
+
+    **Arquivo:** `testes-produto/backend`
+
+    - pytest completo, ruff, shellcheck, PSScriptAnalyzer e pytest-cov
+    - cobertura mínima de 70%
+    - Specs executáveis da especialidade backend em Concordion-Markdown,
+      rodadas via Concordion com tradutor Python interno à suíte
+
+    ### segurança
+
+    **Arquivo:** `testes-produto/seguranca`
+
+    - gitleaks, pip-audit e bandit
+    - Specs executáveis da especialidade segurança em Concordion-Markdown,
+      rodadas via Concordion com tradutor Python interno à suíte
+
+    ### Agregador
+
+    **Arquivo:** `testes-produto`
+
+    Chama backend e segurança, consolida `findings` e não chama Concordion
+    diretamente. O agente `qa` executa o agregador na fase Testes; o
+    `curador-produto` valida a evidência. A suíte meta vive em
+    `testes-produto/tests/`.
+    Artefatos temporários de uma instalação genérica ficam em
+    `testes-produto/target/` e não são versionados.
+
     ### Dois níveis de teste
 
     1. **Testes da aplicação** — validam o produto em
-       desenvolvimento. Rodam via suítes/orquestrador
+       desenvolvimento. Rodam via suítes/agregador
        `testes-produto` na fase Testes do workflow, sempre
        que se desenvolve funcionalidade.
     2. **Testes dos scripts de teste** — os scripts de suíte
-       e o orquestrador são código e têm testes próprios.
+        e o agregador são código e têm testes próprios.
        Esta seção é a especificação executável deles: os
        testes dos scripts cobrem exatamente o que ela define.
        Rodam SOMENTE quando os scripts mudam, nunca no ciclo
@@ -139,7 +165,7 @@ DOC_TEMPLATE = dedent(
     - dados: `testes-produto/dados`
     - segurança: `testes-produto/seguranca`
     - frontend: `testes-produto/frontend`
-    - Orquestrador: `testes-produto`
+    - Agregador: `testes-produto`
     """
 )
 
@@ -154,7 +180,16 @@ TESTES_PRODUTO_TEMPLATE = dedent(
     | segurança | testes-produto/seguranca |
     | frontend | testes-produto/frontend |
 
-    Orquestrador: testes-produto
+    Agregador: `testes-produto`
+
+    Chama as suítes backend e segurança e consolida o relatório. O agente `qa`
+    executa; o `curador-produto` valida a evidência. Testes dos scripts:
+    `testes-produto/tests/`.
+
+    | Especialidade | Script |
+    |---------------|--------|
+    | backend | `testes-produto/backend` |
+    | segurança | `testes-produto/seguranca` |
 
     Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
     """
