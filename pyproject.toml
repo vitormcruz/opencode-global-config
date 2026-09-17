@@ -21,6 +21,7 @@ opencode-scaffold-mapa = "opencode_config.cli.scaffold_mapa:main"
 opencode-bootstrap = "opencode_config.bootstrap.main:main"
 opencode-adapter = "opencode_config.adapters.opencode:main"
 opencode-copilot-adapter = "opencode_config.adapters.copilot:main"
+testes-produto = "opencode_config.product_tests.aggregator:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -34,3 +35,13 @@ markers = [
     "agent_eval_context: contexto minimo de um teste de avaliacao de agente",
     "all: atalho de selecao traduzido pelo conftest para unit or integration (nao usar como decorator)",
 ]
+
+[tool.coverage.run]
+omit = ["testes-produto/tests/*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

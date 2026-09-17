@@ -1,0 +1,35 @@
+plugins {
+    id 'groovy'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation localGroovy()
+    testImplementation 'org.concordion:concordion:4.0.1'
+    testImplementation 'junit:junit:4.13.2'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.11.0'
+}
+
+sourceSets {
+    test {
+        groovy.srcDir 'src/test/groovy'
+        resources.srcDir 'docs/specs'
+    }
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'repo.root', rootProject.projectDir.absolutePath
+    reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/test')
+    outputs.upToDateWhen { false }
+
+    if (project.hasProperty('productSpecialty')) {
+        def fixture = project.property('productSpecialty') == 'backend'
+            ? 'BackendFixture'
+            : 'SegurancaFixture'
+        include "**/${fixture}.class"
+    }
+}

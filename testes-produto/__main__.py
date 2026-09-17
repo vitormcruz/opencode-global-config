@@ -1,0 +1,18 @@
+"""Permite executar o agregador com ``python testes-produto``."""
+
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = REPOSITORY_ROOT / "src"
+if str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+
+from opencode_config.product_tests.aggregator import main  # noqa: E402
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
