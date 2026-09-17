@@ -122,13 +122,29 @@ def _run_gitleaks(
     )
     if result.succeeded:
         return []
-    return [
-        Finding(
-            "bloqueante",
-            "gitleaks",
-            "segredo detectado ou execução do scan falhou; verifique a saída local",
-        )
-    ]
+    detail = " ".join((result.stdout or result.stderr).split())[:800]
+    if result.returncode == 1:
+        message = "segredo detectado pelo gitleaks; remova o segredo do historico"
+        if detail:
+            message = f"{message}; detalhe: {detail}"
+        return [Finding("bloqueante", "gitleaks", message)]
+    message = f"execução do gitleaks falhou (exit {result.returncode})"
+    if detail:
+        message = f"{message}: {detail}"
+    return [Finding("bloqueante", "gitleaks", message)]
+
+
+def _venv_site_packages(repo_root: Path) -> Path | None:
+    """Localiza o site-packages do ambiente do repo (.venv)."""
+
+    venv = repo_root / ".venv"
+    windows = venv / "Lib" / "site-packages"
+    if windows.is_dir():
+        return windows
+    for candidate in sorted((venv / "lib").glob("python*/site-packages")):
+        if candidate.is_dir():
+            return candidate
+    return None
 
 
 def _run_pip_audit(
@@ -141,8 +157,18 @@ def _run_pip_audit(
     executable = which("pip-audit")
     if executable is None:
         return [Finding("bloqueante", "pip-audit", "ferramenta ausente; instale via pipx")]
+    site_packages = _venv_site_packages(repo_root)
+    if site_packages is None:
+        return [
+            Finding(
+                "bloqueante",
+                "pip-audit",
+                "ambiente do repo ausente (.venv sem site-packages); "
+                "execute o bootstrap user-space para criar a .venv",
+            )
+        ]
     result = run_with_network_retry(
-        [executable, "--local", "--format=json"],
+        [executable, "--path", str(site_packages), "--format=json"],
         cwd=repo_root,
         progress=progress,
         runner=runner,

@@ -151,9 +151,101 @@ def test_backend_runs_all_available_checks_and_concordion(
 
 
 @pytest.mark.unit
+def test_pip_audit_targets_the_repository_venv(tmp_path: Path) -> None:
+    site_packages = (
+        tmp_path / ".venv" / "lib" / "python3.12" / "site-packages"
+    )
+    site_packages.mkdir(parents=True)
+    commands: list[tuple[str, ...]] = []
+
+    def runner(command, **_kwargs):
+        normalized = tuple(str(item) for item in command)
+        commands.append(normalized)
+        if normalized[0] == "/tool/pip-audit":
+            return ProcessResult(normalized, 0, json.dumps({"dependencies": []}), "")
+        if normalized[0] == "/tool/bandit":
+            return ProcessResult(normalized, 0, json.dumps({"results": []}), "")
+        return ProcessResult(normalized, 0, "", "")
+
+    run_security_suite(
+        tmp_path,
+        which=lambda name: "/tool/gradle" if name == "java" else f"/tool/{name}",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    audit = next(command for command in commands if command[0] == "/tool/pip-audit")
+    assert "--path" in audit
+    assert str(site_packages) in audit
+    assert "--local" not in audit
+
+
+@pytest.mark.unit
+def test_pip_audit_reports_missing_repository_environment_as_blocking(
+    tmp_path: Path,
+) -> None:
+    def runner(command, **_kwargs):
+        assert "pip-audit" not in str(command)
+        return ProcessResult(tuple(str(item) for item in command), 0, "", "")
+
+    report = run_security_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}" if name != "java" else None,
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    assert report.status == "fail"
+    finding = next(f for f in report.findings if f.tool == "pip-audit")
+    assert finding.severity == "bloqueante"
+    assert ".venv" in finding.message
+
+
+@pytest.mark.unit
+def test_gitleaks_secret_detection_has_a_distinct_message(tmp_path: Path) -> None:
+    def runner(command, **_kwargs):
+        return ProcessResult(tuple(str(item) for item in command), 1, "leak in config", "")
+
+    report = run_security_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}" if name != "java" else None,
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    finding = next(f for f in report.findings if f.tool == "gitleaks")
+    assert finding.severity == "bloqueante"
+    assert "segredo detectado" in finding.message
+    assert "leak in config" in finding.message
+
+
+@pytest.mark.unit
+def test_gitleaks_execution_failure_is_not_reported_as_a_secret(
+    tmp_path: Path,
+) -> None:
+    def runner(command, **_kwargs):
+        return ProcessResult(tuple(str(item) for item in command), 128, "", "boom")
+
+    report = run_security_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}" if name != "java" else None,
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    finding = next(f for f in report.findings if f.tool == "gitleaks")
+    assert finding.severity == "bloqueante"
+    assert "execução do gitleaks falhou" in finding.message
+    assert "segredo detectado" not in finding.message
+
+
+@pytest.mark.unit
 def test_security_suite_keeps_low_findings_as_improvements(
     tmp_path: Path,
 ) -> None:
+    (tmp_path / ".venv" / "lib" / "python3.12" / "site-packages").mkdir(
+        parents=True
+    )
     commands: list[tuple[str, ...]] = []
 
     def runner(command, **_kwargs):
