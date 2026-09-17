@@ -130,11 +130,41 @@ user-space conforme a seleção interativa ou `--yes`:
 | `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
+| ruff | `pipx install ruff` | `pipx install ruff` |
+| shellcheck | `pipx install shellcheck-py` | `pipx install shellcheck-py` |
+| pwsh | arquivo portatil em user-space | arquivo zip em user-space |
+| PSScriptAnalyzer | `Install-Module -Scope CurrentUser` via pwsh | igual ao Linux |
+| pytest-cov | `.venv` + `requirements-dev.txt` | igual ao Linux |
+| gitleaks | release oficial no cache user-space | release oficial no cache user-space |
+| pip-audit | `pipx install pip-audit` | `pipx install pip-audit` |
+| bandit | `pipx install bandit` | `pipx install bandit` |
+| JDK | OpenJDK portatil no cache user-space | OpenJDK portatil no cache user-space |
+| Gradle | distribuicao portatil no cache user-space | distribuicao portatil no cache user-space |
 
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
 `aws-add-account-sso`; após o bootstrap, abra um novo PowerShell no Windows
 para carregar o PATH persistido e confirme com `aws --version`.
+
+As ferramentas do `testes-produto` entram no conjunto do bootstrap com `--yes`.
+O WSL/Linux recebe `pwsh` para executar o PSScriptAnalyzer. O Windows recebe
+`shellcheck` para analisar os scripts Bash. O JDK e o Gradle ficam no cache
+user-space e executam as specs Concordion sem instalação global.
+
+Comandos manuais equivalentes, todos sem elevação:
+
+```bash
+pipx install ruff
+pipx install shellcheck-py
+pipx install pip-audit
+pipx install bandit
+```
+
+No PowerShell, o PSScriptAnalyzer usa o escopo do usuário:
+
+```powershell
+pwsh -NoProfile -Command "Install-Module PSScriptAnalyzer -Scope CurrentUser -Force"
+```
 
 No Linux/WSL o instalador oficial do AWS CLI v2 exige `unzip` (pacote do
 sistema), que não pode ser instalado em user-space. O bootstrap detecta a

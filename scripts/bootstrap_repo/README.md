@@ -18,6 +18,11 @@ interativa, instala as dependências em user-space e configura os
 harnesses instalados: OpenCode com links em `~/.config/opencode` e
 Copilot CLI com cópia sincronizada em `~/.copilot`.
 
+Com `--yes`, o bootstrap também instala as ferramentas do
+`testes-produto`, o `pwsh` portátil para o PSScriptAnalyzer, o JDK e o
+Gradle para as specs Concordion. O bootstrap mantém todos os arquivos no
+cache do usuário.
+
 ## Windows
 
 Execute no PowerShell:
@@ -30,6 +35,9 @@ O entrypoint verifica Python >= 3.10 e configura os harnesses
 instalados: OpenCode com cópia sincronizada em
 `%USERPROFILE%\.config\opencode` e Copilot CLI com cópia sincronizada
 em `%USERPROFILE%\.copilot`.
+
+O bootstrap instala `shellcheck` em user-space para analisar os scripts Bash,
+além das ferramentas do `testes-produto` e do Gradle/JDK portáteis.
 
 ## Opções
 

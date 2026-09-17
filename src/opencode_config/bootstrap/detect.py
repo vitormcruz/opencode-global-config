@@ -1,12 +1,12 @@
 """Deteccao sem efeitos colaterais das dependencias do bootstrap."""
 
+import os
+import re
+import shutil
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
-import os
 from pathlib import Path
-import re
-import shutil
 
 from opencode_config.lib.environment import EnvironmentKind, detect_environment
 from opencode_config.lib.process import CommandResult, run_command
@@ -16,7 +16,7 @@ from .libgomp import (
     runtime_is_valid,
     runtime_library_path,
 )
-from .registry import DEPENDENCY_REGISTRY, DependencySpec
+from .registry import ALL_DEPENDENCY_REGISTRY, DependencySpec
 
 
 class DependencyStatus(str, Enum):
@@ -210,7 +210,7 @@ def detect_dependency(
 def detect_dependencies(
     environment: EnvironmentKind | None = None,
     *,
-    specs: Sequence[DependencySpec] = DEPENDENCY_REGISTRY,
+    specs: Sequence[DependencySpec] = ALL_DEPENDENCY_REGISTRY,
     env: Mapping[str, str] | None = None,
     runner: Runner | None = None,
 ) -> tuple[DependencyDetection, ...]:

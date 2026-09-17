@@ -1,11 +1,8 @@
 """Instaladores zero-admin e utilitarios de download do bootstrap."""
 
-from collections.abc import Callable, Iterable, Mapping, MutableMapping
-from dataclasses import dataclass, field
 import hashlib
 import io
 import os
-from pathlib import Path
 import shutil
 import stat
 import sys
@@ -14,6 +11,9 @@ import tarfile
 import tempfile
 import urllib.request
 import zipfile
+from collections.abc import Callable, Iterable, Mapping, MutableMapping
+from dataclasses import dataclass, field
+from pathlib import Path
 
 from opencode_config.lib.config import update_marked_block
 from opencode_config.lib.environment import EnvironmentKind
@@ -33,11 +33,13 @@ from ..libgomp import (
     write_runtime_metadata,
 )
 
-
 FNM_VERSION = "1.38.1"
 PANDOC_VERSION = "3.11"
 PORTABLE_GIT_VERSION = "2.55.0.windows.5"
 CODEBASE_MEMORY_VERSION = "0.10.8"
+POWERSHELL_VERSION = "7.4.6"
+GRADLE_VERSION = "8.10.2"
+GITLEAKS_VERSION = "8.24.2"
 AWS_LINUX_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.sh"
 AWS_WINDOWS_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.ps1"
 INSTALL_COMMAND_TIMEOUT_SECONDS = 1800
@@ -586,6 +588,237 @@ def _install_pipx_app(
     return _result(command_name, f"{package} instalado via pipx")
 
 
+def install_ruff(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    return _install_pipx_app(context, "ruff", "ruff", runner=runner)
+
+
+def install_shellcheck(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    # shellcheck-py fornece o mesmo entrypoint em Linux, WSL e Windows.
+    return _install_pipx_app(
+        context,
+        "shellcheck-py",
+        "shellcheck",
+        runner=runner,
+    )
+
+
+def install_pip_audit(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    return _install_pipx_app(context, "pip-audit", "pip-audit", runner=runner)
+
+
+def install_bandit(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    return _install_pipx_app(context, "bandit", "bandit", runner=runner)
+
+
+def _install_user_archive(
+    context: InstallContext,
+    *,
+    name: str,
+    url: str,
+    executable_names: set[str],
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    """Instala um pacote portatil completo dentro do cache do usuario."""
+
+    with tempfile.TemporaryDirectory(prefix=f"opencode-{name}-") as temporary:
+        temporary_root = Path(temporary)
+        archive = temporary_root / (Path(url).name or "archive")
+        extracted = temporary_root / "extract"
+        download_file(
+            url,
+            archive,
+            expected_sha256=expected_sha256,
+            fetcher=fetcher,
+        )
+        _extract_archive(archive, extracted)
+        executable = _find_file(extracted, executable_names)
+        package_root = executable.parent.parent if executable.parent.name == "bin" else executable.parent
+        destination = context.paths.data_dir / name
+        if destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(package_root, destination)
+
+    installed_executable = _find_file(destination, executable_names)
+    _make_executable(installed_executable)
+    ensure_path_entry(
+        installed_executable.parent,
+        environment_kind=context.environment,
+        profile_path=context.profile_path,
+        environ=context.current_environment,
+        persist=context.persist_paths,
+    )
+    return _result(name, f"{name} instalado em {destination}")
+
+
+def _portable_url(
+    context: InstallContext,
+    *,
+    linux_template: str,
+    windows_template: str,
+) -> str:
+    template = (
+        windows_template
+        if context.environment is EnvironmentKind.WINDOWS
+        else linux_template
+    )
+    return template.format(
+        powershell_version=POWERSHELL_VERSION,
+        gradle_version=GRADLE_VERSION,
+        gitleaks_version=GITLEAKS_VERSION,
+    )
+
+
+def install_pwsh(
+    context: InstallContext,
+    *,
+    url: str | None = None,
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    archive_url = url or _portable_url(
+        context,
+        linux_template=(
+            "https://github.com/PowerShell/PowerShell/releases/download/"
+            "v{powershell_version}/powershell-{powershell_version}-linux-x64.tar.gz"
+        ),
+        windows_template=(
+            "https://github.com/PowerShell/PowerShell/releases/download/"
+            "v{powershell_version}/PowerShell-{powershell_version}-win-x64.zip"
+        ),
+    )
+    return _install_user_archive(
+        context,
+        name="pwsh",
+        url=archive_url,
+        executable_names={"pwsh", "pwsh.exe"},
+        expected_sha256=expected_sha256,
+        fetcher=fetcher,
+    )
+
+
+def install_psscriptanalyzer(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    _execute(
+        context,
+        [
+            "pwsh",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            (
+                "Install-Module PSScriptAnalyzer -Scope CurrentUser "
+                "-Force -AllowClobber"
+            ),
+        ],
+        runner=runner,
+    )
+    _execute(
+        context,
+        [
+            "pwsh",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "Import-Module PSScriptAnalyzer",
+        ],
+        runner=runner,
+    )
+    return _result("PSScriptAnalyzer", "PSScriptAnalyzer instalado no escopo do usuario")
+
+
+def install_java(
+    context: InstallContext,
+    *,
+    url: str | None = None,
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    archive_url = url or (
+        "https://api.adoptium.net/v3/binary/version/"
+        "jdk-21.0.6%2B7/windows/x64/jdk/hotspot/normal/eclipse"
+        if context.environment is EnvironmentKind.WINDOWS
+        else "https://api.adoptium.net/v3/binary/version/"
+        "jdk-21.0.6%2B7/linux/x64/jdk/hotspot/normal/eclipse"
+    )
+    return _install_user_archive(
+        context,
+        name="jdk",
+        url=archive_url,
+        executable_names={"java", "java.exe"},
+        expected_sha256=expected_sha256,
+        fetcher=fetcher,
+    )
+
+
+def install_gradle(
+    context: InstallContext,
+    *,
+    url: str | None = None,
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    archive_url = url or (
+        "https://services.gradle.org/distributions/"
+        f"gradle-{GRADLE_VERSION}-bin.zip"
+    )
+    return _install_user_archive(
+        context,
+        name="gradle",
+        url=archive_url,
+        executable_names={"gradle", "gradle.bat"},
+        expected_sha256=expected_sha256,
+        fetcher=fetcher,
+    )
+
+
+def install_gitleaks(
+    context: InstallContext,
+    *,
+    url: str | None = None,
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
+) -> InstallResult:
+    archive_url = url or _portable_url(
+        context,
+        linux_template=(
+            "https://github.com/gitleaks/gitleaks/releases/download/"
+            "v{gitleaks_version}/gitleaks_{gitleaks_version}_linux_x64.zip"
+        ),
+        windows_template=(
+            "https://github.com/gitleaks/gitleaks/releases/download/"
+            "v{gitleaks_version}/gitleaks_{gitleaks_version}_windows_x64.zip"
+        ),
+    )
+    return _install_user_archive(
+        context,
+        name="gitleaks",
+        url=archive_url,
+        executable_names={"gitleaks", "gitleaks.exe"},
+        expected_sha256=expected_sha256,
+        fetcher=fetcher,
+    )
+
+
 def install_docling(
     context: InstallContext,
     *,
@@ -1067,6 +1300,23 @@ def install_pytest(
     return _result("pytest", f".venv criada em {venv_path}")
 
 
+def install_pytest_cov(
+    context: InstallContext,
+    *,
+    runner: Runner | None = None,
+) -> InstallResult:
+    """Garante pytest-cov dentro da mesma virtualenv usada pela suite."""
+
+    install_pytest(context, runner=runner)
+    python_path = _venv_python_path(context)
+    _execute(
+        context,
+        [python_path, "-m", "pip", "install", "pytest-cov"],
+        runner=runner,
+    )
+    return _result("pytest-cov", "pytest-cov instalado na .venv do repositorio")
+
+
 def install_aws_cli(
     context: InstallContext,
     *,
@@ -1178,6 +1428,16 @@ INSTALLERS: Mapping[str, DependencyInstaller] = {
     "git": install_git,
     "playwright": install_playwright,
     "pytest": install_pytest,
+    "pytest-cov": install_pytest_cov,
+    "ruff": install_ruff,
+    "shellcheck": install_shellcheck,
+    "pwsh": install_pwsh,
+    "PSScriptAnalyzer": install_psscriptanalyzer,
+    "gitleaks": install_gitleaks,
+    "pip-audit": install_pip_audit,
+    "bandit": install_bandit,
+    "java": install_java,
+    "gradle": install_gradle,
     "aws-cli": install_aws_cli,
     "libgomp-runtime": install_libgomp_runtime,
 }

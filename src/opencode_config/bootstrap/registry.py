@@ -1,7 +1,7 @@
 """Registro declarativo das dependencias gerenciadas pelo bootstrap."""
 
-from dataclasses import dataclass, field
 from collections.abc import Mapping
+from dataclasses import dataclass, field
 
 from opencode_config.lib.environment import EnvironmentKind
 
@@ -374,9 +374,137 @@ DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
     ),
 )
 
+
+# As dependencias abaixo pertencem ao gate de testes-produto. Elas ficam em
+# um registro separado para manter compatibilidade com consumidores que usam
+# DEPENDENCY_REGISTRY como inventario historico do bootstrap base.
+PRODUCT_DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
+    DependencySpec(
+        name="ruff",
+        commands=("ruff",),
+        install_methods=_methods("pipx install ruff"),
+        manual_commands=_commands(
+            "pipx install ruff",
+            windows="pipx install ruff",
+        ),
+    ),
+    DependencySpec(
+        name="shellcheck",
+        commands=("shellcheck",),
+        supported_environments=frozenset(_ALL_ENVIRONMENTS),
+        install_methods=_methods("pipx install shellcheck-py"),
+        manual_commands=_commands(
+            "pipx install shellcheck-py",
+            windows="pipx install shellcheck-py",
+        ),
+    ),
+    DependencySpec(
+        name="pwsh",
+        commands=("pwsh",),
+        supported_environments=frozenset(_ALL_ENVIRONMENTS),
+        install_methods=_methods(
+            "arquivo portatil PowerShell Core em user-space",
+            windows="arquivo zip PowerShell Core em user-space",
+        ),
+        manual_commands=_commands(
+            "opencode-bootstrap --yes",
+            windows="opencode-bootstrap --yes",
+        ),
+    ),
+    DependencySpec(
+        name="PSScriptAnalyzer",
+        commands=("pwsh",),
+        supported_environments=frozenset(_ALL_ENVIRONMENTS),
+        install_methods=_methods(
+            "pwsh -NoProfile -Command Install-Module -Scope CurrentUser",
+            windows="pwsh -NoProfile -Command Install-Module -Scope CurrentUser",
+        ),
+        manual_commands=_commands(
+            "pwsh -NoProfile -Command \"Install-Module PSScriptAnalyzer -Scope CurrentUser -Force\"",
+            windows="pwsh -NoProfile -Command \"Install-Module PSScriptAnalyzer -Scope CurrentUser -Force\"",
+        ),
+        version_args=(
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "Import-Module PSScriptAnalyzer",
+        ),
+    ),
+    DependencySpec(
+        name="pytest-cov",
+        commands=("pytest",),
+        install_methods=_methods(
+            "python da .venv -m pip install pytest-cov",
+            windows="python da .venv -m pip install pytest-cov",
+        ),
+        manual_commands=_commands(
+            ".venv/bin/python -m pip install pytest-cov",
+            windows=".venv\\Scripts\\python.exe -m pip install pytest-cov",
+        ),
+        version_args=("-c", "import pytest_cov"),
+    ),
+    DependencySpec(
+        name="gitleaks",
+        commands=("gitleaks",),
+        install_methods=_methods("download do release oficial em user-space"),
+        manual_commands=_commands(
+            "opencode-bootstrap --yes",
+            windows="opencode-bootstrap --yes",
+        ),
+    ),
+    DependencySpec(
+        name="pip-audit",
+        commands=("pip-audit",),
+        install_methods=_methods("pipx install pip-audit"),
+        manual_commands=_commands(
+            "pipx install pip-audit",
+            windows="pipx install pip-audit",
+        ),
+    ),
+    DependencySpec(
+        name="bandit",
+        commands=("bandit",),
+        install_methods=_methods("pipx install bandit"),
+        manual_commands=_commands(
+            "pipx install bandit",
+            windows="pipx install bandit",
+        ),
+    ),
+    DependencySpec(
+        name="java",
+        commands=("java",),
+        install_methods=_methods("JDK portatil em user-space"),
+        manual_commands=_commands(
+            "opencode-bootstrap --yes",
+            windows="opencode-bootstrap --yes",
+        ),
+    ),
+    DependencySpec(
+        name="gradle",
+        commands=("gradle",),
+        install_methods=_methods("Gradle portatil em user-space"),
+        manual_commands=_commands(
+            "opencode-bootstrap --yes",
+            windows="opencode-bootstrap --yes",
+        ),
+    ),
+)
+
+
+ALL_DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
+    DEPENDENCY_REGISTRY + PRODUCT_DEPENDENCY_REGISTRY
+)
+
 if {
     environment
     for spec in DEPENDENCY_REGISTRY
     for environment in spec.install_methods
 } != _ALL_ENVIRONMENTS:
     raise RuntimeError("Registro de dependencias sem metodo para algum ambiente")
+
+if {
+    environment
+    for spec in PRODUCT_DEPENDENCY_REGISTRY
+    for environment in spec.install_methods
+} != _ALL_ENVIRONMENTS:
+    raise RuntimeError("Registro de ferramentas sem metodo para algum ambiente")
