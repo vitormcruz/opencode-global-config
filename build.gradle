@@ -13,12 +13,46 @@ dependencies {
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.11.0'
 }
 
+// Os ADRs em docs/adr/ sao a fonte unica das specs executaveis. O nome do
+// arquivo com prefixo numerico nao e um identificador de classe valido, entao
+// o task abaixo deriva uma copia de build com nome de fixture (0001-x.md ->
+// Adr0001.md) sem armazenar conteudo duplicado no repositorio.
+def adrSpecsDir = layout.buildDirectory.dir('generated/adr-specs')
+
+tasks.register('renderAdrSpecs', Copy) {
+    from 'docs/adr'
+    include '*-*.md'
+    into adrSpecsDir
+    rename { name ->
+        def matcher = (name =~ /^(\d{4})-.*\.md$/)
+        matcher.matches() ? "Adr${matcher.group(1)}.md" : name
+    }
+}
+
 sourceSets {
     test {
         groovy.srcDir 'src/test/groovy'
         resources.srcDir 'docs/specs'
+        resources.srcDir tasks.named('renderAdrSpecs')
     }
 }
+
+// As assercoes executaveis de cada ADR pertencem a suite da especialidade
+// correspondente (docs/README.md, "Elementos de Especificacao").
+def specialtyFixtures = [
+    backend  : [
+        'BackendFixture',
+        'Adr0001Fixture',
+        'Adr0002Fixture',
+        'Adr0003Fixture',
+        'Adr0004Fixture',
+        'Adr0005Fixture',
+    ],
+    seguranca: [
+        'SegurancaFixture',
+        'Adr0006Fixture',
+    ],
+]
 
 test {
     useJUnitPlatform()
@@ -27,9 +61,8 @@ test {
     outputs.upToDateWhen { false }
 
     if (project.hasProperty('productSpecialty')) {
-        def fixture = project.property('productSpecialty') == 'backend'
-            ? 'BackendFixture'
-            : 'SegurancaFixture'
-        include "**/${fixture}.class"
+        (specialtyFixtures[project.property('productSpecialty')] ?: []).each { fixture ->
+            include "**/${fixture}.class"
+        }
     }
 }
