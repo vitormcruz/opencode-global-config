@@ -1923,6 +1923,7 @@ Commits de construção já criados:
 - `6fcc952` — `feat(bootstrap): adicionar toolchain das suites de produto`
 - `f6aee5c` — `feat(scaffold): alinhar mapa ao contrato de testes-produto`
 - `109d000` — `fix(skills): remover atribuicao morta no update`
+- `83c4dcc` — `docs(curadoria): registrar mapa e contratos do repo`
 
 ### Item (a) — suites e contrato
 
