@@ -2035,3 +2035,161 @@ Commits de construção já criados:
 - Gradle estava disponível, mas sem JDK. A execução Concordion foi deixada
   para a fase Testes, como exige o contrato do workflow.
 - Nenhum bloqueio de implementação foi identificado.
+
+### Revisão da Construção — 2026-09-14
+
+Autor: rev (instância limpa, chamada pelo devflow para a fase REVISÃO DA
+CONSTRUÇÃO). Objeto: diff total da construção (commits `757a0a6` a
+`dd3839e`, worktree limpo) cruzado com a seção "Testes por Especialidade"
+do `docs/README.md`, emendas aplicadas e itens (a)–(h). Não executei
+suítes de produto nem meta (regra da fase); revisão por leitura de código,
+configs e diffs.
+
+#### Verificação por eixo (10 pontos da demanda)
+
+| # | Eixo | Resultado |
+|---|------|-----------|
+| 1 | Aderência à spec | Checks por suíte presentes (pytest `-m all` + ruff + shellcheck + PSScriptAnalyzer + cobertura 70% + Concordion no backend; gitleaks + pip-audit + bandit + Concordion na segurança); agregador chama exatamente as 2 suítes e não chama Concordion; severidades conforme spec. Exceto achados 1–2 |
+| 2 | Corretude do código | Crash, exit inesperado, JSON inválido e ferramenta ausente produzem finding bloqueante em todos os caminhos; coerência exit↔status validada pelo agregador; retry de rede 3x (pip-audit, gradle); UTF-8 forçado em stdout/stderr; progresso em stderr; exit 0/1. Exceto achado 2 |
+| 3 | Bootstrap | ruff, shellcheck, pwsh, PSScriptAnalyzer, pytest-cov, gitleaks, pip-audit, bandit, JDK e Gradle em `PRODUCT_DEPENDENCY_REGISTRY`; pwsh no WSL/Linux e shellcheck no Windows; instalação user-space (cache do usuário, PATH de usuário, `Install-Module -Scope CurrentUser`); sem elevação; README de dependências atualizado. Exceto melhoria 4 |
+| 4 | Concordion/Groovy | `build.gradle` mínimo (groovy + Concordion 4.0.1 + JUnit4/vintage); fixtures por especialidade com `-PproductSpecialty`; tradutor XML JUnit → JSON robusto (valida contagens, skipped = bloqueante, XML inválido = bloqueante). Specs Backend/Seguranca com asserção executável ligando texto↔fixture |
+| 5 | Retrofit ADRs + C4 | 6 ADRs com diretivas Concordion-Markdown, conteúdo e numeração preservados (ADR-0003 ganhou Alternativas e Asserções que não existiam); C4 L1/L2/L3 válidos como Mermaid (C4Context/C4Container/C4Component); L3 seletivo com critério registrado. Exceto achado 1 |
+| 6 | Renomeação | Sem resíduo de "orquestrador" referente ao script em docs, agentes, skills e scaffold; ocorrências restantes nomeiam o devflow/orquestração do workflow (exceto melhoria 5) |
+| 7 | Scaffold | `scaffold_mapa.py` com agregador, papéis qa/curador-produto, specs Concordion e suíte meta; testes novos em `tests/cli/test_scaffold_mapa_curadoria.py`. Exceto melhoria 1 |
+| 8 | Suíte meta | `testes-produto/tests/test_interface_meta.py` com 5 testes (interface JSON das 2 suítes, argumentos, agregador, separação física); fora de `testpaths` e do `-m all`; sem marker novo |
+| 9 | Cobertura | Gate `--cov-fail-under=70` com fontes `src/` + `scripts/` + `testes-produto/`; `omit` apenas de `testes-produto/tests/`; sem fraude no cálculo (74,68% reportado com margem) |
+| 10 | Não regressão | Ema v2 aplicada ao `AGENTS.md`; taxonomia ADR-0005 intacta (sem marker novo, separação por path); estrutura de testes espelhada (`tests/product_tests/`); sem `skip` novo (skipif só no `platform_requirements.py` pré-existente, mecanismo declarado) |
+
+#### Achados
+
+| # | Achado | Ação recomendada | Severidade |
+|---|--------|------------------|------------|
+| 1 | Lacuna (retrofit ADRs inercial): os 6 ADRs declaram "A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`", mas não existe fixture para nenhum ADR (só `BackendFixture`/`SegurancaFixture` em `src/test/groovy/`), `docs/adr/` não está nos resources do Gradle e nenhuma suíte executa as specs dos ADRs. A asserção executável obrigatória (decisão P3.f; regra gravada "valida que a decisão está implementada") não valida nada; o texto dos ADRs declara uma fixture inexistente (contradição interna). O modelo aprovado ("spec executável É UM TESTE e roda na suíte da especialidade") não foi aplicado aos ADRs | Delegar a eng-software: criar fixtures Concordion por ADR (ou por grupo por especialidade) com verificações reais, executadas dentro das suítes backend/segurança via o mesmo pipeline Gradle + tradutor; ajustar o texto dos ADRs ao desenho final. Se mudar o desenho aprovado, devflow media decisão humana antes | bloqueante |
+| 2 | Desvio (check pip-audit inefetivo): `_run_pip_audit` executa `pip-audit --local`, que audita o ambiente onde o pip-audit roda (venv própria do pipx), não as dependências do repo. O check atravessa CVE/OSV apenas das dependências do próprio pip-audit e tende a passar sempre (falso verde), contrariando a subseção segurança ("cruza dependências com bases de CVE/OSV") | Delegar a eng-software: auditar as dependências do projeto (ex.: `pip-audit` sobre `requirements-dev.txt`/`pyproject.toml` do `.venv` do repo, ou `--path` apontando o `.venv`), mantendo retry de rede e severidades da spec | bloqueante |
+| 3 | Contradição (template do scaffold): `TESTES_PRODUTO_TEMPLATE` fica com DUAS tabelas índice (uma com backend/dados/segurança/frontend, outra com backend/segurança) e o texto "Chama as suítes backend e segurança" contradiz a tabela de 4; `DOC_TEMPLATE` mantém lista "Suítes" com dados/frontend. Resíduo do modelo antigo coexiste com o novo no mapa gerado para projetos novos; indentação da linha 2 de "Dois níveis" sai desalinhada no dedent | eng-software aplica: alinhar template do scaffold ao modelo novo (uma tabela, suítes conforme curadoria do projeto-alvo) e corrigir indentação | melhoria |
+| 4 | Segurança (integridade de downloads): `_install_user_archive` baixa pwsh, JDK, Gradle, gitleaks e shellcheck (Windows) sem SHA256 fixado (`expected_sha256=None`); o instalador já suporta o parâmetro. Release oficial comprometida passaria sem detecção | eng-software adiciona checksums fixados por versão (mesma prática já usada em outros instaladores do repo, se aplicável) | melhoria |
+| 5 | Resíduo terminológico: comentário `# orquestrador das suítes por especialidade` ao lado de `"testes-produto"` em `tests/agents/test_workflow_consistency.py` usa o termo antigo para o script | eng-software ajusta o comentário (edição simples) | melhoria |
+| 6 | Código morto / linha sem propósito em `concordion.py`: `PRODUCT_TEST_REPO_ROOT` é exportado no ambiente e nunca consumido pelo build ou fixtures; `JAVA_HOME` é forçado a string vazia quando ausente, sem efeito nos launchers atuais e sem propósito declarado | eng-software remove os dois vestígios ou documenta a intenção | melhoria |
+| 7 | Diagnosticabilidade (gitleaks): falha de execução e segredo detectado produzem a mesma mensagem genérica ("segredo detectado ou execução do scan falhou"), enfraquecendo a instrução de correção exigida pela interface | eng-software diferencia: incluir trecho do stdout do gitleaks ou mensagens distintas para segredo vs erro de execução | melhoria |
+
+#### Veredicto
+
+[ ] Aprovado sem ressalvas
+[ ] Aprovado com melhorias opcionais
+[x] Bloqueado — resolver os achados bloqueantes 1 (asserções executáveis
+    dos ADRs sem execução) e 2 (pip-audit auditando o ambiente errado)
+    antes da fase Testes. O restante da construção está aderente à spec
+    aprovada: suítes, agregador, interface JSON, bootstrap user-space nos
+    dois SOs, suíte meta, cobertura 70% sem fraude, renomeação e taxonomia.
+
+#### Evidências (rev)
+
+- [x] Artefatos lidos: `plan/curadoria-repo.md` (2037 linhas),
+      `docs/README.md`, `AGENTS.md` (diff), `src/opencode_config/product_tests/`
+      (7 módulos), `testes-produto/` (entrypoints, README, suíte meta),
+      `build.gradle`/`settings.gradle`, fixtures Groovy, specs
+      `docs/specs/`, 6 ADRs (diffs), 3 diagramas C4, `registry.py`,
+      `installers/core.py`, `detect.py`, `scaffold_mapa.py`,
+      `skills_sync.py` (diff), `pyproject.toml`, READMEs, testes novos
+      (`tests/product_tests/`, `tests/bootstrap/`, `tests/cli/`,
+      `tests/agents/`)
+- [x] Plano aprovado consultado: sim (seção gravada + emendas Ema v2,
+      Emc, Emd v2, Eme v2, Emf v2, Emg, Emh, Emi + itens a–h)
+- [x] Checklist integrativo: 10 eixos da demanda + 5 eixos da skill
+      (corretude, legibilidade, arquitetura, segurança, performance)
+- [x] Achados encontrados: 7 total (2 bloqueantes, 5 melhorias)
+- [x] Suítes de produto e meta NÃO executadas (regra da fase)
+
+#### Correção dos achados — eng-software (2026-09-17)
+
+Todos os 2 bloqueantes e as 5 melhorias foram corrigidos via TDD (testes
+novos primeiro, RED confirmado com 17 falhas, depois implementação).
+
+**Bloqueante 1 — asserções executáveis dos ADRs agora rodam de verdade:**
+
+- Criadas fixtures Groovy reais por ADR: `Adr0001Fixture` a `Adr0006Fixture`
+  em `src/test/groovy/`, cada uma com `executarVerificacoes()` e
+  `getVeredito()`, verificando artefatos reais do repo (arquivos, conteúdo
+  e, no ADR-0006, o JSON canônico `harness-conf/opencode.json` via
+  `JsonSlurper` contra entradas MCP não aprovadas).
+- `build.gradle` ganhou o task `renderAdrSpecs` (Copy): deriva de `docs/adr/`
+  uma cópia de build com nome de fixture válido (`0001-x.md` →
+  `Adr0001.md`). O ADR continua sendo a fonte única; a cópia é artefato
+  derivado, não versionado.
+- Cada ADR pertence à suíte da especialidade (modelo aprovado "spec
+  executável é um teste"): backend executa ADR-0001 a ADR-0005; segurança
+  executa ADR-0006. Os includes por `-PproductSpecialty` cobrem as fixtures
+  de especialidade e as de ADRs.
+- Nenhum ADR ficou sem asserção verificável; não houve bloqueio pontual.
+- Guardas pytest novos em `tests/product_tests/test_concordion_spec_infra.py`
+  (renderAdrSpecs no build, includes por especialidade, fixture por ADR com
+  a API declarada, verificações reais e não-veredito-fixo).
+
+**Bloqueante 2 — pip-audit agora audita o ambiente do repo:**
+
+- `_run_pip_audit` localiza o `site-packages` da `.venv` do repo (POSIX:
+  `.venv/lib/python*/site-packages`; Windows: `.venv/Lib/site-packages`) e
+  executa `pip-audit --path <site-packages> --format=json`, com o mesmo
+  retry de rede 3x e severidades da spec. Sem `.venv`: finding bloqueante
+  com instrução de bootstrap (nenhum falso verde).
+- Vulnerabilidade de exemplo: os testes com payload JSON simulado (CVE high
+  bloqueante, low melhoria) continuam cobrindo o mapeamento; idempotência
+  mantida.
+
+**Melhorias 3 a 7:**
+
+- Melhoria 3 (scaffold): `TESTES_PRODUTO_TEMPLATE` ficou com UMA tabela
+  (suítes conforme a curadoria do projeto-alvo) e texto do agregador
+  genérico; `DOC_TEMPLATE` com o mesmo texto genérico e indentação do
+  "Dois níveis" corrigida. O teste de curadoria do scaffold
+  (`tests/cli/test_scaffold_mapa_curadoria.py`) foi ajustado junto, pois
+  fora escrito nesta construção e codificava a contradição apontada.
+  Testes pré-existentes do scaffold intocados e verdes.
+- Melhoria 4 (integridade): SHA-256 fixados para Gradle 8.10.2, PowerShell
+  7.4.6 (linux/windows), gitleaks 8.24.2 (linux/windows), ShellCheck 0.10.0
+  (windows) e JDK Temurin 21.0.6+7 (linux/windows), aplicados por padrão em
+  `install_pwsh`, `install_gradle`, `install_gitleaks`,
+  `install_shellcheck` (Windows) e `install_java`. Fontes registradas em
+  comentário no `installers/core.py`: arquivos de checksum oficiais dos
+  releases (Gradle, PowerShell, gitleaks, Adoptium); ShellCheck v0.10.0 não
+  publica checksum, então o SHA-256 foi calculado do asset oficial
+  (GitHub Releases, 2026-09-17). Corrigido também o asset linux do gitleaks
+  (é `.tar.gz`, não `.zip`). Teste novo fixa o formato dos 8 checksums e a
+  rejeição de divergência.
+- Melhoria 5: comentário em `tests/agents/test_workflow_consistency.py`
+  corrigido para "agregador das suítes por especialidade".
+- Melhoria 6: removidos de `concordion.py` os vestígios
+  `PRODUCT_TEST_REPO_ROOT` e `JAVA_HOME=""`; o `repo.root` já é passado via
+  systemProperty do Gradle.
+- Melhoria 7: gitleaks diferencia "segredo detectado pelo gitleaks" (exit 1,
+  com trecho da saída) de "execução do gitleaks falhou (exit N)".
+
+### Arquivos alterados na correção
+
+- `src/opencode_config/product_tests/security.py` (bloqueante 2, melhoria 7)
+- `src/opencode_config/product_tests/concordion.py` (melhoria 6)
+- `build.gradle`, `src/test/groovy/Adr0001Fixture.groovy` a
+  `Adr0006Fixture.groovy` (bloqueante 1)
+- `src/opencode_config/bootstrap/installers/core.py` e `__init__.py`
+  (melhoria 4)
+- `src/opencode_config/cli/scaffold_mapa.py` (melhoria 3)
+- `tests/product_tests/test_concordion_spec_infra.py` (novo; bloqueante 1)
+- `tests/product_tests/test_suites.py`, `tests/product_tests/test_concordion.py`
+  (testes dos bloqueantes 2 e melhorias 6/7; setup do teste de segurança
+  ajustado por causa do novo contrato do pip-audit)
+- `tests/bootstrap/test_product_dependencies.py` (melhoria 4)
+- `tests/cli/test_scaffold_mapa_curadoria.py` (melhoria 3)
+- `tests/agents/test_workflow_consistency.py` (melhoria 5)
+
+### Evidências de Testes — Revisão da Construção (correção)
+
+- [x] Testes novos: 14 novos/ajustados; RED confirmado (17 falhas) antes da
+      implementação; GREEN após.
+- [x] Suítes direcionadas: 65 passed (product_tests + product_dependencies +
+      scaffold curadoria); 193 passed (scaffold, bootstrap, agents).
+- [x] Análise estática: `ruff check src scripts testes-produto` verde;
+      `shellcheck scripts/bootstrap_repo/configurar-repo.sh` verde;
+      `py_compile` dos 3 entrypoints verde.
+- [x] Suítes de produto, agregador e meta: não executados (regra da fase).
+- [x] Gate de refatoração: sem impacto no plano; ajuste do teste de
+      curadoria do scaffold registrado como parte da melhoria 3.
