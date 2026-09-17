@@ -2019,6 +2019,8 @@ Commits de construção já criados:
 - [x] Compilação Python: `python -m py_compile` dos três entrypoints verde.
 - [x] Regressão incremental: testes direcionados executados após cada ajuste;
       testes de bootstrap, scaffold e skills verdes.
+- [x] Smoke final direcionado: `112 passed` cobrindo product_tests, bootstrap,
+      scaffold e consistência do workflow.
 - [x] Suítes de especialidade, agregador e suíte meta: não executados por
       regra operacional da Construção.
 - [x] Gate de refatoração: sem impacto no plano; a separação do agregador em
