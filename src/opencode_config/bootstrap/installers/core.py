@@ -40,6 +40,7 @@ CODEBASE_MEMORY_VERSION = "0.10.8"
 POWERSHELL_VERSION = "7.4.6"
 GRADLE_VERSION = "8.10.2"
 GITLEAKS_VERSION = "8.24.2"
+SHELLCHECK_VERSION = "0.10.0"
 AWS_LINUX_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.sh"
 AWS_WINDOWS_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.ps1"
 INSTALL_COMMAND_TIMEOUT_SECONDS = 1800
@@ -599,9 +600,23 @@ def install_ruff(
 def install_shellcheck(
     context: InstallContext,
     *,
+    url: str | None = None,
+    expected_sha256: str | None = None,
+    fetcher: Fetcher | None = None,
     runner: Runner | None = None,
 ) -> InstallResult:
-    # shellcheck-py fornece o mesmo entrypoint em Linux, WSL e Windows.
+    if context.environment is EnvironmentKind.WINDOWS:
+        return _install_user_archive(
+            context,
+            name="shellcheck",
+            url=url or (
+                "https://github.com/koalaman/shellcheck/releases/download/"
+                f"v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.zip"
+            ),
+            executable_names={"shellcheck", "shellcheck.exe"},
+            expected_sha256=expected_sha256,
+            fetcher=fetcher,
+        )
     return _install_pipx_app(
         context,
         "shellcheck-py",

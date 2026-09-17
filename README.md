@@ -131,7 +131,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
 | ruff | `pipx install ruff` | `pipx install ruff` |
-| shellcheck | `pipx install shellcheck-py` | `pipx install shellcheck-py` |
+| shellcheck | `pipx install shellcheck-py` | release oficial no cache user-space |
 | pwsh | arquivo portatil em user-space | arquivo zip em user-space |
 | PSScriptAnalyzer | `Install-Module -Scope CurrentUser` via pwsh | igual ao Linux |
 | pytest-cov | `.venv` + `requirements-dev.txt` | igual ao Linux |
@@ -159,6 +159,9 @@ pipx install shellcheck-py
 pipx install pip-audit
 pipx install bandit
 ```
+
+No Windows, o bootstrap baixa o zip oficial do ShellCheck para o cache do
+usuário e adiciona o executável ao PATH do usuário.
 
 No PowerShell, o PSScriptAnalyzer usa o escopo do usuário:
 

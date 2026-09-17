@@ -40,6 +40,7 @@ from .core import (
     install_ruff,
     install_shellcheck,
     is_pytest_environment_ready,
+    SHELLCHECK_VERSION,
 )
 
 __all__ = [
@@ -82,4 +83,5 @@ __all__ = [
     "install_ruff",
     "install_shellcheck",
     "is_pytest_environment_ready",
+    "SHELLCHECK_VERSION",
 ]

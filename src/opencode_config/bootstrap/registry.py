@@ -392,10 +392,13 @@ PRODUCT_DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
         name="shellcheck",
         commands=("shellcheck",),
         supported_environments=frozenset(_ALL_ENVIRONMENTS),
-        install_methods=_methods("pipx install shellcheck-py"),
+        install_methods=_methods(
+            "pipx install shellcheck-py",
+            windows="release oficial do ShellCheck em user-space",
+        ),
         manual_commands=_commands(
             "pipx install shellcheck-py",
-            windows="pipx install shellcheck-py",
+            windows="opencode-bootstrap --yes",
         ),
     ),
     DependencySpec(

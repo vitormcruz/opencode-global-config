@@ -8,6 +8,7 @@ from opencode_config.bootstrap.installers import (
     install_gradle,
     install_psscriptanalyzer,
     install_ruff,
+    install_shellcheck,
 )
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import resolve_user_space_paths
@@ -127,3 +128,18 @@ def test_install_gradle_extracts_a_complete_user_space_distribution(tmp_path) ->
     assert str(context.paths.data_dir / "gradle" / "bin") in (
         context.current_environment["PATH"]
     )
+
+
+@pytest.mark.unit
+def test_install_shellcheck_uses_the_official_archive_on_windows(tmp_path) -> None:
+    import zipfile
+
+    archive = tmp_path / "shellcheck.zip"
+    with zipfile.ZipFile(archive, "w") as output:
+        output.writestr("shellcheck-v0.10.0/shellcheck.exe", "binary")
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+
+    result = install_shellcheck(context, url=f"file://{archive}")
+
+    assert result.success
+    assert (context.paths.data_dir / "shellcheck" / "shellcheck.exe").is_file()
