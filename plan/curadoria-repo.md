@@ -1924,6 +1924,7 @@ Commits de construção já criados:
 - `f6aee5c` — `feat(scaffold): alinhar mapa ao contrato de testes-produto`
 - `109d000` — `fix(skills): remover atribuicao morta no update`
 - `83c4dcc` — `docs(curadoria): registrar mapa e contratos do repo`
+- `9945a59` — `fix(bootstrap): instalar shellcheck no Windows`
 
 ### Item (a) — suites e contrato
 
