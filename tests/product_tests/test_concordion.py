@@ -91,7 +91,10 @@ def test_run_concordion_suite_reports_missing_jdk_or_gradle(tmp_path: Path) -> N
 def test_run_concordion_suite_translates_a_successful_gradle_report(
     tmp_path: Path,
 ) -> None:
-    def runner(command, **_kwargs):
+    observed_environments: list[object] = []
+
+    def runner(command, **kwargs):
+        observed_environments.append(kwargs.get("env"))
         report_dir = tmp_path / "build" / "test-results" / "test"
         report_dir.mkdir(parents=True)
         (report_dir / "TEST-backend.xml").write_text(
@@ -111,3 +114,5 @@ def test_run_concordion_suite_translates_a_successful_gradle_report(
     )
 
     assert report.status == "pass"
+    for environment in observed_environments:
+        assert environment is None or "PRODUCT_TEST_REPO_ROOT" not in environment

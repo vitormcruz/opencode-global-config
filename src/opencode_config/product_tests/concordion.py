@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 from collections.abc import Callable
 from pathlib import Path
@@ -161,16 +160,12 @@ def run_concordion_suite(
         "--no-daemon",
         f"-PproductSpecialty={specialty}",
     ]
-    environment = dict(os.environ)
-    environment["JAVA_HOME"] = environment.get("JAVA_HOME", "")
-    environment["PRODUCT_TEST_REPO_ROOT"] = str(repo_root)
     progress(f"[{specialty}] executando Concordion via Gradle")
     result = run_with_network_retry(
         command,
         cwd=repo_root,
         progress=progress,
         runner=runner,
-        env=environment,
         label="gradle",
     )
 
