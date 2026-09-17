@@ -4,7 +4,15 @@ from opencode_config.bootstrap.registry import (
     PRODUCT_DEPENDENCY_REGISTRY,
 )
 from opencode_config.bootstrap.installers import (
+    GITLEAKS_SHA256_LINUX,
+    GITLEAKS_SHA256_WINDOWS,
+    GRADLE_SHA256,
     InstallContext,
+    JDK_SHA256_LINUX,
+    JDK_SHA256_WINDOWS,
+    POWERSHELL_SHA256_LINUX,
+    POWERSHELL_SHA256_WINDOWS,
+    SHELLCHECK_SHA256_WINDOWS,
     install_gradle,
     install_psscriptanalyzer,
     install_ruff,
@@ -112,16 +120,45 @@ def test_install_psscriptanalyzer_uses_current_user_scope(tmp_path) -> None:
     assert all("sudo" not in part.casefold() for command in commands for part in command)
 
 
+PINNED_CHECKSUMS = {
+    "GRADLE_SHA256": GRADLE_SHA256,
+    "POWERSHELL_SHA256_LINUX": POWERSHELL_SHA256_LINUX,
+    "POWERSHELL_SHA256_WINDOWS": POWERSHELL_SHA256_WINDOWS,
+    "GITLEAKS_SHA256_LINUX": GITLEAKS_SHA256_LINUX,
+    "GITLEAKS_SHA256_WINDOWS": GITLEAKS_SHA256_WINDOWS,
+    "SHELLCHECK_SHA256_WINDOWS": SHELLCHECK_SHA256_WINDOWS,
+    "JDK_SHA256_LINUX": JDK_SHA256_LINUX,
+    "JDK_SHA256_WINDOWS": JDK_SHA256_WINDOWS,
+}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("constant_name", sorted(PINNED_CHECKSUMS))
+def test_portable_downloads_pin_the_official_sha256(constant_name: str) -> None:
+    import re
+
+    checksum = PINNED_CHECKSUMS[constant_name]
+
+    assert re.fullmatch(r"[0-9a-f]{64}", checksum), (
+        f"{constant_name} precisa do SHA-256 fixado do release oficial"
+    )
+
+
 @pytest.mark.unit
 def test_install_gradle_extracts_a_complete_user_space_distribution(tmp_path) -> None:
     import zipfile
+    from hashlib import sha256
 
     archive = tmp_path / "gradle.zip"
     with zipfile.ZipFile(archive, "w") as output:
         output.writestr("gradle-8.10.2/bin/gradle", "#!/bin/sh\n")
     context = make_context(tmp_path)
 
-    result = install_gradle(context, url=f"file://{archive}")
+    result = install_gradle(
+        context,
+        url=f"file://{archive}",
+        expected_sha256=sha256(archive.read_bytes()).hexdigest(),
+    )
 
     assert result.success
     assert (context.paths.data_dir / "gradle" / "bin" / "gradle").is_file()
@@ -131,15 +168,37 @@ def test_install_gradle_extracts_a_complete_user_space_distribution(tmp_path) ->
 
 
 @pytest.mark.unit
+def test_install_gradle_rejects_a_checksum_mismatch(tmp_path) -> None:
+    import zipfile
+
+    archive = tmp_path / "gradle.zip"
+    with zipfile.ZipFile(archive, "w") as output:
+        output.writestr("gradle-8.10.2/bin/gradle", "#!/bin/sh\n")
+    context = make_context(tmp_path)
+
+    with pytest.raises(Exception, match="SHA256 divergente"):
+        install_gradle(
+            context,
+            url=f"file://{archive}",
+            expected_sha256="0" * 64,
+        )
+
+
+@pytest.mark.unit
 def test_install_shellcheck_uses_the_official_archive_on_windows(tmp_path) -> None:
     import zipfile
+    from hashlib import sha256
 
     archive = tmp_path / "shellcheck.zip"
     with zipfile.ZipFile(archive, "w") as output:
         output.writestr("shellcheck-v0.10.0/shellcheck.exe", "binary")
     context = make_context(tmp_path, EnvironmentKind.WINDOWS)
 
-    result = install_shellcheck(context, url=f"file://{archive}")
+    result = install_shellcheck(
+        context,
+        url=f"file://{archive}",
+        expected_sha256=sha256(archive.read_bytes()).hexdigest(),
+    )
 
     assert result.success
     assert (context.paths.data_dir / "shellcheck" / "shellcheck.exe").is_file()

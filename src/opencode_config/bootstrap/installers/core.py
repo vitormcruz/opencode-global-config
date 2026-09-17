@@ -41,6 +41,37 @@ POWERSHELL_VERSION = "7.4.6"
 GRADLE_VERSION = "8.10.2"
 GITLEAKS_VERSION = "8.24.2"
 SHELLCHECK_VERSION = "0.10.0"
+JDK_VERSION_TAG = "jdk-21.0.6%2B7"
+
+# SHA-256 fixados dos releases portaveis. Fontes dos valores:
+# - Gradle: services.gradle.org/distributions/gradle-8.10.2-bin.zip.sha256
+# - PowerShell: hashes.sha256 anexado ao release v7.4.6 (GitHub)
+# - gitleaks: gitleaks_8.24.2_checksums.txt anexado ao release v8.24.2
+# - JDK: arquivo .sha256.txt do release jdk-21.0.6+7 (temurin21-binaries)
+# - ShellCheck: release v0.10.0 nao publica checksum; SHA-256 calculado do
+#   asset oficial shellcheck-v0.10.0.zip (GitHub Releases, 2026-09-17)
+GRADLE_SHA256 = "31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26"
+POWERSHELL_SHA256_LINUX = (
+    "6f6015203c47806c5cc444c19d8ed019695e610fbd948154264bf9ca8e157561"
+)
+POWERSHELL_SHA256_WINDOWS = (
+    "ed49ce5adb2162cc4a835d740486be729ba904627cca71fcb6c2b95be11b993d"
+)
+GITLEAKS_SHA256_LINUX = (
+    "fa0500f6b7e41d28791ebc680f5dd9899cd42b58629218a5f041efa899151a8e"
+)
+GITLEAKS_SHA256_WINDOWS = (
+    "cc47fdc0364964e2d346fbbcbe4cc87f34d490b2647508fb05930d0ec2fbff07"
+)
+SHELLCHECK_SHA256_WINDOWS = (
+    "eb6cd53a54ea97a56540e9d296ce7e2fa68715aa507ff23574646c1e12b2e143"
+)
+JDK_SHA256_LINUX = (
+    "a2650fba422283fbed20d936ce5d2a52906a5414ec17b2f7676dddb87201dbae"
+)
+JDK_SHA256_WINDOWS = (
+    "897c8eebb0f85a99ccecbd482ebae9a45d88c19d6077054f6529ebab49b6d259"
+)
 AWS_LINUX_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.sh"
 AWS_WINDOWS_INSTALL_URL = "https://awscli.amazonaws.com/v2/install.ps1"
 INSTALL_COMMAND_TIMEOUT_SECONDS = 1800
@@ -614,7 +645,11 @@ def install_shellcheck(
                 f"v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.zip"
             ),
             executable_names={"shellcheck", "shellcheck.exe"},
-            expected_sha256=expected_sha256,
+            expected_sha256=(
+                SHELLCHECK_SHA256_WINDOWS
+                if expected_sha256 is None
+                else expected_sha256
+            ),
             fetcher=fetcher,
         )
     return _install_pipx_app(
@@ -707,6 +742,7 @@ def install_pwsh(
     expected_sha256: str | None = None,
     fetcher: Fetcher | None = None,
 ) -> InstallResult:
+    windows = context.environment is EnvironmentKind.WINDOWS
     archive_url = url or _portable_url(
         context,
         linux_template=(
@@ -723,7 +759,15 @@ def install_pwsh(
         name="pwsh",
         url=archive_url,
         executable_names={"pwsh", "pwsh.exe"},
-        expected_sha256=expected_sha256,
+        expected_sha256=(
+            expected_sha256
+            if expected_sha256 is not None
+            else (
+                POWERSHELL_SHA256_WINDOWS
+                if windows
+                else POWERSHELL_SHA256_LINUX
+            )
+        ),
         fetcher=fetcher,
     )
 
@@ -768,19 +812,24 @@ def install_java(
     expected_sha256: str | None = None,
     fetcher: Fetcher | None = None,
 ) -> InstallResult:
+    windows = context.environment is EnvironmentKind.WINDOWS
     archive_url = url or (
         "https://api.adoptium.net/v3/binary/version/"
-        "jdk-21.0.6%2B7/windows/x64/jdk/hotspot/normal/eclipse"
-        if context.environment is EnvironmentKind.WINDOWS
+        f"{JDK_VERSION_TAG}/windows/x64/jdk/hotspot/normal/eclipse"
+        if windows
         else "https://api.adoptium.net/v3/binary/version/"
-        "jdk-21.0.6%2B7/linux/x64/jdk/hotspot/normal/eclipse"
+        f"{JDK_VERSION_TAG}/linux/x64/jdk/hotspot/normal/eclipse"
     )
     return _install_user_archive(
         context,
         name="jdk",
         url=archive_url,
         executable_names={"java", "java.exe"},
-        expected_sha256=expected_sha256,
+        expected_sha256=(
+            expected_sha256
+            if expected_sha256 is not None
+            else (JDK_SHA256_WINDOWS if windows else JDK_SHA256_LINUX)
+        ),
         fetcher=fetcher,
     )
 
@@ -801,7 +850,7 @@ def install_gradle(
         name="gradle",
         url=archive_url,
         executable_names={"gradle", "gradle.bat"},
-        expected_sha256=expected_sha256,
+        expected_sha256=GRADLE_SHA256 if expected_sha256 is None else expected_sha256,
         fetcher=fetcher,
     )
 
@@ -813,11 +862,12 @@ def install_gitleaks(
     expected_sha256: str | None = None,
     fetcher: Fetcher | None = None,
 ) -> InstallResult:
+    windows = context.environment is EnvironmentKind.WINDOWS
     archive_url = url or _portable_url(
         context,
         linux_template=(
             "https://github.com/gitleaks/gitleaks/releases/download/"
-            "v{gitleaks_version}/gitleaks_{gitleaks_version}_linux_x64.zip"
+            "v{gitleaks_version}/gitleaks_{gitleaks_version}_linux_x64.tar.gz"
         ),
         windows_template=(
             "https://github.com/gitleaks/gitleaks/releases/download/"
@@ -829,7 +879,11 @@ def install_gitleaks(
         name="gitleaks",
         url=archive_url,
         executable_names={"gitleaks", "gitleaks.exe"},
-        expected_sha256=expected_sha256,
+        expected_sha256=(
+            expected_sha256
+            if expected_sha256 is not None
+            else (GITLEAKS_SHA256_WINDOWS if windows else GITLEAKS_SHA256_LINUX)
+        ),
         fetcher=fetcher,
     )
 
