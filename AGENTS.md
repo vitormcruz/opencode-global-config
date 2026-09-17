@@ -174,7 +174,24 @@ Todos suportam `--yes` e `--check-only`.
   bootstrap espelham `scripts/bootstrap_repo/` em
   `tests/scripts/bootstrap_repo/`.
 - Não crie testes para scripts cuja única função é executar ou orquestrar
-  testes.
+  testes. Exceção: scripts dentro de `testes-produto/` não são testes —
+  são código produtivo das validações usadas pelos agentes e, como
+  tais, são suscetíveis a testes (suíte meta em
+  `testes-produto/tests/`, que roda quando os scripts mudam).
+
+## Testes por Especialidade
+
+| Especialidade | Script |
+|---------------|--------|
+| backend | `testes-produto/backend` |
+| segurança | `testes-produto/seguranca` |
+
+Agregador: `testes-produto`
+
+Executado pelo agente `qa` na fase Testes; a evidência é
+validada pelo `curador-produto`.
+
+Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
 
 ## README
 
@@ -213,3 +230,36 @@ Todos suportam `--yes` e `--check-only`.
 - Mensagem concisa e direta, sem filler. Proponha mensagens sempre que o
   humano pedir.
 - Descubra a linguagem do projeto pelo contexto; use PT-BR por padrão.
+
+## Instruções por Agente
+
+Cada agente lê a própria subseção no início de qualquer
+tarefa. Esta seção não contém comando de suíte.
+
+### eng-software
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### dba
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### front
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### sec
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### qa
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### rev
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
+
+### curador-produto
+
+SEM INSTRUÇÕES A PEDIDO DO HUMANO

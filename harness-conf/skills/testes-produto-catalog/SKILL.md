@@ -3,7 +3,7 @@ name: testes-produto-catalog
 description: >
   Catálogo de referência com sugestões de ferramentas por
   especialidade (backend, dados, segurança, frontend) e
-  o orquestrador testes-produto. Use quando: criando ou
+  o agregador testes-produto. Use quando: criando ou
   atualizando suítes, definindo a seção "Testes por
   Especialidade" no docs/README.md, configurando
   ferramentas determinísticas. Triggers:
@@ -11,7 +11,7 @@ description: >
   "sugestões de suíte", "regras de contenção",
   "ferramentas de testes-produto", "criar suítes",
   "definir suítes", "testes por especialidade",
-  "orquestrador".
+   "agregador".
 ---
 
 # Catálogo de Referência — Suítes por Especialidade
@@ -23,7 +23,7 @@ description: >
 
 ## Interface Padronizada
 
-Cada suíte e o orquestrador `testes-produto` são scripts
+Cada suíte e o agregador `testes-produto` são scripts
 sem argumentos, idempotentes, com JSON:
 
 ```json
@@ -39,9 +39,11 @@ sem argumentos, idempotentes, com JSON:
 }
 ```
 
-Exit code: 0 = pass, 1 = fail. O orquestrador chama as
-quatro suítes e agrega `findings`. Falha se qualquer
-suíte falhar.
+Exit code: 0 = pass, 1 = fail. O agregador `testes-produto`
+chama as quatro suítes e consolida `findings`. Falha se
+qualquer suíte falhar. Executado pelo agente `qa` na fase
+Testes do workflow; a evidência é validada pelo
+`curador-produto`.
 
 ### Regras de segurança da interface
 

@@ -3,7 +3,7 @@ description: >
   Curador de Produto unificado — especifica e edita
   docs/README.md (4 seções, incluindo Testes por
   Especialidade), instruções por agente; valida evidência
-  do orquestrador no fim da fase Testes. Foco em conteúdo.
+  do agregador no fim da fase Testes. Foco em conteúdo.
   Nunca commita alterações. (PT-BR)
 mode: primary
 temperature: 0.2
@@ -87,8 +87,8 @@ obrigatórias:
 3. **Estratégias de Indexação de Código** — técnicas para
    agentes IA encontrarem informação rapidamente.
 4. **Testes por Especialidade** — spec das suítes e do
-   orquestrador `testes-produto` (suítes, interface
-   JSON, orçamento, proibições).
+   agregador `testes-produto`, executado pelo `qa` na fase
+   Testes (suítes, interface JSON, orçamento, proibições).
 
 **Template default**: leia
 `default-artifacts/doc-readme-template.md` (mesmo diretório deste
@@ -124,15 +124,17 @@ agente do workflow).
 
 **Orientação ao humano na entrevista**: a seção é a
 especificação executável dos scripts de suíte e do
-orquestrador — os scripts são código e são implementados
+agregador — os scripts são código e são implementados
 para cobrir exatamente o que ela define. Explique os dois
 níveis de teste: (1) testes da aplicação rodam via
-suítes/orquestrador `testes-produto` na fase Testes,
-sempre que se desenvolve funcionalidade; (2) testes dos
+suítes/agregador `testes-produto`, executados pelo agente
+`qa` na fase Testes, sempre que se desenvolve
+funcionalidade; (2) testes dos
 scripts de teste rodam SOMENTE quando os scripts mudam
 (por exemplo, curadoria alterando ferramentas ou
-critérios por orientação do humano), nunca no ciclo
-normal de desenvolvimento.
+critérios por orientação do humano), nunca no ciclo normal de
+desenvolvimento — vivem em `testes-produto/tests/`, fora da
+suíte `-m all` (separação por path, sem marker novo).
 
 **Fluxo de entrevista**:
 
@@ -140,7 +142,7 @@ normal de desenvolvimento.
    A seção `## Testes por Especialidade` vive no
    `<pasta>/README.md` (default `docs/README.md`).
 2. Entreviste especialidades (backend, dados, segurança,
-   frontend) e o orquestrador `testes-produto` na seção
+   frontend) e o agregador `testes-produto` na seção
    do `docs/README.md`. pa11y, axe-core ou ambos: a
    entrevista decide.
 3. Depois, `## Instruções por Agente` no `AGENTS.md`,
@@ -175,17 +177,18 @@ Especialidade" do `docs/README.md`.
   (ex.: `docs/testes-produto.md`) — a seção "Testes por
   Especialidade" do `docs/README.md` é o único spec.
 
-### 3. Validar evidência do orquestrador
+### 3. Validar evidência do agregador
 
 Não valida evidências na Construção nem na Revisão da
-Construção. Valida no fim da fase Testes se o
-orquestrador `testes-produto` rodou.
+Construção. Valida no fim da fase Testes se o agente `qa`
+executou o agregador `testes-produto` (o devflow,
+orquestrador do workflow, não executa testes de produto).
 
 **O que fazer**:
 
 1. Ler no `AGENTS.md` a tabela `## Testes por Especialidade`
    e o link âncora para a seção do `docs/README.md`.
-2. Ler a evidência do orquestrador no arquivo de
+2. Ler a evidência do agregador no arquivo de
    planejamento (fase Testes).
 3. Presente e completa = OK. Ausente ou incompleta = FALHA.
    Seção ou comando ausente → LACUNA.
@@ -207,7 +210,10 @@ orquestrador `testes-produto` rodou.
 Ao final do trabalho de curadoria, os scripts de
 testes-produto implementados são executados. Você verifica
 o sucesso (verde) — validação objetiva que resolve a regra
-"não valida o que editou".
+"não valida o que editou". Papéis: na fase Testes do
+workflow, o executor de rotina do `testes-produto` é o
+`qa`; o devflow (orquestrador do workflow) não executa
+testes de produto; você valida a evidência.
 
 ### 5. Detectar ausência de artefatos
 
@@ -243,10 +249,10 @@ Ao fim de um ciclo de desenvolvimento:
 
 | Item | Esperado | Evidência | Status |
 |------|----------|-----------|--------|
-| orquestrador | testes-produto | Presente e completa | OK |
+| agregador | testes-produto | Presente e completa | OK |
 
 ### Falhas
-- **orquestrador**: evidência ausente.
+- **agregador**: evidência ausente.
   Ação: re-executar `testes-produto` e persistir.
 
 ### Lacunas

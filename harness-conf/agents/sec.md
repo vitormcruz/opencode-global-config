@@ -232,7 +232,7 @@ sistemático.
 O que você **NÃO** faz:
 - **Não executa testes de lógica de negócio ou aceitação**
   — responsabilidade do agente `qa`. A suíte automática
-  de segurança também é do orquestrador; este agente
+  de segurança também é do agregador; este agente
   executa só o roteiro manual.
 - **Não implementa lógica de negócio** — apenas configs
   e correções de segurança.

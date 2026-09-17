@@ -79,9 +79,16 @@ mensagem clara e acionável — nunca seleção reduzida, nunca silêncio.
 
 ## Asserções executáveis
 
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` executa os checks preservados abaixo. A diretiva
+`assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+
 - `tests/test_taxonomy.py` compara via subprocess que `-m all` seleciona
   exatamente a união de `-m unit` com `-m integration`, que `all` não
   inclui `agent_eval`, e que marker desconhecido continua sem selecionar
   teste.
 - `tests/test_package_setup.py` exige o registro dos markers novos e a
   ausência dos revogados no `pyproject.toml`.
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).

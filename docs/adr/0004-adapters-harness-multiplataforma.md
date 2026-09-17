@@ -102,6 +102,12 @@ consumido através de um contrato comum. As decisões aceitas:
 
 ## Asserções executáveis
 
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` executa os checks preservados abaixo. A diretiva
+`assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+
 - `pytest -m "unit or tools or opencode"` (WSL/Linux) e
   `pytest -m "unit or tools or copilot"` (Windows) validam adapters,
   factory, strategies e bootstrap.
@@ -111,3 +117,4 @@ consumido através de um contrato comum. As decisões aceitas:
 - `tests/lib/test_windows_env.py` valida gravação em HKCU e broadcast
   com módulo `winreg` falso; `tests/bootstrap/` cobre o broadcast da
   persistência do PATH.
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).

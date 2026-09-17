@@ -89,6 +89,38 @@ def _extract_task_allow_agents(frontmatter: str) -> list[str]:
     return allowed
 
 
+def _extract_task_entries(frontmatter: str) -> list[tuple[str, str]]:
+    """Extrai entradas ``(nome, acao)`` da seção ``task:``, preservando ordem.
+
+    Ignora a entrada especial ``"*"`` (wildcard) apenas na filtragem; ela
+    é mantida aqui porque a posição dela importa para o teste de ordem.
+    """
+
+    entries: list[tuple[str, str]] = []
+    in_task = False
+
+    for raw_line in frontmatter.splitlines():
+        stripped = raw_line.rstrip()
+
+        if re.match(r"^\s+task:\s*$", stripped):
+            in_task = True
+            continue
+
+        if in_task:
+            entry_match = re.match(
+                r"^\s{4,}([\w*-]+|\"[\w*]+\"):\s*(allow|deny)\s*$", stripped
+            )
+            if entry_match:
+                name = entry_match.group(1).strip('"')
+                entries.append((name, entry_match.group(2)))
+                continue
+
+            if stripped and not stripped.startswith("    "):
+                in_task = False
+
+    return entries
+
+
 def _has_question_allow_permission(frontmatter: str) -> bool:
     """Detecta a permissão shorthand ``question: allow`` no frontmatter."""
 
@@ -256,6 +288,48 @@ def test_extract_task_allow_agents_detects_synthetic_orphan() -> None:
         "Parser não detectou 'agente-fantasma: allow' com 4 espaços"
     )
     assert "eng-software" in extracted
+
+
+@pytest.mark.unit
+def test_task_wildcard_deny_must_precede_allows(repo_root: Path) -> None:
+    """Agentes que spawnam subagentes não podem fechar o bloco com ``*: deny``.
+
+    O OpenCode remove a tool ``task`` inteira quando a última regra do
+    bloco é ``*: deny`` (``Permission.disabled`` usa ``findLast``). A
+    wildcard deny deve vir antes dos ``allow``.
+    """
+
+    agents_dir = repo_root / "harness-conf" / "agents"
+    offenders: list[str] = []
+
+    for agent_name, content in _read_agent_files(agents_dir).items():
+        entries = _extract_task_entries(_extract_frontmatter(content))
+        has_allow = any(action == "allow" for _, action in entries)
+        if not has_allow:
+            continue
+        if entries and entries[-1] == ("*", "deny"):
+            offenders.append(agent_name)
+
+    assert offenders == [], (
+        "Agentes com `*: deny` no fim do bloco `task:` (a tool task é "
+        "removida nessa ordem; mova `*: deny` para antes dos allow):\n"
+        + "\n".join(f"  - {agent_name}" for agent_name in offenders)
+    )
+
+
+@pytest.mark.unit
+def test_task_wildcard_deny_order_detects_synthetic_offender() -> None:
+    """Parser detecta ``*: deny`` no fim com entrada sintética."""
+
+    frontmatter = (
+        "mode: primary\n"
+        "permission:\n"
+        "  task:\n"
+        "    eng-software: allow\n"
+        "    \"*\": deny\n"
+    )
+    entries = _extract_task_entries(frontmatter)
+    assert entries[-1] == ("*", "deny")
 
 
 @pytest.mark.unit

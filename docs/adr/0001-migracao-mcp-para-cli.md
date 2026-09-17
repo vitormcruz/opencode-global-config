@@ -72,6 +72,12 @@ comportamento. O plano de migração aprovado registra as seguintes decisões:
 
 ## Asserções executáveis
 
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` executa os checks preservados abaixo. A diretiva
+`assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+
 As decisões são verificadas pelos testes e pelos inventários do repositório:
 
 - `pytest -m "unit or tools"` valida o pacote, bootstrap, adapters e CLIs.
@@ -83,3 +89,4 @@ As decisões são verificadas pelos testes e pelos inventários do repositório:
   entrypoints e a ausência dos scripts legados.
 - A validação final executa `aws --version` após o bootstrap em WSL/Linux e
   Windows, além das suítes específicas de cada cliente.
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).

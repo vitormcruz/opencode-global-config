@@ -87,7 +87,7 @@ Estratégias de Indexação de Código. Criação e manutenção:
 ### 2. Testes por Especialidade
 
 Suítes (backend, dados, segurança, frontend) e o
-orquestrador `testes-produto`. Tabela e link no
+agregador `testes-produto`. Tabela e link no
 `AGENTS.md`; spec na pasta de docs. Criação e
 manutenção: `curador-produto`.
 
@@ -99,7 +99,7 @@ Ver schema na seção "Schema do arquivo de planejamento".
 
 ### 4. Verificação das suítes
 
-Evidência do orquestrador `testes-produto`. O
+Evidência do agregador `testes-produto`. O
 `curador-produto` valida no fim da fase **Testes**.
 O `devflow` decide a ação sobre falhas.
 
@@ -127,7 +127,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    e recebe resumo curto. **Nunca executa** tarefas de
    domínio. Ao final da fase Testes, spawna
    `curador-produto` para validar a evidência do
-   orquestrador. Se falhas, re-spawna agente ou consulta
+   agregador. Se falhas, re-spawna agente ou consulta
    humano.
 2. **Contrato de retorno** — todo agente persiste resultado
    no arquivo e retorna resumo curto (≤ 5 linhas). Ultima
@@ -187,7 +187,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
     (bloqueante ou melhoria).
 27. **`qa` não analisa código** — foca em execução de testes.
 28. **Roteiro manual de segurança é do `sec`**. A suíte
-    automática entra no orquestrador executado pelo `qa`.
+    automática entra no agregador executado pelo `qa`.
 
 ### Arquivo de planejamento
 
@@ -195,7 +195,7 @@ prosseguir. Regras já registradas nunca são reperguntadas.
     `curador-produto` exclui plano e artefatos auxiliares.
 17.1. **Seção de evidências** —
      `## Evidências de Testes — Testes`. `curador-produto`
-     lê a evidência do orquestrador no fim da fase Testes.
+     lê a evidência do agregador no fim da fase Testes.
 18. **Campo `Status` obrigatório** no topo. O agente que
     conclui uma fase atualiza o status antes de retornar.
 19. **Regras de escrita:** na construção, apenas marca
@@ -230,7 +230,7 @@ Status: <FASE> [— detalhe opcional]
   `REVISÃO DA CONSTRUÇÃO`, `TESTES`, `FINALIZAÇÃO`.
 - **Regras de Produto**: tabela de restrições de domínio.
 - **Evidências de Testes — Testes**: evidência do
-  orquestrador `testes-produto`.
+  agregador `testes-produto`.
 - **Perguntas**: pendências de decisão humana.
 
 ### docs/README.md
@@ -277,9 +277,9 @@ Status: <FASE> [— detalhe opcional]
 33. **Fase Testes** — `qa` executa só `testes-produto` e
     manuais do plano. `sec` executa só o roteiro manual.
 34. **Evidência** — JSON `{ status, findings[] }` do
-    orquestrador, persistida na fase Testes.
+    agregador, persistida na fase Testes.
 35. **Validação pelo `curador-produto`** — no fim da fase
-    Testes, confere se o orquestrador rodou. Reporta
+    Testes, confere se o agregador rodou. Reporta
     OK/FALHA/LACUNA. `devflow` decide ação.
 36. **Falha de suíte** — backend → `eng-software`; dados →
     `dba`; segurança automática → `sec`; frontend →
@@ -393,7 +393,7 @@ sequenceDiagram
     qa -->> devflow: Resultado
     devflow ->> sec: Roteiro manual
     sec -->> devflow: Resultado
-    devflow ->> prod: Evidência do orquestrador
+    devflow ->> prod: Evidência do agregador
     prod -->> devflow: Relatório
     opt Falha de suíte
         alt backend
@@ -455,7 +455,7 @@ seção com o humano (mediação via blocos adaptativos da
   Indexação. Cada seção requer aprovação explícita.
 - **Suítes** — pasta de docs, seção "Testes por
   Especialidade" no `docs/README.md`, especialidades,
-  orquestrador, depois instruções. Cada entrada requer
+  agregador, depois instruções. Cada entrada requer
   aprovação explícita.
 
 ### Construção da curadoria

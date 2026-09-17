@@ -39,7 +39,7 @@ Seu foco: modelagem conceitual de dados e migrações seguras.
   (default; pasta definida na curadoria). Nunca use
   path hardcoded.
 - **Não execute a suíte de dados**: lint e schema
-  diff da especialidade dados rodam no orquestrador,
+  diff da especialidade dados rodam no agregador,
   não na Construção. Checklists e skills são
   diretrizes intelectuais, não suíte.
 - **Falha**: se não conseguir completar, registre o

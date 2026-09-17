@@ -195,16 +195,16 @@ manuais do plano. Não chama scripts de especialidade
 um a um.
 
 **Dois níveis de teste**: (1) testes da aplicação — os
-que você executa aqui via suítes/orquestrador
+que você executa aqui via suítes/agregador
 `testes-produto`, sempre que se desenvolve
 funcionalidade; (2) testes dos scripts de teste — os
-scripts de suíte/orquestrador são código, têm testes
+scripts de suíte/agregador são código, têm testes
 próprios com base na seção "Testes por Especialidade"
 do `docs/README.md` (a spec executável deles) e rodam
 SOMENTE quando os scripts mudam, nunca no ciclo normal.
 
 **O que fazer**:
-1. Executar o orquestrador `testes-produto` (comando
+1. Executar o agregador `testes-produto` (comando
    na tabela `## Testes por Especialidade`).
 2. Executar testes manuais planejados (quando aplicável):
    - Seguir roteiro definido no plano de testes.
@@ -233,7 +233,7 @@ O que você **NÃO** faz:
   não a implementação.
 - **Não executa o roteiro manual de segurança** —
   responsabilidade do agente `sec`. A suíte automática
-  entra no orquestrador `testes-produto`.
+  entra no agregador `testes-produto`.
 - **Não corrige código de produção** — apenas reporta
   falhas e corrige/cria testes.
 - **Não faz revisão integrativa** — responsabilidade do

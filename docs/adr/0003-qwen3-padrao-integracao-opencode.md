@@ -50,6 +50,13 @@ Esta decisão substitui, somente para o contrato OpenCode, as decisões do
 ADR-0002 que permitiam um modelo/provider diferente do Qwen fixado e uma
 seleção por execução. O ADR-0002 permanece imutável como registro histórico.
 
+## Alternativas consideradas
+
+- Seleção de modelo por execução: rejeitada porque reintroduz ramificações no
+  servidor, nas fixtures, na configuração e nos comandos de teste.
+- Provider alternativo ou fallback silencioso: rejeitado porque mascara falhas
+  de provisionamento, inferência, privacidade, integridade ou disponibilidade.
+
 ## Consequências
 
 - A configuração efetiva declara exatamente um provider local.
@@ -67,3 +74,12 @@ seleção por execução. O ADR-0002 permanece imutável como registro históric
 
 O rollback suportado é `git revert` do conjunto de commits da migração. Não se
 reativa um caminho alternativo no harness nem se reescreve o ADR-0002.
+
+## Asserções executáveis
+
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` verifica provider, artefato, checksum, runtime e ausência
+de fallback. A diretiva `assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).

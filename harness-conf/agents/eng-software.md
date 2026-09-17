@@ -246,12 +246,12 @@ evita espera bloqueante sem sinal de progresso e timeout
 de número mágico.
 
 **Scripts de testes-produto**: quando a tarefa for
-implementar ou alterar scripts de suíte/orquestrador
+implementar ou alterar scripts de suíte/agregador
 `testes-produto`, a seção "Testes por Especialidade" do
 `docs/README.md` é a especificação executável deles —
 construa com TDD cobrindo exatamente o que a seção
 define. Dois níveis de teste: (1) testes da aplicação
-rodam via suítes/orquestrador na fase Testes, sempre
+rodam via suítes/agregador na fase Testes, sempre
 que se desenvolve funcionalidade; (2) testes dos
 scripts de teste rodam SOMENTE quando os scripts mudam,
 nunca no ciclo normal de desenvolvimento.

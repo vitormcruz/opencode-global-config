@@ -144,12 +144,14 @@ O analista deve elicitar:
 
 ## Testes por Especialidade
 
-Scripts por especialidade e o orquestrador `testes-produto`.
+Scripts por especialidade e o agregador `testes-produto`.
 Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
 exit 1 = fail. Sem argumentos.
 
-O orquestrador chama as quatro suítes e agrega o relatório.
-Falha se qualquer suíte falhar.
+O agregador `testes-produto` chama as quatro suítes e
+consolida o relatório. Falha se qualquer suíte falhar.
+Quem o executa na fase Testes é o agente `qa`; o
+`curador-produto` valida a evidência.
 
 Critérios, orçamento e ferramentas saem da entrevista de
 curadoria. Fingerprint e cache ficam em `testes-produto/target/`
@@ -162,14 +164,16 @@ remoção — reporte finding com instrução de instalação.
 ### Dois níveis de teste
 
 1. **Testes da aplicação** — validam o produto em
-   desenvolvimento. Rodam via suítes/orquestrador
-   `testes-produto` na fase Testes do workflow, sempre que
-   se desenvolve funcionalidade.
+   desenvolvimento. Rodam via suítes/agregador
+   `testes-produto`, executados pelo agente `qa` na fase
+   Testes do workflow, sempre que se desenvolve funcionalidade.
 2. **Testes dos scripts de teste** — os scripts de suíte e
-   o orquestrador são código e têm testes próprios. Esta
+   o agregador são código e têm testes próprios, em
+   `testes-produto/tests/`, fora da suíte `-m all` (separação por
+   path, sem marker novo). Esta
    seção é a especificação executável deles: os testes dos
    scripts cobrem exatamente o que ela define (suítes,
-   interface JSON, orçamento, proibições). Rodam SOMENTE
+   interface JSON, proibições). Rodam SOMENTE
    quando os scripts mudam — por exemplo, curadoria
    alterando ferramentas ou critérios por orientação do
    humano —, nunca no ciclo normal de desenvolvimento.
@@ -188,6 +192,9 @@ suítes com link para esta seção
 - Comandos de teste do projeto (unitários + integração)
 - Relatório de cobertura de testes
 - Análise estática, se o projeto tiver
+- Specs executáveis da especialidade (quando o projeto usa spec
+  executável), rodadas via Concordion com tradutor Python interno à
+  suíte; spec falhando = bloqueante
 
 **Ferramentas:** definidas na entrevista
 
@@ -205,6 +212,9 @@ suítes com link para esta seção
 - Validação de existência de documentos de especificação
 - Validação de sintaxe do modelo (DBML ou equivalente)
 - Conferência entre modelo e schema atual
+- Specs executáveis da especialidade (quando o projeto usa spec
+  executável), rodadas via Concordion com tradutor Python interno à
+  suíte; spec falhando = bloqueante
 
 **Ferramentas:** definidas na entrevista
 
@@ -222,6 +232,9 @@ suítes com link para esta seção
 - Secrets scan no repositório
 - Auditoria de dependências
 - Verificação de vulnerabilidades conhecidas
+- Specs executáveis da especialidade (quando o projeto usa spec
+  executável), rodadas via Concordion com tradutor Python interno à
+  suíte; spec falhando = bloqueante
 
 **Ferramentas:** definidas na entrevista
 
@@ -242,6 +255,9 @@ frontend.
 - Verificação de acessibilidade
 - Cobertura da suíte de UI, se houver
 - `pa11y`, `axe-core` ou ambos: a entrevista decide
+- Specs executáveis da especialidade (quando o projeto usa spec
+  executável), rodadas via Concordion com tradutor Python interno à
+  suíte; spec falhando = bloqueante
 
 **Ferramentas:** definidas na entrevista
 
@@ -249,12 +265,14 @@ frontend.
 
 **Orçamento:** tetos da entrevista; ver interface padronizada
 
-### Orquestrador
+### Agregador
 
 **Arquivo:** `testes-produto`
 
 Chama as quatro suítes (`testes-produto/backend`,
 `testes-produto/dados`, `testes-produto/seguranca`,
-`testes-produto/frontend`) e agrega o
+`testes-produto/frontend`) e consolida o
 relatório no fim. `status` é `fail` se qualquer suíte
 falhar. Não reabre entrevista nem inventa check.
+Executado pelo agente `qa` na fase Testes do workflow; o
+`curador-produto` valida a evidência da execução.

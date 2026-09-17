@@ -10,6 +10,13 @@
 | segurança | `testes-produto/seguranca` |
 | frontend | `testes-produto/frontend` |
 
-Orquestrador: `testes-produto`
+Agregador: `testes-produto`
+
+Chama as suítes da tabela e consolida o relatório; cada suíte roda
+os checks e as specs executáveis da sua especialidade (via
+Concordion, quando o projeto usa spec executável). Executado pelo
+agente `qa` na fase Testes; a evidência é validada pelo
+`curador-produto`. Testes dos scripts de suíte e do agregador:
+`testes-produto/tests/`.
 
 Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)

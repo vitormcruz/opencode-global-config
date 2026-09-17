@@ -46,6 +46,13 @@ O padrão permanece CLI-first. A camada MCP é opcional, por ferramenta:
 
 ## Asserções executáveis
 
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` executa os checks preservados abaixo. A diretiva
+`assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+
 - Decisão de processo; sem testes novos obrigatórios.
 - Revisões verificam ausência de entradas MCP não aprovadas nas configs
   canônicas dos harnesses gerenciados.
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).

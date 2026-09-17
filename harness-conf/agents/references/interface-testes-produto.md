@@ -71,13 +71,23 @@ Quando o humano oferece uma ferramenta, analise estes pontos:
    SHA-256 em `testes-produto/target/` (não versionado), com
    fallback para a suíte completa
 
-## Orquestrador
+## Agregador
 
 - Comando sem argumentos (padrão: `testes-produto`)
 - Chama as quatro suítes (backend, dados, segurança, frontend)
-  e agrega `findings`
+  e consolida `findings`
 - `status` é `fail` se qualquer suíte falhar
+- Execução na fase Testes do workflow: agente `qa` (o script
+  apenas agrega suítes)
+- Evidência da execução validada pelo `curador-produto`
 - Não substitui a entrevista de ferramentas por especialidade
+- Especificação executável É UM TESTE: cada suíte roda
+  internamente as specs executáveis da sua especialidade via
+  Concordion (tradutor Python como infra interna da suíte, como o
+  pytest é do backend)
+- Os testes dos scripts de suíte e do agregador (suíte meta) vivem
+  em `testes-produto/tests/`: fora da suíte `-m all` (separação por
+  path, sem marker novo), rodam quando os scripts mudam
 
 ## Cobertura Estática
 

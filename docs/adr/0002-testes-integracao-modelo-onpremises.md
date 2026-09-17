@@ -253,6 +253,12 @@ contexto, e nenhum pacote foi instalado para mascarar essas ausências.
 
 ## Asserções executáveis
 
+A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
+A diretiva `execute` executa os checks preservados abaixo. A diretiva
+`assertEquals` fixa o veredito esperado da decisão.
+
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+
 Executar dentro do WSL/Linux, no diretório do repositório:
 
 ```bash
@@ -295,3 +301,5 @@ python3 tests/integration/docker/container_test_opencode.py --down
 O proxy deve aparecer somente em `127.0.0.1`; depois de `--down`, a mesma URL
 deve recusar a conexão e nenhum processo `container_test_opencode.py --proxy`
 deve permanecer.
+
+- O veredito agregado da implementação é [pass](#assertEquals=veredito).
