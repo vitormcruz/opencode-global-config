@@ -22,6 +22,8 @@ Thumbs.db
 .venv/
 *.egg-info/
 __pycache__/
+.coverage
+.coverage.*
 
 # Gradle (specs executáveis derivadas e resultados das suítes)
 build/
