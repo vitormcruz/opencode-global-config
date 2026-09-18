@@ -33,6 +33,16 @@ def test_build_renders_adr_specs_with_fixture_names(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
+def test_render_adr_specs_glob_does_not_match_the_c4_diagrams(
+    repo_root: Path,
+) -> None:
+    build = (repo_root / "build.gradle").read_text(encoding="utf-8")
+
+    assert "[0-9][0-9][0-9][0-9]-*.md" in build
+    assert "include '*-*.md'" not in build
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("specialty", "fixtures"),
     sorted(SPECIALTY_ADRS.items()),

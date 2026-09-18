@@ -21,7 +21,9 @@ def adrSpecsDir = layout.buildDirectory.dir('generated/adr-specs')
 
 tasks.register('renderAdrSpecs', Copy) {
     from 'docs/adr'
-    include '*-*.md'
+    // Somente specs numeradas de ADR (0001-*.md ...); os diagramas C4
+    // (diagrama-c4-*.md) ficam fora do classpath de teste.
+    include '[0-9][0-9][0-9][0-9]-*.md'
     into adrSpecsDir
     rename { name ->
         def matcher = (name =~ /^(\d{4})-.*\.md$/)
