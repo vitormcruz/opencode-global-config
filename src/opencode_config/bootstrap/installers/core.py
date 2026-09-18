@@ -11,7 +11,7 @@ import tarfile
 import tempfile
 import urllib.request
 import zipfile
-from collections.abc import Callable, Iterable, Mapping, MutableMapping
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -292,6 +292,9 @@ def _extract_archive(archive: Path, destination: Path) -> None:
                 if member.isdir():
                     target.mkdir(parents=True, exist_ok=True)
                     continue
+                if member.issym():
+                    _extract_tar_symlink(destination, member, target)
+                    continue
                 if not member.isfile():
                     raise InstallerError(
                         f"Tipo de arquivo nao suportado no arquivo: {member.name}"
@@ -305,6 +308,26 @@ def _extract_archive(archive: Path, destination: Path) -> None:
         return
 
     raise InstallerError(f"Formato de arquivo nao suportado: {archive.name}")
+
+
+def _extract_tar_symlink(
+    destination: Path,
+    member: tarfile.TarInfo,
+    target: Path,
+) -> None:
+    """Cria um symlink do tarball apenas se o destino ficar dentro da extracao."""
+
+    resolved_root = destination.resolve()
+    link_target = (target.parent / member.linkname).resolve()
+    if link_target != resolved_root and resolved_root not in link_target.parents:
+        raise InstallerError(
+            f"Symlink fora do destino de extracao: {member.name} -> "
+            f"{member.linkname}"
+        )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.is_symlink() or target.exists():
+        target.unlink()
+    target.symlink_to(member.linkname)
 
 
 def _read_deb_members(package: Path) -> dict[str, bytes]:
@@ -680,23 +703,46 @@ def _install_user_archive(
     context: InstallContext,
     *,
     name: str,
-    url: str,
+    url: str | None,
     executable_names: set[str],
     expected_sha256: str | None = None,
     fetcher: Fetcher | None = None,
+    fallback_urls: Sequence[str] = (),
 ) -> InstallResult:
-    """Instala um pacote portatil completo dentro do cache do usuario."""
+    """Instala um pacote portatil completo dentro do cache do usuario.
 
+    Quando ``url`` nao resolve (rede bloqueada, artefato corrompido), tenta
+    as ``fallback_urls`` em ordem. O checksum obrigatorio (``expected_sha256``)
+    vale para todas as origens; nenhuma origem e aceita sem validar.
+    """
+
+    candidates: Sequence[str] = (
+        (url, *fallback_urls) if url is not None else fallback_urls
+    )
     with tempfile.TemporaryDirectory(prefix=f"opencode-{name}-") as temporary:
         temporary_root = Path(temporary)
-        archive = temporary_root / (Path(url).name or "archive")
         extracted = temporary_root / "extract"
-        download_file(
-            url,
-            archive,
-            expected_sha256=expected_sha256,
-            fetcher=fetcher,
-        )
+        archive: Path | None = None
+        errors: list[str] = []
+        for candidate in candidates:
+            attempt = temporary_root / (Path(candidate).name or "archive")
+            try:
+                download_file(
+                    candidate,
+                    attempt,
+                    expected_sha256=expected_sha256,
+                    fetcher=fetcher,
+                )
+            except (InstallerError, OSError) as error:
+                errors.append(f"{candidate}: {error}")
+                continue
+            archive = attempt
+            break
+        if archive is None:
+            detail = "; ".join(errors) if errors else "nenhuma origem informada"
+            raise InstallerError(
+                f"Falha ao obter {name} de todas as origens: {detail}"
+            )
         _extract_archive(archive, extracted)
         executable = _find_file(extracted, executable_names)
         package_root = executable.parent.parent if executable.parent.name == "bin" else executable.parent
@@ -813,17 +859,32 @@ def install_java(
     fetcher: Fetcher | None = None,
 ) -> InstallResult:
     windows = context.environment is EnvironmentKind.WINDOWS
-    archive_url = url or (
-        "https://api.adoptium.net/v3/binary/version/"
-        f"{JDK_VERSION_TAG}/windows/x64/jdk/hotspot/normal/eclipse"
-        if windows
-        else "https://api.adoptium.net/v3/binary/version/"
-        f"{JDK_VERSION_TAG}/linux/x64/jdk/hotspot/normal/eclipse"
-    )
+    if url is not None:
+        primary, fallbacks = url, ()
+    else:
+        primary = (
+            "https://api.adoptium.net/v3/binary/version/"
+            f"{JDK_VERSION_TAG}/windows/x64/jdk/hotspot/normal/eclipse"
+            if windows
+            else "https://api.adoptium.net/v3/binary/version/"
+            f"{JDK_VERSION_TAG}/linux/x64/jdk/hotspot/normal/eclipse"
+        )
+        # O espelho GitHub da Adoptium serve o MESMO artefato do primary e o
+        # checksum fixado do repo vale para os dois; redes locais que bloqueiam
+        # api.adoptium.net para urllib caem aqui (403/404 no redirect).
+        artifact = (
+            "OpenJDK21U-jdk_x64_windows_hotspot_21.0.6_7.zip"
+            if windows
+            else "OpenJDK21U-jdk_x64_linux_hotspot_21.0.6_7.tar.gz"
+        )
+        fallbacks = (
+            "https://github.com/adoptium/temurin21-binaries/releases/download/"
+            f"{JDK_VERSION_TAG}/{artifact}",
+        )
     return _install_user_archive(
         context,
         name="jdk",
-        url=archive_url,
+        url=primary,
         executable_names={"java", "java.exe"},
         expected_sha256=(
             expected_sha256
@@ -831,6 +892,7 @@ def install_java(
             else (JDK_SHA256_WINDOWS if windows else JDK_SHA256_LINUX)
         ),
         fetcher=fetcher,
+        fallback_urls=fallbacks,
     )
 
 

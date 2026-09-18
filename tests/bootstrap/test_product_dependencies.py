@@ -14,6 +14,7 @@ from opencode_config.bootstrap.installers import (
     POWERSHELL_SHA256_WINDOWS,
     SHELLCHECK_SHA256_WINDOWS,
     install_gradle,
+    install_java,
     install_psscriptanalyzer,
     install_ruff,
     install_shellcheck,
@@ -202,3 +203,151 @@ def test_install_shellcheck_uses_the_official_archive_on_windows(tmp_path) -> No
 
     assert result.success
     assert (context.paths.data_dir / "shellcheck" / "shellcheck.exe").is_file()
+
+
+def build_tar_with_symlink(tmp_path, link_name, link_target):
+    import io
+    import tarfile
+
+    archive = tmp_path / "jdk.tar.gz"
+    with tarfile.open(archive, "w:gz") as output:
+        directory = tarfile.TarInfo("jdk-21")
+        directory.type = tarfile.DIRTYPE
+        output.addfile(directory)
+        payload = b"binary"
+        library = tarfile.TarInfo("jdk-21/lib/libjvm.so")
+        library.size = len(payload)
+        output.addfile(library, io.BytesIO(payload))
+        symlink = tarfile.TarInfo(link_name)
+        symlink.type = tarfile.SYMTYPE
+        symlink.linkname = link_target
+        output.addfile(symlink)
+    return archive
+
+
+@pytest.mark.unit
+def test_extract_archive_accepts_symlinks_inside_the_jdk_tarball(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    import tarfile
+
+    from opencode_config.bootstrap.installers.core import _extract_archive
+
+    monkeypatch.setattr(
+        tarfile,
+        "is_tarfile",
+        lambda _archive: True,
+        raising=False,
+    )
+    archive = build_tar_with_symlink(
+        tmp_path,
+        "jdk-21/bin/server-link",
+        "../lib/libjvm.so",
+    )
+    destination = tmp_path / "extracted"
+
+    _extract_archive(archive, destination)
+
+    link = destination / "jdk-21" / "bin" / "server-link"
+    assert link.is_symlink()
+    assert link.resolve() == (
+        destination / "jdk-21" / "lib" / "libjvm.so"
+    ).resolve()
+
+
+@pytest.mark.unit
+def test_extract_archive_rejects_symlink_escape(tmp_path, monkeypatch) -> None:
+    import tarfile
+
+    import pytest
+
+    from opencode_config.bootstrap.installers.core import InstallerError
+    from opencode_config.bootstrap.installers.core import _extract_archive
+
+    monkeypatch.setattr(
+        tarfile,
+        "is_tarfile",
+        lambda _archive: True,
+        raising=False,
+    )
+    archive = build_tar_with_symlink(
+        tmp_path,
+        "jdk-21/escape",
+        "../../../outside",
+    )
+    destination = tmp_path / "extracted"
+
+    with pytest.raises(InstallerError, match="Symlink fora do destino"):
+        _extract_archive(archive, destination)
+
+
+def build_jdk_tarball(destination) -> None:
+    import io
+    import tarfile
+
+    with tarfile.open(destination, "w:gz") as output:
+        directory = tarfile.TarInfo("jdk-21.0.6+7/bin")
+        directory.type = tarfile.DIRTYPE
+        output.addfile(directory)
+        payload = b"#!/bin/sh\n"
+        executable = tarfile.TarInfo("jdk-21.0.6+7/bin/java")
+        executable.size = len(payload)
+        output.addfile(executable, io.BytesIO(payload))
+
+
+@pytest.mark.unit
+def test_install_java_falls_back_to_github_mirror_keeping_checksum(tmp_path) -> None:
+    from hashlib import sha256
+
+    context = make_context(tmp_path)
+    fetched_urls = []
+    payload = tmp_path / "payload.tar.gz"
+    build_jdk_tarball(payload)
+
+    def fetcher(url, destination):
+        fetched_urls.append(url)
+        if "api.adoptium.net" in url:
+            raise OSError("HTTP 403")
+        destination.write_bytes(payload.read_bytes())
+
+    result = install_java(
+        context,
+        expected_sha256=sha256(payload.read_bytes()).hexdigest(),
+        fetcher=fetcher,
+    )
+
+    assert result.success
+    assert len(fetched_urls) == 2
+    assert "api.adoptium.net" in fetched_urls[0]
+    assert "github.com/adoptium" in fetched_urls[1]
+    assert (
+        context.paths.data_dir / "jdk" / "bin" / "java"
+    ).is_file()
+
+
+@pytest.mark.unit
+def test_install_java_with_explicit_url_does_not_mirror(tmp_path) -> None:
+    from hashlib import sha256
+
+    payload = tmp_path / "payload.tar.gz"
+    build_jdk_tarball(payload)
+    context = make_context(tmp_path)
+    fetched_urls = []
+
+    def fetcher(url, destination):
+        fetched_urls.append(url)
+        destination.write_bytes(payload.read_bytes())
+
+    result = install_java(
+        context,
+        url=f"file://{payload}",
+        expected_sha256=sha256(payload.read_bytes()).hexdigest(),
+        fetcher=fetcher,
+    )
+
+    assert result.success
+    assert fetched_urls == []
+    assert (
+        context.paths.data_dir / "jdk" / "bin" / "java"
+    ).is_file()
