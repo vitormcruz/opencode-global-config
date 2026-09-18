@@ -178,8 +178,20 @@ def run_concordion_suite(
             report.findings + (_process_finding("gradle", result),),
             declared_status="fail",
         )
-    if result.returncode == 1 and not report.findings:
-        return ProductReport.from_findings([_process_finding("gradle", result)])
+    if result.returncode == 1:
+        reports_missing = all(
+            "nenhum relatorio XML" in finding.message for finding in report.findings
+        )
+        gradle_detail = result.stderr or result.stdout
+        if reports_missing and gradle_detail.strip():
+            # Exit 1 sem XML: a causa raiz (build, toolchain, rede) esta no
+            # stderr; sem este anexo o finding "nenhum relatorio" esconde o
+            # diagnostico (ex.: Gradle incompativel com o JDK).
+            return ProductReport.from_findings(
+                [*report.findings, _process_finding("gradle", result)]
+            )
+        if not report.findings:
+            return ProductReport.from_findings([_process_finding("gradle", result)])
     return report
 
 

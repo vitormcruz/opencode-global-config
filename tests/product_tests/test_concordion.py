@@ -116,3 +116,30 @@ def test_run_concordion_suite_translates_a_successful_gradle_report(
     assert report.status == "pass"
     for environment in observed_environments:
         assert environment is None or "PRODUCT_TEST_REPO_ROOT" not in environment
+
+
+@pytest.mark.unit
+def test_gradle_exit_1_without_reports_attaches_stderr_to_findings(
+    tmp_path: Path,
+) -> None:
+    def runner(command, **_kwargs):
+        return ProcessResult(
+            tuple(str(item) for item in command),
+            1,
+            "",
+            "FAILURE: build failed with an exception: Could not open cp_proj",
+        )
+
+    report = run_concordion_suite(
+        tmp_path,
+        specialty="backend",
+        which=lambda _name: "/tool/executable",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    assert report.status == "fail"
+    assert any(
+        "nenhum relatorio XML" in finding.message for finding in report.findings
+    )
+    assert any("FAILURE: build failed" in finding.message for finding in report.findings)
