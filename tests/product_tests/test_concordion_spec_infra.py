@@ -32,14 +32,59 @@ def test_build_renders_adr_specs_with_fixture_names(repo_root: Path) -> None:
     assert "Adr" in build
 
 
-@pytest.mark.unit
-def test_render_adr_specs_glob_does_not_match_the_c4_diagrams(
+@pytest.mark.integration
+def test_render_adr_specs_task_derives_exactly_the_six_adr_specs(
     repo_root: Path,
 ) -> None:
-    build = (repo_root / "build.gradle").read_text(encoding="utf-8")
+    """Guarda comportamental: a task real deriva as 6 specs, sem diagramas.
 
-    assert "[0-9][0-9][0-9][0-9]-*.md" in build
-    assert "include '*-*.md'" not in build
+    Executa ``gradle renderAdrSpecs`` do build real (validação dirigida do
+    build; não executa suítes de teste) e exige as seis saídas derivadas e a
+    ausência dos diagramas C4 no classpath. Um include que não case nada
+    (task NO-SOURCE silenciosa) ou que copie diagramas faz este teste falhar.
+    """
+
+    import os
+    import shutil
+    import subprocess
+
+    gradle = shutil.which("gradle")
+    if gradle is None:
+        pytest.fail(
+            "gradle ausente no PATH; execute o bootstrap user-space "
+            "(install_gradle)"
+        )
+    java_home = os.environ.get("JAVA_HOME", "")
+    if not java_home or not Path(java_home, "bin", "java").exists():
+        pytest.fail(
+            "JAVA_HOME ausente ou invalido; execute o bootstrap user-space "
+            "(install_java) e carregue o PATH persistido no .bashrc"
+        )
+
+    environment = {**os.environ, "JAVA_HOME": java_home}
+    completed = subprocess.run(
+        [gradle, "-q", "renderAdrSpecs", "--no-daemon"],
+        cwd=repo_root,
+        env=environment,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=300,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+    generated = repo_root / "build" / "generated" / "adr-specs"
+    derived = sorted(path.name for path in generated.glob("*.md"))
+    assert derived == [
+        "Adr0001.md",
+        "Adr0002.md",
+        "Adr0003.md",
+        "Adr0004.md",
+        "Adr0005.md",
+        "Adr0006.md",
+    ]
+    assert list(generated.glob("diagrama-*")) == []
 
 
 @pytest.mark.unit
