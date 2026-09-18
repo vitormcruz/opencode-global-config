@@ -5,7 +5,6 @@ from pathlib import Path
 import subprocess
 import sys
 
-import pytest
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -26,7 +25,6 @@ def run_script(path: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-@pytest.mark.unit
 def test_specialty_scripts_are_argumentless_and_return_normative_json() -> None:
     for path in SUITE_PATHS:
         completed = run_script(path)
@@ -37,7 +35,6 @@ def test_specialty_scripts_are_argumentless_and_return_normative_json() -> None:
         assert completed.returncode in {0, 1}
 
 
-@pytest.mark.unit
 def test_specialty_scripts_reject_arguments_with_json_finding() -> None:
     for path in SUITE_PATHS:
         completed = subprocess.run(
@@ -54,7 +51,6 @@ def test_specialty_scripts_reject_arguments_with_json_finding() -> None:
         assert report["findings"][0]["severity"] == "bloqueante"
 
 
-@pytest.mark.unit
 def test_aggregator_returns_the_same_normative_json_contract() -> None:
     completed = subprocess.run(
         [sys.executable, str(REPOSITORY_ROOT / "testes-produto")],
@@ -72,7 +68,6 @@ def test_aggregator_returns_the_same_normative_json_contract() -> None:
     assert completed.returncode in {0, 1}
 
 
-@pytest.mark.unit
 def test_aggregator_rejects_arguments_with_a_blocking_finding() -> None:
     completed = subprocess.run(
         [sys.executable, str(REPOSITORY_ROOT / "testes-produto"), "unexpected"],
@@ -89,7 +84,6 @@ def test_aggregator_rejects_arguments_with_a_blocking_finding() -> None:
     assert report["findings"][0]["severity"] == "bloqueante"
 
 
-@pytest.mark.unit
 def test_aggregator_is_separate_from_the_meta_suite() -> None:
     assert (REPOSITORY_ROOT / "testes-produto" / "tests").is_dir()
     assert (REPOSITORY_ROOT / "testes-produto" / "__main__.py").is_file()
