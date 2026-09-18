@@ -162,10 +162,10 @@ DOC_TEMPLATE = dedent(
     ### Suítes
 
     - backend: `testes-produto/backend`
-    - dados: `testes-produto/dados`
     - segurança: `testes-produto/seguranca`
-    - frontend: `testes-produto/frontend`
     - Agregador: `testes-produto`
+
+    Novas especialidades entram por curadoria do projeto-alvo.
     """
 )
 

@@ -53,3 +53,21 @@ def test_curated_doc_scaffold_describes_specialty_specs_and_concordion(
     assert "Specs executáveis da especialidade segurança" in content
     assert "tradutor Python" in content
     assert "Chama backend e segurança" not in content
+
+
+@pytest.mark.unit
+def test_curated_doc_scaffold_suite_list_matches_recorded_sections(
+    tmp_path: Path,
+) -> None:
+    destination = tmp_path / "README.md"
+
+    status, _, _ = run_scaffold("--doc", str(destination))
+    content = destination.read_text(encoding="utf-8")
+
+    assert status == 0
+    assert "- dados: `testes-produto/dados`" not in content
+    assert "- frontend: `testes-produto/frontend`" not in content
+    assert "- backend: `testes-produto/backend`" in content
+    assert "- segurança: `testes-produto/seguranca`" in content
+    assert "- Agregador: `testes-produto`" in content
+    assert "Novas especialidades entram por curadoria" in content
