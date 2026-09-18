@@ -69,12 +69,27 @@ def findings_from_pip_audit(payload: object) -> list[Finding]:
                     Finding("bloqueante", "pip-audit", "JSON invalido: vulnerabilidade")
                 ]
             identifier = vulnerability.get("id", "identificador ausente")
-            severity = _severity(vulnerability.get("severity"))
+            package_label = f"{package}: {identifier}"
+            raw_severity = vulnerability.get("severity")
+            if raw_severity is None:
+                # O JSON do pip-audit nao expoe severity; sem o campo, o
+                # veredito e fail-closed (bloqueante) por decisao registrada
+                # no arquivo de planejamento.
+                findings.append(
+                    Finding(
+                        "bloqueante",
+                        "pip-audit",
+                        f"{package_label} (severity nao informada pelo "
+                        "pip-audit; bloqueante por fail-closed)",
+                    )
+                )
+                continue
+            severity = _severity(raw_severity)
             findings.append(
                 Finding(
                     severity,
                     "pip-audit",
-                    f"{package}: {identifier} ({severity})",
+                    f"{package_label} ({severity})",
                 )
             )
     return findings
@@ -128,7 +143,7 @@ def _run_gitleaks(
         if detail:
             message = f"{message}; detalhe: {detail}"
         return [Finding("bloqueante", "gitleaks", message)]
-    message = f"execução do gitleaks falhou (exit {result.returncode})"
+    message = f"execucao do gitleaks falhou (exit {result.returncode})"
     if detail:
         message = f"{message}: {detail}"
     return [Finding("bloqueante", "gitleaks", message)]
