@@ -1,3 +1,5 @@
+import json
+import shutil
 import subprocess
 from io import StringIO
 from pathlib import Path
@@ -83,6 +85,130 @@ def test_documented_skill_command_has_timeout(
 
     assert status == 1
     assert "tempo limite" in output
+
+
+@pytest.mark.unit
+def test_documented_command_runs_without_shell(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run(argv, **kwargs):
+        captured["argv"] = argv
+        captured["kwargs"] = kwargs
+
+        class Completed:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        return Completed()
+
+    monkeypatch.setattr(skills_sync.subprocess, "run", fake_run)
+
+    status, _ = skills_sync._run_documented_command(
+        "python3 scripts/update.py --flag 'valor com espaco'",
+        tmp_path,
+    )
+
+    assert status == 0
+    assert captured["argv"] == [
+        "python3",
+        "scripts/update.py",
+        "--flag",
+        "valor com espaco",
+    ]
+    kwargs = captured["kwargs"]
+    assert kwargs.get("shell") is not True
+    assert kwargs.get("capture_output") is True
+    assert kwargs.get("text") is True
+    assert (
+        kwargs.get("timeout") == skills_sync.SKILL_COMMAND_TIMEOUT_SECONDS
+    )
+
+
+@pytest.mark.unit
+def test_documented_command_rejects_executable_outside_whitelist(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("subprocess.run nao deveria ser chamado")
+
+    monkeypatch.setattr(skills_sync.subprocess, "run", forbidden)
+
+    status, output = skills_sync._run_documented_command(
+        "comando-nao-documentado --flag",
+        tmp_path,
+    )
+
+    assert status == 1
+    assert "fora da lista permitida" in output
+
+
+@pytest.mark.unit
+@pytest.mark.skipif(
+    shutil.which("bash") is None,
+    reason="exige bash (POSIX)",
+)
+def test_documented_command_preserves_quoted_arguments(tmp_path: Path) -> None:
+    script = tmp_path / "echo_args.sh"
+    script.write_text(
+        '#!/bin/bash\nfor arg in "$@"; do printf \'%s\\n\' "$arg"; done\n',
+        encoding="utf-8",
+    )
+    script.chmod(0o755)
+
+    status, output = skills_sync._run_documented_command(
+        f"bash {script} 'primeiro argumento' segundo",
+        tmp_path,
+    )
+
+    assert status == 0
+    assert "primeiro argumento" in output
+    assert "segundo" in output
+
+
+@pytest.mark.integration
+def test_skills_sync_has_no_bandit_shell_true_finding(repo_root: Path) -> None:
+    bandit = shutil.which("bandit")
+    if bandit is None:
+        pytest.fail(
+            "bandit nao encontrado no PATH; instale em user-space com: "
+            "pipx install bandit"
+        )
+    target = repo_root / "src" / "opencode_config" / "cli" / "skills_sync.py"
+    try:
+        completed = subprocess.run(
+            [bandit, "-q", "-f", "json", str(target)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired as problem:
+        pytest.fail(f"bandit excedeu o tempo limite de 120s: {problem}")
+    try:
+        report = json.loads(completed.stdout)
+    except json.JSONDecodeError as problem:
+        pytest.fail(
+            "bandit nao produziu relatorio JSON valido "
+            f"(exit {completed.returncode}): {problem}; stderr: "
+            f"{completed.stderr.strip()}"
+        )
+    shell_findings = [
+        result
+        for result in report.get("results", [])
+        if result.get("test_id") == "B602"
+    ]
+    locations = ", ".join(
+        f"{result.get('filename')}:{result.get('line_number')}"
+        for result in shell_findings
+    )
+    assert shell_findings == [], (
+        "bandit B602 (subprocess com shell=True) deve ser eliminado de "
+        f"skills_sync.py; encontrados: {locations}"
+    )
 
 
 @pytest.mark.unit

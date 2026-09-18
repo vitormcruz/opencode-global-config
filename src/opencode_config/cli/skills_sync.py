@@ -19,6 +19,21 @@ from opencode_config.lib.paths import HARNESS_CONF_DIR
 
 SKILL_COMMAND_TIMEOUT_SECONDS = 300
 
+# Executáveis aceitos em comandos documentados no UPSTREAM.md de uma skill.
+_DOCUMENTED_EXECUTABLES = frozenset(
+    {"bash", "sh", "python", "python3", "opencode-skills"}
+)
+
+
+def _is_documented_executable(executable: str) -> bool:
+    """Confere se o executável segue o padrão documentado de atualização."""
+
+    return (
+        executable in _DOCUMENTED_EXECUTABLES
+        or executable.startswith("./")
+        or executable.startswith("scripts/")
+    )
+
 
 class SyncError(RuntimeError):
     """Indica que um upstream não pode ser sincronizado com segurança."""
@@ -505,9 +520,7 @@ def _documented_commands(upstream_file: Path) -> list[str]:
             first = shlex.split(candidate)[0]
         except ValueError:
             continue
-        if first in {"bash", "sh", "python", "python3", "opencode-skills"}:
-            commands.append(candidate)
-        elif first.startswith("./") or first.startswith("scripts/"):
+        if _is_documented_executable(first):
             commands.append(candidate)
     return commands
 
@@ -539,10 +552,15 @@ def _run_documented_command(
                 timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
             )
         else:
+            # Defesa em profundidade: o comando vem de conteúdo upstream
+            # (UPSTREAM.md), tratado como não-confiável. Executa por lista de
+            # argumentos, sem shell: metacaracteres não são interpretados e
+            # o executável precisa seguir o padrão documentado.
+            if not _is_documented_executable(tokens[0]):
+                return 1, f"executavel fora da lista permitida: {tokens[0]}"
             completed = subprocess.run(
-                command,
+                tokens,
                 cwd=repo_root,
-                shell=True,
                 capture_output=True,
                 text=True,
                 timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
