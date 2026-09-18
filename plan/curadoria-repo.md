@@ -1,4 +1,4 @@
-Status: REVISÃO DA CONSTRUÇÃO — refazer revisão em glm-5.3 (rodada anterior rodou em flash por desvio de roteamento; qa cancelado antes de iniciar)
+Status: TESTES — evidência registrada; aguardando validação do curador-produto
 
 # Curadoria do Repo — opencode-global-config
 
@@ -2407,3 +2407,546 @@ humano, pois adiciona rede ao check.
 - [x] Suítes de produto, agregador e meta: não executados como suítes
       (regra da fase); apenas coleta (`--collect-only`) para verificação
       da melhoria 6.
+
+### Verificação final da construção — 2026-09-14
+
+Autor: rev (instância limpa, glm-5.3, chamada pelo devflow para a
+verificação final da REVISÃO DA CONSTRUÇÃO). Data de execução: 2026-09-17.
+Objeto: os 7 achados da rodada glm-5.3 contra os commits `7cebb28`..`e8169ab`
+e o worktree (idêntico a `e8169ab` nos artefatos revisados). Suítes de
+produto e meta NÃO executadas; inspeção, diffs, leitura de testes e
+verificações leves (coleta `--collect-only`, ruff, py_compile).
+
+#### Conferência dos 7 achados
+
+| # | Achado original | Status | Evidência resumida |
+|---|-----------------|--------|--------------------|
+| 1 | Fail-open PSScriptAnalyzer (bloqueante) | Resolvido | Probe + rc!=0 bloqueante em todos os ramos; 4 testes |
+| 2 | `.gitignore` sem `build/`/`.gradle/` | Resolvido | `build/`, `.gradle/` e `target/` ignorados |
+| 3 | Glob do `renderAdrSpecs` casa diagramas C4 | Resolvido | Include `[0-9][0-9][0-9][0-9]-*.md` + guarda em teste |
+| 4 | pip-audit: severity ausente implícito | Resolvido | Caminho explícito fail-closed; decisão registrada |
+| 5 | Acento na mensagem do gitleaks | Resolvido | "execucao do gitleaks falhou (exit N)"; teste atualizado junto |
+| 6 | Suíte meta com marker `unit` | Resolvido | Sem marker; separação só por path, confirmada por coleta |
+| 7 | Lista "Suítes" do scaffold desalinhada | Resolvido | backend, segurança, Agregador + nota de curadoria |
+
+Detalhe do bloqueante 1 (pergunta da verificação): `_lint_findings` agora
+executa probe `Import-Module PSScriptAnalyzer -ErrorAction Stop` antes do
+loop; `probe.error or probe.returncode != 0` produz finding bloqueante com a
+instrução `Install-Module PSScriptAnalyzer -Scope CurrentUser`. No loop de
+análise, `result.error or result.returncode != 0` vira "falha de execucao"
+bloqueante com `continue` — o guard antigo `not in {0, 1}` foi removido e
+rc=1 nunca é tratado como sucesso em ramo algum. Caminho pwsh presente +
+módulo ausente: probe rc=1, finding bloqueante, nenhum script analisado
+(o teste verifica probe único e `analyzed == []`), sem falso verde.
+
+#### Regressões (eixo 3 da demanda)
+
+Nenhuma. Exit codes e interface JSON intocados (runner/agregador/concordion
+fora dos commits de correção); idempotência Gradle preservada (`clean` +
+`upToDateWhen { false }`); mensagens novas sem acento, no estilo do módulo,
+com `ProcessResult` em UTF-8/replace; sem resíduo de "orquestrador" para o
+script (ocorrências restantes nomeiam o papel de workflow em docs);
+cobertura `omit` restrita a `testes-produto/tests/*`; suíte meta fora do
+`-m all` da raiz (testpaths=tests); spec do docs/README.md intacta; ruff +
+py_compile verdes nos arquivos alterados; `git diff e8169ab` vazio.
+
+#### Achados
+
+| # | Achado | Ação recomendada | Severidade |
+|---|--------|------------------|------------|
+| 1 | Nota: decisão do pip-audit (melhoria 4) fora de ## Decisões | Consolidar na próxima edição do plan | melhoria |
+
+#### Veredicto
+
+[ ] Aprovado sem ressalvas
+[x] Aprovado com melhorias opcionais
+[ ] Bloqueado — resolver achados bloqueantes antes de prosseguir
+
+Bloqueante 1 resolvido e verificado (sem falso verde em ramo algum);
+melhorias 2–7 confirmadas com testes de guarda. Nenhuma regressão
+detectada. A construção está liberada para a fase Testes.
+
+#### Evidências (rev)
+
+- [x] Artefatos lidos: `plan/curadoria-repo.md` (rodada glm-5.3 e correção),
+      diffs `7cebb28`..`e8169ab`, `backend.py`, `security.py`, `process.py`,
+      `build.gradle`, `.gitignore`, `scaffold_mapa.py`, suíte meta e 3
+      arquivos de teste
+- [x] Plano aprovado consultado: sim (relatório anterior + correção
+      registrada no plan)
+- [x] Checklist integrativo: 3 dimensões da demanda (7 achados, bloqueante,
+      regressões) + 5 eixos da skill code-review-and-quality
+- [x] Verificações de fato: coleta leve da suíte meta (5/5 por path, 0 com
+      `-m unit`, fora do `-m all`); ruff + py_compile; grep de resíduo;
+      diff vazio vs `e8169ab`
+- [x] Achados encontrados: 0 bloqueantes, 1 melhoria (nota editorial)
+- [x] Suítes de produto e meta NÃO executadas (regra da fase)
+
+## Evidências de Testes — TESTES
+
+Autor: qa (instância limpa, glm-5.3), chamado pelo devflow para a fase TESTES.
+Data: 2026-09-17.
+
+### Ambiente
+
+- SO: WSL2 (Ubuntu 24.04.4 LTS, kernel 6.6.87.2-microsoft-standard-WSL2).
+- venv: `.venv` do repo (Python 3.12.3, pytest 9.1.1).
+- Comando: `.venv/bin/python testes-produto`, sem argumentos (equivalente, no
+  checkout sem console script instalado, do comando `testes-produto`; interface
+  da seção "Testes por Especialidade" do `docs/README.md`).
+- Ferramentas user-space ao fim da sessão: ruff 0.16.8 e shellcheck 0.11.0
+  (pipx), pwsh 7.4.6 (`~/.local/share/pwsh`), PSScriptAnalyzer 1.25.0
+  (`Install-Module -Scope CurrentUser`), gitleaks 8.24.2
+  (`~/.local/share/gitleaks`), pip-audit 2.10.1 e bandit 1.9.4 (pipx),
+  OpenJDK 21.0.6+7 (`~/.local/share/jdk`), Gradle 8.10.2
+  (`~/.local/share/gradle`).
+
+### Execuções do agregador
+
+1. Execução 1 (ambiente cru, antes das instalações): exit 1, 146s, 8 findings
+   bloqueantes de ferramenta ausente (ruff, shellcheck, PSScriptAnalyzer/pwsh,
+   java 2x, gitleaks, pip-audit, bandit). Cada finding trazia instrução de
+   instalação user-space; instalações realizadas (seção abaixo).
+2. Execução 2 (ferramentas instaladas; Gradle do sistema 6.6.1): exit 1, 198s,
+   38 findings (3 bloqueantes: concordion backend "nenhum relatorio XML JUnit",
+   bandit shell=True, concordion seguranca; 35 melhorias bandit). Diagnóstico:
+   Gradle 6.6.1 não suporta JDK 21 ("Unsupported class file major version 65"
+   na compilação do settings.gradle). Instalado Gradle 8.10.2 user-space do
+   repo (install_gradle, checksum fixado).
+3. Execução 3 (evidência final, ambiente completo): exit 1, 178s, 42 findings
+   (7 bloqueantes, 35 melhorias). JSON integral no fim desta seção.
+
+### Instalações user-space realizadas (instruções dos próprios findings)
+
+- pipx (`~/.local/bin`): ruff, shellcheck-py, pip-audit, bandit.
+- Instaladores oficiais do repo (`install_dependencies`): pwsh 7.4.6 e
+  gitleaks 8.24.2 (arquivos portáteis com SHA-256 fixado do repo) e
+  PSScriptAnalyzer 1.25.0 via pwsh (`Install-Module -Scope CurrentUser`).
+- JDK: `install_java` do repo falhou 2x (rede local bloqueia api.adoptium.net
+  para urllib, HTTP 403; e `_extract_archive` do repo rejeita os symlinks do
+  tarball Linux do JDK: "Tipo de arquivo nao suportado"). Instalado
+  manualmente com o MESMO artefato oficial (espelho GitHub da Adoptium,
+  OpenJDK21U-jdk_x64_linux_hotspot_21.0.6_7.tar.gz), SHA-256 conferido contra
+  `JDK_SHA256_LINUX` do repo, extraído com `tar` do SO para
+  `~/.local/share/jdk` (mesmo destino do instalador). Sem elevação.
+- Gradle 8.10.2 via `install_gradle` do repo (checksum fixado).
+- PATH persistido no bloco `opencode-config:bootstrap-path` do `~/.bashrc`
+  (mesmo mecanismo `update_marked_block` do repo).
+
+### Resultado da execução 3 (final)
+
+- `status`: fail; exit 1; duração 178s; progresso em stderr conforme interface.
+- 42 findings: 7 bloqueantes (6 concordion + 1 bandit) e 35 melhorias (bandit).
+- Checks que passaram (sem finding): pytest `-m all` (suíte completa do
+  ambiente, nenhum teste falho), ruff, shellcheck, PSScriptAnalyzer,
+  cobertura total >= 70% (gate pytest-cov), gitleaks (nenhum segredo),
+  pip-audit (nenhuma vulnerabilidade reportada) e specs Concordion de
+  especialidade (`docs/specs/Backend.md` e `docs/specs/Seguranca.md`:
+  BackendFixture e SegurancaFixture verdes).
+- Bloqueantes:
+  1. bandit (high, bloqueante por spec): `skills_sync.py:545` subprocess call
+     with shell=True.
+  2. a 7. concordion: `Adr0001Fixture` a `Adr0006Fixture` com
+     initializationError "Unable to find specification". Causa raiz
+     diagnosticada pelo qa: a task `renderAdrSpecs` do `build.gradle` usa
+     `include '[0-9][0-9][0-9][0-9]-*.md'`, padrão que NAO casa arquivos no
+     Copy do Gradle 8.10.2 (task resulta NO-SOURCE; reproduzido em sandbox
+     fora do repo com include alternativo casando normalmente). Logo, nenhuma
+     spec de ADR é derivada para o classpath e as 6 fixtures de ADR não
+     executam as asserções. Nao corrigido (regra do qa: nao corrige código de
+     produção; reporta).
+
+### Achados de QA (complementares aos findings do agregador)
+
+- [bloqueante] `build.gradle`: include de `renderAdrSpecs` sem casamento
+  (NO-SOURCE) torna as asserções executáveis dos 6 ADRs inertes; a guarda
+  pytest da suíte meta (`tests/product_tests/test_concordion_spec_infra.py`)
+  é textual (verifica o trecho do include no script) e não detecta o defeito
+  comportamental. Correção é do eng-software.
+- [melhoria] `install_java` do repo não instala JDK Linux pelo caminho
+  documentado: `_extract_archive` rejeita symlinks do tarball oficial
+  (member nao file/dir). Registrar no backlog de correção.
+- [melhoria] Rede local bloqueia `api.adoptium.net` para o urllib do repo
+  (HTTP 403/404; curl recebe 404 no endpoint de redirect). O espelho GitHub da
+  Adoptium funciona e serve o mesmo artefato (checksum do repo confere).
+- [melhoria] Diagnosticabilidade: em `concordion.py`, quando o Gradle termina
+  exit 1 sem gerar XML e o report já tem finding ("nenhum relatorio"), o
+  stderr do processo não é anexado ao finding, mascarando a causa raiz
+  (aconteceu na execução 2; diagnóstico manual foi necessario).
+- [melhoria] `.coverage` gerado na raiz pela suíte backend e nao coberto pelo
+  `.gitignore` (aparece como untracked).
+
+### Correções TESTES — sec (bloqueante 1: bandit B602)
+
+Autor: sec (instância nova, rodada de correção TESTES), chamado pelo devflow.
+Data: 2026-09-18. Escopo: `src/opencode_config/cli/skills_sync.py` e
+`tests/skills_mgmt/test_sync.py`.
+
+**Diagnóstico.** Em `_run_documented_command`, o branch `opencode-skills` já
+executava por lista de argumentos; o branch `else` executava a string do
+comando com `shell=True` (bandit B602, high). O comando é extraído do
+`UPSTREAM.md` da skill (conteúdo upstream externo, não-confiável), então o
+shell interpretaria metacaracteres de entrada externa. Comandos que caem no
+branch: `bash`, `sh`, `python`, `python3`, `./...` e `scripts/...` (mesmo
+conjunto do filtro de `_documented_commands`); nenhum `UPSTREAM.md` atual usa
+pipeline/redirecionamento (verificados: todos são `opencode-skills sync ...`).
+
+**Mudança** (menor alteração de comportamento):
+
+- `subprocess.run(tokens, ...)` por lista de argumentos de `shlex.split`,
+  sem `shell=True`; `cwd`, `capture_output`, `text` e timeout preservados.
+- Whitelist defensiva extraída para `_DOCUMENTED_EXECUTABLES` /
+  `_is_documented_executable` (mesma regra de `_documented_commands`, agora
+  compartilhada): token fora do conjunto e sem prefixo `./`/`scripts/` é
+  recusado com `(1, "executavel fora da lista permitida: ...")` sem executar.
+- Diferença consciente: metacaracteres de shell (pipeline, redirect, expansão)
+  deixam de ser interpretados; passam como argumentos literais. Nenhum comando
+  documentado atual depende disso.
+
+**TDD** (`tests/skills_mgmt/test_sync.py`; RED confirmado antes da correção):
+
+- `test_skills_sync_has_no_bandit_shell_true_finding` (integration): roda
+  bandit JSON no módulo e reprova se houver B602; reproduziu o finding na
+  linha 545 antes do fix (bandit ausente falha com instrução `pipx install
+  bandit`, sem skip).
+- `test_documented_command_runs_without_shell` (unit): falhava no RED
+  (string + `shell=True` capturados); agora assegura argv em lista, tokenização
+  de argumento com espaço preservada e `capture_output`/`text`/timeout.
+- `test_documented_command_rejects_executable_outside_whitelist` (unit):
+  falhava no RED (comando ia pro shell); agora recusa sem chamar subprocess.
+- `test_documented_command_preserves_quoted_arguments` (unit, skipif sem
+  bash): execução real de script com argumento entre aspas; paridade
+  shell → lista (já passava no RED; guarda de não-regressão).
+
+**Validação:**
+
+- bandit local no arquivo alvo: B602 = nenhum; restam 7 findings LOW
+  (B404/B603/B607, severidade melhoria, fora do escopo bloqueante).
+- `tests/skills_mgmt/`: 63/63 verdes (`.venv/bin/pytest tests/skills_mgmt/`).
+- Suíte completa `.venv/bin/pytest -m all`: as falhas remanescentes estão em
+  `tests/bootstrap/test_product_dependencies.py` (instalação de JDK, rede
+  local bloqueada, pré-existente) e `tests/product_tests/test_concordion*`
+  (achados do qa em `build.gradle`, em correção pelo eng-software em
+  paralelo). Nenhuma em skills_mgmt; diff deste agente limitado aos 2 arquivos
+  do escopo.
+
+
+### Roteiro manual
+
+- Sem roteiro manual definido para esta fase. O elemento "Plano de Testes
+  Manuais" foi removido da tabela de Elementos na curadoria (decisão P3.b:
+  manual sob demanda, sem artefato obrigatório) e nem o `docs/README.md` nem
+  este plan definem roteiro manual para TESTES.
+
+### JSON integral da execução 3 (stdout do agregador, formatado)
+
+```json
+{
+    "status": "fail",
+    "findings": [
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0001Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0001.html' or 'Adr0001.xhtml' or 'Adr0001.md' or 'Adr0001.markdown'"
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0002Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0002.html' or 'Adr0002.xhtml' or 'Adr0002.md' or 'Adr0002.markdown'"
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0003Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0003.html' or 'Adr0003.xhtml' or 'Adr0003.md' or 'Adr0003.markdown'"
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0004Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0004.html' or 'Adr0004.xhtml' or 'Adr0004.md' or 'Adr0004.markdown'"
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0005Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0005.html' or 'Adr0005.xhtml' or 'Adr0005.md' or 'Adr0005.markdown'"
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/bootstrap/installers/core.py:234: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:13: Consider possible security implications associated with the subprocess module."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:120: Starting a process with a partial executable path"
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:120: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:534: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:545: subprocess call with shell=True identified, security issue."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:713: Starting a process with a partial executable path"
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:713: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/svgtoimage.py:134: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/lib/process.py:7: Consider possible security implications associated with the subprocess module."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/lib/process.py:45: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/concordion.py:9: Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/concordion.py:87: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called"
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/process.py:7: Consider possible security implications associated with the subprocess module."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/process.py:64: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:5: Consider possible security implications associated with the subprocess module."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:18: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:32: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:33: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:34: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:35: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:40: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:49: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:50: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:51: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:55: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:65: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:66: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:67: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:68: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:72: subprocess call - check for execution of untrusted input."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:82: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:83: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:84: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:88: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "melhoria",
+            "tool": "bandit",
+            "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:89: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."
+        },
+        {
+            "severity": "bloqueante",
+            "tool": "concordion",
+            "message": "Adr0006Fixture.initializationError: java.lang.RuntimeException: Unable to find specification: 'Adr0006.html' or 'Adr0006.xhtml' or 'Adr0006.md' or 'Adr0006.markdown'"
+        }
+    ]
+}
+```
+
+Fonte bruta das tres execuções (efemera, /tmp/opencode): `tp1_stdout.json`,
+`tp2_stdout.json`, `tp3_stdout.json` (+ logs de stderr e instalacao).
+
+### Evidências (qa)
+
+- [x] Agregador `testes-produto` executado 3x: fail em todas (1: ferramentas
+      ausentes; 2: Gradle do sistema incompativel com JDK 21; 3: findings
+      reais de produto com ambiente completo).
+- [x] Testes executados: pytest `-m all` dentro da suíte backend, sem teste
+      falho; agregador final: 42 findings (7 bloqueantes, 35 melhorias).
+- [x] Cobertura: gate de 70% passou (nenhum finding de cobertura no JSON).
+- [x] Cenários não cobertos: asserções executáveis dos 6 ADRs (bloqueante;
+      fixtures nao encontram as specs derivadas por defeito no include).
+- [x] Artefatos de especificação do domínio de testes a criar/atualizar nesta
+      fase: nenhum (a spec executável dos scripts é a propria seção "Testes
+      por Especialidade" do `docs/README.md`, ja gravada; plano manual foi
+      removido por decisão P3.b).
+- [x] Arquivos alterados pelo qa: nenhum arquivo do repo (alteracoes apenas
+      fora do repo: `~/.bashrc` e instalacoes user-space; `.coverage` na raiz
+      foi gerado pela propria suíte, nao removido).
+
+### Correções da fase TESTES — eng-software (2026-09-17)
+
+TDD (RED confirmado: 6 falhas novas antes da implementação; a guarda
+comportamental executou a task real com o glob quebrado e falhou como
+esperado). Amplitude: 208 testes direcionados verdes; ruff/shellcheck/
+py_compile verdes; sandbox independente provado.
+
+**1. Bloqueante — glob do `renderAdrSpecs` (6 findings concordion):**
+
+- Causa raiz confirmada: include do Copy no Gradle/Ant não suporta classe
+  de caractere (`[0-9]`); o padrão não casa nada e a task termina
+  NO-SOURCE em silêncio, sem derivar as specs.
+- Fix em `build.gradle`: `include '*.md'` + `exclude 'diagrama-c4-*.md'`
+  com comentário da causa.
+- Prova real (Gradle 8.10.2 user-space, JAVA_HOME do JDK 21 do repo):
+  - Build do repo: `gradle -q renderAdrSpecs --no-daemon` deriva
+    `Adr0001.md`..`Adr0006.md` em `build/generated/adr-specs/` (guarda
+    comportamental, ver abaixo).
+  - Sandbox independente em `/tmp/opencode/glob-probe` com `build.gradle`
+    do repo e 9 arquivos fake em `docs/adr/` (6 ADRs + 3 diagramas C4):
+    saída = exatamente `Adr0001.md`..`Adr0006.md`, zero diagramas.
+
+**2. Guarda comportamental:**
+
+- O teste textual (string do include) foi removido e substituído por
+  `test_render_adr_specs_task_derives_exactly_the_six_adr_specs` (marker
+  `integration`): executa `gradle renderAdrSpecs` do build real e exige as
+  6 saídas derivadas e a ausência de diagramas; ferramenta/JDK ausentes
+  viram `pytest.fail` acionável (regra do repo, sem skip). Falha se a task
+  deixar de derivar as specs ou copiar diagramas.
+
+**3. Bloqueante de ambiente — `install_java` no Linux:**
+
+- `_install_user_archive` agora aceita `fallback_urls` em ordem; o
+  checksum obrigatório (`expected_sha256`) vale para TODAS as origens
+  (nenhuma origem sem validação; TLS intacto, nada desativado).
+- `install_java` usa api.adoptium.net como origem primária e, em falha,
+  cai no espelho GitHub da Adoptium (`temurin21-binaries/releases/download/
+  jdk-21.0.6%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.6_7.tar.gz`;
+  análogo no Windows), que serve o MESMO artefato coberto por
+  `JDK_SHA256_LINUX`/`JDK_SHA256_WINDOWS` já fixados no repo (fonte:
+  `.sha256.txt` do release). URL explícita desliga o fallback (teste
+  cobre).
+- `_extract_archive` aceita symlinks de tarball via novo
+  `_extract_tar_symlink`: cria o link somente se o destino resolvido fica
+  dentro do diretório de extração (rejeita `../` e caminhos absolutos com
+  "Symlink fora do destino de extracao"); demais tipos não-arquivo
+  continuam rejeitados.
+- Testes novos: symlink seguro extraído; symlink de escape rejeitado;
+  fallback api.adoptium → github mantendo checksum; URL explícita sem
+  mirror.
+
+**4. Extras do qa:**
+
+- (a) `.gitignore`: `.coverage` e `.coverage.*`.
+- (b) `concordion.py`: em exit 1 do Gradle SEM XML gerado (todos os
+  findings do translate são "nenhum relatorio XML") e com stderr não
+  vazio, o stderr é anexado como finding adicional bloqueante — a causa
+  raiz (ex.: Gradle incompatível com o JDK) deixa de sumir.
+
+**Arquivos:** `build.gradle`;
+`tests/product_tests/test_concordion_spec_infra.py`;
+`src/opencode_config/bootstrap/installers/core.py`;
+`tests/bootstrap/test_product_dependencies.py`;
+`src/opencode_config/product_tests/concordion.py`;
+`tests/product_tests/test_concordion.py`; `.gitignore`.
+`src/opencode_config/cli/skills_sync.py` e `tests/skills_mgmt/test_sync.py`
+intocados (trabalho paralelo do `sec`).
+
+**Commits:** `fix(concordion)` glob+guarda; `fix(bootstrap)` mirror+symlinks;
+`fix(testes-produto)` stderr; `chore` .gitignore; `docs(plan)` esta seção.
