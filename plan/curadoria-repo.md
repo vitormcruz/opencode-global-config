@@ -2950,3 +2950,18 @@ intocados (trabalho paralelo do `sec`).
 
 **Commits:** `fix(concordion)` glob+guarda; `fix(bootstrap)` mirror+symlinks;
 `fix(testes-produto)` stderr; `chore` .gitignore; `docs(plan)` esta seção.
+
+**Commit do `sec` (bandit B602) — commitado pelo eng-software como
+committer único (2026-09-17):**
+
+- `88d5edd` — `fix(skills-sync): remover shell=True do comando documentado
+  do upstream`. Autoria da correção: agente `sec` (subprocess por lista de
+  argumentos com `shlex.split`, whitelist `_is_documented_executable`
+  aplicada antes do run, 4 testes novos em `tests/skills_mgmt/test_sync.py`
+  incluindo guarda de que o bandit B602 não retorna em `skills_sync.py`).
+- Revisão do diff pelo eng-software: alterações confinadas ao escopo B602;
+  sem `shell=True`; erro de executável fora da whitelist retorna status 1
+  com mensagem acionável; `skipif` POSIX declarado (mecanismo da suíte).
+- Validações: `pytest tests/skills_mgmt` = 63 passed; `ruff` nos dois
+  arquivos tocados = verde. Trabalho do `sec` em paralelo, fechando o
+  bloqueante bandit (high) da evidência de TESTES.
