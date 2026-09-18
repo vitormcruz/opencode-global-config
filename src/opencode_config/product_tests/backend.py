@@ -163,43 +163,89 @@ def _lint_findings(
             )
         )
     elif powershell_files:
-        for script in powershell_files:
-            escaped = os.fspath(script).replace("'", "''")
-            command = [
+        probe = runner(
+            [
                 pwsh,
                 "-NoProfile",
                 "-NonInteractive",
                 "-Command",
-                (
-                    "Import-Module PSScriptAnalyzer -ErrorAction Stop; "
-                    f"$items = Invoke-ScriptAnalyzer -LiteralPath '{escaped}'; "
-                    "$items | ConvertTo-Json -Compress"
-                ),
-            ]
-            result = runner(
-                command,
-                cwd=repo_root,
-                progress=progress,
-                env=None,
-                label="PSScriptAnalyzer",
+                "Import-Module PSScriptAnalyzer -ErrorAction Stop",
+            ],
+            cwd=repo_root,
+            progress=progress,
+            env=None,
+            label="PSScriptAnalyzer",
+        )
+        if probe.error or probe.returncode != 0:
+            findings.append(
+                Finding(
+                    "bloqueante",
+                    "PSScriptAnalyzer",
+                    "modulo PSScriptAnalyzer ausente ou nao carregavel; instale "
+                    "com Install-Module PSScriptAnalyzer -Scope CurrentUser",
+                )
             )
-            if result.error or result.returncode not in {0, 1}:
-                findings.append(
-                    Finding(
-                        "bloqueante",
-                        "PSScriptAnalyzer",
-                        _short_process_message(result),
-                    )
+        else:
+            findings.extend(
+                _analyze_powershell_scripts(
+                    repo_root,
+                    pwsh=pwsh,
+                    scripts=powershell_files,
+                    runner=runner,
+                    progress=progress,
                 )
-                continue
-            if result.stdout.strip() and result.stdout.strip() not in {"null", "[]"}:
-                findings.append(
-                    Finding(
-                        "bloqueante",
-                        "PSScriptAnalyzer",
-                        f"violacoes encontradas em {script.relative_to(repo_root)}",
-                    )
+            )
+    return findings
+
+
+def _analyze_powershell_scripts(
+    repo_root: Path,
+    *,
+    pwsh: str,
+    scripts: list[Path],
+    runner: Runner,
+    progress: Progress,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for script in scripts:
+        escaped = os.fspath(script).replace("'", "''")
+        command = [
+            pwsh,
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            (
+                "Import-Module PSScriptAnalyzer -ErrorAction Stop; "
+                f"$items = Invoke-ScriptAnalyzer -LiteralPath '{escaped}'; "
+                "$items | ConvertTo-Json -Compress"
+            ),
+        ]
+        result = runner(
+            command,
+            cwd=repo_root,
+            progress=progress,
+            env=None,
+            label="PSScriptAnalyzer",
+        )
+        if result.error or result.returncode != 0:
+            findings.append(
+                Finding(
+                    "bloqueante",
+                    "PSScriptAnalyzer",
+                    f"falha de execucao do analyzer em "
+                    f"{script.relative_to(repo_root)}: "
+                    f"{_short_process_message(result)}",
                 )
+            )
+            continue
+        if result.stdout.strip() and result.stdout.strip() not in {"null", "[]"}:
+            findings.append(
+                Finding(
+                    "bloqueante",
+                    "PSScriptAnalyzer",
+                    f"violacoes encontradas em {script.relative_to(repo_root)}",
+                )
+            )
     return findings
 
 

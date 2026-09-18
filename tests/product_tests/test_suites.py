@@ -235,8 +235,131 @@ def test_gitleaks_execution_failure_is_not_reported_as_a_secret(
 
     finding = next(f for f in report.findings if f.tool == "gitleaks")
     assert finding.severity == "bloqueante"
-    assert "execução do gitleaks falhou" in finding.message
+    assert "execucao do gitleaks falhou" in finding.message
     assert "segredo detectado" not in finding.message
+
+
+def psscriptanalyzer_runner(responses):
+    """Runner fake: probe do modulo e analise de cada script .ps1."""
+
+    probes = {"probe": 0}
+    analyzed: list[str] = []
+
+    def runner(command, **_kwargs):
+        text = " ".join(str(item) for item in command)
+        if "Invoke-ScriptAnalyzer" not in text:
+            if "Import-Module PSScriptAnalyzer" in text:
+                probes["probe"] += 1
+                code, out, err = responses["probe"]
+            else:
+                code, out, err = responses.get("other", (0, "", ""))
+            return ProcessResult(("pwsh",), code, out, err)
+        analyzed.append(text)
+        code, out, err = responses["script"]
+        return ProcessResult(("pwsh",), code, out, err)
+
+    runner.analyzed = analyzed  # type: ignore[attr-defined]
+    runner.probes = probes  # type: ignore[attr-defined]
+    return runner
+
+
+@pytest.mark.unit
+def test_psscriptanalyzer_missing_module_is_blocking(tmp_path: Path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "check.ps1").write_text("Write-Output ok\n", encoding="utf-8")
+    runner = psscriptanalyzer_runner(
+        {"probe": (1, "", "Import-Module : no foi encontrado")}
+    )
+
+    report = run_backend_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    assert report.status == "fail"
+    finding = next(f for f in report.findings if f.tool == "PSScriptAnalyzer")
+    assert finding.severity == "bloqueante"
+    assert "Install-Module PSScriptAnalyzer -Scope CurrentUser" in finding.message
+    assert runner.probes["probe"] == 1
+    assert runner.analyzed == []
+
+
+@pytest.mark.unit
+def test_psscriptanalyzer_reports_violations_as_blocking(tmp_path: Path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "check.ps1").write_text("Write-Output ok\n", encoding="utf-8")
+    runner = psscriptanalyzer_runner(
+        {"probe": (0, "", ""), "script": (0, '[{"Severity":"Error"}]', "")}
+    )
+
+    report = run_backend_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    finding = next(f for f in report.findings if f.tool == "PSScriptAnalyzer")
+    assert finding.severity == "bloqueante"
+    assert "violacoes" in finding.message
+
+
+@pytest.mark.unit
+def test_psscriptanalyzer_clean_script_produces_no_finding(tmp_path: Path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "check.ps1").write_text("Write-Output ok\n", encoding="utf-8")
+    runner = psscriptanalyzer_runner(
+        {"probe": (0, "", ""), "script": (0, "", "")}
+    )
+
+    report = run_backend_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    assert all(f.tool != "PSScriptAnalyzer" for f in report.findings)
+
+
+@pytest.mark.unit
+def test_psscriptanalyzer_execution_failure_is_blocking(tmp_path: Path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "check.ps1").write_text("Write-Output ok\n", encoding="utf-8")
+    runner = psscriptanalyzer_runner(
+        {"probe": (0, "", ""), "script": (1, "", "parser error")}
+    )
+
+    report = run_backend_suite(
+        tmp_path,
+        which=lambda name: f"/tool/{name}",
+        runner=runner,
+        progress=lambda _message: None,
+    )
+
+    assert report.status == "fail"
+    finding = next(f for f in report.findings if f.tool == "PSScriptAnalyzer")
+    assert "falha de execucao" in finding.message
+
+
+@pytest.mark.unit
+def test_pip_audit_vuln_without_severity_is_explicitly_fail_closed() -> None:
+    findings = findings_from_pip_audit(
+        {
+            "dependencies": [
+                {"name": "package", "vulns": [{"id": "GHSA-real"}]}
+            ]
+        }
+    )
+
+    assert findings[0].severity == "bloqueante"
+    assert "severity" in findings[0].message
 
 
 @pytest.mark.unit
