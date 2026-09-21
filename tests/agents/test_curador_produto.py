@@ -263,10 +263,10 @@ def test_curador_produto_catalog_as_reference(
 
 
 @pytest.mark.unit
-def test_curador_produto_validates_orchestrator_evidence(
+def test_curador_produto_validates_aggregator_evidence(
     curador_normalized: str,
 ) -> None:
-    assert "orquestrador" in curador_normalized
+    assert "agregador" in curador_normalized
     assert "testes-produto" in curador_normalized
     assert "fase testes" in curador_normalized
 
