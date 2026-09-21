@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import os
 from pathlib import Path
-import subprocess
+import subprocess  # nosec B404 - wrapper interno; chamadores passam comandos fixados no codigo
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,9 @@ def run_command(
 
     args = tuple(os.fspath(argument) for argument in command)
     try:
-        completed = subprocess.run(
+        # nosec B603 - wrapper interno; cada chamador fixa o executavel no
+        # codigo (node, gradle, ferramentas da suíte), sem entrada do usuario.
+        completed = subprocess.run(  # nosec B603
             args,
             input=input_text,
             capture_output=True,

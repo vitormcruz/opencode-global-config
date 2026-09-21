@@ -6,7 +6,7 @@ import json
 import shutil
 from collections.abc import Callable
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405 - XML gerado localmente pelo Gradle (JUnit), nao input externo
 
 from .interface import Finding, ProductReport
 from .process import (
@@ -84,7 +84,9 @@ def translate_junit_reports(
     findings: list[Finding] = []
     for report_file in report_files:
         try:
-            root = ElementTree.parse(report_file).getroot()
+            # nosec B314 - relatorio XML JUnit produzido pelo build local do
+            # Gradle no cache do repo; conteudo vira finding, nunca e executado.
+            root = ElementTree.parse(report_file).getroot()  # nosec B314
         except (ElementTree.ParseError, OSError) as error:
             findings.append(
                 Finding(

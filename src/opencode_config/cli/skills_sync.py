@@ -10,7 +10,10 @@ from pathlib import Path
 import re
 import shlex
 import shutil
-import subprocess
+# subprocess e usado apenas para executaveis fixos (git, python) e comandos
+# documentados filtrados por _is_documented_executable; por isso o import
+# segue com supressao local justificada pelo bandit (B404).
+import subprocess  # nosec B404
 import sys
 import tempfile
 from typing import TextIO
@@ -132,7 +135,7 @@ def list_updatable(repo_root: Path) -> list[str]:
 
 def _run_git(upstream_dir: Path, *arguments: str) -> str:
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosec B603 B607 - git fixado do sistema; arguments fixos do codigo
             ["git", "-C", str(upstream_dir), *arguments],
             check=True,
             capture_output=True,
@@ -544,7 +547,7 @@ def _run_documented_command(
                     "opencode_config.cli.skills_sync",
                     *tokens[1:],
                 ]
-            completed = subprocess.run(
+            completed = subprocess.run(  # nosec B603 - sys.executable + modulo fixo
                 argv,
                 cwd=repo_root,
                 capture_output=True,
@@ -558,7 +561,7 @@ def _run_documented_command(
             # o executável precisa seguir o padrão documentado.
             if not _is_documented_executable(tokens[0]):
                 return 1, f"executavel fora da lista permitida: {tokens[0]}"
-            completed = subprocess.run(
+            completed = subprocess.run(  # nosec B603 - executavel filtrado pela whitelist documentada
                 tokens,
                 cwd=repo_root,
                 capture_output=True,
@@ -728,7 +731,7 @@ def _clone_upstream(spec: SyncSpec) -> tuple[tempfile.TemporaryDirectory[str], P
     temporary = tempfile.TemporaryDirectory(prefix="opencode-skills-")
     destination = Path(temporary.name) / "upstream"
     try:
-        subprocess.run(
+        subprocess.run(  # nosec B603 B607 - git fixado do sistema; spec.repository do UPSTREAM.md versionado
             [
                 "git",
                 "clone",

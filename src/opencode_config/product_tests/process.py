@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import queue
-import subprocess
+import subprocess  # nosec B404 - wrapper interno das suítes; comandos fixados no codigo
 import threading
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -61,7 +61,9 @@ def run_process(
     arguments = tuple(os.fspath(argument) for argument in command)
     process_label = label or arguments[0]
     try:
-        process = subprocess.Popen(
+        # nosec B603 - executaveis das suítes fixados no codigo (ruff, gradle,
+        # gitleaks e afins), resolvidos por which; sem entrada do usuario.
+        process = subprocess.Popen(  # nosec B603
             arguments,
             cwd=cwd,
             env=None if env is None else dict(env),

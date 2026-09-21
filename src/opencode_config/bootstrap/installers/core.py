@@ -261,7 +261,9 @@ def _sha256(path: Path) -> str:
 
 
 def _fetch_url(url: str, destination: Path) -> None:
-    with urllib.request.urlopen(url) as response, destination.open("wb") as target:
+    # nosec B310 - URL fixada no codigo dos instaladores (https); o conteudo
+    # baixado ainda passa por checksum SHA-256 obrigatorio antes de ser usado.
+    with urllib.request.urlopen(url) as response, destination.open("wb") as target:  # nosec B310
         shutil.copyfileobj(response, target)
 
 
