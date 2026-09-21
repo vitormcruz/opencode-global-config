@@ -1,4 +1,4 @@
-Status: TESTES — evidência registrada; aguardando validação do curador-produto
+Status: FINALIZAÇÃO — fase Testes validada pelo curador-produto (2026-09-21)
 
 # Curadoria do Repo — opencode-global-config
 
@@ -1829,6 +1829,96 @@ subseções backend/segurança/Agregador.
 - [x] Achados encontrados: 2 total (2 melhorias, 0 bloqueantes);
       bloqueantes 1–4 = RESOLVIDOS
 
+### Verificação das correções TESTES — 2026-09-18
+
+Autor: rev (instância limpa, glm-5.3), chamada pelo devflow para verificar as
+correções da fase TESTES (7 bloqueantes da seção `## Evidências de Testes —
+TESTES`). Objeto: commits `f55c9ad`..`00b341e` (`f55c9ad` concordion glob+guarda,
+`25814ec` bootstrap mirror+symlinks, `dc85c38` stderr, `b842c62` .gitignore,
+`5b5c8a5`/`00b341e` docs, `88d5edd` skills-sync B602). Inspeção de diffs,
+código atual e provas em sandbox Gradle 8.10.2 + JDK 21 user-space (nenhuma
+suíte de produto/meta executada, agregador não executado).
+
+#### Verificação por bloqueante
+
+| # | Bloqueante original | Verificação da resolução | Estado |
+|---|---------------------|--------------------------|--------|
+| 1 | bandit B602 (`skills_sync.py:545` shell=True) | `subprocess.run(tokens)` por argv de `shlex.split`, sem shell; whitelist `_is_documented_executable` = mesmo predicado que `_documented_commands` já aplicava inline (fluxo fechado: `_run_documented_command` só recebe comandos já filtrados); bandit no arquivo: B602 nenhum, restam 7 LOW (melhorias, coerente com o agregador) | RESOLVIDO |
+| 2–7 | concordion Adr0001–Adr0006 "Unable to find specification" | `include '*.md'` + `exclude 'diagrama-c4-*.md'` + rename preservado; sandbox com a task idêntica derivou exatamente `Adr0001.md`..`Adr0006.md`, zero diagramas; causa raiz reproduzida no mesmo sandbox (padrão `[0-9]` antigo → NO-SOURCE, 0 derivados) | RESOLVIDO |
+
+#### Checagens de regressão
+
+- `renderAdrSpecs`: re-run UP-TO-DATE exit 0 (Copy incremental idempotente);
+  `outputs.upToDateWhen { false }` segue apenas no `test` (intocado);
+  agregador roda `gradle clean test`, sem interferência.
+- Guarda comportamental `_RED` de verdade: checkout limpo com include quebrado
+  → 0 derivados → falha; e include quebrado APÓS specs derivadas → o Gradle
+  invalida os outputs stale (fingerprint da spec muda) e remove
+  `build/generated/adr-specs` → falha também (provado em sandbox; não é
+  tautologia). Exigência de lista exata + zero `diagrama-*` cobre os dois
+  eixos (omissão e excesso). Gradle/JAVA_HOME ausentes viram `pytest.fail`
+  acionável (sem skip).
+- `install_java`: checksum obrigatório em TODAS as origens (`download_file`
+  com `expected_sha256` para cada candidate); TLS intacto (`urlopen` padrão);
+  `JDK_VERSION_TAG` já URL-encoded (`%2B`) e a URL do espelho responde 200
+  com o artefato exato (HEAD verificado); URL explícita desliga o mirror
+  (teste cobre); `_extract_tar_symlink` rejeita `../` e linkname absoluto
+  (`resolve()` dentro do root; `member.name` já validado por
+  `_safe_extract_path`); demais instaladores inalterados (`fallback_urls`
+  default vazio).
+- `skills_sync`: branch `opencode-skills` (único usado pelos 15 UPSTREAM.md do
+  repo, todos `opencode-skills sync`) já era argv e não passou pelo código
+  alterado; `_supports_assume_yes` intocado; `cwd`/`capture_output`/`text`/
+  timeout preservados; nenhum UPSTREAM.md usa executável fora da whitelist.
+- `concordion.py`: anexo de stderr só quando exit 1 + todos os findings são
+  "nenhum relatorio XML" + stderr/stdout não vazio; cenários anteriores
+  preservados (exit 1 sem findings; exit 1 com falhas reais de testcase);
+  interface `{status, findings[]}`, exit codes e UTF-8 (`emit_report`)
+  intocados.
+- `.gitignore`: `.coverage`/`.coverage.*` cobrem o untracked reportado.
+- Commits: 7 atômicos com escopo fechado (conferido via `--stat`), mensagens
+  Conventional em PT-BR; working tree sem `modified` (2 untracked em `plan/`
+  são insumos de outras sessões, não commitados nesta correção).
+
+#### Achados
+
+| # | Achado | Ação recomendada | Severidade |
+|---|--------|------------------|------------|
+| — | Nenhum achado novo. Os 7 findings LOW remanescentes em `skills_sync.py` (B404/B603/B607) já são classificados como melhoria pelo agregador e estavam fora do escopo bloqueante desta correção | Manter como está (backlog de melhorias) | — |
+
+#### Veredicto
+
+[ ] Aprovado sem ressalvas
+[x] Aprovado com melhorias opcionais — bloqueantes 1–7 RESOLVIDOS; fase TESTES
+    liberada para re-execução do agregador pelo `qa`
+
+Nota: o veredicto "com melhorias opcionais" refere-se apenas aos findings LOW
+pré-existentes reportados pelo agregador; nenhuma ação é exigida desta
+verificação.
+
+#### Evidências (rev)
+
+- [x] Artefato lido: `plan/curadoria-repo.md` (seções TESTES e Correções),
+      diffs `f55c9ad`..`00b341e`, `build.gradle`,
+      `src/opencode_config/bootstrap/installers/core.py`,
+      `src/opencode_config/cli/skills_sync.py`,
+      `src/opencode_config/product_tests/concordion.py`,
+      `tests/product_tests/test_concordion_spec_infra.py`,
+      `tests/bootstrap/test_product_dependencies.py`,
+      `tests/product_tests/test_concordion.py`, `tests/skills_mgmt/test_sync.py`,
+      15 `harness-conf/skills/*/UPSTREAM.md`, `docs/README.md` (Testes por
+      Especialidade)
+- [x] Plano aprovado consultado: sim (spec de interface do docs/README.md)
+- [x] Checklist integrativo: 8 dimensões (bloqueante a bloqueante, regressão
+      de comportamento, guarda _RED, segurança do symlink/fallback TLS+checksum,
+      whitelist vs UPSTREAM.md, interface JSON/exit/UTF-8, atomicidade de
+      commits, arquivos alheios)
+- [x] Provas em sandbox: task do `renderAdrSpecs` (6 specs/0 diagramas;
+      NO-SOURCE com padrão antigo; UP-TO-DATE em re-run; outputs stale
+      removidos); bandit B602 ausente; HEAD 200 no espelho GitHub
+- [x] Achados encontrados: 0 total (0 bloqueantes); bloqueantes 1–7 =
+      RESOLVIDOS
+
 ## Construção: fatia curatorial documental (2026-09-17)
 
 ### Status da fatia
@@ -2965,3 +3055,283 @@ committer único (2026-09-17):**
 - Validações: `pytest tests/skills_mgmt` = 63 passed; `ruff` nos dois
   arquivos tocados = verde. Trabalho do `sec` em paralelo, fechando o
   bloqueante bandit (high) da evidência de TESTES.
+
+### Re-execução — 2026-09-18
+
+Autor: qa (instância nova, re-execução do agregador), chamado pelo devflow
+após a verificação do rev ("Verificação das correções TESTES — 2026-09-18").
+Objeto: confirmar se os 7 bloqueantes da execução 3 sumiram com os commits
+`f55c9ad`..`00b341e`. Executado em 2026-09-21 (fim de tarde, -03). Uma
+tentativa anterior desta re-execução foi interrompida sem persistir nada
+(sem execução registrada; ignorada).
+
+#### Ambiente
+
+- SO: WSL2 (Ubuntu 24.04, kernel 6.6.87.2-microsoft-standard-WSL2).
+- venv do repo: `.venv` (Python 3.12.3, pytest 9.1.1).
+- PATH: bloco `opencode-config:bootstrap-path` do `~/.bashrc` (gradle, jdk,
+  gitleaks, pwsh, `~/.local/bin` dos pipx).
+- JAVA_HOME: `~/.local/share/jdk` (OpenJDK 21.0.6+7 Temurin); Gradle 8.10.2
+  (`~/.local/share/gradle`); ruff 0.16.8, shellcheck, pip-audit, bandit
+  (pipx); pwsh 7.4.6 + PSScriptAnalyzer; gitleaks 8.24.2. Nada reinstalado
+  (ambiente da rodada anterior intacto).
+- Comando: `.venv/bin/python testes-produto`, sem argumentos.
+
+#### Execuções
+
+1. Execução 4a (primeira tentativa; JAVA_HOME não exportado no shell):
+   exit 1, 185s, 37 findings (1 bloqueante, 36 melhorias). O bloqueante é a
+   guarda comportamental nova
+   `test_render_adr_specs_task_derives_exactly_the_six_adr_specs`, que reprova
+   com "JAVA_HOME ausente ou invalido; execute o bootstrap user-space
+   (install_java) e carregue o PATH persistido no .bashrc". Diagnóstico por
+   isolamento (sem alterar código): a guarda exige a env var JAVA_HOME
+   explícita; o bootstrap persiste apenas entradas de PATH no `~/.bashrc` e o
+   concordion não exige JAVA_HOME (gradle resolve o java pelo PATH). O mesmo
+   teste isolado passa em 7,2s com `JAVA_HOME=$HOME/.local/share/jdk`.
+   Conclusão: reprovação de preparo de ambiente, não defeito de produto.
+   Demais números da 4a: pytest 807 passed, 1 failed, 31 deselected, 138,5s;
+   gate de cobertura 85,19% >= 70% (ok).
+2. Execução 4b (oficial desta re-execução; `JAVA_HOME` exportado): exit 0,
+   165s, `status: pass`, 36 findings, todos `melhoria`. JSON integral no fim
+   desta subseção. Stderr só com progresso ("aguardando conclusao", 93
+   linhas), conforme interface.
+
+#### Resultado da execução 4b (oficial)
+
+- Os 7 bloqueantes da execução 3 sumiram:
+  - 1 a 6. concordion `Adr0001Fixture` a `Adr0006Fixture`: NENHUM finding
+    concordion; as specs derivam via `renderAdrSpecs` corrigido e todas as
+    fixtures executam verdes (inclui a guarda comportamental nova).
+  - 7. bandit B602 (`skills_sync.py:545`, shell=True): sumiu; o arquivo
+    `skills_sync.py` mantém só findings LOW (linhas 13, 135 2x, 547, 561,
+    731 2x), coerentes com a verificação do rev.
+- 36 melhorias (bandit, severidade LOW): mesma distribuição da execução 3
+  (35) com +1 em `skills_sync.py:561` ("subprocess call"), linha nova criada
+  pelo refactor argv do `sec`; mesma família B603/B607, classificação
+  melhoria, fora do gate.
+- Suíte backend dentro do agregador: 808 passed, 0 failed; gate de cobertura
+  ok; specs Concordion de especialidade verdes.
+
+#### Achados de QA — re-execução
+
+- [melhoria] O bootstrap não persiste `JAVA_HOME` no `~/.bashrc` (persiste
+  só PATH); qualquer sessão nova reencontra a reprovação da guarda da 4a,
+  com mensagem acionável e sem skip (comportamento correto do teste).
+  Correção é do eng-software: persistir `export JAVA_HOME` no bloco
+  bootstrap-path do bootstrap. Registre no backlog.
+- [melhoria, preexistente] 36 bandit LOW (backlog de melhorias; não bloqueia
+  a fase, status do agregador é pass).
+
+#### JSON integral da execução 4b (stdout do agregador, formatado)
+
+```json
+{
+    "status": "pass",
+    "findings": [
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/bootstrap/installers/core.py:234: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:13: Consider possible security implications associated with the subprocess module."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:135: Starting a process with a partial executable path"},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:135: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:547: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:561: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:731: Starting a process with a partial executable path"},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/skills_sync.py:731: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/cli/svgtoimage.py:134: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/lib/process.py:7: Consider possible security implications associated with the subprocess module."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/lib/process.py:45: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/concordion.py:9: Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/concordion.py:87: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called"},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/process.py:7: Consider possible security implications associated with the subprocess module."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/src/opencode_config/product_tests/process.py:64: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:5: Consider possible security implications associated with the subprocess module."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:18: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:32: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:33: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:34: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:35: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:40: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:49: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:50: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:51: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:55: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:65: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:66: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:67: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:68: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:72: subprocess call - check for execution of untrusted input."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:82: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:83: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:84: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:88: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."},
+        {"severity": "melhoria", "tool": "bandit", "message": "/mnt/e/Projetos/opencode-global-config/testes-produto/tests/test_interface_meta.py:89: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code."}
+    ]
+}
+```
+
+Fonte bruta das execuções 4a/4b (efemera, /tmp/opencode): `tp4_stdout.json`,
+`tp4_stderr.log`, `tp5_stdout.json`, `tp5_stderr.log`.
+
+#### Evidências (qa) — re-execução
+
+- [x] Agregador `testes-produto` executado 2x nesta instância: 4a exit 1
+      (JAVA_HOME ausente no shell; diagnosticado e reproduzido em isolamento)
+      e 4b exit 0, `status: pass` (evidência oficial).
+- [x] Bloqueantes: 7 da rodada anterior -> 0 remanescentes; nenhum bloqueante
+      novo de produto (o único da 4a foi ambiente, resolvido com JAVA_HOME).
+- [x] Melhorias: 36 (bandit LOW), +1 vs. rodada anterior (efeito documentado
+      do refactor do `sec`).
+- [x] Cobertura: gate 70% ok (85,19% medido na 4a; sem finding de cobertura
+      na 4b).
+- [x] Cenários não cobertos: nenhum novo.
+- [x] Arquivos alterados pelo qa: apenas `plan/curadoria-repo.md` (esta
+      subseção + Status); nenhum arquivo de produção ou de teste.
+
+### Validação da evidência — curador-produto
+
+Autor: curador-produto (instância limpa), chamado pelo devflow para validar a
+evidência da fase TESTES. Data: 2026-09-21. Objeto: subseção "Re-execução —
+2026-09-18" (execução 4b oficial), cadeia de correções e verificação do rev,
+cruzados com a seção "Testes por Especialidade" do `docs/README.md` e a
+interface `interface-testes-produto.md`. A evidência NÃO foi re-executada;
+validação por leitura (papel do curador).
+
+| Item | Esperado | Evidência | Status |
+|------|----------|-----------|--------|
+| agregador | `testes-produto` executado pelo `qa`, sem argumentos | Execução 4b registrada: `.venv/bin/python testes-produto`, 165s, exit 0 | OK |
+| JSON integral | `{ status, findings[] }` persistido e válido | JSON da 4b no plan; 36 findings, todos com `severity`/`tool`/`message` | OK |
+| Coerência exit↔status | exit 0 = pass | exit 0 registrado; `status: pass` no JSON | OK |
+| Severidades | conforme spec: bandit LOW = melhoria | 36 × `melhoria` (bandit), zero `bloqueante` | OK |
+| Bloqueantes anteriores | 7 ausentes do novo JSON | 6 concordion (Adr0001–Adr0006) e bandit `skills_sync.py:545` shell=True não ocorrem; skills_sync segue só com LOW (13, 135 2x, 547, 561, 731 2x), coerente com o rev | OK |
+| Cobertura | gate 70% (pytest-cov) | 85,19% medido na 4a; nenhum finding de cobertura na 4b (gate passou) | OK |
+| Rastreabilidade | cadeia íntegra no plan | execução 3 (fail, 7 bloqueantes, JSON integral) → correções sec (B602) e eng-software (glob+guarda, bootstrap, extras) → verificação rev 2026-09-18 (7/7 RESOLVIDOS) → re-execução 4a (ambiente JAVA_HOME) e 4b (pass) | OK |
+| Melhorias residuais | registradas como backlog, não bloqueio | 36 bandit LOW + persistência de `JAVA_HOME` no bootstrap em "Achados de QA — re-execução", classificadas melhoria/backlog | OK |
+
+### Falhas
+- Nenhuma.
+
+### Lacunas
+- Nenhuma.
+
+### Veredicto
+
+[x] Todos OK — fase TESTES validada. Evidência conforme a interface
+    (`{ status, findings[] }`, exit 0 = pass, severidades pela spec) e a
+    seção "Testes por Especialidade" do `docs/README.md`; cadeia de
+    correções íntegra; melhorias residuais em backlog. Status do plan
+    avança para FINALIZAÇÃO.
+
+### Revisão final — FINALIZAÇÃO, 2026-09-21
+
+Autor: curador-produto (instância nova), chamado pelo devflow para o passo
+7.1 (revisão final dos artefatos de spec). Objeto: os 8 itens do escopo da
+revisão final. Não executei suítes; não corriji; validação por leitura e
+grep, cruzando spec ↔ código ↔ evidência (execução 4b da fase Testes).
+
+#### Verificação por item do escopo
+
+| # | Item | Verificação | Estado |
+|---|------|-------------|--------|
+| 1 | `docs/README.md` — 4 seções | Definição de Escopo com "história de usuário" (P2.a, sem RN-ACL); `docs/backlog/` é condicional (só com histórias elicidadas antecipadamente), ausência não é lacuna; Elementos com Concordion-Markdown + C4 L1/L2/L3 seletivo (gate na regra); Indexação só codebase-memory (tabela de 1 linha); Testes por Especialidade backend/segurança + Agregador. Nomes/paths/comandos conferidos contra o repo real (`testes-produto/backend`, `testes-produto/seguranca`, agregador via `__main__.py` + console script no `pyproject.toml`, `docs/specs/` com Backend/Seguranca/rnf-gerais). Zero ocorrência de "orquestrador" | OK |
+| 2 | `AGENTS.md` | Tabela índice backend/segurança + "Agregador: `testes-produto`" + papéis (qa executa; curador valida) + link âncora `docs/README.md#testes-por-especialidade` (âncora confere com o heading gravado); Instruções por Agente com 7× "SEM INSTRUÇÕES A PEDIDO DO HUMANO"; Ema v2 intacta: regra original preservada + exceção literal de `testes-produto/` com o path da suíte meta | OK |
+| 3 | ADRs 0001–0006 | Retrofit Concordion-Markdown presente nos 6 (`#execute=executarVerificacoes()` + `#assertEquals=veredito`, conferidos por grep); numeração e conteúdo preservados (ADR-0003 ganhou Alternativas+Asserções, conforme registro da construção); correspondência com as fixtures `Adr0001Fixture`–`Adr0006Fixture` (`renderAdrSpecs`: `include '*.md'` + `exclude 'diagrama-c4-*.md'`); includes por especialidade: backend = ADR 1–5 + BackendFixture, seguranca = ADR 6 + SegurancaFixture (fixado em `tests/product_tests/test_concordion_spec_infra.py`); executaram verdes na execução 4b (zero finding concordion) | OK |
+| 4 | C4 L1/L2/L3 | Blocos Mermaid válidos: `C4Context` (l1), `C4Container` (l2), `C4Component` (l3); L3 seletivo com o gate registrado no próprio arquivo (critério de inclusão/exclusão explícito) e espelhado na regra do `docs/README.md` | OK |
+| 5 | `docs/specs/rnf-gerais.md` | Presente, mínimo (`# RNFs Gerais`), conforme decisão P2.c (fica vazio se não houver RNF transversal) | OK |
+| 6 | `interface-testes-produto.md` | Alinhada ao implementado: Agregador puro (papéis qa/curador/devflow), JSON `{ status, findings[] }` com severidades `bloqueante|melhoria`, suíte meta em `testes-produto/tests/` fora do `-m all`. Nota: mantém "quatro suítes" e "Orçamento de Tempo" genéricos; decisão P5.2.e já registra que a interface é referência e o spec efetivo é a seção do `docs/README.md` | OK |
+| 7 | Renomeação agregador | `docs/README.md` e `AGENTS.md` sem resíduos; ocorrências restantes no repo nomeiam o devflow/orquestração do workflow (legítimo) ou são histórico do plan (aceitável, achado 8 da revisão do plano). Uma observação de melhoria (abaixo), fora dos artefatos de spec | OK, 1 observação |
+| 8 | Coerência spec ↔ código ↔ evidência | A spec promete (backend: pytest `-m all` + ruff + shellcheck + PSScriptAnalyzer + cobertura 70% + Concordion; segurança: gitleaks + pip-audit + bandit + Concordion; agregador JSON/exit/severidades; suíte meta por path) e a execução 4b confirma (808 passed, gate de cobertura ok, specs Concordion verdes, 36 findings todos melhoria, exit 0 = pass) | OK |
+
+#### Achados
+
+| # | Achado | Ação recomendada | Severidade |
+|---|--------|------------------|------------|
+| 1 | Vestígio do modelo antigo em código de teste (fora dos artefatos de spec): `tests/agents/test_curador_produto.py` (`test_curador_produto_validates_orchestrator_evidence`) asseria "orquestrador" no `curador-produto.md` no sentido antigo do script; hoje passa só porque o termo resta nomeando o devflow ("orquestrador do workflow"). O teste segue verde (808 passed na 4b); sem impacto de execução | eng-software renomeia o teste/intenção para "agregador" e assevera o termo corrente (edição simples, inclui o nome do teste) | melhoria |
+
+#### Lacunas
+- Nenhuma.
+
+#### Veredicto
+
+[x] Aprovado — revisão final sem lacunas bloqueantes; artefatos de spec
+    coerentes entre si, com o código e com a evidência da fase Testes.
+    Melhoria residual (vestígio em teste) vai ao backlog com responsável
+    indicado (eng-software). Status do plan permanece FINALIZAÇÃO.
+
+#### Evidências (curador-produto)
+
+- [x] Artefatos lidos: `docs/README.md`, `AGENTS.md`,
+      `interface-testes-produto.md`, `docs/specs/rnf-gerais.md`,
+      `docs/adr/0001`–`0006` (diretivas por grep),
+      `docs/adr/diagrama-c4-l1/l2/l3.md`, `build.gradle`,
+      `tests/product_tests/test_concordion_spec_infra.py`,
+      `tests/agents/test_curador_produto.py`, `plan/curadoria-repo.md`
+      (inteiro), `testes-produto/` e fixtures `src/test/groovy/`
+      (existência via glob)
+- [x] Plano aprovado consultado: sim (decisões, emendas e validação da
+      fase Testes)
+- [x] Verificações de fato: grep de "orquestrador" no repo; grep das
+      diretivas Concordion nos 6 ADRs; âncora vs heading; tabela e
+      Ema v2 literais no `AGENTS.md`; mapeamento backend 1–5 /
+      segurança 6 no `build.gradle` e na guarda pytest
+- [x] Suítes de produto e meta NÃO executadas (regra desta revisão)
+- [x] Achados encontrados: 1 total (0 bloqueantes, 1 melhoria)
+
+## Backlog resolvido na FINALIZAÇÃO — eng-software (2026-09-21)
+
+Os 3 itens aprovados pelo humano como dívida foram corrigidos. Bandit no
+escopo da suíte (`src` + `scripts` + `testes-produto`) agora reporta
+ZERO findings de qualquer severidade (antes: 36 LOW). `Status: FINALIZAÇÃO`
+mantido.
+
+**1. 36 findings bandit LOW resolvidos:**
+
+- Correção real (sem supressão): `src/opencode_config/cli/svgtoimage.py`
+  trocou o `assert image_path is not None` por guarda explícita com mensagem
+  de erro e exit 1 (assert some com `python -O`). TDD: teste novo
+  `test_svgtoimage_reports_error_when_render_returns_no_image`
+  (monkeypatch de `render_svg` retornando `(None, "")`), RED antes.
+- Supressões locais `# nosec <id> - <justificativa>` (nenhuma global),
+  em: `installers/core.py` (B310, URL https fixada + checksum SHA-256
+  obrigatório), `cli/skills_sync.py` (B404/B603/B607, executáveis fixos
+  git/sys.executable e whitelist `_is_documented_executable` do sec),
+  `lib/process.py` (B404/B603, wrapper interno com comandos fixados),
+  `product_tests/process.py` (B404/B603, idem), `product_tests/concordion.py`
+  (B405/B314, XML JUnit gerado pelo build local, conteúdo vira finding sem
+  execução), `testes-produto/tests/test_interface_meta.py` (B404/B603/
+  B101, sys.executable + scripts fixos do repo; assert é o mecanismo do
+  teste).
+- Verificação: `bandit -q -r src scripts testes-produto` →
+  `LOW restantes: 0`, `Qualquer severidade: 0`.
+
+**2. Persistência de JAVA_HOME no bootstrap:**
+
+- Nova `ensure_env_var(name, value, ...)` em `installers/core.py`: grava
+  bloco marcado `bootstrap-env` no perfil (POSIX `export JAVA_HOME="..."`,
+  Windows `$env:JAVA_HOME = "..."`), mesmo mecanismo idempotente do PATH;
+  no Windows com `persist` grava também em `HKCU\Environment` com
+  broadcast (`set_user_env`).
+- `install_java` chama a função após instalar (JAVA_HOME = diretório do
+  JDK user-space) e atualiza `current_environment` da sessão.
+- TDD: 3 testes novos em `tests/bootstrap/test_product_dependencies.py`
+  (perfil POSIX recebe `export JAVA_HOME`; perfil Windows recebe
+  `$env:JAVA_HOME`; sem profile_path nada é escrito). RED confirmado.
+- Efeito: a falha de ambiente da execução 4a (guarda
+  `test_render_adr_specs_task_derives_exactly_the_six_adr_specs` reprovando
+  por JAVA_HOME ausente em shell novo) não se repete após o bootstrap.
+
+**3. Teste vestigial renomeado (exceção aprovada):**
+
+- `test_curador_produto_validates_orchestrator_evidence` →
+  `test_curador_produto_validates_aggregator_evidence` em
+  `tests/agents/test_curador_produto.py`; assert de "orquestrador"
+  substituído por "agregador" (termo corrente presente no
+  `curador-produto.md`). Comportamento verificado inalterado (o doc orienta
+  a validação da evidência do agregador na fase Testes).
+
+**Validações:** bandit 0 findings; ruff verde (`src scripts testes-produto`
+e testes tocados); 72 testes dirigidos verdes (svgtoimage, agents,
+product_dependencies); suíte meta executada por autorização: 5 passed
+(~6min, executa as suítes reais e o agregador); bootstrap 111 passed.
+
+**Commits:** `fix(cli)` svgtoimage sem assert; `chore(seguranca)` supressões
+justificadas; `docs(plan)` este registro.
