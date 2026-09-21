@@ -176,6 +176,36 @@ def _persist_windows_user_path(target: str) -> None:
     broadcast_environment_change()
 
 
+def ensure_env_var(
+    name: str,
+    value: str,
+    *,
+    environment_kind: EnvironmentKind,
+    profile_path: Path | None = None,
+    persist: bool = True,
+) -> None:
+    """Persiste uma variavel de ambiente do bootstrap para shells novos.
+
+    Com profile_path, grava o bloco marcado ``bootstrap-env`` (idempotente,
+    mesmo mecanismo do PATH) no formato do SO. No Windows, quando ``persist``
+    esta ativo e o SO e Windows de fato, grava tambem em HKCU\\Environment
+    com broadcast. Sem profile_path, nada e escrito.
+    """
+
+    content: str
+    if environment_kind is EnvironmentKind.WINDOWS:
+        content = f'$env:{name} = "{value}"'
+        if persist and os.name == "nt":
+            from opencode_config.lib.windows_env import set_user_env
+
+            set_user_env(name, value)
+    else:
+        content = f'export {name}="{value}"'
+
+    if profile_path is not None:
+        update_marked_block(profile_path, "bootstrap-env", content)
+
+
 def ensure_path_entry(
     path: Path,
     *,
@@ -881,7 +911,7 @@ def install_java(
             "https://github.com/adoptium/temurin21-binaries/releases/download/"
             f"{JDK_VERSION_TAG}/{artifact}",
         )
-    return _install_user_archive(
+    result = _install_user_archive(
         context,
         name="jdk",
         url=primary,
@@ -894,6 +924,16 @@ def install_java(
         fetcher=fetcher,
         fallback_urls=fallbacks,
     )
+    java_home = str(context.paths.data_dir / "jdk")
+    context.current_environment["JAVA_HOME"] = java_home
+    ensure_env_var(
+        "JAVA_HOME",
+        java_home,
+        environment_kind=context.environment,
+        profile_path=context.profile_path,
+        persist=context.persist_paths,
+    )
+    return result
 
 
 def install_gradle(

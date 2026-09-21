@@ -351,3 +351,88 @@ def test_install_java_with_explicit_url_does_not_mirror(tmp_path) -> None:
     assert (
         context.paths.data_dir / "jdk" / "bin" / "java"
     ).is_file()
+
+
+@pytest.mark.unit
+def test_install_java_persists_java_home_in_posix_profile(tmp_path) -> None:
+    import io
+    import tarfile
+
+    payload = tmp_path / "jdk.tar.gz"
+    with tarfile.open(payload, "w:gz") as output:
+        directory = tarfile.TarInfo("jdk-21.0.6+7/bin")
+        directory.type = tarfile.DIRTYPE
+        output.addfile(directory)
+        executable_payload = b"#!/bin/sh\n"
+        executable = tarfile.TarInfo("jdk-21.0.6+7/bin/java")
+        executable.size = len(executable_payload)
+        output.addfile(executable, io.BytesIO(executable_payload))
+    profile = tmp_path / ".bashrc"
+    context = make_context(tmp_path)
+    context.profile_path = profile
+
+    result = install_java(
+        context,
+        url=f"file://{payload}",
+        expected_sha256=__import__("hashlib")
+        .sha256(payload.read_bytes())
+        .hexdigest(),
+    )
+
+    assert result.success
+    persisted = profile.read_text(encoding="utf-8")
+    assert 'export JAVA_HOME="' in persisted
+    assert str(context.paths.data_dir / "jdk") in persisted
+
+
+@pytest.mark.unit
+def test_install_java_persists_java_home_for_powershell_profile(tmp_path) -> None:
+    import zipfile
+    from hashlib import sha256
+
+    payload = tmp_path / "jdk.zip"
+    with zipfile.ZipFile(payload, "w") as output:
+        output.writestr("jdk-21.0.6+7/bin/java.exe", "#!/bin/sh\n")
+    profile = tmp_path / "profile.ps1"
+    context = make_context(tmp_path, EnvironmentKind.WINDOWS)
+    context.profile_path = profile
+
+    result = install_java(
+        context,
+        url=f"file://{payload}",
+        expected_sha256=sha256(payload.read_bytes()).hexdigest(),
+    )
+
+    assert result.success
+    persisted = profile.read_text(encoding="utf-8")
+    assert "$env:JAVA_HOME =" in persisted
+    assert str(context.paths.data_dir / "jdk") in persisted
+
+
+@pytest.mark.unit
+def test_install_java_without_profile_skips_persistence(tmp_path) -> None:
+    import io
+    import tarfile
+    from hashlib import sha256
+
+    payload = tmp_path / "jdk.tar.gz"
+    with tarfile.open(payload, "w:gz") as output:
+        directory = tarfile.TarInfo("jdk-21.0.6+7/bin")
+        directory.type = tarfile.DIRTYPE
+        output.addfile(directory)
+        executable_payload = b"#!/bin/sh\n"
+        executable = tarfile.TarInfo("jdk-21.0.6+7/bin/java")
+        executable.size = len(executable_payload)
+        output.addfile(executable, io.BytesIO(executable_payload))
+    profile = tmp_path / ".bashrc"
+    context = make_context(tmp_path)
+    context.profile_path = None
+
+    result = install_java(
+        context,
+        url=f"file://{payload}",
+        expected_sha256=sha256(payload.read_bytes()).hexdigest(),
+    )
+
+    assert result.success
+    assert not profile.exists()
