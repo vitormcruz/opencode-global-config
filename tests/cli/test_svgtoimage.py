@@ -168,3 +168,26 @@ def test_svgtoimage_output_is_valid_json(
 
     assert status == 0
     assert set(result) == {"imagePath", "markdown"}
+
+
+@pytest.mark.unit
+def test_svgtoimage_reports_error_when_render_returns_no_image(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Sem imagem e sem erro de renderizacao, o entry point falha com sinal."""
+
+    from opencode_config.cli import svgtoimage
+
+    monkeypatch.setattr(
+        svgtoimage,
+        "render_svg",
+        lambda _svg: (None, ""),
+    )
+    monkeypatch.setattr(sys, "stdin", io.StringIO("<svg/>"))
+
+    status = svgtoimage.main()
+    captured = capsys.readouterr()
+
+    assert status == 1
+    assert "imagem" in captured.err

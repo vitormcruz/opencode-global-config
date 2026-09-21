@@ -131,7 +131,11 @@ def main() -> int:
         print(error, file=sys.stderr)
         return 1
 
-    assert image_path is not None
+    if image_path is None:
+        # Invariante de render_svg (ou Path ou erro); o ramo de guarda evita
+        # depender de assert, que some com python -O.
+        print("renderizacao nao produziu imagem", file=sys.stderr)
+        return 1
     print(
         json.dumps(
             {
