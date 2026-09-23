@@ -1,8 +1,10 @@
 # Plano: otimização de custo e contexto do repo
 
 Status: TESTES — fases 1-3 (tasks 1-11) concluídas e aprovadas por
-revisor independente; task 12 (piloto ai-memory) Parte 2 (medição) em
-andamento; task 13 (consolidação do insumo) executada. Executor = worker
+revisor independente; task 12 (piloto ai-memory) concluída: instalação
+auditada + medição -37% de contexto, payback ~3 chamadas, checkpoint
+persistido; task 13 (insumo do devflow) concluída. Pendente: decisão de
+adoção do ai-memory (Open Question 4, pelo humano). Executor = worker
 zai-coding-plan/glm-5.3-flash, revisor = zai-coding-plan/glm-5.3 (D12).
 Próximo ciclo: fase DEVFLOW (ver seção própria ao final).
 
@@ -586,29 +588,54 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
   método do relatório (requests, custo, cache_write antes/depois do
   PreCompact). Registrar resultados no plano. Adoção decidida pelo humano
   com os dados.
-  **Acceptance criteria:**
-  - [ ] Instalação user-space sem sudo/administrador.
-  - [ ] Hook PreCompact ativo e persistindo resumo antes de compactar.
-  - [ ] Medição registrada (antes/depois) no plano.
-  **Verification:** sessão de teste com compactação disparada; wiki do
-  ai-memory com o resumo persistido; comparação de métricas anotada.
-  **Dependencies:** Tasks 1-11 (otimizações implementadas; baseline
-  pós-otimização).
-  **Files likely touched:** `harness-conf/opencode.json` (se hooks/MCP
-  forem declarados no repo; só com aprovação), `plan/otimizacao-custo-con
-  texto.md` (resultados)
-  **Estimated scope:** Medium
+   **Acceptance criteria:**
+   - [x] Instalação user-space sem sudo/administrador.
+   - [x] Hook PreCompact ativo e persistindo resumo antes de compactar.
+   - [x] Medição registrada (antes/depois) no plano.
+   **Verification:** sessão de teste com compactação disparada; wiki do
+   ai-memory com o resumo persistido; comparação de métricas anotada.
+   **Resultado da medição (Parte 2, 2026-09-23, sessão
+   `ses_f345d5cf7ffeBFsiBoVJtvYCqm`):**
+   - ANTES (212 requests acumulados; últimas 3 chamadas): contexto
+     efetivo ~87,1-88,1k tokens/chamada (ex.: 88.137 = input não cacheado
+     376 + cache_read 87.040 + output 721); prefixo quase todo em
+     cache_read, input novo <2k/chamada.
+   - Compactação: `/compact` às 21:44:50; hook PreCompact persistiu
+     checkpoint de 2.931 bytes (~730 tokens) em `sessions/3c55e491-*.md`
+     na wiki do ai-memory (verificado; recuperável por sessões futuras).
+   - DEPOIS (1ª chamada, 21:45:58): total 55.402 (input não cacheado
+     21.492 + cache_read 33.408 + output 400).
+   - **Redução de contexto: ~87,8k → 55,4k = -32,4k tokens/chamada
+     (-37%).** Nuance de cache: a 1ª chamada pós-compact pagou 21,5k de
+     input não cacheado (reconstrução do cache); chamadas seguintes
+     tendem a input pequeno + cache_read ~55k.
+   - Custo único da sumarização: não registrado no DB (o /compact não
+     grava message com tokens); estimativa ~88k de leitura (maioria
+     cacheada) + ~1k output.
+   - **Payback em tokens de contexto: ~3 chamadas** (32,4k/chamada de
+     economia ÷ ~89k de custo único de leitura+output da sumarização);
+     a partir daí, cada chamada transporta 37% menos contexto.
+   - Limitações: provider zai reporta `cost`=0 e `cache_write`=0 (sem
+     US$ confiáveis sem tarifa externa); `session.time_compacting` não
+     populado pelo OpenCode 1.x (fronteira via mtime do checkpoint);
+     n=1 chamada pós-compact.
+   **Dependencies:** Tasks 1-11 (otimizações implementadas; baseline
+   pós-otimização).
+   **Files likely touched:** `harness-conf/opencode.json` (se hooks/MCP
+   forem declarados no repo; só com aprovação), `plan/otimizacao-custo-con
+   texto.md` (resultados)
+   **Estimated scope:** Medium
 
-- [ ] **Task 13: Materializar o insumo do devflow**
-  **Description:** consolidar neste arquivo o estado final da fase AGORA:
-  implementado (com SHAs dos checkpoints), resultados do piloto,
-  pendências (Copilot CLI, testes faltantes, docs) e decisões; atualizar o
-  campo Status para o vocabulário do devflow; seção Fase DEVFLOW como
-  roteiro do planejamento dele.
-  **Acceptance criteria:**
-  - [ ] Status no vocabulário do devflow; seção Fase DEVFLOW completa.
-  - [ ] Todo item de D9 fase AGORA marcado como feito/pendente com
-        evidência (SHA ou medição).
+- [x] **Task 13: Materializar o insumo do devflow**
+   **Description:** consolidar neste arquivo o estado final da fase AGORA:
+   implementado (com SHAs dos checkpoints), resultados do piloto,
+   pendências (Copilot CLI, testes faltantes, docs) e decisões; atualizar
+   campo Status para o vocabulário do devflow; seção Fase DEVFLOW como
+   roteiro do planejamento dele.
+   **Acceptance criteria:**
+   - [x] Status no vocabulário do devflow; seção Fase DEVFLOW completa.
+   - [x] Todo item de D9 fase AGORA marcado como feito/pendente com
+         evidência (SHA ou medição).
   **Verification:** leitura do arquivo por um leitor fresco responde "o
   que foi feito, o que falta, por onde continuar".
   **Dependencies:** Tasks 1-12
@@ -635,8 +662,8 @@ no repo (é o insumo do devflow; não é removido ao final).
 | 10 | Import writing-for-agents (D10) | FEITO | `f3b294b`, `1801503` (SHA c55ee46, MIT) |
 | 11 | Command otimização AGENTS.md (D7) | FEITO | `6b05375`, `1801503` |
 | 12 | Teste de consistência estendido | FEITO | `362ab54` (4 casos + fixtures) |
-| 13 | Piloto ai-memory (F1/D2) | PARCIAL | Parte 1 instalada e auditada (2.4.0, zero-LLM, local-only); Parte 2 (medição antes/depois + decisão de adoção) em andamento nesta sessão |
-| 14 | Insumo do devflow (esta seção + Fase DEVFLOW + Status) | FEITO | commit desta consolidação |
+| 13 | Piloto ai-memory (F1/D2) | FEITO (medição) | Parte 1: instalado e auditado (2.4.0, zero-LLM, local-only); Parte 2: medição concluída (contexto -37%, checkpoint persistido, payback ~3 chamadas; ver Task 12). Adoção: Open Question 4 |
+| 14 | Insumo do devflow (esta seção + Fase DEVFLOW + Status) | FEITO | `7ddfc21` |
 
 Revisões independentes: Fases 1 e 2 aprovadas (com correções `1801503`,
 `0c5343d`); Fase 3 aprovada (achado documental resolvido `05eece3`,
