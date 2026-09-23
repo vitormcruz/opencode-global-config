@@ -1,25 +1,18 @@
 ---
 name: tls-certificate-recovery
 description: >
-  Diagnostica e resolve autonomamente erros de certificado TLS/SSL que
-  ferramentas CLI (Python, Node, pip, npm, git, curl, huggingface_hub,
-  docling, aws-cli etc.) encontram em maquinas corporativas com proxy de
-  inspecao TLS, extraindo a cadeia de certificados ja confiada pelo sistema
-  operacional (Windows certificate store ou bundle CA do Linux/WSL) para um
-  bundle PEM reutilizavel, sem nunca desativar a validacao TLS. Use quando o
-  agente encontrar/receber qualquer um destes sinais em stdout/stderr de um
-  comando: "CERTIFICATE_VERIFY_FAILED", "self-signed certificate in
-  certificate chain", "unable to get local issuer certificate", "unable to
-  verify the first certificate", "certificate has expired",
-  "SSLCertVerificationError", "SSLError", "certificate verify failed",
-  "PKIX path building failed", "x509: certificate signed by unknown
-  authority", "NET::ERR_CERT_AUTHORITY_INVALID",
-  "DEPTH_ZERO_SELF_SIGNED_CERT", "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
-  "SEC_ERROR_UNKNOWN_ISSUER", "erro de certificado", "certificado nao
-  confiavel", "certificado autoassinado", "falha de verificacao SSL/TLS",
-  "problema de certificado", ou quando o humano disser "tenho problema de
-  certificado", "erro de certificado nessa maquina", "configura o
-  certificado pra mim", "resolve esse erro de TLS/SSL".
+  Use quando ferramenta CLI (Python, Node, pip, npm, git, curl, huggingface_hub, docling, aws-cli etc.) falhar por
+  validacao de cadeia de certificado TLS em maquina corporativa com proxy de inspecao TLS: extrai a cadeia ja confiada
+  pelo SO para bundle PEM reutilizavel e aplica no escopo do comando, sem nunca desativar a validacao TLS. Ativa
+  automaticamente ao detectar qualquer um destes sinais em stdout/stderr de comando, ou quando o humano reportar
+  problema de certificado. Triggers: CERTIFICATE_VERIFY_FAILED", "self-signed certificate in certificate chain",
+  "unable to get local issuer certificate", "unable to verify the first certificate", "certificate has expired",
+  "SSLCertVerificationError", "SSLError", "certificate verify failed", "PKIX path building failed", "x509: certificate
+  signed by unknown authority", "NET::ERR_CERT_AUTHORITY_INVALID", "DEPTH_ZERO_SELF_SIGNED_CERT",
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE", "SEC_ERROR_UNKNOWN_ISSUER", "erro de certificado", "certificado nao confiavel",
+  "certificado autoassinado", "falha de verificacao SSL/TLS", "problema de certificado", ou quando o humano disser
+  "tenho problema de certificado", "erro de certificado nessa maquina", "configura o certificado pra mim", "resolve
+  esse erro de TLS/SSL".
 ---
 
 Voce e uma skill de diagnostico e recuperacao de erros de certificado

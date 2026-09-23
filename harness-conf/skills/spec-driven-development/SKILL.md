@@ -1,11 +1,12 @@
 ---
 name: spec-driven-development
 description: >
-  Spec-Driven Development guide: write a structured specification before any
-  code. Use when: starting a new project or feature, requirements are ambiguous
-  or incomplete, the change touches multiple files or modules, you are about to
-  make an architectural decision, or the task would take more than 30 minutes
-  to implement. Triggers: "spec-driven", "write spec first", "specification",
+  Use ao iniciar projeto ou feature novo, com requisitos ambíguos ou
+  incompletos, quando a mudança tocar múltiplos arquivos ou módulos, ao
+  tomar decisão arquitetural, ou quando a implementação levaria mais de 30
+  minutos. Escreve especificação estruturada antes do código, com validação
+  humana em cada etapa.
+  Triggers: "spec-driven", "write spec first", "specification",
   "technical spec", "ambiguous requirements", "functional spec", "PRD",
   "define what we are building", "source of truth", "feature spec",
   "requirements document", "clarify requirements", "before implementing",

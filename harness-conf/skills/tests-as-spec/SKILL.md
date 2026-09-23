@@ -1,12 +1,11 @@
 ---
 name: tests-as-spec
 description: >
-  Testes como especificação executável do sistema. Use
-  quando: discutindo imutabilidade de testes na construção,
-  planejando alteração de testes existentes, avaliando
-  contradições entre testes, revisando cobertura como
-  proteção de spec, ou decidindo se um teste pode ser
-  removido/alterado. Triggers: "testes como especificação",
+  Use ao discutir intocabilidade de testes na construção, planejar alteração
+  de testes existentes, avaliar contradição entre testes, revisar cobertura
+  como proteção de spec, ou decidir se um teste pode ser removido ou
+  alterado. Testes são a especificação executável do sistema.
+  Triggers: "testes como especificação",
   "tests as spec", "teste é especificação", "testes são
   spec", "test specification", "intocável",
   "imutabilidade de teste", "teste contradiz",

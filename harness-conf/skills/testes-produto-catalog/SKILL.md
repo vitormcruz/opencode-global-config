@@ -1,12 +1,11 @@
 ---
 name: testes-produto-catalog
 description: >
-  Catálogo de referência com sugestões de ferramentas por
-  especialidade (backend, dados, segurança, frontend) e
-  o agregador testes-produto. Use quando: criando ou
-  atualizando suítes, definindo a seção "Testes por
-  Especialidade" no docs/README.md, configurando
-  ferramentas determinísticas. Triggers:
+  Use ao criar ou atualizar suítes, definir a seção "Testes por
+  Especialidade" no docs/README.md ou configurar ferramentas
+  determinísticas. Catálogo de sugestões de ferramentas por especialidade
+  (backend, dados, segurança, frontend) e do agregador testes-produto.
+  Triggers:
   "testes-produto", "catálogo de testes-produto",
   "sugestões de suíte", "regras de contenção",
   "ferramentas de testes-produto", "criar suítes",

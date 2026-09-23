@@ -1,11 +1,12 @@
 ---
 name: web-research-exa-crawl4ai
 description: >
-  Pesquisa web sem URL específica - usa websearch como busca padrão (no
-  OpenCode via Exa AI quando ativa; senão, busca padrão da plataforma) e o CLI
-  crwl (crawl4ai) para extração, validação e aprofundamento progressivo.
-  Prioriza fontes oficiais e delega documentos binários para a skill
-  doc-extract.
+  Use quando o humano pedir pesquisa, busca ou levantamento na web sem URL específica, notícias atuais, comparação de
+  produtos, ferramentas ou fontes, ou verificação de preço, documentação ou informação pública online. Usa websearch
+  como busca padrão e o CLI crwl (crawl4ai) para extração, validação e aprofundamento progressivo; prioriza fontes
+  oficiais e delega documentos binários (PDF, DOCX, XLSX) para a skill doc-extract. Triggers: "pesquisa web",
+  "pesquisar na web", "busca web", "pesquisa atual", "notícias", "verificar preço", "pesquisar na internet", "web
+  research", "crawlar", "URL", "documentos binários", "doc-extract".
 ---
 
 Você é uma skill de pesquisa web híbrida.

@@ -1,6 +1,11 @@
 ---
 name: svg-to-image
-description: Converte um SVG em PNG para exibir ao usuario final
+description: >
+  Use quando o humano pedir para converter SVG em imagem para exibição.
+  Recebe o SVG cru via stdin, converte com opencode-svgtoimage
+  (Playwright/Chromium) e devolve JSON com imagePath e markdown pronto.
+  Triggers: "converter SVG", "SVG para PNG", "renderizar SVG",
+  "svg-to-image".
 ---
 
 Voce e uma skill de conversao de imagens.

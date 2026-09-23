@@ -1,16 +1,16 @@
 ---
 name: test-driven-development
 description: >
-  Test-Driven Development guide: write failing test first, then code to make it
-  pass. Use when: implementing any new logic or behavior, fixing a bug (reproduce
-  with test first), modifying existing functionality, adding edge case handling,
-  or any change that could break existing behavior. Triggers: "TDD",
+  Use ao implementar lógica ou comportamento novo, corrigir bug (reproduzir
+  com teste antes), alterar funcionalidade existente, tratar casos de borda,
+  ou qualquer mudança que possa quebrar comportamento atual. Escreve teste
+  que falha antes do código, no ciclo red-green-refactor.
+  Triggers: "TDD",
   "test-driven development", "write tests first", "red-green-refactor",
   "unit test", "integration test", "test coverage", "testing patterns",
   "prove it works", "reproduce bug with test", "failing test", "test suite",
   "Prove-It Pattern", "browser testing", "flaky test", "test isolation",
-  "mocking", "test doubles", "regression test". Uses
-  references/testing-patterns.md as pattern reference.
+  "mocking", "test doubles", "regression test".
 ---
 
 # Test-Driven Development

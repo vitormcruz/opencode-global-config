@@ -1,14 +1,13 @@
 ---
 name: spec-executavel
 description: >
-  Como escrever especificação executável — critérios de aceitação em texto
-  legível que viram teste automatizado (o texto é a spec; o teste decorre
-  dela). Use quando: escrever, revisar ou detalhar critérios de aceitação;
-  criar cenários BDD/Gherkin; converter requisitos ou histórias em cenários
-  automatizáveis; avaliar se um critério está bom o bastante para automatizar;
-  estruturar `Esquema do Cenário` com `Exemplos`; escolher formato de spec
-  executável; revisar specs Concordion ou ferramentas similares; ligar valores
-  de regras de negócio ao código de teste. Triggers: "spec executável",
+  Use ao escrever, revisar ou detalhar critérios de aceitação; criar cenários
+  BDD/Gherkin; converter requisitos ou histórias em cenários automatizáveis;
+  avaliar se um critério está pronto para automatizar; estruturar
+  `Esquema do Cenário` com `Exemplos`; ou revisar specs Concordion. Especificação
+  executável: texto legível que vira teste automatizado (mexer no texto muda
+  o veredito do teste).
+  Triggers: "spec executável",
   "especificação executável", "critérios de aceitação", "critério de aceitação",
   "Gherkin", "BDD", "Cenário", "Esquema do Cenário", "Dado que", "Quando tento",
   "Então", "specification by example", "cenário verificável", "automatizar

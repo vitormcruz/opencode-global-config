@@ -1,16 +1,17 @@
 ---
 name: security-and-hardening
 description: >
-  Security hardening guide for code and applications. Use when: handling user
-  input, implementing authentication or authorization, storing or transmitting
-  sensitive data, integrating with external APIs, adding file uploads, webhooks,
-  callbacks, or handling payment and PII data. Triggers: "security",
+  Use ao lidar com input de usuário, implementar autenticação ou
+  autorização, armazenar ou transmitir dados sensíveis, integrar com APIs
+  externas, adicionar upload de arquivos, webhooks, callbacks, ou lidar com
+  pagamento e PII. Desenvolvimento security-first para web (OWASP Top 10,
+  secrets, hardening).
+  Triggers: "security",
   "hardening", "OWASP", "XSS", "SQL injection", "CSRF", "input sanitization",
   "authentication", "authorization", "sensitive data", "secrets management",
   "encryption", "vulnerability", "CVE", "rate limiting", "CORS", "CSP",
   "zero-trust", "API security", "JWT", "session management", "penetration
-  testing", "threat model", "secure coding". Uses
-  references/security-checklist.md as checklist.
+  testing", "threat model", "secure coding".
 ---
 
 # Security and Hardening
