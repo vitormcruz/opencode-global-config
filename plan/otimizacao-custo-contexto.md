@@ -463,23 +463,13 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
   **Files likely touched:** `tests/agents/test_workflow_consistency.py`
   **Estimated scope:** Small
 
-- [ ] **Task 10: Roteamento, política de compactação e premissa 7**
-  **Estado (2026-09-23): rascunhos APROVADOS pelo humano; aplicação
-  PENDENTE (humano compactou a sessão antes de aplicar). Após a
-  compactação, aplicar com o worker:**
-  - Rascunho A (AGENTS.base.md): `/tmp/opencode/fase3/AGENTS.base.md`
-    (3 seções novas: Roteamento com tabela dos 8 agentes + regra de
-    sugerir troca; Autonomia; Compactação de contexto). Diff:
-    `/tmp/opencode/fase3/diff-AGENTS.base.md`.
-  - Rascunho B (docs/workflow-agentes-dev.md):
-    `/tmp/opencode/fase3/workflow-agentes-dev.md` (premissa 7 com exceção
-    de compactação). Diff: `/tmp/opencode/fase3/diff-workflow-agentes-dev.md`.
-  - Item C (docs/workflow-definicao-escopo.md): verificado, SEM mudança
-    necessária (zero menções a sessão).
-  - Aplicação: validar sha256 dos originais contra os registros do
-    executor, copiar rascunhos, rodar suíte (esperado 831 passed, 1 failed
-    pré-existente JAVA_HOME, 31 deselected), commit
-    `docs(workflow): roteamento de agentes e política de compactação`.
+- [x] **Task 10: Roteamento, política de compactação e premissa 7**
+  **Resultado (2026-09-23):** commit `c24068d`. AGENTS.base.md +34 (seções
+  Roteamento com tabela dos 8 agentes, Autonomia, Compactação de contexto);
+  workflow-agentes-dev.md premissa 7 com exceção de compactação (+6/-1).
+  sha256 dos originais validado antes da aplicação; diff confere com os
+  rascunhos aprovados; suíte 831 passed, 1 failed pré-existente (JAVA_HOME),
+  31 deselected. Item C sem mudança.
   **Ajuste (2026-09-23, pedido do humano):** incluir também no
   AGENTS.base.md regra de autonomia: violação de regra objetiva do repo
   (formatação, largura de linha, estilo) é corrigida de imediato pelo
