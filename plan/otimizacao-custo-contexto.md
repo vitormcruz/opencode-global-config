@@ -317,10 +317,16 @@ DEVFLOW).
   **Files likely touched:** `harness-conf/skills/<dominio>/SKILL.md` (~24)
   **Estimated scope:** Large (executar em lotes de ~8)
 
-- [ ] **Task 7: Reescrever corpos das 31 skills**
+- [x] **Task 7: Reescrever corpos das 31 skills**
   **Nota de contagem (2026-09-23):** são 32 corpos (7 core + 25 domínio).
   writing-for-agents fica EXCLUÍDO: corpo é cópia canônica do upstream e
   referência do método; reescrevê-lo enfraquece o papel de referência.
+  **Resultado (2026-09-23):** 3 lotes, commits `b78379b`, `36447b9`,
+  `c518e73`. Corpos 64391 → 48266 tokens chars/4 (-16125, -25%). Frontmatter
+  intocado (validação programática); references/UPSTREAM/LICENSE intocados;
+  no-op test por skill em `/tmp/opencode/fase2/corpos-lote{1,2,3}.md`;
+  pinos de teste restaurados quando fixavam strings de corpo. Suíte: 822
+  passed, 1 failed pré-existente (JAVA_HOME), 31 deselected.
   **Description:** aplicar writing-for-agents ao corpo de cada SKILL.md
   (no-op pruning, context pointers, bullets, split > ~100 linhas).
   Executar em lotes de até 10 skills; diff por skill; sem mudança de
@@ -473,6 +479,7 @@ no repo (é o insumo do devflow; não é removido ao final).
 | Sessão longa da fase infla o próprio custo | Médio | aplicar a própria política: estado persistido + nova sessão quando o histórico virar ruído |
 | Testes mínimos deixam regressão passar | Médio | rodar suíte completa e registrar falhas pré-existentes; completar é da fase DEVFLOW |
 | Enxugo remove gotcha não-óbvio | Médio | filtro "descobre em 10s?" por linha; dúvida = manter; revisão humana do diff |
+| Sync de upstream desfazer as reescritas | Alto (analisado 2026-09-23: NÃO ocorre) | `_copy_skill_md` só copia SKILL.md inexistente; guardas de teste cobrem as 5 famílias de sync. Convivência: UPSTREAM.md é regenerado pelo sync preservando só a seção "## Adaptacao da description" (anotações locais vivem nela); writing-for-agents fora do sync até a DEVFLOW registrar com `extra_fields` para `description_lang`/`description_note` |
 
 ## Open Questions
 
