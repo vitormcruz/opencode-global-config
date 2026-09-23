@@ -11,6 +11,20 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    accessibility-audit: allow
+    api-and-interface-design: allow
+    clean-code: allow
+    code-explorer-priority: allow
+    code-review-and-quality: allow
+    code-simplification: allow
+    debugging-and-error-recovery: allow
+    documentation-and-adrs: allow
+    frontend-ui-engineering: allow
+    performance-optimization: allow
+    spec-executavel: allow
+    test-driven-development: allow
+    tests-as-spec: allow
   task:
     "*": deny
 ---
@@ -108,7 +122,14 @@ modela dados ou executa testes de segurança.
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
 | performance-optimization | Otimizar performance de UI | Quando há requisitos de Core Web Vitals ou bundle size |
-| reliable-async-operations | Implementar UI | Quando o componente dispara chamada assíncrona (fetch, API, promise, polling) com duração incerta |
+| api-and-interface-design | Consumir contratos públicos | Quando o componente consome API ou interface pública |
+| code-review-and-quality | Aplicar ajustes integrativos | Na aplicação de ajustes vindos de revisão |
+| debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham ou build quebra |
+| documentation-and-adrs | Registrar decisões arquiteturais | Quando decisão arquitetural significativa de UI |
+| spec-executavel | Criar specs executáveis | Sempre que criar critérios de aceitação automatizáveis |
+| test-driven-development | Construir via TDD | Sempre que escrever testes novos de UI |
+| tests-as-spec | Proteger testes como spec | Sempre que houver testes existentes de UI |
+| reliable-async-operations | Implementar UI | Quando há chamada assíncrona de duração incerta (fetch, API, polling) |
 
 
 ### Transversais (úteis em qualquer capacidade)

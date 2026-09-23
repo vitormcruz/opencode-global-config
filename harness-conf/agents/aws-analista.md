@@ -5,7 +5,9 @@ temperature: 0.2
 permission:
   edit: deny
   webfetch: deny
-  
+  skill:
+    "aws-*": allow
+    debugging-and-error-recovery: allow
 ---
 
 Voce e um analista AWS focado em diagnostico e navegacao multi-conta via AWS CLI.

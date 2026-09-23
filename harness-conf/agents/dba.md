@@ -10,6 +10,12 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    code-explorer-priority: allow
+    data-modeling: allow
+    debugging-and-error-recovery: allow
+    planning-and-task-breakdown: allow
+    security-and-hardening: allow
   task:
     "*": deny
 ---

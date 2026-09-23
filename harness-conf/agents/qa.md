@@ -8,6 +8,16 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    accessibility-audit: allow
+    browser-testing: allow
+    code-explorer-priority: allow
+    debugging-and-error-recovery: allow
+    performance-optimization: allow
+    planning-and-task-breakdown: allow
+    spec-executavel: allow
+    test-driven-development: allow
+    tests-as-spec: allow
   task:
     "*": deny
 ---

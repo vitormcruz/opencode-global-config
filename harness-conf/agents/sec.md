@@ -9,6 +9,12 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    code-explorer-priority: allow
+    code-review-and-quality: allow
+    debugging-and-error-recovery: allow
+    security-and-hardening: allow
+    spec-executavel: allow
   task:
     "*": deny
 ---

@@ -63,6 +63,8 @@
 - Se o repo estiver indexado no codebase-memory, faça descoberta CLI-first
   antes de grep/glob; carregue `code-explorer-priority` para detectar o
   índice e seguir o fallback.
+- Agente de codificação: para descoberta de código, carregue a skill
+  `code-explorer-priority` e siga o CLI-first.
 
 ## Geração de arquivos MD
 - Limite cada linha a 120 colunas; use word-wrap para garantir.

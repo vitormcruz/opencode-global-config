@@ -20,6 +20,11 @@ permission:
   bash: deny
   webfetch: deny
   websearch: deny
+  skill:
+    code-explorer-priority: allow
+    planning-and-task-breakdown: allow
+    prompt-improver: allow
+    writing-for-agents: allow
   task:
     "*": deny
     eng-software: allow

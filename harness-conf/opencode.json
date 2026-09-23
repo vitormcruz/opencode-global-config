@@ -9,20 +9,34 @@
         "reserved": 10000
     },
     "agent": {
-        "aws-analista": {
-            "permission": {
-                "skill": {
-                    "aws-*": "allow"
-                }
-            }
-        },
         "worker": {
             "reasoningEffort": "max"
         }
     },
     "permission": {
         "skill": {
-            "aws-*": "deny"
+            "aws-*": "deny",
+            "accessibility-audit": "deny",
+            "api-and-interface-design": "deny",
+            "browser-testing": "deny",
+            "clean-code": "deny",
+            "code-explorer-priority": "deny",
+            "code-review-and-quality": "deny",
+            "code-simplification": "deny",
+            "data-modeling": "deny",
+            "debugging-and-error-recovery": "deny",
+            "documentation-and-adrs": "deny",
+            "frontend-ui-engineering": "deny",
+            "performance-optimization": "deny",
+            "planning-and-task-breakdown": "deny",
+            "prompt-improver": "deny",
+            "security-and-hardening": "deny",
+            "spec-driven-development": "deny",
+            "spec-executavel": "deny",
+            "test-driven-development": "deny",
+            "testes-produto-catalog": "deny",
+            "tests-as-spec": "deny",
+            "writing-for-agents": "deny"
         }
     }
 }

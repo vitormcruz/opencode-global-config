@@ -12,6 +12,17 @@ permission:
   bash: allow
   webfetch: deny
   websearch: deny
+  skill:
+    accessibility-audit: allow
+    api-and-interface-design: allow
+    code-explorer-priority: allow
+    code-review-and-quality: allow
+    code-simplification: allow
+    data-modeling: allow
+    documentation-and-adrs: allow
+    frontend-ui-engineering: allow
+    security-and-hardening: allow
+    tests-as-spec: allow
   task:
     "*": deny
 ---

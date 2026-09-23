@@ -10,6 +10,20 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    api-and-interface-design: allow
+    clean-code: allow
+    code-explorer-priority: allow
+    code-review-and-quality: allow
+    code-simplification: allow
+    debugging-and-error-recovery: allow
+    documentation-and-adrs: allow
+    performance-optimization: allow
+    planning-and-task-breakdown: allow
+    spec-executavel: allow
+    test-driven-development: allow
+    tests-as-spec: allow
+    writing-for-agents: allow
   task:
     "*": deny
 ---

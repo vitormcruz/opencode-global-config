@@ -12,6 +12,9 @@ permission:
   edit: allow
   bash: allow
   webfetch: deny
+  skill:
+    planning-and-task-breakdown: allow
+    writing-for-agents: allow
   task:
     "*": allow
 ---

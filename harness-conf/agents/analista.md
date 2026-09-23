@@ -12,6 +12,9 @@ mode: primary
 temperature: 0.3
 permission:
   question: allow
+  skill:
+    spec-driven-development: allow
+    spec-executavel: allow
   task:
     "*": deny
     revisor-historia: allow

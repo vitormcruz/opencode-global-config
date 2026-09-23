@@ -12,6 +12,11 @@ permission:
   bash: allow
   webfetch: deny
   websearch: deny
+  skill:
+    code-explorer-priority: allow
+    documentation-and-adrs: allow
+    spec-executavel: allow
+    testes-produto-catalog: allow
   task:
     "*": deny
 ---
