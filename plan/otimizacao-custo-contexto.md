@@ -444,7 +444,13 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
   `harness-conf/agents/*.md` (frontmatter)
   **Estimated scope:** Medium
 
-- [ ] **Task 9: Teste de consistência estendido**
+- [x] **Task 9: Teste de consistência estendido**
+  **Resultado (2026-09-23):** commit `362ab54`. 9 testes novos em
+  `tests/agents/test_workflow_consistency.py` (parser de permission.skill,
+  wildcard via fnmatchcase, whitelist das 10 globais): órfã sem allow, allow
+  de skill inexistente, domínio sem deny, agente fantasma; cada caso com
+  fixture violante validada. Suíte: 831 passed, 1 failed pré-existente
+  (JAVA_HOME), 31 deselected.
   **Description:** estender `tests/agents/test_workflow_consistency.py`
   para o mapa novo: skill com deny sem nenhum allow (órfã), allow de skill
   inexistente, skill de domínio sem deny, agente referenciado inexistente.
