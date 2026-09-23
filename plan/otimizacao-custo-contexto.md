@@ -541,7 +541,7 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
 
 ### Fase 4: Piloto e insumo
 
-- [ ] **Task 12: Piloto do ai-memory**
+- [x] **Task 12: Piloto do ai-memory**
   **Parte 1 CONCLUÍDA (2026-09-23, instalação, sem commit):** versão real
   2.4.0 (mais nova que a v1.29.0 da D2; quick-start oficial mudou para
   Docker + wrapper). Instalado user-space: wrapper
@@ -597,24 +597,27 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
    **Resultado da medição (Parte 2, 2026-09-23, sessão
    `ses_f345d5cf7ffeBFsiBoVJtvYCqm`):**
    - ANTES (212 requests acumulados; últimas 3 chamadas): contexto
-     efetivo ~87,1-88,1k tokens/chamada (ex.: 88.137 = input não cacheado
-     376 + cache_read 87.040 + output 721); prefixo quase todo em
-     cache_read, input novo <2k/chamada.
+     efetivo ~88,1-89,0k tokens/chamada (ex.: total 88.137 = input não
+     cacheado 376 + cache_read 87.040 + output pequeno embutido no
+     total; decomposição aproximada/inferida: as rubricas do DB não
+     somam exatas ao total); prefixo quase todo em cache_read, input
+     novo <2k/chamada.
    - Compactação: `/compact` às 21:44:50; hook PreCompact persistiu
      checkpoint de 2.931 bytes (~730 tokens) em `sessions/3c55e491-*.md`
      na wiki do ai-memory (verificado; recuperável por sessões futuras).
    - DEPOIS (1ª chamada, 21:45:58): total 55.402 (input não cacheado
-     21.492 + cache_read 33.408 + output 400).
-   - **Redução de contexto: ~87,8k → 55,4k = -32,4k tokens/chamada
+     21.492 + cache_read 33.408 + output 400; a soma das rubricas dá
+     55.300, residual ~102 tokens de rubrica não exposta no DB).
+   - **Redução de contexto: ~88,6k → 55,4k = -33,2k tokens/chamada
      (-37%).** Nuance de cache: a 1ª chamada pós-compact pagou 21,5k de
      input não cacheado (reconstrução do cache); chamadas seguintes
      tendem a input pequeno + cache_read ~55k.
-   - Custo único da sumarização: não registrado no DB (o /compact não
-     grava message com tokens); estimativa ~88k de leitura (maioria
-     cacheada) + ~1k output.
-   - **Payback em tokens de contexto: ~3 chamadas** (32,4k/chamada de
-     economia ÷ ~89k de custo único de leitura+output da sumarização);
-     a partir daí, cada chamada transporta 37% menos contexto.
+   - Custo único da sumarização: registrado no DB (message de
+     compaction, criada 21:43:52Z e concluída 21:44:50Z, logo antes da
+     1ª chamada pós): input 33.408 + output 2.331 = ~35,7k.
+   - **Payback em tokens de contexto: ~1-2 chamadas** (~35,7k de custo
+     único da sumarização ÷ ~33,2k/chamada de economia ≈ 1,1); a partir
+     daí, cada chamada transporta 37% menos contexto.
    - Limitações: provider zai reporta `cost`=0 e `cache_write`=0 (sem
      US$ confiáveis sem tarifa externa); `session.time_compacting` não
      populado pelo OpenCode 1.x (fronteira via mtime do checkpoint);
