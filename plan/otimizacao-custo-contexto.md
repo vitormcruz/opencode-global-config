@@ -284,7 +284,10 @@ DEVFLOW).
   **Files likely touched:** `AGENTS.md`
   **Estimated scope:** Small
 
-- [ ] **Task 5: Reescrever descriptions das 7 skills core**
+- [x] **Task 5: Reescrever descriptions das 7 skills core**
+  **Resultado (2026-09-23):** 1355 → 1130 tokens chars/4 (-225), commit
+  `ee74995`. Triggers canônicos preservados byte a byte (validação automática
+  contra baseline).
   **Description:** reescrever as descriptions das skills core
   (code-explorer-priority, git-workflow-and-versioning, humanizer-br,
   planning-and-task-breakdown, portugues-tecnico-controlado,
@@ -298,7 +301,13 @@ DEVFLOW).
   **Files likely touched:** `harness-conf/skills/<core>/SKILL.md` (7)
   **Estimated scope:** Medium
 
-- [ ] **Task 6: Reescrever descriptions das ~24 skills de domínio**
+- [x] **Task 6: Reescrever descriptions das ~24 skills de domínio**
+  **Resultado (2026-09-23):** contagem real: 25 skills de domínio (33 pastas
+  no total: 7 core + 25 domínio + writing-for-agents). Descriptions
+  3519 → 3555 tokens chars/4 (+36): 8 convertidas de EN para PT-BR e 7 skills
+  sem triggers ganharam triggers de discovery (justifica o acréscimo).
+  Commits `b7fe366`, `55c5e72`, `f01cc34`. Tabela consolidada em
+  `/tmp/opencode/fase2/descriptions-tabela.md`.
   **Description:** idem Task 5 para as demais skills de
   `harness-conf/skills/` (excluindo writing-for-agents, recém-importada).
   **Acceptance criteria:**
@@ -309,6 +318,9 @@ DEVFLOW).
   **Estimated scope:** Large (executar em lotes de ~8)
 
 - [ ] **Task 7: Reescrever corpos das 31 skills**
+  **Nota de contagem (2026-09-23):** são 32 corpos (7 core + 25 domínio).
+  writing-for-agents fica EXCLUÍDO: corpo é cópia canônica do upstream e
+  referência do método; reescrevê-lo enfraquece o papel de referência.
   **Description:** aplicar writing-for-agents ao corpo de cada SKILL.md
   (no-op pruning, context pointers, bullets, split > ~100 linhas).
   Executar em lotes de até 10 skills; diff por skill; sem mudança de
