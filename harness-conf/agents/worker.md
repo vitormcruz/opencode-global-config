@@ -8,7 +8,7 @@ description: >
   resolvidos por conta propria. Exclusivo do OpenCode —
   ignorado pelo adapter Copilot. (PT-BR)
 mode: subagent
-model: opencode-go/gpt-5.6-luna
+model: zai-coding-plan/glm-5.3-flash
 temperature: 0.2
 permission:
   edit: allow
