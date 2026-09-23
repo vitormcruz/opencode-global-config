@@ -66,6 +66,28 @@
 - Agente de codificação: para descoberta de código, carregue a skill
   `code-explorer-priority` e siga o CLI-first.
 
+## Roteamento de agentes
+- Tarefa de especialidade vai ao agente especialista:
+
+| Agente | Função |
+|---|---|
+| `devflow` | Orquestrador: roteia fases e mantém o Status; nunca executa tarefa de domínio |
+| `eng-software` | Engenheiro de software: planeja e constrói código com TDD; único committer |
+| `front` | Engenheiro frontend: prototipa telas, implementa UI e revisa identidade visual |
+| `curador-produto` | Curador de produto: mantém docs/README.md e testes por especialidade; valida evidências |
+| `dba` | Banco de dados: modela dados e revisa artefatos e scripts de BD |
+| `sec` | Segurança: analisa requisitos, gera configurações, revisa e testa |
+| `rev` | Revisor integrativo: revisão solo com skills de domínio; reporta, não corrige |
+| `qa` | Testador: planeja e executa testes; não analisa código |
+
+- Agente genérico recebendo tarefa de especialista: sugira ao humano a
+  troca para o agente certo.
+
+## Autonomia
+- Violação de regra objetiva do repo (formatação, largura de linha,
+  estilo): corrija de imediato, sem escalar ao humano.
+- Escale ao humano apenas decisão de escopo, comportamento ou risco.
+
 ## Geração de arquivos MD
 - Limite cada linha a 120 colunas; use word-wrap para garantir.
 
@@ -79,6 +101,18 @@
   30 segundos, peça confirmação ao humano.
 - Código que depende de espera: carregue a skill
   `reliable-async-operations`.
+
+## Compactação de contexto
+- Reconheça os sinais: histórico virou ruído; tarefa longa confirmada.
+- Prefira mecanismo automatizado efetivo: auto-compactação por threshold;
+  nova sessão ou spawn com estado persistido em arquivo, quando o fluxo
+  dá conta.
+- Sem mecanismo automatizado aplicável: solicite `/compact` ao humano ou
+  proponha nova sessão com estado persistido.
+- Esta regra prevalece sobre a política de sessão do workflow de
+  desenvolvimento ("retomada dentro da fase, sessão nova entre fases"):
+  se os sinais dispararem, compacte ou troque de sessão mesmo dentro da
+  mesma fase.
 
 ## Commits
 - Siga Conventional Commits; ao versionar, carregue a skill

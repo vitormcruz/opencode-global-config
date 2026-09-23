@@ -154,7 +154,11 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    próprio. Mapa combinado registrado no arquivo. Pausa
    antes de fases cujo modelo difere do atual. Política de
    sessão: `{workflowId}-{fase}-{agente}`; retomada dentro
-   da fase, sessão nova entre fases.
+   da fase, sessão nova entre fases. Exceção: quando os
+   critérios de compactação do `AGENTS.base.md` dispararem
+   (histórico como ruído; tarefa longa confirmada), a
+   política de compactação prevalece, mesmo dentro da mesma
+   fase (compactação ou nova sessão com estado persistido).
 
 ### Governança
 
