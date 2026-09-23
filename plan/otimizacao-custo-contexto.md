@@ -363,7 +363,15 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
 
 ### Fase 3: Permissions e regras
 
-- [ ] **Task 8: Permissions de skills por agente**
+- [x] **Task 8: Permissions de skills por agente**
+  **Resultado (2026-09-23):** commit `42b2212`. 13 arquivos: opencode.json
+  (deny global: 21 chaves novas + aws-* existente, cobrindo 23 skills),
+  frontmatter com 69 allows em 11 agentes (worker/revisores sem alteração),
+  corpo do front completado com as 7 skills de engenharia, linha de
+  descoberta no AGENTS.base.md, allow aws-* migrado ao frontmatter do
+  aws-analista. Suíte: 822 passed, 1 failed pré-existente (JAVA_HOME), 31
+  deselected. Dívida pré-existente registrada: linhas >120 em vários
+  agents/*.md (fora do escopo deste commit).
   **Mapa FINAL v4, aprovado e confirmado pelo humano em 2026-09-23
   (derivação por varredura linha a linha das menções nos corpos + decisões
   humanas):**
