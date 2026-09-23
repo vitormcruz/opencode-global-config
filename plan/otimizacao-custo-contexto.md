@@ -151,7 +151,9 @@ adapters, atualizar docs, completar testes).
     completa `-m all`, registro da skill importada no `opencode-skills` +
     checklist pós-sync do AGENTS.md do repo, verificação de consistência
     workflow↔agentes, README/seção de dependências se o ai-memory mudar
-    premissas de instalação).
+    premissas de instalação). Item prioritário adicional (D13, decidido
+    pelo humano em 2026-09-23): mecânica de sync diff assistido + freeze
+    no `opencode-skills`.
 - **D10 (writing-for-agents é skill de domínio, não global):** deny global
   junto às demais skills de domínio + allow nos agentes que escrevem e
   revisam conteúdo para agentes: `devflow`, `eng-software` e
@@ -199,6 +201,17 @@ adapters, atualizar docs, completar testes).
   Verificação antes/depois: tokens + cobertura das regras operacionais.
   agents-md-optimizer (CaesiumY) descartado como dependência; instrlint
   descartado (dead rules JS/TS+C#, repo é Python).
+- **D13 (sync de upstream: diff assistido + freeze; implementação na fase
+  DEVFLOW):** o sync continua sem sobrescrever SKILL.md local. Ganhos novos:
+  (1) comando `opencode-skills diff NOME` que traz o diff upstream
+  base→novo desde o último sync (o que o autor mudou lá), e a aplicação no
+  SKILL.md local é ASSISTIDA: agente/humano aplica o que é relevante
+  seguindo writing-for-agents, mantendo o formato e a estrutura da versão
+  local; (2) freeze por skill: campo `sincronizacao: congelada` no
+  UPSTREAM.md, respeitado pelo sync e pelo `list`; congelar ou descongelar
+  é decisão humana, caso a caso; o UPSTREAM.md permanece no repo para
+  proveniência e licença (nunca é apagado). Implementação e testes na fase
+  DEVFLOW, junto do registro da writing-for-agents no CLI.
 
 ## Task List
 
@@ -322,7 +335,8 @@ DEVFLOW).
   writing-for-agents fica EXCLUÍDO: corpo é cópia canônica do upstream e
   referência do método; reescrevê-lo enfraquece o papel de referência.
   **Resultado (2026-09-23):** 3 lotes, commits `b78379b`, `36447b9`,
-  `c518e73`. Corpos 64391 → 48266 tokens chars/4 (-16125, -25%). Frontmatter
+  `c518e73`. Corpos 64391 → 48266 tokens chars/4; medição corpo a corpo
+  do revisor (convenção unificada): -16059 tokens (-26%). Frontmatter
   intocado (validação programática); references/UPSTREAM/LICENSE intocados;
   no-op test por skill em `/tmp/opencode/fase2/corpos-lote{1,2,3}.md`;
   pinos de teste restaurados quando fixavam strings de corpo. Suíte: 822
@@ -383,6 +397,11 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
   **Estimated scope:** Small
 
 - [ ] **Task 10: Roteamento, política de compactação e premissa 7**
+  **Ajuste (2026-09-23, pedido do humano):** incluir também no
+  AGENTS.base.md regra de autonomia: violação de regra objetiva do repo
+  (formatação, largura de linha, estilo) é corrigida de imediato pelo
+  agente, sem escalar ao humano; escalar apenas decisão de escopo,
+  comportamento ou risco.
   **Description:** no `harness-conf/AGENTS.base.md` (estilo enxuto da
   Fase 2): tabela de roteamento agentes→funções + regra "agente genérico
   sugere troca" (texto autocontido); política de compactação para todos
@@ -479,7 +498,7 @@ no repo (é o insumo do devflow; não é removido ao final).
 | Sessão longa da fase infla o próprio custo | Médio | aplicar a própria política: estado persistido + nova sessão quando o histórico virar ruído |
 | Testes mínimos deixam regressão passar | Médio | rodar suíte completa e registrar falhas pré-existentes; completar é da fase DEVFLOW |
 | Enxugo remove gotcha não-óbvio | Médio | filtro "descobre em 10s?" por linha; dúvida = manter; revisão humana do diff |
-| Sync de upstream desfazer as reescritas | Alto (analisado 2026-09-23: NÃO ocorre) | `_copy_skill_md` só copia SKILL.md inexistente; guardas de teste cobrem as 5 famílias de sync. Convivência: UPSTREAM.md é regenerado pelo sync preservando só a seção "## Adaptacao da description" (anotações locais vivem nela); writing-for-agents fora do sync até a DEVFLOW registrar com `extra_fields` para `description_lang`/`description_note` |
+| Sync de upstream desfazer as reescritas | Alto (analisado 2026-09-23: NÃO ocorre) | `_copy_skill_md` só copia SKILL.md inexistente; guardas de teste cobrem as 5 famílias de sync. Convivência: UPSTREAM.md é regenerado pelo sync preservando só a seção "## Adaptacao da description" (anotações locais vivem nela); writing-for-agents fora do sync até a DEVFLOW registrar com `extra_fields` para `description_lang`/`description_note`. Melhoria decidida (D13): diff assistido + freeze, na fase DEVFLOW |
 
 ## Open Questions
 
