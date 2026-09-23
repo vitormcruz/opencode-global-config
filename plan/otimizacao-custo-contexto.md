@@ -498,7 +498,15 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
   `docs/workflow-definicao-escopo.md`
   **Estimated scope:** Medium
 
-- [ ] **Task 11: Normalizar estado manual das skills**
+- [x] **Task 11: Normalizar estado manual das skills**
+  **Resultado (2026-09-23):** sem commit (nada versionado alterado).
+  Bootstrap OK: symlink único de `skills` restaurado (backup em
+  `~/.config/opencode-backup/20260923-170938`); symlinks de agents,
+  commands, opencode.json e scripts apontando para o repo; AGENTS.md global
+  regenerado com os blocos novos (Roteamento, Autonomia, Compactação,
+  code-explorer-priority); 33 skills resolvidas (incluindo
+  writing-for-agents); Copilot sincronizado (33 skills, 12 agents, 4
+  commands).
   **Description:** desfazer o diretório manual `~/.config/opencode/skills`
   (7 symlinks individuais) e restaurar o symlink único de bootstrap:
   rodar `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes` (o
