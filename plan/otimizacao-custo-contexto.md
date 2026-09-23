@@ -539,6 +539,27 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
 ### Fase 4: Piloto e insumo
 
 - [ ] **Task 12: Piloto do ai-memory**
+  **Parte 1 CONCLUÍDA (2026-09-23, instalação, sem commit):** versão real
+  2.4.0 (mais nova que a v1.29.0 da D2; quick-start oficial mudou para
+  Docker + wrapper). Instalado user-space: wrapper
+  `~/.local/bin/ai-memory` (sha256 verificado), container Docker
+  `akitaonrails/ai-memory:latest` publicando só em 127.0.0.1:49374,
+  volume `~/.local/share/ai-memory/` (wiki markdown git-versionado +
+  memory.sqlite FTS5), MCP declarado em `~/.config/opencode/opencode.jsonc`
+  (merge por cima do symlink do repo; repo intacto; backup .bak), plugin
+  `~/.config/opencode/plugins/ai-memory.ts` com hook pre-compact nos
+  eventos experimental.session.compacting/session.compacted. Revisão de
+  segurança: APROVADO; zero-LLM (nenhuma key), única rede é o servidor
+  local; prompts persistem em texto local (tratar como sensível); binário
+  do servidor é build upstream com checksum (não auditável linha a linha).
+  Pendências da Parte 2: (1) reiniciar o OpenCode (plugin carrega no
+  próximo start; sessões atuais não têm o hook); (2) sessão de trabalho
+  real + /compact; (3) medição pelo procedimento registrado
+  (baseline/depois via sqlite no `~/.local/share/opencode/opencode.db`,
+  tabela message, fronteira session.time_compacting; payback = custo da
+  compactação ÷ economia por chamada; cost do provider zai vem 0, aplicar
+  tarifa externa); (4) registrar antes/depois aqui e decidir adoção com o
+  humano. Smoke test feito e purgado (estado inicial limpo).
   **Description:** instalar `akitaonrails/ai-memory` em user-space
   (OpenCode: MCP + hooks), rodar sessão de trabalho real e medir com o
   método do relatório (requests, custo, cache_write antes/depois do
