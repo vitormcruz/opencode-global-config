@@ -5,7 +5,7 @@ description: >
   validacao de cadeia de certificado TLS em maquina corporativa com proxy de inspecao TLS: extrai a cadeia ja confiada
   pelo SO para bundle PEM reutilizavel e aplica no escopo do comando, sem nunca desativar a validacao TLS. Ativa
   automaticamente ao detectar qualquer um destes sinais em stdout/stderr de comando, ou quando o humano reportar
-  problema de certificado. Triggers: CERTIFICATE_VERIFY_FAILED", "self-signed certificate in certificate chain",
+  problema de certificado. Triggers: "CERTIFICATE_VERIFY_FAILED", "self-signed certificate in certificate chain",
   "unable to get local issuer certificate", "unable to verify the first certificate", "certificate has expired",
   "SSLCertVerificationError", "SSLError", "certificate verify failed", "PKIX path building failed", "x509: certificate
   signed by unknown authority", "NET::ERR_CERT_AUTHORITY_INVALID", "DEPTH_ZERO_SELF_SIGNED_CERT",
@@ -75,9 +75,12 @@ Ative automaticamente, sem perguntar antes de tentar, quando:
        $thumb = $cert.Thumbprint.ToUpperInvariant()
        if ($seen.ContainsKey($thumb)) { continue }
        $seen[$thumb] = $true
-       $b64 = [Convert]::ToBase64String($cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+       $type = [System.Security.Cryptography.X509Certificates.X509ContentType]::Cert
+       $b64 = [Convert]::ToBase64String($cert.Export($type))
        $lines = New-Object System.Collections.Generic.List[string]
-       for ($i = 0; $i -lt $b64.Length; $i += 64) { [void]$lines.Add($b64.Substring($i, [Math]::Min(64, $b64.Length - $i))) }
+       for ($i = 0; $i -lt $b64.Length; $i += 64) {
+         [void]$lines.Add($b64.Substring($i, [Math]::Min(64, $b64.Length - $i)))
+       }
        [void]$blocks.Add("-----BEGIN CERTIFICATE-----`r`n$($lines -join "`r`n")`r`n-----END CERTIFICATE-----")
      }
    }

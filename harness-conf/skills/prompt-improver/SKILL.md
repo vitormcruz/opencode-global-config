@@ -4,7 +4,8 @@ description: >
   Use somente quando o humano pedir explicitamente para melhorar, reescrever, estruturar, revisar ou avaliar um
   prompt. Exceção: agente orquestrador pode acionar autonomamente para preparar briefing interno de subagente, sem
   alterar decisões humanas. Fora dessa exceção, nunca se autoative por contexto nem aplique o prompt melhorado
-  automaticamente.
+  automaticamente. Triggers: "melhore este prompt", "reescreva este prompt", "me ajude a estruturar este prompt",
+  "qual framework devo usar", "improve this prompt", "melhore:", "prompt engineering".
 license: MIT
 ---
 
