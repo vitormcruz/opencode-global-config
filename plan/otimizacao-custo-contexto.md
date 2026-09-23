@@ -1,12 +1,13 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: TESTES — fases 1-3 (tasks 1-11) concluídas e aprovadas por
-revisor independente; task 12 (piloto ai-memory) concluída: instalação
-auditada + medição -37% de contexto, payback ~1,1 chamada, checkpoint
-persistido; adoção decidida (manter user-space); task 13 (insumo do
-devflow) concluída. Executor = worker zai-coding-plan/glm-5.3-flash,
-revisor = zai-coding-plan/glm-5.3 (D12). Próximo ciclo: fase DEVFLOW
-(ver seção própria ao final).
+Status: FINALIZAÇÃO — ciclo concluído. 13/13 tasks executadas; fases 1-4
+aprovadas por revisor independente (fase 4: APROVADO com 3 achados de
+melhoria corrigidos em de335bf/bb97036 e revalidados sem ressalvas).
+Piloto ai-memory: contexto -37% por chamada, payback ~1,1 chamada,
+checkpoint persistido; adoção: manter user-space. Este arquivo PERMANECE
+como insumo da fase DEVFLOW (roteiro na seção própria ao final).
+Executor = worker zai-coding-plan/glm-5.3-flash, revisor =
+zai-coding-plan/glm-5.3 (D12).
 
 ## Overview
 
