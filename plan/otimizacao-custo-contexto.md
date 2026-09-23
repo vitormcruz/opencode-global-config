@@ -364,44 +364,59 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
 ### Fase 3: Permissions e regras
 
 - [ ] **Task 8: Permissions de skills por agente**
-  **Mapa FINAL aprovado em 2026-09-23 (pendente de aplicação; derivação por
-  varredura linha a linha das menções nos corpos, não só tabelas):**
-  - Core (visível a todos, sem deny): git-workflow-and-versioning,
-    humanizer-br, portugues-tecnico-controlado, question-orchestration.
-  - Utilitárias globais (sem deny): doc-extract, md-export,
-    tls-certificate-recovery, svg-to-image, web-research-exa-crawl4ai.
-  - Deny global (24): as demais skills de domínio + writing-for-agents
-    + planning-and-task-breakdown + code-explorer-priority +
-    reliable-async-operations (estas 3 removidas de core por decisão
-    humana, com allow conforme menções nos corpos).
-  - Allow (skill: agentes): planning-and-task-breakdown: smart-planner,
-    qa, dba, eng-software · code-explorer-priority: eng-software, front
-    · reliable-async-operations: eng-software, front, dba, qa, sec, rev
+  **Mapa FINAL v4, aprovado e confirmado pelo humano em 2026-09-23
+  (derivação por varredura linha a linha das menções nos corpos + decisões
+  humanas):**
+  - Global (visível a todos, sem deny): git-workflow-and-versioning,
+    humanizer-br, portugues-tecnico-controlado, question-orchestration,
+    reliable-async-operations (voltou a global por decisão humana) + 5
+    utilitárias: doc-extract, md-export, tls-certificate-recovery,
+    svg-to-image, web-research-exa-crawl4ai.
+  - Deny global (23): 21 skills de domínio + writing-for-agents +
+    planning-and-task-breakdown + code-explorer-priority (estas 2
+    removidas de core por decisão humana, com allow conforme abaixo).
+  - Allow (skill: agentes):
+    · code-explorer-priority: TODOS os 8 agentes do workflow de
+      desenvolvimento (devflow, eng-software, front, curador-produto,
+      dba, sec, rev, qa; docs/workflow-agentes-dev.md, tabela Agentes)
+    · planning-and-task-breakdown: smart-planner, qa, dba, eng-software,
+      devflow
     · writing-for-agents: devflow, eng-software, smart-planner (D10)
-    · aws-*: aws-analista (allow pré-existente, migrado ao frontmatter)
+    · aws-*: aws-analista (allow pré-existente, MIGRADO da seção agent do
+      opencode.json para o frontmatter; corpo cobre os fluxos sem citar
+      nominalmente)
     · debugging-and-error-recovery: aws-analista, dba, eng-software, qa,
-    sec · security-and-hardening: sec, dba, rev · data-modeling: dba,
-    rev · code-review-and-quality: sec, eng-software, rev ·
-    code-simplification: eng-software, front, rev · clean-code:
-    eng-software, front · frontend-ui-engineering: front, rev ·
-    accessibility-audit: front, qa, rev · performance-optimization:
-    front, qa, eng-software · test-driven-development: qa, eng-software
-    · tests-as-spec: qa, eng-software, rev · spec-executavel: analista,
-    curador-produto, eng-software, qa, sec, front ·
-    spec-driven-development: analista · documentation-and-adrs:
-    curador-produto, eng-software, rev, front · api-and-interface-design:
-    eng-software, rev, front · testes-produto-catalog: curador-produto
-    · prompt-improver: devflow. Sem allow: worker, revisor,
-    revisor-historia.
+      sec
+    · security-and-hardening: sec, dba, rev
+    · data-modeling: dba, rev
+    · code-review-and-quality: sec, eng-software, rev
+    · code-simplification: eng-software, front, rev
+    · clean-code: eng-software, front
+    · frontend-ui-engineering: front, rev
+    · accessibility-audit: front, qa, rev
+    · performance-optimization: front, qa, eng-software
+    · test-driven-development: qa, eng-software, front
+    · tests-as-spec: qa, eng-software, rev, front
+    · spec-executavel: analista, curador-produto, eng-software, qa, sec,
+      front
+    · spec-driven-development: analista
+    · documentation-and-adrs: curador-produto, eng-software, rev, front
+    · api-and-interface-design: eng-software, rev, front
+    · testes-produto-catalog: curador-produto
+    · prompt-improver: devflow
+    Sem allow: worker, revisor, revisor-historia (fora do workflow de
+    desenvolvimento).
   - Front: além das 5 atuais do corpo, GANHA 7 de engenharia por decisão
     humana (test-driven-development, tests-as-spec,
     debugging-and-error-recovery, documentation-and-adrs,
     api-and-interface-design, code-review-and-quality, spec-executavel),
     ACRESCENTANDO as menções no corpo dele (o allow tem que bater com o
-    corpo; listas nunca saem dos agentes).
-  - Efeitos aceitos: "Descoberta de Código" do AGENTS.base só funciona
-    para eng-software/front (demais caem no fallback grep/glob);
-    "Espera por tarefas" (reliable-async) vale para os 6 com allow.
+    corpo; listas nunca saem dos agentes). Front total: 12 de domínio.
+  - AGENTS.base.md, seção Descoberta de Código, linha nova aprovada:
+    "Agente de codificação: para descoberta de código, carregue a skill
+    `code-explorer-priority` e siga o CLI-first."
+  - Efeito aceito: a regra de descoberta do AGENTS.base.md passa a valer
+    para os 8 do workflow (demais caem no fallback grep/glob).
   **Description:** adicionar `permission.skill` com deny global das skills
   de domínio em `harness-conf/opencode.json` e allow específico no
   frontmatter de cada agente especialista, derivando o mapa das tabelas de
