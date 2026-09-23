@@ -560,6 +560,26 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
   compactação ÷ economia por chamada; cost do provider zai vem 0, aplicar
   tarifa externa); (4) registrar antes/depois aqui e decidir adoção com o
   humano. Smoke test feito e purgado (estado inicial limpo).
+  **Roteiro da Parte 2 (aprovado pelo humano 2026-09-23; executar na
+  continuação pós-restart):**
+  1. Humano reiniciou o OpenCode. Confirmar plugin carregado: após 1
+     prompt, `docker exec ai-memory ai-memory status` deve mostrar
+     sessão/observações > 0.
+  2. Anotar sessionID corrente (sqlite readonly na tabela session).
+  3. Trabalho real da medição = Task 13 (consolidação deste plano como
+     insumo do devflow), deixando o campo de resultado do piloto para o
+     final.
+  4. ANTES do /compact: rodar query baseline (requests, input não
+     cacheado, cache_read, cache_write, output da session) e anotar.
+  5. Pedir ao humano para rodar `/compact`.
+  6. Verificar checkpoint na wiki: `find
+     ~/.local/share/ai-memory/wiki -path "*sessions*" -name "*.md"`.
+  7. Medir DEPOIS (mesma query com time_created >= time_compacting);
+     contexto efetivo = tokens.total da última assistant message de cada
+     período. Payback em tokens (cost do provider vem 0; US$ só com
+     tarifa externa confiável, registrando a tabela usada).
+  8. Registrar antes/depois + payback aqui; apresentar ao humano para a
+     decisão de adoção.
   **Description:** instalar `akitaonrails/ai-memory` em user-space
   (OpenCode: MCP + hooks), rodar sessão de trabalho real e medir com o
   método do relatório (requests, custo, cache_write antes/depois do
