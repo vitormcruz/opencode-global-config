@@ -14,349 +14,171 @@ description: >
 
 # Code Review and Quality
 
-## Overview
+Review multidimensional com quality gates. Toda mudança passa por review antes do merge, sem
+exceção. O review cobre cinco eixos: correctness, readability, architecture, security e
+performance.
 
-Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.
+**Padrão de aprovação:** aprove quando a mudança melhora a saúde geral do código, mesmo sem ser
+perfeita. Não bloqueie por "eu teria escrito diferente". Melhora o codebase e segue as convenções
+do projeto? Aprove.
 
-**The approval standard:** Approve a change when it definitely improves overall code health, even if it isn't perfect. Perfect code doesn't exist — the goal is continuous improvement. Don't block a change because it isn't exactly how you would have written it. If it improves the codebase and follows the project's conventions, approve it.
-
-## When to Use
-
-- Before merging any PR or change
-- After completing a feature implementation
-- When another agent or model produced code you need to evaluate
-- When refactoring existing code
-- After any bug fix (review both the fix and the regression test)
-
-## The Five-Axis Review
-
-Every review evaluates code across these dimensions:
+## Os cinco eixos
 
 ### 1. Correctness
 
-Does the code do what it claims to do?
+O código faz o que diz fazer?
 
-- Does it match the spec or task requirements?
-- Are edge cases handled (null, empty, boundary values)?
-- Are error paths handled (not just the happy path)?
-- Does it pass all tests? Are the tests actually testing the right things?
-- Are there off-by-one errors, race conditions, or state inconsistencies?
-- Does it depend on an operation of uncertain duration (external process,
-  network call, promise/async-await, queue/job, lock, polling)? If so, it
-  must expose an observable progress/cancellation signal and separate idle
-  timeout from total timeout — never a single clock-based timeout, and
-  never a silently swallowed error. See `reliable-async-operations` for
-  the required pattern and a one-line rejection criterion.
+- Bate com a spec ou task? Cobre edge cases (null, vazio, valor de borda)?
+- Trata caminhos de erro, não só o happy path?
+- Os testes passam? Eles testam o que importa? Há off-by-one, race condition ou inconsistência
+  de estado?
+- Depende de operação de duração incerta (processo externo, rede, promise, fila, lock, polling)?
+  Exige sinal observável de progresso/cancelamento e timeout de idle separado do timeout total,
+  nunca um único timeout de relógio nem erro engolido. Padrão exigido vive em
+  `reliable-async-operations`.
 
 ### 2. Readability & Simplicity
 
-Can another engineer (or agent) understand this code without the author explaining it?
+Outro engenheiro (ou agente) entende sem o autor explicar?
 
-- Are names descriptive and consistent with project conventions? (No `temp`, `data`, `result` without context)
-- Is the control flow straightforward (avoid nested ternaries, deep callbacks)?
-- Is the code organized logically (related code grouped, clear module boundaries)?
-- Are there any "clever" tricks that should be simplified?
-- **Could this be done in fewer lines?** (1000 lines where 100 suffice is a failure)
-- **Are abstractions earning their complexity?** (Don't generalize until the third use case)
-- Would comments help clarify non-obvious intent? (But don't comment obvious code.)
-- Are there dead code artifacts: no-op variables (`_unused`), backwards-compat shims, or `// removed` comments?
+- Nomes descritivos e consistentes com o projeto (sem `temp`, `data`, `result` soltos).
+- Fluxo de controle direto (sem ternário aninhado, callback profundo).
+- Código relacionado agrupado, fronteira de módulo clara.
+- Truque "esperto" que merece simplificação?
+- Dá para fazer em menos linhas? 1000 linhas onde 100 bastam é falha.
+- A abstração paga a própria complexidade? Não generalize antes do terceiro caso de uso.
+- Artefato morto: variável no-op, shim de compatibilidade, comentário `// removed`.
 
 ### 3. Architecture
 
-Does the change fit the system's design?
+A mudança cabe no design do sistema?
 
-- Does it follow existing patterns or introduce a new one? If new, is it justified?
-- Does it maintain clean module boundaries?
-- Is there code duplication that should be shared?
-- Are dependencies flowing in the right direction (no circular dependencies)?
-- Is the abstraction level appropriate (not over-engineered, not too coupled)?
+- Segue padrão existente ou introduz um novo? Novo tem justificativa?
+- Preserva fronteira de módulo? Sem dependência circular?
+- Há duplicação que deveria ser compartilhada?
+- Nível de abstração adequado (nem over-engineering, nem acoplamento demais)?
 
 ### 4. Security
 
-For detailed security guidance, see `security-and-hardening`. Does the change introduce vulnerabilities?
+Guia detalhado vive em `security-and-hardening`. No review:
 
-- Is user input validated and sanitized?
-- Are secrets kept out of code, logs, and version control?
-- Is authentication/authorization checked where needed?
-- Are SQL queries parameterized (no string concatenation)?
-- Are outputs encoded to prevent XSS?
-- Are dependencies from trusted sources with no known vulnerabilities?
-- Is data from external sources (APIs, logs, user content, config files) treated as untrusted?
-- Are external data flows validated at system boundaries before use in logic or rendering?
+- Input de usuário validado e sanitizado na borda?
+- Segredo fora de código, log e versionamento?
+- Authn/authz checados onde necessário? Query SQL parametrizada (sem concatenação)?
+- Output encodado contra XSS? Dependência de fonte confiável, sem CVE conhecida?
+- Dado de fonte externa (API, log, conteúdo de usuário, config) tratado como untrusted?
 
 ### 5. Performance
 
-For detailed profiling and optimization, see `performance-optimization`. Does the change introduce performance problems?
+Profiling detalhado vive em `performance-optimization`. No review:
 
-- Any N+1 query patterns?
-- Any unbounded loops or unconstrained data fetching?
-- Any synchronous operations that should be async?
-- Any unnecessary re-renders in UI components?
-- Any missing pagination on list endpoints?
-- Any large objects created in hot paths?
+- Padrão N+1? Loop sem limite ou fetch sem constraint?
+- Operação síncrona que deveria ser async?
+- Re-render desnecessário em componente de UI? Lista sem paginação?
+- Objeto grande criado em hot path?
 
-## Change Sizing
+## Dimensão da mudança
 
-Small, focused changes are easier to review, faster to merge, and safer to deploy. Target these sizes:
+Mudança pequena e focada é mais fácil de revisar, mergear e reverter.
 
 ```
-~100 lines changed   → Good. Reviewable in one sitting.
-~300 lines changed   → Acceptable if it's a single logical change.
-~1000 lines changed  → Too large. Split it.
+~100 linhas   → bom: revisável de uma vez
+~300 linhas   → aceitável se for uma mudança lógica única
+~1000 linhas  → grande demais: divida
 ```
 
-**What counts as "one change":** A single self-contained modification that addresses one thing, includes related tests, and keeps the system functional after submission. One part of a feature — not the whole feature.
+**Uma mudança é:** uma modificação autocontida que endereça um assunto, inclui os testes
+relacionados e mantém o sistema funcional. Uma parte de feature, não a feature inteira.
 
-**Splitting strategies when a change is too large:**
+**Estratégias de split:** stack (submete uma base e empilha a próxima sobre ela), por grupo de
+arquivos (grupos com revisores diferentes), horizontal (infra compartilhada primeiro, consumidores
+depois), vertical (fatias full-stack da feature). Deleção completa de arquivo e refatoração
+automatizada podem ficar grandes: o revisor valida intenção, não linha a linha.
 
-| Strategy | How | When |
-|----------|-----|------|
-| **Stack** | Submit a small change, start the next one based on it | Sequential dependencies |
-| **By file group** | Separate changes for groups needing different reviewers | Cross-cutting concerns |
-| **Horizontal** | Create shared code/stubs first, then consumers | Layered architecture |
-| **Vertical** | Break into smaller full-stack slices of the feature | Feature work |
+**Refatoração separada de feature.** Mudança que refatora e adiciona comportamento são duas
+mudanças: submeta separado. Cleanup pequeno (rename) pode ir junto, a critério do revisor.
 
-**When large changes are acceptable:** Complete file deletions and automated refactoring where the reviewer only needs to verify intent, not every line.
+## Descrição da mudança
 
-**Separate refactoring from feature work.** A change that refactors existing code and adds new behavior is two changes — submit them separately. Small cleanups (variable renaming) can be included at reviewer discretion.
+Toda mudança precisa de descrição que se sustente sozinha no histórico.
 
-## Change Descriptions
+- **Primeira linha:** curta, imperativa, informativa sem o diff ("Delete the FizzBuzz RPC", não
+  "Deleting the FizzBuzz RPC").
+- **Corpo:** o que muda e por quê. Contexto, decisão e raciocínio invisíveis no código. Link de
+  bug, benchmark e design doc quando houver. Reconheça limitação da abordagem.
+- **Anti-padrões:** "Fix bug", "Fix build", "Add patch", "Phase 1".
 
-Every change needs a description that stands alone in version control history.
+## Processo de review
 
-**First line:** Short, imperative, standalone. "Delete the FizzBuzz RPC" not "Deleting the FizzBuzz RPC." Must be informative enough that someone searching history can understand the change without reading the diff.
+1. **Contexto antes do código:** o que a mudança quer fazer? Qual spec implementa? Qual
+   comportamento esperado?
+2. **Testes primeiro:** existem? Testam comportamento (não detalhe de implementação)? Cobrem edge
+   cases? Nomes descritivos? Pegariam regressão se o código mudasse?
+3. **Implementação:** percorra os arquivos com os cinco eixos.
+4. **Categorize cada achado com severidade**, para o autor saber o que é obrigatório:
 
-**Body:** What is changing and why. Include context, decisions, and reasoning not visible in the code itself. Link to bug numbers, benchmark results, or design docs where relevant. Acknowledge approach shortcomings when they exist.
+| Prefixo | Significado | Ação do autor |
+|---|---|---|
+| (sem prefixo) | mudança requerida | resolver antes do merge |
+| **Critical:** | bloqueia merge | falha de segurança, perda de dado, funcionalidade quebrada |
+| **Nit:** | menor, opcional | pode ignorar (formatação, preferência de estilo) |
+| **Optional:** / **Consider:** | sugestão | vale considerar, não obrigatório |
+| **FYI** | informativo | nenhuma ação; contexto para o futuro |
 
-**Anti-patterns:** "Fix bug," "Fix build," "Add patch," "Moving code from A to B," "Phase 1," "Add convenience functions."
+5. **Verifique a verificação:** quais testes rodaram? Build passou? Verificação manual feita?
+   Screenshot para mudança de UI? Comparação antes/depois?
 
-## Review Process
+## Padrões complementares
 
-### Step 1: Understand the Context
+**Multi-model review:** um modelo escreve, outro revisa (correctness e arquitetura), o primeiro
+endereça o feedback, o humano decide. Modelos diferentes têm blind spots diferentes.
 
-Before looking at code, understand the intent:
+**Dead code:** após refatoração ou mudança de implementação, liste código órfão e **pergunte
+antes de deletar** ("Removo estes elementos sem uso: [lista]?"). Não deixe código morto espalhado;
+não delete silenciosamente o que não tem certeza.
 
-```
-- What is this change trying to accomplish?
-- What spec or task does it implement?
-- What is the expected behavior change?
-```
+**Velocity:** review lento bloqueia time inteiro. Responda em um dia útil (teto, não alvo);
+prefira feedback rápido em várias rodadas a aprovação demorada em uma. Mudança grande? Peça split
+em vez de revisar um monólito.
 
-### Step 2: Review the Tests First
+**Desacordo:** fatos e dados vencem opinião; style guide é autoridade em estilo; design se avalia
+por princípio de engenharia, não gosto pessoal; consistência com o codebase é aceitável se não
+degrada a saúde geral. **"Depois eu limpo" não é aceito:** cleanup adiado raramente acontece.
+Exija cleanup antes da submissão, ou bug com self-assignment quando o escopo da mudança não cobre.
 
-Tests reveal intent and coverage:
+**Honestidade:** sem rubber-stamp ("LGTM" sem evidência de review não serve a ninguém), sem
+suavizar problema real ("talvez seja uma preocupação menor" para bug que vai à produção é
+desonestidade), quantifique quando possível ("este N+1 adiciona ~50ms por item"), aponte
+alternativa quando a abordagem tem problema. Autor com contexto completo e discordância? Respeite
+o julgamento dele. Comente código, nunca pessoa.
 
-```
-- Do tests exist for the change?
-- Do they test behavior (not implementation details)?
-- Are edge cases covered?
-- Do tests have descriptive names?
-- Would the tests catch a regression if the code changed?
-```
+**Dependência:** antes de adicionar, responda: o stack atual resolve? Qual o impacto de bundle?
+Está mantida (último commit, issues abertas)? Tem CVE conhecida (`npm audit`)? A licença é
+compatível? Prefira stdlib e utility existente; toda dependência é passivo.
 
-### Step 3: Review the Implementation
+## Racionalizações comuns
 
-Walk through the code with the five axes in mind:
-
-```
-For each file changed:
-1. Correctness: Does this code do what the test says it should?
-2. Readability: Can I understand this without help?
-3. Architecture: Does this fit the system?
-4. Security: Any vulnerabilities?
-5. Performance: Any bottlenecks?
-```
-
-### Step 4: Categorize Findings
-
-Label every comment with its severity so the author knows what's required vs optional:
-
-| Prefix | Meaning | Author Action |
-|--------|---------|---------------|
-| *(no prefix)* | Required change | Must address before merge |
-| **Critical:** | Blocks merge | Security vulnerability, data loss, broken functionality |
-| **Nit:** | Minor, optional | Author may ignore — formatting, style preferences |
-| **Optional:** / **Consider:** | Suggestion | Worth considering but not required |
-| **FYI** | Informational only | No action needed — context for future reference |
-
-This prevents authors from treating all feedback as mandatory and wasting time on optional suggestions.
-
-### Step 5: Verify the Verification
-
-Check the author's verification story:
-
-```
-- What tests were run?
-- Did the build pass?
-- Was the change tested manually?
-- Are there screenshots for UI changes?
-- Is there a before/after comparison?
-```
-
-## Multi-Model Review Pattern
-
-Use different models for different review perspectives:
-
-```
-Model A writes the code
-    │
-    ▼
-Model B reviews for correctness and architecture
-    │
-    ▼
-Model A addresses the feedback
-    │
-    ▼
-Human makes the final call
-```
-
-This catches issues that a single model might miss — different models have different blind spots.
-
-**Example prompt for a review agent:**
-```
-Review this code change for correctness, security, and adherence to
-our project conventions. The spec says [X]. The change should [Y].
-Flag any issues as Critical, Important, or Suggestion.
-```
-
-## Dead Code Hygiene
-
-After any refactoring or implementation change, check for orphaned code:
-
-1. Identify code that is now unreachable or unused
-2. List it explicitly
-3. **Ask before deleting:** "Should I remove these now-unused elements: [list]?"
-
-Don't leave dead code lying around — it confuses future readers and agents. But don't silently delete things you're not sure about. When in doubt, ask.
-
-```
-DEAD CODE IDENTIFIED:
-- formatLegacyDate() in src/utils/date.ts — replaced by formatDate()
-- OldTaskCard component in src/components/ — replaced by TaskCard
-- LEGACY_API_URL constant in src/config.ts — no remaining references
-→ Safe to remove these?
-```
-
-## Review Speed
-
-Slow reviews block entire teams. The cost of context-switching to review is less than the waiting cost imposed on others.
-
-- **Respond within one business day** — this is the maximum, not the target
-- **Ideal cadence:** Respond shortly after a review request arrives, unless deep in focused coding. A typical change should complete multiple review rounds in a single day
-- **Prioritize fast individual responses** over quick final approval. Quick feedback reduces frustration even if multiple rounds are needed
-- **Large changes:** Ask the author to split them rather than reviewing one massive changeset
-
-## Handling Disagreements
-
-When resolving review disputes, apply this hierarchy:
-
-1. **Technical facts and data** override opinions and preferences
-2. **Style guides** are the absolute authority on style matters
-3. **Software design** must be evaluated on engineering principles, not personal preference
-4. **Codebase consistency** is acceptable if it doesn't degrade overall health
-
-**Don't accept "I'll clean it up later."** Experience shows deferred cleanup rarely happens. Require cleanup before submission unless it's a genuine emergency. If surrounding issues can't be addressed in this change, require filing a bug with self-assignment.
-
-## Honesty in Review
-
-When reviewing code — whether written by you, another agent, or a human:
-
-- **Don't rubber-stamp.** "LGTM" without evidence of review helps no one.
-- **Don't soften real issues.** "This might be a minor concern" when it's a bug that will hit production is dishonest.
-- **Quantify problems when possible.** "This N+1 query will add ~50ms per item in the list" is better than "this could be slow."
-- **Push back on approaches with clear problems.** Sycophancy is a failure mode in reviews. If the implementation has issues, say so directly and propose alternatives.
-- **Accept override gracefully.** If the author has full context and disagrees, defer to their judgment. Comment on code, not people — reframe personal critiques to focus on the code itself.
-
-## Dependency Discipline
-
-Part of code review is dependency review:
-
-**Before adding any dependency:**
-1. Does the existing stack solve this? (Often it does.)
-2. How large is the dependency? (Check bundle impact.)
-3. Is it actively maintained? (Check last commit, open issues.)
-4. Does it have known vulnerabilities? (`npm audit`)
-5. What's the license? (Must be compatible with the project.)
-
-**Rule:** Prefer standard library and existing utilities over new dependencies. Every dependency is a liability.
-
-## The Review Checklist
-
-```markdown
-## Review: [PR/Change title]
-
-### Context
-- [ ] I understand what this change does and why
-
-### Correctness
-- [ ] Change matches spec/task requirements
-- [ ] Edge cases handled
-- [ ] Error paths handled
-- [ ] Tests cover the change adequately
-
-### Readability
-- [ ] Names are clear and consistent
-- [ ] Logic is straightforward
-- [ ] No unnecessary complexity
-
-### Architecture
-- [ ] Follows existing patterns
-- [ ] No unnecessary coupling or dependencies
-- [ ] Appropriate abstraction level
-
-### Security
-- [ ] No secrets in code
-- [ ] Input validated at boundaries
-- [ ] No injection vulnerabilities
-- [ ] Auth checks in place
-- [ ] External data sources treated as untrusted
-
-### Performance
-- [ ] No N+1 patterns
-- [ ] No unbounded operations
-- [ ] Pagination on list endpoints
-
-### Verification
-- [ ] Tests pass
-- [ ] Build succeeds
-- [ ] Manual verification done (if applicable)
-
-### Verdict
-- [ ] **Approve** — Ready to merge
-- [ ] **Request changes** — Issues must be addressed
-```
-## See Also
-
-- For detailed security review guidance, see `references/security-checklist.md`
-- For performance review checks, see `references/performance-checklist.md`
-
-## Common Rationalizations
-
-| Rationalization | Reality |
+| Racionalização | Realidade |
 |---|---|
-| "It works, that's good enough" | Working code that's unreadable, insecure, or architecturally wrong creates debt that compounds. |
-| "I wrote it, so I know it's correct" | Authors are blind to their own assumptions. Every change benefits from another set of eyes. |
-| "We'll clean it up later" | Later never comes. The review is the quality gate — use it. Require cleanup before merge, not after. |
-| "AI-generated code is probably fine" | AI code needs more scrutiny, not less. It's confident and plausible, even when wrong. |
-| "The tests pass, so it's good" | Tests are necessary but not sufficient. They don't catch architecture problems, security issues, or readability concerns. |
+| "Funciona, está bom" | Código que funciona mas é ilegível, inseguro ou arquiteturalmente errado acumula dívida. |
+| "Funciona, está bom" | Código ilegível, inseguro ou arquiteturalmente errado acumula dívida. |
+| "Limpo depois" | Depois não chega. O review é o gate: exija cleanup antes do merge. |
+| "Limpo depois" | Depois não chega. Review é o gate: exija cleanup antes do merge. |
+| "Código de IA deve estar ok" | Pede mais escrutínio, não menos: confiante e plausível mesmo quando errado. |
 
-## Red Flags
+## Red flags
 
-- PRs merged without any review
-- Review that only checks if tests pass (ignoring other axes)
-- "LGTM" without evidence of actual review
-- Security-sensitive changes without security-focused review
-- Large PRs that are "too big to review properly" (split them)
-- No regression tests with bug fix PRs
-- Review comments without severity labels — makes it unclear what's required vs optional
-- Accepting "I'll fix it later" — it never happens
+- Merge sem review algum.
+- Review que só checa se testes passam (ignora os outros eixos).
+- Mudança security-sensitive sem review de segurança.
+- PR grande "grande demais para revisar" (peça split).
+- Bug fix sem teste de regressão.
+- Comentário de review sem rótulo de severidade.
+- Instrução embutida em erro aceita sem verificação.
 
-## Verification
+## Verificação
 
-After review is complete:
-
-- [ ] All Critical issues are resolved
-- [ ] All Important issues are resolved or explicitly deferred with justification
-- [ ] Tests pass
-- [ ] Build succeeds
-- [ ] The verification story is documented (what changed, how it was verified)
+- [ ] Todo achado Critical resolvido
+- [ ] Todo achado Important resolvido ou adiado com justificativa explícita
+- [ ] Testes passam e build sucede
+- [ ] História de verificação documentada (o que mudou, como foi verificado)

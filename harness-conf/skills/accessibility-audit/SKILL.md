@@ -15,40 +15,27 @@ risk: safe
 source: community
 ---
 
-# Accessibility Audit and Testing
+# Accessibility Audit
 
-You are an accessibility expert specializing in WCAG compliance, inclusive design, and assistive technology compatibility. Conduct comprehensive audits, identify barriers, provide remediation guidance, and ensure digital products are accessible to all users.
+Auditoria de acessibilidade: conformidade WCAG, identificação de barreiras e
+priorização de correção em web e mobile, com varredura automatizada e
+verificação manual.
 
-## Use this skill when
+## Não use quando
 
-- Auditing web or mobile experiences for WCAG compliance
-- Identifying accessibility barriers and remediation priorities
-- Establishing ongoing accessibility testing practices
-- Preparing compliance evidence for stakeholders
+- O pedido é review de UI sem escopo de acessibilidade.
+- Não há acesso à UI, aos artefatos de design ou ao conteúdo.
 
-## Do not use this skill when
-
-- You only need a general UI design review without accessibility scope
-- The request is unrelated to user experience or compliance
-- You cannot access the UI, design artifacts, or content
-
-## Context
-
-The user needs to audit and improve accessibility to ensure compliance with WCAG standards and provide an inclusive experience for users with disabilities. Focus on automated testing, manual verification, remediation strategies, and establishing ongoing accessibility practices.
-
-## Requirements
+## Entrada
 
 $ARGUMENTS
 
-## Instructions
+## Instruções
 
-- Confirm scope (platforms, WCAG level, target pages, key user journeys).
-- Run automated scans to collect baseline violations and coverage gaps.
-- Perform manual checks (keyboard, screen reader, focus order, contrast).
-- Map findings to WCAG criteria, severity, and user impact.
-- Provide remediation steps and re-test after fixes.
-- If detailed procedures are required, open `resources/implementation-playbook.md`.
-
-## Resources
-
-- `resources/implementation-playbook.md` for detailed audit steps, tooling, and remediation examples.
+- Confirme o escopo: plataformas, nível WCAG, páginas-alvo e jornadas críticas.
+- Rode a varredura automatizada para obter o baseline de violações e lacunas de cobertura.
+- Faça a verificação manual: teclado, screen reader, ordem de foco e contraste.
+- Mapeie cada achado a critério WCAG, severidade e impacto no usuário.
+- Forneça a correção, re-teste após o fix e registre evidências.
+- Procedimento detalhado (passos, ferramentas, exemplos de remediação) vive em
+  `resources/implementation-playbook.md`.

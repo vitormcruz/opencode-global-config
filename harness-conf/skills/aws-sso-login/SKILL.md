@@ -6,70 +6,30 @@ description: >
   Triggers: "login AWS", "sessão expirada", "aws sso login".
 ---
 
-Voce e uma skill para autenticacao AWS SSO via AWS CLI.
-
-## Objetivo
-
-Garantir que o agente consiga usar um `--profile` AWS com sessao SSO valida antes de iniciar investigacoes.
-
-## Quando usar
-
-Use esta skill quando:
-- o humano pedir login na AWS
-- o agente receber erro de sessao expirada
-- comandos AWS falharem por falta de autenticacao SSO
-- for necessario validar se um profile ainda esta autenticado
+Autenticação AWS SSO via AWS CLI: garante um `--profile` com sessão válida antes de investigações.
 
 ## Entrada esperada
 
-Receba do agente principal:
-- `profile`
-- opcionalmente `region`
-- opcionalmente contexto humano, como "vou investigar ECS" ou "vou adicionar nova conta"
+- `profile` alvo.
+- Opcional: `region` e contexto do humano (ex.: "vou investigar ECS").
 
-## Fluxo obrigatorio
+## Fluxo obrigatório
 
-1. Validar se o AWS CLI esta disponivel.
-2. Verificar se o profile existe:
-   - `aws configure list --profile <profile>`
-3. Testar autenticacao atual com:
-   - `aws sts get-caller-identity --profile <profile>`
-4. Se funcionar:
-   - informar que a sessao esta valida
-   - devolver `account id`, `arn` e `region`
-5. Se falhar por expiracao/ausencia de login:
-   - executar `aws sso login --profile <profile>`
-6. Informar ao humano que o navegador pode abrir ou que ele precisara confirmar o codigo/device flow.
-7. Depois do login, validar novamente com:
-   - `aws sts get-caller-identity --profile <profile>`
-8. Devolver o resultado final ao agente principal.
+1. Valide que o AWS CLI está disponível.
+2. Verifique que o profile existe: `aws configure list --profile <profile>`
+3. Teste a autenticação atual: `aws sts get-caller-identity --profile <profile>`
+4. Sessão válida: devolva `account id`, `arn` e `region` e encerre.
+5. Sessão expirada ou ausente: execute `aws sso login --profile <profile>`.
+6. Avise o humano que o navegador pode abrir ou que o device flow pedirá confirmação.
+7. Revalide com `aws sts get-caller-identity --profile <profile>` e devolva o resultado.
 
 ## Regras
 
-- Sempre usar o `profile` informado explicitamente.
-- Nao alterar `~/.aws/config`.
-- Nao trocar aliases automaticamente.
-- Nao tentar criar profile novo; isso pertence a outra skill.
-- Se o login falhar, devolver o erro resumido e o ponto de bloqueio.
+- Use sempre o `profile` informado explicitamente.
+- Não altere o `~/.aws/config`, não troque aliases, não crie profile novo (outra skill cobre isso).
+- Login falhou? Devolva o erro resumido e o ponto exato do bloqueio.
 
-## Saida esperada
+## Saída esperada
 
-A skill deve devolver ao agente principal:
-- profile validado
-- se a sessao ja estava valida ou foi renovada
-- account id
-- arn do caller identity
-- regiao efetiva
-- eventual erro, se houver
-
-## Exemplos de uso
-
-Validar sessao:
-```bash
-aws sts get-caller-identity --profile atlas-a12345-nprd
-```
-
-Renovar sessao:
-```bash
-aws sso login --profile atlas-a12345-nprd
-```
+Profile validado, situação da sessão (válida ou renovada), account id, arn do caller identity,
+região efetiva e erro eventual.
