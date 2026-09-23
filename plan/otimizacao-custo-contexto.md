@@ -3,10 +3,10 @@
 Status: TESTES — fases 1-3 (tasks 1-11) concluídas e aprovadas por
 revisor independente; task 12 (piloto ai-memory) concluída: instalação
 auditada + medição -37% de contexto, payback ~3 chamadas, checkpoint
-persistido; task 13 (insumo do devflow) concluída. Pendente: decisão de
-adoção do ai-memory (Open Question 4, pelo humano). Executor = worker
-zai-coding-plan/glm-5.3-flash, revisor = zai-coding-plan/glm-5.3 (D12).
-Próximo ciclo: fase DEVFLOW (ver seção própria ao final).
+persistido; adoção decidida (manter user-space); task 13 (insumo do
+devflow) concluída. Executor = worker zai-coding-plan/glm-5.3-flash,
+revisor = zai-coding-plan/glm-5.3 (D12). Próximo ciclo: fase DEVFLOW
+(ver seção própria ao final).
 
 ## Overview
 
@@ -693,10 +693,11 @@ revalidado). Suíte final: 831 passed, 1 failed pré-existente (JAVA_HOME),
    `description_note` no UPSTREAM.md da skill (T1).
 3. RESOLVIDA (2026-09-23): mapa v4 aplicado (T8) e guardado pelo teste de
    consistência estendido (T9).
-4. ABERTA: adoção do ai-memory — humano decide com os dados da Parte 2 da
-   Task 12 (medição antes/depois + payback). Se adotado, avaliar migração
-   do MCP/hooks do user-space (`opencode.jsonc` do usuário) para a fonte
-   de verdade do repo (toca `harness-conf/opencode.json`; exige aprovação).
+4. RESOLVIDA (2026-09-23): humano decidiu MANTER o ai-memory em
+   user-space (MCP no `opencode.jsonc` do usuário, plugin em
+   `~/.config/opencode`, Docker local). Repo permanece intocado pelo
+   piloto; migração da config para a fonte de verdade do repo vira item
+   opcional da fase DEVFLOW (item 6 do roteiro).
 
 ## Fase DEVFLOW (roteiro do próximo ciclo)
 
@@ -722,8 +723,9 @@ Itens do roteiro (origem D9 + D13 + pendências registradas):
    `tests/agents/test_workflow_consistency.py`).
 5. Docs: README/seção de dependências se o ai-memory mudar premissas de
    instalação; manter sincronia workflow↔agentes (regra do repo).
-6. Decisão de adoção do ai-memory (Open Question 4) e, se positiva,
-   migração da config para o repo.
+6. Opcional: migrar a config do ai-memory do user-space para o repo
+   (decisão de adoção 2026-09-23: manter user-space; só migrar se a
+   operação user-space virar ponto de dor ou exigir replicação).
 7. Dívidas conhecidas: linhas >120 pré-existentes em vários
    `harness-conf/agents/*.md`; 1 failed pré-existente na suíte
    (`tests/product_tests/test_concordion_spec_infra.py`, JAVA_HOME).
