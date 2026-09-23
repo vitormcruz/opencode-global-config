@@ -2,7 +2,7 @@
 
 Status: TESTES — fases 1-3 (tasks 1-11) concluídas e aprovadas por
 revisor independente; task 12 (piloto ai-memory) concluída: instalação
-auditada + medição -37% de contexto, payback ~3 chamadas, checkpoint
+auditada + medição -37% de contexto, payback ~1,1 chamada, checkpoint
 persistido; adoção decidida (manter user-space); task 13 (insumo do
 devflow) concluída. Executor = worker zai-coding-plan/glm-5.3-flash,
 revisor = zai-coding-plan/glm-5.3 (D12). Próximo ciclo: fase DEVFLOW
@@ -665,7 +665,7 @@ no repo (é o insumo do devflow; não é removido ao final).
 | 10 | Import writing-for-agents (D10) | FEITO | `f3b294b`, `1801503` (SHA c55ee46, MIT) |
 | 11 | Command otimização AGENTS.md (D7) | FEITO | `6b05375`, `1801503` |
 | 12 | Teste de consistência estendido | FEITO | `362ab54` (4 casos + fixtures) |
-| 13 | Piloto ai-memory (F1/D2) | FEITO (medição) | Parte 1: instalado e auditado (2.4.0, zero-LLM, local-only); Parte 2: medição concluída (contexto -37%, checkpoint persistido, payback ~3 chamadas; ver Task 12). Adoção: Open Question 4 |
+| 13 | Piloto ai-memory (F1/D2) | FEITO (medição) | Parte 1: instalado e auditado (2.4.0, zero-LLM, local-only); Parte 2: medição concluída (contexto -37%, checkpoint persistido, payback ~1,1 chamada; ver Task 12). Adoção: manter user-space (OQ4) |
 | 14 | Insumo do devflow (esta seção + Fase DEVFLOW + Status) | FEITO | `7ddfc21` |
 
 Revisões independentes: Fases 1 e 2 aprovadas (com correções `1801503`,
