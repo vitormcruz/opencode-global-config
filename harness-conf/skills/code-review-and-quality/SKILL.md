@@ -1,14 +1,15 @@
 ---
 name: code-review-and-quality
 description: >
-  Multi-axis code review guide with quality gates. Use when: reviewing code
-  before merge, evaluating PR quality, inspecting agent- or human-generated
-  code, or ensuring a change does not degrade the project. Triggers: "code
-  review", "review PR", "review this code", "before merging", "quality gates",
-  "five-axis review", "correctness", "readability", "architecture review",
-  "security review", "performance review", "approve PR", "reject PR",
-  "review checklist", "LGTM", "code quality", "technical debt", "smell",
-  "refactoring review", "agent output review".
+  Use ao revisar código antes de merge, avaliar qualidade de PR, inspecionar
+  código gerado por agente ou humano, ou garantir que a mudança não degrada
+  o projeto. Review em cinco eixos com quality gates.
+  Triggers: "code review", "review PR", "review this code", "before
+  merging", "quality gates", "five-axis review", "correctness",
+  "readability", "architecture review", "security review",
+  "performance review", "approve PR", "reject PR", "review checklist",
+  "LGTM", "code quality", "technical debt", "smell", "refactoring
+  review", "agent output review".
 ---
 
 # Code Review and Quality

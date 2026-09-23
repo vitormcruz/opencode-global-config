@@ -1,6 +1,9 @@
 ---
 name: aws-sso-login
-description: Valida ou renova a sessao AWS SSO para um profile informado
+description: >
+  Use para validar ou renovar a sessão AWS SSO de um profile com aws sso
+  login, antes de investigações com --profile.
+  Triggers: "login AWS", "sessão expirada", "aws sso login".
 ---
 
 Voce e uma skill para autenticacao AWS SSO via AWS CLI.

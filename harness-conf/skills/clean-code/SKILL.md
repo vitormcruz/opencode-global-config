@@ -1,16 +1,13 @@
 ---
 name: clean-code
 description: >
-  Regras de Clean Code para escrever código de produção. Use sempre que
-  construir, implementar, alterar ou revisar código (TDD, feature, bugfix,
-  UI, script). Não substitui code-simplification: esta skill define como
-  escrever; aquela define como simplificar sem mudar comportamento.
-  Triggers: "clean code", "Clean Code", "código limpo", "escrever código",
-  "construir código", "implementar função", "produção", "TDD green",
-  "dependência temporal", "acoplamento temporal", "temporal coupling",
-  "CQS", "command query", "efeito colateral", "Law of Demeter",
-  "Demeter", "SOLID", "SRP", "um nível de abstração", "não retornar null",
-  "argumento de saída", "feature envy", "passo-a-passo da classe".
+  Use sempre que construir, implementar, alterar ou revisar código de produção (TDD, feature, bugfix, UI,
+  script). Não substitui code-simplification: esta define como escrever; aquela, como simplificar sem mudar
+  comportamento. Triggers:
+  "clean code", "Clean Code", "código limpo", "escrever código", "construir código", "implementar função",
+  "produção", "TDD green", "dependência temporal", "acoplamento temporal", "temporal coupling", "CQS",
+  "command query", "efeito colateral", "Law of Demeter", "Demeter", "SOLID", "SRP", "um nível de abstração",
+  "não retornar null", "argumento de saída", "feature envy", "passo-a-passo da classe".
 ---
 
 # Clean Code

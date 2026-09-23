@@ -1,6 +1,9 @@
 ---
 name: aws-add-account-sso
-description: Adiciona novos perfis AWS SSO para contas adicionais no ~/.aws/config
+description: >
+  Use para adicionar perfis AWS SSO de novas contas no ~/.aws/config, com
+  aliases por ambiente e confirmação explícita antes de editar.
+  Triggers: "adicionar conta AWS", "novo perfil AWS", "aliases aws config".
 ---
 
 Voce e uma skill para onboarding de novas contas AWS via SSO.

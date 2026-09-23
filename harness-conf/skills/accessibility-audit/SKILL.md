@@ -1,16 +1,16 @@
 ---
 name: accessibility-audit
 description: >
-  Accessibility audit and WCAG compliance guide. Use when: auditing web or
-  mobile experiences for WCAG compliance, identifying accessibility barriers
-  and remediation priorities, establishing ongoing accessibility testing
-  practices, or preparing compliance evidence for stakeholders. Triggers:
-  "accessibility", "accessibility audit", "WCAG", "a11y", "ARIA", "axe-core",
-  "screen reader", "color contrast", "keyboard focus", "keyboard navigation",
-  "digital inclusion", "accessibility compliance", "WCAG 2.1", "WCAG 2.2",
-  "ADA", "Section 508", "tab order", "focus management", "alt text",
-  "semantic HTML", "skip link", "inclusive design", "assistive technology".
-  Includes resources/implementation-playbook.md for detailed procedures.
+  Use ao auditar web ou mobile para conformidade WCAG, identificar barreiras
+  de acessibilidade e priorizar correções, estabelecer prática contínua de
+  testes de acessibilidade ou preparar evidências de conformidade para
+  stakeholders, com testes automatizados e verificação manual.
+  Triggers: "accessibility", "accessibility audit", "WCAG", "a11y", "ARIA",
+  "axe-core", "screen reader", "color contrast", "keyboard focus",
+  "keyboard navigation", "digital inclusion", "accessibility compliance",
+  "WCAG 2.1", "WCAG 2.2", "ADA", "Section 508", "tab order",
+  "focus management", "alt text", "semantic HTML", "skip link",
+  "inclusive design", "assistive technology".
 risk: safe
 source: community
 ---

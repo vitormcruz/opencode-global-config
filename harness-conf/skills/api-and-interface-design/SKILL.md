@@ -1,15 +1,16 @@
 ---
 name: api-and-interface-design
 description: >
-  API and interface design guide: design stable, well-documented interfaces
-  that are hard to misuse. Use when: designing new API endpoints, defining
-  module boundaries or contracts between teams, creating component prop
-  interfaces, establishing database schema that informs API shape, or changing
-  existing public interfaces. Triggers: "API design", "interface design",
-  "REST API", "GraphQL", "endpoint", "interface contract", "module boundary",
-  "API typing", "API versioning", "breaking change", "public API", "schema",
+  Use ao desenhar novos endpoints de API, definir fronteiras de módulo ou
+  contratos entre times, criar interfaces de props de componente, definir
+  schema de banco que molda a API ou alterar interface pública existente.
+  Desenha interfaces estáveis e documentadas, difíceis de usar errado.
+  Triggers: "API design", "interface design", "REST API", "GraphQL",
+  "endpoint", "interface contract", "module boundary", "API typing",
+  "API versioning", "breaking change", "public API", "schema",
   "idempotency", "contract design", "component props", "Hyrum's Law",
-  "backward compatibility", "OpenAPI", "pagination design", "error responses".
+  "backward compatibility", "OpenAPI", "pagination design",
+  "error responses".
 ---
 
 # API and Interface Design

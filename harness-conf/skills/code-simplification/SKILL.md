@@ -1,18 +1,18 @@
 ---
 name: code-simplification
 description: >
-  Code simplification guide: reduce complexity while preserving exact behavior.
-  Use when: writing or changing production code during construction; code works
-  but is hard to read or maintain; after a feature is implemented and tests
-  pass; during code review when complexity is flagged; when encountering
-  deeply nested logic, long functions, or unclear names; or when consolidating
-  scattered logic. Also use on every TDD green/refactor step and whenever an
-  agent is constructing or implementing code. Triggers: "simplify",
-  "simplification", "refactor for clarity", "too complex", "hard to read",
-  "deep nesting", "long function", "extract function", "remove duplication",
-  "YAGNI", "dead code", "rename variable", "code smell", "cyclomatic
-  complexity", "consolidate logic", "reduce cognitive load", "construir
-  código", "escrever código", "implementar", "TDD", "refatorar".
+  Use ao escrever ou alterar código de produção (during construction), quando o
+  código funciona mas está difícil de ler ou manter, após implementar feature
+  com testes passando, no review quando complexidade for apontada, ao
+  encontrar aninhamento profundo, função longa ou nomes pouco claros, ao
+  consolidar lógica espalhada, e em todo passo TDD green/refactor. Reduz
+  complexidade preservando comportamento exato.
+  Triggers: "simplify", "simplification", "refactor for clarity",
+  "too complex", "hard to read", "deep nesting", "long function",
+  "extract function", "remove duplication", "YAGNI", "dead code",
+  "rename variable", "code smell", "cyclomatic complexity",
+  "consolidate logic", "reduce cognitive load", "construir código",
+  "escrever código", "implementar", "TDD", "refatorar".
 ---
 
 # Code Simplification

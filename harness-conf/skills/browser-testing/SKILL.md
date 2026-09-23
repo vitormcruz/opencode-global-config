@@ -1,7 +1,10 @@
 ---
 name: browser-testing
-description: Testes funcionais de UI com Playwright. Use quando validar fluxos web,
-  screenshots, navegacao em browser ou testes end-to-end.
+description: >
+  Use para validar fluxos web, screenshots, navegação em browser e testes
+  end-to-end com UI real. Playwright via opencode-browser-test, script .js
+  auto-contido em /tmp/.
+  Triggers: "Playwright", "screenshot", "teste end-to-end", "teste browser".
 ---
 
 # browser-testing
