@@ -380,9 +380,10 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
     reliable-async-operations (voltou a global por decisão humana) + 5
     utilitárias: doc-extract, md-export, tls-certificate-recovery,
     svg-to-image, web-research-exa-crawl4ai.
-  - Deny global (23): 21 skills de domínio + writing-for-agents +
-    planning-and-task-breakdown + code-explorer-priority (estas 2
-    removidas de core por decisão humana, com allow conforme abaixo).
+  - Deny global (23): 18 skills de domínio + writing-for-agents +
+    planning-and-task-breakdown + code-explorer-priority + aws-add-account-sso
+    + aws-sso-login (estas 3 removidas de core por decisão humana, com allow
+    conforme abaixo; as 2 aws cobertas pela chave `aws-*`).
   - Allow (skill: agentes):
     · code-explorer-priority: TODOS os 8 agentes do workflow de
       desenvolvimento (devflow, eng-software, front, curador-produto,
@@ -405,6 +406,7 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
     · performance-optimization: front, qa, eng-software
     · test-driven-development: qa, eng-software, front
     · tests-as-spec: qa, eng-software, rev, front
+    · browser-testing: qa
     · spec-executavel: analista, curador-produto, eng-software, qa, sec,
       front
     · spec-driven-development: analista
