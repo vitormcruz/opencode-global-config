@@ -1,6 +1,9 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: PLANEJAMENTO (Planejador Interativo)
+Status: APROVADO (plano aprovado pelo humano; execução pela fase AGORA
+inicia após reinício do OpenCode, necessário para o novo modelo do worker
+valer; executor = worker zai-coding-plan/glm-5.3-flash, revisor =
+zai-coding-plan/glm-5.3, ver D12)
 
 ## Overview
 
