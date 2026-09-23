@@ -1,15 +1,13 @@
 ---
 name: humanizer-br
 version: 2.0.0
-description: |
-  Editor de texto anti-IA: remove sinais de escrita gerada por IA e eleva a
-  qualidade editorial (naturalidade, ritmo, voz autoral, densidade
-  intelectual). Use em toda comunicação do chat para soar natural e humano,
-  e ao revisar textos que parecem robóticos, genéricos ou corporativos.
-  Baseado no guia da Wikipedia "Signs of AI writing", nas diretrizes do
-  professor Rafael Cardoso Sampaio (2026) e em boas práticas editoriais.
-  Módulo complementar: references/aprofundador.md (densidade intelectual,
-  executado após esta skill).
+description: >
+  Use em toda comunicação de chat e ao revisar texto que soe robótico,
+  genérico ou corporativo. Editor anti-IA: remove sinais de escrita gerada
+  por IA (vocabulário e estruturas proibidos, pontuação, clichês de chatbot)
+  e eleva naturalidade, ritmo e voz autoral, preservando o significado.
+  Módulo complementar: references/aprofundador.md, densidade intelectual,
+  executado após esta skill.
   Triggers: "humanizar", "humanize", "humanizer", "texto parece IA",
   "remover clichês de IA", "escrita natural", "naturalidade", "tom natural",
   "tom humano", "anti-IA", "não parecer gerado por IA", "texto robótico",

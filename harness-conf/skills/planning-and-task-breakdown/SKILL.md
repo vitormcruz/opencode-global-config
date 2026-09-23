@@ -1,13 +1,13 @@
 ---
 name: planning-and-task-breakdown
 description: >
-  Planning and task breakdown guide: decompose work into small, verifiable
-  tasks with explicit acceptance criteria. Use when: you have a spec and need
-  to break it into implementable units, a task feels too large or vague to
-  start, work needs to be parallelized across agents or sessions, or the
-  implementation order is not obvious. Triggers: "planning", "task breakdown",
-  "decompose work", "scope estimation", "task list", "sprint planning",
-  "backlog", "acceptance criteria", "epic", "user story", "order tasks",
+  Use quando tiver spec a quebrar em unidades implementáveis, task grande ou
+  vaga para começar, trabalho a paralelizar entre agentes ou sessões, ou
+  ordem de implementação pouco óbvia. Decompõe o trabalho em tasks pequenas
+  e verificáveis, com critérios de aceitação explícitos e grafo de
+  dependências. Triggers: "planning", "task breakdown", "decompose work",
+  "scope estimation", "task list", "sprint planning", "backlog",
+  "acceptance criteria", "epic", "user story", "order tasks",
   "task dependencies", "parallel work", "sequencing", "prioritize",
   "what to build next", "break this down", "implementation plan".
 ---

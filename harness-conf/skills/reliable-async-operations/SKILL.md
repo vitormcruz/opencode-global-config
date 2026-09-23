@@ -1,23 +1,15 @@
 ---
 name: reliable-async-operations
 description: >
-  Padrão obrigatório para qualquer código que dependa de uma operação de
-  duração desconhecida ou variável — processo externo, chamada de rede/HTTP,
-  promise/async-await, fila/job em background, lock, polling, WebSocket/stream
-  — em qualquer linguagem, backend ou frontend. Corrige a causa raiz de
-  agentes escreverem código que fica bloqueado esperando sem sinal de
-  progresso, ou que usa timeout de relógio com número mágico. Não é
-  específico de subprocess: aplica-se a qualquer chamada assíncrona.
-  Use quando: escrever ou revisar código com subprocess/child_process/
-  ProcessBuilder/exec/spawn; escrever ou revisar `fetch`/HTTP client/API
-  call; escrever `async`/`await`/Promise/asyncio sem timeout ou cancelamento;
-  escrever polling, retry, backoff, lock, mutex, semáforo, fila/job
-  assíncrono, WebSocket ou stream; investigar operação que trava, não
-  responde ou não emite progresso; decidir timeout para qualquer chamada
-  assíncrona; definir, ajustar ou aumentar timeout em código existente;
-  revisar código que cria ou altera timeouts. Triggers: "processo externo",
-  "subprocess", "child_process", "ProcessBuilder", "execSync", "waitFor",
-  "spawn", "async", "await", "Promise", "asyncio", "fetch sem timeout",
+  Use ao escrever ou revisar código com subprocess, fetch/HTTP, async/await,
+  polling, retry, lock, fila em background, WebSocket ou stream, ao
+  investigar operação travada ou sem progresso, e ao definir, ajustar ou
+  aumentar timeout. Padrão para operação de duração desconhecida ou
+  variável, em qualquer linguagem: exponha sinal de progresso,
+  cancelamento ou conclusão antes de decidir a espera; proíbe timeout
+  genérico com número mágico. Triggers: "processo externo", "subprocess",
+  "child_process", "ProcessBuilder", "execSync", "waitFor", "spawn",
+  "async", "await", "Promise", "asyncio", "fetch sem timeout",
   "AbortController", "race condition", "polling", "retry", "backoff",
   "fila assíncrona", "job em background", "lock", "mutex", "WebSocket",
   "stream", "chamada de rede", "timeout de rede", "timeout genérico",

@@ -1,15 +1,14 @@
 ---
 name: git-workflow-and-versioning
 description: >
-  Git workflow and versioning guide. Use always — every code change flows
-  through git. Use when: making any code change, writing commit messages,
-  creating branches, resolving merge conflicts, organizing parallel work,
-  or applying versioning best practices. Triggers: "git workflow", "commit",
-  "commit message", "branch", "merge", "rebase", "merge conflict",
-  "trunk-based development", "feature branch", "conventional commits",
-  "semver", "version tag", "cherry-pick", "git bisect", "stash", "squash",
-  "pull request workflow", "gitflow", "git history", "stage changes",
-  "git log", "rollback".
+  Use sempre: toda mudança de código passa por git. Guia de workflow e
+  versionamento: commits atômicos, mensagens descritivas (Conventional
+  Commits), trunk-based development, worktrees, save points, higiene de
+  pre-commit. Triggers: "git workflow", "commit", "commit message",
+  "branch", "merge", "rebase", "merge conflict", "trunk-based development",
+  "feature branch", "conventional commits", "semver", "version tag",
+  "cherry-pick", "git bisect", "stash", "squash", "pull request workflow",
+  "gitflow", "git history", "stage changes", "git log", "rollback".
 ---
 
 # Git Workflow and Versioning

@@ -1,6 +1,14 @@
 ---
 name: portugues-tecnico-controlado
-description: "Reescreve texto técnico em português do Brasil para ter uma leitura só — tira sujeito oculto, -se apassivador, modal que é obrigação e probabilidade ao mesmo tempo, e escopo decidido por vírgula. Congela terminologia, formato de número e data, e ortografia. Gera par EN/PT quando preciso. Triggers - 'português controlado', 'PTC', 'tira a ambiguidade', 'simplifica esse procedimento', 'reescreve esse runbook', 'versão em EN e PT', 'revisa esse comunicado', 'linguagem controlada', 'esse texto tem duas leituras', 'escreve isso pra um agente ler'."
+description: >
+  Use em procedimento, runbook, doc de sistema, mensagem de erro ou doc
+  bilíngue PT/EN. Reescreve texto técnico para uma leitura só: elimina
+  sujeito oculto, -se apassivador, modal ambíguo e vírgula decidindo
+  escopo; congela terminologia, número e data; gera par EN/PT.
+  Triggers - 'português controlado', 'PTC', 'tira a ambiguidade',
+  'simplifica esse procedimento', 'reescreve esse runbook',
+  'versão em EN e PT', 'revisa esse comunicado', 'linguagem controlada',
+  'esse texto tem duas leituras', 'escreve isso pra um agente ler'.
 version: 1.1.0
 ---
 

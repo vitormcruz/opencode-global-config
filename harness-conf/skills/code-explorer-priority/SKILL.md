@@ -1,13 +1,13 @@
 ---
 name: code-explorer-priority
 description: >
-  Use para qualquer pedido de descoberta de código, documentação, símbolos ou
-  arquitetura. Ao ativar, detecte o projeto com list_projects; se o repo estiver
-  indexado, use o codebase-memory CLI antes de grep/glob. Em repo não indexado,
-  use grep/glob normalmente após a detecção. Triggers: pesquisar, procurar,
-  buscar, descobrir, descoberta, encontrar, localizar, explorar, investigar,
-  search, find, look for, locate, explore, investigate, onde está, onde fica,
-  onde estão, procura, busca, quem chama, como funciona, code discovery, how does.
+  Use para qualquer pedido de descoberta de código, documentação, símbolos
+  ou arquitetura. Detecta o projeto com list_projects; em repo indexado,
+  usa o codebase-memory CLI antes de grep/glob; sem índice, usa grep/glob
+  após a detecção. Triggers: pesquisar, procurar, buscar, descobrir,
+  descoberta, encontrar, localizar, explorar, investigar, search, find,
+  look for, locate, explore, investigate, onde está, onde fica, onde estão,
+  procura, busca, quem chama, como funciona, code discovery, how does.
 ---
 
 # Descoberta por detecção

@@ -1,15 +1,15 @@
 ---
 name: question-orchestration
 description: >
-  Protocolo conversacional para agentes que conversam com o humano,
-  direta ou mediadamente: conduz triagem, perguntas adaptativas e
-  confirmações de decisão sem cansar o humano. Use quando precisar
-  planejar por perguntas, mediar dúvidas de agentes, rotear decisões
-  ou reduzir carga cognitiva. Triggers: "mediação de perguntas",
-  "agente mediador", "planejamento interativo", "protocolo
-  conversacional", "elicitação de escopo", "curadoria de documentação",
-  "rotear dúvidas de agentes", "confirmar decisões", "reduzir carga
-  cognitiva", "organizar dúvidas", "escalar decisão".
+  Use para planejar por perguntas, mediar dúvidas de agentes, rotear
+  decisões ou confirmar escolhas com o humano. Protocolo conversacional:
+  triagem, blocos adaptativos (até 4 perguntas por rodada), escape por
+  resposta livre e registro só de decisão aprovada.
+  Triggers: "mediação de perguntas", "agente mediador", "planejamento
+  interativo", "protocolo conversacional", "elicitação de escopo",
+  "curadoria de documentação", "rotear dúvidas de agentes", "confirmar
+  decisões", "reduzir carga cognitiva", "organizar dúvidas", "escalar
+  decisão".
 ---
 
 # Orquestração de Perguntas
