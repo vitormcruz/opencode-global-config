@@ -1,9 +1,10 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: APROVADO (plano aprovado pelo humano; execução pela fase AGORA
-inicia após reinício do OpenCode, necessário para o novo modelo do worker
-valer; executor = worker zai-coding-plan/glm-5.3-flash, revisor =
-zai-coding-plan/glm-5.3, ver D12)
+Status: TESTES — fases 1-3 (tasks 1-11) concluídas e aprovadas por
+revisor independente; task 12 (piloto ai-memory) Parte 2 (medição) em
+andamento; task 13 (consolidação do insumo) executada. Executor = worker
+zai-coding-plan/glm-5.3-flash, revisor = zai-coding-plan/glm-5.3 (D12).
+Próximo ciclo: fase DEVFLOW (ver seção própria ao final).
 
 ## Overview
 
@@ -618,6 +619,30 @@ agente`; `test(agents): estende consistência para o mapa de permissions`;
 `docs(plan): consolida insumo do devflow`. O arquivo do plano PERMANECE
 no repo (é o insumo do devflow; não é removido ao final).
 
+### Situação da fase AGORA — itens de D9 (evidências)
+
+| # | Item | Situação | Evidência |
+|---|---|---|---|
+| 1 | Permissions por agente (A1) | FEITO | `42b2212` (deny 23 + 69 allows) |
+| 2 | Symlink único das skills (A2) | FEITO | bootstrap T11 (sem commit): symlink único + backup `~/.config/opencode-backup/20260923-170938` |
+| 3 | Enxugo AGENTS.md do repo (A3) | FEITO | `6b8e6f8` (2712→2590 tokens chars/4) |
+| 4 | Enxugo AGENTS.base.md (A4) | FEITO | `6b8e6f8` (1082→1047 tokens) |
+| 5 | Descriptions 7 skills core (A5) | FEITO | `ee74995`, `b7fe366` (1355→1130) |
+| 6 | Descriptions skills de domínio (A6) | FEITO | `55c5e72`, `f01cc34` (triggers novos; 24 convertidas EN→PT-BR) |
+| 7 | Corpos das skills de domínio (A7) | FEITO | `b78379b`, `36447b9`, `c518e73` (-16059 tokens, -26%; revisor) |
+| 8 | Roteamento agentes + regra genérico (B1) | FEITO | `c24068d` |
+| 9 | Política de compactação (C2/D11) | FEITO | `c24068d` (AGENTS.base.md + premissa 7) |
+| 10 | Import writing-for-agents (D10) | FEITO | `f3b294b`, `1801503` (SHA c55ee46, MIT) |
+| 11 | Command otimização AGENTS.md (D7) | FEITO | `6b05375`, `1801503` |
+| 12 | Teste de consistência estendido | FEITO | `362ab54` (4 casos + fixtures) |
+| 13 | Piloto ai-memory (F1/D2) | PARCIAL | Parte 1 instalada e auditada (2.4.0, zero-LLM, local-only); Parte 2 (medição antes/depois + decisão de adoção) em andamento nesta sessão |
+| 14 | Insumo do devflow (esta seção + Fase DEVFLOW + Status) | FEITO | commit desta consolidação |
+
+Revisões independentes: Fases 1 e 2 aprovadas (com correções `1801503`,
+`0c5343d`); Fase 3 aprovada (achado documental resolvido `05eece3`,
+revalidado). Suíte final: 831 passed, 1 failed pré-existente (JAVA_HOME),
+31 deselected.
+
 ## Risks and Mitigations
 
 | Risco | Impacto | Mitigação |
@@ -634,13 +659,47 @@ no repo (é o insumo do devflow; não é removido ao final).
 
 ## Open Questions
 
-1. Conteúdo da fase DEVFLOW ("o que mais?"): proposta registrada em D9
-   (suíte completa, registro no opencode-skills + checklist pós-sync,
-   consistência workflow↔agentes, README). A validar na aprovação do plano.
-2. Língua da description do writing-for-agents importado: regra do repo
-   manda perguntar ao humano. Default proposto: converter para PT-BR e
-   enriquecer com triggers, registrando `description_lang` no UPSTREAM.md.
-3. Mapeamento fino skills de domínio ↔ agentes especialistas (para o
-   `permission.skill` de A1): a definir na execução a partir das tabelas de
-   skills obrigatórias/condicionais já presentes no corpo de cada
-   `agents/*.md`; validado pelo teste de consistência estendido (D3).
+1. RESOLVIDA (2026-09-22): corte final registrado em D9; consolidação na
+   seção "Fase DEVFLOW (roteiro do próximo ciclo)".
+2. RESOLVIDA (2026-09-23): humano aprovou converter a description do
+   writing-for-agents para PT-BR com triggers; `description_lang` +
+   `description_note` no UPSTREAM.md da skill (T1).
+3. RESOLVIDA (2026-09-23): mapa v4 aplicado (T8) e guardado pelo teste de
+   consistência estendido (T9).
+4. ABERTA: adoção do ai-memory — humano decide com os dados da Parte 2 da
+   Task 12 (medição antes/depois + payback). Se adotado, avaliar migração
+   do MCP/hooks do user-space (`opencode.jsonc` do usuário) para a fonte
+   de verdade do repo (toca `harness-conf/opencode.json`; exige aprovação).
+
+## Fase DEVFLOW (roteiro do próximo ciclo)
+
+Insumo: este arquivo (decisões D1-D13, seção "Situação da fase AGORA",
+resultados do piloto na Task 12). O devflow parte daqui para planejar a
+fase DEVFLOW com o humano.
+
+Itens do roteiro (origem D9 + D13 + pendências registradas):
+
+1. Revisar e expandir o implementado (fases 1-3 deste plano) com visão
+   fresca: auditar enxugos, descriptions, corpos e permissions.
+2. Aplicar ao Copilot CLI o que ficou só no OpenCode (adapter Copilot
+   materializa cópia; avaliar permissions por agente e o command de
+   otimização de AGENTS.md; D11: isolamento por harness se a herança do
+   AGENTS.base.md for indesejada no Copilot).
+3. D13 (prioritária): mecânica de sync diff assistido + freeze no
+   `opencode-skills`: comando `opencode-skills diff NOME` (diff upstream
+   base→novo com aplicação assistida) e campo `sincronizacao: congelada`
+   no UPSTREAM.md; registrar a writing-for-agents no CLI com
+   `extra_fields` (`description_lang`, `description_note`).
+4. Completar testes faltantes: suíte completa, checklist pós-sync do
+   AGENTS.md do repo (consistência workflow↔agentes já coberta por
+   `tests/agents/test_workflow_consistency.py`).
+5. Docs: README/seção de dependências se o ai-memory mudar premissas de
+   instalação; manter sincronia workflow↔agentes (regra do repo).
+6. Decisão de adoção do ai-memory (Open Question 4) e, se positiva,
+   migração da config para o repo.
+7. Dívidas conhecidas: linhas >120 pré-existentes em vários
+   `harness-conf/agents/*.md`; 1 failed pré-existente na suíte
+   (`tests/product_tests/test_concordion_spec_infra.py`, JAVA_HOME).
+
+Estado para retomada: campo `Status` no topo; evidências na seção
+"Situação da fase AGORA"; resultado do piloto na Task 12.
