@@ -1,5 +1,8 @@
 ---
-description: Analisa e otimiza um arquivo AGENTS.md em dois estágios (descobribilidade e compressão); gera diff e relatório antes/depois e só aplica com aprovação explícita do humano
+description: >
+  Analisa e otimiza um arquivo AGENTS.md em dois estágios (descobribilidade e
+  compressão); gera diff e relatório antes/depois e só aplica com aprovação
+  explícita do humano
 ---
 
 Otimizar um arquivo AGENTS.md apontado pelo humano: reduzir o custo de

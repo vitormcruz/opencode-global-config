@@ -26,6 +26,12 @@ O sync automático via `opencode-skills sync` ainda não cobre este upstream
 
     bash -c 'git clone --depth=1 https://github.com/mattpocock/skills /tmp/mattpocock-skills && cp /tmp/mattpocock-skills/skills/productivity/writing-for-agents/SKILL-MECHANICS.md harness-conf/skills/writing-for-agents/SKILL-MECHANICS.md && git -C /tmp/mattpocock-skills log -1 --format="%H %ci"'
 
+O comando acima é mantido em linha única por requisito do parser
+`_documented_commands` deste repo, que espera cada comando documentado numa
+única linha iniciada pelo executável. Migrar para um script versionado com
+`--yes` está previsto para a fase DEVFLOW, quando o sync for registrado no
+CLI.
+
 Depois, atualize `commit`, `data_commit` e `sincronizado_em` no topo deste
 arquivo e confira se mudanças upstream afetam o `SKILL.md` local. O
 `SKILL.md` nunca é sobrescrito pelo sync.
