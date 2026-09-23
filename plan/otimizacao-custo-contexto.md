@@ -509,6 +509,14 @@ AGENTS.base.md`; `refactor(skills): reescreve descriptions`;
   code-explorer-priority); 33 skills resolvidas (incluindo
   writing-for-agents); Copilot sincronizado (33 skills, 12 agents, 4
   commands).
+  **FECHAMENTO DA FASE 3 (2026-09-23):** revisor independente validou os
+  7 itens (Task 8 mapa v4 sem divergências skill a skill; Task 9 quatro
+  casos com fixtures; Task 10 conteúdo idêntico aos rascunhos aprovados;
+  Task 11 ambiente sincronizado; suíte 831 passed, 1 failed pré-existente
+  JAVA_HOME, 31 deselected; higiene dos commits). Achado único: documental
+  (omissão de browser-testing:qa e soma do deny no plano), corrigido em
+  `05eece3` e REVALIDADO por nova instância do revisor: APROVADO. Fase 3
+  tecnicamente concluída.
   **Description:** desfazer o diretório manual `~/.config/opencode/skills`
   (7 symlinks individuais) e restaurar o symlink único de bootstrap:
   rodar `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes` (o
