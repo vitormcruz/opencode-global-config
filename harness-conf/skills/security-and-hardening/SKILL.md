@@ -16,171 +16,125 @@ description: >
 
 # Security and Hardening
 
-## Overview
-
-Security-first development practices for web applications. Treat every external input as hostile, every secret as sacred, and every authorization check as mandatory. Security isn't a phase — it's a constraint on every line of code that touches user data, authentication, or external systems.
-
-## When to Use
-
-- Building anything that accepts user input
-- Implementing authentication or authorization
-- Storing or transmitting sensitive data
-- Integrating with external APIs or services
-- Adding file uploads, webhooks, or callbacks
-- Handling payment or PII data
+Security-first development for web applications. Treat every external
+input as hostile, every secret as sacred, every authorization check as
+mandatory. Security is a constraint on every line of code that touches
+user data, auth, or external systems — not a final phase.
 
 ## The Three-Tier Boundary System
 
-### Always Do (No Exceptions)
+### Always Do (no exceptions)
 
 - **Validate all external input** at the system boundary (API routes, form handlers)
 - **Parameterize all database queries** — never concatenate user input into SQL
-- **Encode output** to prevent XSS (use framework auto-escaping, don't bypass it)
+- **Encode output** to prevent XSS (use framework auto-escaping; don't bypass it)
 - **Use HTTPS** for all external communication
-- **Hash passwords** with bcrypt/scrypt/argon2 (never store plaintext)
+- **Hash passwords** with bcrypt/scrypt/argon2 (never plaintext)
 - **Set security headers** (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
 - **Use httpOnly, secure, sameSite cookies** for sessions
 - **Run `npm audit`** (or equivalent) before every release
 
-### Ask First (Requires Human Approval)
+### Ask First (requires human approval)
 
-- Adding new authentication flows or changing auth logic
-- Storing new categories of sensitive data (PII, payment info)
-- Adding new external service integrations
-- Changing CORS configuration
-- Adding file upload handlers
-- Modifying rate limiting or throttling
-- Granting elevated permissions or roles
+- New or changed authentication flows
+- Storing new categories of sensitive data (PII, payment)
+- New external service integrations
+- CORS changes
+- New file upload handlers
+- Rate limiting or throttling changes
+- Elevated permissions or roles
 
 ### Never Do
 
 - **Never commit secrets** to version control (API keys, passwords, tokens)
-- **Never log sensitive data** (passwords, tokens, full credit card numbers)
+- **Never log sensitive data** (passwords, tokens, card numbers)
 - **Never trust client-side validation** as a security boundary
 - **Never disable security headers** for convenience
 - **Never use `eval()` or `innerHTML`** with user-provided data
-- **Never store sessions in client-accessible storage** (localStorage for auth tokens)
+- **Never store session tokens in client-accessible storage** (localStorage)
 - **Never expose stack traces** or internal error details to users
 
-## OWASP Top 10 Prevention
+## OWASP Top 10 Patterns
 
-### 1. Injection (SQL, NoSQL, OS Command)
+### Injection (SQL, NoSQL, command)
 
 ```typescript
-// BAD: SQL injection via string concatenation
+// BAD: string concatenation
 const query = `SELECT * FROM users WHERE id = '${userId}'`;
-
-// GOOD: Parameterized query
+// GOOD: parameterized query
 const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
-
-// GOOD: ORM with parameterized input
-const user = await prisma.user.findUnique({ where: { id: userId } });
 ```
 
-### 2. Broken Authentication
+### Broken authentication
 
 ```typescript
-// Password hashing
-import { hash, compare } from 'bcrypt';
-
-const SALT_ROUNDS = 12;
-const hashedPassword = await hash(plaintext, SALT_ROUNDS);
+const hashedPassword = await hash(plaintext, 12);          // bcrypt, ≥12 rounds
 const isValid = await compare(plaintext, hashedPassword);
 
-// Session management
 app.use(session({
-  secret: process.env.SESSION_SECRET,  // From environment, not code
+  secret: process.env.SESSION_SECRET,   // from environment, not code
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    httpOnly: true,     // Not accessible via JavaScript
-    secure: true,       // HTTPS only
-    sameSite: 'lax',    // CSRF protection
-    maxAge: 24 * 60 * 60 * 1000,  // 24 hours
-  },
+  cookie: { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 },
 }));
 ```
 
-### 3. Cross-Site Scripting (XSS)
+### XSS
 
 ```typescript
-// BAD: Rendering user input as HTML
+// BAD: rendering user input as HTML
 element.innerHTML = userInput;
-
-// GOOD: Use framework auto-escaping (React does this by default)
+// GOOD: framework auto-escaping (React default)
 return <div>{userInput}</div>;
-
-// If you MUST render HTML, sanitize first
-import DOMPurify from 'dompurify';
+// If you MUST render HTML, sanitize first:
 const clean = DOMPurify.sanitize(userInput);
 ```
 
-### 4. Broken Access Control
+### Broken access control
+
+Authorization on every endpoint, not just authentication. Check ownership:
 
 ```typescript
-// Always check authorization, not just authentication
 app.patch('/api/tasks/:id', authenticate, async (req, res) => {
   const task = await taskService.findById(req.params.id);
-
-  // Check that the authenticated user owns this resource
   if (task.ownerId !== req.user.id) {
-    return res.status(403).json({
-      error: { code: 'FORBIDDEN', message: 'Not authorized to modify this task' }
-    });
+    return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Not authorized' } });
   }
-
-  // Proceed with update
-  const updated = await taskService.update(req.params.id, req.body);
-  return res.json(updated);
+  return res.json(await taskService.update(req.params.id, req.body));
 });
 ```
 
-### 5. Security Misconfiguration
+### Misconfiguration (headers, CORS)
 
 ```typescript
-// Security headers (use helmet for Express)
-import helmet from 'helmet';
-app.use(helmet());
-
-// Content Security Policy
+app.use(helmet());   // security headers
 app.use(helmet.contentSecurityPolicy({
   directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'"],
-    styleSrc: ["'self'", "'unsafe-inline'"],  // Tighten if possible
-    imgSrc: ["'self'", 'data:', 'https:'],
-    connectSrc: ["'self'"],
+    defaultSrc: ["'self'"], scriptSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", 'data:', 'https:'], connectSrc: ["'self'"],
   },
 }));
-
-// CORS — restrict to known origins
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(','), credentials: true }));
 ```
 
-### 6. Sensitive Data Exposure
+### Sensitive data exposure
 
 ```typescript
-// Never return sensitive fields in API responses
 function sanitizeUser(user: UserRecord): PublicUser {
   const { passwordHash, resetToken, ...publicFields } = user;
-  return publicFields;
+  return publicFields;   // never return sensitive fields in API responses
 }
-
-// Use environment variables for secrets
 const API_KEY = process.env.STRIPE_API_KEY;
 if (!API_KEY) throw new Error('STRIPE_API_KEY not configured');
 ```
 
-## Input Validation Patterns
+## Input Validation
 
-### Schema Validation at Boundaries
+Validate at the boundary with a schema; the parsed result is typed and
+trusted:
 
 ```typescript
-import { z } from 'zod';
-
 const CreateTaskSchema = z.object({
   title: z.string().min(1).max(200).trim(),
   description: z.string().max(2000).optional(),
@@ -188,173 +142,88 @@ const CreateTaskSchema = z.object({
   dueDate: z.string().datetime().optional(),
 });
 
-// Validate at the route handler
 app.post('/api/tasks', async (req, res) => {
   const result = CreateTaskSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(422).json({
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid input',
-        details: result.error.flatten(),
-      },
-    });
+    return res.status(422).json({ error: { code: 'VALIDATION_ERROR', details: result.error.flatten() } });
   }
-  // result.data is now typed and validated
-  const task = await taskService.create(result.data);
-  return res.status(201).json(task);
+  return res.status(201).json(await taskService.create(result.data));
 });
 ```
 
-### File Upload Safety
+File uploads: restrict MIME type and size; don't trust the file extension
+(check magic bytes if critical).
 
 ```typescript
-// Restrict file types and sizes
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-
-function validateUpload(file: UploadedFile) {
-  if (!ALLOWED_TYPES.includes(file.mimetype)) {
-    throw new ValidationError('File type not allowed');
-  }
-  if (file.size > MAX_SIZE) {
-    throw new ValidationError('File too large (max 5MB)');
-  }
-  // Don't trust the file extension — check magic bytes if critical
-}
 ```
-
-## Triaging npm audit Results
-
-Not all audit findings require immediate action. Use this decision tree:
-
-```
-npm audit reports a vulnerability
-├── Severity: critical or high
-│   ├── Is the vulnerable code reachable in your app?
-│   │   ├── YES --> Fix immediately (update, patch, or replace the dependency)
-│   │   └── NO (dev-only dep, unused code path) --> Fix soon, but not a blocker
-│   └── Is a fix available?
-│       ├── YES --> Update to the patched version
-│       └── NO --> Check for workarounds, consider replacing the dependency, or add to allowlist with a review date
-├── Severity: moderate
-│   ├── Reachable in production? --> Fix in the next release cycle
-│   └── Dev-only? --> Fix when convenient, track in backlog
-└── Severity: low
-    └── Track and fix during regular dependency updates
-```
-
-**Key questions:**
-- Is the vulnerable function actually called in your code path?
-- Is the dependency a runtime dependency or dev-only?
-- Is the vulnerability exploitable given your deployment context (e.g., a server-side vulnerability in a client-only app)?
-
-When you defer a fix, document the reason and set a review date.
 
 ## Rate Limiting
 
 ```typescript
-import rateLimit from 'express-rate-limit';
-
-// General API rate limit
-app.use('/api/', rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                   // 100 requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-}));
-
-// Stricter limit for auth endpoints
-app.use('/api/auth/', rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,  // 10 attempts per 15 minutes
-}));
+app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false }));
+// Stricter limit for auth endpoints:
+app.use('/api/auth/', rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }));
 ```
 
 ## Secrets Management
 
 ```
-.env files:
-  ├── .env.example  → Committed (template with placeholder values)
-  ├── .env          → NOT committed (contains real secrets)
-  └── .env.local    → NOT committed (local overrides)
+.env.example → committed (template with placeholders)
+.env         → NOT committed (real secrets)
+.env.local   → NOT committed (local overrides)
 
-.gitignore must include:
-  .env
-  .env.local
-  .env.*.local
-  *.pem
-  *.key
+.gitignore must include: .env, .env.local, .env.*.local, *.pem, *.key
 ```
 
-**Always check before committing:**
+Before committing:
+
 ```bash
-# Check for accidentally staged secrets
 git diff --cached | grep -i "password\|secret\|api_key\|token"
 ```
 
-## Security Review Checklist
+## Triage npm audit Results
 
-```markdown
-### Authentication
-- [ ] Passwords hashed with bcrypt/scrypt/argon2 (salt rounds ≥ 12)
-- [ ] Session tokens are httpOnly, secure, sameSite
-- [ ] Login has rate limiting
-- [ ] Password reset tokens expire
+Not all findings need immediate action. Ask, in order:
 
-### Authorization
-- [ ] Every endpoint checks user permissions
-- [ ] Users can only access their own resources
-- [ ] Admin actions require admin role verification
+1. Severity: critical/high → Is the vulnerable code reachable?
+   - Reachable → fix now (update, patch, or replace the dependency)
+   - Not reachable (dev-only dep, unused path) → fix soon, not a blocker
+2. Severity: moderate → reachable in production means next release cycle;
+   dev-only means backlog
+3. Severity: low → fix during regular dependency updates
 
-### Input
-- [ ] All user input validated at the boundary
-- [ ] SQL queries are parameterized
-- [ ] HTML output is encoded/escaped
+When deferring, document the reason and set a review date.
 
-### Data
-- [ ] No secrets in code or version control
-- [ ] Sensitive fields excluded from API responses
-- [ ] PII encrypted at rest (if applicable)
+## Security Checklist (run before merge)
 
-### Infrastructure
-- [ ] Security headers configured (CSP, HSTS, etc.)
-- [ ] CORS restricted to known origins
-- [ ] Dependencies audited for vulnerabilities
-- [ ] Error messages don't expose internals
-```
-## See Also
+**Authentication**
+- [ ] Passwords hashed (bcrypt/scrypt/argon2, salt rounds ≥ 12)
+- [ ] Session tokens httpOnly, secure, sameSite; reset tokens expire
+- [ ] Rate limiting on login
 
-For detailed security checklists and pre-commit verification steps, see `references/security-checklist.md`.
+**Authorization**
+- [ ] Every endpoint checks permissions; users access only their own resources
+- [ ] Admin actions verified by role
+
+**Input**
+- [ ] All user input validated at the boundary; SQL parameterized; output encoded
+
+**Data & infrastructure**
+- [ ] No secrets in code, config, or git history; PII encrypted at rest
+- [ ] Security headers present (verify in DevTools); CORS restricted to known origins
+- [ ] `npm audit` clean of critical/high; error responses don't expose internals
+
+For detailed checklists and pre-commit verification steps, see
+`references/security-checklist.md`.
 
 ## Common Rationalizations
 
 | Rationalization | Reality |
 |---|---|
-| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
-| "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
-| "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
-| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
-| "It's just a prototype" | Prototypes become production. Security habits from day one. |
-
-## Red Flags
-
-- User input passed directly to database queries, shell commands, or HTML rendering
-- Secrets in source code or commit history
-- API endpoints without authentication or authorization checks
-- Missing CORS configuration or wildcard (`*`) origins
-- No rate limiting on authentication endpoints
-- Stack traces or internal errors exposed to users
-- Dependencies with known critical vulnerabilities
-
-## Verification
-
-After implementing security-relevant code:
-
-- [ ] `npm audit` shows no critical or high vulnerabilities
-- [ ] No secrets in source code or git history
-- [ ] All user input validated at system boundaries
-- [ ] Authentication and authorization checked on every protected endpoint
-- [ ] Security headers present in response (check with browser DevTools)
-- [ ] Error responses don't expose internal details
-- [ ] Rate limiting active on auth endpoints
+| "It's an internal tool" | Internal tools get compromised too |
+| "We'll add security later" | Retrofitting is 10x harder; build it in now |
+| "No one would exploit this" | Automated scanners will find it |
+| "The framework handles it" | Frameworks provide tools, not guarantees |
+| "It's just a prototype" | Prototypes become production; habits start day one |

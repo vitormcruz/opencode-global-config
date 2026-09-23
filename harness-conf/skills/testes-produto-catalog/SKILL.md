@@ -15,15 +15,13 @@ description: >
 
 # Catálogo de Referência — Suítes por Especialidade
 
-> **Nota:** as regras abaixo são referência de domínio.
-> **Não são obrigatórias.** O spec efetivo é a seção
-> "Testes por Especialidade" do `docs/README.md`
-> (o `AGENTS.md` mantém só a tabela com link âncora).
+Referência de domínio, não regra obrigatória. O spec efetivo é a seção
+"Testes por Especialidade" do `docs/README.md`.
 
 ## Interface Padronizada
 
-Cada suíte e o agregador `testes-produto` são scripts
-sem argumentos, idempotentes, com JSON:
+Cada suíte e o agregador `testes-produto` são scripts sem argumentos,
+idempotentes, com JSON:
 
 ```json
 {
@@ -38,78 +36,59 @@ sem argumentos, idempotentes, com JSON:
 }
 ```
 
-Exit code: 0 = pass, 1 = fail. O agregador `testes-produto`
-chama as quatro suítes e consolida `findings`. Falha se
-qualquer suíte falhar. Executado pelo agente `qa` na fase
-Testes do workflow; a evidência é validada pelo
-`curador-produto`.
+Exit code: 0 = pass, 1 = fail. O agregador `testes-produto` chama as
+quatro suítes e consolida `findings`; falha se qualquer suíte falhar.
+Executado pelo agente `qa` na fase Testes do workflow; a evidência é
+validada pelo `curador-produto`.
 
 ### Regras de segurança da interface
 
-- Forçar UTF-8 em stdout/stderr e emitir progresso em
-  stderr, sem ecoar a linha JSON final.
-- Em falha transitória de rede, retry até 3 vezes;
-  esgotado, finding bloqueante com instrução de rede.
-- Não bypassar verificações, usar `failOnViolation=false`,
-  excluir teste do scan, usar fail-open em audit ou cache
-  sem fallback.
+- Forçar UTF-8 em stdout/stderr e emitir progresso em stderr, sem ecoar a
+  linha JSON final.
+- Falha transitória de rede: retry até 3 vezes; esgotado, finding
+  bloqueante com instrução de rede.
+- Não bypassar verificações, usar `failOnViolation=false`, excluir teste do
+  scan, usar fail-open em audit ou cache sem fallback.
 
 ## backend
 
-- **Análise estática** `tool`
-  ESLint, ruff, mypy, pyright, shellcheck, hadolint, etc.
-
-- **Cobertura mínima** `tool`
-  Cobertura não pode cair abaixo do baseline.
-
-- **Testes de aceitação** `tool`
-  BDD/Playwright/Cypress quando o fluxo for backend.
-  Falhas = bloqueante.
+- **Análise estática** `tool`: ESLint, ruff, mypy, pyright, shellcheck,
+  hadolint, etc.
+- **Cobertura mínima** `tool`: cobertura não pode cair abaixo do baseline.
+- **Testes de aceitação** `tool`: BDD/Playwright/Cypress quando o fluxo for
+  backend. Falhas = bloqueante.
 
 ## dados
 
-- **Validação de SQL** `tool`
-  SQLFluff ou linter SQL do projeto. Error = bloqueante.
-
-- **Schema diff** `tool`
-  Comparar schema resultante com modelo "as code".
-
-- **IaC lint** `tool`
-  checkov/tflint se houver infra de BD.
+- **Validação de SQL** `tool`: SQLFluff ou linter SQL do projeto.
+  Error = bloqueante.
+- **Schema diff** `tool`: comparar schema resultante com modelo "as code".
+- **IaC lint** `tool`: checkov/tflint se houver infra de BD.
 
 ## segurança
 
-- **SAST obrigatório** `tool`
-  Semgrep ou SAST do projeto. high/critical = bloqueante.
-
-- **Secrets scan** `tool`
-  gitleaks/git-secrets no diff. Segredo = bloqueante.
-
-- **Dependency check** `tool`
-  Snyk/npm audit/pip-audit. Críticas = bloqueante.
-
-- **DAST** `tool`
-  OWASP ZAP ou equivalente. high/critical = bloqueante.
+- **SAST obrigatório** `tool`: Semgrep ou SAST do projeto.
+  high/critical = bloqueante.
+- **Secrets scan** `tool`: gitleaks/git-secrets no diff. Segredo =
+  bloqueante.
+- **Dependency check** `tool`: Snyk/npm audit/pip-audit. Críticas =
+  bloqueante.
+- **DAST** `tool`: OWASP ZAP ou equivalente. high/critical = bloqueante.
 
 ## frontend
 
-- **Lint CSS/HTML** `tool`
-  stylelint, htmlhint ou equivalente.
-
-- **Acessibilidade** `tool`
-  pa11y, axe-core ou ambos: a entrevista decide.
+- **Lint CSS/HTML** `tool`: stylelint, htmlhint ou equivalente.
+- **Acessibilidade** `tool`: pa11y, axe-core ou ambos; a entrevista decide.
   Critical = bloqueante.
-
-- **Snapshot visual** `tool`
-  Playwright/Cypress snapshot visual (se aplicável).
-
-- **Cobertura da suíte de UI** `tool`
-  Se houver suíte de UI, a cobertura entra aqui.
+- **Snapshot visual** `tool`: Playwright/Cypress snapshot visual (se
+  aplicável).
+- **Cobertura da suíte de UI** `tool`: se houver suíte de UI, a cobertura
+  entra aqui.
 
 ## Instruções
 
-Itens abaixo não são suíte; vivem em
-`## Instruções por Agente` se o humano aprovar.
+Itens abaixo não são suíte; vivem em `## Instruções por Agente` se o
+humano aprovar.
 
 - Smoke tests e regressão incremental (construção).
 - Testes existentes são intocáveis.

@@ -16,31 +16,29 @@ description: >
 
 # Especificação Executável
 
-Spec executável é texto legível pelo humano que vira teste automatizado:
-editar o texto muda o veredito do teste. Esta skill define como escrever e
-revisar esse texto. Ela cobre o COMO escrever cada critério; definir QUAIS
-cenários existem e como classificar requisitos é decisão de quem administra
-o backlog, não daqui.
+Spec executável é texto legível que vira teste automatizado: editar o texto
+muda o veredito do teste. Esta skill define COMO escrever cada critério.
+Definir QUAIS cenários existem e classificar requisitos é decisão de quem
+administra o backlog, não daqui.
 
 ## Princípio central
 
 **A spec está ótima quando o humano mexe no texto e o teste quebra.**
 
 Corolário: linke ao máximo os valores definidos nas regras ao código de
-teste — valores concretos e aspas duplas aparecem na spec apenas para
-literais que mudam o veredito. Se trocar uma palavra do critério não muda o
-teste correspondente, texto e teste estão soltos um do outro: aperte o link
-(faça o teste ler do texto o valor que a regra define).
+teste — valor concreto e aspas duplas aparecem na spec apenas para literais
+que mudam o veredito. Trocar uma palavra do critério sem quebrar o teste
+correspondente significa texto e teste soltos: aperte o link (faça o teste
+ler do texto o valor que a regra define).
 
 ## Formato default: Gherkin (recomendação forte)
 
-Gherkin é o formato recomendado por padrão: vocabulário controlado, estrutura
-rígida e adoção ampla em ferramentas BDD.
+Gherkin por padrão: vocabulário controlado, estrutura rígida, adoção ampla
+em ferramentas BDD.
 
-**Cláusula de exceção**: avalie a adequação caso a caso. Se outro formato
-expressar a regra melhor (ex.: tabela para matrizes de permissionamento),
-proponha o formato alternativo ao humano e discuta antes de desviar. Sem
-aprovação, mantenha Gherkin.
+**Cláusula de exceção**: se outro formato expressar a regra melhor (ex.:
+tabela para matrizes de permissionamento), proponha o formato alternativo
+ao humano e discuta antes de desviar. Sem aprovação, mantenha Gherkin.
 
 ### Estrutura canônica do cenário
 
@@ -104,11 +102,11 @@ Esquema do Cenário: <frase curta> (origem: <requisito/regra>)
 ## Meio e ferramenta
 
 - **Arquivos Markdown são favorecidos** como meio da spec (difusão, review
-  e versionamento naturais); exceções são possíveis quando a ferramenta de
-  execução exigir outro formato.
-- **Agnóstica de ferramenta**: os critérios acima valem para qualquer
-  motor de execução. Concordion é um exemplo de ferramenta que executa
-  specs escritas em Markdown; não é requisito nem recomendação exclusiva.
+  e versionamento naturais); exceções quando a ferramenta de execução
+  exigir outro formato.
+- **Agnóstica de ferramenta**: os critérios acima valem para qualquer motor
+  de execução. Concordion é um exemplo de ferramenta que executa specs em
+  Markdown; não é requisito nem recomendação exclusiva.
 
 ## Rastreabilidade
 

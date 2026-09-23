@@ -15,62 +15,57 @@ description: >
   esse erro de TLS/SSL".
 ---
 
-Voce e uma skill de diagnostico e recuperacao de erros de certificado
-TLS/SSL em ferramentas de linha de comando.
+# Recuperação de Certificado TLS/SSL
 
 ## Objetivo
 
-Quando uma ferramenta (Python/pip, Node/npm, git, curl, huggingface_hub,
-docling, aws-cli, etc.) falha por nao conseguir validar a cadeia de
-certificados TLS, resolver o problema **sem desativar a validacao TLS** e
-**sem introduzir uma nova autoridade nao confiavel** — reaproveitando apenas
-certificados que o proprio sistema operacional ja confia.
+Ferramenta CLI (Python/pip, Node/npm, git, curl, huggingface_hub, docling,
+aws-cli etc.) falhou por não validar a cadeia de certificados TLS: resolver
+**sem desativar a validação TLS** e **sem introduzir autoridade não
+confiável**, reaproveitando apenas certificados que o próprio SO já confia.
 
-## Por que isso acontece
+## Causa raiz
 
-Muitas ferramentas escritas em Python/Node (via `certifi`, `httpx`,
-`requests`, Node `https`) **nao consultam o repositorio de certificados do
-SO** (Windows Certificate Store, `/etc/ssl/certs` no Linux). Em maquinas
-corporativas com proxy de inspecao TLS (MITM), o certificado raiz do proxy
-costuma **ja estar instalado e confiado pelo SO** (senao o navegador tambem
-falharia), mas a ferramenta ainda falha porque usa sua propria lista de CAs
-embutida, que nao inclui esse certificado corporativo.
+Ferramentas Python/Node (`certifi`, `httpx`, `requests`, Node `https`) não
+consultam o repositório de certificados do SO (Windows Certificate Store,
+`/etc/ssl/certs` no Linux) e usam sua própria lista embutida de CAs. Em
+máquina corporativa com proxy de inspeção TLS (MITM), a raiz do proxy já
+está instalada e confiada pelo SO (o navegador funciona), mas a lista
+embutida da ferramenta não a contém — e a ferramenta falha.
 
 ## Quando usar
 
-Ative esta skill automaticamente, sem perguntar antes de tentar, quando:
-- Um comando falhar com qualquer sinal de erro de certificado listado na
+Ative automaticamente, sem perguntar antes de tentar, quando:
+
+- Um comando falha com qualquer sinal de erro de certificado listado na
   `description` desta skill.
-- O humano relatar erro de certificado/TLS/SSL em qualquer ferramenta.
+- O humano relata erro de certificado/TLS/SSL em qualquer ferramenta.
 
-## Quando NAO usar / limites de autonomia
+## Limites de autonomia
 
-- **Nunca** desative validacao TLS para "resolver" o erro (ver secao
-  "Nunca fazer").
-- Se a extracao da cadeia do SO **nao resolver** o erro (ou seja, o
-  certificado do proxy/CA corporativa nao esta nem no proprio SO), **pare**
-  e pergunte ao humano por uma CA PEM corporativa aprovada ou um mirror
-  aprovado — nunca baixe ou invente um certificado por conta propria.
-- Mudancas de configuracao **persistentes e globais** (editar
-  `~/.gitconfig`, `~/.npmrc`, `pip.conf` do sistema, variaveis de ambiente
-  permanentes no perfil do shell) exigem confirmacao explicita do humano.
-  Por padrao, aplique a correcao **apenas no escopo do comando/sessao atual**
-  (variaveis de ambiente no processo, flags do comando).
+- Mudança de configuração **persistente e global** (`~/.gitconfig`,
+  `~/.npmrc`, `pip.conf` do sistema, variável de ambiente permanente no
+  perfil do shell) exige confirmação explícita do humano. Por padrão,
+  aplique a correção **apenas no escopo do comando/sessão atual**
+  (variável de ambiente no processo, flag do comando).
+- Se a extração da cadeia do SO não resolver (a CA corporativa não está
+  nem no próprio SO), **pare** e pergunte ao humano por uma CA PEM
+  corporativa aprovada ou um mirror aprovado. Nunca baixe nem invente um
+  certificado por conta própria (ver "Nunca fazer").
 
-## Fluxo obrigatorio
+## Fluxo obrigatório
 
-1. **Diagnosticar**: confirme que o erro e de validacao de cadeia de
-   certificado (nao de rede/DNS/firewall/proxy-auth). Releia a mensagem de
+1. **Diagnosticar**: confirme que o erro é de validação de cadeia de
+   certificado, não de rede/DNS/firewall/proxy-auth. Releia a mensagem de
    erro completa antes de agir.
-2. **Extrair a cadeia confiavel do SO** para um bundle PEM estavel e
-   reutilizavel (nao apagar entre execucoes):
-    - Local padrao (cross-platform via `$HOME`):
-     `~/.cache/tls-certificate-recovery/system-ca-bundle.pem`
+2. **Extrair a cadeia confiada pelo SO** para um bundle PEM estável e
+   reutilizável (não apagado entre execuções) em
+   `$HOME/.cache/tls-certificate-recovery/system-ca-bundle.pem`.
 
-   **Windows (PowerShell)** — exporta todos os certificados de
-   Root e CA intermediarias confiados pelo usuario e pela maquina:
-```powershell
-  $bundle = Join-Path $env:USERPROFILE '.cache\tls-certificate-recovery\system-ca-bundle.pem'
+   **Windows (PowerShell)** — exporta os certificados de Root e CA
+   intermediária confiados pelo usuário e pela máquina:
+   ```powershell
+   $bundle = Join-Path $env:USERPROFILE '.cache\tls-certificate-recovery\system-ca-bundle.pem'
    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $bundle) | Out-Null
    $stores = @('Cert:\CurrentUser\Root','Cert:\CurrentUser\CA','Cert:\LocalMachine\Root','Cert:\LocalMachine\CA')
    $seen = @{}
@@ -87,87 +82,72 @@ Ative esta skill automaticamente, sem perguntar antes de tentar, quando:
      }
    }
    Set-Content -Path $bundle -Value ($blocks -join "`r`n") -Encoding ascii
-```
+   ```
 
-   **Linux/WSL** — reaproveita o bundle que o proprio SO ja usa (nao
-   reconstroi do zero); so copia para o caminho padrao da skill:
-```bash
-  bundle="$HOME/.cache/tls-certificate-recovery/system-ca-bundle.pem"
+   **Linux/WSL** — reaproveita o bundle que o próprio SO já usa (não
+   reconstrói do zero); só copia para o caminho padrão da skill:
+   ```bash
+   bundle="$HOME/.cache/tls-certificate-recovery/system-ca-bundle.pem"
    mkdir -p "$(dirname "$bundle")"
    for candidate in /etc/ssl/certs/ca-certificates.crt \
                     /etc/pki/tls/certs/ca-bundle.crt \
                     /etc/ssl/cert.pem; do
      if [ -f "$candidate" ]; then cp "$candidate" "$bundle"; break; fi
    done
-```
-   Se nenhum caminho existir e o erro persistir, isso indica que a CA
-   corporativa **nao esta instalada nem no SO** — pare e escale ao humano
-   (nao tente `update-ca-certificates`/instalar CA sem `sudo` e sem
-   aprovacao explicita).
+   ```
 
-3. **Aplicar o bundle apenas no escopo do comando**, escolhendo a(s)
-   variavel(is) certa(s) conforme a ferramenta que falhou:
+   Nenhum caminho existente e erro persistente = a CA corporativa não está
+   nem no SO. **Pare** e escale ao humano; não tente
+   `update-ca-certificates` nem instalar CA sem `sudo` e sem aprovação
+   explícita.
 
-   | Ferramenta | Variavel/flag |
+3. **Aplicar o bundle apenas no escopo do comando**, com a variável certa
+   para a ferramenta que falhou:
+
+   | Ferramenta | Variável/flag |
    |---|---|
    | Python (`requests`, `httpx`, `pip`, `huggingface_hub`) | `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `PIP_CERT` |
    | Node.js / npm | `NODE_EXTRA_CA_CERTS` |
    | curl | `CURL_CA_BUNDLE` ou `curl --cacert <bundle>` |
-   | git (por invocacao, sem alterar config global) | `GIT_SSL_CAINFO=<bundle> git ...` |
+   | git (por invocação, sem alterar config global) | `GIT_SSL_CAINFO=<bundle> git ...` |
    | AWS CLI | `AWS_CA_BUNDLE` |
    | Geral/OpenSSL | `SSL_CERT_FILE` |
 
-   Exemplo (PowerShell, escopo do processo):
-```powershell
-  $env:SSL_CERT_FILE = $bundle
+   ```powershell
+   $env:SSL_CERT_FILE = $bundle
    $env:REQUESTS_CA_BUNDLE = $bundle
-```
-   Exemplo (bash, escopo do processo):
-```bash
-  export SSL_CERT_FILE="$bundle"
+   ```
+   ```bash
+   export SSL_CERT_FILE="$bundle"
    export REQUESTS_CA_BUNDLE="$bundle"
-```
+   ```
 
-4. **Repetir o comando original** que falhou, com as variaveis aplicadas.
-5. **Se funcionar**: informe ao humano, em poucas linhas, que a cadeia de
-   certificados do SO foi extraida para o caminho do bundle e qual variavel
-   resolveu o problema, para que ele saiba que nenhuma nova autoridade foi
-   introduzida.
-6. **Se persistir o erro de certificado** apos o passo 4: pare de tentar
-   variacoes automaticamente. Pergunte ao humano (via `ask_user` quando
-   disponivel) com duas opcoes: (a) caminho de uma CA PEM corporativa
-   aprovada, ou (b) um mirror interno aprovado. Nao prossiga sem resposta.
+4. **Repetir o comando original** que falhou, com as variáveis aplicadas.
+5. **Se resolver**: informe ao humano, em poucas linhas, que a cadeia do
+   SO foi extraída para o caminho do bundle e qual variável resolveu —
+   nenhuma autoridade nova foi introduzida.
+6. **Se o erro persistir** após o passo 4: pare de tentar variações
+   automaticamente. Pergunte ao humano (via `ask_user` quando disponível)
+   entre: (a) caminho de uma CA PEM corporativa aprovada, ou (b) um mirror
+   interno aprovado. Não prossiga sem resposta.
 
 ## Nunca fazer
 
-- Nunca desative validacao TLS: `--insecure`/`-k` (curl), `verify=False`
-  (Python), `NODE_TLS_REJECT_UNAUTHORIZED=0`, `git config
-  http.sslVerify false`, `npm config set strict-ssl false`,
-  `PYTHONHTTPSVERIFY=0`.
-- Nunca baixe um certificado de uma URL arbitraria e o adicione como
-  confiavel "para funcionar".
-- Nunca invente ou gere um certificado/CA por conta propria.
-- Nunca oculte do humano que um bundle de certificados foi criado/alterado.
-- Nunca altere configuracao global persistente (`~/.gitconfig`, `~/.npmrc`,
-  `pip.conf` do sistema, variaveis de ambiente permanentes) sem confirmacao
-  explicita do humano.
+- **Desativar validação TLS**: `--insecure`/`-k` (curl), `verify=False`
+  (Python), `NODE_TLS_REJECT_UNAUTHORIZED=0`, `git config http.sslVerify
+  false`, `npm config set strict-ssl false`, `PYTHONHTTPSVERIFY=0`.
+- **Baixar** certificado de URL arbitrária para confiar "para funcionar".
+- **Inventar ou gerar** certificado/CA por conta própria.
+- **Ocultar** do humano que um bundle foi criado ou alterado.
+- **Alterar** configuração global persistente sem confirmação explícita.
 
-## Saida esperada
+## Saída esperada
 
 Ao concluir, resuma ao humano:
+
 - Qual erro de certificado foi detectado.
 - Caminho do bundle PEM gerado/reaproveitado.
-- Quais variaveis de ambiente foram usadas e em qual escopo (processo atual,
-  nao persistente).
-- Confirmacao de que nenhuma validacao TLS foi desativada.
-- Se precisou escalar, o que exatamente foi pedido ao humano.
-
-## Caso de referencia
-
-Em uma maquina Windows corporativa, `docling-tools models download` falhou
-com `SSL: CERTIFICATE_VERIFY_FAILED: self-signed certificate in certificate
-chain`ao acessar`huggingface.co\`. A skill extraiu os certificados de
-`Cert:\CurrentUser\Root`, `Cert:\CurrentUser\CA`, `Cert:\LocalMachine\Root` e
-`Cert:\LocalMachine\CA` para um bundle PEM, aplicou `SSL_CERT_FILE` e
-`REQUESTS_CA_BUNDLE` no escopo do processo, e o download foi concluido com
-sucesso sem qualquer alteracao permanente no sistema.
+- Quais variáveis de ambiente foram usadas e em qual escopo (processo
+  atual, não persistente).
+- Confirmação de que nenhuma validação TLS foi desativada.
+- Se escalou: o que exatamente foi pedido ao humano.

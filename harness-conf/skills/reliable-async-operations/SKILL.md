@@ -21,23 +21,17 @@ description: >
 
 # Operações Assíncronas Confiáveis
 
-## Causa raiz (geral, não só subprocess)
+## Causa raiz
 
-Qualquer operação de duração desconhecida ou variável — processo externo,
-chamada de rede, promise, job de fila, lock, stream — vira um problema do
-mesmo tipo quando o código a trata como **síncrona e atômica**: "chamo,
-espero, uso o resultado". Sob esse modelo, a única pergunta possível diante
-da demora é "quanto tempo já passou?", e daí nasce o timeout de relógio com
-número escolhido do nada — ou, na ausência de qualquer timeout, a espera
-infinita (subprocess pendurado, `await` sem prazo, `fetch` sem
-`AbortController`, lock nunca liberado, spinner que não sai da tela).
-
-A pergunta certa é "quanto tempo faz que nada acontece?" ou "isso ainda está
-em andamento?" — só respondível se houver sinal observável de progresso ou
-conclusão (stream de saída, evento, callback, poll de status, promise
-resolvida). **Subprocess é só um caso particular** desse problema; a mesma
-falha aparece em `fetch` sem timeout, `await` sem cancelamento, filas sem
-callback de conclusão, locks sem prazo, polling sem teto.
+Toda operação de duração desconhecida ou variável (processo externo,
+chamada de rede, promise, job, lock, stream) falha do mesmo modo quando o
+código a trata como síncrona e atômica: a única pergunta disponível é
+"quanto tempo já passou?", e daí nasce o timeout de relógio chutado ou, na
+ausência de timeout, a espera infinita (`fetch` sem `AbortController`,
+subprocess pendurado, lock sem prazo, spinner eterno). A pergunta certa é
+"quanto tempo faz que nada acontece?" — só respondível com sinal
+observável de progresso ou conclusão (stream, evento, callback, poll de
+status, promise resolvida). Subprocess é um caso particular do problema.
 
 ## Regra central
 
@@ -66,21 +60,18 @@ inatividade — com valor justificado pelo recurso e pela operação.
 
 ## Ordem de preferência (do melhor para o pior)
 
-Ao integrar com uma operação de duração incerta, escolha o mecanismo mais
-alto nesta lista que estiver disponível — nunca pule direto para timeout:
+Escolha o mecanismo mais alto disponível — nunca pule direto para timeout:
 
-1. **Callback / evento / pub-sub** — o chamador é notificado quando a
-   operação termina; nenhuma espera ativa é necessária. Sempre que a
-   API/broker/biblioteca oferecer isso (webhook, event emitter, message
-   broker, `on('done')`), use-o em vez de qualquer forma de espera.
-2. **Polling orientado a condição, com backoff** — só quando pub/sub não
-   estiver disponível. Verifica uma condição real ("terminou?"), não
-   apenas o tempo decorrido.
-3. **Heartbeat** — piso mínimo apenas quando a operação não expõe nem
-   evento nem estado consultável (ver item 7 do contrato abaixo).
-4. **Timeout de relógio isolado** — último recurso, e mesmo assim só como
-   rede de segurança (timeout de inatividade/total) por trás de um dos
-   mecanismos acima, nunca como único instrumento de decisão.
+1. **Callback / evento / pub-sub** — o chamador é notificado da conclusão;
+   nenhuma espera ativa. Sempre que a API/broker/biblioteca oferecer
+   (webhook, event emitter, `on('done')`), use-o em vez de qualquer espera.
+2. **Polling orientado a condição, com backoff** — só sem pub/sub. Verifica
+   uma condição real ("terminou?"), não o tempo decorrido.
+3. **Heartbeat** — piso mínimo quando a operação não expõe nem evento nem
+   estado consultável (ver item 7 do contrato abaixo).
+4. **Timeout de relógio isolado** — último recurso, só como rede de
+   segurança (inatividade/total) por trás de um mecanismo acima, nunca como
+   único instrumento de decisão.
 
 A distinção de escopo importa: esta skill rege o **código que o agente
 escreve** para lidar com operações de duração incerta. Quando for o
@@ -91,30 +82,26 @@ estimativa de tempo.
 
 ## Contrato mínimo (qualquer linguagem, qualquer tipo de operação)
 
-1. Nunca bloquear em espera sem um sinal observável de progresso ou um
-   mecanismo de cancelamento.
+1. Nunca bloquear em espera sem sinal observável de progresso ou mecanismo
+   de cancelamento.
 2. Separar **timeout de inatividade** (idle — tempo sem novo sinal) de
-   **timeout total** (duração máxima absoluta). Nunca usar um único número
+   **timeout total** (duração máxima absoluta). Nunca um único número
    mágico para os dois.
-3. Se a duração for desconhecida ou variável (builds, chamadas de rede,
-   jobs de fila, streams), aplicar a ordem de preferência acima — nunca
-   escolher timeout de relógio quando pub/sub, evento ou polling
-   condicional estiverem disponíveis.
-4. Nunca engolir erro, rejeição de promise ou timeout em `catch`/`except`
-   silencioso — propagar causa e contexto.
-5. Registrar timestamp da última atividade; travamento é ausência de
+3. Duração desconhecida ou variável (builds, rede, jobs, streams): aplicar
+   a ordem de preferência — nunca timeout de relógio quando pub/sub,
+   evento ou polling condicional estiverem disponíveis.
+4. Nunca engolir erro, rejeição ou timeout em `catch`/`except` silencioso —
+   propagar causa e contexto.
+5. Registrar timestamp da última atividade: travamento é ausência de
    progresso, não tempo total decorrido.
-6. Em UI (frontend): toda chamada assíncrona exibida ao usuário (spinner,
-   loading state) precisa de timeout + tratamento de erro — nunca deixe um
-   estado de carregamento sem saída possível.
-7. **Heartbeat quando não há saída natural**: se a operação for longa mas
-   não produz output incremental por si (ex.: cálculo pesado, chamada a
-   uma API que só responde no fim), emita um heartbeat periódico próprio
-   ("ainda vivo, decorridos Ns") em vez de silêncio total. **Heartbeat
-   prova que o processo não morreu — não prova que está avançando.**
-   Prefira sinal de progresso real (linha de log, evento, delta de
-   estado) sempre que existir; use heartbeat como piso mínimo quando não
-   houver nada melhor para observar.
+6. Em UI: toda chamada assíncrona visível ao usuário (spinner, loading)
+   precisa de timeout + tratamento de erro — nunca um estado de
+   carregamento sem saída.
+7. **Heartbeat quando não há saída natural**: operação longa sem output
+   incremental (cálculo pesado, API que só responde no fim) emite
+   heartbeat periódico próprio em vez de silêncio. **Heartbeat prova que o
+   processo não morreu — não que está avançando.** Prefira sinal de
+   progresso real; heartbeat é piso mínimo.
 
 ## Padrões por categoria (copiar, não reinventar)
 
@@ -213,7 +200,7 @@ if (!proc.waitFor(30, TimeUnit.SECONDS)) {   // só após EOF do stream
 ### 2. Chamada de rede / HTTP
 
 Toda chamada de rede precisa de timeout explícito + cancelamento — o
-default de muitos clientes HTTP é **sem timeout** (espera infinita).
+default de muitos clientes HTTP é espera infinita.
 
 ```js
 // fetch (browser/Node 18+): AbortController separa timeout de cancelamento manual
@@ -233,14 +220,14 @@ import httpx
 httpx.get(url, timeout=httpx.Timeout(connect=5, read=15, write=5, pool=5))
 ```
 
-Retry em chamada de rede: sempre com **backoff exponencial + teto de
-tentativas**, nunca retry infinito ou em loop apertado.
+Retry em rede: sempre com **backoff exponencial + teto de tentativas**,
+nunca retry infinito ou em loop apertado.
 
 ### 3. `async`/`await`, Promises, `asyncio`
 
-`await` sem prazo herda a falha do que está sendo aguardado — se a
-promise nunca resolve, o `await` nunca retorna. Sempre corrida contra um
-timeout quando a duração não é garantida:
+`await` sem prazo herda a falha do que aguarda: promise que nunca resolve
+deixa o `await` pendurado. Corra contra um timeout quando a duração não é
+garantida:
 
 ```js
 function withTimeout(promise, ms, label) {
@@ -257,17 +244,15 @@ import asyncio
 await asyncio.wait_for(fetch_user_profile(id), timeout=8)
 ```
 
-Em UI: todo estado de `loading`/spinner disparado por uma chamada
-assíncrona precisa de um caminho de saída (timeout → estado de erro
-visível). "Loading infinito" é o equivalente visual do subprocess
-pendurado — mesma causa raiz, sinal de conclusão nunca chega à UI.
-Cuidado também com **race conditions** entre requisições concorrentes
-(ex.: resposta antiga sobrescrevendo estado mais novo) — use um token/id
-de requisição para descartar respostas obsoletas.
+"Loading infinito" na UI é o subprocess pendurado em roupa visual: mesma
+causa raiz, sinal de conclusão que nunca chega. Guarde também para
+**race conditions** entre requisições concorrentes (resposta antiga
+sobrescrevendo estado mais novo): descarte respostas obsoletas com um
+token/id de requisição.
 
 ### 4. Fila / job em background
 
-Nunca bloqueie esperando um job de fila terminar. Publique e retorne um
+Nunca bloqueie esperando job de fila terminar. Publique e retorne um
 identificador; consulte status via polling com backoff ou via callback/
 webhook de conclusão:
 
@@ -279,8 +264,8 @@ ou: registrar callback/webhook chamado quando o job concluir
 
 ### 5. Lock / mutex / semáforo
 
-Lock sem prazo é espera infinita disfarçada de exclusão mútua. Sempre
-adquirir com timeout e liberar em `finally`/`try-with-resources`:
+Lock sem prazo é espera infinita disfarçada de exclusão mútua. Adquirir
+sempre com timeout e liberar em `finally`/`try-with-resources`:
 
 ```python
 acquired = lock.acquire(timeout=30)
@@ -312,19 +297,17 @@ raise TimeoutError(f"job {job_id} não concluiu em {max_attempts} tentativas")
 - `consumeProcessOutput()` sem argumentos (Groovy) — descarta a saída.
 - `waitFor()` sem timeout (Java/Groovy) — espera para sempre.
 - `execSync`/`subprocess.run(..., capture_output=True)` em comando de
-  duração desconhecida — bloqueia o processo chamador sem sinal.
-- `fetch`/HTTP client sem timeout configurado — depende do default do
-  socket (pode ser minutos ou infinito).
+  duração desconhecida — bloqueia o chamador sem sinal.
+- `fetch`/HTTP client sem timeout — depende do default do socket (minutos
+  ou infinito).
 - `await`/`Promise` sem corrida contra timeout quando a duração não é
-  garantida — mesmo problema do subprocess, em roupa de async/await.
-- Estado de `loading` na UI sem timeout que leve a um estado de erro
-  visível — "spinner infinito".
+  garantida — o subprocess pendurado em roupa de async/await.
+- Estado de `loading` na UI sem timeout que leve a estado de erro visível.
 - Lock/mutex adquirido sem timeout.
-- Polling sem backoff e sem número máximo de tentativas.
-- Timeout único de relógio (`waitFor(600, SECONDS)`, um único `setTimeout`
-  cobrindo tudo) sem separar inatividade de duração total.
-- `catch (e) {}` / `except Exception: pass` ao redor de qualquer chamada
-  assíncrona — mascara falha real.
+- Polling sem backoff e sem teto de tentativas.
+- Timeout único de relógio sem separar inatividade de duração total.
+- `catch (e) {}` / `except Exception: pass` em chamada assíncrona —
+  mascara falha real.
 
 ## Critério de revisão (uma linha, verificável)
 
@@ -337,4 +320,3 @@ erro/timeout engolido silenciosamente.**
 
 - `debugging-and-error-recovery` — diagnóstico quando a operação já
   travou em produção.
-

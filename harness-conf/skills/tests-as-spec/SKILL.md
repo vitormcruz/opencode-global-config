@@ -17,94 +17,60 @@ description: >
 
 # Testes como Especificação
 
-## Princípio
+Testes aprovados no planejamento são **especificação executável** do
+sistema: um teste que passa expressa um comportamento que o sistema **deve**
+ter. Alterar ou remover um teste equivale a alterar ou remover um
+requisito. Consequências operacionais, por fase:
 
-Testes aprovados no plano são **especificação executável**
-do sistema. Um teste que passa expressa um comportamento
-que o sistema **deve** ter. Alterar ou remover um teste
-equivale a alterar ou remover um requisito.
+## Na construção
 
-Esse princípio tem consequências operacionais em todas
-as fases do desenvolvimento.
+1. **Código errado, não o teste** — teste falho na construção: corrija o
+   código de produção, nunca o teste. O teste é a especificação; o código,
+   a implementação.
 
----
+2. **Testes contraditórios → voltar ao planejamento** — impossível fazer um
+   conjunto de testes passar porque eles se contradizem: algum foi
+   planejado errado ou um teste preexistente deveria ter sido revisado como
+   mudança de spec. Na construção, o teste nunca é alterado para resolver
+   contradição; o planejamento é.
 
-## Consequências operacionais
+3. **Teste que passa sem código novo é suspeito** — teste recém-criado que
+   passa de imediato pode não estar testando o que deveria. Investigue
+   antes de prosseguir.
 
-### Na construção
+## No planejamento
 
-1. **Código errado, não teste** — se um teste falha na
-   construção, o código de produção é quem deve ser
-   alterado. Nunca o teste. O teste é a especificação;
-   o código é a implementação.
+4. **Único momento de alterar testes** — testes existentes são revisados
+   apenas no planejamento, como mudança explícita de especificação, com
+   registro no arquivo de planejamento (o que mudou, por quê, qual spec foi
+   afetada). Novos testes também entram aqui.
 
-2. **Testes contraditórios → voltar ao planejamento** —
-   se não há como fazer um conjunto de testes passar
-   porque eles se contradizem, é necessário voltar ao
-   planejamento. Algum teste foi planejado errado ou
-   um teste preexistente deveria ter sido revisado como
-   mudança de spec mas não foi considerado. Na
-   construção, o teste **nunca** é alterado para
-   resolver contradição — o plano é.
-
-3. **Teste que passa sem código novo é suspeito** — se
-   um teste recém-criado passa imediatamente sem
-   nenhuma implementação nova, ele pode não estar
-   testando o que deveria. Investigar antes de
-   prosseguir.
-
-### No planejamento
-
-4. **Único momento de alterar testes** — testes
-   existentes só podem ser revisados durante o
-   planejamento, como mudança explícita de
-   especificação. Novos testes podem ser adicionados
-   e testes antigos podem ser modificados, mas apenas
-   nesta fase e com registro no arquivo de planejamento
-   (o quê mudou, por quê, qual spec foi afetada).
-
-5. **Alteração de múltiplos testes = refatoração de
-   spec** — quando a mudança envolve vários testes
-   existentes, é uma refatoração de especificação.
-   Deve ser planejada como tal: escopo definido,
+5. **Mudança em múltiplos testes = refatoração de spec** — alterar vários
+   testes existentes é refatoração de especificação: escopo definido,
    impacto mapeado, aprovação do humano.
 
-6. **Exclusão de teste = exclusão de requisito** —
-   remover um teste é equivalente a remover um
-   requisito do sistema. Só pode acontecer com
-   decisão explícita no planejamento e aprovação do
-   humano. Registrar qual requisito deixou de existir
-   e por quê.
+6. **Exclusão de teste = exclusão de requisito** — remover um teste remove
+   o requisito que ele guarda. Só com decisão explícita no planejamento e
+   aprovação do humano, registrando qual requisito deixou de existir e por
+   quê.
 
-### Na revisão
+## Na revisão
 
-7. **Queda de cobertura = spec perdeu proteção** — se
-   a cobertura cai após uma mudança, significa que
-   parte da especificação perdeu sua guarda
-   automatizada. Não é métrica de vaidade; é alarme
-   de spec desprotegida. Reportar como achado.
-
----
+7. **Queda de cobertura = spec desprotegida** — cobertura que cai após uma
+   mudança significa parte da especificação sem guarda automatizada. Não é
+   métrica de vaidade; é alarme. Reporte como achado.
 
 ## Aplicação por fase
 
-| Fase | Regras aplicáveis | Ação |
-|------|-------------------|------|
-| Planejamento | 4, 5, 6 | Planejar mudanças de spec (testes) explicitamente |
+| Fase | Regras | Ação |
+|------|--------|------|
+| Planejamento | 4, 5, 6 | Planejar mudanças de testes como mudança de spec, explicitamente |
 | Construção | 1, 2, 3 | Nunca alterar teste; contradição → voltar ao planejamento |
 | Revisão | 7 | Cobertura como indicador de proteção de spec |
 
----
+## Relação com a skill TDD
 
-## Relação com skill TDD
-
-Esta skill **complementa** `test-driven-development`:
-- **TDD** cobre o ciclo de escrita (red → green →
-  refactor) e padrões de teste.
-- **tests-as-spec** cobre o **status** dos testes após
-  escritos: são especificação, imutáveis na construção,
-  alteráveis apenas no planejamento.
-
-Não há sobreposição: TDD diz *como escrever* testes;
-esta skill diz *o que testes significam* depois de
-escritos.
+Complementar a `test-driven-development`, sem sobreposição: TDD diz *como
+escrever* testes (ciclo red → green → refactor, padrões); esta skill diz
+*o que os testes significam* depois de escritos: são especificação,
+imutáveis na construção, alteráveis apenas no planejamento.

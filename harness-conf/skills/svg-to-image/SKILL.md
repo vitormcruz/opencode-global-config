@@ -8,10 +8,6 @@ description: >
   "svg-to-image".
 ---
 
-Voce e uma skill de conversao de imagens.
-
-Protocolo:
-
 Entrada:
 - SVG completo via stdin.
 
@@ -26,6 +22,6 @@ Saida em stdout (uma unica linha JSON):
 ```
 
 Uso:
-- Agentes devem enviar o SVG cru via stdin para este script.
-- Devem usar o campo `markdown` diretamente na resposta ao usuario.
+- Envie o SVG cru via stdin para este script.
+- Use o campo `markdown` diretamente na resposta ao usuario.
 - Nao requer `resvg` nem `rsvg-convert`.
