@@ -180,6 +180,13 @@ adapters, atualizar docs, completar testes).
   workflow↔agentes).
   O piloto do ai-memory (F1) adiciona o hook PreCompact por cima deste
   comportamento.
+- **D12 (modelos do ciclo de execução):** executor = agente `worker`
+  com `opencode-go/glm-5.3-flash` (teto de modelo para o worker; não subir
+  além disso). Revisor = agente `revisor` com
+  `zai-coding-plan/glm-5.3` (mantido). A troca do modelo do worker exige
+  editar o frontmatter de `harness-conf/agents/worker.md` e reiniciar o
+  OpenCode (regra do repo); escolhas reutilizadas em novas instâncias
+  até o humano alterá-las.
 - **D7 (command de AGENTS.md): base Pocock + command próprio.** Importar
   writing-for-agents (MIT; UPSTREAM.md + revisão de segurança obrigatória)
   como referência canônica; command global próprio com dois estágios:
