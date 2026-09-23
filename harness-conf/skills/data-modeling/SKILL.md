@@ -1,13 +1,11 @@
 ---
 name: data-modeling
 description: >
-  Guia de modelagem de dados: schema, normalização, tipos, constraints,
-  migrações seguras, indexação e zero-downtime. Use quando: projetar ou
-  alterar schema de banco de dados, criar ou revisar migrations, modelar
-  entidades e relacionamentos, definir constraints e índices, avaliar
-  normalização/desnormalização, planejar migração com zero-downtime,
-  revisar artefatos de BD (DBML, SQL, migration files). Triggers:
-  "modelagem", "modelagem de dados", "data modeling", "schema", "schema
+  Use ao projetar ou alterar schema de banco, criar ou revisar migrations,
+  modelar entidades e relacionamentos, definir constraints e índices,
+  avaliar normalização/desnormalização ou planejar migração com
+  zero-downtime. Revisa artefatos de BD (DBML, SQL, migration files).
+  Triggers: "modelagem", "modelagem de dados", "data modeling", "schema", "schema
   de dados", "migration", "migração", "migrate", "normalização",
   "forma normal", "1NF", "2NF", "3NF", "BCNF", "índice", "index",
   "FK", "foreign key", "chave estrangeira", "constraint", "CHECK",

@@ -1,16 +1,15 @@
 ---
 name: performance-optimization
 description: >
-  Performance optimization guide: measure before optimizing, then fix proven
-  bottlenecks. Use when: performance requirements exist in the spec, users or
-  monitoring report slow behavior, Core Web Vitals scores are below thresholds,
-  suspecting a regression, or building features that handle large datasets or
-  high traffic. Triggers: "performance", "optimization", "Core Web Vitals",
+  Use quando houver requisito de performance na spec, usuarios ou
+  monitoramento reportarem lentidão, Core Web Vitals abaixo do limiar,
+  suspeita de regressão, ou ao construir feature com grande volume de dados
+  ou tráfego. Mede antes de otimizar e corrige gargalos comprovados.
+  Triggers: "performance", "optimization", "Core Web Vitals",
   "LCP", "FCP", "CLS", "TTI", "slow", "bottleneck", "profiling", "benchmark",
   "response time SLA", "load time", "bundle size", "lazy loading", "caching",
   "memoization", "performance regression", "throughput", "N+1 query",
-  "memory leak", "render blocking", "lighthouse score". Uses
-  references/performance-checklist.md.
+  "memory leak", "render blocking", "lighthouse score".
 ---
 
 # Performance Optimization

@@ -1,9 +1,12 @@
 ---
 name: md-export
 description: >
-  Converte arquivos Markdown para docx, pptx ou xlsx usando Pandoc.
-  Use quando o humano pedir para gerar um documento Word, PowerPoint ou Excel
-  a partir de um arquivo .md ou de conteudo Markdown.
+  Use quando o humano pedir para gerar documento Word, PowerPoint ou Excel
+  a partir de arquivo Markdown, ou para exportar/converter um .md com
+  template personalizado. Converte .md para docx, pptx ou xlsx usando
+  Pandoc.
+  Triggers: "exportar Markdown", "md para docx", "md para pptx", "md para
+  xlsx", "gerar Word", "gerar PowerPoint", "md-export".
 ---
 
 Voce e uma skill de exportacao de documentos Markdown.

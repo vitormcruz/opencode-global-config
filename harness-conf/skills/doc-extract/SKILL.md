@@ -1,12 +1,13 @@
 ---
 name: doc-extract
 description: >
-  Extrai conteudo de documentos (PDF, DOCX, PPTX, XLSX, HTML, imagens e outros)
-  convertendo para Markdown, JSON, texto ou HTML usando Docling.
-  Use quando: (1) o humano pedir para ler, analisar, resumir ou extrair dados
-  de um arquivo que nao e Markdown; (2) uma URL apontar para arquivo binario
-  (.pdf, .docx, .pptx, .xlsx, .png, .jpg etc.) — crawl4ai falha nesses casos
-  com ERR_FAILED e doc-extract e o substituto correto.
+  Use quando o humano pedir para ler, analisar, resumir ou extrair dados de
+  documento que não é Markdown (PDF, DOCX, PPTX, XLSX, HTML, imagem), ou
+  quando uma URL apontar para arquivo binário que o crawl4ai não baixa
+  (ERR_FAILED). Extrai conteúdo com Docling e converte para md, json,
+  texto ou html.
+  Triggers: "extrair PDF", "ler PDF", "converter PDF", "converter
+  documento", "extrair texto de documento", "doc-extract", "URL binária".
 ---
 
 Voce e uma skill de extracao de conteudo de documentos.

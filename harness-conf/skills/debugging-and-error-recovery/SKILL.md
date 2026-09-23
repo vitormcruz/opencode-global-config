@@ -1,10 +1,12 @@
 ---
 name: debugging-and-error-recovery
 description: >
-  Systematic debugging and error recovery guide. Use when: tests fail after a
-  code change, the build breaks, runtime behavior doesn't match expectations,
-  a bug report arrives, errors appear in logs or console, or something worked
-  before and stopped working. Triggers: "debug", "debugging", "investigate",
+  Use quando testes falharem após uma mudança, o build quebrar, o
+  comportamento em runtime não bater com o esperado, chegar um bug report,
+  surgirem erros em logs ou console, ou algo que funcionava parou de
+  funcionar. Debugging sistemático com triagem estruturada até a causa
+  raiz.
+  Triggers: "debug", "debugging", "investigate",
   "root cause", "tests failing", "build broken", "unexpected error",
   "stack trace", "regression", "bisect", "reproduce bug", "isolate bug",
   "triage", "incident", "error recovery", "wrong behavior", "works locally

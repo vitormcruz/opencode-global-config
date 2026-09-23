@@ -1,16 +1,17 @@
 ---
 name: frontend-ui-engineering
 description: >
-  Frontend UI engineering guide for production-quality interfaces. Use when:
-  building new UI components or pages, modifying existing user-facing
-  interfaces, implementing responsive layouts, adding interactivity or state
-  management, or fixing visual and UX issues. Triggers: "frontend", "UI",
+  Use ao construir componentes ou páginas de UI, alterar interfaces visíveis
+  ao usuário, implementar layouts responsivos, adicionar interatividade ou
+  gerenciamento de estado, ou corrigir problemas visuais e de UX.
+  Frontend de qualidade de produção: design system, acessibilidade e
+  interações polidas.
+  Triggers: "frontend", "UI",
   "component", "layout", "responsive", "CSS", "design system", "state
   management", "React", "Vue", "Angular", "Svelte", "accessibility",
   "interactivity", "animation", "theme", "dark mode", "mobile", "UX",
   "polished UI", "frontend engineering", "TypeScript component", "form",
-  "modal", "navigation", "design tokens", "Tailwind", "styled components".
-  Uses references/accessibility-checklist.md.
+  "modal",   "navigation", "design tokens", "Tailwind", "styled components".
 ---
 
 # Frontend UI Engineering

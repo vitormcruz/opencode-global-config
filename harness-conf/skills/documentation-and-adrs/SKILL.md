@@ -1,10 +1,11 @@
 ---
 name: documentation-and-adrs
 description: >
-  Documentation and ADR guide: capture the why behind decisions, not just the
-  what. Use when: making a significant architectural decision, choosing between
-  competing approaches, adding or changing a public API, shipping a feature that
-  changes user-facing behavior, or onboarding new team members or agents.
+  Use ao tomar decisão arquitetural relevante, escolher entre abordagens
+  concorrentes, adicionar ou alterar API pública, entregar feature que muda
+  comportamento visível ao usuário, ou integrar novos membros e agentes ao
+  time. Documenta o porquê das decisões, não só o quê (ADRs, CHANGELOG,
+  docs técnicas).
   Triggers: "ADR", "architectural decision record", "decision record",
   "document this decision", "why did we", "trade-offs", "alternatives
   considered", "CHANGELOG", "technical docs", "onboarding docs", "README",

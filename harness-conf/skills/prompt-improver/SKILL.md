@@ -1,16 +1,10 @@
 ---
 name: prompt-improver
 description: >
-   Ative SOMENTE quando o humano pedir explicitamente para melhorar,
-   reescrever, estruturar, revisar ou avaliar um prompt. Exemplos de
-   ativacao explicita: "melhore este prompt", "reescreva este prompt",
-   "me ajude a estruturar este prompt", "qual framework devo usar",
-   "improve this prompt", "melhore:", "prompt engineering". Excecao:
-    um agente orquestrador pode aciona-la autonomamente apenas para
-    preparar briefing interno para subagente, sem alterar decisoes
-    humanas. Fora dessa
-   excecao, nunca se autoative por contexto nem aplique o prompt
-   melhorado automaticamente.
+  Use somente quando o humano pedir explicitamente para melhorar, reescrever, estruturar, revisar ou avaliar um
+  prompt. Exceção: agente orquestrador pode acionar autonomamente para preparar briefing interno de subagente, sem
+  alterar decisões humanas. Fora dessa exceção, nunca se autoative por contexto nem aplique o prompt melhorado
+  automaticamente.
 license: MIT
 ---
 
