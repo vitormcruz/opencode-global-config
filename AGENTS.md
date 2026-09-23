@@ -6,23 +6,19 @@ deste repo.
 
 ## Descoberta de Código e Documentação
 
-- Use SEMPRE o codebase-memory CLI (CÓDIGO) antes de grep/glob. Ele
-  retorna resultados estruturados, consome menos tokens e entende a
-  arquitetura do projeto.
+- Use SEMPRE o codebase-memory CLI (CÓDIGO) antes de grep/glob; grep/glob
+  são fallback: strings literais, mensagens de erro e valores de config.
 - Detalhes operacionais (comandos JSON, ordem das ferramentas, busca em
   docs, fallback) vivem na skill `code-explorer-priority`.
-- Recovery obrigatório: se o CLI retornar `"project not found"`,
-  execute `list_projects`, copie o nome exato do projeto indexado e
-  retente. Caia para grep/glob somente se o projeto não estiver
-  indexado.
-- grep/glob são fallback: strings literais, mensagens de erro e
-  valores de config.
+- Recovery obrigatório: se o CLI retornar `"project not found"`, execute
+  `list_projects`, copie o nome exato do projeto indexado e retente. Caia
+  para grep/glob somente se o projeto não estiver indexado.
 - No Windows, execute os CLIs sem prefixo `wsl`.
 
 ## Atalho: "configure este repo"
 
-Se o humano pedir explicitamente "configure este repo" (ou equivalente),
-isso conta como confirmação para executar o bootstrap:
+Pedido explícito de "configure este repo" (ou equivalente) vale como
+confirmação para executar o bootstrap:
 
 ```bash
 bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
@@ -38,16 +34,14 @@ bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
   (OpenCode, Copilot CLI).
 - No Linux/WSL, o adapter OpenCode cria links em `~/.config/opencode`
   apontando para `harness-conf/` (`agents`, `commands`, `skills`,
-  `opencode.json`) e para `scripts/` (que fica na raiz por ser infra do
-  repo). No Windows, materializa cópia sincronizada dos quatro destinos
-  de `harness-conf/` em `%USERPROFILE%\.config\opencode` a cada
-  execução.
+  `opencode.json`) e para `scripts/` (infra do repo, na raiz). No Windows,
+  materializa cópia sincronizada dos quatro destinos de `harness-conf/` em
+  `%USERPROFILE%\.config\opencode` a cada execução.
 - O `AGENTS.md` global é gerado pelo adapter (arquivo regular: base +
-  blocos gerenciados por terceiros, como o codebase-memory-mcp) — nunca
+  blocos gerenciados por terceiros, como o codebase-memory-mcp): nunca
   symlink, nunca editado à mão.
 - No Windows, env vars de usuário (ex.: `OPENCODE_ENABLE_EXA`) são
-  persistidas em `HKCU\Environment` com broadcast de
-  `WM_SETTINGCHANGE`.
+  persistidas em `HKCU\Environment` com broadcast de `WM_SETTINGCHANGE`.
 
 ## Bootstrap
 
@@ -59,9 +53,9 @@ Depois de clonar, rode:
 
 No Windows, execute `.\scripts\bootstrap_repo\configurar-repo.ps1 --yes`
 no PowerShell. O bootstrap detecta e instala dependências em user-space
-(sem `sudo`/administrador). Se uma dependência não estiver disponível,
-use os comandos user-space exibidos pelo próprio bootstrap e aguarde o
-humano executá-los. Não introduza instruções que exijam elevação.
+(sem `sudo`/administrador). Dependência indisponível? Use os comandos
+user-space exibidos pelo próprio bootstrap e aguarde o humano executá-los.
+Não introduza instruções que exijam elevação.
 
 O bootstrap configura todos os harnesses instalados no SO corrente
 (OpenCode e Copilot CLI); harness ausente é ignorado com aviso. A flag
@@ -74,36 +68,36 @@ para aplicar no shell atual:
 source ~/.bashrc
 ```
 
-Fluxos de provisionamento do docling (modelos locais, modo offline) e
-de erros de certificado TLS (CA PEM/mirror, sem desativar validação)
-estão detalhados na seção de dependências do `README.md`.
+Fluxos de provisionamento do docling (modelos locais, modo offline) e de
+erros de certificado TLS (CA PEM/mirror, sem desativar validação) estão na
+seção de dependências do `README.md`.
 
 As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
-`OPENCODE_SKIP_*`, estão documentadas na seção "Variáveis de ambiente"
-do `README.md`. Não use esses overrides em uma validação completa.
+`OPENCODE_SKIP_*`, estão na seção "Variáveis de ambiente" do `README.md`.
+Não use esses overrides em uma validação completa.
 
 ## Worker
 
-- O worker roda modelo menor definido no frontmatter de
-  `harness-conf/agents/worker.md` (`model:`). O frontmatter contorna a
-  limitação da tool `task` (que não aceita modelo no spawn): para trocar
-  o modelo do worker, edite o frontmatter e reinicie o OpenCode.
+- O worker roda o modelo menor definido no frontmatter de
+  `harness-conf/agents/worker.md` (`model:`), que contorna a limitação da
+  tool `task` (sem modelo no spawn). Para trocar o modelo: edite o
+  frontmatter e reinicie o OpenCode.
 
 ## Upstream de Skills Externas
 
 - Skills baseadas em repositórios externos seguem o padrão de upstream:
-  - `UPSTREAM.md` na pasta da skill com origem, SHA, data e instruções
-    de sync.
+  - `UPSTREAM.md` na pasta da skill com origem, SHA, data e instruções de
+    sync.
   - `SKILL.md` local é adaptado e NUNCA sobrescrito pelo sync.
   - `references/` e afins são sincronizados do upstream.
   - Registrar a skill no `opencode-skills list` e sincronizar com
     `opencode-skills sync NOME`.
 - Revisão de segurança obrigatória na importação: ler TODO o conteúdo
   copiado procurando prompt injection, comandos, URLs e exfiltração.
-- Import externo novo: pergunte ao humano se mantém a língua de origem
-  da description ou converte para PT-BR; registre a decisão no
-  `UPSTREAM.md` (`description_lang` + `description_note`) e enriqueça a
-  description com triggers.
+- Import externo novo: pergunte ao humano se mantém a língua de origem da
+  description ou converte para PT-BR; registre a decisão no `UPSTREAM.md`
+  (`description_lang` + `description_note`) e enriqueça a description com
+  triggers.
 
 ### Scripts de sync disponíveis
 
@@ -121,8 +115,7 @@ Todos suportam `--yes` e `--check-only`.
 
 1. Revisar diff do conteúdo copiado (references, assets, etc.)
 2. Verificar se mudanças upstream afetam o `SKILL.md` local
-3. Atualizar `SKILL.md` manualmente se necessário (o sync nunca o
-   sobrescreve; ele só copia na criação inicial)
+3. Atualizar `SKILL.md` manualmente se necessário
 4. Confirmar que o `UPSTREAM.md` foi atualizado com o novo SHA
 5. Rodar os testes no executável pytest do SO: WSL/Linux com
    `.venv/bin/pytest -m all`, Windows com
@@ -137,18 +130,16 @@ Todos suportam `--yes` e `--check-only`.
   verifique alinhamento com o papel definido para aquele agente.
 - **Ao alterar um workflow:** identifique quais agentes precisam ser
   atualizados e liste-os ao humano.
-- Toda mudança — em workflow **ou** em agentes — sempre passa pelo humano
-  antes de ser aplicada. Sem exceção.
+- Toda mudança (em workflow **ou** em agentes) passa pelo humano antes de
+  ser aplicada. Sem exceção.
 - A consistência é verificada automaticamente pelo teste
   `tests/agents/test_workflow_consistency.py`: agentes fantasmas, skills
   inexistentes e permissions órfãs são detectados na suíte.
 
 ## Regras Obrigatórias Para Testes
 
-- Toda evolução funcional do repo deve criar ou atualizar testes
-  automatizados.
-- Aplica-se a: novos scripts, skills, comandos, agentes e mudanças no
-  bootstrap.
+- Toda evolução funcional do repo cria ou atualiza testes automatizados:
+  novos scripts, skills, comandos, agentes e mudanças no bootstrap.
 - Framework: `pytest` em `tests/` com a taxonomia de markers da ADR-0005
   (`unit`, `integration`, `agent_eval`; `-m all` é atalho traduzido pelo
   conftest para `unit or integration`). No WSL/Linux, use
@@ -161,23 +152,22 @@ Todos suportam `--yes` e `--check-only`.
   session-scoped inicia ou reutiliza o serviço antes da integração. Para
   iniciar manualmente:
   `python3 tests/integration/model/local_model_server.py --up`.
-- O agente roda sempre a suíte completa do ambiente corrente, sem deixar
-  teste de fora. `skipif` por plataforma (ex.: "exige symlink (POSIX)") é
-  mecanismo da suíte, declarado no próprio teste, que o relatório mostra
-  como skip com motivo onde a capacidade não se aplica — não é autorização
-  para o agente deixar de rodar teste nem reduzir a seleção.
-- Nenhum teste pode usar `skip`: quando um pré-requisito externo não
-  estiver disponível, use `pytest.fail` com mensagem clara e acionável.
-  Silenciar testes esconde problemas de ambiente.
-- A estrutura de testes deve espelhar a estrutura do código.
-- Testes de scripts ficam em `tests/scripts/` com nomes `test_*.py`; os de
-  bootstrap espelham `scripts/bootstrap_repo/` em
+- Rode sempre a suíte completa do ambiente corrente, sem deixar teste de
+  fora. `skipif` por plataforma (ex.: "exige symlink (POSIX)") é mecanismo
+  da suíte, declarado no próprio teste, que o relatório mostra como skip
+  com motivo onde a capacidade não se aplica; não autoriza deixar de rodar
+  teste nem reduzir a seleção.
+- Nenhum teste pode usar `skip`: sem pré-requisito externo disponível, use
+  `pytest.fail` com mensagem clara e acionável. Silenciar testes esconde
+  problemas de ambiente.
+- A estrutura de testes espelha a estrutura do código: scripts em
+  `tests/scripts/` com nomes `test_*.py`; bootstrap espelhado em
   `tests/scripts/bootstrap_repo/`.
 - Não crie testes para scripts cuja única função é executar ou orquestrar
-  testes. Exceção: scripts dentro de `testes-produto/` não são testes —
-  são código produtivo das validações usadas pelos agentes e, como
-  tais, são suscetíveis a testes (suíte meta em
-  `testes-produto/tests/`, que roda quando os scripts mudam).
+  testes. Exceção: scripts de `testes-produto/` são código produtivo das
+  validações usadas pelos agentes e, como tais, são suscetíveis a testes
+  (suíte meta em `testes-produto/tests/`, que roda quando os scripts
+  mudam).
 
 ## Testes por Especialidade
 
@@ -188,8 +178,8 @@ Todos suportam `--yes` e `--check-only`.
 
 Agregador: `testes-produto`
 
-Executado pelo agente `qa` na fase Testes; a evidência é
-validada pelo `curador-produto`.
+Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
+`curador-produto`.
 
 Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
 
@@ -197,8 +187,8 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
 
 - Mantenha a seção de dependências do `README.md` atualizada sempre que
   mudar bootstrap, scripts, skills ou requisitos de instalação.
-- A seção deve ser enxuta e voltada ao humano: listar o que é instalado
-  automaticamente e quais comandos user-space o humano pode executar.
+- Seção enxuta e voltada ao humano: o que é instalado automaticamente e
+  quais comandos user-space o humano pode executar.
 
 ## Sincronização dos Adaptadores
 
@@ -209,14 +199,14 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
   contrato `HarnessAdapter`, registry e factory com injeção de strategy
   por SO. `adapters/opencode.py` e `adapters/copilot.py` são wrappers
   finos dos entrypoints de console.
-- O harness OpenCode varia por SO via strategy (`OpenCodePosix`:
-  symlink + `.bashrc`; `OpenCodeWindows`: cópia sincronizada + env vars
-  em `HKCU\Environment`). O harness Copilot não varia e materializa
-  cópia sincronizada em `~/.copilot/` em qualquer SO.
-- O adapter nunca decide SO: a strategy vem injetida no construtor.
+- O harness OpenCode varia por SO via strategy (`OpenCodePosix`: symlink +
+  `.bashrc`; `OpenCodeWindows`: cópia sincronizada + env vars em
+  `HKCU\Environment`). O harness Copilot não varia e materializa cópia
+  sincronizada em `~/.copilot/` em qualquer SO.
+- O adapter nunca decide SO: a strategy vem injetada no construtor.
 - Utilitários compartilhados ficam em `src/opencode_config/lib/`
-  (`sync.py`, `windows_env.py`); não duplique cópia sincronizada,
-  backup ou broadcast entre harnesses.
+  (`sync.py`, `windows_env.py`); não duplique cópia sincronizada, backup
+  ou broadcast entre harnesses.
 - Os entrypoints finos `configurar-repo.sh` e `configurar-repo.ps1`
   apenas verificam Python e delegam ao pacote.
 - Ao alterar o comportamento de um harness, atualize o módulo Python e
@@ -225,10 +215,10 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
 
 ## Commits
 
-- Conventional Commits em PT-BR: `tipo(escopo): descrição curta` —
-  tipos: feat, fix, docs, style, refactor, test, chore, ci, build, perf.
-- Mensagem concisa e direta, sem filler. Proponha mensagens sempre que o
-  humano pedir.
+- Conventional Commits em PT-BR: `tipo(escopo): descrição curta`, tipos:
+  feat, fix, docs, style, refactor, test, chore, ci, build, perf.
+- Mensagem concisa, sem filler. Proponha mensagens sempre que o humano
+  pedir.
 - Descubra a linguagem do projeto pelo contexto; use PT-BR por padrão.
 
 ## Instruções por Agente
