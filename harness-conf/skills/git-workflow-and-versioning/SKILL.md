@@ -13,192 +13,111 @@ description: >
 
 # Git Workflow and Versioning
 
-## Overview
+Git é a rede de segurança: commit é save point, branch é sandbox, histórico
+é documentação. Com agentes gerando código em alta velocidade, versionamento
+disciplinado é o que mantém a mudança revisável e reversível.
 
-Git is your safety net. Treat commits as save points, branches as sandboxes, and history as documentation. With AI agents generating code at high speed, disciplined version control is the mechanism that keeps changes manageable, reviewable, and reversible.
+Vale sempre: toda mudança de código passa por git.
 
-## When to Use
+## Trunk-based development (recomendado)
 
-Always. Every code change flows through git.
+Mantenha `main` sempre deployable. Trabalhe em branches curtos, com merge
+em 1-3 dias. Branch de dev longa é custo escondido: diverge, gera conflito
+e atrasa integração. Pesquisa DORA correlaciona trunk-based com times de
+alta performance.
 
-## Core Principles
+- **Branch de dev é custo.** Cada dia de vida acumula risco de merge.
+- **Release branch é aceitável** para estabilizar release enquanto
+  `main` avança.
+- **Feature flag > branch longa.** Prefira deployar trabalho incompleto
+  atrás de flag a manter branch por semanas.
 
-### Trunk-Based Development (Recommended)
+Time com gitflow ou branches longas? Adapte os princípios (commits
+atômicos, mudanças pequenas, mensagens descritivas): a disciplina de
+commit importa mais que a estratégia de branching.
 
-Keep `main` always deployable. Work in short-lived feature branches that merge back within 1-3 days. Long-lived development branches are hidden costs — they diverge, create merge conflicts, and delay integration. DORA research consistently shows trunk-based development correlates with high-performing engineering teams.
+## Commits
 
-```
-main ──●──●──●──●──●──●──●──●──●──  (always deployable)
-        ╲      ╱  ╲    ╱
-         ●──●─╱    ●──╱    ← short-lived feature branches (1-3 days)
-```
+**1. Commit cedo, commit sempre.** Cada incremento bem-sucedido vira um
+commit: implementar → testar → verificar → commit → próximo slice.
+Commit é save point: a próxima mudança quebrou? Reverta ao último estado
+conhecido-bom na hora.
 
-This is the recommended default. Teams using gitflow or long-lived branches can adapt the principles (atomic commits, small changes, descriptive messages) to their branching model — the commit discipline matters more than the specific branching strategy.
-
-- **Dev branches are costs.** Every day a branch lives, it accumulates merge risk.
-- **Release branches are acceptable.** When you need to stabilize a release while main moves forward.
-- **Feature flags > long branches.** Prefer deploying incomplete work behind flags rather than keeping it on a branch for weeks.
-
-### 1. Commit Early, Commit Often
-
-Each successful increment gets its own commit. Don't accumulate large uncommitted changes.
-
-```
-Work pattern:
-  Implement slice → Test → Verify → Commit → Next slice
-
-Not this:
-  Implement everything → Hope it works → Giant commit
-```
-
-Commits are save points. If the next change breaks something, you can revert to the last known-good state instantly.
-
-### 2. Atomic Commits
-
-Each commit does one logical thing:
+**2. Commit atômico.** Um commit faz uma coisa lógica:
 
 ```
-# Good: Each commit is self-contained
-git log --oneline
+# Bom: cada commit é autocontido
 a1b2c3d Add task creation endpoint with validation
 d4e5f6g Add task creation form component
 h7i8j9k Connect form to API and add loading state
 m1n2o3p Add task creation tests (unit + integration)
 
-# Bad: Everything mixed together
-git log --oneline
+# Ruim: tudo misturado
 x1y2z3a Add task feature, fix sidebar, update deps, refactor utils
 ```
 
-### 3. Descriptive Messages
-
-Commit messages explain the *why*, not just the *what*:
+**3. Mensagem descritiva.** Explica o porquê, não só o quê:
 
 ```
-# Good: Explains intent
 feat: add email validation to registration endpoint
 
 Prevents invalid email formats from reaching the database.
 Uses Zod schema validation at the route handler level,
 consistent with existing validation patterns in auth.ts.
-
-# Bad: Describes what's obvious from the diff
-update auth.ts
 ```
 
-**Format:**
-```
-<type>: <short description>
+Formato: `<type>: <descrição curta>` + corpo opcional explicando o
+porquê. Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`.
 
-<optional body explaining why, not what>
-```
+**4. Separe as preocupações.** Não misture formatação com mudança de
+comportamento, nem refactor com feature: cada tipo em commit separado
+(idealmente PR separado). Pequena limpeza (renomear variável) pode
+entrar no commit de feature, a critério do revisor.
 
-**Types:**
-- `feat` — New feature
-- `fix` — Bug fix
-- `refactor` — Code change that neither fixes a bug nor adds a feature
-- `test` — Adding or updating tests
-- `docs` — Documentation only
-- `chore` — Tooling, dependencies, config
+**5. Dimensione a mudança.** Alvo ~100 linhas por commit/PR; ~300 é
+aceitável para uma mudança lógica; acima de ~1000, divida. Estratégias
+de divisão: ver `code-review-and-quality`.
 
-### 4. Keep Concerns Separate
-
-Don't combine formatting changes with behavior changes. Don't combine refactors with features. Each type of change should be a separate commit — and ideally a separate PR:
-
-```
-# Good: Separate concerns
-git commit -m "refactor: extract validation logic to shared utility"
-git commit -m "feat: add phone number validation to registration"
-
-# Bad: Mixed concerns
-git commit -m "refactor validation and add phone number field"
-```
-
-**Separate refactoring from feature work.** A refactoring change and a feature change are two different changes — submit them separately. This makes each change easier to review, revert, and understand in history. Small cleanups (renaming a variable) can be included in a feature commit at reviewer discretion.
-
-### 5. Size Your Changes
-
-Target ~100 lines per commit/PR. Changes over ~1000 lines should be split. See the splitting strategies in `code-review-and-quality` for how to break down large changes.
-
-```
-~100 lines  → Easy to review, easy to revert
-~300 lines  → Acceptable for a single logical change
-~1000 lines → Split into smaller changes
-```
-
-## Branching Strategy
-
-### Feature Branches
+## Branches
 
 ```
 main (always deployable)
-  │
-  ├── feature/task-creation    ← One feature per branch
-  ├── feature/user-settings    ← Parallel work
-  └── fix/duplicate-tasks      ← Bug fixes
+  ├── feature/task-creation    ← uma feature por branch
+  ├── feature/user-settings    ← trabalho paralelo
+  └── fix/duplicate-tasks      ← correções
 ```
 
-- Branch from `main` (or the team's default branch)
-- Keep branches short-lived (merge within 1-3 days) — long-lived branches are hidden costs
-- Delete branches after merge
-- Prefer feature flags over long-lived branches for incomplete features
+- Crie a partir de `main` (ou do default do time).
+- Vida curta: merge em 1-3 dias; delete após o merge.
+- Trabalho incompleto: feature flag em vez de branch longa.
 
-### Branch Naming
+Nomes: `feature/<descricao>`, `fix/<descricao>`, `chore/<descricao>`,
+`refactor/<descricao>`.
 
-```
-feature/<short-description>   → feature/task-creation
-fix/<short-description>       → fix/duplicate-tasks
-chore/<short-description>     → chore/update-deps
-refactor/<short-description>  → refactor/auth-module
-```
+## Worktrees
 
-## Working with Worktrees
-
-For parallel AI agent work, use git worktrees to run multiple branches simultaneously:
+Para agentes em paralelo, um diretório por branch:
 
 ```bash
-# Create a worktree for a feature branch
 git worktree add ../project-feature-a feature/task-creation
 git worktree add ../project-feature-b feature/user-settings
-
-# Each worktree is a separate directory with its own branch
-# Agents can work in parallel without interfering
-ls ../
-  project/              ← main branch
-  project-feature-a/    ← task-creation branch
-  project-feature-b/    ← user-settings branch
-
-# When done, merge and clean up
-git worktree remove ../project-feature-a
+# cada diretório tem a própria branch; agentes trabalham sem trocar de branch
+git worktree remove ../project-feature-a  # ao terminar: merge e cleanup
 ```
 
-Benefits:
-- Multiple agents can work on different features simultaneously
-- No branch switching needed (each directory has its own branch)
-- If one experiment fails, delete the worktree — nothing is lost
-- Changes are isolated until explicitly merged
+Experimento falhou? Delete o worktree: nada se perde. Mudanças ficam
+isoladas até o merge explícito.
 
-## The Save Point Pattern
+## Save point pattern
 
-```
-Agent starts work
-    │
-    ├── Makes a change
-    │   ├── Test passes? → Commit → Continue
-    │   └── Test fails? → Revert to last commit → Investigate
-    │
-    ├── Makes another change
-    │   ├── Test passes? → Commit → Continue
-    │   └── Test fails? → Revert to last commit → Investigate
-    │
-    └── Feature complete → All commits form a clean history
-```
+Fez uma mudança → testes passam? Commit e continue; falham? Reverta ao
+último commit e investigue. Repita por incremento. Assim nunca se perde
+mais que um incremento: `git reset --hard HEAD` volta ao último estado
+bom.
 
-This pattern means you never lose more than one increment of work. If an agent goes off the rails, `git reset --hard HEAD` takes you back to the last successful state.
+## Resumo de mudanças
 
-## Change Summaries
-
-After any modification, provide a structured summary. This makes review easier, documents scope discipline, and surfaces unintended changes:
+Após qualquer modificação, forneça resumo estruturado:
 
 ```
 CHANGES MADE:
@@ -214,33 +133,24 @@ POTENTIAL CONCERNS:
 - Added zod as a dependency (72KB gzipped) — already in package.json
 ```
 
-This pattern catches wrong assumptions early and gives reviewers a clear map of the change. The "DIDN'T TOUCH" section is especially important — it shows you exercised scope discipline and didn't go on an unsolicited renovation.
+A seção "DIDN'T TOUCH" evidencia disciplina de escopo e evita reforma
+não solicitada; "CONCERNS" antecipa suposição errada.
 
-## Pre-Commit Hygiene
+## Higiene de pre-commit
 
-Before every commit:
+Antes de todo commit:
 
 ```bash
-# 1. Check what you're about to commit
-git diff --staged
-
-# 2. Ensure no secrets
-git diff --staged | grep -i "password\|secret\|api_key\|token"
-
-# 3. Run tests
-npm test
-
-# 4. Run linting
-npm run lint
-
-# 5. Run type checking
-npx tsc --noEmit
+git diff --staged                                       # revise o que vai entrar
+git diff --staged | grep -i "password\|secret\|api_key\|token"  # sem segredos
+npm test                                                # testes
+npm run lint                                            # lint
+npx tsc --noEmit                                        # tipos
 ```
 
-Automate this with git hooks:
+Automatize com hooks (lint-staged + husky):
 
 ```json
-// package.json (using lint-staged + husky)
 {
   "lint-staged": {
     "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
@@ -249,60 +159,56 @@ Automate this with git hooks:
 }
 ```
 
-## Handling Generated Files
+## Arquivos gerados
 
-- **Commit generated files** only if the project expects them (e.g., `package-lock.json`, Prisma migrations)
-- **Don't commit** build output (`dist/`, `.next/`), environment files (`.env`), or IDE config (`.vscode/settings.json` unless shared)
-- **Have a `.gitignore`** that covers: `node_modules/`, `dist/`, `.env`, `.env.local`, `*.pem`
+- Commit de arquivo gerado só se o projeto o espera (`package-lock.json`,
+  migrations Prisma).
+- Nunca commitar build output (`dist/`, `.next/`), `.env` nem IDE config
+  não compartilhada (`.vscode/settings.json`).
+- `.gitignore` cobrindo: `node_modules/`, `dist/`, `.env`, `.env.local`,
+  `*.pem`.
 
-## Using Git for Debugging
+## Git para debug
 
 ```bash
-# Find which commit introduced a bug
+# Qual commit introduziu o bug (checkout nos midpoints; teste a cada passo)
 git bisect start
 git bisect bad HEAD
 git bisect good <known-good-commit>
-# Git checkouts midpoints; run your test at each to narrow down
 
-# View what changed recently
+# O que mudou recentemente
 git log --oneline -20
 git diff HEAD~5..HEAD -- src/
 
-# Find who last changed a specific line
+# Quem mudou uma linha; procurar mensagem
 git blame src/services/task.ts
-
-# Search commit messages for a keyword
 git log --grep="validation" --oneline
 ```
 
-## Common Rationalizations
+## Anti-racionalizações
 
-| Rationalization | Reality |
+| Racionalização | Realidade |
 |---|---|
-| "I'll commit when the feature is done" | One giant commit is impossible to review, debug, or revert. Commit each slice. |
-| "The message doesn't matter" | Messages are documentation. Future you (and future agents) will need to understand what changed and why. |
-| "I'll squash it all later" | Squashing destroys the development narrative. Prefer clean incremental commits from the start. |
-| "Branches add overhead" | Short-lived branches are free and prevent conflicting work from colliding. Long-lived branches are the problem — merge within 1-3 days. |
-| "I'll split this change later" | Large changes are harder to review, riskier to deploy, and harder to revert. Split before submitting, not after. |
-| "I don't need a .gitignore" | Until `.env` with production secrets gets committed. Set it up immediately. |
+| "Committarei quando a feature estiver pronta" | Commit gigante é impossível de revisar. Commite cada slice. |
+| "A mensagem não importa" | Mensagem é documentação; você e os agentes futuros precisarão do porquê. |
+| "Squasho tudo depois" | Squash destrói a narrativa de desenvolvimento; commits incrementais desde o início. |
+| "Branch custa caro" | Branch curta é de graça; a longa é que diverge e colide. |
+| "Divido essa mudança depois" | Divida antes de submeter, não depois. |
+| "Não preciso de .gitignore" | Até o `.env` de produção ser commitado. Configure agora. |
 
-## Red Flags
+## Red flags
 
-- Large uncommitted changes accumulating
-- Commit messages like "fix", "update", "misc"
-- Formatting changes mixed with behavior changes
-- No `.gitignore` in the project
-- Committing `node_modules/`, `.env`, or build artifacts
-- Long-lived branches that diverge significantly from main
-- Force-pushing to shared branches
+Mudanças grandes acumuladas sem commit; mensagens tipo "fix", "update",
+"misc"; formatação misturada com comportamento; projeto sem
+`.gitignore`; `node_modules/`, `.env` ou build artifact commitado;
+branch longa muito divergente de `main`; force-push em branch
+compartilhada.
 
-## Verification
+## Verificação (todo commit)
 
-For every commit:
-
-- [ ] Commit does one logical thing
-- [ ] Message explains the why, follows type conventions
-- [ ] Tests pass before committing
-- [ ] No secrets in the diff
-- [ ] No formatting-only changes mixed with behavior changes
-- [ ] `.gitignore` covers standard exclusions
+- [ ] Uma coisa lógica por commit
+- [ ] Mensagem explica o porquê e segue o padrão de tipos
+- [ ] Testes passam antes do commit
+- [ ] Nenhum segredo no diff
+- [ ] Nenhuma mudança só-de-formatação misturada
+- [ ] `.gitignore` cobre as exclusões padrão

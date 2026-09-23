@@ -14,228 +14,170 @@ description: >
 
 # Planning and Task Breakdown
 
-## Overview
+Decomponha trabalho em tasks pequenas e verificáveis, com critérios de
+aceitação explícitos e grafo de dependências. Task pequena é o que separa
+um agente que entrega de um que enrola: cada task deve ser implementável,
+testável e verificável em uma sessão focada.
 
-Decompose work into small, verifiable tasks with explicit acceptance criteria. Good task breakdown is the difference between an agent that completes work reliably and one that produces a tangled mess. Every task should be small enough to implement, test, and verify in a single focused session.
+Quando não usar: mudança de arquivo único com escopo óbvio, ou spec que
+já traz tasks bem definidas.
 
-## When to Use
+## Processo de planejamento
 
-- You have a spec and need to break it into implementable units
-- A task feels too large or vague to start
-- Work needs to be parallelized across multiple agents or sessions
-- You need to communicate scope to a human
-- The implementation order isn't obvious
+**1. Modo planejamento (read-only).** Antes de escrever código, leia a
+spec e as partes relevantes do codebase, identifique padrões e
+convenções existentes, mapeie dependências e anote riscos e incógnitas.
+Não escreva código no planejamento; o output é o plano.
 
-**When NOT to use:** Single-file changes with obvious scope, or when the spec already contains well-defined tasks.
-
-## The Planning Process
-
-### Step 1: Enter Plan Mode
-
-Before writing any code, operate in read-only mode:
-
-- Read the spec and relevant codebase sections
-- Identify existing patterns and conventions
-- Map dependencies between components
-- Note risks and unknowns
-
-**Do NOT write code during planning.** The output is a plan document, not implementation.
-
-### Step 2: Identify the Dependency Graph
-
-Map what depends on what:
+**2. Grafo de dependências.** Mapeie o que depende do quê:
 
 ```
-Database schema
-    │
-    ├── API models/types
-    │       │
-    │       ├── API endpoints
-    │       │       │
-    │       │       └── Frontend API client
-    │       │               │
-    │       │               └── UI components
-    │       │
-    │       └── Validation logic
-    │
-    └── Seed data / migrations
+schema de banco
+    ├── models/types da API
+    │       ├── endpoints
+    │       │       └── client da API no frontend
+    │       └── validação
+    └── seeds / migrations
 ```
 
-Implementation order follows the dependency graph bottom-up: build foundations first.
+A ordem de implementação segue o grafo, de baixo para cima: fundação
+primeiro.
 
-### Step 3: Slice Vertically
+**3. Fatie verticalmente.** Cada slice entrega um caminho completo e
+funcional, não uma camada inteira:
 
-Instead of building all the database, then all the API, then all the UI — build one complete feature path at a time:
-
-**Bad (horizontal slicing):**
 ```
-Task 1: Build entire database schema
-Task 2: Build all API endpoints
-Task 3: Build all UI components
-Task 4: Connect everything
-```
+# Ruim (horizontal):
+Task 1: todo o schema do banco
+Task 2: todos os endpoints
+Task 3: toda a UI
+Task 4: conectar tudo
 
-**Good (vertical slicing):**
-```
-Task 1: User can create an account (schema + API + UI for registration)
-Task 2: User can log in (auth schema + API + UI for login)
-Task 3: User can create a task (task schema + API + UI for creation)
-Task 4: User can view task list (query + API + UI for list view)
+# Bom (vertical):
+Task 1: usuário cria conta (schema + API + UI de registro)
+Task 2: usuário faz login (auth + API + UI de login)
+Task 3: usuário cria task (schema + API + UI de criação)
+Task 4: usuário vê a lista (query + API + UI de listagem)
 ```
 
-Each vertical slice delivers working, testable functionality.
+Cada fatia vertical é funcional e testável por si só.
 
-### Step 4: Write Tasks
-
-Each task follows this structure:
+**4. Escreva as tasks.** Estrutura por task:
 
 ```markdown
-## Task [N]: [Short descriptive title]
+## Task [N]: [Título curto e descritivo]
 
-**Description:** One paragraph explaining what this task accomplishes.
+**Description:** um parágrafo com o que a task entrega.
 
 **Acceptance criteria:**
-- [ ] [Specific, testable condition]
-- [ ] [Specific, testable condition]
+- [ ] [Condição específica e testável]
 
 **Verification:**
-- [ ] Tests pass: `npm test -- --grep "feature-name"`
-- [ ] Build succeeds: `npm run build`
-- [ ] Manual check: [description of what to verify]
+- [ ] Testes: `npm test -- --grep "feature-name"`
+- [ ] Build: `npm run build`
+- [ ] Manual: [o que verificar]
 
-**Dependencies:** [Task numbers this depends on, or "None"]
+**Dependencies:** [tasks de que depende, ou "None"]
 
 **Files likely touched:**
 - `src/path/to/file.ts`
-- `tests/path/to/test.ts`
 
-**Estimated scope:** [Small: 1-2 files | Medium: 3-5 files | Large: 5+ files]
+**Estimated scope:** [S: 1-2 arquivos | M: 3-5 | L: 5+]
 ```
 
-### Step 5: Order and Checkpoint
-
-Arrange tasks so that:
-
-1. Dependencies are satisfied (build foundation first)
-2. Each task leaves the system in a working state
-3. Verification checkpoints occur after every 2-3 tasks
-4. High-risk tasks are early (fail fast)
-
-Add explicit checkpoints:
+**5. Ordene e marque checkpoints.** Dependências satisfeitas, sistema
+em estado funcional após cada task, risco alto no começo (fail fast) e
+checkpoint explícito a cada 2-3 tasks:
 
 ```markdown
-## Checkpoint: After Tasks 1-3
-- [ ] All tests pass
-- [ ] Application builds without errors
+## Checkpoint: after Tasks 1-3
+- [ ] All tests pass, build clean
 - [ ] Core user flow works end-to-end
 - [ ] Review with human before proceeding
 ```
 
-## Task Sizing Guidelines
+## Dimensionamento
 
-| Size | Files | Scope | Example |
-|------|-------|-------|---------|
-| **XS** | 1 | Single function or config change | Add a validation rule |
-| **S** | 1-2 | One component or endpoint | Add a new API endpoint |
-| **M** | 3-5 | One feature slice | User registration flow |
-| **L** | 5-8 | Multi-component feature | Search with filtering and pagination |
-| **XL** | 8+ | **Too large — break it down further** | — |
+| Tamanho | Arquivos | Escopo | Exemplo |
+|---|---|---|---|
+| **XS** | 1 | função ou config | nova regra de validação |
+| **S** | 1-2 | componente ou endpoint | novo endpoint de API |
+| **M** | 3-5 | uma fatia de feature | fluxo de registro |
+| **L** | 5-8 | feature multi-componente | busca com filtros e paginação |
+| **XL** | 8+ | muito grande, dividir | — |
 
-If a task is L or larger, it should be broken into smaller tasks. An agent performs best on S and M tasks.
+Agente performa melhor em S e M. Quebre mais uma task se: não cabe em
+uma sessão focada (~2h de trabalho de agente); os critérios de aceitação
+não cabem em 3 bullets; toca 2+ subsistemas independentes (auth e
+billing); o título tem "and" (são duas tasks).
 
-**When to break a task down further:**
-- It would take more than one focused session (roughly 2+ hours of agent work)
-- You cannot describe the acceptance criteria in 3 or fewer bullet points
-- It touches two or more independent subsystems (e.g., auth and billing)
-- You find yourself writing "and" in the task title (a sign it is two tasks)
-
-## Plan Document Template
+## Template de plano
 
 ```markdown
-# Implementation Plan: [Feature/Project Name]
+# Implementation Plan: [Feature]
 
 ## Overview
-[One paragraph summary of what we're building]
+[Um parágrafo do que será construído]
 
 ## Architecture Decisions
-- [Key decision 1 and rationale]
-- [Key decision 2 and rationale]
+- [Decisão-chave + rationale]
 
 ## Task List
-
 ### Phase 1: Foundation
 - [ ] Task 1: ...
-- [ ] Task 2: ...
-
 ### Checkpoint: Foundation
-- [ ] Tests pass, builds clean
+- [ ] Tests pass, build clean
 
 ### Phase 2: Core Features
-- [ ] Task 3: ...
-- [ ] Task 4: ...
-
-### Checkpoint: Core Features
+- [ ] Task 2: ...
+### Checkpoint: Core
 - [ ] End-to-end flow works
-
-### Phase 3: Polish
-- [ ] Task 5: ...
-- [ ] Task 6: ...
-
-### Checkpoint: Complete
-- [ ] All acceptance criteria met
-- [ ] Ready for review
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| [Risk] | [High/Med/Low] | [Strategy] |
 
 ## Open Questions
-- [Question needing human input]
+- [Questão que precisa do humano]
 ```
 
-## Parallelization Opportunities
+## Paralelização
 
-When multiple agents or sessions are available:
-
-- **Safe to parallelize:** Independent feature slices, tests for already-implemented features, documentation
-- **Must be sequential:** Database migrations, shared state changes, dependency chains
-- **Needs coordination:** Features that share an API contract (define the contract first, then parallelize)
-
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "I'll figure it out as I go" | That's how you end up with a tangled mess and rework. 10 minutes of planning saves hours. |
-| "The tasks are obvious" | Write them down anyway. Explicit tasks surface hidden dependencies and forgotten edge cases. |
-| "Planning is overhead" | Planning is the task. Implementation without a plan is just typing. |
-| "I can hold it all in my head" | Context windows are finite. Written plans survive session boundaries and compaction. |
-
-## Red Flags
-
-- Starting implementation without a written task list
-- Tasks that say "implement the feature" without acceptance criteria
-- No verification steps in the plan
-- All tasks are XL-sized
-- No checkpoints between tasks
-- Dependency order isn't considered
+- **Paralelizável:** fatias independentes, testes de feature já
+  implementada, documentação.
+- **Sequencial:** migrations, mudança de estado compartilhado, cadeia de
+  dependências.
+- **Coordenado:** features que dividem contrato de API (defina o
+  contrato primeiro, depois paralelize).
 
 ## Separação plano ↔ artefato
 
-O plano é um artefato de trabalho temporário. TODO artefato de produção
-gerado na execução (código, docs, prompts, testes, configuração) deve ser
-AUTOCONTIDO — jamais referenciar códigos de decisão (D1, D2…), números de
-task, seções ou vocabulário interno do plano. Se o conteúdo de um artefato
-depender do plano para fazer sentido, reformular em linguagem autocontida.
+O plano é artefato de trabalho temporário. TODO artefato de produção
+gerado na execução (código, docs, prompts, testes, configuração) deve
+ser AUTOCONTIDO: jamais citar códigos de decisão (D1, D2...), números de
+task, seções ou vocabulário interno do plano. Conteúdo que só faz
+sentido com o plano na mão deve ser reescrito em linguagem autocontida.
 
-## Verification
+## Anti-racionalizações
 
-Before starting implementation, confirm:
+| Racionalização | Realidade |
+|---|---|
+| "Vou resolvendo no caminho" | É assim que vira nó cego e retrabalho; 10 minutos de plano economizam horas. |
+| "As tasks são óbvias" | Escreva assim mesmo: tasks explícitas expõem dependência escondida e edge case esquecido. |
+| "Planejar é overhead" | Planejamento é a task; implementar sem plano é só digitar. |
+| "Consigo segurar na cabeça" | Janela de contexto acaba; plano escrito sobrevive a troca de sessão e compaction. |
 
-- [ ] Every task has acceptance criteria
-- [ ] Every task has a verification step
-- [ ] Task dependencies are identified and ordered correctly
-- [ ] No task touches more than ~5 files
-- [ ] Checkpoints exist between major phases
-- [ ] The human has reviewed and approved the plan
+## Red flags
+
+Implementação começada sem lista de tasks escrita; task "implemente a
+feature" sem critério de aceitação; plano sem passo de verificação; todas
+as tasks XL; sem checkpoint entre fases; ordem ignorando dependências.
+
+## Verificação (antes de implementar)
+
+- [ ] Toda task tem critérios de aceitação e passo de verificação
+- [ ] Dependências identificadas e ordenadas
+- [ ] Nenhuma task toca mais de ~5 arquivos
+- [ ] Checkpoints entre fases grandes
+- [ ] Humano revisou e aprovou o plano
 - [ ] Nenhum artefato de produção cita identificadores do plano

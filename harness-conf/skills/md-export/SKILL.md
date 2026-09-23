@@ -9,22 +9,19 @@ description: >
   xlsx", "gerar Word", "gerar PowerPoint", "md-export".
 ---
 
-Voce e uma skill de exportacao de documentos Markdown.
+# md-export
 
-## Objetivo
-
-Converter arquivos `.md` para `docx`, `pptx` ou `xlsx` usando o Pandoc como backend.
+Converte arquivos `.md` para `docx`, `pptx` ou `xlsx` usando Pandoc como
+backend.
 
 ## Quando usar
 
-- Humano pede para gerar um `.docx`, `.pptx` ou `.xlsx` a partir de Markdown
-- Humano quer exportar/converter um arquivo `.md` para Office
-- Humano quer usar um template Word ou PowerPoint personalizado
+- Humano pede para gerar `.docx`, `.pptx` ou `.xlsx` a partir de Markdown.
+- Humano quer exportar um `.md` para Office, inclusive com template Word
+  ou PowerPoint personalizado.
 
-## Quando nao usar
-
-- Se o arquivo de entrada nao for Markdown (use `doc-extract` para outros formatos)
-- Se o formato de saida nao for `docx`, `pptx` ou `xlsx`
+Não use se a entrada não for Markdown (`doc-extract` cobre outros
+formatos) nem se a saída não for `docx`, `pptx` ou `xlsx`.
 
 ## Ferramenta
 
@@ -46,7 +43,7 @@ Comando: `opencode-md-export`
 }
 ```
 
-## Saida (stdout, 1 linha JSON)
+## Saída (stdout, 1 linha JSON)
 
 ```json
 {
@@ -61,38 +58,27 @@ Comando: `opencode-md-export`
 
 ## Regras
 
-1. Nunca sobrescrever arquivo existente sem `--force` explicito nas `extraArgs`.
-2. `outputDir` default: `./out/md-export/<timestamp>/`
-3. Se `pandoc` nao estiver no PATH nem no diretorio portatil do repositorio,
-   retornar `ok: false` com `hint` de instalacao.
-4. Nao tentar instalar dependencias; apenas informar.
-5. O agente deve passar `source` como caminho absoluto ou relativo ao diretorio de trabalho atual.
+1. Nunca sobrescrever arquivo existente sem `--force` explícito nas
+   `extraArgs`.
+2. `outputDir` default: `./out/md-export/<timestamp>/`.
+3. `pandoc` fora do PATH nem do diretório portátil do repositório:
+   retornar `ok: false` com `hint` de instalação; não instalar
+   dependências.
+4. Passe `source` como caminho absoluto ou relativo ao diretório de
+   trabalho atual.
 
 ## Exemplos de uso pelo agente
 
-Converter para DOCX simples:
 ```json
 {"source": "relatorio.md", "to": "docx"}
-```
-
-Converter para PPTX com template:
-```json
 {"source": "apresentacao.md", "to": "pptx", "template": "templates/empresa.pptx"}
-```
-
-Converter para DOCX com sumario e metadata:
-```json
 {"source": "doc.md", "to": "docx", "toc": true, "metadata": {"title": "Meu Relatorio", "author": "Time X"}}
-```
-
-Converter para XLSX (tabelas Markdown):
-```json
 {"source": "dados.md", "to": "xlsx", "outputPath": "saida/tabela.xlsx"}
 ```
 
-## Sugestoes de instalacao (quando pandoc faltar)
+## Instalação do pandoc (quando faltar)
 
-- Recomendado: baixe o ZIP portatil oficial e extraia em `tools/pandoc/`
-- Windows: use o `pandoc.exe` do ZIP portatil, sem instalacao administrativa
-- Linux/WSL e macOS: use o ZIP portatil ou uma instalacao user-space
+- Recomendado: ZIP portátil oficial extraído em `tools/pandoc/`; no
+  Windows, use o `pandoc.exe` do ZIP, sem instalação administrativa.
+- Linux/WSL e macOS: ZIP portátil ou instalação user-space.
 - Docs: https://pandoc.org/installing.html

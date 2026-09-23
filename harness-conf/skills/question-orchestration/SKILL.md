@@ -52,9 +52,6 @@ uma ideia clara do que quer.
    questionamento antes de apresentá-lo ao humano.
 4. Só então prossiga para as perguntas de planejamento.
 
-Premissa: assuma que o humano pode estar começando sem ter pensado bem no
-prompt inicial.
-
 ## Modo mediado
 
 Use quando um agente orquestrador recebe perguntas de agentes e as apresenta

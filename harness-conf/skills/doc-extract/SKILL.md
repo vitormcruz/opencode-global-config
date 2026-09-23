@@ -10,35 +10,33 @@ description: >
   documento", "extrair texto de documento", "doc-extract", "URL binária".
 ---
 
-Voce e uma skill de extracao de conteudo de documentos.
+# doc-extract
 
-## Objetivo
+Extrai conteúdo de documentos não-Markdown com Docling e converte para
+`md`, `json`, `text` ou `html`.
 
-Converter documentos nos formatos `pdf`, `docx`, `pptx`, `xlsx`, `html`, `imagens` e outros
-para `md`, `json`, `text` ou `html`, facilitando que a IA leia e processe o conteudo.
+## Formatos
+
+- Entrada (via Docling): `pdf`, `docx`, `pptx`, `xlsx`, `html`, `md`,
+  `asciidoc`, `png`, `jpg`, `jpeg`, `tiff`, `bmp`, `gif`
+- Saída: `md` (default), `json`, `text`, `html`
 
 ## Quando usar
 
-- Humano pede para ler, analisar, resumir ou extrair dados de um PDF, Word, PowerPoint, Excel etc.
-- Humano quer converter um documento para Markdown para processamento posterior
-- Humano quer extrair tabelas ou texto estruturado de um arquivo
-- Humano quer que a IA "entenda" o conteudo de um documento existente
-- **URL aponta para PDF, DOCX, PPTX, XLSX ou imagem** — `crawl4ai` falha com `ERR_FAILED` em arquivos
-  binarios; use `doc-extract` sempre que a URL terminar em `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.png`,
-  `.jpg`, `.jpeg`, `.tiff`, `.bmp` ou `.gif`
+- Humano pede para ler, analisar, resumir ou extrair dados de PDF, Word,
+  PowerPoint, Excel ou imagem.
+- URL aponta para arquivo binário (`crawl4ai` falha com `ERR_FAILED`):
+  `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.tiff`,
+  `.bmp`, `.gif`.
+- Humano quer converter um documento para Markdown para processamento
+  posterior.
 
-## Quando nao usar
-
-- Se o arquivo ja e `.md` (use diretamente ou `md-export` para converter para outro formato)
-- Se o humano quiser gerar um documento (use `md-export`)
+Não use se o arquivo já é `.md` (leia direto ou use `md-export` para
+converter) nem para gerar documento (use `md-export`).
 
 ## Ferramenta
 
 Comando: `opencode-doc-extract`
-
-## Formatos de entrada suportados (via Docling)
-
-`pdf`, `docx`, `pptx`, `xlsx`, `html`, `md`, `asciidoc`, `png`, `jpg`, `jpeg`, `tiff`, `bmp`, `gif`
 
 ## Entrada (stdin, JSON)
 
@@ -54,7 +52,7 @@ Comando: `opencode-doc-extract`
 }
 ```
 
-## Saida (stdout, 1 linha JSON)
+## Saída (stdout, 1 linha JSON)
 
 ```json
 {
@@ -69,66 +67,37 @@ Comando: `opencode-doc-extract`
 
 ## Regras
 
-1. `outputDir` default: `./out/doc-extract/<timestamp>/`
-2. Se `docling` nao estiver no PATH, retornar `ok: false` com `hint` de instalacao.
-3. Nao tentar instalar dependencias; apenas informar.
-4. Para PDFs escaneados (sem texto), OCR e ativado por padrao; desative com `"ocr": false` se o PDF
-   ja tiver texto selecionavel.
-   O OCR e executado pelo proprio Docling; nao requer `tesseract` nem `ocrmypdf`.
-5. O agente deve ler o(s) arquivo(s) gerados em `artifacts` para obter o conteudo extraido.
-6. **Imagens base64 no output**: o Docling inclui imagens como `![Image](data:image/...base64...)`.
-   Essas linhas sao longas e poluem o contexto. Ao ler o `.md` gerado, ignore linhas que comecem com
-   `![Image](data:image/` — o conteudo util (texto, tabelas, headings) esta nas demais linhas.
-   Para evitar o problema na origem, prefira `"imageExportMode": "placeholder"` (ja e o default).
-7. **Arquivos grandes**: use `Read` com `offset` e `limit` para navegar o `.md` gerado em secoes
-   (ex: `offset=1, limit=100`, depois `offset=101, limit=100`, etc.).
-   Para extrair uma informacao especifica sem ler tudo, delegue ao agente `Task/explore` com uma
-   pergunta objetiva — ele usa `Read offset+limit` e `Grep` internamente e devolve so o trecho
-   relevante, economizando contexto.
+1. `outputDir` default: `./out/doc-extract/<timestamp>/`.
+2. `docling` fora do PATH: retornar `ok: false` com `hint` de instalação;
+   não instalar dependências.
+3. PDF escaneado (sem texto): OCR ativo por default, executado pelo
+   próprio Docling (sem `tesseract` nem `ocrmypdf`); desative com
+   `"ocr": false` se o PDF já tem texto selecionável.
+4. Leia o(s) arquivo(s) gerado(s) em `artifacts` para obter o conteúdo
+   extraído.
+5. **Imagens base64**: o Docling emite `![Image](data:image/...base64...)`
+   em linhas longas que poluem o contexto. Ao ler o `.md` gerado, ignore
+   linhas que começam com `![Image](data:image/`; o conteúdo útil está
+   nas demais. `"imageExportMode": "placeholder"` (default) evita o
+   problema na origem.
+6. **Arquivos grandes**: navegue o `.md` gerado com `Read` e `offset`/
+   `limit` por seções. Para achar informação específica sem ler tudo,
+   delegue ao agente `Task/explore` uma pergunta objetiva; ele usa
+   `Read`+`Grep` internamente e devolve só o trecho relevante.
 
 ## Exemplos de uso pelo agente
 
-Extrair PDF para Markdown (default):
 ```json
 {"source": "relatorio.pdf"}
-```
-
-Extrair DOCX para JSON (mais estruturado):
-```json
 {"source": "contrato.docx", "to": "json"}
-```
-
-Extrair PPTX para texto simples:
-```json
-{"source": "apresentacao.pptx", "to": "text"}
-```
-
-Extrair Excel para Markdown (tabelas):
-```json
-{"source": "planilha.xlsx", "to": "md"}
-```
-
-Extrair PDF escaneado com OCR:
-```json
 {"source": "scan.pdf", "ocr": true, "to": "md"}
-```
-
-Extrair PDF com imagens referenciadas:
-```json
 {"source": "doc_com_imagens.pdf", "imageExportMode": "referenced", "outputDir": "saida/"}
 ```
 
-## Fluxo recomendado para analise
+## Instalação do docling (quando faltar)
 
-1. Chamar `doc-extract` com o arquivo
-2. Ler o arquivo `.md` (ou `.json`) retornado em `artifacts`
-3. Processar/analisar o conteudo extraido
-4. Se necessario, gerar um novo documento com `md-export`
-
-## Sugestoes de instalacao (quando docling faltar)
-
-- Recomendado (pipx): `pipx install docling`
-  - Se pipx nao estiver instalado: `pip install --user pipx && pipx ensurepath`
+- Recomendado (pipx): `pipx install docling`; sem pipx:
+  `pip install --user pipx && pipx ensurepath`
 - Alternativa (pip): `pip install --user docling`
 - Ubuntu/WSL: `python3 -m pip install --user pipx && pipx install docling`
 - Docs: https://github.com/docling-project/docling
