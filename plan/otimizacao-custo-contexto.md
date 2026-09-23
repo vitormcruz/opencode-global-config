@@ -251,7 +251,12 @@ DEVFLOW).
 
 ### Fase 2: Standing load
 
-- [ ] **Task 3: Enxugar o AGENTS.base.md**
+- [x] **Task 3: Enxugar o AGENTS.base.md**
+  **Resultado (2026-09-23):** 1082 → 1047 tokens chars/4 (-3,2%), commit
+  `6b8e6f8`. Ajustes humanos incorporados: bullet novo na seção "Criação de
+  Skills" apontando para `writing-for-agents`; literais do teste de contrato
+  ("repo estiver indexado no codebase-memory", "CLI-first") restaurados no
+  bullet da Descoberta de Código.
   **Description:** aplicar o command (estágios 1 e 2) ao
   `harness-conf/AGENTS.base.md`; revisar diff com o humano; aplicar.
   **Acceptance criteria:**
@@ -263,7 +268,11 @@ DEVFLOW).
   **Files likely touched:** `harness-conf/AGENTS.base.md`
   **Estimated scope:** Small
 
-- [ ] **Task 4: Enxugar o AGENTS.md do repo**
+- [x] **Task 4: Enxugar o AGENTS.md do repo**
+  **Resultado (2026-09-23):** 2712 → 2590 tokens chars/4 (-4,5%), commit
+  `6b8e6f8`. Subseções "SEM INSTRUÇÕES" preservadas byte a byte; 2 saídas
+  aprovadas (justificativa do codebase-memory CLI; parêntese repetido no
+  checklist pós-sync).
   **Description:** idem Task 3 para o `AGENTS.md` da raiz do repo (10,9 KB,
   maior alvo). Preservar subseções "SEM INSTRUÇÕES" (decisão prévia) e
   regras de governança do repo.
