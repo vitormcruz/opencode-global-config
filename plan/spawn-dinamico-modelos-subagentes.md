@@ -49,6 +49,17 @@ restrição).
 - **D6 — Modelos da validação: zai flash + zai.** `zai-coding-plan/
   glm-5.3-flash` e `zai-coding-plan/glm-5.3` (provider já configurado),
   para o teste automatizado e para o runbook.
+- **D7 — Validação pelo caminho real de uso.** O teste automatizado
+  exercita o fluxo que os agentes usam: um agente primário headless
+  (`opencode run`) chama a tool `task` (com o plugin) passando `model`
+  explícito. Proibido chamar API de provider diretamente ou criar
+  sessão child por fora da tool `task`. Verificação do modelo efetivo
+  pelo storage local de sessões do OpenCode (`modelID` da child).
+- **D8 — Commit final remove plano e esboço; insumo do devflow
+  permanece.** No commit final do fluxo, `git rm` remove este plano E o
+  esboço `plan/plugin-opencode-task-model.md`. O
+  `plan/insumo-devflow-spawn-dinamico.md` é artefato de produção e
+  permanece no repo até o devflow consumir.
 
 ## Task List
 
@@ -140,24 +151,31 @@ aplicação)
 
 ### Phase 2 — Validação automatizada do spawn dinâmico
 
-- [ ] **Task 4: Teste de integração com dois modelos reais**
-  **Description:** teste pytest (marker `integration`) que sobe o
-  OpenCode headless (`opencode serve`) com o plugin carregado em
-  contexto próprio — o `tests/integration/integration_context.py`
-  padrão zera `config["plugin"]`, então o teste precisa de contexto que
-  preserve o plugin. Via API HTTP: criar sessão, spawnar subagente
-  built-in SEM `model` no frontmatter (ex.: `general`/`build`) com
-  `model` explícito `zai-coding-plan/glm-5.3-flash` e, em seguida,
-  `zai-coding-plan/glm-5.3`; verificar o modelo efetivo de cada child
-  session. Incluir caso negativo: sem `model`, precedência nativa
-  (model do agente, senão herdado do pai). Premissa declarada:
-  credenciais zai no ambiente; sem `skip`, `pytest.fail` com mensagem
-  acionável se faltar.
+- [ ] **Task 4: Validação automatizada via caminho real de uso**
+  **Description:** teste pytest (marker `integration`) que executa o
+  OpenCode headless (`opencode run`) com o plugin carregado em contexto
+  próprio — o `tests/integration/integration_context.py` padrão zera
+  `config["plugin"]`, então o teste precisa de contexto que preserve o
+  plugin. O prompt instrui um agente primário a spawnar subagente
+  built-in SEM `model` no frontmatter (ex.: `general`) usando a tool
+  `task` com `model` explícito `zai-coding-plan/glm-5.3-flash` e, em
+  seguida, `zai-coding-plan/glm-5.3`. O consumo do provider acontece
+  dentro do OpenCode; o teste NUNCA chama API de provider diretamente
+  nem cria sessão child por fora da tool `task`. Verificar o modelo
+  efetivo de cada child lendo o storage local de sessões do OpenCode
+  (`modelID`). Caso negativo: sem `model`, precedência nativa (model do
+  agente, senão herdado do pai). Sem `skip`: `pytest.fail` com
+  mensagem acionável se faltar pré-requisito (plugin, providers
+  configurados).
   **Acceptance criteria:**
-  - [ ] Dois spawns na mesma execução com models distintos; modelo
-        efetivo de cada child verificado por API.
+  - [ ] Dois spawns reais via tool `task` (com plugin) com models
+        distintos, na mesma execução.
+  - [ ] Modelo efetivo de cada child verificado via storage de
+        sessões do OpenCode.
   - [ ] Caso negativo (sem `model`) preserva precedência nativa.
   - [ ] Contexto de teste não zera o plugin.
+  - [ ] Nenhuma chamada direta a API de provider; nenhum spawn fora
+        da tool `task`.
   - [ ] Suíte `-m all` do ambiente corrente verde.
   **Verification:** `.venv/bin/pytest -m integration` (e `-m all`
   completo) verde; custo mínimo (spawns flash).
@@ -221,9 +239,10 @@ aplicação)
 - [ ] Commit: `docs(plan): valida spawn dinamico e registra insumo
       para devflow`
 - [ ] Revisão independente (executor/revisor do fluxo) aprovada.
-- [ ] Commit final do fluxo remove este arquivo de planejamento
-      (`git rm`), preservando o insumo (artefato de produção que
-      permanece até o devflow consumir).
+- [ ] Commit final do fluxo remove ESTE plano e o esboço
+      `plan/plugin-opencode-task-model.md` (`git rm`); o
+      `plan/insumo-devflow-spawn-dinamico.md` permanece no repo até o
+      devflow consumir.
 
 ## Risks and Mitigations
 
@@ -231,7 +250,7 @@ aplicação)
 |------|--------|------------|
 | Plugin sobrescreve a `task` built-in para todos os agentes | Superfície de risco global | Fase 0 obrigatória (revisão + SHA + diff npm); pin exato; status PROVISÓRIO; deny rules do config como kill switch |
 | Mantenedor único, adoção baixa | Abandono upstream | Pin + PROVISÓRIO + procedimento de remoção documentado (README/insumo) |
-| Teste integration depende de credenciais reais | Suíte frágil fora do ambiente do humano | Premissa declarada; `pytest.fail` com mensagem acionável (sem `skip`); custo mínimo com modelos flash |
+| Teste executa spawns reais dentro do OpenCode | Consome cota do provider; exige providers configurados no ambiente | Spawns em modelos flash (custo desprezível); premissa declarada; `pytest.fail` com mensagem acionável (sem `skip`) |
 | Números de PR/issue de rastreio divergentes entre esboço e pesquisa | Documentação imprecisa | Task 1 confirma os identificadores vigentes antes de escrever README |
 | `background: true` libera `bash`/`write`/`edit` no child | Escopo não intencional | Guarda no `AGENTS.base.md`; usar apenas com escopo aprovado e `worktree: true` |
 | Spawn refeito via client API não resolve `@arquivo` em prompts delegados | Comportamento surpreendente | Guarda no `AGENTS.base.md`: incluir conteúdo no texto |
@@ -242,3 +261,15 @@ aplicação)
 - Nenhuma aberta. Acompanhamento do suporte nativo upstream
   (issue #6651 + PR em review) é procedimento contínuo registrado no
   README e no insumo, com remoção do plugin quando nativo.
+
+## Execução (registro do orquestrador)
+
+- Plano completo apresentado e commitado (b2ac417); revisto após
+  mediação: D7 (validação só pelo caminho real de uso, sem API por
+  fora) e D8 (commit final remove plano + esboço; insumo do devflow
+  permanece).
+- Executor acordado: subagente `worker` (`zai-coding-plan/
+  glm-5.3-flash`), enquanto o plugin não está instalado.
+- Revisor acordado: instância `general` no modelo atual da sessão
+  (`zai-coding-plan/glm-5.3`).
+- Execução NÃO autorizada ainda; aguardando palavra do humano.
