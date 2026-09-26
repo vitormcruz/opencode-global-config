@@ -114,6 +114,17 @@
   se os sinais dispararem, compacte ou troque de sessão mesmo dentro da
   mesma fase.
 
+## Tool task (plugin opencode-task-model)
+
+- O plugin aceita `model` e `reasoning` extras na tool `task`. Por padrão,
+  omita os dois: a precedência nativa (modelo do agente no frontmatter,
+  senão herda do pai) permanece canônica.
+- Use `model` explícito apenas quando o briefing do humano ou do plano
+  pedir um modelo específico para a subtask.
+- `background: true` dá acesso local pleno ao subagente; use apenas com
+  escopo aprovado e preferindo `worktree: true` para escrita.
+- Prompts delegados não resolvem `@arquivo`: inclua o conteúdo no texto.
+
 ## Commits
 - Siga Conventional Commits; ao versionar, carregue a skill
   `git-workflow-and-versioning`.
