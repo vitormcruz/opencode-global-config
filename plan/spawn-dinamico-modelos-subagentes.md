@@ -239,6 +239,56 @@ aplicação)
 - [ ] Commit: `docs(plan): valida spawn dinamico e registra insumo
       para devflow`
 - [ ] Revisão independente (executor/revisor do fluxo) aprovada.
+
+## Phase 4: Consistência de adapters (Task 7)
+
+> Adicionada por decisão do humano após validação ao vivo: `model`
+> por chamada funcionou, mas agentes `primary` (ex.: `analista`)
+> não aparecem na `task`, que lista apenas `subagent`/`all`.
+
+- [ ] **Task 7: Consistência de adapters no tratamento de agentes
+  e modos (OpenCode vs Copilot CLI)**
+  **Description:** em 3 passos aprovados pelo humano:
+  1. **Investigar** como cada adapter aplica agentes e modos hoje:
+     contrato `HarnessAdapter` e strategies em
+     `src/opencode_config/harnesses/` (OpenCode: symlinks POSIX /
+     cópia Windows; Copilot: cópia em `~/.copilot/`), modos atuais
+     de todos os agentes em `harness-conf/agents/*.md` vs papel
+     definido em `docs/workflow-agentes-dev.md` e
+     `docs/workflow-definicao-escopo.md`, e o que o Copilot CLI
+     suporta de subagente.
+  2. **Corrigir o OpenCode**: propor ao humano a lista de agentes
+     que devem ser spawnáveis via `task` e o `mode` de cada um
+     (ex.: `analista` → `all`); aplicar somente o aprovado. Regra
+     do repo: mudança em agente passa pelo humano; manter
+     sincronização workflow↔agentes.
+  3. **Avaliar o Copilot**: se a investigação mostrar divergência
+     (ex.: modos sem efeito no Copilot, agentes spawnáveis de um
+     lado e não do outro), propor ajuste ao humano e aplicar o
+     aprovado; se não houver divergência, registrar a justificativa.
+  **Acceptance criteria:**
+  - [ ] Análise da investigação registrada (modos por agente;
+        como cada adapter aplica; divergências encontradas).
+  - [ ] Lista de mudanças de `mode` proposta, aprovada pelo humano
+        e aplicada (ou justificativa de não mudança).
+  - [ ] Ajuste do Copilot avaliado: aplicado ou justificativa
+        registrada.
+  - [ ] `tests/agents/test_workflow_consistency.py` verde (e
+        atualizado se a mudança exigir).
+  - [ ] Suíte `-m all` verde no ambiente corrente (JAVA_HOME).
+  - [ ] Teste ao vivo: agente aprovado (ex.: `analista`) spawnável
+        via `task` após restart do OpenCode (quando aplicável).
+  **Verification:** suítes; spawn manual ao vivo pelo humano.
+  **Dependencies:** nenhuma (independente das Tasks 1-6).
+  **Files likely touched:** `harness-conf/agents/*.md`
+  (frontmatter), condicionalmente `src/opencode_config/harnesses/`
+  + `tests/` correspondentes, `docs/workflow-agentes-dev.md`.
+  **Estimated scope:** M.
+
+### Checkpoint: Phase 4
+- [ ] Commit: `fix(harness): ajusta modos de agentes para spawn via
+      task` (mensagem exata conforme mudanças aprovadas).
+- [ ] Revisão independente aprovada.
 - [ ] Commit final do fluxo remove ESTE plano e o esboço
       `plan/plugin-opencode-task-model.md` (`git rm`); o
       `plan/insumo-devflow-spawn-dinamico.md` permanece no repo até o
@@ -272,4 +322,35 @@ aplicação)
   glm-5.3-flash`), enquanto o plugin não está instalado.
 - Revisor acordado: instância `general` no modelo atual da sessão
   (`zai-coding-plan/glm-5.3`).
-- Execução NÃO autorizada ainda; aguardando palavra do humano.
+- Execução autorizada pelo humano em 2026-09-26. Ciclos orquestrados:
+  ciclo 1 = Phase 0-1 (Tasks 1-3), ciclo 2 = Phase 2-3 (Tasks 4-6),
+  com revisor independente após cada ciclo.
+- **Ciclo 1 CONCLUÍDO E APROVADO** (revisor independente, veredito
+  APROVADO): commits `0f1ce5e` (revisão de segurança, UPSTREAM.md,
+  pin 1.3.1, rastreios #6651/#34947 confirmados) e `cdde56f`
+  (opencode.json + README + AGENTS.base.md + testes unit, 835 passed).
+  Observações: `@slkiser/opencode-quota` sem pin (pendência de ciclo
+  futuro); suíte exige `JAVA_HOME=/home/vitor/.local/share/jdk`.
+- **Ciclo 2 CONCLUÍDO E APROVADO** (revisor independente: APROVADO):
+  commits `1041452` (teste integration via caminho real; spawns reais
+  flash/glm-5.3/nativo verificados no storage local) e `b7ecad8`
+  (insumo do devflow autocontido, com evidências do runbook).
+  Achados do revisor: (1, menor) README/guarda citam `worktree` que a
+  1.3.1 não implementa — correção aprovada pelo humano, pendente de
+  execução; (2, obs.) runbook cita CLI `sqlite3` ausente no WSL;
+  (3, obs.) timeout do teste pode não disparar com saída silenciosa.
+- Validado AO VIVO pelo humano após reinício da TUI: `model` por
+  chamada funcionando; `analista` não apareceu na `task` — causa:
+  `mode: primary` (a `task` lista apenas `subagent`/`all`).
+- **Task 7 adicionada por decisão do humano (2026-09-26):**
+  consistência dos adapters no tratamento de agentes e modos
+  (primary/subagent/all) entre OpenCode e Copilot CLI: investigar
+  como cada adapter aplica os agentes, corrigir a aplicação no
+  OpenCode e avaliar ajustes no Copilot. Escopo em definição.
+  Commit final do fluxo (D8) só após a Task 7 concluir.
+  Observações do revisor registradas:
+  1. `@slkiser/opencode-quota` (escoped) segue sem pin e flutua para
+     @latest; fora do escopo deste ciclo, pendência de ciclo futuro
+     (pinar ou ajustar critério).
+  2. Suíte exige `JAVA_HOME=/home/vitor/.local/share/jdk` (falha
+     ambiental pré-existente sem ela; propagado ao ciclo 2).
