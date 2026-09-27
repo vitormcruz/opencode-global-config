@@ -118,11 +118,19 @@ Todos suportam `--yes` e `--check-only`.
 
 ### Checklist pós-sync
 
-1. Revisar diff do conteúdo copiado (references, assets, etc.)
-2. Verificar se mudanças upstream afetam o `SKILL.md` local
-3. Atualizar `SKILL.md` manualmente se necessário
-4. Confirmar que o `UPSTREAM.md` foi atualizado com o novo SHA
-5. Rodar os testes no executável pytest do SO: WSL/Linux com
+**Verificações automáticas (guardadas por testes):**
+- Após o sync aplicado, `UPSTREAM.md` registra o SHA novo do upstream.
+- Os arquivos declarados em "Arquivos sincronizados" existem localmente e
+  correspondem aos arquivos do upstream.
+- O sync preserva o `SKILL.md` local e nunca sobrescreve sua adaptação.
+
+**Verificações manuais (não automatizáveis):**
+1. Revisar o diff do conteúdo copiado (references, assets etc.), incluindo
+   a revisão de segurança do conteúdo novo (prompt injection, comandos, URLs
+   e exfiltração).
+2. Verificar se mudanças upstream afetam o `SKILL.md` local. Aplicar alguma
+   mudança exige decisão humana e edição assistida, nunca sync automático.
+3. Rodar os testes no executável pytest do SO: WSL/Linux com
    `.venv/bin/pytest -m all`, Windows com
    `.\.venv\Scripts\pytest.exe -m all`.
 

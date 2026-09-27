@@ -1083,3 +1083,85 @@ def test_sync_table_documents_every_cli_family(repo_root: Path) -> None:
 
 
 @pytest.mark.integration
+def test_sync_records_new_sha_and_verifies_declared_files_after_upstream_change(
+    tmp_path: Path,
+) -> None:
+    if shutil.which("git") is None:
+        pytest.fail("git é necessário para criar o upstream local de dois commits")
+
+    upstream_skill = "skills/accessibility-compliance-accessibility-audit"
+    synced_relative_path = "resources/implementation-playbook.md"
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License\n",
+            f"{upstream_skill}/SKILL.md": "upstream skill v1\n",
+            f"{upstream_skill}/{synced_relative_path}": "playbook v1\n",
+        },
+    )
+    base_sha = subprocess.run(
+        ["git", "-C", str(upstream), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    upstream_skill_file = upstream / upstream_skill / "SKILL.md"
+    upstream_skill_file.write_text("upstream skill v2\n", encoding="utf-8")
+    upstream_synced_file = upstream / upstream_skill / synced_relative_path
+    upstream_synced_file.write_text("playbook v2\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(upstream), "add", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(upstream), "commit", "-qm", "advance upstream"],
+        check=True,
+    )
+    new_sha = subprocess.run(
+        ["git", "-C", str(upstream), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    repo = tmp_path / "repo"
+    local_skill = repo / "harness-conf/skills/accessibility-audit"
+    local_skill.mkdir(parents=True)
+    local_skill_file = local_skill / "SKILL.md"
+    local_skill_file.write_text("adapted local skill\n", encoding="utf-8")
+    (local_skill / "UPSTREAM.md").write_text(
+        "# Metadados do Upstream\n"
+        "repositorio: https://example.invalid/upstream.git\n"
+        "branch: main\n"
+        f"commit: {base_sha}\n\n"
+        "## Arquivos sincronizados\n\n"
+        f"- {synced_relative_path}\n",
+        encoding="utf-8",
+    )
+
+    result = skills_sync.sync_skill("accessibility-audit", repo, upstream)
+
+    regenerated_metadata = (local_skill / "UPSTREAM.md").read_text(
+        encoding="utf-8"
+    )
+    synchronized_file = local_skill / synced_relative_path
+    assert result.status == "success"
+    assert f"commit: {new_sha}" in regenerated_metadata
+    assert f"- {synced_relative_path}" in regenerated_metadata
+    assert synchronized_file.is_file()
+    assert synchronized_file.read_bytes() == upstream_synced_file.read_bytes()
+    assert local_skill_file.read_text(encoding="utf-8") == "adapted local skill\n"
+
+
+@pytest.mark.unit
+def test_post_sync_checklist_marks_security_review_as_manual(
+    repo_root: Path,
+) -> None:
+    agents_rules = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    _, heading_found, checklist = agents_rules.partition("### Checklist pós-sync")
+
+    assert heading_found, "AGENTS.md deve manter a seção Checklist pós-sync"
+    assert "**Verificações automáticas (guardadas por testes):**" in checklist
+    assert "**Verificações manuais (não automatizáveis):**" in checklist
+    assert "a revisão de segurança do conteúdo novo" in checklist.lower()
