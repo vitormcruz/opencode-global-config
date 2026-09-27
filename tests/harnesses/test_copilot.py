@@ -630,7 +630,12 @@ def test_copilot_adapter_backups_existing_destinations(
     repo_root: Path,
     tmp_path: Path,
 ) -> None:
-    existing = tmp_path / ".copilot" / "skills" / "browser-testing"
+    existing = (
+        tmp_path
+        / ".copilot"
+        / "skills"
+        / "browser-testing"
+    )
     existing.mkdir(parents=True)
     (existing / "SKILL.md").write_text("old", encoding="utf-8")
 
