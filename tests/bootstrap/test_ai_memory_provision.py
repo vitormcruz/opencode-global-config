@@ -146,6 +146,29 @@ def prevent_real_docker_processes(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.unit
+def test_ai_memory_upstream_release_pins_match_reviewed_artifacts() -> None:
+    assert ai_memory.AI_MEMORY_WRAPPER_VERSION == "v2.4.1"
+    assert ai_memory.AI_MEMORY_WRAPPER_URL == (
+        "https://github.com/akitaonrails/ai-memory/releases/download/"
+        "v2.4.1/ai-memory-wrapper"
+    )
+    assert ai_memory.AI_MEMORY_WRAPPER_SHA256 == (
+        "49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6"
+    )
+    assert ai_memory.AI_MEMORY_IMAGE_TAG == "akitaonrails/ai-memory:latest"
+    assert ai_memory.AI_MEMORY_IMAGE_MANIFEST_SHA256 == (
+        "a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9"
+    )
+    assert ai_memory.AI_MEMORY_IMAGE_LINUX_AMD64_SHA256 == (
+        "5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e"
+    )
+    assert ai_memory.AI_MEMORY_IMAGE == (
+        "akitaonrails/ai-memory:latest@sha256:"
+        "5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e"
+    )
+
+
+@pytest.mark.unit
 def test_ai_memory_without_docker_warns_and_cleans_active_hooks(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

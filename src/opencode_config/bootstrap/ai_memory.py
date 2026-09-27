@@ -29,7 +29,14 @@ from opencode_config.lib.paths import UserSpacePaths
 from opencode_config.lib.process import CommandResult
 from opencode_config.lib.sync import backup_copy, backup_move
 
-AI_MEMORY_IMAGE = "akitaonrails/ai-memory:latest"
+AI_MEMORY_IMAGE_TAG = "akitaonrails/ai-memory:latest"
+AI_MEMORY_IMAGE_MANIFEST_SHA256 = (
+    "a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9"
+)
+AI_MEMORY_IMAGE_LINUX_AMD64_SHA256 = (
+    "5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e"
+)
+AI_MEMORY_IMAGE = f"{AI_MEMORY_IMAGE_TAG}@sha256:{AI_MEMORY_IMAGE_LINUX_AMD64_SHA256}"
 AI_MEMORY_NETWORK = "ai-memory-internal"
 AI_MEMORY_HOST = "127.0.0.1"
 AI_MEMORY_PORT = 49374
@@ -37,12 +44,13 @@ AI_MEMORY_MCP_URL = "http://127.0.0.1:49374/mcp"
 AI_MEMORY_DATA_NAME = "ai-memory"
 AI_MEMORY_READY_MARKER = ".bootstrap-provisioned"
 AI_MEMORY_NETWORK_MARKER = ".bootstrap-network-created"
+AI_MEMORY_WRAPPER_VERSION = "v2.4.1"
 AI_MEMORY_WRAPPER_URL = (
-    "https://github.com/akitaonrails/ai-memory/releases/latest/download/"
-    "ai-memory-wrapper"
+    "https://github.com/akitaonrails/ai-memory/releases/download/"
+    f"{AI_MEMORY_WRAPPER_VERSION}/ai-memory-wrapper"
 )
 AI_MEMORY_WRAPPER_SHA256 = (
-    "4b2e5736195f0ac4cd38adf62f25b294922ebf81f5f4802a07803e1abbf9f72d"
+    "49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6"
 )
 AI_MEMORY_WINDOWS_WRAPPERS = (
     (
