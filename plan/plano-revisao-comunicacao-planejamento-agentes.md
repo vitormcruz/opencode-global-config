@@ -221,6 +221,19 @@ compactação, a skill é recarregada e o protocolo (uma pergunta por
 rodada, volume por turno) se mantém. Caso futuro da suíte de
 comunicação.
 
+**Item 9 — Dúvida trava ação (aprovado).** Destino: skill
+`question-orchestration` (acréscimo, seção "Confirmação e continuidade
+de decisões"):
+
+- Dúvida em aberto trava ação: enquanto uma pergunta ao humano estiver
+  sem resposta, ou uma contestação estiver em resolução, não execute
+  ação dependente (editar, delegar, commitar, avançar de fase). Resolva
+  a dúvida primeiro.
+
+Verificação: conversa roteirizada com dúvida levantada no meio; a
+transcrição não mostra ação (edição, commit, spawn de agente) entre a
+dúvida e a resolução. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
