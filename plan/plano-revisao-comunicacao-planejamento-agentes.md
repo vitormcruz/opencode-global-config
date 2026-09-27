@@ -101,6 +101,32 @@ Verificação: conversa roteirizada; nenhuma resposta concentra mais de
 uma ideia central por turno; resposta a reclamação de confusão menor
 que a original. Caso futuro da suíte de comunicação.
 
+**Item 4 — Perguntas múltiplas (aprovado).** Destinos: skill
+`question-orchestration` (trecho "Perguntas em blocos adaptativos",
+reformulação) e `AGENTS.base.md` (seção Concisão, acréscimo).
+
+Skill `question-orchestration`:
+
+- Uma pergunta por rodada é o padrão.
+- Agrupe só quando as duas condições valem: cada pergunta é entendível
+  sem as outras, e nenhuma exige contexto novo nem lembrança de turnos
+  anteriores. Mesmo assim, no máximo 4.
+- Perguntas dependentes entre si: uma por vez, na ordem da dependência.
+- Pergunta que exige contexto novo: apresente sozinha, com o contexto
+  reapresentado.
+
+`AGENTS.base.md` (Concisão):
+
+- Menor é melhor, desde que não gere abreviação nem confusão.
+- Texto acima de ~5 linhas ou 2 parágrafos: divida em partes ou
+  converta em bullets antes de enviar.
+
+Verificação: conversa roteirizada com várias decisões pendentes; a
+transcrição mostra no máximo uma pergunta exigindo decisão por rodada;
+agrupamento só com perguntas triviais e independentes; contexto de
+pergunta sem abreviação nem confusão. Caso futuro da suíte de
+comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
