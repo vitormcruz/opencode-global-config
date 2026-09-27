@@ -295,6 +295,29 @@ implementação; decisões internas registradas no artefato; toda pergunta
 trata de premissa, escopo, comportamento, risco ou ponto novo. Caso
 futuro da suíte de comunicação.
 
+### Ajustes da revisão independente (discutidos com o humano)
+
+**Achado 1 — Distinção comunicação e entrega (aprovado).** O revisor
+apontou que a regra de volume fragmentaria entregas completas. A
+decisão do humano define a distinção: comunicação é o que o humano
+processa na conversa, por partes; entrega é o que ele consome fora da
+conversa, completa. Destino: `AGENTS.base.md`, seção Concisão
+(acréscimo):
+
+- Distinga comunicação de entrega: comunicação é o que o humano precisa
+  processar na conversa para entender, decidir ou validar; entrega é o
+  que ele consome fora da conversa, no formato que pediu.
+- Comunicação vai por partes: uma coisa por vez; conteúdo com vários
+  itens é anunciado no total e apresentado item por item, ou poucos
+  relacionados por vez; nunca tudo de uma vez, salvo pedido.
+- Entrega vai completa: densa e no formato pedido, sem as regras de
+  ritmo da conversa.
+
+Verificação: conversa roteirizada com conteúdo de múltiplos itens a
+validar; a transcrição mostra anúncio do total e apresentação por
+partes; entrega solicitada vem completa no formato pedido. Caso futuro
+da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
