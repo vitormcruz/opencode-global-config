@@ -90,6 +90,10 @@ Não use esses overrides em uma validação completa.
     sync.
   - `SKILL.md` local é adaptado e NUNCA sobrescrito pelo sync.
   - `references/` e afins são sincronizados do upstream.
+  - `sincronizacao: congelada` no `UPSTREAM.md` impede sync e update; o
+    comando `list` marca a skill congelada.
+  - Congelar ou descongelar exige decisão humana. O agente só altera o
+    campo sob ordem explícita. O CLI nunca cria nem remove o campo sozinho.
   - Registrar a skill no `opencode-skills list` e sincronizar com
     `opencode-skills sync NOME`.
 - Revisão de segurança obrigatória na importação: ler TODO o conteúdo

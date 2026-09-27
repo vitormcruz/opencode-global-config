@@ -53,6 +53,7 @@ class SyncResult:
     """Resultado resumido de uma sincronização."""
 
     status: str
+    skipped_skills: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -133,6 +134,29 @@ def list_updatable(repo_root: Path) -> list[str]:
     )
 
 
+def _synchronization_field(upstream_file: Path) -> str | None:
+    if not upstream_file.is_file():
+        return None
+    for line in upstream_file.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            break
+        if line.startswith("sincronizacao:"):
+            return line
+    return None
+
+
+def _is_skill_frozen(repo_root: Path, skill_name: str) -> bool:
+    upstream_file = _skills_root(repo_root) / skill_name / "UPSTREAM.md"
+    field = _synchronization_field(upstream_file)
+    return field is not None and field.partition(":")[2].strip() == "congelada"
+
+
+def _family_skills(name: str) -> tuple[str, ...]:
+    if name == "addyosmani":
+        return ADDYOSMANI_SKILLS
+    return (name,)
+
+
 def _run_git(upstream_dir: Path, *arguments: str) -> str:
     try:
         completed = subprocess.run(  # nosec B603 B607 - git fixado do sistema; arguments fixos do codigo
@@ -198,7 +222,9 @@ def _write_upstream(
     license_text: str,
     extra_fields: list[str] | None = None,
 ) -> None:
-    adaptation = _adaptation_section(local_skill / "UPSTREAM.md")
+    upstream_file = local_skill / "UPSTREAM.md"
+    adaptation = _adaptation_section(upstream_file)
+    synchronization_field = _synchronization_field(upstream_file)
     lines = [
         "# Metadados do Upstream",
         "",
@@ -207,6 +233,8 @@ def _write_upstream(
     ]
     if extra_fields:
         lines.extend(extra_fields)
+    if synchronization_field is not None:
+        lines.append(synchronization_field)
     lines.extend(
         [
             f"commit: {metadata['sha']}",
@@ -289,12 +317,16 @@ def _sync_addyosmani(
     repo_root: Path,
     upstream_dir: Path,
     metadata: dict[str, str],
+    *,
+    frozen_skills: frozenset[str],
 ) -> None:
     license_text = (
         "MIT License - Copyright (c) Addy Osmani\n"
         "https://github.com/addyosmani/agent-skills/blob/main/LICENSE"
     )
     for skill_name in ADDYOSMANI_SKILLS:
+        if skill_name in frozen_skills:
+            continue
         upstream_skill = upstream_dir / "skills" / skill_name
         if not (upstream_skill / "SKILL.md").is_file():
             continue
@@ -475,22 +507,36 @@ def sync_skill(
 
     if name not in SPECS:
         raise SyncError(f"Upstream desconhecido: {name}")
+    family_skills = _family_skills(name)
+    frozen_skills = tuple(
+        skill_name
+        for skill_name in family_skills
+        if _is_skill_frozen(repo_root, skill_name)
+    )
+    if len(frozen_skills) == len(family_skills):
+        return SyncResult("skipped", frozen_skills)
+
     _validate_license(upstream_dir)
     metadata = _metadata(upstream_dir)
     if check_only:
-        return SyncResult("check-only")
+        return SyncResult("check-only", frozen_skills)
 
     if name == "accessibility-audit":
         _sync_accessibility(repo_root, upstream_dir, metadata)
     elif name == "addyosmani":
-        _sync_addyosmani(repo_root, upstream_dir, metadata)
+        _sync_addyosmani(
+            repo_root,
+            upstream_dir,
+            metadata,
+            frozen_skills=frozenset(frozen_skills),
+        )
     elif name == "humanizer-br":
         _sync_humanizer_br(repo_root, upstream_dir, metadata)
     elif name == "portugues-tecnico-controlado":
         _sync_portugues_tecnico_controlado(repo_root, upstream_dir, metadata)
     else:
         _sync_prompt_improver(repo_root, upstream_dir, metadata)
-    return SyncResult("success")
+    return SyncResult("success", frozen_skills)
 
 
 def _documented_commands(upstream_file: Path) -> list[str]:
@@ -636,6 +682,12 @@ def update_skill(
             skill_name,
             "no-clear-update-flow",
             "skill sem UPSTREAM.md; nao e considerada atualizavel",
+        )
+    if _is_skill_frozen(repo_root, skill_name):
+        return _format_update_result(
+            skill_name,
+            "frozen",
+            "skill congelada; nenhum comando de atualizacao foi executado",
         )
 
     commands = _documented_commands(upstream_file)
@@ -803,7 +855,13 @@ def run(
         )
         if parsed.command == "list":
             skills = list_updatable(repo_root)
-            output.write("\n".join(skills))
+            listed_skills = [
+                f"{skill} (congelada)"
+                if _is_skill_frozen(repo_root, skill)
+                else skill
+                for skill in skills
+            ]
+            output.write("\n".join(listed_skills))
             if skills:
                 output.write("\n")
             return 0
@@ -834,6 +892,8 @@ def run(
         finally:
             temporary.cleanup()
         output.write(f"status: {result.status}\n")
+        for skill_name in result.skipped_skills:
+            output.write(f"skipped_skill: {skill_name}\n")
         return 0
     except (SyncError, OSError, ValueError) as problem:
         error.write(f"ERRO: {problem}\n")
