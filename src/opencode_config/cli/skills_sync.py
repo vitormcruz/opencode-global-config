@@ -1112,7 +1112,7 @@ def _detect_upstream(family: str, repo_root: Path) -> str:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="opencode-skills",
-        description="Sincroniza skills externas e lista skills atualizaveis.",
+        description="Lista, detecta e sincroniza skills externas.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
