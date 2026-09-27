@@ -112,6 +112,7 @@ Não use esses overrides em uma validação completa.
 | prompt-improver | `opencode-skills sync prompt-improver` |
 | 12 skills addyosmani | `opencode-skills sync addyosmani` |
 | accessibility-audit | `opencode-skills sync accessibility-audit` |
+| writing-for-agents | `opencode-skills sync writing-for-agents` |
 
 Todos suportam `--yes` e `--check-only`.
 

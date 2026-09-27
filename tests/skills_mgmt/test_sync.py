@@ -961,3 +961,125 @@ def test_upstream_regeneration_preserves_synchronization_field(
 
 
 @pytest.mark.unit
+def test_writing_for_agents_sync_preserves_local_skill_and_notes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    local_skill = repo / "harness-conf/skills/writing-for-agents"
+    local_skill.mkdir(parents=True)
+    local_skill_file = local_skill / "SKILL.md"
+    local_skill_file.write_text("adapted local skill", encoding="utf-8")
+    local_metadata = local_skill / "UPSTREAM.md"
+    security_review = (
+        "Conteúdo total revisado na importação (commit citado acima):\n\n"
+        "- `SKILL.md`: texto metodológico sobre escrita para agentes.\n"
+        "- `SKILL-MECHANICS.md`: texto sobre frontmatter e invocação.\n"
+        "  Mesmo perfil, limpo.\n"
+    )
+    local_metadata.write_text(
+        "# Metadados do Upstream\n\n"
+        "repositorio: https://github.com/mattpocock/skills\n"
+        "branch: main\n"
+        "commit: c55ee46073ed923f86ce59a5eb3b6d895095d1b7\n"
+        "data_commit: 2026-09-18 11:12:29 +0100\n"
+        "sincronizado_em: 2026-09-22 23:30 UTC\n\n"
+        "## Como atualizar\n\n"
+        "Fluxo manual via bash em linha única, removido pelo sync.\n\n"
+        "## Segurança na importação (2026-09-22)\n\n"
+        f"{security_review}\n"
+        "## Licenca\n\n"
+        "MIT License - Copyright (c) 2026 Matt Pocock\n\n"
+        "## Adaptacao da description\n\n"
+        "Description convertida para PT-BR; corpo mantido em inglês.\n",
+        encoding="utf-8",
+    )
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License\nCopyright (c) Matt Pocock\n",
+            "skills/productivity/writing-for-agents/SKILL.md": "upstream skill",
+            "skills/productivity/writing-for-agents/SKILL-MECHANICS.md": (
+                "upstream mechanics"
+            ),
+        },
+    )
+
+    class Temporary:
+        def cleanup(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        skills_sync,
+        "_clone_upstream",
+        lambda _spec: (Temporary(), upstream),
+    )
+    sync_arguments = [
+        "sync",
+        "writing-for-agents",
+        "--yes",
+        "--repo-root",
+        str(repo),
+    ]
+    status = skills_sync.run(
+        sync_arguments,
+        output=StringIO(),
+        error=StringIO(),
+    )
+    second_status = skills_sync.run(
+        sync_arguments,
+        output=StringIO(),
+        error=StringIO(),
+    )
+
+    assert status == 0
+    assert second_status == 0
+    assert skills_sync.list_updatable(repo) == ["writing-for-agents"]
+    assert local_skill_file.read_text(encoding="utf-8") == "adapted local skill"
+    assert (local_skill / "SKILL-MECHANICS.md").read_text(
+        encoding="utf-8"
+    ) == "upstream mechanics"
+    regenerated_metadata = local_metadata.read_text(encoding="utf-8")
+    assert "description_lang: pt-br" in regenerated_metadata
+    assert (
+        "description_note: Converted to Brazilian Portuguese and enriched with trigger terms."
+        in regenerated_metadata
+    )
+    assert "SKILL-MECHANICS.md" in regenerated_metadata
+    assert "## Notas locais" in regenerated_metadata
+    assert security_review in regenerated_metadata
+    assert "## Segurança na importação" not in regenerated_metadata
+    assert "Fluxo manual via bash em linha única" not in regenerated_metadata
+    assert "## Adaptacao da description" in regenerated_metadata
+
+    list_output = StringIO()
+    list_status = skills_sync.run(
+        ["list", "--repo-root", str(repo)],
+        output=list_output,
+        error=StringIO(),
+    )
+    assert list_status == 0
+    assert "writing-for-agents" in list_output.getvalue()
+
+
+@pytest.mark.unit
+def test_sync_table_documents_every_cli_family(repo_root: Path) -> None:
+    agents_rules = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    sync_table = agents_rules.split("### Scripts de sync disponíveis", 1)[1].split(
+        "\n### ", 1
+    )[0]
+    documented_families = {
+        row.split("opencode-skills sync ", 1)[1].split("`", 1)[0]
+        for row in sync_table.splitlines()
+        if "opencode-skills sync " in row
+    }
+    cli_families = set(skills_sync.SPECS)
+
+    assert "writing-for-agents" in cli_families
+    assert cli_families <= documented_families, (
+        "famílias do CLI ausentes da tabela de sync do AGENTS.md: "
+        f"{sorted(cli_families - documented_families)}"
+    )
+
+
+@pytest.mark.integration

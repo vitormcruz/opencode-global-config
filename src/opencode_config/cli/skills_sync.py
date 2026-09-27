@@ -89,6 +89,11 @@ SPECS = {
         "https://github.com/carlosafjr-dev/humanizer-br.git",
         "master",
     ),
+    "writing-for-agents": SyncSpec(
+        "writing-for-agents",
+        "https://github.com/mattpocock/skills.git",
+        "main",
+    ),
     "portugues-tecnico-controlado": SyncSpec(
         "portugues-tecnico-controlado",
         "https://github.com/kayquer/portugues-tecnico-controlado.git",
@@ -211,6 +216,24 @@ def _adaptation_section(upstream_file: Path) -> str:
     return "" if match is None else match.group(0).rstrip()
 
 
+def _local_notes_section(upstream_file: Path) -> str:
+    if not upstream_file.is_file():
+        return ""
+    content = upstream_file.read_text(encoding="utf-8")
+    match = re.search(
+        r"^## (?:Notas locais|Segurança na importação(?:\s+\([^)]*\))?)\s*$.*?(?=^##\s|\Z)",
+        content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if match is None:
+        return ""
+
+    section = match.group(0).rstrip()
+    if section.startswith("## Segurança na importação"):
+        section = "## Notas locais" + section.partition("\n")[2]
+    return section
+
+
 def _copy_skill_md(upstream_skill: Path, local_skill: Path) -> None:
     local_skill.mkdir(parents=True, exist_ok=True)
     destination = local_skill / "SKILL.md"
@@ -231,6 +254,7 @@ def _write_upstream(
 ) -> None:
     upstream_file = local_skill / "UPSTREAM.md"
     adaptation = _adaptation_section(upstream_file)
+    local_notes = _local_notes_section(upstream_file)
     synchronization_field = _synchronization_field(upstream_file)
     lines = [
         "# Metadados do Upstream",
@@ -277,6 +301,8 @@ def _write_upstream(
     )
     if adaptation:
         lines.extend(["", adaptation])
+    if local_notes:
+        lines.extend(["", local_notes])
     (local_skill / "UPSTREAM.md").write_text(
         "\n".join(lines) + "\n",
         encoding="utf-8",
@@ -466,6 +492,45 @@ def _sync_humanizer_br(
     )
 
 
+def _sync_writing_for_agents(
+    repo_root: Path,
+    upstream_dir: Path,
+    metadata: dict[str, str],
+) -> None:
+    upstream_skill = (
+        upstream_dir / "skills" / "productivity" / "writing-for-agents"
+    )
+    skill_file = upstream_skill / "SKILL.md"
+    mechanics_file = upstream_skill / "SKILL-MECHANICS.md"
+    if not skill_file.is_file():
+        raise SyncError("SKILL.md da writing-for-agents nao encontrado no upstream.")
+    if not mechanics_file.is_file():
+        raise SyncError("SKILL-MECHANICS.md da writing-for-agents nao encontrado.")
+
+    local_skill = _skills_root(repo_root) / "writing-for-agents"
+    _copy_skill_md(upstream_skill, local_skill)
+    shutil.copy2(mechanics_file, local_skill / mechanics_file.name)
+    _write_upstream(
+        local_skill,
+        metadata=metadata,
+        repository=SPECS["writing-for-agents"].repository,
+        branch=SPECS["writing-for-agents"].branch,
+        files=[
+            "SKILL-MECHANICS.md  "
+            "(skills/productivity/writing-for-agents/SKILL-MECHANICS.md)"
+        ],
+        update_command="opencode-skills sync writing-for-agents",
+        license_text=(
+            "MIT License - Copyright (c) 2026 Matt Pocock\n"
+            "https://github.com/mattpocock/skills/blob/main/LICENSE"
+        ),
+        extra_fields=[
+            "description_lang: pt-br",
+            "description_note: Converted to Brazilian Portuguese and enriched with trigger terms.",
+        ],
+    )
+
+
 def _sync_portugues_tecnico_controlado(
     repo_root: Path,
     upstream_dir: Path,
@@ -539,6 +604,8 @@ def sync_skill(
         )
     elif name == "humanizer-br":
         _sync_humanizer_br(repo_root, upstream_dir, metadata)
+    elif name == "writing-for-agents":
+        _sync_writing_for_agents(repo_root, upstream_dir, metadata)
     elif name == "portugues-tecnico-controlado":
         _sync_portugues_tecnico_controlado(repo_root, upstream_dir, metadata)
     else:
