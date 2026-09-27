@@ -160,6 +160,50 @@ Verificação: conversa roteirizada com contestação de premissa no meio;
 a resposta seguinte corrige o ponto, identifica o conteúdo dependente e
 o reapresenta ajustado. Caso futuro da suíte de comunicação.
 
+**Item 7 — Plano abstraído e perguntas (aprovado).** Destinos: skill
+`question-orchestration` (acréscimos), `smart-planner`, `devflow`,
+skills `planning-and-task-breakdown` e `spec-driven-development`,
+`docs/workflow-agentes-dev.md` (ajustes de sentido).
+
+Princípio do plano abstraído (skill `question-orchestration`):
+
+- O humano aprova o plano, não o arquivo: aprova o plano que lhe foi
+  apresentado na conversa, não o documento físico que o agente edita.
+  Cabe ao agente abstrair o plano físico: traduzir o documento em
+  conteúdo significativo, apresentado por partes, para aprovação e
+  discussão. O arquivo fica como artefato interno, commitado e
+  consultável para auditoria.
+
+Regra de perguntas (skill `question-orchestration`):
+
+- Pergunte só o que tem efeito no resultado para o humano: decisão de
+  escopo, comportamento ou risco. Detalhe de escrita do plano ou do
+  artefato é do agente: resolva dentro do escopo aprovado e registre,
+  sem perguntar.
+
+Efeitos nos pontos da pesquisa:
+
+- `smart-planner`: substituir "mostre o diff ao humano" e "mostrar o
+  plano completo" por apresentação abstraída na conversa, por partes; o
+  diff fica como evidência interna do commit; "cat plans/<arquivo>.md"
+  vira nota de auditoria (o arquivo reflete o estado; a conversa carrega
+  o contexto).
+- `devflow`: "Apresentar plano ao humano para aprovação" com o sentido
+  de plano abstraído na conversa, não o arquivo.
+- `planning-and-task-breakdown`: checklist "Humano revisou e aprovou o
+  plano" com o sentido de plano apresentado na conversa.
+- `spec-driven-development`: "The plan must be reviewable: the human
+  can read it" muda para apresentação abstraída na conversa; o diagrama
+  "Human reviews" por fase mantém o gate, com o sentido de conteúdo
+  apresentado.
+- `docs/workflow-agentes-dev.md`: "Humano aprova o plano antes da
+  construção" mantém o texto, com o sentido corrigido.
+
+Verificação: conversa roteirizada de planejamento; a transcrição não
+apresenta diff, plano completo ou caminho de arquivo ao humano; toda
+aprovação é sobre conteúdo apresentado na conversa; nenhuma pergunta
+sobre detalhe de escrita do plano. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
