@@ -18,6 +18,10 @@ import shutil
 import sys
 from typing import TextIO
 
+from opencode_config.bootstrap.ai_memory import (
+    AI_MEMORY_MCP_URL,
+    is_ai_memory_provisioned,
+)
 from opencode_config.harnesses import ApplyOptions, HarnessError
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import HARNESS_CONF_DIR
@@ -660,6 +664,82 @@ def _sync_agents_base(
     output("OK    AGENTS.md (base global)")
 
 
+def _sync_mcp_config(
+    repository: Path,
+    home: Path,
+    backup_dir: Path,
+    *,
+    ai_memory_enabled: bool,
+    output: Callable[[str], None],
+) -> None:
+    destination = home / ".copilot" / "mcp-config.json"
+    existing: dict[str, object] = {}
+    if destination.is_file():
+        try:
+            loaded = json.loads(destination.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            raise AdapterError(f"JSON inválido em {destination}; a configuração foi preservada.") from error
+        if not isinstance(loaded, dict):
+            raise AdapterError(f"A raiz de {destination} precisa ser um objeto JSON.")
+        existing = loaded
+
+    servers = existing.get("mcpServers", {})
+    if not isinstance(servers, dict):
+        raise AdapterError(f"mcpServers em {destination} precisa ser um objeto JSON.")
+
+    if ai_memory_enabled:
+        canonical_path = repository / HARNESS_CONF_DIR / "opencode.json"
+        try:
+            canonical = json.loads(canonical_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise AdapterError(
+                f"Não foi possível ler a config canônica {canonical_path}: {error}"
+            ) from error
+        canonical_servers = canonical.get("mcp") if isinstance(canonical, dict) else None
+        canonical_server = (
+            canonical_servers.get("ai-memory")
+            if isinstance(canonical_servers, dict)
+            else None
+        )
+        if (
+            not isinstance(canonical_server, dict)
+            or canonical_server.get("url") != AI_MEMORY_MCP_URL
+        ):
+            raise AdapterError("harness-conf/opencode.json não declara mcp.ai-memory.")
+        desired = {
+            "type": "http",
+            "url": AI_MEMORY_MCP_URL,
+        }
+        current = servers.get("ai-memory")
+        if current is not None and current != desired:
+            raise AdapterError(
+                f"mcpServers.ai-memory já existe em {destination} com outro "
+                "destino. Preserve a entrada ou remova-a após backup explícito."
+            )
+        if current == desired:
+            return
+        servers["ai-memory"] = desired
+    elif servers.get("ai-memory") == {
+        "type": "http",
+        "url": AI_MEMORY_MCP_URL,
+    }:
+        del servers["ai-memory"]
+    else:
+        return
+
+    if servers:
+        existing["mcpServers"] = servers
+    else:
+        existing.pop("mcpServers", None)
+    backup_copy(destination, backup_dir)
+    _write_utf8(
+        destination,
+        json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
+    )
+    action = "declarado" if ai_memory_enabled else "removido"
+    output(f"OK    MCP ai-memory {action} em {destination}")
+
+
 def _print_plan(
     repository: Path,
     skill_plan: CopilotSkillPlan,
@@ -726,6 +806,7 @@ def synchronize(
     input_stream: TextIO | None = None,
     output: TextIO | None = None,
     error: TextIO | None = None,
+    ai_memory_enabled: bool | None = None,
 ) -> None:
     """Sincroniza todos os artefatos sem reescrever scripts de skills."""
 
@@ -737,6 +818,11 @@ def synchronize(
     resolved_repository = repository.expanduser().resolve()
     resolved_dest_root = dest_root.expanduser().resolve()
     copilot_dir = resolved_dest_root / ".copilot"
+    include_ai_memory = (
+        is_ai_memory_provisioned(resolved_dest_root)
+        if ai_memory_enabled is None
+        else ai_memory_enabled
+    )
     skill_plan = _build_skill_plan(resolved_repository, copilot_dir)
     skills_dir = skill_plan.discovery_directory
     agents_dir = copilot_dir / "agents"
@@ -767,6 +853,13 @@ def synchronize(
         backup_dir,
         say,
     )
+    _sync_mcp_config(
+        resolved_repository,
+        resolved_dest_root,
+        backup_dir,
+        ai_memory_enabled=include_ai_memory,
+        output=say,
+    )
     say("")
     say("Pronto.")
 
@@ -782,6 +875,11 @@ class CopilotAdapter:
         return shutil.which("copilot") is not None
 
     def apply(self, repository: Path, options: ApplyOptions) -> None:
+        ai_memory_enabled = (
+            is_ai_memory_provisioned(options.home)
+            if options.ai_memory_enabled is None
+            else options.ai_memory_enabled
+        )
         synchronize(
             repository,
             options.home,
@@ -791,4 +889,5 @@ class CopilotAdapter:
             input_stream=sys.stdin,
             output=options.output,
             error=options.error,
+            ai_memory_enabled=ai_memory_enabled,
         )

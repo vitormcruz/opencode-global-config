@@ -92,6 +92,57 @@ No Windows, os quatro destinos de `harness-conf/` (agents, commands, skills,
 conteudo divergente. Divergencias entre execucoes sao realinhadas no proximo
 sync.
 
+### ai-memory
+
+O bootstrap provisiona o ai-memory em user-space quando Docker está
+disponível. O wrapper vem de um release oficial do GitHub e passa por
+validação SHA-256 fixada no código. A imagem continua em `:latest`, conforme
+decisão do produto. O container publica apenas `127.0.0.1:49374` e usa uma
+rede Docker `internal`, sem rota de saída padrão.
+
+O volume fica em `~/.local/share/ai-memory/`. A wiki contém prompts em texto
+claro. Trate o diretório como dado sensível: não o versione nem o sincronize
+para um destino compartilhado. No POSIX, o bootstrap restringe o diretório ao
+usuário. O bootstrap não instala chaves de LLM.
+
+Depois de provisionar o container, o bootstrap executa `ai-memory install-hooks`
+para gerar o plugin OpenCode. O plugin é artefato local regenerável e não é
+versionado. O Copilot recebe somente a declaração MCP; os hooks de compactação
+continuam limitados ao OpenCode.
+
+O bootstrap não substitui um wrapper com checksum divergente. A mensagem de
+erro informa o caminho para backup e remoção explícita antes de reexecutar.
+Container antigo com mount incompatível também bloqueia a injeção. Confira o
+mount de `/data` e faça uma cópia dos dados antes de reverter essa instalação.
+
+Sem Docker, o bootstrap avisa e orienta a instalação de um runtime em user-space,
+sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. Em Linux,
+use Docker rootless. No WSL, use Docker Desktop com integração WSL. Consulte
+<https://docs.docker.com/engine/security/rootless/> ou
+<https://docs.docker.com/desktop/setup/install/>. Depois de iniciar o runtime,
+execute o bootstrap novamente.
+
+No Linux/WSL, o adapter mantém `opencode.json` como symlink canônico quando o
+provisionamento termina. Enquanto o ai-memory estiver desabilitado, o adapter
+substitui o symlink por uma cópia filtrada que não declara esse MCP. Após um
+provisionamento completo, a próxima execução restaura o symlink canônico. No
+Copilot, o adapter mescla `mcpServers.ai-memory` e preserva as demais entradas.
+O adapter cria backup antes de alterar `~/.copilot/mcp-config.json`.
+
+O bootstrap move `~/.config/opencode/opencode.jsonc` para
+`~/.config/opencode-backup/<timestamp>/opencode.jsonc`, sem editar o conteúdo.
+
+Para reverter a integração, execute:
+
+```bash
+opencode-bootstrap --rollback-ai-memory
+```
+
+O rollback para e remove o container e a rede internal criada pelo bootstrap.
+O rollback faz backup e remove hooks e wrappers gerenciados, remove declarações
+MCP e restaura o backup de `opencode.jsonc`. O rollback preserva
+`~/.local/share/ai-memory/`. A remoção do volume é uma ação separada do usuário.
+
 ## Variaveis de ambiente
 
 - `OPENCODE_CONFIG_REPO`: substitui a detecção automática da raiz do checkout;
@@ -142,6 +193,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
+| ai-memory | Docker rootless; no WSL, Docker Desktop integrado | Docker Desktop em escopo do usuário |
 | ruff | `pipx install ruff` | `pipx install ruff` |
 | shellcheck | `pipx install shellcheck-py` | release oficial no cache user-space |
 | pwsh | arquivo portatil em user-space | arquivo zip em user-space |
@@ -231,8 +283,9 @@ orquestrados pelo bootstrap via factory:
 
 | Adapter | Entrada | Destino |
 |---|---|---|
-| `harnesses/opencode.py` (CLI: `opencode-adapter`) | agents, skills, commands e configuração | Linux/WSL: links em `~/.config/opencode/`; Windows: cópia sincronizada em `%USERPROFILE%\.config\opencode` |
-| `harnesses/copilot.py` (CLI: `opencode-copilot-adapter`) | fonte canônica transformada | `~/.copilot/` em qualquer sistema |
+| `opencode-adapter` | agents, skills, commands e configuração | Linux/WSL: `~/.config/opencode/` |
+|  |  | Windows: `%USERPROFILE%\.config\opencode` |
+| `harnesses/copilot.py` (`opencode-copilot-adapter`) | fonte canônica transformada | `~/.copilot/` |
 
 No Linux/WSL o adapter OpenCode cria links simbólicos. No Windows usa cópia
 sincronizada e persiste env vars de usuário em `HKCU\Environment` com

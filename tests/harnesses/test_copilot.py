@@ -765,6 +765,178 @@ def test_factory_returns_both_adapters_when_selected() -> None:
 
 
 @pytest.mark.unit
+def test_copilot_adapter_merges_ai_memory_without_losing_existing_servers(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_repo,
+    tmp_path: Path,
+) -> None:
+    repo_root = fake_repo(
+        {
+            "harness-conf/agents/planner.md": "---\ndescription: Planner\n---\n",
+            "harness-conf/commands/example.md": "# Example\n",
+            "harness-conf/skills/global/SKILL.md": "# Global\n",
+            "harness-conf/opencode.json": json.dumps(
+                {
+                    "mcp": {
+                        "ai-memory": {
+                            "type": "remote",
+                            "url": "http://127.0.0.1:49374/mcp",
+                        }
+                    }
+                }
+            ),
+        }
+    )
+    ready_marker = (
+        tmp_path / ".local" / "share" / "ai-memory" / ".bootstrap-provisioned"
+    )
+    ready_marker.parent.mkdir(parents=True)
+    ready_marker.write_text("ready", encoding="utf-8")
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir(parents=True)
+    preexisting_config = {
+        "otherSetting": "preserved",
+        "mcpServers": {
+            "existing-server": {
+                "type": "http",
+                "url": "http://127.0.0.1:49375/mcp",
+            }
+        },
+    }
+    config_path.write_text(json.dumps(preexisting_config), encoding="utf-8")
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    merged = json.loads(config_path.read_text(encoding="utf-8"))
+    assert merged["otherSetting"] == "preserved"
+    assert (
+        merged["mcpServers"]["existing-server"]
+        == (preexisting_config["mcpServers"]["existing-server"])
+    )
+    assert merged["mcpServers"]["ai-memory"] == {
+        "type": "http",
+        "url": "http://127.0.0.1:49374/mcp",
+    }
+    backups = list((tmp_path / ".config" / "copilot-backup").rglob("mcp-config.json"))
+    assert backups
+    assert json.loads(backups[0].read_text(encoding="utf-8")) == preexisting_config
+
+
+@pytest.mark.unit
+def test_copilot_adapter_removes_ai_memory_entry_when_provisioning_is_incomplete(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_repo,
+    tmp_path: Path,
+) -> None:
+    repo_root = fake_repo(
+        {
+            "harness-conf/agents/planner.md": "---\ndescription: Planner\n---\n",
+            "harness-conf/commands/example.md": "# Example\n",
+            "harness-conf/skills/global/SKILL.md": "# Global\n",
+            "harness-conf/opencode.json": "{}",
+        }
+    )
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir(parents=True)
+    existing_config = {
+        "mcpServers": {
+            "ai-memory": {"type": "http", "url": "http://127.0.0.1:49374/mcp"},
+            "user-server": {"type": "http", "url": "http://127.0.0.1:49375/mcp"},
+        }
+    }
+    config_path.write_text(json.dumps(existing_config), encoding="utf-8")
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    merged = json.loads(config_path.read_text(encoding="utf-8"))
+    assert merged["mcpServers"] == {
+        "user-server": existing_config["mcpServers"]["user-server"]
+    }
+    backups = list((tmp_path / ".config" / "copilot-backup").rglob("mcp-config.json"))
+    assert backups
+
+
+@pytest.mark.unit
+def test_copilot_adapter_rejects_collision_with_a_user_ai_memory_server(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_repo,
+    tmp_path: Path,
+) -> None:
+    repo_root = fake_repo(
+        {
+            "harness-conf/agents/planner.md": "---\ndescription: Planner\n---\n",
+            "harness-conf/commands/example.md": "# Example\n",
+            "harness-conf/skills/global/SKILL.md": "# Global\n",
+            "harness-conf/opencode.json": json.dumps(
+                {
+                    "mcp": {
+                        "ai-memory": {
+                            "type": "remote",
+                            "url": "http://127.0.0.1:49374/mcp",
+                        }
+                    }
+                }
+            ),
+        }
+    )
+    ready_marker = (
+        tmp_path / ".local" / "share" / "ai-memory" / ".bootstrap-provisioned"
+    )
+    ready_marker.parent.mkdir(parents=True)
+    ready_marker.write_text("ready", encoding="utf-8")
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir(parents=True)
+    user_server = {"type": "http", "url": "http://remote.example/mcp"}
+    config_path.write_text(
+        json.dumps({"mcpServers": {"ai-memory": user_server}}),
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 1
+    assert "ai-memory" in error
+    assert json.loads(config_path.read_text(encoding="utf-8"))["mcpServers"] == {
+        "ai-memory": user_server
+    }
+
+
+@pytest.mark.unit
+def test_copilot_adapter_keeps_user_ai_memory_entry_when_provisioning_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_repo,
+    tmp_path: Path,
+) -> None:
+    repo_root = fake_repo(
+        {
+            "harness-conf/agents/planner.md": "---\ndescription: Planner\n---\n",
+            "harness-conf/commands/example.md": "# Example\n",
+            "harness-conf/skills/global/SKILL.md": "# Global\n",
+            "harness-conf/opencode.json": "{}",
+        }
+    )
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir(parents=True)
+    user_server = {"type": "http", "url": "http://remote.example/mcp"}
+    config_path.write_text(
+        json.dumps({"mcpServers": {"ai-memory": user_server}}),
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    assert json.loads(config_path.read_text(encoding="utf-8"))["mcpServers"] == {
+        "ai-memory": user_server
+    }
+
+
+@pytest.mark.unit
 def test_copilot_installed_uses_path_lookup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

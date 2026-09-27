@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import os
 from pathlib import Path
 import shutil
@@ -149,13 +150,36 @@ def test_repo_state_commands_symlink_points_to_repo(
     ).resolve()
 
 
-def test_repo_state_opencode_json_symlink_points_to_repo(
+def test_repo_state_opencode_json_matches_a_valid_provisioning_state(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "opencode.json"
-    assert destination.is_symlink() and destination.resolve() == (
+    canonical_config = (
         bootstrapped_repo_state.repository / "harness-conf" / "opencode.json"
-    ).resolve()
+    )
+
+    if destination.is_symlink():
+        assert destination.resolve() == canonical_config.resolve()
+        return
+
+    assert destination.is_file()
+    assert not destination.is_symlink()
+    canonical = json.loads(canonical_config.read_text(encoding="utf-8"))
+    expected = dict(canonical)
+    if isinstance(expected.get("mcp"), dict):
+        filtered_servers = {
+            name: server
+            for name, server in expected["mcp"].items()
+            if name != "ai-memory"
+        }
+        if filtered_servers:
+            expected["mcp"] = filtered_servers
+        else:
+            expected.pop("mcp")
+    actual = json.loads(destination.read_text(encoding="utf-8"))
+
+    assert actual == expected
+    assert "ai-memory" not in actual.get("mcp", {})
 
 
 def test_repo_state_skills_symlink_points_to_repo(

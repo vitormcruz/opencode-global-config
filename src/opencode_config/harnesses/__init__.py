@@ -25,6 +25,7 @@ class ApplyOptions:
     timestamp: str | None = None
     output: TextIO | None = None
     error: TextIO | None = None
+    ai_memory_enabled: bool | None = None
 
     def resolve_streams(
         self,

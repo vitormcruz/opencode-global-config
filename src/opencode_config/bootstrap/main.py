@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+import json
 import os
 import re
 import sys
@@ -19,6 +20,11 @@ from opencode_config.lib.environment import (
 )
 from opencode_config.lib.paths import resolve_user_space_paths
 
+from .ai_memory import (
+    disable_ai_memory,
+    provision_ai_memory,
+    rollback_ai_memory,
+)
 from .installers import InstallContext, ensure_path_entry
 from .interactive import InteractiveError, run_bootstrap
 
@@ -26,13 +32,15 @@ from .interactive import InteractiveError, run_bootstrap
 HELP_TEXT = """opencode-bootstrap
 
 Uso:
-  opencode-bootstrap [--yes] [--quiet] [--check-only] [--repo-root PATH]
+  opencode-bootstrap [--yes] [--quiet] [--check-only] [--rollback-ai-memory]
+                     [--repo-root PATH]
                      [--harness LISTA]
 
 Opcoes:
   --yes             Instala dependencias ausentes sem perguntar
   --quiet           Suprime a tabela e o progresso
   --check-only      Detecta e exibe comandos manuais sem instalar
+  --rollback-ai-memory  Remove a integração e preserva os dados ai-memory
   --repo-root PATH  Define a raiz do repositorio
   --harness LISTA   Configura apenas os harnesses listados
                     (ex.: opencode,copilot); default: todos os instalados
@@ -49,10 +57,11 @@ def _parse_harness_selection(raw: str) -> list[str]:
 
 def _parse_arguments(
     arguments: Sequence[str],
-) -> tuple[bool, bool, bool, str | None, list[str] | None, bool]:
+) -> tuple[bool, bool, bool, bool, str | None, list[str] | None, bool]:
     assume_yes = False
     quiet = False
     check_only = False
+    rollback = False
     repo_root: str | None = None
     harness_selection: list[str] | None = None
     index = 0
@@ -64,8 +73,10 @@ def _parse_arguments(
             quiet = True
         elif argument == "--check-only":
             check_only = True
+        elif argument == "--rollback-ai-memory":
+            rollback = True
         elif argument in {"--help", "-h"}:
-            return assume_yes, quiet, check_only, None, None, True
+            return assume_yes, quiet, check_only, rollback, None, None, True
         elif argument == "--repo-root":
             index += 1
             if index >= len(arguments):
@@ -85,11 +96,31 @@ def _parse_arguments(
         else:
             raise ValueError(f"Opcao desconhecida: {argument}")
         index += 1
-    return assume_yes, quiet, check_only, repo_root, harness_selection, False
+    return (
+        assume_yes,
+        quiet,
+        check_only,
+        rollback,
+        repo_root,
+        harness_selection,
+        False,
+    )
 
 
 def _default_repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
+
+
+def _repo_declares_ai_memory(repository: Path) -> bool:
+    configuration = repository / "harness-conf" / "opencode.json"
+    if not configuration.is_file():
+        return False
+    try:
+        parsed = json.loads(configuration.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    servers = parsed.get("mcp", {}) if isinstance(parsed, dict) else {}
+    return isinstance(servers, dict) and "ai-memory" in servers
 
 
 def _apply_harnesses(
@@ -101,6 +132,7 @@ def _apply_harnesses(
     quiet: bool,
     output: TextIO,
     error: TextIO,
+    ai_memory_enabled: bool | None = None,
 ) -> int:
     """Configura cada harness selecionado, instalado e nao-pulado (ADR-0004)."""
 
@@ -123,6 +155,7 @@ def _apply_harnesses(
                     quiet=quiet,
                     output=output,
                     error=error,
+                    ai_memory_enabled=ai_memory_enabled,
                 ),
             )
         except (HarnessError, OSError) as problem:
@@ -256,9 +289,15 @@ def run(
     error: TextIO,
 ) -> int:
     try:
-        assume_yes, quiet, check_only, repo_arg, harness_selection, show_help = (
-            _parse_arguments(arguments)
-        )
+        (
+            assume_yes,
+            quiet,
+            check_only,
+            rollback,
+            repo_arg,
+            harness_selection,
+            show_help,
+        ) = _parse_arguments(arguments)
     except ValueError as problem:
         error.write(f"ERRO: {problem}\n{HELP_TEXT}")
         return 2
@@ -274,16 +313,48 @@ def run(
             if repo_arg is None
             else Path(repo_arg).expanduser().resolve()
         )
+        if rollback and (check_only or harness_selection is not None):
+            error.write(
+                "ERRO: --rollback-ai-memory não aceita --check-only nem "
+                "--harness; o rollback precisa atualizar os dois harnesses.\n"
+            )
+            return 2
+
+        if rollback:
+            context = _context_for(environment, repo_root, persist_paths=False)
+            rollback_result = rollback_ai_memory(context, output=output)
+            adapter_status = _apply_harnesses(
+                environment,
+                repo_root,
+                None,
+                assume_yes=True,
+                quiet=quiet,
+                output=output,
+                error=error,
+                ai_memory_enabled=False,
+            )
+            return max(1 if rollback_result.failed else 0, adapter_status)
+
         _cleanup_legacy_bashrc(check_only=check_only)
+        context = _context_for(
+            environment,
+            repo_root,
+            persist_paths=not check_only,
+        )
         if os.environ.get("OPENCODE_SKIP_DEPS") == "1":
             bootstrap_result = None
+            memory_result = (
+                None
+                if check_only
+                else disable_ai_memory(
+                    context,
+                    reason="provisionamento ignorado por OPENCODE_SKIP_DEPS=1.",
+                    output=output,
+                )
+            )
         else:
             bootstrap_result = run_bootstrap(
-                context=_context_for(
-                    environment,
-                    repo_root,
-                    persist_paths=not check_only,
-                ),
+                context=context,
                 repo_root=repo_root,
                 environment=environment,
                 assume_yes=assume_yes,
@@ -292,6 +363,7 @@ def run(
                 input_stream=sys.stdin,
                 output=output,
             )
+            memory_result = None
     except (InteractiveError, UnsupportedEnvironmentError) as problem:
         error.write(f"ERRO: {problem}\n")
         return 1
@@ -304,6 +376,17 @@ def run(
     if check_only:
         return status
 
+    if memory_result is None and _repo_declares_ai_memory(repo_root):
+        memory_result = provision_ai_memory(context, output=output)
+    elif memory_result is None:
+        memory_result = disable_ai_memory(
+            context,
+            reason="a configuração canônica não declara mcp.ai-memory.",
+            output=output,
+        )
+    if memory_result.failed:
+        status = 1
+
     adapter_status = _apply_harnesses(
         environment,
         repo_root,
@@ -312,6 +395,7 @@ def run(
         quiet=quiet,
         output=output,
         error=error,
+        ai_memory_enabled=memory_result.provisioned,
     )
     return max(status, adapter_status)
 

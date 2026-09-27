@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from datetime import datetime
+import json
 import os
 from pathlib import Path
 import re
@@ -17,14 +18,21 @@ import sys
 from typing import Protocol, TextIO
 
 from opencode_config.harnesses import ApplyOptions, HarnessError
+from opencode_config.bootstrap.ai_memory import (
+    AiMemoryProvisionError,
+    filter_ai_memory_config,
+    is_ai_memory_provisioned,
+)
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import HARNESS_CONF_DIR
 from opencode_config.lib.sync import (
     backup_move,
+    backup_copy,
     link_one,
     link_target,
     paths_equal,
     resolve_target,
+    remove_path,
     sync_path,
 )
 from opencode_config.lib.versions import fnm_node_bin_dir
@@ -73,6 +81,14 @@ class OpenCodeEnvStrategy(Protocol):
         source: Path,
         destination: Path,
         backup_dir: Path,
+    ) -> None: ...
+
+    def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
     ) -> None: ...
 
     def env_status(
@@ -189,6 +205,21 @@ class OpenCodePosix:
     ) -> None:
         link_one(source, destination, backup_dir)
 
+    def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
+    ) -> None:
+        del source
+        if destination.is_file() and not destination.is_symlink():
+            if destination.read_text(encoding="utf-8") == content:
+                return
+        backup_move(destination, backup_dir)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(content, encoding="utf-8")
+
     def env_status(
         self,
         home: Path,
@@ -246,6 +277,23 @@ class OpenCodeWindows:
         backup_dir: Path,
     ) -> None:
         sync_path(source, destination, backup_dir)
+
+    def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
+    ) -> None:
+        del source
+        if destination.is_file() and not destination.is_symlink():
+            if destination.read_text(encoding="utf-8") == content:
+                return
+        if destination.exists() or destination.is_symlink():
+            backup_copy(destination, backup_dir)
+            remove_path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(content, encoding="utf-8")
 
     def env_status(
         self,
@@ -352,6 +400,11 @@ class OpenCodeAdapter:
             "%Y%m%d-%H%M%S"
         )
         backup_dir = home / ".config" / "opencode-backup" / backup_name
+        ai_memory_enabled = (
+            is_ai_memory_provisioned(home)
+            if options.ai_memory_enabled is None
+            else options.ai_memory_enabled
+        )
 
         _print_plan(
             resolved_repository,
@@ -359,6 +412,7 @@ class OpenCodeAdapter:
             config_dir,
             backup_dir,
             strategy,
+            ai_memory_enabled,
             write,
         )
         _confirm(options.assume_yes, sys.stdin, output, error)
@@ -366,11 +420,25 @@ class OpenCodeAdapter:
         write("Aplicando...")
         config_dir.mkdir(parents=True, exist_ok=True)
         for source, destination in strategy.destinations():
-            strategy.materialize(
-                resolved_repository / source,
-                config_dir / destination,
-                backup_dir,
-            )
+            source_path = resolved_repository / source
+            destination_path = config_dir / destination
+            if (
+                destination == "opencode.json"
+                and not ai_memory_enabled
+                and _configuration_declares_ai_memory(source_path)
+            ):
+                strategy.materialize_filtered_config(
+                    source_path,
+                    destination_path,
+                    backup_dir,
+                    _configuration_without_ai_memory(source_path),
+                )
+            else:
+                strategy.materialize(
+                    source_path,
+                    destination_path,
+                    backup_dir,
+                )
         _sync_agents_base(
             resolved_repository,
             config_dir,
@@ -387,6 +455,7 @@ def _print_plan(
     config_dir: Path,
     backup_dir: Path,
     strategy: OpenCodeEnvStrategy,
+    ai_memory_enabled: bool,
     output: Callable[[str], None],
 ) -> None:
     output(f"Repo:   {repository}")
@@ -398,12 +467,23 @@ def _print_plan(
         output(f"MKDIR {config_dir}")
 
     for source, destination in strategy.destinations():
-        output(
-            strategy.status_line(
-                repository / source,
-                config_dir / destination,
+        source_path = repository / source
+        if (
+            destination == "opencode.json"
+            and not ai_memory_enabled
+            and _configuration_declares_ai_memory(source_path)
+        ):
+            output(
+                f"CP    {config_dir / destination} "
+                "(configuração filtrada: MCP ai-memory não provisionado)"
             )
-        )
+        else:
+            output(
+                strategy.status_line(
+                    source_path,
+                    config_dir / destination,
+                )
+            )
 
     agents_md = config_dir / "AGENTS.md"
     existing = _read_text(agents_md)
@@ -417,3 +497,21 @@ def _print_plan(
 
     for line in strategy.env_status(home, os.environ):
         output(line)
+
+
+def _configuration_without_ai_memory(source: Path) -> str:
+    try:
+        return filter_ai_memory_config(source.read_text(encoding="utf-8"))
+    except AiMemoryProvisionError as error:
+        raise AdapterError(str(error)) from error
+
+
+def _configuration_declares_ai_memory(source: Path) -> bool:
+    try:
+        configuration = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise AdapterError(
+            f"Não foi possível ler a configuração canônica {source}: {error}"
+        ) from error
+    servers = configuration.get("mcp") if isinstance(configuration, dict) else None
+    return isinstance(servers, dict) and "ai-memory" in servers
