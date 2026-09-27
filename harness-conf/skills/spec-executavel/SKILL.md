@@ -9,9 +9,10 @@ description: >
   o veredito do teste).
   Triggers: "spec executável",
   "especificação executável", "critérios de aceitação", "critério de aceitação",
-  "Gherkin", "BDD", "Cenário", "Esquema do Cenário", "Dado que", "Quando tento",
-  "Então", "specification by example", "cenário verificável", "automatizar
-  critérios", "concordion", "cucumber", "behavior driven".
+  "Gherkin", "BDD", "Cenário em Gherkin", "Esquema do Cenário",
+  "Dado que em Gherkin", "Quando tento em Gherkin", "Então em Gherkin",
+  "specification by example", "cenário verificável", "automatizar critérios",
+  "concordion", "cucumber", "behavior driven".
 ---
 
 # Especificação Executável
