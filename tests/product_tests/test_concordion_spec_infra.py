@@ -9,6 +9,7 @@ correta e que as fixtures existem com os métodos declarados.
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 
@@ -16,11 +17,12 @@ import pytest
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 GROOVY_DIR = REPOSITORY_ROOT / "src" / "test" / "groovy"
 
-SPECIALTY_ADRS = {
-    "backend": ("Adr0001Fixture", "Adr0002Fixture", "Adr0003Fixture",
-                "Adr0004Fixture", "Adr0005Fixture"),
-    "seguranca": ("Adr0006Fixture",),
-}
+
+def numbered_adrs(repo_root: Path) -> list[tuple[str, str]]:
+    return [
+        (path.name[:4], f"Adr{path.name[:4]}Fixture")
+        for path in sorted(repo_root.joinpath("docs", "adr").glob("[0-9][0-9][0-9][0-9]-*.md"))
+    ]
 
 
 @pytest.mark.unit
@@ -33,13 +35,13 @@ def test_build_renders_adr_specs_with_fixture_names(repo_root: Path) -> None:
 
 
 @pytest.mark.integration
-def test_render_adr_specs_task_derives_exactly_the_six_adr_specs(
+def test_render_adr_specs_task_derives_every_numbered_adr_spec(
     repo_root: Path,
 ) -> None:
-    """Guarda comportamental: a task real deriva as 6 specs, sem diagramas.
+    """Guarda comportamental: a task deriva as specs numeradas, sem diagramas.
 
     Executa ``gradle renderAdrSpecs`` do build real (validação dirigida do
-    build; não executa suítes de teste) e exige as seis saídas derivadas e a
+    build; não executa suítes de teste) e exige as saídas derivadas e a
     ausência dos diagramas C4 no classpath. Um include que não case nada
     (task NO-SOURCE silenciosa) ou que copie diagramas faz este teste falhar.
     """
@@ -76,45 +78,31 @@ def test_render_adr_specs_task_derives_exactly_the_six_adr_specs(
 
     generated = repo_root / "build" / "generated" / "adr-specs"
     derived = sorted(path.name for path in generated.glob("*.md"))
-    assert derived == [
-        "Adr0001.md",
-        "Adr0002.md",
-        "Adr0003.md",
-        "Adr0004.md",
-        "Adr0005.md",
-        "Adr0006.md",
-    ]
+    assert derived == [f"Adr{number}.md" for number, _ in numbered_adrs(repo_root)]
     assert list(generated.glob("diagrama-*")) == []
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ("specialty", "fixtures"),
-    sorted(SPECIALTY_ADRS.items()),
+    ("adr_number", "fixture"),
+    numbered_adrs(REPOSITORY_ROOT),
 )
-def test_build_includes_adr_fixtures_in_the_specialty_suite(
+def test_build_registers_each_adr_fixture_in_one_specialty_suite(
     repo_root: Path,
-    specialty: str,
-    fixtures: tuple[str, ...],
+    adr_number: str,
+    fixture: str,
 ) -> None:
     build = (repo_root / "build.gradle").read_text(encoding="utf-8")
 
-    assert specialty in build
-    for fixture in fixtures:
-        assert fixture in build
+    assert re.search(rf"'{fixture}'", build)
+    assert build.count(f"'{fixture}'") == 1
+    assert f"Adr{adr_number}" == fixture.removesuffix("Fixture")
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
     ("adr_number", "fixture"),
-    [
-        ("0001", "Adr0001Fixture"),
-        ("0002", "Adr0002Fixture"),
-        ("0003", "Adr0003Fixture"),
-        ("0004", "Adr0004Fixture"),
-        ("0005", "Adr0005Fixture"),
-        ("0006", "Adr0006Fixture"),
-    ],
+    numbered_adrs(REPOSITORY_ROOT),
 )
 def test_every_adr_has_a_real_fixture_with_the_declared_api(
     adr_number: str,
@@ -151,3 +139,15 @@ def test_adr0006_fixture_checks_canonical_config_for_mcp_entries() -> None:
 
     assert "opencode.json" in body
     assert "JsonSlurper" in body
+
+
+@pytest.mark.unit
+def test_adr0007_fixture_checks_upstream_detection() -> None:
+    body = (GROOVY_DIR / "Adr0007Fixture.groovy").read_text(encoding="utf-8")
+    build = (REPOSITORY_ROOT / "build.gradle").read_text(encoding="utf-8")
+    backend_fixtures = re.search(r"backend\s*:\s*\[(.*?)\]", build, re.DOTALL)
+
+    assert backend_fixtures is not None
+    assert "Adr0007Fixture" in backend_fixtures.group(1)
+    assert "opencode-skills detect" in body
+    assert "test_upstream_detect.py" in body

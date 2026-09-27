@@ -251,8 +251,9 @@ Os dois comandos funcionam em Linux, WSL e Windows; cada adapter configura
 seu harness no formato do sistema corrente. O bootstrap executa ambos
 automaticamente quando os harnesses estão instalados.
 
-O adapter OpenCode não altera arquivos da fonte canônica. A sincronização de
-skills upstream é uma operação separada: `opencode-skills sync NOME`.
+O adapter OpenCode não altera arquivos da fonte canônica. Para revisar mudanças
+sem alterar skills, execute `opencode-skills detect FAMÍLIA`. Depois da decisão
+humana e das edições aprovadas, sincronize com `opencode-skills sync FAMÍLIA`.
 
 Destinos sincronizados pelo Copilot CLI:
 
