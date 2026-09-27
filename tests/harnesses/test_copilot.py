@@ -1,5 +1,7 @@
 """Testes do harness Copilot CLI: adapter, conversoes e wrapper CLI."""
 
+import json
+from fnmatch import fnmatchcase
 from pathlib import Path
 import re
 
@@ -311,7 +313,12 @@ def test_copilot_adapter_adds_skill_frontmatter(
 
     assert status == 0
     skill = (
-        tmp_path / ".copilot" / "skills" / "browser-testing" / "SKILL.md"
+        tmp_path
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "browser-testing"
+        / "SKILL.md"
     ).read_text(encoding="utf-8")
     assert "name: browser-testing" in skill
     assert "description:" in skill
@@ -335,6 +342,13 @@ def test_copilot_adapter_copies_question_orchestration_skill(
     ).read_text(encoding="utf-8")
     assert "name: question-orchestration" in skill
     assert "question-orchestration" in skill
+    assert not (
+        tmp_path
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "question-orchestration"
+    ).exists()
 
 
 @pytest.mark.unit
@@ -359,6 +373,127 @@ def test_copilot_adapter_preserves_skill_content_without_path_rewrite(
     assert copied.read_text(encoding="utf-8") == source.read_text(
         encoding="utf-8"
     )
+    assert not (
+        tmp_path
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "web-research-exa-crawl4ai"
+    ).exists()
+
+
+@pytest.mark.unit
+def test_copilot_adapter_routes_skills_from_global_permissions(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    harness_dir = repo_root / "harness-conf"
+    source_skills = {
+        path.name
+        for path in (harness_dir / "skills").iterdir()
+        if path.is_dir() and (path / "SKILL.md").is_file()
+    }
+    global_deny = json.loads(
+        (harness_dir / "opencode.json").read_text(encoding="utf-8")
+    )["permission"]["skill"]
+    domain_skills = {
+        name
+        for name in source_skills
+        if any(
+            action == "deny" and fnmatchcase(name, pattern)
+            for pattern, action in global_deny.items()
+        )
+    }
+    global_skills = source_skills - domain_skills
+
+    copilot_skills = tmp_path / ".copilot" / "skills"
+    auxiliary_skills = tmp_path / ".copilot" / "referencias" / "skills"
+    discovered_source_skills = source_skills & {
+        path.name for path in copilot_skills.iterdir() if path.is_dir()
+    }
+    auxiliary_source_skills = {
+        path.name for path in auxiliary_skills.iterdir() if path.is_dir()
+    }
+
+    assert len(global_skills) == 10
+    assert len(domain_skills) == 23
+    assert global_skills.isdisjoint(domain_skills)
+    assert global_skills | domain_skills == source_skills
+    assert discovered_source_skills == global_skills
+    assert auxiliary_source_skills == domain_skills
+
+
+@pytest.mark.unit
+def test_copilot_adapter_changes_skill_destination_when_global_deny_changes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    harness_dir = repo_root / "harness-conf"
+    skills_dir = harness_dir / "skills"
+    (harness_dir / "agents" / "default-artifacts").mkdir(parents=True)
+    (harness_dir / "commands").mkdir()
+    skills_dir.mkdir()
+    (harness_dir / "AGENTS.base.md").write_text("# Agents\n", encoding="utf-8")
+    for skill_name in ("global-skill", "domain-skill"):
+        skill_dir = skills_dir / skill_name
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            f"# {skill_name}\nDescription for {skill_name}.\n",
+            encoding="utf-8",
+        )
+
+    config_path = harness_dir / "opencode.json"
+    config_path.write_text(
+        json.dumps({"permission": {"skill": {"domain-skill": "deny"}}}),
+        encoding="utf-8",
+    )
+    first_destination = tmp_path / "first"
+    status, _, error = run_adapter(
+        monkeypatch, repo_root, first_destination
+    )
+
+    assert status == 0
+    assert error == ""
+    assert (first_destination / ".copilot" / "skills" / "global-skill").is_dir()
+    assert not (
+        first_destination / ".copilot" / "skills" / "domain-skill"
+    ).exists()
+    assert (
+        first_destination
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "domain-skill"
+    ).is_dir()
+
+    config_path.write_text(
+        json.dumps({"permission": {"skill": {"global-skill": "deny"}}}),
+        encoding="utf-8",
+    )
+    second_destination = tmp_path / "second"
+    status, _, error = run_adapter(
+        monkeypatch, repo_root, second_destination
+    )
+
+    assert status == 0
+    assert error == ""
+    assert not (
+        second_destination / ".copilot" / "skills" / "global-skill"
+    ).exists()
+    assert (second_destination / ".copilot" / "skills" / "domain-skill").is_dir()
+    assert (
+        second_destination
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "global-skill"
+    ).is_dir()
 
 
 @pytest.mark.unit
@@ -410,6 +545,17 @@ def test_copilot_adapter_backups_existing_destinations(
     assert (
         backup_dirs[0] / "browser-testing" / "SKILL.md"
     ).read_text(encoding="utf-8") == "old"
+    assert (
+        tmp_path
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "browser-testing"
+        / "SKILL.md"
+    ).is_file()
+    assert not (
+        tmp_path / ".copilot" / "skills" / "browser-testing"
+    ).exists()
 
 
 @pytest.mark.unit

@@ -8,7 +8,9 @@ operacional: a materializacao e sempre copia sincronizada (ADR-0004).
 from __future__ import annotations
 
 from collections.abc import Callable, Collection
+from dataclasses import dataclass
 from datetime import datetime
+from fnmatch import fnmatchcase
 import json
 from pathlib import Path
 import re
@@ -74,6 +76,37 @@ _MODEL_ID = re.compile(
     r"o\d|kimi-k|grok-\d|mai-code|luna$)",
     re.IGNORECASE,
 )
+
+
+@dataclass(frozen=True)
+class SkillRoute:
+    """Destinos atual e anterior de uma skill sincronizada."""
+
+    source: Path
+    destination: Path
+    stale_destination: Path
+
+
+@dataclass(frozen=True)
+class CopilotSkillPlan:
+    """Plano de roteamento de skills derivado das permissions globais."""
+
+    discovery_directory: Path
+    auxiliary_directory: Path
+    routes: tuple[SkillRoute, ...]
+
+    @property
+    def global_count(self) -> int:
+        return sum(
+            route.destination == self.discovery_directory
+            for route in self.routes
+        )
+
+    @property
+    def domain_count(self) -> int:
+        return len(self.routes) - self.global_count
+
+
 _COMMAND_DESCRIPTIONS = {
     "index-codebase": (
         "Indexa repo no codebase-memory. Ative quando humano pedir "
@@ -390,23 +423,74 @@ def _copy_skill(
             _write_utf8(skill_md, adapted)
 
 
+def _load_skill_permission_map(repository: Path) -> dict[str, str]:
+    opencode_json = repository / HARNESS_CONF_DIR / "opencode.json"
+    configuration = json.loads(opencode_json.read_text(encoding="utf-8"))
+    skill_permissions = configuration.get("permission", {}).get("skill", {})
+    return {
+        str(pattern): str(action)
+        for pattern, action in skill_permissions.items()
+    }
+
+
+def _is_domain_skill(
+    skill_name: str,
+    skill_permissions: dict[str, str],
+) -> bool:
+    return any(
+        action == "deny" and fnmatchcase(skill_name, pattern)
+        for pattern, action in skill_permissions.items()
+    )
+
+
+def _build_skill_plan(repository: Path, copilot_dir: Path) -> CopilotSkillPlan:
+    discovery_directory = copilot_dir / "skills"
+    auxiliary_directory = copilot_dir / "referencias" / "skills"
+    source_directory = repository / HARNESS_CONF_DIR / "skills"
+    skill_permissions = _load_skill_permission_map(repository)
+    routes: list[SkillRoute] = []
+
+    for source in sorted(source_directory.iterdir()):
+        if not source.is_dir() or not (source / "SKILL.md").is_file():
+            continue
+        is_domain_skill = _is_domain_skill(source.name, skill_permissions)
+        destination_directory = (
+            auxiliary_directory if is_domain_skill else discovery_directory
+        )
+        stale_directory = (
+            discovery_directory if is_domain_skill else auxiliary_directory
+        )
+        routes.append(
+            SkillRoute(
+                source=source,
+                destination=destination_directory / source.name,
+                stale_destination=stale_directory / source.name,
+            )
+        )
+
+    return CopilotSkillPlan(
+        discovery_directory=discovery_directory,
+        auxiliary_directory=auxiliary_directory,
+        routes=tuple(routes),
+    )
+
+
 def _sync_skills(
-    repository: Path,
-    skills_dir: Path,
+    skill_plan: CopilotSkillPlan,
     backup_dir: Path,
     output: Callable[[str], None],
 ) -> None:
     output("")
     output("--- Skills ---")
-    skills_dir.mkdir(parents=True, exist_ok=True)
-    count = 0
-    for source in sorted((repository / HARNESS_CONF_DIR / "skills").iterdir()):
-        if not source.is_dir() or not (source / "SKILL.md").is_file():
-            continue
-        _copy_skill(source, skills_dir / source.name, backup_dir)
-        output(f"OK    {source.name}")
-        count += 1
-    output(f"      {count} skill(s) sincronizada(s)")
+    skill_plan.discovery_directory.mkdir(parents=True, exist_ok=True)
+    skill_plan.auxiliary_directory.mkdir(parents=True, exist_ok=True)
+    for route in skill_plan.routes:
+        if route.stale_destination.exists() or route.stale_destination.is_symlink():
+            backup_copy(route.stale_destination, backup_dir)
+            remove_path(route.stale_destination)
+        _copy_skill(route.source, route.destination, backup_dir)
+        output(f"OK    {route.source.name}")
+    output(f"      {len(skill_plan.routes)} skill(s) sincronizada(s)")
 
 
 def _prune_orphan_agents(
@@ -578,15 +662,10 @@ def _sync_agents_base(
 
 def _print_plan(
     repository: Path,
-    skills_dir: Path,
+    skill_plan: CopilotSkillPlan,
     agents_dir: Path,
     output: Callable[[str], None],
 ) -> None:
-    skill_count = sum(
-        1
-        for path in (repository / HARNESS_CONF_DIR / "skills").iterdir()
-        if path.is_dir() and (path / "SKILL.md").is_file()
-    )
     agent_count = sum(
         1
         for path in (repository / HARNESS_CONF_DIR / "agents").glob("*.md")
@@ -596,11 +675,19 @@ def _print_plan(
         list((repository / HARNESS_CONF_DIR / "commands").glob("*.md"))
     )
     output(f"Repo:         {repository}")
-    output(f"Skills:       {skills_dir}")
+    output(f"Skills:       {skill_plan.discovery_directory}")
+    output(f"Referências:  {skill_plan.auxiliary_directory}")
     output(f"Agents:       {agents_dir}")
     output("")
     output("Plano:")
-    output(f"  - Copiar {skill_count} skill(s) para .copilot/skills/")
+    output(
+        f"  - Copiar {skill_plan.global_count} skill(s) global(is) para "
+        ".copilot/skills/"
+    )
+    output(
+        f"  - Copiar {skill_plan.domain_count} skill(s) de domínio para "
+        ".copilot/referencias/skills/"
+    )
     output(f"  - Converter {agent_count} agent(s) para .agent.md")
     output(f"  - Converter {command_count} command(s) em skills")
     output(
@@ -650,7 +737,8 @@ def synchronize(
     resolved_repository = repository.expanduser().resolve()
     resolved_dest_root = dest_root.expanduser().resolve()
     copilot_dir = resolved_dest_root / ".copilot"
-    skills_dir = copilot_dir / "skills"
+    skill_plan = _build_skill_plan(resolved_repository, copilot_dir)
+    skills_dir = skill_plan.discovery_directory
     agents_dir = copilot_dir / "agents"
     backup_name = timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_dir = (
@@ -659,12 +747,12 @@ def synchronize(
 
     _print_plan(
         resolved_repository,
-        skills_dir,
+        skill_plan,
         agents_dir,
         say,
     )
     _confirm(assume_yes, input_stream, output, error)
-    _sync_skills(resolved_repository, skills_dir, backup_dir, say)
+    _sync_skills(skill_plan, backup_dir, say)
     _sync_agents(resolved_repository, agents_dir, backup_dir, say)
     _sync_commands(resolved_repository, skills_dir, backup_dir, say)
     _sync_default_artifacts(

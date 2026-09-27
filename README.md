@@ -259,7 +259,11 @@ Destinos sincronizados pelo Copilot CLI:
 
 - `harness-conf/agents/*.md` → `~/.copilot/agents/*.agent.md`
 - `harness-conf/commands/*.md` → `~/.copilot/skills/*/SKILL.md`
-- `harness-conf/skills/*/` → `~/.copilot/skills/`
+- `harness-conf/skills/*/` sem deny global em `harness-conf/opencode.json`
+  → `~/.copilot/skills/` (10 skills globais no mapa atual)
+- `harness-conf/skills/*/` cobertas por deny global no mesmo mapa
+  → `~/.copilot/referencias/skills/` (23 skills de domínio no mapa atual),
+  fora da descoberta automática
 - `harness-conf/agents/default-artifacts/` →
   `~/.copilot/agents/default-artifacts/`
 - `harness-conf/AGENTS.base.md` → `~/.copilot/AGENTS.md`
