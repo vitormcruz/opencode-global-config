@@ -383,6 +383,104 @@ def test_copilot_adapter_preserves_skill_content_without_path_rewrite(
 
 
 @pytest.mark.unit
+def test_copilot_adapter_generates_skill_references_only_for_allowed_agents(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo com espaços"
+    harness_dir = repo_root / "harness-conf"
+    agents_dir = harness_dir / "agents"
+    skills_dir = harness_dir / "skills"
+    agents_dir.mkdir(parents=True)
+    (harness_dir / "commands").mkdir()
+    skill_directory = skills_dir / "architecture-skill"
+    skill_directory.mkdir(parents=True)
+    (harness_dir / "opencode.json").write_text(
+        json.dumps(
+            {"permission": {"skill": {"architecture-skill": "deny"}}}
+        ),
+        encoding="utf-8",
+    )
+    skill_source = skill_directory / "SKILL.md"
+    skill_source.write_text(
+        "---\n"
+        "name: architecture-skill\n"
+        "description: >\n"
+        "  Descrição completa da skill, com detalhes que não podem ser\n"
+        "  truncados durante a geração do perfil. Frase final verificável.\n"
+        "---\n\n"
+        "EXTERNAL_SKILL_BODY_MARKER\n",
+        encoding="utf-8",
+    )
+    allowed_agent = agents_dir / "planner.md"
+    allowed_agent.write_text(
+        "---\n"
+        "description: Planner\n"
+        "permission:\n"
+        "  skill:\n"
+        "    architecture-skill: allow\n"
+        "---\n\n"
+        "Corpo original do perfil.\n",
+        encoding="utf-8",
+    )
+    agent_without_allow = agents_dir / "reader.md"
+    agent_without_allow.write_text(
+        "---\n"
+        "description: Reader\n"
+        "permission:\n"
+        "  edit: deny\n"
+        "---\n\n"
+        "Corpo original do leitor.\n",
+        encoding="utf-8",
+    )
+    destination_root = tmp_path / "home com espaços"
+
+    status, _, error = run_adapter(
+        monkeypatch,
+        repo_root,
+        destination_root,
+    )
+
+    assert status == 0
+    assert error == ""
+    copied_agents = destination_root / ".copilot" / "agents"
+    planner = (copied_agents / "planner.agent.md").read_text(encoding="utf-8")
+    reader = (copied_agents / "reader.agent.md").read_text(encoding="utf-8")
+    source_planner = allowed_agent.read_text(encoding="utf-8")
+    begin_marker = "<!-- BEGIN COPILOT GENERATED SKILLS -->"
+    end_marker = "<!-- END COPILOT GENERATED SKILLS -->"
+
+    assert begin_marker in planner
+    assert end_marker in planner
+    generated_block = planner.split(begin_marker, maxsplit=1)[1].split(
+        end_marker,
+        maxsplit=1,
+    )[0]
+    assert "architecture-skill" in generated_block
+    expected_description = (
+        "Descrição completa da skill, com detalhes que não podem ser truncados "
+        "durante a geração do perfil. Frase final verificável."
+    )
+    assert expected_description in generated_block
+    expected_skill_path = (
+        destination_root.resolve()
+        / ".copilot"
+        / "referencias"
+        / "skills"
+        / "architecture-skill"
+        / "SKILL.md"
+    )
+    assert expected_skill_path.is_file()
+    assert str(expected_skill_path) in generated_block
+    assert "~/.copilot" not in generated_block
+    assert "EXTERNAL_SKILL_BODY_MARKER" not in generated_block
+    assert begin_marker not in source_planner
+    assert end_marker not in source_planner
+    assert begin_marker not in reader
+    assert end_marker not in reader
+
+
+@pytest.mark.unit
 def test_copilot_adapter_routes_skills_from_global_permissions(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,

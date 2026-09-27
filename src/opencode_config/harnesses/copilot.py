@@ -523,10 +523,157 @@ def _prune_orphan_agents(
     return pruned
 
 
+def _agent_skill_allow_patterns(agent_content: str) -> list[str]:
+    lines = agent_content.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return []
+
+    frontmatter_end = next(
+        (index for index in range(1, len(lines)) if lines[index].strip() == "---"),
+        None,
+    )
+    if frontmatter_end is None:
+        return []
+
+    frontmatter = lines[1:frontmatter_end]
+    permission_start = next(
+        (
+            index
+            for index, line in enumerate(frontmatter)
+            if line == "permission:"
+        ),
+        None,
+    )
+    if permission_start is None:
+        return []
+
+    permission_end = next(
+        (
+            index
+            for index in range(permission_start + 1, len(frontmatter))
+            if frontmatter[index].strip()
+            and not frontmatter[index].startswith((" ", "\t"))
+        ),
+        len(frontmatter),
+    )
+    skill_header = next(
+        (
+            index
+            for index in range(permission_start + 1, permission_end)
+            if frontmatter[index] == "  skill:"
+        ),
+        None,
+    )
+    if skill_header is None:
+        return []
+
+    patterns: list[str] = []
+    for line in frontmatter[skill_header + 1:permission_end]:
+        if not line.strip():
+            continue
+        if not line.startswith("    "):
+            break
+        match = re.match(
+            r'^    (?:"([^"]+)"|([^:\s]+)):\s*(allow|deny)\s*$',
+            line,
+        )
+        if match and match.group(3) == "allow":
+            patterns.append(match.group(1) or match.group(2))
+    return patterns
+
+
+def _read_skill_description(skill_file: Path) -> str:
+    lines = skill_file.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0].strip() != "---":
+        raise AdapterError(f"Frontmatter ausente: {skill_file}")
+
+    frontmatter_end = next(
+        (index for index in range(1, len(lines)) if lines[index].strip() == "---"),
+        None,
+    )
+    if frontmatter_end is None:
+        raise AdapterError(f"Frontmatter invalido: {skill_file}")
+
+    description_start = next(
+        (
+            index
+            for index, line in enumerate(lines[1:frontmatter_end], start=1)
+            if line.startswith("description:")
+        ),
+        None,
+    )
+    if description_start is None:
+        raise AdapterError(f"Description ausente: {skill_file}")
+
+    first_value = lines[description_start].partition(":")[2].strip()
+    if first_value in {">", "|", ">-", "|-", ">+", "|+"}:
+        description_lines: list[str] = []
+        for line in lines[description_start + 1:frontmatter_end]:
+            if line.strip() and not line.startswith((" ", "\t")):
+                break
+            description_lines.append(line.strip())
+    else:
+        description_lines = [first_value]
+
+    description = re.sub(r"\s+", " ", " ".join(description_lines)).strip()
+    if len(description) >= 2 and description[0] == description[-1] == '"':
+        description = description[1:-1]
+    elif len(description) >= 2 and description[0] == description[-1] == "'":
+        description = description[1:-1]
+    if not description:
+        raise AdapterError(f"Description vazia: {skill_file}")
+    return description
+
+
+def _skill_reference_block(
+    agent_content: str,
+    skill_plan: CopilotSkillPlan,
+) -> str:
+    allow_patterns = _agent_skill_allow_patterns(agent_content)
+    allowed_routes = [
+        route
+        for route in skill_plan.routes
+        if route.destination.parent == skill_plan.auxiliary_directory
+        and any(
+            fnmatchcase(route.source.name, pattern)
+            for pattern in allow_patterns
+        )
+    ]
+    if not allowed_routes:
+        return ""
+
+    lines = [
+        "<!-- BEGIN COPILOT GENERATED SKILLS -->",
+        "## Skills de domínio autorizadas",
+        "",
+        "Leia cada skill pelo caminho absoluto quando precisar aplicar seu método.",
+        "",
+    ]
+    for route in allowed_routes:
+        skill_file = route.source / "SKILL.md"
+        description = _read_skill_description(skill_file)
+        path = (route.destination / "SKILL.md").resolve()
+        lines.extend(
+            [
+                f"- **{route.source.name}**: {description}",
+                f"  Arquivo: `{path}`",
+            ]
+        )
+    lines.extend(["", "<!-- END COPILOT GENERATED SKILLS -->"])
+    return "\n".join(lines)
+
+
+def _append_skill_reference_block(profile: str, block: str) -> str:
+    if not block:
+        return profile
+    return f"{profile.rstrip()}\n\n{block}\n"
+
+
 def _sync_agents(
     repository: Path,
     agents_dir: Path,
     backup_dir: Path,
+    skill_plan: CopilotSkillPlan,
     output: Callable[[str], None],
 ) -> None:
     output("")
@@ -548,13 +695,16 @@ def _sync_agents(
             continue
         destination = agents_dir / f"{source.stem}.agent.md"
         backup_copy(destination, backup_dir)
+        source_content = source.read_text(encoding="utf-8")
+        converted_profile = convert_agent_frontmatter(
+            source_content,
+            agent_type=source.stem,
+            available_agent_types=available_agent_types,
+        )
+        skill_references = _skill_reference_block(source_content, skill_plan)
         _write_utf8(
             destination,
-            convert_agent_frontmatter(
-                source.read_text(encoding="utf-8"),
-                agent_type=source.stem,
-                available_agent_types=available_agent_types,
-            ),
+            _append_skill_reference_block(converted_profile, skill_references),
         )
         output(f"OK    {destination.name}")
         synced_names.add(source.stem)
@@ -839,7 +989,7 @@ def synchronize(
     )
     _confirm(assume_yes, input_stream, output, error)
     _sync_skills(skill_plan, backup_dir, say)
-    _sync_agents(resolved_repository, agents_dir, backup_dir, say)
+    _sync_agents(resolved_repository, agents_dir, backup_dir, skill_plan, say)
     _sync_commands(resolved_repository, skills_dir, backup_dir, say)
     _sync_default_artifacts(
         resolved_repository,

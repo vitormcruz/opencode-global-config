@@ -321,6 +321,12 @@ Destinos sincronizados pelo Copilot CLI:
   `~/.copilot/agents/default-artifacts/`
 - `harness-conf/AGENTS.base.md` → `~/.copilot/AGENTS.md`
 
+A classificação usa as regras `permission.skill` globais, inclusive wildcards.
+Na sincronização, o adapter faz backup e remove cópias antigas do destino
+incorreto para evitar descoberta de skills de domínio.
+Perfis materializados recebem referências completas e caminhos absolutos apenas
+para as skills de domínio autorizadas em cada agente.
+
 ## Testes
 
 Taxonomia de markers agnóstica de SO e harness (detalhes em
