@@ -60,28 +60,33 @@ ou dependência relevante, modelagem de dados, estratégia de
 autenticação, arquitetura de API (REST vs GraphQL vs tRPC), ferramentas
 de build, hosting e infraestrutura.
 
-Guarde em `docs/decisions/` com numeração sequencial:
+Use a pasta e a numeração definidas pelo projeto. Neste repositório, consulte
+`docs/README.md`: guarde ADRs em `docs/adr/` com numeração sequencial e use
+Concordion-Markdown. Todo ADR novo exige uma asserção executável.
 
 ```markdown
-# ADR-001: PostgreSQL como banco primário
+# ADR-000X: <decisão>
 
-## Status
-Accepted | Superseded by ADR-XXX | Deprecated
+- **Status:** Aceita
+- **Data:** YYYY-MM-DD
+- **Escopo:** <sistemas ou módulos afetados>
 
-## Date
-2026-01-15
-
-## Context
+## Contexto
 Requisitos e restrições que motivam a decisão.
 
-## Decision
+## Decisão
 A decisão tomada.
 
-## Alternatives Considered
+## Consequências
+Efeitos práticos da decisão.
+
+## Alternativas consideradas
 Para cada alternativa: prós, contras e motivo da rejeição.
 
-## Consequences
-Efeitos práticos da decisão.
+## Asserções executáveis
+A fixture Concordion expõe um método de verificação e o veredito agregado.
+- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+- O veredito esperado é [pass](#assertEquals=veredito).
 ```
 
 Ciclo: `PROPOSED → ACCEPTED → (SUPERSEDED ou DEPRECATED)`.
