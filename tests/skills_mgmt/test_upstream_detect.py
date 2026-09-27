@@ -199,6 +199,28 @@ def test_detect_is_read_only_repeats_refused_changes_and_cleans_clone(
 
 
 @pytest.mark.integration
+def test_detect_keeps_unfrozen_skill_without_freeze_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    upstream, base_sha, _ = upstream_with_change(
+        tmp_path,
+        {"skills/fixture/SKILL.md": "conteúdo anterior\n"},
+        {"skills/fixture/SKILL.md": "conteúdo atual\n"},
+    )
+    repo = tmp_path / "repo"
+    metadata = write_metadata(repo, "fixture", base_sha)
+    before = metadata.read_bytes()
+    set_upstream_spec(monkeypatch, "fixture", upstream)
+
+    status, _output, error = run_detect(repo)
+
+    assert status == 0, error
+    assert metadata.read_bytes() == before
+    assert "sincronizacao:" not in metadata.read_text(encoding="utf-8")
+
+
+@pytest.mark.integration
 def test_detect_omits_frozen_skills_from_family_changes(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

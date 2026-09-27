@@ -19,6 +19,16 @@ def test_opencode_canonical_declares_ai_memory_mcp(repo_root: Path):
 
 
 @pytest.mark.unit
+def test_opencode_integration_config_does_not_declare_mcp(repo_root: Path) -> None:
+    config_path = (
+        repo_root / "tests" / "integration" / "config" / "opencode.test.json"
+    )
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+
+    assert "mcp" not in config
+
+
+@pytest.mark.unit
 def test_legacy_install_wrappers_are_removed(repo_root: Path):
     assert not (repo_root / "scripts/browser-test/install-playwright.sh").exists()
     assert not (repo_root / "scripts/codebase-memory/install.sh").exists()

@@ -442,6 +442,36 @@ def test_opencode_windows_materializes_copies(
 
 
 @pytest.mark.unit
+def test_opencode_materializes_approved_sections_in_global_agents_md(
+    repo_root: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fake_winreg: FakeWinreg,
+) -> None:
+    repository = make_repository(tmp_path)
+    source_base = repo_root / "harness-conf" / "AGENTS.base.md"
+    base_content = source_base.read_text(encoding="utf-8")
+    (repository / "harness-conf" / "AGENTS.base.md").write_text(
+        base_content,
+        encoding="utf-8",
+    )
+    home = tmp_path / "home"
+    home.mkdir()
+    intercept_broadcast(monkeypatch)
+
+    apply_adapter(repository, home, strategy=OpenCodeWindows())
+
+    generated = (home / ".config" / "opencode" / "AGENTS.md").read_text(
+        encoding="utf-8"
+    )
+    assert "## Compactação de contexto" in generated
+    assert "rede de segurança" in generated
+    assert "fronteira foi perdida" in generated
+    assert "## Chamadas de ferramentas" in generated
+    assert "dependência real" in generated
+
+
+@pytest.mark.unit
 def test_opencode_windows_copy_removes_stale_entries(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

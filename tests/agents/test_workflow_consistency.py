@@ -915,6 +915,43 @@ def test_opencode_agent_ghost_reference_is_detected(tmp_path: Path) -> None:
     )
 
 
+def _extract_level_two_section(content: str, heading: str) -> str:
+    """Retorna uma seção Markdown de nível 2, incluindo o título."""
+
+    lines = content.splitlines()
+    heading_line = f"## {heading}"
+    start = lines.index(heading_line)
+    end = next(
+        (
+            index
+            for index in range(start + 1, len(lines))
+            if lines[index].startswith("## ")
+        ),
+        len(lines),
+    )
+    return "\n".join(lines[start:end])
+
+
+@pytest.mark.unit
+def test_approved_agents_base_sections_keep_their_anchors(
+    repo_root: Path,
+) -> None:
+    """Guarda as seções aprovadas e a remoção da regra ligada à premissa 7."""
+
+    base_content = (repo_root / "harness-conf" / "AGENTS.base.md").read_text(
+        encoding="utf-8"
+    )
+    compaction = _extract_level_two_section(
+        base_content, "Compactação de contexto"
+    )
+    tool_calls = _extract_level_two_section(base_content, "Chamadas de ferramentas")
+
+    assert "rede de segurança" in compaction
+    assert "fronteira foi perdida" in compaction
+    assert "dependência real" in tool_calls
+    assert "premissa 7" not in base_content.casefold()
+
+
 @pytest.mark.unit
 def test_extract_skill_permission_entries_parses_quoted_wildcard() -> None:
     """Parser lê wildcard entre aspas e fecha o bloco em ``task:``."""

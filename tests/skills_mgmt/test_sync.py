@@ -823,6 +823,49 @@ def test_sync_skips_frozen_addyosmani_skill_and_reports_it(
 
 
 @pytest.mark.unit
+def test_sync_keeps_unfrozen_skill_without_freeze_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    local_skill = repo / "harness-conf/skills/test-driven-development"
+    local_skill.mkdir(parents=True)
+    (local_skill / "SKILL.md").write_text("local skill", encoding="utf-8")
+    metadata_path = local_skill / "UPSTREAM.md"
+    metadata_path.write_text(
+        "# Metadados do Upstream\nrepositorio: upstream\n",
+        encoding="utf-8",
+    )
+    assert "sincronizacao:" not in metadata_path.read_text(encoding="utf-8")
+    upstream = git_upstream(
+        tmp_path,
+        {
+            "LICENSE": "MIT License",
+            "skills/test-driven-development/SKILL.md": "upstream skill",
+            "references/testing-patterns.md": "updated patterns",
+        },
+    )
+
+    class Temporary:
+        def cleanup(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        skills_sync,
+        "_clone_upstream",
+        lambda _spec: (Temporary(), upstream),
+    )
+    status = skills_sync.run(
+        ["sync", "addyosmani", "--yes", "--repo-root", str(repo)],
+        output=StringIO(),
+        error=StringIO(),
+    )
+
+    assert status == 0
+    assert "sincronizacao:" not in metadata_path.read_text(encoding="utf-8")
+
+
+@pytest.mark.unit
 def test_update_skips_frozen_skill_without_running_commands(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -892,6 +935,40 @@ def test_update_skips_frozen_skill_without_running_commands(
 
     assert unfrozen_status == 0
     assert "sincronizacao:" not in unfrozen_metadata.read_text(encoding="utf-8")
+
+
+@pytest.mark.unit
+def test_update_keeps_unfrozen_skill_without_freeze_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    metadata_path = repo / "harness-conf/skills/unfrozen/UPSTREAM.md"
+    metadata_path.parent.mkdir(parents=True)
+    metadata_path.write_text(
+        "# Metadados do Upstream\n"
+        "repositorio: upstream\n"
+        "\n"
+        "## Como atualizar\n"
+        "\n"
+        "    opencode-skills sync accessibility-audit\n",
+        encoding="utf-8",
+    )
+    assert "sincronizacao:" not in metadata_path.read_text(encoding="utf-8")
+    monkeypatch.setattr(
+        skills_sync,
+        "_run_documented_command",
+        lambda *_args, **_kwargs: (0, "atualizada"),
+    )
+
+    status = skills_sync.run(
+        ["update", "unfrozen", "--repo-root", str(repo)],
+        output=StringIO(),
+        error=StringIO(),
+    )
+
+    assert status == 0
+    assert "sincronizacao:" not in metadata_path.read_text(encoding="utf-8")
 
 
 @pytest.mark.unit

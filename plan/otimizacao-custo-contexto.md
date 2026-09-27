@@ -3421,6 +3421,39 @@ construção; E11(c) aguarda aprovação da premissa 7.
 - **Q-Efix-13:** especificar em `AGENTS.base.md` se a regra exige carregar `writing-for-agents` ou
   aplicar seu método conhecido, e quais agentes podem receber essa instrução?
 
+### Ajustes pós-revisão — 2026-09-27
+
+**Escopo:** resolvi os achados 1, 3 e 5 atribuídos ao `eng-software`.
+
+- T15 guarda as âncoras aprovadas nas seções de compactação e chamadas de
+  ferramentas, verifica a ausência da regra da premissa 7 e testa a
+  regeneração do `AGENTS.md` global.
+- Restaurei a asserção que mantém `tests/integration/config/opencode.test.json`
+  sem a chave `mcp`.
+- Acrescentei casos explícitos para o campo `sincronizacao` permanecer ausente
+  após `sync`, `update` e `detect`, quando a skill não está congelada.
+- Não alterei código de produção, as seções aprovadas, a premissa 7 ou os
+  arquivos de plano fora deste escopo.
+
+#### Evidências de Testes — Revisão da Construção
+
+- [x] TDD: seis testes novos falharam sob mutações temporárias dos anchors,
+  da configuração MCP e dos três subcomandos; removi as mutações antes da
+  validação final.
+- [x] Testes focados: 107 passaram nos cinco módulos tocados e na guarda T14.
+- [x] Ruff nos cinco arquivos Python alterados: o arquivo
+  `test_workflow_consistency.py` mantém 17 achados F541 anteriores; a mesma
+  lista ocorre em `HEAD`. Os demais arquivos e as linhas novas não têm
+  achados. Não alterei testes existentes para remover essa dívida.
+- [x] `git diff --check`: passou.
+- [x] Regressão incremental: executei as guardas sob mutações e repeti os
+  módulos após restaurar os dados e o código.
+- [x] Gate de refatoração: sem mudança no plano aprovado. Os ajustes só
+  acrescentam as guardas pedidas nos achados 1, 3 e 5.
+- [x] Não executei a suíte completa e não alterei `Status`.
+
+**Commit:** `test(repo): restaura guardas contra regressões` (sem push).
+
 ## Ciclo 2 — CONSTRUÇÃO — Apêndice: auditoria E7
 
 ### Auditoria E7, 2026-09-27
