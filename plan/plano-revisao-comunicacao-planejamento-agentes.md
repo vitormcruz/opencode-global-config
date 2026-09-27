@@ -69,6 +69,22 @@ Verificação: conversa roteirizada em que o agente explica uma decisão;
 a transcrição não pode ter abreviação nem sigla sem definição. Caso
 futuro da suíte de comunicação.
 
+**Item 2 — Referências ao plano (aprovado).** Destino: `AGENTS.base.md`,
+seção Comunicação, subseção "Conversa sobre plano" (reformulação):
+
+- Plano e artefatos de estado são do agente; o humano não os lê.
+- Toda pergunta, decisão ou discussão é autocontida: traga a fase atual,
+  o trecho relevante e o escopo da questão, em termos simples.
+- Nunca referencie número, código, sigla ou link interno do plano:
+  apresente o conteúdo discutido, contextualizado.
+- Apresente por partes: uma etapa ou decisão por vez. Resumo de etapas
+  é permitido; ao encerrar, um resumo dirigido do todo, também por
+  partes.
+
+Verificação: conversa roteirizada com várias decisões em jogo; a
+transcrição não pode ter número, código ou link do plano sem o conteúdo
+contextualizado. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
