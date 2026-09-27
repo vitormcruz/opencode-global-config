@@ -116,7 +116,8 @@ ou spawna outros agentes.
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
 | code-simplification | Identificar complexidade | Quando revisar qualidade de código |
-| reliable-async-operations | Revisão multi-eixo | Quando o código revisado dispara processo externo, rede, async/await, fila, lock ou polling |
+| reliable-async-operations | Revisão multi-eixo | Código revisado dispara processo externo, rede, |
+|  |  | async/await, fila, lock ou polling |
 
 
 ## Capacidade: Revisão integrativa

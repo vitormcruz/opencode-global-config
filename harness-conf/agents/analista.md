@@ -89,8 +89,11 @@ Heurísticas:
 - 1 bullet = 1 comportamento.
 - Prefira verbos claros: "criar", "editar", "excluir", "consultar", "validar", "bloquear", "notificar".
 - Inclua validação apenas quando for regra de negócio (ou obrigação legal/contratual) e mudar o resultado do fluxo.
-- Evite regra de produto/implementação no RF (ex: máximo de caracteres, tipo numérico, regex, máscara), a menos que o humano confirme que é exigência legal/contratual.
-- Se surgir um detalhe de formato/estrutura (ex: CPF, código padronizado, tamanho, tipo), pergunte explicitamente ao humano antes de escrever: "Isso é regra de negócio ou obrigação legal/contratual? Qual e por que importa no fluxo?".
+- Evite regra de produto/implementação no RF (ex: máximo de caracteres, tipo numérico, regex,
+  máscara), a menos que o humano confirme que é exigência legal/contratual.
+- Se surgir um detalhe de formato/estrutura (ex: CPF, código padronizado, tamanho, tipo), pergunte
+  explicitamente ao humano antes de escrever: "Isso é regra de negócio ou obrigação
+  legal/contratual? Qual e por que importa no fluxo?".
 - Inclua regras de permissão quando existirem (quem pode fazer).
 - Evite descrever UI/implementação (ex: "usar React"); isso não é RF.
 
@@ -187,7 +190,8 @@ Regras:
 Revisão obrigatória antes de mostrar ao humano:
 - Gere o rascunho da lista.
 - Chame @revisor-historia em contexto novo, passando APENAS a lista.
-- Mostre ao humano somente a versão revisada (não exiba o bloco `Observações:`; use apenas para guiar 1-3 perguntas e ajustes).
+- Mostre ao humano somente a versão revisada (não exiba o bloco `Observações:`; use apenas
+  para guiar 1-3 perguntas e ajustes).
 
 Otimização:
 - Cada candidata deve ser pequena (INVEST); se for grande, proponha 2-3 candidatas menores.
@@ -257,7 +261,8 @@ Pergunte ao humano:
 
 ### 3B. Etapa 2: Criar critérios de aceitação (Gherkin)
 
-Só após a confirmação do humano na Etapa 1, acrescente um bloco de critérios de aceitação na seção ## Critérios de Aceitação
+Só após a confirmação do humano na Etapa 1, acrescente um bloco de critérios de aceitação
+na seção ## Critérios de Aceitação
 
 **ANTES** de escrever os critérios, carregue a skill
 `spec-executavel` e aplique o checklist dela a cada cenário.
@@ -284,13 +289,21 @@ Regras para critérios (otimiza automação futura):
 - Cada cenário deve ter: `Cenário:` + `Dado que` (+ `E` 0+) + exatamente 1 `Quando tento` + `Então` (+ `E` 0+).
 - Linguagem de negócio: descreva intenção e resultado, evite UI/implementação (tela, botão, endpoint, classe, etc.).
 - Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
-- Evite redundância de contexto: se o(s) `Dado que`/`E` já fixou(aram) o alvo/identidade sem ambiguidade, não repita em todos os steps.
-- Repetição útil: no `Então`, repetir valores do `Quando` é recomendado quando isso valida persistência/aplicação correta (muda o veredito do teste).
-- Regra prática: repita no `Então` o que valida estado/dados finais; evite repetir apenas contexto já estabelecido.
-- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades/identificadores possíveis), explicite (nome/id/matrícula) no step necessário.
-- Concisão: cada passo tem só o contexto/ação/resultado indispensável para validar; corte o resto sem perder autoexplicação do cenário completo.
-- Foco em negócio: critérios descrevem a intenção do negócio e o resultado observável. Evite regra de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara), salvo se o humano confirmar que é exigência legal/contratual.
-- Valores concretos: use apenas quando fizerem parte da validação do critério (ex: limite, formato, mensagem, status). Se não influencia o veredito, omita.
+- Evite redundância de contexto: se o(s) `Dado que`/`E` já fixou(aram) o alvo/identidade
+  sem ambiguidade, não repita em todos os steps.
+- Repetição útil: no `Então`, repetir valores do `Quando` é recomendado quando isso valida
+  persistência/aplicação correta (muda o veredito do teste).
+- Regra prática: repita no `Então` o que valida estado/dados finais; evite repetir apenas
+  contexto já estabelecido.
+- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades/identificadores
+  possíveis), explicite (nome/id/matrícula) no step necessário.
+- Concisão: cada passo tem só o contexto/ação/resultado indispensável para validar; corte o
+  resto sem perder autoexplicação do cenário completo.
+- Foco em negócio: critérios descrevem a intenção do negócio e o resultado observável. Evite
+  regra de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara), salvo
+  se o humano confirmar que é exigência legal/contratual.
+- Valores concretos: use apenas quando fizerem parte da validação do critério (ex: limite, formato,
+  mensagem, status). Se não influencia o veredito, omita.
 - Aspas duplas: apenas para valores literais usados na validação (não force em tudo).
 - Perfil/persona: não inclua nos critérios, exceto quando o foco do teste for permissão/controle de acesso.
 - `Quando` sempre em forma de tentativa: `Quando tento <ação>`.
@@ -300,9 +313,11 @@ Regras para critérios (otimiza automação futura):
 - Rastreabilidade: todo cenário deve indicar `(derivado de RFx)` ou `(derivado de RNFx)`.
 - Cobertura mínima:
 - Para cada RF relevante: 1 cenário principal que expresse a regra/resultado de negócio.
-- Rejeição/erro: inclua apenas quando for regra de negócio (ou lei/contrato confirmado), não para validações técnicas ou exploração de bordas.
+- Rejeição/erro: inclua apenas quando for regra de negócio (ou lei/contrato confirmado), não para
+  validações técnicas ou exploração de bordas.
 - Casos limite/combinatória: evite; só inclua quando o negócio definir limites e isso for relevante para a regra.
-- Para RNFs: pelo menos 1 cenário verificável quando fizer sentido; se o RNF estiver vago, faça 1 pergunta objetiva para tornar mensurável.
+- Para RNFs: pelo menos 1 cenário verificável quando fizer sentido; se o RNF estiver vago, faça
+  1 pergunta objetiva para tornar mensurável.
 - Mantenha leve: em geral 3-8 cenários por história.
 
 Quando houver variações de valores para a mesma regra, use `Esquema do Cenário`:

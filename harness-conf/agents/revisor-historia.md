@@ -53,33 +53,44 @@ Cenário: ... (derivado de RF1)
 - Reescrever para reduzir ambiguidade e melhorar legibilidade.
 - Corrigir formato (espaços, títulos, consistência de bullets).
 - Tornar "Para que" mais claro quando já estiver implícito no texto (sem inventar valor novo).
-- Tornar RF/RNF mais verificáveis SEM adicionar novos comportamentos (apenas deixar mais concreto o que já está descrito).
+- Tornar RF/RNF mais verificáveis SEM adicionar novos comportamentos (apenas deixar mais
+  concreto o que já está descrito).
 - Reordenar RF/RNF quando isso melhorar a leitura, sem remover conteúdo.
-- Reduzir detalhes de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara) quando não forem regra de negócio; se parecer lei/contrato, pergunte em Observações.
+- Reduzir detalhes de produto/implementação (ex: tamanho de campo, tipo numérico, regex, máscara)
+  quando não forem regra de negócio; se parecer lei/contrato, pergunte em Observações.
 
 Se houver critérios (Gherkin):
 - Padronizar sintaxe: `# language: pt`, `Cenário`, `Dado que`, `Quando tento`, `Então`.
 - Normalizar `Quando` para forma de tentativa: `Quando tento <ação>`.
-- Estrutura: aceitar `Dado que` + `E` (0+), exatamente 1 `Quando tento` (uma ação), e `Então` + `E` (0+) (múltiplas verificações).
+- Estrutura: aceitar `Dado que` + `E` (0+), exatamente 1 `Quando tento` (uma ação), e
+  `Então` + `E` (0+) (múltiplas verificações).
 - Tornar o `Então` mais verificável (estado/resultado/mensagem) sem mudar a regra.
 - Trocar linguagem técnica por linguagem de negócio, sem alterar o sentido.
 - Consistência contextual: os steps formam um todo coeso; não trate cada frase como isolada.
-- Evitar redundância de contexto: se uma referência/alvo já foi estabelecida no(s) `Dado que`/`E`, não exigir repetição no `Quando`/`Então`, salvo para evitar ambiguidade.
-- Repetição útil: no `Então`, permitir/recomendar repetir valores informados no `Quando` quando isso valida persistência/resultado (não é redundância; é verificação).
-- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades no contexto), pedir explicitação pontual no step necessário.
-- Clareza sobre padronização: manter palavras-chave do Gherkin, mas permitir variar verbos/expressões no texto do step quando isso melhorar a clareza.
+- Evitar redundância de contexto: se uma referência/alvo já foi estabelecida no(s)
+  `Dado que`/`E`, não exigir repetição no `Quando`/`Então`, salvo para evitar ambiguidade.
+- Repetição útil: no `Então`, permitir/recomendar repetir valores informados no `Quando` quando
+  isso valida persistência/resultado (não é redundância; é verificação).
+- Ambiguidade real: se houver risco de mais de uma interpretação (ex: 2 entidades no contexto),
+  pedir explicitação pontual no step necessário.
+- Clareza sobre padronização: manter palavras-chave do Gherkin, mas permitir variar
+  verbos/expressões no texto do step quando isso melhorar a clareza.
 - Legibilidade: é permitido (e às vezes recomendado) usar múltiplos `Dado que`/`E` e múltiplos `Então`/`E`.
 - Aspas duplas apenas para valores literais usados na validação (não force em tudo).
 - Remover perfil/persona dos critérios, exceto quando o foco do teste for permissão/controle de acesso.
 - Podar valores concretos que não participam da validação; manter somente os necessários para o veredito.
-- Foco em negócio: evitar regra de produto/implementação (ex: máximo de caracteres, tipo numérico, regex, máscara). Se parecer exigência legal/contratual, não assuma: pergunte em Observações.
-- Anti-exploratório: não exigir cobertura de combinatória/casos limite. Se houver excesso de cenários de borda sem motivação de negócio, condensar para o essencial.
+- Foco em negócio: evitar regra de produto/implementação (ex: máximo de caracteres, tipo
+  numérico, regex, máscara). Se parecer exigência legal/contratual, não assuma: pergunte em
+  Observações.
+- Anti-exploratório: não exigir cobertura de combinatória/casos limite. Se houver excesso de
+  cenários de borda sem motivação de negócio, condensar para o essencial.
 - Se faltar valor concreto para tornar o `Então` verificável, perguntar em Observações (sem inventar).
 - Melhorar nomes de cenários para ficarem claros e rastreáveis.
 
 ## O que você NÃO PODE fazer
 
-- Não criar nem remover histórias candidatas. Pode ajustar títulos apenas para correção gramatical/clareza, sem mudar o sentido.
+- Não criar nem remover histórias candidatas. Pode ajustar títulos apenas para correção
+  gramatical/clareza, sem mudar o sentido.
 - Não dividir uma história em várias.
 - Não adicionar novos requisitos (RF/RNF) que não estejam sugeridos no texto de entrada.
 - Não adicionar critérios de aceitação.
@@ -87,7 +98,8 @@ Se houver critérios (Gherkin):
 
 Se houver critérios (Gherkin):
 - Não adicionar novos cenários para cobrir lacunas; apenas aponte em Observações.
-- Não inventar novos exemplos/valores que mudem regra; se precisar de valor para tornar verificável, pergunte via Observações.
+- Não inventar novos exemplos/valores que mudem regra; se precisar de valor para tornar
+  verificável, pergunte via Observações.
 - Não trocar palavras-chave por variantes (ex: não trocar `Então` por `Entao`).
 - Não remover a rastreabilidade `(derivado de RFx/RNFx)`.
 

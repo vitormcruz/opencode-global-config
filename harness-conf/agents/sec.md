@@ -103,7 +103,8 @@ negócio.
 | Skill | Capacidade | Quando |
 |-------|-----------|--------|
 | security-and-hardening | Analisar segurança | Sempre que analisar ou revisar segurança |
-| spec-executavel | Escrever specs executáveis | Sempre que criar specs executáveis (ex.: requisitos/threat model como cenários automatizáveis) |
+| spec-executavel | Escrever specs executáveis | Ao criar specs executáveis (ex.: requisitos/threat model |
+|  |  | como cenários automatizáveis) |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -111,7 +112,8 @@ negócio.
 |-------|-----------|----------|
 | code-review-and-quality | Revisar segurança | Na capacidade 3 (revisar e corrigir) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando ferramentas de segurança falham inesperadamente |
-| reliable-async-operations | Executar testes de segurança | Quando escrever script que dispara ferramenta de segurança externa (SAST, DAST, scan) ou chamada assíncrona |
+| reliable-async-operations | Executar testes de segurança | Script dispara ferramenta externa de segurança |
+|  |  | (SAST, DAST, scan) ou chamada assíncrona |
 
 
 ## Capacidades

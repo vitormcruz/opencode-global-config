@@ -139,7 +139,8 @@ unidades lógicas seguindo `git-workflow-and-versioning`.
 | code-review-and-quality | Aplicar ajustes integrativos | Na capacidade 3 (ajustes de revisão) |
 | debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham ou build quebra |
 | performance-optimization | Otimizar performance | Quando há requisitos de performance |
-| reliable-async-operations | Construir via TDD | Quando o código escrito dispara processo externo, chamada de rede, async/await, fila, lock ou polling |
+| reliable-async-operations | Construir via TDD | Código escrito dispara processo externo, |
+|  |  | chamada de rede, async/await, fila, lock ou polling |
 
 ### Transversais (úteis em qualquer capacidade)
 

@@ -103,7 +103,7 @@ analisa código de produção ou faz revisão integrativa.
 | test-driven-development | Planejar testes | Sempre que planejar ou revisar testes |
 | tests-as-spec | Proteger cobertura como spec | Na revisão de testabilidade e cobertura |
 | browser-testing | Testes funcionais de UI | Quando houver UI no escopo de testes |
-| spec-executavel | Planejar testes | Sempre que criar ou avaliar specs executáveis (critérios de aceitação automatizáveis) |
+| spec-executavel | Planejar testes | Criar ou avaliar specs executáveis (critérios de aceitação automatizáveis) |
 
 ### Condicionais (carregar quando a condição se aplicar)
 
@@ -113,7 +113,8 @@ analisa código de produção ou faz revisão integrativa.
 | debugging-and-error-recovery | Diagnosticar falhas | Quando testes falham inesperadamente |
 | accessibility-audit | Auditar acessibilidade | Quando há UI no escopo de testes |
 | performance-optimization | Testar performance | Quando há RNF de performance |
-| reliable-async-operations | Executar testes | Quando escrever script que dispara suíte de testes, CLI externo ou chamada assíncrona |
+| reliable-async-operations | Executar testes | Script que dispara suíte de testes, CLI externo |
+|  |  | ou chamada assíncrona |
 
 
 ## Capacidades

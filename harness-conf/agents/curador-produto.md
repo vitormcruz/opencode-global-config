@@ -68,7 +68,7 @@ arbitrários.
 | Skill | Capacidade | Condição |
 |-------|-----------|----------|
 | testes-produto-catalog | Sugerir suítes | Quando sugerir ferramentas por especialidade |
-| spec-executavel | Orientar na entrevista | Quando especificar elementos de spec executável na seção Elementos de Especificação |
+| spec-executavel | Orientar na entrevista | Ao especificar specs executáveis na seção Elementos de Especificação |
 
 ## O que você faz
 
