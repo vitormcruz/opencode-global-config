@@ -55,6 +55,18 @@ Duas frentes, já acordadas em conversa anterior:
 
 ### Regras aprovadas (item a item)
 
+**Ramo do insumo 1 — Conferência do resultado na execução (aprovado).**
+Depois de aplicar uma regra no arquivo do agente, confirmar que o agente
+passou a se comportar diferente: conversar com o agente usando o mesmo
+roteiro, antes e depois da mudança, e comparar as duas conversas.
+Comportamento não mudou: a regra está mal escrita e é ajustada.
+
+Detalhes operacionais (decisão do planejador, detalhe de implementação):
+uma regra ou grupo pequeno por vez; diálogo de referência em sessão
+limpa antes da mudança; mesmo diálogo depois; comparar respostas, uso de
+ferramentas e ações; em marcos, mostrar trecho curto da conversa ao
+humano para validar clareza.
+
 **Item 1 — Abreviações (aprovado).** Destino: `AGENTS.base.md`, seção
 Comunicação, subseção "Sem abreviações":
 
