@@ -75,6 +75,11 @@ com qualquer agente. Regra de planejamento: teste com `smart-planner` e
 `devflow`. Os casos reutilizam as técnicas já decididas no insumo
 (execução real, asserção de trajetória, juiz com rubrica, consenso).
 
+**Ramo do insumo 3 — Ordem de aplicação (aprovado).** Regras de
+comunicação primeiro (valem para todos os agentes e baseiam as conversas
+de verificação), depois as de planejamento (`smart-planner`, `devflow` e
+revisores).
+
 **Item 1 — Abreviações (aprovado).** Destino: `AGENTS.base.md`, seção
 Comunicação, subseção "Sem abreviações":
 
@@ -292,12 +297,98 @@ futuro da suíte de comunicação.
 
 ## Task List
 
-(tasks a definir após os itens do humano e as decisões)
+### Fase 1: Insumo de revisão e ajuste
+
+- [ ] **Task 1: Consolidar o insumo de revisão e ajuste.**
+  - **Description:** criar
+    `plan/insumo-revisao-comunicacao-planejamento-agentes.md`,
+    consolidando as regras da seção "Regras aprovadas" deste plano, com
+    texto completo, destino (arquivo e seção), protocolo de conferência
+    e instruções de execução ao `devflow` (ordem de aplicação, uma regra
+    por vez, conferência antes/depois). Estrutura do insumo: contexto de
+    origem; regras de comunicação (todos os agentes); regras de
+    planejamento (`smart-planner`, `devflow`, revisores); protocolo de
+    conferência; ordem de aplicação; casos de teste (referência à seção
+    nova do insumo de testes).
+  - **Acceptance criteria:**
+    - [ ] Todas as regras da seção "Regras aprovadas" estão no insumo,
+          com texto idêntico ao aprovado e destino por arquivo e seção.
+    - [ ] Nenhuma regra além das aprovadas; nada inventado.
+    - [ ] Protocolo de conferência e ordem de aplicação incluídos.
+    - [ ] Autocontido: sem citar identificadores, números de item ou
+          vocabulário interno deste plano.
+  - **Verification:**
+    - [ ] Conferência item a item contra a seção "Regras aprovadas".
+    - [ ] Busca por referências internas ao plano (números de item,
+          "ramo", "task") no texto do insumo.
+  - **Dependencies:** None
+  - **Files likely touched:**
+    `plan/insumo-revisao-comunicacao-planejamento-agentes.md` (novo)
+  - **Estimated scope:** S
+
+- [ ] **Task 2: Revisão independente do insumo.**
+  - **Description:** instância independente do revisor verifica o insumo
+    contra este plano.
+  - **Acceptance criteria:**
+    - [ ] Fidelidade: regras idênticas às aprovadas.
+    - [ ] Cobertura: os 11 problemas relatados têm regra.
+    - [ ] Autocontenção confirmada.
+  - **Verification:** relatório de revisão com aprovação ou achados.
+  - **Dependencies:** Task 1
+  - **Files likely touched:** nenhum (relatório)
+  - **Estimated scope:** S
+
+### Checkpoint: Insumo pronto
+- [ ] Insumo revisado e aprovado
+- [ ] Apresentação das partes ao humano para aprovação
+
+### Fase 2: Casos de teste
+
+- [ ] **Task 3: Seção de casos no insumo de testes.**
+  - **Description:** acrescentar a
+    `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
+    teste de comunicação, após a seção de técnicas futuras (simulação
+    multi-turn), sem renumerar seções existentes. Cada regra aprovada
+    vira roteiro de conversa que o teste verifica. Regra de comunicação:
+    caso com qualquer agente. Regra de planejamento: caso com
+    `smart-planner` e `devflow`. Reutiliza as técnicas já decididas no
+    insumo (execução real, asserção de trajetória, juiz com rubrica,
+    consenso).
+  - **Acceptance criteria:**
+    - [ ] Uma regra aprovada, um caso correspondente.
+    - [ ] Separação comunicação/planejamento respeitada.
+    - [ ] Seções existentes não renumeradas; decisões existentes não
+          alteradas.
+  - **Verification:** conferência da seção contra as regras aprovadas;
+    diff limitado ao acréscimo.
+  - **Dependencies:** Task 1
+  - **Files likely touched:** `plan/insumo-testes-comportamento-agentes.md`
+  - **Estimated scope:** S
+
+- [ ] **Task 4: Revisão independente final.**
+  - **Description:** instância independente nova do revisor verifica o
+    conjunto (insumo + seção de casos).
+  - **Acceptance criteria:**
+    - [ ] Achados da Task 2 resolvidos (se houve).
+    - [ ] Seção de casos fiel às regras e às técnicas do insumo.
+  - **Verification:** relatório de revisão com aprovação ou achados.
+  - **Dependencies:** Task 3
+  - **Files likely touched:** nenhum (relatório)
+  - **Estimated scope:** S
+
+### Checkpoint: Conjunto completo
+- [ ] Insumo e seção de casos revisados
+- [ ] Apresentação final ao humano
 
 ## Risks and Mitigations
 
-(a preencher)
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Regra redigida sem efeito no comportamento | Alta | Protocolo de conferência antes/depois com mesmo roteiro; não mudou, ajustar redação |
+| Executor inventar regra não aprovada | Alta | Revisor confere fidelidade item a item; critério "nenhuma regra além das aprovadas" |
+| Sessão paralela na worktree misturando commits | Média | Commits só com o arquivo próprio; conferir stat do commit |
+| Insumo de testes com decisões fechadas sendo alterado | Média | Acréscimo de seção sem renumerar; diff limitado ao acréscimo |
 
 ## Open Questions
 
-- Item 1 (abreviações) em discussão; itens 2 a 11 pendentes.
+Nenhuma; todos os ramos foram resolvidos com o humano.
