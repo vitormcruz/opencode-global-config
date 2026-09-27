@@ -54,7 +54,8 @@ Revisão de segurança (barreira de adoção, já executada):
   "Validação executada").
 
 Commits: `0f1ce5e`, `cdde56f`, `1041452`. Nenhum arquivo de `src/` ou
-`adapters/` foi alterado.
+`adapters/` foi alterado nesses três (a leva de consistência descrita
+adiante altera `src/`).
 
 ## Como usar
 
@@ -114,8 +115,9 @@ para as sessões (o plano não tarifa por token).
   | `general` sem `model` | herda `glm-5.3-flash` do pai | `glm-5.3-flash` ✓ |
 
 - Suíte: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m
-  integration` → 75 passed. `JAVA_HOME=/home/vitor/.local/share/jdk
-  .venv/bin/pytest -m all` → 836 passed (2026-09-26).
+  integration` → 75 passed na validação original. Estado atual da
+  suíte completa: `JAVA_HOME=/home/vitor/.local/share/jdk
+  .venv/bin/pytest -m all` → 840 passed, 31 deselected (2026-09-26).
 
 ### Runbook manual (segunda execução, independente do teste)
 
@@ -167,6 +169,47 @@ horário -03:00, duração 46,5 s, custo 0,0000):
 O mesmo tipo de subagente (`general`) rodou com dois modelos distintos
 na mesma execução, sem agente pré-criado por modelo.
 
+## Consistência de agentes e adapters
+
+Depois do plugin, o repo fechou a consistência entre os modos dos
+agentes e os dois adapters. Diagnóstico: os workflows multi-agente
+pressupunham spawn via tool `task`, mas quase todos os especialistas
+eram `mode: primary` (não spawnáveis); o adapter OpenCode apenas
+repassa os arquivos, e o adapter Copilot ignorava `primary`, tornando
+tudo spawnável no Copilot CLI.
+
+Modos finais em `harness-conf/agents/`:
+
+- `primary` (não spawnável, uso direto): `analista`, `devflow`,
+  `aws-analista`, `smart-planner`. O `analista` é agente não mediado:
+  conversa direto com o humano. Na elicitação, o `devflow` instrui o
+  humano a trocar para o `analista` em vez de spawná-lo.
+- `all` (spawnável e de uso direto): `eng-software`, `front`,
+  `curador-produto`, `dba`, `sec`, `qa`, `rev`.
+- `subagent` (apenas spawn): `revisor-historia`, `worker`, `revisor`.
+
+Permissões: o `curador-produto` ganhou `eng-software: allow` no bloco
+`permission.task` (após `"*": deny`). O `devflow` mantém allows
+nomeados só para os especialistas spawnáveis.
+
+O adapter Copilot passou a espelhar a semântica dos modos na conversão
+de frontmatter: `primary` emite `disable-model-invocation: true`;
+`subagent` mantém `user-invocable: false`; `all` não emite propriedade.
+O sync Copilot também exclui agentes OpenCode-only (`worker`,
+`revisor`) do vocabulário de delegação publicado na prosa dos perfis e
+remove `.agent.md` órfãos de nomes historicamente gerenciados (com
+backup; a lista de nomes é mantida à mão, limitação documentada no
+código).
+
+Teste de guarda novo: `tests/agents/test_task_spawnable_modes.py`
+exige que toda permissão `task` nomeada (`X: allow`) aponte para
+agente com mode spawnável (`subagent` ou `all`).
+
+Nota de mediação registrada no workflow: `curador-produto`, quando
+spawnado, faz perguntas ao humano via `devflow`.
+
+Commits: `795e284`, `94d33f6`, `6a65b34`.
+
 ## Remoção do plugin quando o suporte nativo chegar
 
 1. Confirme na release do OpenCode que a tool `task` aceita `model`
@@ -189,6 +232,34 @@ revisão de segurança da versão nova (ler o tarball, comparar com a tag
 correspondente, refazer os findings) e atualize o
 `UPSTREAM.md`. Só então suba o pin no config e a versão no README.
 
+## Pendências conhecidas
+
+Registro para o ciclo de revisão; nenhuma bloqueia o escopo descrito
+neste documento:
+
+- README, guarda do `AGENTS.base.md` e o `UPSTREAM.md` do plugin citam
+  `worktree`, que o pin `1.3.1` não implementa. Corrigir o texto
+  (remover a citação ou marcar como aspiracional).
+- O runbook manual deste documento usa o CLI `sqlite3`, ausente no
+  WSL desta máquina. Adaptar a verificação para `python3` (módulo
+  `sqlite3` da biblioteca padrão).
+- O timeout do teste de integração pode não disparar se o processo
+  `opencode run` ficar silencioso. Endurecer com `select`/thread de
+  leitura ou `pytest-timeout`.
+- Linhas acima de 120 colunas pré-existentes em
+  `harness-conf/agents/*.md`.
+- O wildcard `task: "*": allow` do `smart-planner` fica fora da
+  cobertura do teste de guarda, que valida apenas entradas nomeadas.
+- A suíte exige `JAVA_HOME=/home/vitor/.local/share/jdk`; sem a
+  variável, falha por motivo ambiental pré-existente.
+- `@slkiser/opencode-quota` segue sem pin de versão no array `plugin`
+  e flutua para a mais recente. O teste de pin exato aceita entradas
+  escopadas sem versão. Decidir pinar ou ajustar o critério.
+- Decisão registrada: após validação OK em uso, excluir os agentes
+  `worker` e `revisor`. Eles existem por causa da limitação que o
+  plugin resolve. A exclusão envolve `harness-conf/opencode.json`, o
+  adapter Copilot e testes.
+
 ## Pedido ao devflow
 
 Revisar o implementado e promover a aderência ao repo. O escopo da
@@ -201,10 +272,11 @@ Checklist de revisão e aderência:
    `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`.
    A variável `JAVA_HOME` é pré-requisito ambiental já conhecido do
    repo; sem ela a suíte falha por motivo ambiental pré-existente.
-2. Execute `tests/agents/test_workflow_consistency.py` e confirme que
-   nada ficou órfão. O plugin não criou agente, command nem skill
-   novos; a guarda do `AGENTS.base.md` é o único texto novo voltado a
-   agentes.
+2. Execute `tests/agents/test_workflow_consistency.py` e
+   `tests/agents/test_task_spawnable_modes.py` e confirme que nada
+   ficou órfão. O plugin não criou agente, command nem skill novos; a
+   leva de consistência alterou modos e permissões em
+   `harness-conf/agents/` e o comportamento do adapter Copilot.
 3. Valide `harness-conf/plugins/opencode-task-model/UPSTREAM.md` contra
    o padrão de registro de origem do repo (origem, SHA, data, findings,
    instruções de atualização).
@@ -215,10 +287,9 @@ Checklist de revisão e aderência:
    revisar, considere o fato registrado em "Como usar": a citação a
    `worktree` é aspiracional no pin `1.3.1`.
 6. Confirme que nenhum arquivo de `src/` ou `adapters/` mudou nos
-   commits `0f1ce5e`, `cdde56f` e `1041452`.
-
-Pendência conhecida, fora do escopo deste trabalho:
-`@slkiser/opencode-quota` segue sem pin no array `plugin` e flutua para
-a versão mais recente. O teste de pin exato do repo aceita entradas
-escopadas sem versão. Decidir pinar ou ajustar o critério é decisão de
-ciclo futuro.
+   commits do plugin (`0f1ce5e`, `cdde56f`, `1041452`); a leva de
+   consistência alterou `src/opencode_config/harnesses/copilot.py`
+   (commit `94d33f6`).
+7. Revise a seção "Consistência de agentes e adapters" contra o
+   estado atual de `harness-conf/agents/` e do adapter Copilot, e
+   avalie as "Pendências conhecidas" listadas.
