@@ -204,6 +204,23 @@ apresenta diff, plano completo ou caminho de arquivo ao humano; toda
 aprovação é sobre conteúdo apresentado na conversa; nenhuma pergunta
 sobre detalhe de escrita do plano. Caso futuro da suíte de comunicação.
 
+**Item 8 — Esquecer o protocolo e resumo não apresentado (aprovado).**
+Sintomas já cobertos por outros itens: texto demais, pelo item 3
+(checagem pré-envio); resumo com informação não apresentada, pelo item
+3 (resposta se sustenta sozinha) e item 7 (humano só conhece o que foi
+apresentado na conversa). Peça nova aprovada: âncora de recarga.
+
+Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
+
+- Compactação de contexto ou desvio do protocolo de perguntas (volume,
+  ritmo, uso da tool): recarregue a skill `question-orchestration`
+  antes da próxima resposta ao humano.
+
+Verificação: conversa roteirizada longa com compactação no meio; após a
+compactação, a skill é recarregada e o protocolo (uma pergunta por
+rodada, volume por turno) se mantém. Caso futuro da suíte de
+comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
