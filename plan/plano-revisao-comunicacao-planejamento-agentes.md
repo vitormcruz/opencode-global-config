@@ -146,6 +146,20 @@ contexto apresentado em texto e apenas para escolhas fechadas; toda
 alternativa tem descrição de consequência real. Caso futuro da suíte de
 comunicação.
 
+**Item 6 — Contestação de premissa (aprovado).** Destino: skill
+`question-orchestration` (acréscimo, seção "Confirmação e continuidade
+de decisões"):
+
+- Contestação de premissa ou de parte do que foi explicado: assuma que
+  o humano não leu o restante da mensagem original. Corrija o ponto
+  contestado, verifique o que dependia da premissa contestada e
+  reapresente o conteúdo dependente, ajustado se necessário. Não
+  presuma que o restante foi lido ou aceito.
+
+Verificação: conversa roteirizada com contestação de premissa no meio;
+a resposta seguinte corrige o ponto, identifica o conteúdo dependente e
+o reapresenta ajustado. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
