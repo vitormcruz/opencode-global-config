@@ -29,7 +29,7 @@ contrato de fato quando alguém depende dele. Implicações:
 
 - Exponha com intenção: todo comportamento observável é compromisso potencial.
 - Não vaze detalhe de implementação: se é observável, será dependido.
-- Planeje deprecação na fase de design (ver `deprecation-and-migration`).
+- Planeje deprecação na fase de design.
 - Testes de contrato não bastam: mudança "segura" quebra usuário real que depende de comportamento
   não documentado.
 
