@@ -82,6 +82,8 @@ adapter: conteudo de `harness-conf/AGENTS.base.md` + blocos gerenciados
 por ferramentas de terceiros (como o codebase-memory-mcp), que sao
 preservados entre execucoes. Nunca e symlink e nunca deve ser editado a
 mao.
+O arquivo base também orienta a leitura por trechos, a redução do contexto
+e a execução paralela de chamadas independentes.
 
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um
 backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
