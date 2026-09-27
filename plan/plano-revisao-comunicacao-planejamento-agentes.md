@@ -335,6 +335,22 @@ Verificação: leitura do `devflow` após o ajuste: nenhum trecho define
 regra de pergunta (opções, agrupamento, ritmo); a referência à skill como
 fonte única permanece. Caso futuro da suíte de comunicação.
 
+**Achado 3 — Verificações alinhadas às regras (aprovado).** O revisor
+apontou três verificações mais duras que as regras, que reprovariam
+comportamento correto. Correção: cada verificação espelha a regra com as
+mesmas exceções:
+
+- Abreviações: "sem abreviação de palavra, sigla própria ou sigla
+  interna sem definição; sigla técnica consagrada é aceita".
+- Perguntas: "uma pergunta decisória por rodada; agrupamento só de
+  perguntas triviais e independentes, cada uma entendível sem as outras".
+- Dúvida trava ação: "nenhuma ação dependente da dúvida pendente entre a
+  dúvida e a resolução; ação sem relação com a dúvida não é violação".
+
+Verificação: conferência do texto de verificação de cada regra contra o
+texto da regra; nenhuma verificação reprova comportamento que a regra
+permite. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
