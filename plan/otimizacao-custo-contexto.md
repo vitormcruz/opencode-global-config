@@ -824,6 +824,16 @@ conversa mediada (2026-09-23/24) e incorporadas a este plano em
 2026-09-24 pelo eng-software, a partir do prompt do devflow, com
 fidelidade total. Decisões FECHADAS: não reabrir.
 
+### Decisões do ciclo (2026-09-27)
+
+- **Mapa de modelos atualizado:** todos os subagentes de execução usam
+  `opencode/gpt-6-luna` (zen, reasoning high); o revisor usa
+  `zai-coding-plan/glm-5.3`.
+- **Autonomia:** o devflow avança os gates operacionais sem parar no humano,
+  exceto quando houver bloqueantes.
+- **Compactação sem humano disponível:** cada task registra uma subseção
+  nova e autocontida neste plano.
+
 **P1 — ai-memory na config canônica (E10): opção A com acréscimos.**
 - Bloco `mcp.ai-memory` no `harness-conf/opencode.json` (fonte canônica).
 - O BOOTSTRAP provisiona o ai-memory completo em user-space, idempotente,
@@ -1822,9 +1832,9 @@ ou socket loopback = `integration` com premissa declarada.
 | # | Teste novo | Task | Arquivo provável | Marker | Premissas |
 |---|---|---|---|---|---|
 | T1 | Freeze: sync/update/list pulam congelada; campo preservado na regeneração; negativo por subcomando | E1 | `tests/skills_mgmt/test_sync.py` | unit | nenhuma |
-| T2 | Detecção read-only com fixture git de 2 commits: mudanças exatas base→novo, congelada ausente, SHA inválido com erro acionável, saída por skill | E2 | `tests/skills_mgmt/test_detect.py` (novo) | integration | git local |
-| T3 | Detecção: clone em tempdir fora do repo + cleanup; aviso de conteúdo não confiável por skill; pendência reaparece na 2ª execução pós-recusa | E2 | `tests/skills_mgmt/test_detect.py` | integration | git local |
-| T4 | Fallback clone completo quando shallow sem SHA base (L1) | E2 | `tests/skills_mgmt/test_detect.py` | integration | git local |
+| T2 | Diff base→novo, freeze, SHA inválido e saída por skill | E2 | `test_upstream_detect.py` | integration | git |
+| T3 | Clone externo, cleanup, aviso e repetição pós-recusa | E2 | `test_upstream_detect.py` | integration | git local |
+| T4 | Fallback se clone shallow não contém SHA base | E2 | `test_upstream_detect.py` | integration | git local |
 | T5 | writing-for-agents: fixture MIT + SKILL-MECHANICS.md; SKILL.md intocado; `## Notas locais` e revisão de 2026-09-22 preservadas; extra_fields | E3 | `tests/skills_mgmt/test_sync.py` | unit | nenhuma |
 | T6 | Consistência tabela de sync do AGENTS.md ↔ famílias do CLI (L2) | E3 | `tests/skills_mgmt/test_sync.py` | unit | nenhuma |
 | T7 | Checklist pós-sync: SHA novo refletido; arquivos declarados existem e batem; item manual de revisão explícito | E4 | `tests/skills_mgmt/test_sync.py` | integration | git local |
@@ -2271,3 +2281,1305 @@ plano, pelo eng-software na fase REVISÃO DO PLANO, a pedido do devflow:
 3. Aplicada (RM-11): redação precisa do que existe hoje (bloco MCP no
    `~/.config/opencode/opencode.jsonc` manual do usuário; após a fase
    A, o injetado pelo provisionamento).
+
+## Ciclo 2 — CONSTRUÇÃO
+
+### E8 — 2026-09-27
+
+**Resultado:** o teste falhava quando `JAVA_HOME` não estava definido. O
+teste existente já emitia `pytest.fail` acionável. Mantive o teste e o
+código do repositório sem alterações.
+
+**Causa raiz:** JDK Temurin 21.0.6 e Gradle 8.10.2 estavam instalados e
+disponíveis no `PATH`. O `~/.bashrc` não exportava `JAVA_HOME`.
+
+**Correção:** acrescentei ao `~/.bashrc` o bloco gerenciado
+`bootstrap-env`, com `JAVA_HOME="/home/vitor/.local/share/jdk"`.
+
+**Arquivos tocados:**
+- `~/.bashrc`, inclusão do bloco `bootstrap-env`.
+- `plan/otimizacao-custo-contexto.md`, decisões do ciclo e evidências E8.
+
+**Comandos e saída resumida:**
+- `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest tests/product_tests/test_concordion_spec_infra.py -v`:
+  12 passed em 10,37 s.
+- `env -u JAVA_HOME .venv/bin/pytest tests/product_tests/test_concordion_spec_infra.py -v`:
+  reproduziu 1 failed e 11 passed, com a mensagem esperada do `pytest.fail`.
+- `bash -n /home/vitor/.bashrc`: código de saída 0.
+- Execução do arquivo em Bash interativo carregando `~/.bashrc`, com
+  `JAVA_HOME` removido do ambiente inicial: 12 passed em 10,46 s.
+
+**Pendências:** shells e processos já abertos mantêm o ambiente antigo.
+Uma nova shell interativa carrega a variável persistida no `~/.bashrc`.
+
+### E1 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** o CLI respeita `sincronizacao: congelada` por skill. O sync
+ignora skills congeladas, informa cada skill ignorada e sincroniza as demais
+da família. O update congelado retorna `status: frozen` sem executar comandos.
+O list marca skills congeladas. A regeneração de `UPSTREAM.md` preserva o
+campo existente.
+
+**Arquivos tocados:**
+- `src/opencode_config/cli/skills_sync.py`, leitura e preservação do campo,
+  filtros no sync/update e marcação no list.
+- `tests/skills_mgmt/test_sync.py`, quatro testes novos para sync parcial,
+  update congelado, list somente leitura e regeneração de metadados.
+- `AGENTS.md`, regra de congelamento e autoridade humana documentadas.
+- `plan/otimizacao-custo-contexto.md`, este registro E1.
+
+**Testes e análise:**
+- Red: os quatro testes novos falharam antes do código por ausência de skip,
+  status, marcação e preservação do campo. Comando:
+  `.venv/bin/pytest tests/skills_mgmt/test_sync.py -m unit -k 'frozen or synchronization_field' -q`.
+- Green/regressão: `.venv/bin/pytest tests/skills_mgmt/test_sync.py -m unit
+  -q`: 43 passed, 1 deselected. A execução ficou restrita aos testes unitários
+  do módulo de sync; nenhuma suíte completa foi rodada.
+- Análise estática: `.venv/bin/ruff check src/opencode_config/cli/skills_sync.py tests/skills_mgmt/test_sync.py`
+  passou.
+- Higiene do diff: `git diff --check` passou.
+- Testes existentes foram mantidos sem alteração. Os testes novos falharam
+  antes da implementação e passaram após a implementação.
+
+**Segurança:** nenhum conteúdo real de upstream foi importado ou executado
+nesta task. SEC-14 e SEC-15 pertencem a E2/E3. Não houve operação com elevação
+(SEC-18) nem inclusão de segredo (SEC-20). A alteração só lê o metadado de
+controle e impede comandos de update quando a skill está congelada.
+
+**P1-P5 e documentação:** P3 foi aplicado sem mudar as demais decisões
+fechadas. A decisão de congelar continua humana; o CLI não cria nem remove o
+campo. A seção de regras de upstream em `AGENTS.md` foi atualizada. Consultei
+`docs/README.md`; o item T1 aprovado especifica os testes desta task em
+`tests/skills_mgmt/test_sync.py`. Não criei spec adicional fora do plano.
+
+**Gate de refatoração:** sem impacto no plano. A mudança ficou em E1, sem
+antecipar detecção, import adicional de skills ou checklist das tasks E2-E4.
+Não surgiu decisão arquitetural que exija ADR.
+
+**Pendências para E2-E4:**
+- E2: detecção read-only de diferenças upstream e exclusão das skills
+  congeladas; permanece sem implementação nesta execução.
+- E3: inclusão da `writing-for-agents` e preservação das notas locais;
+  permanece sem implementação nesta execução.
+- E4: checklist pós-sync, validação de SHA/arquivos e revisão manual de
+  segurança do conteúdo novo; permanece sem implementação nesta execução.
+
+### E2 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** concluído. `opencode-skills detect FAMILY` compara cada SHA
+registrado com o commit atual do upstream. A operação não altera o checkout,
+ignora skills congeladas e mantém a pendência após recusa.
+
+**Escopo e decisões aplicadas:** E2, T2-T4, P1-P5 com foco na P3, lacuna L1,
+SEC-12, SEC-13 e SEC-14. P1, P2, P4 e P5 permanecem sem alteração. A P3
+orienta a detecção read-only, a análise do agente, a decisão humana e a
+aplicação assistida. A saída identifica a família, a skill, os SHAs, os
+arquivos e o diff. Cada skill alterada recebe aviso fixo de conteúdo NÃO
+CONFIÁVEL e instrução para não executar conteúdo upstream.
+
+O clone shallow fica em diretório temporário fora do checkout, sem recursão
+de submódulos, e é removido após a operação. Quando o SHA base não está no
+clone shallow, o detector busca o histórico completo no diretório temporário.
+SHA ausente ou inválido gera erro acionável antes do clone. A recusa sem
+congelamento mantém o SHA de `UPSTREAM.md`, então a detecção reapresenta a
+pendência.
+
+**Decisão recebida do devflow (2026-09-27):** autorização para atualizar a
+guarda Concordion existente e a configuração Gradle para incluir ADR-0007.
+A mudança decorre da decisão aprovada de que ADRs novos 0007-0009 seguem a
+convenção dos ADRs retrofitados, com "Asserções executáveis". O teste da
+guarda agora deriva os ADRs numerados de `docs/adr/`; ADR-0008 e ADR-0009 não
+exigirão edição dessa guarda.
+
+**Integração do fluxo P3:** `harness-conf/commands/sync-upstream-skills.md`
+agora executa detecção antes de propor alterações e proíbe `sync` antes da
+aprovação humana. O comando trata diffs como não confiáveis, deixa recusa sem
+congelamento sem efeito e exige decisão explícita para congelar. README e
+`adapters/opencode/README.md` documentam `detect` e `sync` como passos separados.
+
+**Especificações criadas ou atualizadas, conforme `docs/README.md`:**
+- `docs/adr/0007-deteccao-read-only-upstream-skills.md` registra a decisão e
+  inclui "Asserções executáveis".
+- `src/test/groovy/Adr0007Fixture.groovy` implementa a fixture Concordion.
+  `build.gradle` registra a fixture na suíte backend.
+- `tests/product_tests/test_concordion_spec_infra.py` verifica dinamicamente
+  todos os ADRs numerados, a fixture e o registro em uma especialidade.
+- Os diagramas gerados `docs/adr/diagrama-c4-l1.md`, `diagrama-c4-l2.md` e
+  `diagrama-c4-l3.md` incluem o upstream e o componente `cli.skills_sync`.
+- Não criei spec de produto separada. Os testes T2-T4 cobrem a operação, e a
+  asserção do ADR aponta para esses testes.
+
+**Arquivos alterados nesta execução:**
+- `src/opencode_config/cli/skills_sync.py`, detecção, fallback de histórico,
+  clone temporário e saída por skill.
+- `tests/skills_mgmt/test_upstream_detect.py`, casos T2-T4 e invariantes SEC-12/14.
+- `tests/agents/test_sync_upstream_command.py` e
+  `harness-conf/commands/sync-upstream-skills.md`, contrato e fluxo P3.
+- `tests/product_tests/test_concordion_spec_infra.py` e `build.gradle`, guarda
+  genérica e registro da fixture ADR-0007.
+- ADR-0007, fixture Concordion, três diagramas C4, `README.md` e
+  `adapters/opencode/README.md`.
+- Este registro do plano.
+
+#### Evidências de Testes — Construção E2
+
+- [x] Testes novos: 7 casos de `test_upstream_detect.py` falharam antes da detecção,
+  porque `detect` ainda não existia. A guarda de ADR falhou antes da criação
+  da fixture. O teste do comando falhou antes da atualização do fluxo.
+- [x] Regressão de skills: `.venv/bin/pytest tests/skills_mgmt/ -m all -q`,
+  74 passaram.
+- [x] Guarda Concordion e comando: `.venv/bin/pytest
+  tests/agents/test_sync_upstream_command.py
+  tests/product_tests/test_concordion_spec_infra.py -m unit -q`, 19 passaram,
+  1 deselected.
+- [x] Regressão do adapter Copilot: `.venv/bin/pytest
+  tests/harnesses/test_copilot.py -m unit -q`, 28 passaram.
+- [x] Build de specs: teste de integração
+  `test_render_adr_specs_task_derives_every_numbered_adr_spec`, 1 passou com
+  `JAVA_HOME=/home/vitor/.local/share/jdk`.
+- [x] Fixture Concordion: `gradle -q test -PproductSpecialty=backend
+  --tests Adr0007Fixture --no-daemon`, passou.
+- [x] Análise estática: `ruff check` nos módulos e testes alterados passou.
+  `git diff --check` passou. Os artefatos novos e as linhas adicionadas ao
+  bloco E2 têm até 120 colunas.
+- [x] Regressão incremental executada após cada ajuste de código e teste.
+- [x] A suíte completa do projeto não foi executada, conforme instrução do
+  solicitante. A primeira tentativa da integração falhou por `JAVA_HOME` não
+  definido no processo. Reexecutei com o JDK já instalado, sem alterar o
+  ambiente persistente.
+
+**Segurança:** a detecção só lê `UPSTREAM.md` e dados Git. Diff usa
+`--no-ext-diff` e `--no-textconv`. Clone e fetch desativam submódulos. Nenhum
+conteúdo upstream é executado. Não rodei testes de segurança, que pertencem ao
+agente `sec`.
+
+**Gate de refatoração:** sem mudança de escopo ou de decisão aprovada. A
+atualização do comando e da documentação conecta a nova detecção ao fluxo P3
+existente. ADR-0007 registra a decisão técnica exigida por E2.
+
+**Restrições atendidas:** não alterei `Status`, não toquei em
+`plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+### E3 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** concluído. `writing-for-agents` agora é uma família do CLI.
+O sync copia `SKILL-MECHANICS.md`, mantém o `SKILL.md` local e atualiza o
+`UPSTREAM.md` com os campos de descrição e as notas locais preservadas.
+
+**Escopo:** E3, T5, T6 e lacuna L2. Não alterei E4.
+
+**Implementação:**
+- `SPECS` registra `writing-for-agents` no repositório mattpocock/skills,
+  branch `main`.
+- `_sync_writing_for_agents` valida os arquivos esperados e copia a mecânica.
+  `_copy_skill_md` mantém a regra de não sobrescrever `SKILL.md` existente.
+- `_write_upstream` preserva `## Notas locais` e migra a antiga seção de
+  segurança para esse formato. O sync registra `description_lang` e a nota
+  curta em uma linha.
+- `harness-conf/skills/writing-for-agents/UPSTREAM.md` agora aponta para o
+  comando do CLI. O comando manual em linha única saiu. A revisão de
+  segurança de 2026-09-22 permanece nas notas locais.
+- A tabela de sync do `AGENTS.md` inclui `writing-for-agents`. T6 confere
+  que cada família do CLI aparece nessa tabela (L2).
+
+**Arquivos tocados nesta execução:**
+- `src/opencode_config/cli/skills_sync.py`.
+- `tests/skills_mgmt/test_sync.py`, casos T5 e T6.
+- `AGENTS.md` e `harness-conf/skills/writing-for-agents/UPSTREAM.md`.
+- Este registro do plano.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e os princípios
+de documentação. O `UPSTREAM.md` já é o artefato definido para skills
+externas. Não criei spec adicional nem ADR.
+
+#### Evidências de Testes — Construção E3
+
+- [x] Red: os dois testes novos falharam antes da implementação. O teste T5
+  rejeitou a família ausente no parser; T6 rejeitou a família ausente no CLI.
+  Comando: `.venv/bin/pytest tests/skills_mgmt/test_sync.py -m unit -k
+  'writing_for_agents_sync or sync_table_documents' -q`.
+- [x] Green e regressão do módulo: `.venv/bin/pytest
+  tests/skills_mgmt/test_sync.py -m unit -q`, 45 passaram, 1 foi
+  deselecionado.
+- [x] CLI: `.venv/bin/opencode-skills list` incluiu `writing-for-agents`.
+- [x] Análise estática: `ruff check` no módulo e no teste passou.
+  `git diff --check` passou.
+- [x] Linhas adicionadas verificadas com limite de 120 colunas.
+- [x] Nenhuma suíte completa foi executada, conforme pedido. Nenhum teste
+  existente foi alterado e nenhum teste novo usa `skip`.
+
+**Segurança:** usei fixture Git local com licença MIT. Não baixei nem executei
+conteúdo do upstream. A revisão já registrada foi preservada no `UPSTREAM.md`.
+
+**Gate de refatoração:** sem impacto no plano ou decisão arquitetural nova.
+Mantive o roteamento existente do CLI e ampliei o gerador de metadados.
+
+**Restrições atendidas:** não alterei `Status`, não toquei em
+`plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+### E4 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** concluído. O checklist pós-sync agora separa verificações
+automatizadas, guardadas por testes, de verificações manuais que dependem de
+avaliação humana.
+
+**Escopo:** E4 e T7. Não alterei a lógica de sync implementada em E1-E3.
+
+**Testes adicionados em `tests/skills_mgmt/test_sync.py`:**
+- Teste de integração com upstream Git local de dois commits. Após avançar o
+  upstream e aplicar o sync, verifica o SHA novo em `UPSTREAM.md`, a declaração
+  do arquivo sincronizado, sua existência e igualdade byte a byte com o upstream.
+  Também confirma que a versão local adaptada de `SKILL.md` não foi sobrescrita.
+- Teste unitário verifica que o checklist separa garantias automáticas e manuais
+  e marca explicitamente a revisão de segurança como manual.
+- A cobertura existente de não sobrescrever `SKILL.md` também está em
+  `test_accessibility_sync_preserves_skill_and_description_adaptation` e
+  `test_addyosmani_sync_copies_references_without_overwriting_skill`.
+
+**Documentação:** atualizei a seção "Checklist pós-sync" do `AGENTS.md`.
+As verificações automáticas cobrem SHA, arquivos sincronizados e preservação de
+`SKILL.md`. As etapas manuais mantêm a revisão de segurança (prompt injection,
+comandos, URLs e exfiltração), a avaliação de impacto em `SKILL.md` e a decisão
+humana sobre aplicação assistida. Consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. O artefato
+`UPSTREAM.md` existente é o formato definido para skills externas; não criei
+spec ou ADR adicional.
+
+#### Evidências de Testes — Construção E4
+
+- [x] Red: o teste do checklist falhou antes da documentação ser atualizada,
+  pois não havia distinção entre verificações automáticas e manuais. O teste de
+  integração passou nesse primeiro ciclo porque E1-E3 já implementavam o sync
+  validado pela nova guarda.
+- [x] Green/regressão: `.venv/bin/pytest tests/skills_mgmt/ -m all -q`,
+  78 passed.
+- [x] Análise estática: `.venv/bin/ruff check
+  src/opencode_config/cli/skills_sync.py tests/skills_mgmt/test_sync.py`, passou.
+- [x] Higiene do diff: `git diff --check` passou.
+- [x] Regressão incremental executada após a alteração do checklist; nenhum
+  teste existente foi alterado e nenhum teste novo usa `skip`.
+- [x] A suíte completa do projeto não foi executada, conforme instrução.
+
+**Segurança:** usei somente fixture Git local; não baixei nem executei conteúdo
+upstream. A revisão de segurança continua manual e explícita no checklist. Não
+executei testes de segurança, responsabilidade do agente `sec`.
+
+**Gate de refatoração:** sem impacto no plano; não houve mudança de lógica
+produtiva, comportamento ou decisão arquitetural. Nenhum ADR necessário.
+
+**Restrições atendidas:** não alterei `Status`, não toquei em
+`plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+**Pendências para waves futuras:** nenhuma implementação de E4 pendente. Em
+cada sync futuro, a revisão de segurança do conteúdo upstream e a decisão de
+aplicar mudanças em `SKILL.md` continuam manuais e dependem de aprovação humana.
+
+### E5 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** o adapter Copilot fornece uma descrição específica para o comando
+`otimizar-agents-md`; a conversão não usa mais o fallback genérico.
+
+**Implementação:** acrescentei a entrada do comando em `_COMMAND_DESCRIPTIONS`,
+com gatilhos em PT-BR para otimizar, enxugar ou revisar `AGENTS.md`.
+
+**Teste:** criei `test_copilot_adapter_describes_agents_md_optimization_command`.
+O teste verifica a descrição específica e a ausência de
+`Executa o comando otimizar-agents-md.`. O teste novo falhou antes do código e
+passou depois da implementação.
+
+**Evidências:** `.venv/bin/pytest tests/harnesses/test_copilot.py -m unit -q`
+passou com 36 testes em 30,93 s. O Ruff nos arquivos Python alterados e a
+`git diff --check` passaram. A suíte final E12 também inclui este teste.
+
+**Documentação e arquitetura:** consultei `docs/README.md`. O teste T8 é o
+artefato de aceitação previsto para esta descrição; não criei spec Concordion
+nem ADR adicional.
+
+**Commit:** `e7c4115 fix(copilot): description do command de otimizacao de AGENTS.md`.
+
+**Restrições:** não alterei `Status` nem
+`plan/insumo-devflow-spawn-dinamico.md`.
+
+### E9 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Estado:** concluído. Reflowei 31 linhas físicas acima de 120 colunas em
+oito arquivos de agentes. Das oito linhas de tabela, reformulei duas células
+para caber e usei continuação com as duas primeiras células vazias nas outras
+seis.
+
+**Escopo:** E9 e T14. A guarda cobre apenas `harness-conf/agents/*.md` e
+`harness-conf/AGENTS.base.md`. `SKILL.md` e `references/` ficam fora.
+
+**TDD:** criei `tests/agents/test_line_width.py` antes do reflow. O teste
+falhou como esperado e listou as 31 linhas acima de 120 colunas nos oito
+arquivos de agentes. `harness-conf/AGENTS.base.md` não gerou violações.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. A guarda unitária
+é o artefato previsto por T14. Não há spec adicional ou ADR para esta mudança.
+
+**Arquivos alterados:**
+- `harness-conf/agents/analista.md`
+- `harness-conf/agents/curador-produto.md`
+- `harness-conf/agents/dba.md`
+- `harness-conf/agents/eng-software.md`
+- `harness-conf/agents/qa.md`
+- `harness-conf/agents/rev.md`
+- `harness-conf/agents/revisor-historia.md`
+- `harness-conf/agents/sec.md`
+
+#### Evidências de Testes — Construção E9
+
+- [x] T14 novo: `.venv/bin/pytest tests/agents/test_line_width.py -m all -q`;
+  falhou antes do reflow com 31 violações e passou depois, com 1 passed.
+- [x] Regressão do módulo: `.venv/bin/pytest tests/agents/ -m all -q`,
+  182 passed.
+- [x] Checagem estática de largura: T14 confirmou o limite de 120 colunas.
+  `git diff --check` também passou.
+- [x] Regressão incremental: T14 foi executado após o reflow e após a
+  correção das duas linhas restantes.
+- [x] Gate de refatoração: sem impacto no plano. O reflow preserva o conteúdo
+  e altera somente a apresentação física das linhas.
+- [x] Não rodei a suíte completa, não alterei `Status`, não toquei em
+  `plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+### Perguntas (construção)
+
+- **Atualização da guarda de ADR e do build para ADR-0007 — RESPONDIDA
+  (devflow, 2026-09-27):** autorizada como consequência direta da convenção
+  aprovada para ADRs 0007-0009. A guarda deriva os ADRs numerados do diretório,
+  então os próximos dois não exigirão edição desse teste.
+- **E9, reflow em tabelas Markdown — RESPONDIDA (devflow, 2026-09-27):**
+  primeiro encurtar ou reformular o texto da célula, sem perda de informação.
+  Se a linha ainda exceder 120 colunas, usar continuação com as duas primeiras
+  células vazias. T14 mantém o limite de 120 colunas em todas as linhas,
+  inclusive nas continuações. A pergunta original consultava a aprovação desse
+  formato ou de outra representação.
+- **E6, testes existentes em conflito com P4 — RESPONDIDA (devflow,
+  2026-09-27):** autorizado atualizar os quatro testes existentes para o
+  contrato P4, sem excluir testes. Reapresente as garantias antigas como
+  asserções para skills globais em `.copilot/skills/`, skills de domínio em
+  `~/.copilot/referencias/skills/` e os blocos gerados nos perfis. Siga os
+  destinos exatos definidos em P4.
+- **E6, asserção do bloco de referências nos perfis — RESPONDIDA (devflow,
+  2026-09-27):** não antecipar os blocos dos perfis na E6. Blocos gerados no
+  corpo dos perfis são escopo da E14. Decisão de organização de escopo.
+
+### E13 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** apliquei em `harness-conf/AGENTS.base.md` os textos aprovados
+na P5. Substituí a seção de compactação sem alterar o conteúdo aprovado e
+acrescentei `Chamadas de ferramentas`. A regra de precedência sobre a premissa
+7 saiu do arquivo base. Não alterei `docs/workflow-agentes-dev.md`.
+
+**Conteúdo aplicado, conforme P5:**
+- Compactação: avaliação após etapa concluída e resultado salvo; compactação
+  por conta própria com mecanismo disponível; pedido ao humano se nenhum
+  mecanismo for disponível ou suficiente; leitura por trechos e consultas
+  direcionadas; threshold como rede de segurança.
+- Chamadas de ferramentas: agrupar operações independentes em paralelo e
+  sequenciar operações apenas quando houver dependência real.
+
+**Validações:**
+- `.venv/bin/pytest tests/agents/test_line_width.py -m all -q`: 1 passed.
+  A guarda verifica `harness-conf/agents/*.md` e
+  `harness-conf/AGENTS.base.md`, com limite de 120 colunas.
+- `.venv/bin/pytest tests/agents/test_workflow_consistency.py -m all -q`:
+  20 passed.
+- `git diff --check -- harness-conf/AGENTS.base.md
+  plan/otimizacao-custo-contexto.md`: passou.
+- Não executei a suíte completa, não alterei `Status`, não toquei em
+  `plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. A mudança não
+exige spec ou ADR adicional. A atualização do workflow permanece pendente de
+aprovação humana.
+
+**Proposta da premissa 7 — AGUARDANDO APROVAÇÃO HUMANA**
+
+O devflow apresentará esta redação ao humano. Não apliquei a proposta em
+`docs/workflow-agentes-dev.md`; a aplicação fica para task posterior após
+aprovação.
+
+```markdown
+7. **Seleção de modelo por fase** — ao iniciar, `devflow`
+   sugere um padrão (um modelo por etapa — planejamento,
+   execução, testes, revisão) e o humano define como
+   preferir: um modelo só, por fase granular ou arranjo
+   próprio. O mapa combinado fica registrado no arquivo.
+   O workflow pausa antes de fases cujo modelo difere do atual.
+   Política padrão de sessão: `{workflowId}-{fase}-{agente}`;
+   retomada dentro da fase e sessão nova entre fases.
+   Após cada etapa concluída e resultado salvo, o agente
+   avalia compactar antes de iniciar a próxima. A compactação
+   compensa quando o histórico já é grande e ainda virão
+   muitas chamadas. Com contexto pequeno ou pouco trabalho
+   restante, o custo da compactação supera a economia: não
+   compacte.
+   O agente reduz o contexto por conta própria com qualquer
+   mecanismo disponível no harness (compactação, nova sessão
+   ou spawn com estado persistido em arquivo, ou equivalente).
+   Sem mecanismo disponível ou suficiente, o agente pede ao
+   humano.
+   O agente segura o crescimento: lê trechos (offset/limit) e
+   consultas direcionadas. O agente não reinsere arquivos e
+   logs completos no contexto.
+    A auto-compactação por threshold é rede de segurança, não
+    plano. Se disparar, a fronteira foi perdida.
+```
+
+### E6 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Estado:** roteamento de skills implementado e validado. Não antecipei o bloco
+dos perfis. O devflow confirmou que esse bloco pertence à E14, registrada em
+seção própria após a E6.
+
+**Decisão recebida do devflow (2026-09-27):** autorizado atualizar os quatro
+testes existentes para P4. Nenhum teste foi removido; as garantias foram
+reexpressas nos novos destinos. A pergunta sobre essa autorização foi marcada
+RESPONDIDA em `### Perguntas (construção)`.
+
+**Implementação:** o adapter deriva o roteamento de `permission.skill` em
+`harness-conf/opencode.json`, incluindo padrões wildcard. As 10 skills sem
+deny global vão para `~/.copilot/skills/`; as 23 skills cobertas por deny vão
+para `~/.copilot/referencias/skills/`. Cópias antigas na pasta errada recebem
+backup e são removidas, evitando descoberta automática de skills de domínio.
+O plano impresso pelo adapter discrimina os dois destinos e as contagens.
+
+**Testes:** atualizei os quatro testes existentes sem deletá-los. A skill de
+domínio mantém frontmatter na pasta auxiliar; `question-orchestration` e
+`web-research-exa-crawl4ai` permanecem na descoberta por serem globais; o
+conteúdo da segunda continua byte a byte igual à fonte. O teste de backup
+verifica a migração e remoção de uma cópia legada da pasta de descoberta.
+Adicionei T9 para verificar a soma 10/23, a partição integral das skills da
+fonte, a ausência de domínio na descoberta e o efeito de alterar um deny.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. Atualizei a seção
+Adapters do `README.md` com os destinos, o mapa de permissions e a migração com
+backup. O plano de testes do ciclo prevê asserções em pytest; não criei spec
+adicional ou ADR. A asserção do bloco nos perfis permanece associada à E14 e
+segue a decisão do devflow de não antecipar esse escopo na E6.
+
+**Arquivos alterados nesta execução:**
+- `src/opencode_config/harnesses/copilot.py`.
+- `tests/harnesses/test_copilot.py`.
+- `README.md`, somente a descrição dos destinos das skills Copilot.
+- Este registro e a resposta à pergunta de autorização neste plano.
+
+#### Evidências de Testes — Construção E6 (parcial)
+
+- [x] RED: depois de atualizar os testes e antes da implementação, o recorte
+  executado teve 4 failed e 2 passed. As falhas demonstraram destinos auxiliares
+  ausentes, inclusão indevida de domínio na descoberta e roteamento independente
+  do mapa.
+- [x] Green do módulo: `.venv/bin/pytest tests/harnesses/test_copilot.py
+  -m unit -q`, 30 passed.
+- [x] Regressão focada: `.venv/bin/pytest tests/harnesses/ tests/agents/
+  -m all -q`, 240 passed. Não executei a suíte completa.
+- [x] Análise estática: `.venv/bin/ruff check
+  src/opencode_config/harnesses/copilot.py tests/harnesses/test_copilot.py`,
+  passou. `git diff --check` nos arquivos alterados passou.
+- [x] Regressão incremental: recorte RED antes do código; testes do módulo e
+  regressão focada após a implementação.
+- [x] Gate de refatoração: o roteamento não alterou a decisão P4. O devflow
+  confirmou que o bloco pertence à E14; a implementação ficou em seção própria.
+
+**Restrições:** não alterei `Status`, não toquei em
+`plan/insumo-devflow-spawn-dinamico.md`, não executei a suíte completa e não
+criei commit.
+
+### E14 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** concluído. O adapter acrescenta referências às skills de domínio
+autorizadas somente na cópia materializada dos perfis do Copilot. Cada entrada
+tem a descrição completa da fonte e o caminho absoluto da cópia auxiliar.
+Agentes sem allow não recebem o bloco. O adapter não copia o corpo da skill
+para o perfil.
+
+**Implementação:** `_sync_agents` deriva cada bloco das permissões da fonte do
+agente e do roteamento de skills produzido por E6. O bloco usa descrições de
+`harness-conf/skills/*/SKILL.md`, caminhos em
+`.copilot/referencias/skills/` e marcadores gerados próprios. A extração mantém
+a descrição completa de scalars YAML dobrados. A sincronização não lê o corpo
+da pasta auxiliar para compor o bloco.
+
+**Decisão de escopo:** o devflow respondeu que E6 não deve antecipar os blocos
+dos perfis. A resposta foi registrada e marcada RESPONDIDA em
+`### Perguntas (construção)`. E14 mantém sua fronteira original.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. Criei
+`docs/adr/0009-skills-de-dominio-nos-perfis-copilot.md` com a seção
+"Asserções executáveis" e a fixture `src/test/groovy/Adr0009Fixture.groovy`.
+Registrei a fixture na suíte backend em `build.gradle`. Atualizei o README e os
+diagramas C4 L1-L3 para refletir a decisão.
+
+**Arquivos alterados nesta execução:**
+- `src/opencode_config/harnesses/copilot.py`.
+- `tests/harnesses/test_copilot.py`, novo caso T10; alterações E6 preexistentes
+  foram preservadas.
+- `docs/adr/0009-skills-de-dominio-nos-perfis-copilot.md` e
+  `src/test/groovy/Adr0009Fixture.groovy`.
+- `build.gradle`, registro da fixture na suíte backend; alteração E2
+  preexistente foi preservada.
+- `README.md`, descrição dos perfis com referências por agente; alteração E6
+  preexistente foi preservada.
+- `docs/adr/diagrama-c4-l1.md`, `diagrama-c4-l2.md` e `diagrama-c4-l3.md`.
+- Este registro e a resposta à pergunta de escopo no plano.
+
+#### Evidências de Testes — Construção E14
+
+- [x] T10 novo: o teste falhou antes do código porque o perfil não tinha o
+  marcador do bloco gerado. Depois da implementação, uma asserção mais estrita
+  detectou o indicador `>` da descrição YAML na saída; corrigi a extração.
+- [x] T10 passou após a correção, incluindo allow e ausência de allow,
+  descrição completa, caminho absoluto com espaços, fonte limpa e exclusão do
+  marcador plantado no corpo da skill.
+- [x] Módulo Copilot: `.venv/bin/pytest tests/harnesses/test_copilot.py
+  -m unit -q`, 31 passaram.
+- [x] Regressão focada: `.venv/bin/pytest tests/harnesses/ -m all -q`,
+  59 passaram.
+- [x] Guarda da infra ADR: `.venv/bin/pytest
+  tests/product_tests/test_concordion_spec_infra.py -m unit -q`, 20 passaram,
+  1 teste de integração foi deselecionado.
+- [x] Fixture Concordion: `JAVA_HOME=/home/vitor/.local/share/jdk gradle -q
+  test -PproductSpecialty=backend --tests Adr0009Fixture --no-daemon`, passou.
+- [x] Análise estática: `ruff check` nos arquivos Python alterados passou.
+  `git diff --check` nos arquivos desta task passou.
+- [x] Regressão incremental: executei T10 em RED antes do código, após a
+  primeira implementação e depois da correção da descrição YAML.
+- [x] Gate de refatoração: sem mudança de escopo ou conflito com P4. A E14
+  ficou separada da E6, conforme a decisão recebida.
+- [x] Não executei a suíte completa, não alterei `Status`, não toquei em
+  `plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+**Pendências para E10:** E10 continua pendente. A task ainda precisa integrar o
+MCP do Copilot com merge aditivo e backup, implementar o provisionamento e
+validar os critérios próprios. O adapter agora contém E6 e E14 antes dessa
+integração.
+
+### E10 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** a implementação do provisionamento ai-memory e da declaração MCP
+condicional está concluída. A fonte canônica declara `mcp.ai-memory` sem
+credenciais. O bootstrap só sinaliza provisionamento completo depois de
+validar wrapper, container, bind, rede, volume e hooks.
+
+**P1 e tudo-ou-nada:** o bootstrap baixa wrappers oficiais por HTTPS e valida
+SHA-256 fixado no código. A imagem `akitaonrails/ai-memory:latest` permanece
+sem pin, conforme decisão humana. O container publica apenas
+`127.0.0.1:49374`, usa rede Docker `internal` e monta
+`~/.local/share/ai-memory/` em `/data`. No POSIX, o bootstrap restringe esse
+diretório ao usuário.
+
+Docker ausente ou provisionamento incompleto desativa o marcador, os hooks e as
+declarações gerenciadas dos dois harnesses. A mensagem orienta instalação
+user-space e proíbe `sudo`. Docker ausente não falha silenciosamente e não torna
+o bootstrap geral malsucedido. Falhas de integridade, container ou config
+retornam erro e também mantêm MCP desabilitado.
+
+**Risco do symlink POSIX:** o adapter OpenCode nunca edita o symlink nem seu
+alvo canônico. Sem marcador, a strategy materializa um arquivo JSON regular
+com `mcp.ai-memory` filtrado. Com o provisionamento completo, a sincronização
+restaura o symlink canônico. A fonte `harness-conf/opencode.json` permanece
+intacta nos dois caminhos.
+
+**Copilot e rollback:** o adapter converte a entrada canônica para
+`mcpServers.ai-memory`, cria backup antes da primeira escrita e preserva todos
+os servers existentes. Um `ai-memory` diferente, definido pelo usuário, bloqueia
+a escrita quando o servidor estaria ativo e permanece intacto quando a
+integração está desabilitada. `opencode-bootstrap --rollback-ai-memory` remove
+o container, wrappers, hooks e declarações gerenciadas. O rollback restaura
+`opencode.jsonc`, remove a rede apenas quando o bootstrap a criou e preserva o
+volume de dados.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. Atualizei a seção
+de dependências e o roteiro de provisionamento/rollback em `README.md`.
+`docs/specs/Seguranca.md` contém as asserções SEC-01..SEC-11 e SEC-21. A
+aprovação humana dessas asserções permanece pendente para a revisão. Criei
+ADR-0008 com "Asserções executáveis", sua fixture Concordion e o registro na
+especialidade segurança de `build.gradle`. Atualizei os diagramas C4 L1-L3.
+Não editei `docs/README.md`, que pertence ao `curador-produto`.
+
+**Arquivos desta task:**
+- `harness-conf/opencode.json` e
+  `src/opencode_config/bootstrap/ai_memory.py`, configuração e provisionamento.
+- `src/opencode_config/bootstrap/main.py` e
+  `src/opencode_config/harnesses/__init__.py`, fluxo e estado condicional.
+- `src/opencode_config/harnesses/opencode.py`, filtro POSIX/Windows sem escrita
+  através do symlink canônico.
+- `src/opencode_config/harnesses/copilot.py`, merge aditivo de MCP e backup;
+  alterações E6/E14 preexistentes foram preservadas.
+- `tests/bootstrap/test_ai_memory_provision.py`, testes T13 com fakes.
+- `tests/harnesses/test_opencode.py` e `tests/harnesses/test_copilot.py`, T11,
+  T12 e casos de configuração condicional.
+- `docs/specs/Seguranca.md`, `docs/adr/0008-ai-memory-bootstrap-mcp.md`,
+  `src/test/groovy/SegurancaFixture.groovy` e
+  `src/test/groovy/Adr0008Fixture.groovy`.
+- `build.gradle`, registro do ADR-0008; alteração E2 preexistente preservada.
+- `README.md`, dependência, provisionamento e rollback; conteúdo E6/E14
+  preexistente preservado.
+- `docs/adr/diagrama-c4-l1.md`, `diagrama-c4-l2.md` e `diagrama-c4-l3.md`,
+  conteúdo E2/E14 preexistente preservado.
+- Este bloco no plano. Não alterei `Status` nem
+  `plan/insumo-devflow-spawn-dinamico.md`.
+
+#### Evidências de Testes — Construção E10
+
+- [x] RED inicial: `.venv/bin/pytest tests/harnesses/test_opencode.py
+  tests/harnesses/test_copilot.py -m all -k ai_memory -q` produziu 5 failed,
+  1 passed e 47 deselected antes da implementação dos adapters e da config.
+- [x] RED adicional: T13 falhou quando o container fake saiu durante o start.
+  O caso do Copilot também falhou quando o adapter removia uma entrada
+  `ai-memory` preexistente do usuário.
+- [x] T13: `.venv/bin/pytest tests/bootstrap/test_ai_memory_provision.py
+  -m unit -q`, 16 passed. Os testes usam downloader, runner Docker e porta
+  falsos; não iniciam Docker nem acessam a rede. Acrescentei uma fixture
+  autouse que bloqueia `subprocess.Popen` no módulo, exceto quando o próprio
+  teste instala um processo fake; uma chamada sem stub falha antes de iniciar
+  qualquer processo real.
+- [x] OpenCode: `.venv/bin/pytest tests/harnesses/test_opencode.py -m all
+  -k 'ai_memory or opencode_creates_canonical_symlinks' -q`, 4 passed,
+  15 deselected.
+- [x] Copilot: `.venv/bin/pytest tests/harnesses/test_copilot.py -m unit
+  -k ai_memory -q`, 4 passed, 31 deselected.
+- [x] Bootstrap: `.venv/bin/pytest tests/bootstrap/test_entrypoints.py
+  -m unit -k 'check_only or apply_forwards' -q`, 2 passed, 11 deselected.
+- [x] Guarda ADR: `.venv/bin/pytest
+  tests/product_tests/test_concordion_spec_infra.py -m unit -k 0008 -q`,
+  2 passed, 21 deselected.
+- [x] Gradle executou `SegurancaFixture` e `Adr0008Fixture` em uma versão
+  anterior da spec; ambas passaram. Depois, SEC-07 ganhou a asserção de mode
+  `0700`. A fixture final compilou com `gradle -q compileTestGroovy --no-daemon`.
+  A execução final da spec de segurança fica para `sec`/`qa`.
+- [x] Análise estática: `ruff check` nos módulos e testes E10 passou.
+  `ruff format --check` passou nos arquivos novos. `git diff --check` passou.
+- [x] Não executei suítes completas de `tests/bootstrap/` nem
+  `tests/harnesses/`, testes agregados de segurança ou o roteiro manual RM.
+- [x] Regressão incremental executada nos testes focados após as mudanças.
+
+**Correção de hermeticidade e limpeza do ambiente:** a execução RED inicial
+usou o runner Docker real por falta de stub naquela chamada. O fluxo abortou
+antes do download, pull, container ou hooks, mas deixou a rede `ai-memory-internal`
+vazia. O teste unitário agora instala uma guarda autouse em `subprocess.Popen`;
+os caminhos Docker usam `FakeAiMemoryRunner`, e qualquer chamada não stubada falha
+sem tocar no host. A rede foi removida a pedido do devflow:
+`docker network rm ai-memory-internal` retornou `ai-memory-internal`. A consulta
+`docker network ls --filter name=^ai-memory-internal$ --format '{{.Name}}'`
+confirmou que não há rede com esse nome. Não alterei container, imagem, plugin,
+config ou volume real.
+
+**Revalidação após decisões do devflow (2026-09-27):**
+- `.venv/bin/pytest tests/bootstrap/test_ai_memory_provision.py -m unit -q`:
+  16 passed. A guarda impediu qualquer execução de subprocesso real.
+- `.venv/bin/pytest tests/harnesses/test_opencode.py
+  tests/harnesses/test_copilot.py -m all -k ai_memory -q`: 7 passed,
+  47 deselected.
+- `.venv/bin/pytest tests/bootstrap/test_entrypoints.py -m unit -k
+  'check_only or apply_forwards' -q`: 2 passed, 11 deselected.
+- `.venv/bin/pytest tests/product_tests/test_concordion_spec_infra.py
+  -m unit -k 0008 -q`: 2 passed, 21 deselected.
+- `ruff check`, `ruff format --check` no teste T13 e `git diff --check`:
+  passaram. Não executei a suíte completa.
+
+**Gate de refatoração:** sem retorno ao planejamento. O filtro de cópia na
+strategy POSIX implementa o contorno do symlink já previsto como internalidade
+da P1. ADR-0008 registra a decisão aprovada; não alterei o escopo E10.
+
+**Pendências para a fase Testes:** executar o roteiro RM-1..RM-13 na máquina do
+humano, validar o MCP após reiniciar cada harness e executar as suítes completas
+definidas pelo plano. O agente `sec` ou `qa` deve executar a spec final de
+segurança e registrar a aprovação humana SEC→spec. Container antigo
+incompatível exige backup do volume e o caminho de rollback descrito no README.
+
+**Nota de retomada:** o parágrafo `Pendências para E10` da seção E14 registra
+um estado anterior à construção. Esta subseção registra o resultado atual.
+
+### Perguntas (E10)
+
+- **Rede Docker `ai-memory-internal` — RESPONDIDA (devflow, 2026-09-27):**
+  corrigir o teste para usar runner Docker fake no fluxo unitário e remover a
+  rede órfã com `docker network rm ai-memory-internal`. A remoção retornou o
+  nome da rede; a listagem posterior não encontrou rede com esse nome.
+
+### E7 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** auditoria focalizada concluída, sem alteração de código. A amostra permaneceu nas
+16 skills da P2; não expandi para 33, conforme a restrição desta execução. O relatório completo,
+com método, evidências e avaliação por skill, está em `/tmp/opencode/e7-auditoria-2026-09-27.md`.
+
+**Método e amostra:** li integralmente `AGENTS.md`, `harness-conf/AGENTS.base.md` e as 16 skills.
+Comparei permissions dos 14 agentes e suas menções às skills. Conferi os oito `UPSTREAM.md` da
+amostra e a existência dos arquivos declarados como sincronizados. A seleção de quatro skills de
+domínio com upstream e quatro locais usou `random.Random(20260927)` após ordenação alfabética das
+duas populações. A auditoria de no-op foi estática; não executei avaliação com modelo.
+
+- Core: `code-explorer-priority`, `git-workflow-and-versioning`, `humanizer-br`,
+  `planning-and-task-breakdown`, `portugues-tecnico-controlado`, `question-orchestration` e
+  `reliable-async-operations`.
+- Upstream: `api-and-interface-design`, `code-simplification`, `documentation-and-adrs` e
+  `performance-optimization`.
+- Locais: `aws-sso-login`, `md-export`, `spec-executavel` e `web-research-exa-crawl4ai`.
+- Referência: `writing-for-agents`.
+
+**Permissions:** `opencode.json` tem 21 denies nominais e `aws-*`, que cobre duas skills, total de
+23 denies. Os 69 allows em 11 agentes correspondem ao mapa v4. Não identifiquei skill negada sem
+allow nem menção a skill negada sem allow no corpo individual do agente consumidor. O uso de
+`code-explorer-priority` em seis agentes vem da regra compartilhada de `AGENTS.base.md`. O allow
+`planning-and-task-breakdown` de `devflow` não tem acionamento no corpo desse agente. Os três
+allows de `writing-for-agents` não têm gatilho explícito nos corpos locais, embora o base cite o
+método para alterações de skills; não propus alterar a decisão humana que disponibilizou a skill
+a esses três agentes. A regra compartilhada instrui todos os agentes a seguir esse método, mas só
+três têm allow para carregar a skill.
+
+**Regras do repo:** li os dois arquivos completos. Há conflito de precedência: `AGENTS.md` exige
+aprovação humana para qualquer alteração em agente ou workflow; `AGENTS.base.md` manda corrigir
+imediatamente violações objetivas de formatação, largura e estilo. Os outros achados estão nas
+skills globais amostradas.
+
+**Resultado da amostra:** descrições e corpos correspondem, salvo os achados registrados. Oito
+metadados upstream e os arquivos sincronizados declarados estão presentes. Não validei SHAs contra
+os repositórios remotos. Quatorze skills excedem aproximadamente 100 linhas. O split só tem ganho
+claro em `reliable-async-operations`, que junta seis categorias e exemplos em Python, Node.js,
+Bash, PowerShell, Java e Groovy.
+PTC, `writing-for-agents` e `performance-optimization` já usam referências por ramo; os demais
+corpos longos são sequências ou referências coesas.
+
+#### E-fix gerados por E7
+
+Prioridades abaixo são sugestões. A decisão de prioridade e execução neste ciclo permanece humana.
+Todas as tasks dependem de E7.
+
+- **E-fix-1, P1 sugerida, escopo S:** alinhar `documentation-and-adrs` a `docs/README.md`. A skill
+  indica `docs/decisions/` e um template de ADR sem asserção executável. O repo exige `docs/adr/` e
+  asserção em cada ADR novo.
+- **E-fix-2, P1 sugerida, escopo S:** resolver as regras contraditórias de timeout em
+  `reliable-async-operations`. A revisão exige timeout total e de inatividade para toda operação,
+  mas as regras anteriores aceitam evento ou polling sem timeout. Os exemplos também fixam valores
+  sem justificativa, apesar da proibição de timeouts chutados.
+- **E-fix-3, P2 sugerida, escopo S:** mover os exemplos por categoria de
+  `reliable-async-operations` para uma referência e manter as regras gerais no corpo.
+- **E-fix-4, P1 sugerida, escopo S:** alinhar `git-workflow-and-versioning` ao formato local
+  `tipo(escopo): descrição`, substituir os comandos pre-commit específicos de Node e retirar
+  `git reset --hard HEAD` como recuperação sem proteção de mudanças locais.
+- **E-fix-5, P2 sugerida, escopo S:** corrigir o ponteiro quebrado para
+  `deprecation-and-migration` em `api-and-interface-design`; não existe skill ou referência com
+  esse nome no repo.
+- **E-fix-6, P2 sugerida, escopo S:** restringir `humanizer-br` a reescritas e aplicar sua saída de
+  quatro partes apenas nessas tarefas. A description aciona a skill em todo chat, mas o corpo exige
+  versões, auditoria e resumo para cada ativação.
+- **E-fix-7, P2 sugerida, escopo S:** remover ou centralizar a tabela duplicada de Core Web Vitals
+  entre `performance-optimization` e `references/performance-checklist.md`.
+- **E-fix-8, P2 sugerida, escopo S:** consolidar regras duplicadas entre “Regras principais” e
+  “Fluxo padrão” em `web-research-exa-crawl4ai`.
+- **E-fix-9, P2 sugerida, escopo S:** resolver o allow sem acionamento de
+  `planning-and-task-breakdown` em `devflow.md`, adicionando trigger ou propondo sua remoção ao
+  humano.
+- **E-fix-10, P2 sugerida, escopo S:** explicitar nos corpos de `devflow`, `eng-software` e
+  `smart-planner` quando carregar `writing-for-agents`, sem alterar a permissão aprovada sem
+  decisão humana.
+- **E-fix-11, P2 sugerida, escopo S:** restringir triggers genéricos como `Cenário` e `Então` em
+  `spec-executavel` a pedidos sobre BDD ou especificação executável.
+- **E-fix-12, P2 sugerida, escopo S:** resolver a precedência entre aprovação humana obrigatória
+  para mudanças em agentes/workflows e correção imediata de violações objetivas em
+  `AGENTS.md`/`AGENTS.base.md`, sem enfraquecer a autoridade humana.
+- **E-fix-13, P2 sugerida, escopo S:** esclarecer em `AGENTS.base.md` se a regra sobre
+  `writing-for-agents` manda carregar a skill ou seguir o método já conhecido e restringir a
+  instrução ao escopo compatível com os allows aprovados.
+
+**Verificação:** `.venv/bin/pytest tests/agents/ -m all -q`: 182 passed em 4,90 s. Não executei a
+suíte completa. Consultei `docs/README.md` e os princípios de documentação. Não há mudança de
+código, spec ou ADR nesta task.
+
+**Restrições:** não alterei `Status`, não toquei em `plan/insumo-devflow-spawn-dinamico.md` e não
+criei commit.
+
+### E-fix — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Diretriz do devflow (2026-09-27):** autonomia máxima, com parada somente em bloqueantes. Apliquei
+correções objetivas de conteúdo e consistência, uma por vez. Itens que exigem decisão semântica ou
+de design ficaram sem alteração e foram registrados em `## Perguntas` para decisão humana no
+fechamento.
+
+**E-fix aplicados:**
+
+1. **E-fix-1 — aplicado.** Alinhei o local e o formato de ADRs às regras do `docs/README.md`. A
+   skill agora indica `docs/adr/`, numeração sequencial, Concordion-Markdown e asserção executável
+   obrigatória em ADR novo. Atualizei o template com as seções canônicas.
+   **Por quê:** a instrução anterior apontava para `docs/decisions/` e omitia a asserção exigida.
+   **Arquivo:** `harness-conf/skills/documentation-and-adrs/SKILL.md`.
+2. **E-fix-2 — não aplicado.** Mantive as regras de timeout sem alterações.
+   **Motivo:** resolver as diferenças entre timeout total, inatividade, sinais e exceções altera o
+   comportamento prescrito pela skill. Os testes existentes também protegem decisões específicas
+   sobre essa política.
+   **Arquivo não tocado:** `harness-conf/skills/reliable-async-operations/SKILL.md`.
+   **Pergunta:** Q-Efix-2.
+3. **E-fix-3 — não aplicado.** Não movi os exemplos de categorias para outra referência.
+   **Motivo:** o split muda a organização e a invocação do conteúdo, uma decisão de design da skill.
+   **Arquivo não tocado:** `harness-conf/skills/reliable-async-operations/SKILL.md`.
+   **Pergunta:** Q-Efix-3.
+4. **E-fix-4 — não aplicado.** Não alterei formato de commit, comandos de pre-commit ou recuperação.
+   **Motivo:** a proposta combina o padrão local `tipo(escopo): descrição` com mudanças na orientação
+   geral da skill, incluindo comandos e proteção do worktree. Aplicá-la exige decidir o limite entre
+   regra local e recomendação reutilizável.
+   **Arquivo não tocado:** `harness-conf/skills/git-workflow-and-versioning/SKILL.md`.
+   **Pergunta:** Q-Efix-4.
+5. **E-fix-5 — aplicado.** Removi o link para `deprecation-and-migration` e mantive a orientação
+   para planejar deprecação na fase de design.
+   **Por quê:** o destino citado não existe no repo; a frase preserva a orientação sem um ponteiro
+   quebrado.
+   **Arquivo:** `harness-conf/skills/api-and-interface-design/SKILL.md`.
+6. **E-fix-6 — não aplicado.** Mantive o acionamento de `humanizer-br` e seu formato de saída.
+   **Motivo:** restringir a skill a pedidos de reescrita altera o escopo de ativação e o contrato de
+   saída. O `UPSTREAM.md` local registra a adaptação para uso em toda comunicação de chat.
+   **Arquivo não tocado:** `harness-conf/skills/humanizer-br/SKILL.md`.
+   **Pergunta:** Q-Efix-6.
+7. **E-fix-7 — aplicado.** Removi os valores duplicados da tabela Core Web Vitals na skill e apontei
+   para `references/performance-checklist.md` como fonte única dos alvos LCP, INP e CLS. A
+   verificação da skill também aponta para essa referência.
+   **Por quê:** o checklist é arquivo sincronizado declarado no `UPSTREAM.md`; manter os valores
+   nele evita duas fontes para os mesmos limites.
+   **Arquivo:** `harness-conf/skills/performance-optimization/SKILL.md`.
+8. **E-fix-8 — aplicado.** Retirei de “Regras principais” as regras repetidas no “Fluxo padrão” e
+   mantive ali somente as restrições que não aparecem no fluxo. Removi também a repetição de sites
+   sugeridos no passo de descoberta.
+   **Por quê:** cada orientação fica em um ponto, sem remover restrições únicas nem alterar o fluxo.
+   **Arquivo:** `harness-conf/skills/web-research-exa-crawl4ai/SKILL.md`.
+9. **E-fix-9 — não aplicado.** Não adicionei acionamento de `planning-and-task-breakdown` ao corpo de
+   `devflow` nem propus remover o allow nesta construção.
+   **Motivo:** qualquer opção muda o comportamento do agente ou a permissão já aprovada.
+   **Arquivo não tocado:** `harness-conf/agents/devflow.md`.
+   **Pergunta:** Q-Efix-9.
+10. **E-fix-10 — não aplicado.** Não acrescentei instruções de carregamento de
+    `writing-for-agents` aos agentes.
+    **Motivo:** a instrução define novos gatilhos de ativação e altera o comportamento dos agentes.
+    **Arquivos não tocados:** `harness-conf/agents/devflow.md`, `eng-software.md` e
+    `smart-planner.md`.
+    **Pergunta:** Q-Efix-10.
+11. **E-fix-11 — aplicado.** Troquei os triggers isolados `Cenário`, `Dado que`, `Quando tento` e
+    `Então` por expressões que os vinculam a Gherkin. Mantive os triggers específicos de BDD,
+    Concordion e especificação executável.
+    **Por quê:** etapas comuns de conversa não devem acionar a skill sem contexto de BDD.
+    **Arquivo:** `harness-conf/skills/spec-executavel/SKILL.md`.
+12. **E-fix-12 — não aplicado.** Não mudei a precedência entre aprovação humana e correções
+    automáticas de formatação em agentes e workflows.
+    **Motivo:** o achado é uma decisão de governança e afeta a autoridade humana.
+    **Arquivos não tocados:** `AGENTS.md` e `harness-conf/AGENTS.base.md`.
+    **Pergunta:** Q-Efix-12.
+13. **E-fix-13 — não aplicado.** Não alterei a instrução sobre `writing-for-agents` nem o escopo dos
+    agentes autorizados a carregar a skill.
+    **Motivo:** esclarecer “seguir o método” versus “carregar a skill” define semântica de ativação e
+    interação com os allows aprovados.
+    **Arquivo não tocado:** `harness-conf/AGENTS.base.md`.
+    **Pergunta:** Q-Efix-13.
+
+#### Evidências de Testes — Construção E-fix
+
+- [x] Testes novos: nenhum. As mudanças aplicadas são correções estáticas de conteúdo.
+- [x] `.venv/bin/pytest tests/skills/test_web_research.py -m unit -q`: 9 passed, 1 deselected.
+- [x] `.venv/bin/pytest tests/skills/test_spec_executavel.py -m all -q`: 12 passed.
+- [x] Não há testes dedicados em `tests/skills/` para `documentation-and-adrs`,
+  `api-and-interface-design` ou `performance-optimization`; validei esses ajustes por inspeção do
+  conteúdo e das referências.
+- [x] Nenhum agente, permissão, workflow ou regra compartilhada foi alterado; a guarda de
+  consistência agents/workflow não se aplica.
+- [x] `git diff --check` passou nos cinco arquivos de skill alterados e neste plano.
+- [x] Busca de linhas acima de 120 colunas: limpa nos cinco arquivos de skill e no conteúdo
+  acrescentado ao plano.
+- [x] Não executei a suíte completa. Os testes novos ou existentes não foram modificados.
+- [x] Gate de refatoração: os cinco ajustes aplicados não mudam escopo ou decisão arquitetural;
+  itens que exigem decisão estão em `## Perguntas`.
+
+**Documentação e arquitetura:** consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`. Não criei spec ou ADR: os cinco ajustes
+aplicados corrigem conteúdo, referências e duplicações sem nova decisão arquitetural.
+
+**Restrições:** não alterei `Status`, não toquei em `plan/insumo-devflow-spawn-dinamico.md` e não
+criei commit. O relatório completo da auditoria E7 está consolidado no apêndice abaixo.
+
+### E11 — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** confirmei que o README já descreve o provisionamento ai-memory,
+o plugin local gerado, a dependência Docker e a distribuição de skills do
+Copilot. Acrescentei uma síntese das novas orientações do `AGENTS.base.md`:
+leitura por trechos, redução de contexto e execução paralela de chamadas
+independentes.
+
+**Leitura cruzada:** `docs/workflow-agentes-dev.md` ainda contém a redação
+anterior da premissa 7, enquanto `AGENTS.base.md` já não contém a regra de
+precedência removida por E13. A proposta de atualização da premissa 7 segue
+aguardando aprovação humana, conforme registrado em E13. Não alterei o
+workflow nem o arquivo base. O teste de consistência passou, mas não decide
+essa divergência de política.
+
+**ADRs:** confirmei os ADRs 0007, 0008 e 0009 em `docs/adr/`, todos com seção
+"Asserções executáveis". A convenção do repo não exige índice adicional no
+README.
+
+**Escopo delegado:** não editei `docs/README.md`. A correção da subseção ADR
+continua delegada ao `curador-produto`.
+
+#### Evidências — Construção E11
+
+- [x] Não criei testes: a alteração é documental.
+- [x] `.venv/bin/pytest tests/agents/ -m all -q`: 182 passaram.
+- [x] `git diff --check -- README.md`: passou. As linhas inseridas respeitam
+  o limite de 120 colunas.
+- [x] Não executei a suíte completa, não alterei testes, `Status` ou
+  `plan/insumo-devflow-spawn-dinamico.md`, e não criei commit.
+
+**Gate de refatoração:** sem código ou decisão arquitetural nova. A conclusão
+da checagem de sincronização da premissa 7 depende da decisão humana registrada
+em `## Perguntas`.
+
+### E11(b) — 2026-09-27
+
+**Executor:** `opencode/gpt-6-luna`.
+
+**Resultado:** atualizei a subseção "ADR (Arquitetura)" do `docs/README.md`.
+O texto registra o retrofit dos ADRs 0001-0006 e a mesma convenção nos ADRs
+0007-0009.
+
+**Verificação do estado:** `docs/adr/` contém 9 ADRs numerados, de 0001 a
+0009. Todos têm a seção "Asserções executáveis" e uma fixture Concordion com
+`executarVerificacoes()` e `getVeredito()`. As seções dos nove ADRs usam as
+diretivas `execute` e `assertEquals`.
+
+**Arquivos tocados:**
+- `docs/README.md`, subseção "ADR (Arquitetura)".
+- `plan/otimizacao-custo-contexto.md`, este registro.
+
+**Validação:** inspeção dos nove ADRs e das nove fixtures. Não executei testes,
+pois a alteração foi documental.
+
+**Restrições:** não alterei `Status`, não toquei em
+`plan/insumo-devflow-spawn-dinamico.md` e não criei commit.
+
+### E12 — 2026-09-27
+
+**Estado:** suíte final verde; as duas specs em conflito com E10 foram
+atualizadas com autorização do devflow. Commits do lote registrados abaixo.
+
+**Decisões do devflow (2026-09-27):**
+- A suíte pode continuar até terminar, sem limite de 30 s por intervalo. A
+  regra vale para a sessão interativa; a autonomia do humano para este ciclo
+  autoriza a espera contínua. O resultado esperado é 100% verde, base + testes
+  novos, com 31 testes `agent_eval` deselecionados no estado normal.
+- Os 25 achados do Ruff em arquivos fora do lote são dívida pré-existente.
+  Não corrigir neste lote. O Ruff dos arquivos Python alterados no lote deve
+  continuar limpo.
+- Os dois testes em conflito codificavam o contrato antigo, suplantado pelas
+  decisões humanas P1 e tudo-ou-nada. O devflow autorizou atualizar as specs,
+  preservando as garantias com asserções equivalentes.
+
+**Specs atualizadas:**
+- `test_repo_state_opencode_json_matches_a_valid_provisioning_state` aceita o
+  symlink para a configuração canônica ou uma cópia regular igual à canônica
+  filtrada. A cópia filtrada não pode declarar `mcp.ai-memory`.
+- `test_opencode_canonical_declares_ai_memory_mcp` exige que a configuração
+  canônica declare somente `mcp.ai-memory`, com URL em `127.0.0.1` e formato
+  remoto esperado.
+- Não removi testes nem reduzi as garantias cobertas.
+
+**Tentativa inicial:** `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest
+-m all` parou na coleta com colisão de módulo entre
+`tests/bootstrap/test_detect.py` e `tests/skills_mgmt/test_detect.py`.
+Renomeei o teste do lote para `tests/skills_mgmt/test_upstream_detect.py`, sem
+alterar o conteúdo.
+
+**Tentativa anterior (interrompida):** a suíte coletou 927 itens, selecionou
+896 e deselecionou 31. A execução alcançou 35% antes do limite de 30 s da
+ferramenta interromper o processo. A saída não registrou o resultado final.
+
+**Análise estática:** `.venv/bin/ruff check` encontrou 25 erros em arquivos fora
+do lote. A verificação de todos os arquivos Python alterados no lote passou.
+`git diff --check` e `git diff --cached --check` passaram.
+
+**Dívida pré-existente do Ruff, fora do lote:**
+- `harness-conf/skills/prompt-improver/scripts/prompt_evaluator.py`: 1 F541,
+  f-string sem placeholder.
+- `tests/agents/test_workflow_consistency.py`: 17 F541, f-strings sem
+  placeholders em mensagens de asserção.
+- `tests/bootstrap/test_entrypoints.py`: 3 F401, imports não usados.
+- `tests/cli/test_md_export.py`: 1 F401, import `os` não usado.
+- `tests/integration/conftest.py`: 1 F841, variável `context_dir` não usada.
+- `tests/lib/test_shared_lib.py`: 1 F401, import `subprocess` não usado.
+- `tests/test_crawl4ai_cleanup.py`: 1 F401, import `pathlib.Path` não usado.
+
+**Suíte completa anterior (2026-09-27):**
+- Comando: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`.
+- Coleta: 927 itens, 896 selecionados e 31 `agent_eval` deselecionados.
+- Resultado: 894 passaram e 2 falharam. A execução levou 290,85 s pelo
+  pytest e 4 min 52,98 s de tempo total.
+- Os dois testes falharam também em execução isolada. A causa registrada e a
+  decisão tomada estão em `## Perguntas`.
+
+**Suíte completa final (2026-09-27):**
+- Comando: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`.
+- Coleta: 928 itens, 897 selecionados e 31 `agent_eval` deselecionados.
+- Resultado: 897 passaram, 0 falharam. O pytest levou 197,15 s e o tempo total
+  foi 199,170 s. A seleção `-m all` executou todos os 897 itens selecionados.
+- Os dois testes atualizados passaram também no recorte focado: 2 passed em
+  1,49 s.
+
+**Análise estática:** os 25 achados pré-existentes do Ruff permanecem fora do
+lote. `ruff check` nos arquivos Python alterados pelo lote passou. `git diff
+--check` passou antes dos commits.
+
+**Commits do lote (hash curto e mensagem):**
+- E1: `ca6ade1` — `feat(skills): freeze de sincronizacao por skill no opencode-skills`.
+- E2: `c702867` — `feat(skills): deteccao de mudancas de upstream no opencode-skills`.
+- E2, teste do command: `05ce416` — `test(skills): guarda fluxo de decisao no command de sync upstream`.
+- E2, description do CLI: `b84db42` — `fix(skills): atualiza descricao do cli de sync upstream`.
+- E3: `e0321ee` — `feat(skills): registra writing-for-agents no opencode-skills`.
+- E4: `f5153f1` — `test(skills): automatiza itens verificaveis do checklist pos-sync`.
+- E5: `e7c4115` — `fix(copilot): description do command de otimizacao de AGENTS.md`.
+- E6: `b582be8` — `feat(copilot): restringe descoberta de skills as globais`.
+- E6, reflow de fixture: `d426a84` — `style(test): reflow caminho da fixture de skills Copilot`.
+- E9: `38cf964` — `style(agents): reflow de linhas acima de 120 colunas`.
+- E10, config canônica: `06ca1f0` — `feat(config): declara MCP do ai-memory na config canonica`.
+- E10, bootstrap: `b0d2843` — `feat(bootstrap): provisiona ai-memory`.
+- E10, testes OpenCode: `a81d156` — `test(bootstrap): cobre configuracao OpenCode com e sem ai-memory`.
+- E13: `563dc85` — `docs(agents): reescreve compactacao e adiciona chamadas de ferramentas`.
+- E14: `038f565` — `feat(copilot): bloco de referencia de skills por agente na copia`.
+- E11/E11(b): `ceb5ded` — `docs(readme): atualiza contexto e status dos ADRs`.
+- E-fix-5: `b26caf2` — `fix(skills): remove referencia inexistente de design de API`.
+- E-fix-1: `f24815e` — `fix(skills): alinha orientacao de ADR ao repo`.
+- E-fix-7: `3753ea5` — `refactor(skills): centraliza thresholds de Core Web Vitals`.
+- E-fix-11: `dae3f40` — `fix(skills): restringe triggers de spec executavel`.
+- E-fix-8: `66dccaf` — `refactor(skills): remove regras duplicadas de pesquisa web`.
+- E7, E8 e E12 não têm commit funcional. O registro deste plano entra no
+  commit documental de fechamento.
+
+## Perguntas
+
+Responder no fechamento do ciclo. As recomendações E-fix não bloquearam a
+construção; E11(c) aguarda aprovação da premissa 7.
+
+- **E12, continuação da suíte — RESPONDIDA (2026-09-27, decisão do devflow):**
+  continuar `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`
+  até concluir, sem limite de 30 s por intervalo. Registrar duração e
+  contagens finais; o estado esperado é 100% verde, base + testes novos, com
+  31 `agent_eval` deselecionados. Os 25 erros Ruff em arquivos não alterados
+  ficam como dívida pré-existente, sem correção neste lote.
+- **E12, conflito entre testes existentes e E10 — RESPONDIDA (decisão do
+  devflow, 2026-09-27):** os dois testes codificavam o contrato antigo,
+  suplantado pelas decisões humanas P1 e tudo-ou-nada. Autorizada a atualização
+  das specs com asserções equivalentes: o teste do estado do repo aceita o
+  symlink canônico ou a cópia regular filtrada sem `mcp.ai-memory`; o teste da
+  configuração canônica exige exatamente `mcp.ai-memory` em
+  `127.0.0.1`. A suíte final terminou com 897 passados, 0 falhos e 31
+  deselecionados.
+- **Premissa 7 do workflow, seleção de modelo por fase:** aprovar, rejeitar ou
+  pedir ajuste à proposta registrada em E13 antes de atualizar
+  `docs/workflow-agentes-dev.md`? A leitura cruzada da E11 encontrou a redação
+  anterior no workflow e a remoção da regra de precedência em
+  `harness-conf/AGENTS.base.md`.
+- **Q-Efix-2:** aprovar uma regra única para timeout de inatividade/total e suas exceções em
+  `reliable-async-operations`, considerando os testes que fixam a política atual?
+- **Q-Efix-3:** dividir os exemplos de `reliable-async-operations` em referência externa, com os
+  custos de manutenção e contexto correspondentes?
+- **Q-Efix-4:** adaptar `git-workflow-and-versioning` ao padrão deste repo, generalizar os comandos
+  de pre-commit e remover a recomendação de `git reset --hard HEAD`?
+- **Q-Efix-6:** restringir `humanizer-br` a pedidos de reescrita e atualizar a anotação de adaptação
+  no `UPSTREAM.md`, substituindo o uso registrado para toda comunicação de chat?
+- **Q-Efix-9:** adicionar no corpo de `devflow` um gatilho de carregamento para
+  `planning-and-task-breakdown` ou remover o allow aprovado?
+- **Q-Efix-10:** registrar gatilhos de carregamento de `writing-for-agents` nos três agentes que já
+  têm allow, sem mudar as permissões?
+- **Q-Efix-12:** definir qual regra prevalece quando uma violação objetiva de formatação exige editar
+  um agente ou workflow que também requer aprovação humana?
+- **Q-Efix-13:** especificar em `AGENTS.base.md` se a regra exige carregar `writing-for-agents` ou
+  aplicar seu método conhecido, e quais agentes podem receber essa instrução?
+
+## Ciclo 2 — CONSTRUÇÃO — Apêndice: auditoria E7
+
+### Auditoria E7, 2026-09-27
+
+#### Escopo e método
+
+Auditoria focalizada do ciclo 1, sem alterações de código e sem ampliar a amostra definida pela P2.
+O relatório cobre as três frentes E7: permissions, regras de agentes e amostra de skills.
+
+Li integralmente `AGENTS.md` e `harness-conf/AGENTS.base.md`. Comparei os 14 frontmatters de agente
+com o mapa v4, li as menções às skills nos corpos dos agentes e consultei `docs/README.md` e
+`harness-conf/agents/references/principios-documentacao.md`.
+
+Li integralmente as 16 skills da amostra, seus frontmatters e os `UPSTREAM.md` associados. Também
+conferi a existência dos arquivos sincronizados declarados nos metadados selecionados. A seleção
+estratificada é reproduzível: ordenei alfabeticamente os grupos candidatos, usei
+`random.Random(20260927)`, amostrei quatro upstream e depois quatro locais.
+
+- Core integral: `code-explorer-priority`, `git-workflow-and-versioning`, `humanizer-br`,
+  `planning-and-task-breakdown`, `portugues-tecnico-controlado`, `question-orchestration` e
+  `reliable-async-operations`.
+- Candidatas de domínio com `UPSTREAM.md` (12): `accessibility-audit`, `api-and-interface-design`,
+  `code-review-and-quality`, `code-simplification`, `debugging-and-error-recovery`,
+  `documentation-and-adrs`, `frontend-ui-engineering`, `performance-optimization`, `prompt-improver`,
+  `security-and-hardening`, `spec-driven-development` e `test-driven-development`.
+- Candidatas locais de domínio (13): `aws-add-account-sso`, `aws-sso-login`, `browser-testing`,
+  `clean-code`, `data-modeling`, `doc-extract`, `md-export`, `spec-executavel`, `svg-to-image`,
+  `testes-produto-catalog`, `tests-as-spec`, `tls-certificate-recovery` e
+  `web-research-exa-crawl4ai`.
+- Amostra sorteada: upstream `api-and-interface-design`, `code-simplification`,
+  `documentation-and-adrs` e `performance-optimization`; locais `aws-sso-login`, `md-export`,
+  `spec-executavel` e `web-research-exa-crawl4ai`.
+- Completa a amostra `writing-for-agents`.
+
+A avaliação de no-op foi estática. Não executei as skills em um modelo, pois o critério de no-op da
+referência é relativo ao comportamento do modelo. O diretório temporário `/tmp/opencode/fase2/`,
+citado nos registros anteriores, não existe neste ambiente.
+
+#### (a) Permissions contra uso nos agentes
+
+O mapa atual contém 21 denies nominais e `aws-*`, que cobre as duas skills AWS, totalizando as 23
+skills negadas da P2. As 10 skills globais completam o inventário de 33. Os frontmatters contêm
+69 allows em 11 agentes, iguais ao mapa v4 aprovado.
+
+Não encontrei skill negada sem allow, allow para skill inexistente nem menção operacional de skill
+negada sem allow no corpo do agente consumidor. As menções de skills em `devflow.md` nas linhas
+240-242 atribuem o carregamento ao agente `rev`, que tem os allows correspondentes. O `aws-*` de
+`aws-analista` é a exceção já documentada no mapa v4. `code-explorer-priority` não aparece nos
+corpos locais de seis agentes, mas `AGENTS.base.md` a exige para os oito agentes do workflow.
+
+Dois grupos de allows não têm acionamento explícito nos corpos locais:
+
+- `devflow -> planning-and-task-breakdown`: o nome aparece só no frontmatter do `devflow.md`; o
+  corpo e `AGENTS.base.md` não descrevem seu carregamento.
+- `writing-for-agents` aparece como allow em `devflow`, `eng-software` e `smart-planner`, sem
+  acionamento nos corpos locais. `AGENTS.base.md` cita o método para criação ou revisão de skills,
+  mas não define a ativação da skill nesses três agentes. O allow corresponde à decisão humana que
+  disponibilizou a skill a esses agentes, então a auditoria não propõe alterá-la.
+- A mesma regra de `AGENTS.base.md` instrui todos os agentes a seguir o método de
+  `writing-for-agents`, mas o deny global só libera o uso a três agentes. A regra pode indicar um
+  método sem carregar a skill; a intenção não fica explícita.
+
+#### (b) Regras do repo
+
+Li os dois arquivos completos. Encontrei um conflito de precedência: `AGENTS.md` diz que toda
+alteração em workflow ou agente exige aprovação humana, sem exceção. `AGENTS.base.md` manda corrigir
+imediatamente violações objetivas de formatação, largura ou estilo. Uma correção em arquivo de
+agente pode cair nas duas regras. Não encontrei conflito nas regras de upstream, proteção da
+worktree ou autoridade humana fora desse caso. Os outros achados vêm de skills amostradas que
+contradizem formatos canônicos do repo ou desperdiçam contexto.
+
+#### (c) Skills amostradas
+
+As descrições cobrem o assunto dos corpos e contêm triggers correspondentes, com três ressalvas
+registradas nos E-fix: ponteiro quebrado em `api-and-interface-design`, contrato de saída amplo em
+`humanizer-br` e triggers genéricos em `spec-executavel`.
+
+Os oito `UPSTREAM.md` da amostra estão presentes. Os arquivos declarados como sincronizados existem:
+`SKILL-MECHANICS.md`, três referências de `portugues-tecnico-controlado`,
+`references/aprofundador.md`, `LICENSE` de `humanizer-br` e `performance-checklist.md`. Os metadados
+dos quatro itens amostrados de Addy Osmani descrevem o corpo local como cópia inicial e não
+sincronizada. Não validei o SHA contra a rede nem o estado atual dos upstreams.
+
+Quatorze das 16 skills têm mais de aproximadamente 100 linhas. A extensão, isoladamente, não
+justifica split. `portugues-tecnico-controlado` já desloca léxico, ortografia e inglês para
+referências; `writing-for-agents` separa mecânica de skills; `performance-optimization` tem
+checklist externo. `reliable-async-operations` contém seis categorias independentes e 322 linhas,
+com exemplos em Python, Node.js, Bash, PowerShell, Java e Groovy, por isso há ganho claro em mover
+os exemplos para referência.
+
+Os demais corpos acima do limiar formam uma sequência ou referência coesa; não recomendo split
+automático sem uma branch de invocação comprovada.
+
+| Skill | Linhas | Resultado da inspeção focalizada |
+|---|---:|---|
+| `code-explorer-priority` | 119 | Descrição e fluxo correspondem; procedimento único, sem split indicado. |
+| `git-workflow-and-versioning` | 214 | Acionamento amplo; convenção e recuperação conflitam com o repo. |
+| `humanizer-br` | 217 | Description aplica-se a todo chat; saída fixa pode duplicar a resposta. |
+| `planning-and-task-breakdown` | 183 | Description, tarefas e sequência correspondem; sem split indicado. |
+| `portugues-tecnico-controlado` | 425 | Acionamento corresponde; três referências já isolam ramos específicos. |
+| `question-orchestration` | 104 | Modos direto e mediado correspondem aos triggers; protocolo coeso. |
+| `reliable-async-operations` | 322 | Acionamento corresponde; contrato de timeout contraditório e branches grandes. |
+| `api-and-interface-design` | 188 | Triggers correspondem; link para skill inexistente. |
+| `code-simplification` | 171 | Triggers e processo correspondem; sequência coesa. |
+| `documentation-and-adrs` | 149 | Triggers correspondem; diretório e template ADR divergem do repo. |
+| `performance-optimization` | 188 | Triggers correspondem; Core Web Vitals repetidos na referência. |
+| `aws-sso-login` | 35 | Triggers correspondem ao fluxo de validação e renovação SSO. |
+| `md-export` | 84 | Triggers correspondem ao contrato JSON e aos formatos suportados. |
+| `spec-executavel` | 117 | Corpo corresponde; `Cenário` e `Então` são triggers genéricos. |
+| `web-research-exa-crawl4ai` | 151 | Description cobre os ramos; regras e fluxo repetem instruções. |
+| `writing-for-agents` | 162 | Description e corpo inglês correspondem; mecânica está separada. |
+
+#### Achados convertidos em E-fix
+
+Prioridades abaixo são sugestões para o humano, não aprovação de execução neste ciclo. Todas as
+tasks dependem de E7.
+
+1. **E-fix-1, P1 sugerida, escopo S:** atualizar `documentation-and-adrs/SKILL.md`. A seção ADR
+   manda gravar em `docs/decisions/` e mostra um template sem asserção executável. O repo exige
+   `docs/adr/` e asserção executável em todo ADR novo (`docs/README.md`, linhas 101-112).
+2. **E-fix-2, P1 sugerida, escopo S:** resolver as contradições de timeout em
+   `reliable-async-operations/SKILL.md`. O contrato de revisão exige timeout de inatividade e total
+   para qualquer operação (linhas 312-317), enquanto as regras anteriores admitem callbacks,
+   eventos e polling sem timeout. Exemplos fixam valores genéricos sem justificativa, embora a
+   seção central proíba timeouts chutados.
+3. **E-fix-3, P2 sugerida, escopo S:** separar os exemplos das seis categorias de
+   `reliable-async-operations` em uma referência, mantendo no corpo as regras gerais e o ponteiro
+   por categoria.
+4. **E-fix-4, P1 sugerida, escopo S:** alinhar `git-workflow-and-versioning/SKILL.md` ao padrão
+   local `tipo(escopo): descrição`, substituir comandos pre-commit de Node por uma regra dependente
+   do projeto e não recomendar `git reset --hard HEAD` sem proteger mudanças locais. O formato
+   atual conflita com `AGENTS.md`, e o reset pode apagar trabalho não commitado.
+5. **E-fix-5, P2 sugerida, escopo S:** corrigir o ponteiro `deprecation-and-migration` em
+   `api-and-interface-design/SKILL.md`, pois nenhuma skill ou referência com esse nome existe.
+6. **E-fix-6, P2 sugerida, escopo S:** delimitar `humanizer-br` a tarefas de reescrita e restringir
+   o formato de quatro partes a essas tarefas. A description aciona a skill em toda comunicação,
+   enquanto o corpo manda sempre emitir versões, auditoria e resumo.
+7. **E-fix-7, P2 sugerida, escopo S:** remover a duplicação dos thresholds de Core Web Vitals entre
+   `performance-optimization/SKILL.md` e `references/performance-checklist.md`, ou definir uma
+   fonte única.
+8. **E-fix-8, P2 sugerida, escopo S:** consolidar as regras repetidas entre “Regras principais” e
+   “Fluxo padrão” em `web-research-exa-crawl4ai/SKILL.md`; manter cada regra em um único ponto.
+9. **E-fix-9, P2 sugerida, escopo S:** resolver o allow sem acionamento de
+   `planning-and-task-breakdown` em `devflow.md`, adicionando condição explícita ou propondo a
+   remoção do allow ao humano.
+10. **E-fix-10, P2 sugerida, escopo S:** explicitar nos corpos de `devflow`, `eng-software` e
+    `smart-planner` quando carregar `writing-for-agents`, sem alterar a permissão aprovada sem
+    decisão humana.
+11. **E-fix-11, P2 sugerida, escopo S:** restringir triggers genéricos como `Cenário` e `Então` em
+    `spec-executavel/SKILL.md` a menções de especificação executável ou BDD.
+12. **E-fix-12, P2 sugerida, escopo S:** resolver a precedência entre aprovação humana obrigatória
+    para mudanças em agentes/workflows e correção imediata de violações objetivas em
+    `AGENTS.md`/`AGENTS.base.md`, sem enfraquecer a autoridade humana.
+13. **E-fix-13, P2 sugerida, escopo S:** esclarecer em `AGENTS.base.md` se a regra sobre
+    `writing-for-agents` manda carregar a skill ou seguir o método já conhecido, e restringir a
+    instrução ao escopo compatível com os allows aprovados.
+
+#### Validação
+
+- `.venv/bin/pytest tests/agents/ -m all -q`: 182 passed em 4,90 s.
+- Não rodei a suíte completa. Não alterei código, `Status` ou
+  `plan/insumo-devflow-spawn-dinamico.md`. Não criei commit.
