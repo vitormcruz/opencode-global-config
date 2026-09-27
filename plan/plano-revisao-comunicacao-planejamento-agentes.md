@@ -55,7 +55,19 @@ Duas frentes, já acordadas em conversa anterior:
 
 ### Regras aprovadas (item a item)
 
-(nenhuma ainda; item 1 em discussão)
+**Item 1 — Abreviações (aprovado).** Destino: `AGENTS.base.md`, seção
+Comunicação, subseção "Sem abreviações":
+
+- Escreva palavras por extenso; não abrevie palavras nem crie siglas
+  próprias.
+- Sigla consagrada da área técnica (TDD, API, CI) pode aparecer sem
+  expansão.
+- Sigla interna do projeto ou do plano, e termo de domínio afastado,
+  exigem nome por extenso no primeiro uso, em linguagem simples.
+
+Verificação: conversa roteirizada em que o agente explica uma decisão;
+a transcrição não pode ter abreviação nem sigla sem definição. Caso
+futuro da suíte de comunicação.
 
 ## Task List
 
