@@ -85,6 +85,22 @@ Verificação: conversa roteirizada com várias decisões em jogo; a
 transcrição não pode ter número, código ou link do plano sem o conteúdo
 contextualizado. Caso futuro da suíte de comunicação.
 
+**Item 3 — Volume na comunicação (aprovado).** Destino: `AGENTS.base.md`,
+seção Comunicação, seção Concisão (acréscimo operacional):
+
+- Uma ideia central por resposta. Duas ou mais ideias? Separe e
+  apresente uma por turno.
+- Antes de enviar, confira: a resposta tem uma única ação ou decisão?
+  Se não, corte o excedente e guarde para o turno seguinte.
+- Reclamação de confusão: reapresente o ponto em menos linhas do que a
+  mensagem original. Nunca reescreva tudo nem acrescente detalhe.
+- Cada resposta se sustenta sozinha: antes da novidade, reapresente em
+  uma linha o ponto da conversa a que ela se refere.
+
+Verificação: conversa roteirizada; nenhuma resposta concentra mais de
+uma ideia central por turno; resposta a reclamação de confusão menor
+que a original. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
