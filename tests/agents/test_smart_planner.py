@@ -64,7 +64,9 @@ def test_smart_planner_frontmatter_allows_subagent_permission(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
-    assert re.search(r'"\*": allow', content) is not None
+    assert re.search(r"eng-software: allow", content) is not None
+    assert re.search(r"revisor: allow", content) is not None
+    assert re.search(r'"\*": allow', content) is None
 
 
 @pytest.mark.unit
