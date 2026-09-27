@@ -28,24 +28,20 @@ explicitamente.
 
 ## Regras principais
 
-1. URL específica fornecida pelo humano: vá direto para `crwl`, sem busca.
-2. Pesquisa aberta: siga a cadeia de descoberta.
-3. Primeira passada: até 5 URLs relevantes.
-4. Priorize fontes oficiais, documentação original e fontes primárias.
-5. Incorpore sites sugeridos pelo humano quando pertinentes.
-6. Combine busca geral com busca orientada por site quando melhorar
+1. Incorpore sites sugeridos pelo humano quando pertinentes.
+2. Combine busca geral com busca orientada por site quando melhorar
    cobertura, confiabilidade ou velocidade.
-7. Valide as URLs escolhidas; não responda só com resultado bruto de busca.
-8. Não use `curl` nem `bash` para buscar páginas quando as ferramentas
+3. Valide as URLs escolhidas; não responda só com resultado bruto de busca.
+4. Não use `curl` nem `bash` para buscar páginas quando as ferramentas
    desta skill forem suficientes.
-9. Não responda pesquisa atual apenas com conhecimento do modelo.
+5. Não responda pesquisa atual apenas com conhecimento do modelo.
 
 ## Fluxo padrão
 
 1. **Classifique**: URL específica → extração direta; sem URL → cadeia de
    descoberta.
 2. **Descoberta**: no máximo 2 buscas; selecione até 5 URLs; priorize
-   fonte oficial, fontes primárias e sites sugeridos.
+   fontes oficiais e primárias.
 3. **Extração**: `crwl` conforme os exemplos abaixo; URL de arquivo
    binário → skill `doc-extract`.
 4. **Validação**: fatos sensíveis, preço e notícia atual confirmados em
