@@ -9,6 +9,13 @@
         "prune": true,
         "reserved": 10000
     },
+    "mcp": {
+        "ai-memory": {
+            "type": "remote",
+            "url": "http://127.0.0.1:49374/mcp",
+            "enabled": true
+        }
+    },
     "agent": {
         "worker": {
             "reasoningEffort": "max"

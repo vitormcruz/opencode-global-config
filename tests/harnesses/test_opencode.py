@@ -2,6 +2,7 @@
 
 import inspect
 from io import StringIO
+import json
 import os
 from pathlib import Path
 
@@ -85,6 +86,20 @@ def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
         "Conteudo da base.\n"
     )
     assert "Pronto." in output
+
+
+@pytest.mark.unit
+def test_canonical_opencode_ai_memory_mcp_has_no_credentials(
+    repo_root: Path,
+) -> None:
+    config = json.loads(
+        (repo_root / "harness-conf" / "opencode.json").read_text(encoding="utf-8")
+    )
+
+    server = config["mcp"]["ai-memory"]
+    assert server["type"] == "remote"
+    assert server["url"] == "http://127.0.0.1:49374/mcp"
+    assert not {"headers", "environment", "token", "apiKey"} & server.keys()
 
 
 @pytest.mark.integration

@@ -5,15 +5,17 @@ import pytest
 
 
 @pytest.mark.unit
-def test_opencode_configs_have_no_mcp_block(repo_root: Path):
-    config_paths = (
-        repo_root / "harness-conf" / "opencode.json",
-        repo_root / "tests/integration/config/opencode.test.json",
-    )
+def test_opencode_canonical_declares_ai_memory_mcp(repo_root: Path):
+    config_path = repo_root / "harness-conf" / "opencode.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    mcp_servers = config["mcp"]
 
-    for path in config_paths:
-        config = json.loads(path.read_text(encoding="utf-8"))
-        assert config.get("mcp", {}) == {}
+    assert set(mcp_servers) == {"ai-memory"}
+    assert mcp_servers["ai-memory"] == {
+        "type": "remote",
+        "url": "http://127.0.0.1:49374/mcp",
+        "enabled": True,
+    }
 
 
 @pytest.mark.unit
