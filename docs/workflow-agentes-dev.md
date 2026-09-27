@@ -490,6 +490,6 @@ Subagentes retornam perguntas; `devflow` avalia e apresenta
 ao humano. Exceção: agentes não mediados (ex: analista)
 conversam direto com o humano.
 
-**Mediação ao spawnar:** `analista` e `curador-produto`,
-quando spawnados, fazem perguntas ao humano via `devflow`
+**Mediação ao spawnar:** `curador-produto`, quando
+spawnado, faz perguntas ao humano via `devflow`
 (mediação), não diretamente.

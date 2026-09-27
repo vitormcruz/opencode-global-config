@@ -45,7 +45,9 @@ ao final, transiciona para o workflow de desenvolvimento
 
 ### Elicitação
 
-`devflow` spawna `analista`:
+`devflow` instrui o HUMANO a trocar para o `analista`
+(agente não mediado); o analista conduz a elicitação
+direto com o humano:
 
 1. Analista carrega `question-orchestration` no modo direto
    e lê `docs/README.md` (seção Definição de Escopo) + o
@@ -54,7 +56,8 @@ ao final, transiciona para o workflow de desenvolvimento
 3. Se faltar → elicita com humano
 4. Grava no Arquivo de Planejamento
 5. Usa `revisor-historia` para revisar
-6. Quando OK → retorna resumo curto ao `devflow`
+6. Quando OK → o HUMANO retorna ao `devflow`, que segue
+   pela Transição
 
 ### Transição
 
