@@ -127,6 +127,25 @@ agrupamento só com perguntas triviais e independentes; contexto de
 pergunta sem abreviação nem confusão. Caso futuro da suíte de
 comunicação.
 
+**Item 5 — Uso da tool de pergunta (aprovado).** Destino: skill
+`question-orchestration` (acréscimo, seção "Uso da tool de pergunta"):
+
+- Pergunte em texto livre como padrão; a resposta do humano vem como
+  veio.
+- Use a tool apenas quando: a questão já foi apresentada e entendida na
+  conversa, as alternativas são poucas, completas e mutuamente
+  exclusivas, e cada uma tem consequência distinta que o humano precisa
+  escolher.
+- Questão nova ou complexa: apresente em texto primeiro; a tool, se
+  couber, vem depois do entendimento confirmado.
+- Cada alternativa descreve a consequência real da escolha; nunca opção
+  de enchimento.
+
+Verificação: conversa roteirizada; a tool aparece só depois do
+contexto apresentado em texto e apenas para escolhas fechadas; toda
+alternativa tem descrição de consequência real. Caso futuro da suíte de
+comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
