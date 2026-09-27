@@ -364,6 +364,14 @@ aplicação)
     com mode spawnável.
   - Nota em `docs/workflow-agentes-dev.md`: analista e
     curador-produto spawnados fazem perguntas via devflow.
+  - **Decisão REVISADA pelo humano (2026-09-26, pós-revisão):**
+    `analista` NÃO é spawnado; volta a `primary` (agente não mediado,
+    conversa direto com o humano; o workflow-definicao-escopo dizia
+    "devflow spawna analista", que era a raiz do erro). Remove-se
+    `analista: allow` do devflow; ajustes em workflow-agentes-dev
+    (nota sem analista) e workflow-definicao-escopo (padrão não
+    mediado: devflow instrui troca de agente). Resto da tabela
+    mantido. Ciclo de correção iniciado (executor + novo revisor).
   - **Decisão pós-conclusão:** após validação final OK do trabalho,
     `worker` e `revisor` serão excluídos (existem por causa da
     limitação que o plugin resolve).
