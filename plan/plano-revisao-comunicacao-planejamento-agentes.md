@@ -234,6 +234,26 @@ Verificação: conversa roteirizada com dúvida levantada no meio; a
 transcrição não mostra ação (edição, commit, spawn de agente) entre a
 dúvida e a resolução. Caso futuro da suíte de comunicação.
 
+**Item 10 — Cobertura total (aprovado).** Destinos: `smart-planner` e
+revisores (`rev`, `revisor`).
+
+`smart-planner`:
+
+- Cobertura total é o padrão: todo o escopo solicitado entra no plano.
+  Julgamento próprio de "alteração simples" ou "postergável" não reduz
+  escopo; omissão ou postergação de item exige autorização explícita do
+  humano.
+
+Revisores (`rev`, `revisor`):
+
+- Verifique cobertura total: o resultado cobre todo o escopo aprovado.
+  Item faltante é achado, ainda que julgado simples ou postergável; a
+  decisão de aceitar a falta é do humano.
+
+Verificação: conversa roteirizada com escopo de pesos variados; o plano
+cobre todos os itens; o relatório do revisor aponta qualquer omissão.
+Caso futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
