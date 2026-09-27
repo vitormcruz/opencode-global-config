@@ -43,8 +43,8 @@ def test_curador_produto_has_description_frontmatter(
 
 
 @pytest.mark.unit
-def test_curador_produto_is_primary(curador_content: str) -> None:
-    assert "mode: primary" in curador_content
+def test_curador_produto_is_spawnable(curador_content: str) -> None:
+    assert "mode: all" in curador_content
 
 
 @pytest.mark.unit

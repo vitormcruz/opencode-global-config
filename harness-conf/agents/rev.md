@@ -5,7 +5,7 @@ description: >
   aderência ao plano aprovado. Não corrige — devolve
   relatório estruturado para eng-software ou
   especialista aplicar (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow

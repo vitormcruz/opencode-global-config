@@ -1,6 +1,6 @@
 ---
 description: Revisa clareza e formato de histórias e listas candidatas (sem adicionar requisitos) (PT-BR)
-mode: primary
+mode: subagent
 temperature: 0.2
 permission:
   edit: deny

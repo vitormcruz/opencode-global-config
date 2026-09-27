@@ -3,7 +3,7 @@ description: >
   Analisa requisitos de segurança, gera configs de hardening,
   revisa implementação e planeja/executa testes de segurança.
   Devolve resumo estruturado (achado · ação · severidade) (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow

@@ -2,7 +2,7 @@
 description: >
   Planeja e executa testes (aceitação, exploratórios, manuais),
   revisa cobertura e devolve resumo estruturado (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow

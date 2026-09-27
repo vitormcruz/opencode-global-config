@@ -8,7 +8,7 @@ description: >
   no Arquivo de Planejamento (workflow) ou onde o humano
   orientar.
   (PT-BR)
-mode: primary
+mode: all
 temperature: 0.3
 permission:
   question: allow

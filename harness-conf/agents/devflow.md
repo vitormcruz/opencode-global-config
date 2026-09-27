@@ -27,6 +27,7 @@ permission:
     writing-for-agents: allow
   task:
     "*": deny
+    analista: allow
     eng-software: allow
     curador-produto: allow
     dba: allow

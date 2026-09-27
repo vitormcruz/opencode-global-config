@@ -5,7 +5,7 @@ description: >
   conforme identidade visual aprovada. Funciona sozinho
   ou orquestrado.
   Pode consultar o humano diretamente. (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow

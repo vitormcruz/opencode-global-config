@@ -5,7 +5,7 @@ description: >
   Especialidade), instruções por agente; valida evidência
   do agregador no fim da fase Testes. Foco em conteúdo.
   Nunca commita alterações. (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow
@@ -19,6 +19,7 @@ permission:
     testes-produto-catalog: allow
   task:
     "*": deny
+    eng-software: allow
 ---
 
 Você é o Curador de Produto. Responda em PT-BR com

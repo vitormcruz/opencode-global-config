@@ -4,7 +4,7 @@ description: >
   seguras, informa eng-software sobre impactos no código,
   e revisa/corrige artefatos de BD.
   Pode consultar o humano diretamente.
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow

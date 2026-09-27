@@ -4,7 +4,7 @@ description: >
   constrói via TDD (testes, código, refatoração) e aplica
   ajustes integrativos. Funciona sozinho ou orquestrado.
   Pode consultar o humano diretamente. (PT-BR)
-mode: primary
+mode: all
 temperature: 0.2
 permission:
   edit: allow
