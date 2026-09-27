@@ -103,16 +103,24 @@
   `reliable-async-operations`.
 
 ## Compactação de contexto
-- Reconheça os sinais: histórico virou ruído; tarefa longa confirmada.
-- Prefira mecanismo automatizado efetivo: auto-compactação por threshold;
-  nova sessão ou spawn com estado persistido em arquivo, quando o fluxo
-  dá conta.
-- Sem mecanismo automatizado aplicável: solicite `/compact` ao humano ou
-  proponha nova sessão com estado persistido.
-- Esta regra prevalece sobre a política de sessão do workflow de
-  desenvolvimento ("retomada dentro da fase, sessão nova entre fases"):
-  se os sinais dispararem, compacte ou troque de sessão mesmo dentro da
-  mesma fase.
+- Etapa concluída e resultado salvo: avalie compactar antes de iniciar
+  a próxima. Compensa quando o histórico já é grande e ainda virão
+  muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
+  custo da compactação supera a economia: não compacte.
+- Reduza o contexto por conta própria, com qualquer mecanismo
+  disponível no harness (compactação, nova sessão ou spawn com estado
+  persistido em arquivo, ou equivalente). Sem mecanismo disponível ou
+  suficiente, peça ao humano.
+- Segure o crescimento: leia trechos (offset/limit) e consultas
+  direcionadas; não reinsira arquivos e logs completos no contexto.
+- A auto-compactação por threshold é rede de segurança, não plano:
+  se ela disparar, a fronteira foi perdida.
+
+## Chamadas de ferramentas
+- Agrupe operações independentes na mesma resposta: leituras, greps,
+  globs e comandos sem dependência entre si saem juntos, em paralelo.
+- Espere só quando houver dependência real: se B precisa do resultado
+  de A, A primeiro, B depois.
 
 ## Tool task (plugin opencode-task-model)
 
