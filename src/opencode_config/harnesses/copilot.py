@@ -39,6 +39,36 @@ _OPENCODE_ONLY_AGENTS = frozenset(
         "revisor",
     }
 )
+# Nomes de agentes raiz que o adapter já materializou como `.agent.md`
+# em alguma execução (histórico de `harness-conf/agents/*.md`).
+#
+# LIMITAÇÃO do prune de órfãos: os arquivos `.agent.md` não carregam
+# marcador confiável que distinga conteúdo gerado pelo adapter de
+# arquivo criado pelo usuário. O prune só remove arquivos cujo stem
+# está nesta lista e que deixaram de ser sincronizados (agente
+# removido do repo ou tornado OpenCode-only). Consequências:
+# - Arquivos `.agent.md` do usuário com nomes fora desta lista nunca
+#   são removidos.
+# - Agente novo adicionado ao repo e removido depois exige inclusão
+#   manual do nome nesta lista para o prune cobri-lo.
+_HISTORICALLY_SYNCED_AGENTS = frozenset(
+    {
+        "analista",
+        "aws-analista",
+        "curador-produto",
+        "dba",
+        "devflow",
+        "eng-software",
+        "front",
+        "qa",
+        "rev",
+        "revisor-historia",
+        "revisor",
+        "sec",
+        "smart-planner",
+        "worker",
+    }
+)
 _MODEL_ID = re.compile(
     r"^(?:gpt-\d|claude-(?:sonnet|opus|haiku)-|gemini-\d|"
     r"o\d|kimi-k|grok-\d|mai-code|luna$)",
@@ -267,6 +297,10 @@ def convert_agent_frontmatter(
     )
     if mode == "subagent":
         converted.append("user-invocable: false")
+    elif mode == "primary":
+        # Espelha a semântica OpenCode: agente primary não é spawnável
+        # via task no Copilot, então não pode ser invocado por modelo.
+        converted.append("disable-model-invocation: true")
     converted.append("---")
 
     body = "\n".join(lines[end + 1:])
@@ -371,6 +405,32 @@ def _sync_skills(
     output(f"      {count} skill(s) sincronizada(s)")
 
 
+def _prune_orphan_agents(
+    agents_dir: Path,
+    synced_names: Collection[str],
+    backup_dir: Path,
+    output: Callable[[str], None],
+) -> int:
+    """Remove `.agent.md` órfãos de nomes que o adapter já materializou.
+
+    Só toca em arquivos cujo stem está em ``_HISTORICALLY_SYNCED_AGENTS``
+    e que não são mais sincronizados (ver limitação na constante).
+    """
+
+    pruned = 0
+    for path in sorted(agents_dir.glob("*.agent.md")):
+        stem = path.name.removesuffix(".agent.md")
+        if stem not in _HISTORICALLY_SYNCED_AGENTS:
+            continue
+        if stem in synced_names:
+            continue
+        backup_copy(path, backup_dir)
+        remove_path(path)
+        output(f"PRUNE {path.name} (orfa: agente nao sincronizado)")
+        pruned += 1
+    return pruned
+
+
 def _sync_agents(
     repository: Path,
     agents_dir: Path,
@@ -381,10 +441,15 @@ def _sync_agents(
     output("--- Agents ---")
     agents_dir.mkdir(parents=True, exist_ok=True)
     sources = sorted((repository / HARNESS_CONF_DIR / "agents").glob("*.md"))
+    # Agentes OpenCode-only não existem no Copilot: ficam fora do
+    # vocabulário de delegação publicado na prosa dos perfis.
     available_agent_types = _COPILOT_BUILTIN_AGENT_TYPES | {
-        source.stem for source in sources
+        source.stem
+        for source in sources
+        if source.stem not in _OPENCODE_ONLY_AGENTS
     }
     count = 0
+    synced_names: set[str] = set()
     for source in sources:
         if source.stem in _OPENCODE_ONLY_AGENTS:
             output(f"SKIP  {source.name} (OpenCode-only)")
@@ -400,7 +465,16 @@ def _sync_agents(
             ),
         )
         output(f"OK    {destination.name}")
+        synced_names.add(source.stem)
         count += 1
+    pruned = _prune_orphan_agents(
+        agents_dir,
+        synced_names,
+        backup_dir,
+        output,
+    )
+    if pruned:
+        output(f"      {pruned} agent(s) orfao(s) removido(s)")
     output(f"      {count} agent(s) sincronizado(s)")
 
 

@@ -1,6 +1,7 @@
 """Testes do harness Copilot CLI: adapter, conversoes e wrapper CLI."""
 
 from pathlib import Path
+import re
 
 import pytest
 
@@ -58,8 +59,11 @@ def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
         tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).read_text(encoding="utf-8")
     assert "name: curador-produto" in agent
+    # curador-produto spawna apenas eng-software (task: eng-software:
+    # allow); a allowlist publicada na prosa reflete exatamente isso.
+    assert "Delegacao de subagentes" in agent
+    assert "`eng-software`" in agent
     assert "dba, eng-software, front, qa, rev, sec" not in agent
-    assert "Delegacao de subagentes" not in agent
     assert "gpt-5.6-luna" not in agent
 
 
@@ -225,18 +229,39 @@ Planner
 
 
 @pytest.mark.unit
-def test_copilot_adapter_revisor_historia_is_primary(
+def test_copilot_adapter_mirrors_mode_semantics(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
     tmp_path: Path,
 ) -> None:
-    status, _, _ = run_adapter(monkeypatch, repo_root, tmp_path)
+    """Espelha a semântica de modos OpenCode no frontmatter Copilot.
+
+    primary -> disable-model-invocation: true (não spawnável via task);
+    subagent -> user-invocable: false (não invocável direto pelo
+    usuário); all -> nenhuma das duas propriedades.
+    """
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
 
     assert status == 0
-    agent = (
-        tmp_path / ".copilot" / "agents" / "revisor-historia.agent.md"
+    assert error == ""
+    agents_dir = tmp_path / ".copilot" / "agents"
+
+    devflow = (agents_dir / "devflow.agent.md").read_text(encoding="utf-8")
+    assert "disable-model-invocation: true" in devflow
+    assert "user-invocable: false" not in devflow
+
+    revisor_historia = (
+        agents_dir / "revisor-historia.agent.md"
     ).read_text(encoding="utf-8")
-    assert "user-invocable: false" not in agent
+    assert "user-invocable: false" in revisor_historia
+    assert "disable-model-invocation: true" not in revisor_historia
+
+    eng_software = (agents_dir / "eng-software.agent.md").read_text(
+        encoding="utf-8"
+    )
+    assert "disable-model-invocation: true" not in eng_software
+    assert "user-invocable: false" not in eng_software
 
 
 @pytest.mark.unit
@@ -455,6 +480,83 @@ def test_copilot_adapter_does_not_skip_regular_agents(
     assert (
         tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).is_file()
+
+
+@pytest.mark.unit
+def test_copilot_adapter_excludes_opencode_only_agents_from_delegation_prose(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    """A prosa de delegação não cita agentes que não existem no Copilot.
+
+    smart-planner tem ``"*": allow`` e publica todo o vocabulário
+    disponível; worker e revisor são OpenCode-only e devem ficar fora.
+    """
+
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "smart-planner.agent.md"
+    ).read_text(encoding="utf-8")
+    assert "Delegacao de subagentes" in agent
+    prose = re.search(
+        r"estes `agent_type` Copilot:\n+`([^`]*)`", agent
+    )
+    assert prose is not None, "Prosa de delegação ausente"
+    entries = {name.strip() for name in prose.group(1).split(",")}
+    assert "eng-software" in entries
+    assert "revisor-historia" in entries
+    assert "worker" not in entries
+    assert "revisor" not in entries
+
+
+@pytest.mark.unit
+def test_copilot_adapter_prunes_orphan_managed_agents(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Prune remove `.agent.md` de nomes historicamente gerenciados.
+
+    Órfão conhecido (nome na lista histórica, ausente do repo) é
+    removido com backup; arquivo do usuário com nome fora da lista
+    permanece intacto.
+    """
+
+    repo = tmp_path / "repo"
+    agents = repo / "harness-conf" / "agents"
+    agents.mkdir(parents=True)
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills").mkdir()
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / ".github").mkdir()
+    (agents / "planner.md").write_text(
+        "---\ndescription: Planner\nmode: all\n---\nPlanner\n",
+        encoding="utf-8",
+    )
+
+    agents_dir = tmp_path / ".copilot" / "agents"
+    agents_dir.mkdir(parents=True)
+    orphan = agents_dir / "dba.agent.md"
+    orphan.write_text("conteudo antigo", encoding="utf-8")
+    user_file = agents_dir / "meu-agente-custom.agent.md"
+    user_file.write_text("criado pelo usuario", encoding="utf-8")
+
+    status, _, error = run_adapter(monkeypatch, repo, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    assert not orphan.exists()
+    assert user_file.is_file()
+    assert user_file.read_text(encoding="utf-8") == "criado pelo usuario"
+    assert (agents_dir / "planner.agent.md").is_file()
+    backup_root = tmp_path / ".config" / "copilot-backup"
+    backups = list(backup_root.rglob("dba.agent.md"))
+    assert backups and backups[0].read_text(encoding="utf-8") == (
+        "conteudo antigo"
+    )
 
 
 @pytest.mark.unit
