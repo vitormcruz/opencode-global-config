@@ -336,9 +336,40 @@ aplicação)
   flash/glm-5.3/nativo verificados no storage local) e `b7ecad8`
   (insumo do devflow autocontido, com evidências do runbook).
   Achados do revisor: (1, menor) README/guarda citam `worktree` que a
-  1.3.1 não implementa — correção aprovada pelo humano, pendente de
-  execução; (2, obs.) runbook cita CLI `sqlite3` ausente no WSL;
-  (3, obs.) timeout do teste pode não disparar com saída silenciosa.
+  1.3.1 não implementa — correção DELEGADA ao ciclo do devflow
+  (decisão do humano 2026-09-26); (2, obs.) runbook cita CLI
+  `sqlite3` ausente no WSL; (3, obs.) timeout do teste pode não
+  disparar com saída silenciosa.
+- **Ciclo 3 INICIADO (Task 7, somente investigação e proposta):**
+  executor investiga adapters e modos, retorna proposta; NENHUMA
+  mudança aplicada sem aprovação humana.
+- **Ciclo 3 investigação CONCLUÍDA; proposta APROVADA pelo humano
+  (2026-09-26):**
+  - Diagnóstico: 9 agentes spawnáveis pelos workflows são `primary`
+    (workflow multi-agente nunca funcionou via `task`); adapter
+    OpenCode só repassa arquivos; adapter Copilot ignora `primary`
+    (tudo spawnável lá).
+  - Modos aprovados: analista/eng-software/front/curador-produto/
+    dba/sec/qa/rev → `all`; revisor-historia → `subagent`; devflow/
+    aws-analista/smart-planner mantêm `primary`; worker/revisor sem
+    mudança.
+  - Permissões: devflow ganha `analista: allow`; curador-produto
+    ganha `eng-software: allow` (após `"*": deny`).
+  - Adapter Copilot aprovado (espelhar semântica): emitir
+    `disable-model-invocation: true` para `primary`; excluir
+    OpenCode-only (worker/revisor) da lista de disponíveis na prosa;
+    podar órfãos em `~/.copilot/agents/`; validação ao vivo da
+    propriedade no CLI fica pendente (doc cobre cloud agent).
+  - Teste novo de guarda: todo `task: X: allow` aponta para agente
+    com mode spawnável.
+  - Nota em `docs/workflow-agentes-dev.md`: analista e
+    curador-produto spawnados fazem perguntas via devflow.
+  - **Decisão pós-conclusão:** após validação final OK do trabalho,
+    `worker` e `revisor` serão excluídos (existem por causa da
+    limitação que o plugin resolve).
+  - Executor/revisor deste ciclo no provider zen (plugin em uso com
+    outro provider): executor `opencode/glm-5.3-flash`; revisor
+    `opencode/glm-5.3` (via `general`).
 - Validado AO VIVO pelo humano após reinício da TUI: `model` por
   chamada funcionando; `analista` não apareceu na `task` — causa:
   `mode: primary` (a `task` lista apenas `subagent`/`all`).
