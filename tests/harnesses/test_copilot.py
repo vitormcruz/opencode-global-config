@@ -490,8 +490,9 @@ def test_copilot_adapter_excludes_opencode_only_agents_from_delegation_prose(
 ) -> None:
     """A prosa de delegação não cita agentes que não existem no Copilot.
 
-    smart-planner tem ``"*": allow`` e publica todo o vocabulário
-    disponível; worker e revisor são OpenCode-only e devem ficar fora.
+    smart-planner usa ``"*": deny`` com lista nomeada de
+    delegação, que inclui worker e revisor (OpenCode-only);
+    a prosa do adapter deve excluí-los.
     """
 
     status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
