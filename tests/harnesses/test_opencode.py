@@ -59,6 +59,20 @@ def apply_adapter(
     return output.getvalue(), error.getvalue()
 
 
+def require_symlink_support(tmp_path: Path) -> None:
+    target = tmp_path / "symlink-target"
+    link = tmp_path / "symlink-probe"
+    target.write_text("probe", encoding="utf-8")
+    try:
+        link.symlink_to(target)
+    except OSError as problem:
+        pytest.fail(
+            "A estratégia OpenCode POSIX exige symlink; execute este teste "
+            f"em Linux/WSL com symlink habilitado ({problem})."
+        )
+    link.unlink()
+
+
 @pytest.mark.integration
 @requires_symlink
 def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
@@ -86,6 +100,73 @@ def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
         "Conteudo da base.\n"
     )
     assert "Pronto." in output
+
+
+@pytest.mark.integration
+def test_opencode_without_provisioned_ai_memory_filters_symlink_config(
+    tmp_path: Path,
+) -> None:
+    require_symlink_support(tmp_path)
+    repository = make_repository(tmp_path)
+    canonical_config = repository / "harness-conf" / "opencode.json"
+    canonical_config.write_text(
+        json.dumps(
+            {
+                "mcp": {
+                    "ai-memory": {
+                        "type": "remote",
+                        "url": "http://127.0.0.1:49374/mcp",
+                    },
+                    "local-tool": {"type": "remote", "url": "http://localhost"},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    home = tmp_path / "home"
+
+    apply_adapter(repository, home)
+
+    applied_config = home / ".config" / "opencode" / "opencode.json"
+    applied = json.loads(applied_config.read_text(encoding="utf-8"))
+    canonical = json.loads(canonical_config.read_text(encoding="utf-8"))
+    assert not applied_config.is_symlink()
+    assert "ai-memory" not in applied.get("mcp", {})
+    assert applied["mcp"]["local-tool"] == canonical["mcp"]["local-tool"]
+    assert "ai-memory" in canonical["mcp"]
+
+
+@pytest.mark.integration
+def test_opencode_with_provisioned_ai_memory_keeps_canonical_config_link(
+    tmp_path: Path,
+) -> None:
+    require_symlink_support(tmp_path)
+    repository = make_repository(tmp_path)
+    canonical_config = repository / "harness-conf" / "opencode.json"
+    canonical_config.write_text(
+        json.dumps(
+            {
+                "mcp": {
+                    "ai-memory": {
+                        "type": "remote",
+                        "url": "http://127.0.0.1:49374/mcp",
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    home = tmp_path / "home"
+    ready_marker = home / ".local" / "share" / "ai-memory" / ".bootstrap-provisioned"
+    ready_marker.parent.mkdir(parents=True)
+    ready_marker.write_text("ready", encoding="utf-8")
+
+    apply_adapter(repository, home)
+
+    applied_config = home / ".config" / "opencode" / "opencode.json"
+    assert applied_config.is_symlink()
+    assert applied_config.resolve() == canonical_config.resolve()
+    assert "ai-memory" in json.loads(applied_config.read_text(encoding="utf-8"))["mcp"]
 
 
 @pytest.mark.unit
