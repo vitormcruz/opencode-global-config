@@ -254,6 +254,22 @@ Verificação: conversa roteirizada com escopo de pesos variados; o plano
 cobre todos os itens; o relatório do revisor aponta qualquer omissão.
 Caso futuro da suíte de comunicação.
 
+**Item 11 — Detalhe de implementação não se discute (aprovado).**
+Destino: skill `question-orchestration` (acréscimo, junto à regra de
+perguntas do item 7):
+
+- Antes de perguntar ou pedir confirmação, classifique a questão: é
+  detalhe de implementação ou decisão de resultado? Detalhe de
+  implementação não se discute com o humano: decida dentro do escopo
+  aprovado, registre no artefato e siga. Só traz ao humano o que muda
+  premissa, escopo, comportamento ou risco, ou algo novo não abordado
+  no planejamento.
+
+Verificação: conversa roteirizada; nenhuma pergunta sobre detalhe de
+implementação; decisões internas registradas no artefato; toda pergunta
+trata de premissa, escopo, comportamento, risco ou ponto novo. Caso
+futuro da suíte de comunicação.
+
 ## Task List
 
 (tasks a definir após os itens do humano e as decisões)
