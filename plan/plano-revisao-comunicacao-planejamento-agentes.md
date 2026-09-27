@@ -318,6 +318,23 @@ validar; a transcrição mostra anúncio do total e apresentação por
 partes; entrega solicitada vem completa no formato pedido. Caso futuro
 da suíte de comunicação.
 
+**Achado 2 — Divergência de perguntas no orquestrador (aprovado).** O
+revisor apontou conflito entre as regras novas de perguntas e trechos do
+`devflow` (checklist exigindo opções com trade-offs para toda pergunta;
+agrupamento de perguntas por serem curtas e relacionadas). Decisão do
+humano: remover do `devflow` os trechos que duplicam o protocolo de
+perguntas, mantendo só a referência à skill `question-orchestration`
+como fonte única (o `devflow` já a declara fonte única; os trechos
+duplicavam). Controles operacionais do mediador que não duplicam a skill
+(limite de rodadas de reformulação, continuidade da mediação, uso do
+prompt-improver para briefing) ficam. O `dba` fica como está: pergunta só
+o que falta no modelo (decisão de resultado) e consulta o registro antes
+de perguntar.
+
+Verificação: leitura do `devflow` após o ajuste: nenhum trecho define
+regra de pergunta (opções, agrupamento, ritmo); a referência à skill como
+fonte única permanece. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
