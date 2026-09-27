@@ -87,6 +87,10 @@ _COMMAND_DESCRIPTIONS = {
         "Sincroniza skills com upstream. Ative quando humano pedir "
         "sync upstream skills."
     ),
+    "otimizar-agents-md": (
+        "Analisa e otimiza arquivos AGENTS.md. Ative quando humano pedir "
+        "otimizar, enxugar ou revisar AGENTS.md."
+    ),
 }
 
 

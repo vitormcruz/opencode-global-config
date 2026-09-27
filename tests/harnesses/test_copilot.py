@@ -280,6 +280,28 @@ def test_copilot_adapter_converts_commands_to_skills(
 
 
 @pytest.mark.unit
+def test_copilot_adapter_describes_agents_md_optimization_command(
+    monkeypatch: pytest.MonkeyPatch,
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    skill = (
+        tmp_path
+        / ".copilot"
+        / "skills"
+        / "otimizar-agents-md"
+        / "SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Analisa e otimiza arquivos AGENTS.md" in skill
+    assert "Executa o comando otimizar-agents-md." not in skill
+
+
+@pytest.mark.unit
 def test_copilot_adapter_adds_skill_frontmatter(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
