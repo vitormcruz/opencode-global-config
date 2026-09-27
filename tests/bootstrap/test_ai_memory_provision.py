@@ -39,12 +39,15 @@ class FakeAiMemoryRunner:
         self.commands: list[tuple[str, ...]] = []
         self.image_available = False
         self.network_available = False
+        self.network_container_names: list[str] = []
         self.container_available = False
         self.container_running = False
         self.container_starts = True
         self.container_image = ai_memory.AI_MEMORY_IMAGE
+        self.published_loopback = False
         self.plugin_content = "generated plugin"
         self.pull_count = 0
+        self.hook_environments: list[dict[str, str]] = []
 
     def __call__(
         self,
@@ -53,7 +56,7 @@ class FakeAiMemoryRunner:
         env: dict[str, str],
         timeout: float,
     ) -> CommandResult:
-        del env, timeout
+        del timeout
         arguments = tuple(command)
         self.commands.append(arguments)
         docker_arguments = arguments[1:]
@@ -63,7 +66,21 @@ class FakeAiMemoryRunner:
         if docker_arguments[:2] == ("image", "inspect"):
             return self._result(arguments, 0 if self.image_available else 1)
         if docker_arguments[:2] == ("network", "inspect"):
-            return self._result(arguments, 0 if self.network_available else 1, "true")
+            network_containers = {
+                str(index): {"Name": name}
+                for index, name in enumerate(self.network_container_names)
+            }
+            inspect = (
+                f"true|{json.dumps(network_containers)}"
+                if len(docker_arguments) > 3
+                and docker_arguments[3] == "{{.Internal}}|{{json .Containers}}"
+                else "true"
+            )
+            return self._result(
+                arguments,
+                0 if self.network_available else 1,
+                inspect,
+            )
         if docker_arguments[:2] == ("network", "create"):
             self.network_available = True
             return self._result(arguments, 0)
@@ -76,6 +93,8 @@ class FakeAiMemoryRunner:
         if docker_arguments[:1] == ("run",):
             self.container_available = True
             self.container_running = self.container_starts
+            if "ai-memory" not in self.network_container_names:
+                self.network_container_names.append("ai-memory")
             return self._result(arguments, 0)
         if docker_arguments[:1] == ("start",):
             self.container_running = True
@@ -85,8 +104,14 @@ class FakeAiMemoryRunner:
             return self._result(arguments, 0)
         if docker_arguments[:1] == ("rm",):
             self.container_available = False
+            self.network_container_names = [
+                name
+                for name in self.network_container_names
+                if name != "ai-memory"
+            ]
             return self._result(arguments, 0)
         if "install-hooks" in arguments:
+            self.hook_environments.append(env)
             plugin = self.home / ".config" / "opencode" / "plugins" / "ai-memory.ts"
             plugin.parent.mkdir(parents=True, exist_ok=True)
             plugin.write_text(self.plugin_content, encoding="utf-8")
@@ -131,6 +156,18 @@ class FakeAiMemoryRunner:
                     "Destination": "/data",
                 }
             ],
+            "NetworkSettings": {
+                "Ports": {
+                    "49374/tcp": (
+                        [{"HostIp": "127.0.0.1", "HostPort": "49374"}]
+                        if self.published_loopback
+                        else None
+                    )
+                },
+                "Networks": {
+                    ai_memory.AI_MEMORY_NETWORK: {"IPAddress": "172.30.0.2"}
+                },
+            },
         }
         return self._result(arguments, 0, json.dumps(inspected))
 
@@ -143,6 +180,12 @@ def prevent_real_docker_processes(monkeypatch: pytest.MonkeyPatch) -> None:
         )
 
     monkeypatch.setattr(ai_memory.subprocess, "Popen", reject_process)
+    monkeypatch.setattr(
+        ai_memory,
+        "_endpoint_is_reachable",
+        lambda _url: True,
+        raising=False,
+    )
 
 
 @pytest.mark.unit
@@ -293,6 +336,119 @@ def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
         command[1:3] == ("network", "create") and "--internal" in command
         for command in runner.commands
     )
+
+
+@pytest.mark.unit
+def test_ai_memory_uses_internal_bridge_url_when_docker_does_not_publish_loopback(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    expected_url = "http://172.30.0.2:49374/mcp"
+    observed_urls: list[str] = []
+    wrapper_bytes = b"verified wrapper"
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+    monkeypatch.setattr(
+        ai_memory,
+        "AI_MEMORY_WRAPPER_SHA256",
+        sha256(wrapper_bytes).hexdigest(),
+    )
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        fetcher=lambda _url, destination: destination.write_bytes(wrapper_bytes),
+        port_is_in_use=lambda _host, _port: False,
+        endpoint_is_reachable=lambda url: observed_urls.append(url) or True,
+        output=StringIO(),
+    )
+
+    assert result.provisioned
+    assert result.mcp_url == expected_url
+    assert observed_urls == [expected_url]
+    assert runner.hook_environments[0]["AI_MEMORY_SERVER_URL"] == (
+        "http://172.30.0.2:49374"
+    )
+    marker = ai_memory.ai_memory_ready_marker(context.paths)
+    assert json.loads(marker.read_text(encoding="utf-8"))["complete"] is True
+    url_marker = context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+    assert url_marker.read_text(encoding="utf-8").strip() == expected_url
+    assert ai_memory.ai_memory_mcp_url(context.paths.home) == expected_url
+
+
+@pytest.mark.unit
+def test_ai_memory_does_not_enable_mcp_when_internal_endpoint_is_unreachable(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    wrapper_bytes = b"verified wrapper"
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+    monkeypatch.setattr(
+        ai_memory,
+        "AI_MEMORY_WRAPPER_SHA256",
+        sha256(wrapper_bytes).hexdigest(),
+    )
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        fetcher=lambda _url, destination: destination.write_bytes(wrapper_bytes),
+        port_is_in_use=lambda _host, _port: False,
+        endpoint_is_reachable=lambda _url: False,
+        output=StringIO(),
+    )
+
+    assert not result.provisioned
+    assert not ai_memory.ai_memory_ready_marker(context.paths).exists()
+    assert "não está acessível pelo host" in result.message
+
+
+@pytest.mark.unit
+def test_ai_memory_falls_back_to_bridge_when_reported_loopback_is_unreachable(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    runner.published_loopback = True
+    bridge_url = "http://172.30.0.2:49374/mcp"
+    probed_urls: list[str] = []
+    wrapper_bytes = b"verified wrapper"
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+    monkeypatch.setattr(
+        ai_memory,
+        "AI_MEMORY_WRAPPER_SHA256",
+        sha256(wrapper_bytes).hexdigest(),
+    )
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        fetcher=lambda _url, destination: destination.write_bytes(wrapper_bytes),
+        port_is_in_use=lambda _host, _port: False,
+        endpoint_is_reachable=lambda url: probed_urls.append(url)
+        or url == bridge_url,
+        output=StringIO(),
+    )
+
+    assert result.provisioned
+    assert result.mcp_url == bridge_url
+    assert probed_urls == [ai_memory.AI_MEMORY_MCP_URL, bridge_url]
 
 
 @pytest.mark.unit
@@ -493,6 +649,36 @@ def test_ai_memory_occupied_loopback_port_aborts_before_container_creation(
     assert not runner.container_available
     assert "49374" in result.message
     assert "ai-memory" in result.message
+
+
+@pytest.mark.unit
+def test_ai_memory_refuses_internal_network_shared_with_another_container(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    runner.network_available = True
+    runner.network_container_names = ["other-service"]
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+    downloads: list[str] = []
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        fetcher=lambda url, _destination: downloads.append(url),
+        port_is_in_use=lambda _host, _port: False,
+        output=StringIO(),
+    )
+
+    assert not result.provisioned
+    assert not runner.container_available
+    assert downloads == []
+    assert "outro container" in result.message
 
 
 @pytest.mark.unit
@@ -758,6 +944,64 @@ def test_ai_memory_rollback_removes_runtime_but_preserves_data(
     assert sum(command[1:3] == ("network", "rm") for command in runner.commands) == 1
 
 
+@pytest.mark.unit
+def test_ai_memory_rollback_removes_the_recorded_internal_bridge_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    runner.network_available = True
+    runner.container_available = True
+    runner.container_running = True
+    bridge_url = "http://172.30.0.2:49374/mcp"
+    data_directory = context.paths.data_dir / "ai-memory"
+    data_directory.mkdir(parents=True)
+    marker = data_directory / ai_memory.AI_MEMORY_READY_MARKER
+    marker.write_text(
+        json.dumps(
+            {
+                "complete": True,
+                "network_created": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+    url_marker = data_directory / ai_memory.AI_MEMORY_URL_MARKER
+    url_marker.write_text(f"{bridge_url}\n", encoding="utf-8")
+    copilot_config = context.paths.home / ".copilot" / "mcp-config.json"
+    copilot_config.parent.mkdir(parents=True)
+    copilot_config.write_text(
+        json.dumps(
+            {
+                "mcpServers": {
+                    "ai-memory": {"type": "http", "url": bridge_url},
+                    "user-server": {"type": "http", "url": "http://localhost"},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+
+    result = ai_memory.rollback_ai_memory(
+        context,
+        runner=runner,
+        output=StringIO(),
+    )
+
+    assert result.previous_mcp_url == bridge_url
+    assert not url_marker.exists()
+    assert json.loads(copilot_config.read_text(encoding="utf-8"))["mcpServers"] == {
+        "user-server": {"type": "http", "url": "http://localhost"}
+    }
+    assert data_directory.is_dir()
+
+
 @pytest.mark.parametrize("provisioned", [False, True])
 @pytest.mark.unit
 def test_bootstrap_passes_one_ai_memory_state_to_both_harnesses(
@@ -856,6 +1100,57 @@ def test_bootstrap_passes_one_ai_memory_state_to_both_harnesses(
 
     assert status == 0
     assert applied == {"opencode": provisioned, "copilot": provisioned}
+
+
+@pytest.mark.unit
+def test_bootstrap_passes_current_and_previous_mcp_urls_to_harnesses(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from opencode_config.bootstrap import main as bootstrap_main
+
+    current_url = "http://172.30.0.3:49374/mcp"
+    previous_url = "http://172.30.0.2:49374/mcp"
+    received: list[tuple[str | None, str | None]] = []
+
+    class RecordingHarness:
+        name = "opencode"
+
+        def installed(self, _environment: EnvironmentKind) -> bool:
+            return True
+
+        def apply(self, _repository: Path, options) -> None:
+            received.append(
+                (options.ai_memory_url, options.previous_ai_memory_url)
+            )
+
+    adapter = RecordingHarness()
+    definition = HarnessDefinition(
+        name=adapter.name,
+        create=lambda _environment: adapter,
+        skip_variable="OPENCODE_SKIP_OPENCODE_ADAPTER",
+    )
+    monkeypatch.setattr(
+        bootstrap_main,
+        "selecionar_harnesses",
+        lambda _selection: [definition],
+    )
+
+    result = bootstrap_main._apply_harnesses(
+        EnvironmentKind.LINUX,
+        tmp_path / "repo",
+        None,
+        assume_yes=True,
+        quiet=True,
+        output=StringIO(),
+        error=StringIO(),
+        ai_memory_enabled=True,
+        ai_memory_url=current_url,
+        previous_ai_memory_url=previous_url,
+    )
+
+    assert result == 0
+    assert received == [(current_url, previous_url)]
 
 
 @pytest.mark.unit

@@ -26,6 +26,8 @@ class ApplyOptions:
     output: TextIO | None = None
     error: TextIO | None = None
     ai_memory_enabled: bool | None = None
+    ai_memory_url: str | None = None
+    previous_ai_memory_url: str | None = None
 
     def resolve_streams(
         self,

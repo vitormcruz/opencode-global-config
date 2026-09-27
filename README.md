@@ -99,8 +99,11 @@ sync.
 O bootstrap provisiona o ai-memory em user-space quando Docker está
 disponível. O wrapper vem de um release oficial do GitHub e passa por
 validação SHA-256 fixada no código. A imagem continua em `:latest`, conforme
-decisão do produto. O container publica apenas `127.0.0.1:49374` e usa uma
-rede Docker `internal`, sem rota de saída padrão.
+decisão do produto. O container solicita publicação em `127.0.0.1:49374` e
+usa uma rede Docker `internal`, sem rota de saída padrão. Se o Docker não
+materializar a publicação nessa rede, o bootstrap usa o IPv4 privado do
+container na bridge internal, após validar a conectividade do host. Esse
+fallback não abre uma porta nas interfaces do host.
 
 O volume fica em `~/.local/share/ai-memory/`. A wiki contém prompts em texto
 claro. Trate o diretório como dado sensível: não o versione nem o sincronize
@@ -125,11 +128,12 @@ use Docker rootless. No WSL, use Docker Desktop com integração WSL. Consulte
 execute o bootstrap novamente.
 
 No Linux/WSL, o adapter mantém `opencode.json` como symlink canônico quando o
-provisionamento termina. Enquanto o ai-memory estiver desabilitado, o adapter
-substitui o symlink por uma cópia filtrada que não declara esse MCP. Após um
-provisionamento completo, a próxima execução restaura o symlink canônico. No
-Copilot, o adapter mescla `mcpServers.ai-memory` e preserva as demais entradas.
-O adapter cria backup antes de alterar `~/.copilot/mcp-config.json`.
+Docker publica a porta em loopback. Com o fallback da bridge internal, ele
+materializa uma cópia local com o endpoint ativo, sem editar a fonte canônica.
+Enquanto o ai-memory estiver desabilitado, o adapter materializa uma cópia
+filtrada que não declara esse MCP. No Copilot, o adapter mescla
+`mcpServers.ai-memory` e preserva as demais entradas. O adapter cria backup
+antes de alterar `~/.copilot/mcp-config.json`.
 
 O bootstrap move `~/.config/opencode/opencode.jsonc` para
 `~/.config/opencode-backup/<timestamp>/opencode.jsonc`, sem editar o conteúdo.

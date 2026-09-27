@@ -24,15 +24,19 @@ permite a declaração MCP quando esse marcador existe.
 
 O wrapper vem de um release HTTPS do repositório oficial e passa por SHA-256
 fixado no código. A imagem permanece `akitaonrails/ai-memory:latest`, conforme
-decisão humana. O container publica `127.0.0.1:49374`, monta
+decisão humana. O container solicita publicação de `127.0.0.1:49374`, monta
 `~/.local/share/ai-memory/` em `/data` e usa a rede Docker `internal`.
-O bootstrap não configura credenciais nem provider de LLM.
+O bootstrap inspeciona a publicação efetiva. Se o Docker não ativar o bind
+loopback nessa rede, o host usa o IPv4 privado do container na bridge
+`internal`, depois de validar a conectividade. O bootstrap não configura
+credenciais nem provider de LLM.
 
 O adapter OpenCode mantém o symlink canônico quando o provisionamento está
-completo. Quando o marcador está ausente, o adapter substitui o symlink por uma
-cópia filtrada de `opencode.json`. O adapter nunca escreve através do symlink.
-Depois que o bootstrap completa o provisionamento, a sincronização seguinte
-restaura o symlink canônico.
+completo e o MCP usa o endpoint loopback. Quando o marcador está ausente, o
+adapter substitui o symlink por uma cópia filtrada de `opencode.json`. Quando o
+host usa a bridge `internal`, o adapter materializa uma cópia local com o
+endpoint ativo. O adapter nunca escreve através do symlink nem altera a fonte
+canônica.
 
 O adapter Copilot converte `mcp.ai-memory` para `mcpServers.ai-memory` somente
 quando o marcador existe. O merge preserva outras entradas. Uma entrada
@@ -55,12 +59,17 @@ remove os wrappers e hooks gerados, remove as declarações gerenciadas, restaur
   ausente.
 - No POSIX, `opencode.json` é um arquivo regular filtrado enquanto o marcador
   não existe. A configuração canônica permanece intacta.
+- Quando a publicação loopback não fica ativa na rede `internal`, o endpoint
+  MCP usa o IPv4 privado do container. O bootstrap confirma a conexão do host
+  antes de habilitar as declarações nos harnesses; a configuração OpenCode
+  local registra o endpoint e não altera o arquivo canônico.
 - O wrapper tem checksum esperado no código. Mudança de checksum bloqueia a
   substituição e informa como fazer backup antes do upgrade.
 - O bootstrap não atualiza uma imagem já presente; `:latest` pode divergir
   entre máquinas até uma instalação limpa.
-- A rede internal impede rota de saída padrão para o container. O servidor
-  permanece acessível pelo bind de loopback no host.
+- A rede internal impede rota de saída padrão para o container. Quando o Docker
+  publica a porta, o host acessa pelo loopback. Sem publicação efetiva, o host
+  acessa o IPv4 privado pela bridge internal; nenhum listener do host é aberto.
 - A wiki persiste em texto claro no diretório local. O rollback preserva esse
   diretório para evitar perda de memória. No POSIX, o bootstrap restringe o
   acesso ao usuário que executa o provisionamento.

@@ -8,6 +8,7 @@ import re
 import pytest
 
 from opencode_config.harnesses.copilot import CopilotAdapter
+from opencode_config.harnesses import ApplyOptions
 
 
 def run_adapter(
@@ -925,6 +926,67 @@ def test_copilot_adapter_merges_ai_memory_without_losing_existing_servers(
     backups = list((tmp_path / ".config" / "copilot-backup").rglob("mcp-config.json"))
     assert backups
     assert json.loads(backups[0].read_text(encoding="utf-8")) == preexisting_config
+
+
+@pytest.mark.unit
+def test_copilot_updates_only_its_previous_internal_bridge_endpoint(
+    fake_repo,
+    tmp_path: Path,
+) -> None:
+    repo_root = fake_repo(
+        {
+            "harness-conf/agents/planner.md": "---\ndescription: Planner\n---\n",
+            "harness-conf/commands/example.md": "# Example\n",
+            "harness-conf/skills/global/SKILL.md": "# Global\n",
+            "harness-conf/opencode.json": json.dumps(
+                {
+                    "mcp": {
+                        "ai-memory": {
+                            "type": "remote",
+                            "url": "http://127.0.0.1:49374/mcp",
+                        }
+                    }
+                }
+            ),
+        }
+    )
+    previous_url = "http://172.30.0.2:49374/mcp"
+    current_url = "http://172.30.0.3:49374/mcp"
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        json.dumps(
+            {
+                "mcpServers": {
+                    "ai-memory": {"type": "http", "url": previous_url},
+                    "user-server": {"type": "http", "url": "http://localhost"},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    CopilotAdapter().apply(
+        repo_root,
+        ApplyOptions(
+            home=tmp_path,
+            assume_yes=True,
+            quiet=True,
+            ai_memory_enabled=True,
+            ai_memory_url=current_url,
+            previous_ai_memory_url=previous_url,
+        ),
+    )
+
+    merged = json.loads(config_path.read_text(encoding="utf-8"))
+    assert merged["mcpServers"]["ai-memory"] == {
+        "type": "http",
+        "url": current_url,
+    }
+    assert merged["mcpServers"]["user-server"] == {
+        "type": "http",
+        "url": "http://localhost",
+    }
 
 
 @pytest.mark.unit

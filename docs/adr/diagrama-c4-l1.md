@@ -24,7 +24,7 @@ C4Context
     Rel(repo, dependencias, "Detecta e provisiona em user-space")
     Rel(opencode, ai_memory, "Consulta MCP quando o provisionamento termina")
     Rel(copilot, ai_memory, "Consulta MCP quando o provisionamento termina")
-    Rel(repo, ai_memory, "Provisiona com bind de loopback e rede internal")
+    Rel(repo, ai_memory, "Provisiona em rede internal; usa loopback ou IPv4 privado da bridge")
     Rel(repo, upstreams, "Detecta diferenças sem aplicar conteúdo")
     Rel(repo, humano, "Apresenta diferenças para decisão")
 ```

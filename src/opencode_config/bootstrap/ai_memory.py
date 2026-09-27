@@ -6,6 +6,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ import tempfile
 import threading
 import time
 from typing import TextIO
+from urllib.parse import urlsplit
 import urllib.request
 
 from opencode_config.bootstrap.installers import (
@@ -43,6 +45,7 @@ AI_MEMORY_PORT = 49374
 AI_MEMORY_MCP_URL = "http://127.0.0.1:49374/mcp"
 AI_MEMORY_DATA_NAME = "ai-memory"
 AI_MEMORY_READY_MARKER = ".bootstrap-provisioned"
+AI_MEMORY_URL_MARKER = ".bootstrap-mcp-url"
 AI_MEMORY_NETWORK_MARKER = ".bootstrap-network-created"
 AI_MEMORY_WRAPPER_VERSION = "v2.4.1"
 AI_MEMORY_WRAPPER_URL = (
@@ -67,11 +70,13 @@ AI_MEMORY_COMMAND_TIMEOUT_SECONDS = 1800
 # the existing installer ceiling bounds the total without hiding progress.
 AI_MEMORY_COMMAND_IDLE_TIMEOUT_SECONDS = 120
 _DOWNLOAD_IDLE_TIMEOUT_SECONDS = 30
+_TCP_CONNECT_TIMEOUT_SECONDS = 1
 _MAX_WRAPPER_BYTES = 1024 * 1024
 
 Runner = Callable[..., CommandResult]
 Fetcher = Callable[[str, Path], None]
 PortProbe = Callable[[str, int], bool]
+EndpointProbe = Callable[[str], bool]
 
 
 class AiMemoryProvisionError(RuntimeError):
@@ -86,6 +91,8 @@ class AiMemoryProvisionResult:
     changed: bool
     message: str
     failed: bool = False
+    mcp_url: str | None = None
+    previous_mcp_url: str | None = None
 
 
 def ai_memory_data_directory(paths: UserSpacePaths) -> Path:
@@ -104,6 +111,12 @@ def is_ai_memory_provisioned(home: Path) -> bool:
     """Informa se o bootstrap concluiu a integração para esta home."""
 
     return ai_memory_ready_marker(_paths_for_home(home)).is_file()
+
+
+def ai_memory_mcp_url(home: Path) -> str:
+    """Retorna o endpoint atual registrado pelo provisionamento."""
+
+    return _read_ready_mcp_url(_paths_for_home(home)) or AI_MEMORY_MCP_URL
 
 
 def filter_ai_memory_config(content: str) -> str:
@@ -127,17 +140,42 @@ def filter_ai_memory_config(content: str) -> str:
     return json.dumps(configuration, indent=4, ensure_ascii=False) + "\n"
 
 
+def configure_ai_memory_mcp_url(content: str, mcp_url: str) -> str:
+    """Retorna a configuração OpenCode com o endpoint provisionado."""
+
+    try:
+        configuration = json.loads(content)
+    except json.JSONDecodeError as error:
+        raise AiMemoryProvisionError(
+            "JSON inválido na configuração OpenCode; o arquivo foi preservado."
+        ) from error
+    if not isinstance(configuration, dict):
+        raise AiMemoryProvisionError(
+            "A raiz da configuração OpenCode precisa ser um objeto JSON."
+        )
+    servers = configuration.get("mcp")
+    server = servers.get("ai-memory") if isinstance(servers, dict) else None
+    if not isinstance(server, dict):
+        raise AiMemoryProvisionError(
+            "A configuração OpenCode não declara mcp.ai-memory."
+        )
+    server["url"] = mcp_url
+    return json.dumps(configuration, indent=4, ensure_ascii=False) + "\n"
+
+
 def provision_ai_memory(
     context: InstallContext,
     *,
     runner: Runner | None = None,
     fetcher: Fetcher | None = None,
     port_is_in_use: PortProbe | None = None,
+    endpoint_is_reachable: EndpointProbe | None = None,
     output: TextIO | None = None,
 ) -> AiMemoryProvisionResult:
     """Provisiona wrapper, servidor, volume e hooks antes de habilitar MCP."""
 
     stream = output
+    previous_mcp_url = _read_ready_mcp_url(context.paths)
     try:
         network_was_created = _marker_created_network(context.paths)
         _remove_ready_marker(context.paths)
@@ -206,9 +244,32 @@ def provision_ai_memory(
                     ),
                     "Reinício do container ai-memory",
                 )
-        _verify_container_running(docker, context, execute, stream)
+        container = _verify_container_running(docker, context, execute, stream)
+        mcp_url = _resolve_mcp_url(container)
+        probe_endpoint = (
+            _endpoint_is_reachable
+            if endpoint_is_reachable is None
+            else endpoint_is_reachable
+        )
+        endpoint_is_reachable_now = probe_endpoint(mcp_url)
+        if not endpoint_is_reachable_now and mcp_url == AI_MEMORY_MCP_URL:
+            bridge_url = _resolve_internal_bridge_mcp_url(container)
+            if bridge_url != mcp_url:
+                mcp_url = bridge_url
+                endpoint_is_reachable_now = probe_endpoint(mcp_url)
+        if not endpoint_is_reachable_now:
+            raise AiMemoryProvisionError(
+                f"O endpoint MCP {mcp_url} não está acessível pelo host. "
+                "O bloco MCP permanecerá desabilitado."
+            )
+        if mcp_url != AI_MEMORY_MCP_URL:
+            _write(
+                stream,
+                "A publicação loopback não está ativa; usando o endereço "
+                f"{mcp_url} na bridge internal.",
+            )
         plugin_hash_before = _sha256_file(_plugin_path(context.paths.home))
-        _install_hooks(context, execute, stream)
+        _install_hooks(context, execute, stream, mcp_url)
         plugin_path = _plugin_path(context.paths.home)
         if not plugin_path.is_file():
             raise AiMemoryProvisionError(
@@ -223,12 +284,24 @@ def provision_ai_memory(
                 f"{plugin_hash_after}).",
             )
 
+        _write_mcp_url_marker(context.paths, mcp_url)
         _write_ready_marker(context.paths, network_is_owned)
         message = "ai-memory provisionado; declaração MCP habilitada nos harnesses."
         _write(stream, message)
-        return AiMemoryProvisionResult(True, True, message)
+        return AiMemoryProvisionResult(
+            True,
+            True,
+            message,
+            mcp_url=mcp_url,
+            previous_mcp_url=previous_mcp_url,
+        )
     except (AiMemoryProvisionError, InstallerError, OSError, ValueError) as error:
-        return _deactivate_incomplete_setup(context, str(error), output=stream)
+        return _deactivate_incomplete_setup(
+            context,
+            str(error),
+            output=stream,
+            previous_mcp_url=previous_mcp_url,
+        )
 
 
 def disable_ai_memory(
@@ -257,6 +330,7 @@ def rollback_ai_memory(
 
     execute = run_streaming_command if runner is None else runner
     errors: list[str] = []
+    previous_mcp_url = _read_ready_mcp_url(context.paths)
     try:
         network_is_owned = _marker_created_network(context.paths)
         _remove_ready_marker(context.paths)
@@ -306,7 +380,7 @@ def rollback_ai_memory(
     cleanup_steps = (
         lambda: _remove_generated_plugin(context.paths.home),
         lambda: _remove_opencode_server(context.paths.home),
-        lambda: _remove_copilot_server(context.paths.home),
+        lambda: _remove_copilot_server(context.paths.home, previous_mcp_url),
         lambda: _remove_wrapper_artifacts(context.paths),
         lambda: _restore_legacy_jsonc(context.paths.home),
     )
@@ -322,11 +396,22 @@ def rollback_ai_memory(
     if errors:
         message = "Rollback parcial: " + " | ".join(errors)
         _write(output, message)
-        return AiMemoryProvisionResult(False, True, message, failed=True)
+        return AiMemoryProvisionResult(
+            False,
+            True,
+            message,
+            failed=True,
+            previous_mcp_url=previous_mcp_url,
+        )
 
     message = "Rollback concluído; o volume de dados foi preservado."
     _write(output, message)
-    return AiMemoryProvisionResult(False, True, message)
+    return AiMemoryProvisionResult(
+        False,
+        True,
+        message,
+        previous_mcp_url=previous_mcp_url,
+    )
 
 
 def _paths_for_home(home: Path) -> UserSpacePaths:
@@ -393,12 +478,15 @@ def _execute(
     context: InstallContext,
     runner: Runner,
     output: TextIO | None,
+    additional_environment: Mapping[str, str] | None = None,
 ) -> CommandResult:
     _write(output, f"Executando: {' '.join(command)}")
     environment = _command_environment(
         context,
         ai_memory_data_directory(context.paths),
     )
+    if additional_environment:
+        environment.update(additional_environment)
     if runner is run_streaming_command:
         result = runner(
             command,
@@ -437,18 +525,21 @@ def _ensure_container_network(
     runner: Runner,
     output: TextIO | None,
 ) -> bool:
+    inspect_format = "{{.Internal}}|{{json .Containers}}"
     inspected = _execute(
-        [docker, "network", "inspect", "--format", "{{.Internal}}", AI_MEMORY_NETWORK],
+        [docker, "network", "inspect", "--format", inspect_format, AI_MEMORY_NETWORK],
         context,
         runner,
         output,
     )
     if inspected.succeeded:
-        if inspected.stdout.strip().lower() != "true":
+        internal_flag, container_json = _parse_network_inspection(inspected.stdout)
+        if internal_flag.lower() != "true":
             raise AiMemoryProvisionError(
                 f"A rede {AI_MEMORY_NETWORK} existe sem isolamento internal. "
                 "Remova-a após verificar seus usuários e reexecute o bootstrap."
             )
+        _require_exclusive_network_containers(container_json)
         return False
 
     created = _execute(
@@ -467,6 +558,38 @@ def _ensure_container_network(
     )
     _require_success(created, "Criação da rede Docker internal")
     return True
+
+
+def _parse_network_inspection(output: str) -> tuple[str, object]:
+    try:
+        internal_flag, containers_json = output.strip().split("|", maxsplit=1)
+        containers = json.loads(containers_json)
+    except (ValueError, json.JSONDecodeError) as error:
+        raise AiMemoryProvisionError(
+            f"Inspeção da rede {AI_MEMORY_NETWORK} retornou dados inválidos."
+        ) from error
+    return internal_flag, containers
+
+
+def _require_exclusive_network_containers(containers: object) -> None:
+    if not isinstance(containers, dict):
+        raise AiMemoryProvisionError(
+            f"A rede {AI_MEMORY_NETWORK} não retornou a lista de containers."
+        )
+    names: list[str] = []
+    for container in containers.values():
+        name = container.get("Name") if isinstance(container, dict) else None
+        if not isinstance(name, str) or not name:
+            raise AiMemoryProvisionError(
+                f"A rede {AI_MEMORY_NETWORK} contém um container não identificável."
+            )
+        names.append(name)
+    other_containers = [name for name in names if name != AI_MEMORY_DATA_NAME]
+    if other_containers:
+        raise AiMemoryProvisionError(
+            f"A rede {AI_MEMORY_NETWORK} está compartilhada com outro container: "
+            f"{', '.join(other_containers)}. Remova-o da rede antes de reexecutar."
+        )
 
 
 def _inspect_container(
@@ -640,7 +763,7 @@ def _verify_container_running(
     context: InstallContext,
     runner: Runner,
     output: TextIO | None,
-) -> None:
+) -> dict[str, object]:
     container = _inspect_container(docker, context, runner, output)
     state = container.get("State", {}) if container is not None else {}
     if not isinstance(state, dict) or not state.get("Running"):
@@ -648,6 +771,89 @@ def _verify_container_running(
             "O container ai-memory encerrou durante a inicialização. "
             "Consulte `docker logs ai-memory` antes de reexecutar."
         )
+    return container
+
+
+def _resolve_mcp_url(container: dict[str, object]) -> str:
+    network_settings = container.get("NetworkSettings", {})
+    if not isinstance(network_settings, dict):
+        raise AiMemoryProvisionError("Inspeção Docker sem NetworkSettings válido.")
+
+    published_ports = network_settings.get("Ports", {})
+    bindings = (
+        published_ports.get(f"{AI_MEMORY_PORT}/tcp")
+        if isinstance(published_ports, dict)
+        else None
+    )
+    if bindings:
+        if not isinstance(bindings, list) or len(bindings) != 1:
+            raise AiMemoryProvisionError(
+                "A porta MCP tem uma publicação Docker inesperada; "
+                "mantenha somente o bind loopback."
+            )
+        binding = bindings[0]
+        if not isinstance(binding, dict) or (
+            binding.get("HostIp") != AI_MEMORY_HOST
+            or binding.get("HostPort") != str(AI_MEMORY_PORT)
+        ):
+            raise AiMemoryProvisionError(
+                "A porta MCP foi publicada fora do bind loopback; "
+                "o bloco MCP permanecerá desabilitado."
+            )
+        return AI_MEMORY_MCP_URL
+
+    return _resolve_internal_bridge_mcp_url(container)
+
+
+def _resolve_internal_bridge_mcp_url(container: dict[str, object]) -> str:
+    network_settings = container.get("NetworkSettings", {})
+    if not isinstance(network_settings, dict):
+        raise AiMemoryProvisionError("Inspeção Docker sem NetworkSettings válido.")
+    networks = network_settings.get("Networks", {})
+    internal_network = (
+        networks.get(AI_MEMORY_NETWORK) if isinstance(networks, dict) else None
+    )
+    address_text = (
+        internal_network.get("IPAddress")
+        if isinstance(internal_network, dict)
+        else None
+    )
+    try:
+        address = ipaddress.ip_address(address_text)
+    except (TypeError, ValueError) as error:
+        raise AiMemoryProvisionError(
+            "O container não tem endereço IPv4 válido na rede internal."
+        ) from error
+    if (
+        not isinstance(address, ipaddress.IPv4Address)
+        or not address.is_private
+        or address.is_loopback
+        or address.is_link_local
+    ):
+        raise AiMemoryProvisionError(
+            "O endereço do container não pertence a uma bridge privada."
+        )
+    return f"http://{address.compressed}:{AI_MEMORY_PORT}/mcp"
+
+
+def _endpoint_is_reachable(url: str) -> bool:
+    endpoint = urlsplit(url)
+    if endpoint.scheme != "http" or endpoint.hostname is None:
+        return False
+    try:
+        port = endpoint.port
+    except ValueError:
+        return False
+    if port != AI_MEMORY_PORT:
+        return False
+    try:
+        with socket.create_connection(
+            (endpoint.hostname, port),
+            timeout=_TCP_CONNECT_TIMEOUT_SECONDS,
+        ):
+            return True
+    except OSError:
+        return False
 
 
 def _ensure_wrappers(context: InstallContext, fetcher: Fetcher | None) -> None:
@@ -724,6 +930,7 @@ def _install_hooks(
     context: InstallContext,
     runner: Runner,
     output: TextIO | None,
+    mcp_url: str,
 ) -> None:
     if context.environment is EnvironmentKind.WINDOWS:
         powershell = shutil.which(
@@ -757,7 +964,15 @@ def _install_hooks(
             "--apply",
         ]
     _require_success(
-        _execute(command, context, runner, output),
+        _execute(
+            command,
+            context,
+            runner,
+            output,
+            additional_environment={
+                "AI_MEMORY_SERVER_URL": mcp_url.removesuffix("/mcp")
+            },
+        ),
         "Instalação dos hooks oficiais ai-memory",
     )
 
@@ -789,6 +1004,7 @@ def _backup_legacy_jsonc(home: Path) -> None:
 
 def _remove_ready_marker(paths: UserSpacePaths) -> None:
     ai_memory_ready_marker(paths).unlink(missing_ok=True)
+    _mcp_url_marker(paths).unlink(missing_ok=True)
 
 
 def _marker_created_network(paths: UserSpacePaths) -> bool:
@@ -835,20 +1051,44 @@ def _write_ready_marker(
     os.replace(temporary, marker)
 
 
+def _read_ready_mcp_url(paths: UserSpacePaths) -> str | None:
+    if not ai_memory_ready_marker(paths).is_file():
+        return None
+    try:
+        mcp_url = _mcp_url_marker(paths).read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    return mcp_url if isinstance(mcp_url, str) and mcp_url else None
+
+
+def _mcp_url_marker(paths: UserSpacePaths) -> Path:
+    return ai_memory_data_directory(paths) / AI_MEMORY_URL_MARKER
+
+
+def _write_mcp_url_marker(paths: UserSpacePaths, mcp_url: str) -> None:
+    marker = _mcp_url_marker(paths)
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    temporary = marker.with_suffix(".tmp")
+    temporary.write_text(f"{mcp_url}\n", encoding="utf-8")
+    os.replace(temporary, marker)
+
+
 def _deactivate_incomplete_setup(
     context: InstallContext,
     reason: str,
     *,
     output: TextIO | None = None,
     failed: bool = True,
+    previous_mcp_url: str | None = None,
 ) -> AiMemoryProvisionResult:
+    previous_mcp_url = previous_mcp_url or _read_ready_mcp_url(context.paths)
     cleanup_errors: list[str] = []
     cleanup_steps = (
         lambda: _remove_ready_marker(context.paths),
         lambda: _backup_legacy_jsonc(context.paths.home),
         lambda: _remove_generated_plugin(context.paths.home),
         lambda: _remove_opencode_server(context.paths.home),
-        lambda: _remove_copilot_server(context.paths.home),
+        lambda: _remove_copilot_server(context.paths.home, previous_mcp_url),
     )
     for cleanup in cleanup_steps:
         try:
@@ -863,7 +1103,13 @@ def _deactivate_incomplete_setup(
         "O bloco MCP foi desabilitado nos harnesses."
     )
     _write(output, message)
-    return AiMemoryProvisionResult(False, True, message, failed=failed)
+    return AiMemoryProvisionResult(
+        False,
+        True,
+        message,
+        failed=failed,
+        previous_mcp_url=previous_mcp_url,
+    )
 
 
 def _remove_generated_plugin(home: Path) -> None:
@@ -873,7 +1119,10 @@ def _remove_generated_plugin(home: Path) -> None:
         plugin.unlink()
 
 
-def _remove_copilot_server(home: Path) -> None:
+def _remove_copilot_server(
+    home: Path,
+    previous_mcp_url: str | None = None,
+) -> None:
     config_path = home / ".copilot" / "mcp-config.json"
     if not config_path.is_file():
         return
@@ -890,10 +1139,13 @@ def _remove_copilot_server(home: Path) -> None:
     servers = config.get("mcpServers")
     if not isinstance(servers, dict):
         return
-    if servers.get("ai-memory") != {
-        "type": "http",
-        "url": AI_MEMORY_MCP_URL,
-    }:
+    server = servers.get("ai-memory")
+    managed_servers = [
+        {"type": "http", "url": managed_url}
+        for managed_url in {AI_MEMORY_MCP_URL, previous_mcp_url}
+        if managed_url is not None
+    ]
+    if server not in managed_servers:
         return
     del servers["ai-memory"]
     backup_copy(config_path, _backup_directory(home))

@@ -133,6 +133,8 @@ def _apply_harnesses(
     output: TextIO,
     error: TextIO,
     ai_memory_enabled: bool | None = None,
+    ai_memory_url: str | None = None,
+    previous_ai_memory_url: str | None = None,
 ) -> int:
     """Configura cada harness selecionado, instalado e nao-pulado (ADR-0004)."""
 
@@ -156,6 +158,8 @@ def _apply_harnesses(
                     output=output,
                     error=error,
                     ai_memory_enabled=ai_memory_enabled,
+                    ai_memory_url=ai_memory_url,
+                    previous_ai_memory_url=previous_ai_memory_url,
                 ),
             )
         except (HarnessError, OSError) as problem:
@@ -332,6 +336,7 @@ def run(
                 output=output,
                 error=error,
                 ai_memory_enabled=False,
+                previous_ai_memory_url=rollback_result.previous_mcp_url,
             )
             return max(1 if rollback_result.failed else 0, adapter_status)
 
@@ -396,6 +401,8 @@ def run(
         output=output,
         error=error,
         ai_memory_enabled=memory_result.provisioned,
+        ai_memory_url=memory_result.mcp_url,
+        previous_ai_memory_url=memory_result.previous_mcp_url,
     )
     return max(status, adapter_status)
 

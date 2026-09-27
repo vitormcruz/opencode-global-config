@@ -19,7 +19,10 @@ from typing import Protocol, TextIO
 
 from opencode_config.harnesses import ApplyOptions, HarnessError
 from opencode_config.bootstrap.ai_memory import (
+    AI_MEMORY_MCP_URL,
     AiMemoryProvisionError,
+    ai_memory_mcp_url,
+    configure_ai_memory_mcp_url,
     filter_ai_memory_config,
     is_ai_memory_provisioned,
 )
@@ -84,6 +87,14 @@ class OpenCodeEnvStrategy(Protocol):
     ) -> None: ...
 
     def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
+    ) -> None: ...
+
+    def materialize_config_override(
         self,
         source: Path,
         destination: Path,
@@ -205,7 +216,7 @@ class OpenCodePosix:
     ) -> None:
         link_one(source, destination, backup_dir)
 
-    def materialize_filtered_config(
+    def materialize_config_override(
         self,
         source: Path,
         destination: Path,
@@ -219,6 +230,15 @@ class OpenCodePosix:
         backup_move(destination, backup_dir)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(content, encoding="utf-8")
+
+    def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
+    ) -> None:
+        self.materialize_config_override(source, destination, backup_dir, content)
 
     def env_status(
         self,
@@ -278,7 +298,7 @@ class OpenCodeWindows:
     ) -> None:
         sync_path(source, destination, backup_dir)
 
-    def materialize_filtered_config(
+    def materialize_config_override(
         self,
         source: Path,
         destination: Path,
@@ -294,6 +314,15 @@ class OpenCodeWindows:
             remove_path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(content, encoding="utf-8")
+
+    def materialize_filtered_config(
+        self,
+        source: Path,
+        destination: Path,
+        backup_dir: Path,
+        content: str,
+    ) -> None:
+        self.materialize_config_override(source, destination, backup_dir, content)
 
     def env_status(
         self,
@@ -405,6 +434,7 @@ class OpenCodeAdapter:
             if options.ai_memory_enabled is None
             else options.ai_memory_enabled
         )
+        ai_memory_url = options.ai_memory_url or ai_memory_mcp_url(home)
 
         _print_plan(
             resolved_repository,
@@ -413,6 +443,7 @@ class OpenCodeAdapter:
             backup_dir,
             strategy,
             ai_memory_enabled,
+            ai_memory_url,
             write,
         )
         _confirm(options.assume_yes, sys.stdin, output, error)
@@ -432,6 +463,22 @@ class OpenCodeAdapter:
                     destination_path,
                     backup_dir,
                     _configuration_without_ai_memory(source_path),
+                )
+            elif (
+                destination == "opencode.json"
+                and ai_memory_enabled
+                and ai_memory_url != AI_MEMORY_MCP_URL
+                and _configuration_declares_ai_memory(source_path)
+            ):
+                source_content = source_path.read_text(encoding="utf-8")
+                strategy.materialize_config_override(
+                    source_path,
+                    destination_path,
+                    backup_dir,
+                    _configuration_with_ai_memory_url(
+                        source_content,
+                        ai_memory_url,
+                    ),
                 )
             else:
                 strategy.materialize(
@@ -456,6 +503,7 @@ def _print_plan(
     backup_dir: Path,
     strategy: OpenCodeEnvStrategy,
     ai_memory_enabled: bool,
+    ai_memory_url: str,
     output: Callable[[str], None],
 ) -> None:
     output(f"Repo:   {repository}")
@@ -468,14 +516,19 @@ def _print_plan(
 
     for source, destination in strategy.destinations():
         source_path = repository / source
-        if (
+        has_managed_config = (
             destination == "opencode.json"
-            and not ai_memory_enabled
             and _configuration_declares_ai_memory(source_path)
-        ):
+        )
+        if has_managed_config and not ai_memory_enabled:
             output(
                 f"CP    {config_dir / destination} "
                 "(configuração filtrada: MCP ai-memory não provisionado)"
+            )
+        elif has_managed_config and ai_memory_url != AI_MEMORY_MCP_URL:
+            output(
+                f"CP    {config_dir / destination} "
+                "(configuração local: endpoint MCP da bridge internal)"
             )
         else:
             output(
@@ -502,6 +555,13 @@ def _print_plan(
 def _configuration_without_ai_memory(source: Path) -> str:
     try:
         return filter_ai_memory_config(source.read_text(encoding="utf-8"))
+    except AiMemoryProvisionError as error:
+        raise AdapterError(str(error)) from error
+
+
+def _configuration_with_ai_memory_url(content: str, mcp_url: str) -> str:
+    try:
+        return configure_ai_memory_mcp_url(content, mcp_url)
     except AiMemoryProvisionError as error:
         raise AdapterError(str(error)) from error
 

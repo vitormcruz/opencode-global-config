@@ -19,7 +19,7 @@ C4Component
         Component(ai_memory_provisioner, "bootstrap.ai_memory", "Python", "Provisiona MCP com marcador condicional.")
         Component(dependency_flow, "detect_dependencies + DEPENDENCY_REGISTRY", "Python", "Detecta dependências.")
         Component(harness_factory, "criar_adapters + HARNESSES", "Python", "Seleciona harnesses e injeta strategies.")
-        Component(opencode_adapter, "OpenCodeAdapter", "Python", "Aplica a configuração do OpenCode.")
+        Component(opencode_adapter, "OpenCodeAdapter", "Python", "Aplica a configuração e o endpoint MCP do OpenCode.")
         Component(opencode_strategy, "OpenCodePosix + OpenCodeWindows", "Python", "Materializa a configuração por SO.")
         Component(copilot_adapter, "CopilotAdapter", "Python", "Sincroniza perfis e referências de skills autorizadas.")
         Component(skills_sync, "cli.skills_sync", "Python", "Lê UPSTREAM.md e exibe diffs sem aplicar.")
@@ -32,7 +32,7 @@ C4Component
 
     Rel(bootstrap_run, dependency_flow, "Detecta dependências")
     Rel(bootstrap_run, ai_memory_provisioner, "Provisiona antes de aplicar adapters")
-    Rel(ai_memory_provisioner, docker, "Baixa imagem e cria container com bind loopback")
+    Rel(ai_memory_provisioner, docker, "Baixa imagem, solicita bind loopback e resolve fallback na bridge internal")
     Rel(bootstrap_run, harness_factory, "Seleciona e aplica")
     Rel(harness_factory, opencode_adapter, "Cria")
     Rel(harness_factory, copilot_adapter, "Cria")

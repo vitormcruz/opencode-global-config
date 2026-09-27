@@ -20,6 +20,7 @@ from typing import TextIO
 
 from opencode_config.bootstrap.ai_memory import (
     AI_MEMORY_MCP_URL,
+    ai_memory_mcp_url,
     is_ai_memory_provisioned,
 )
 from opencode_config.harnesses import ApplyOptions, HarnessError
@@ -820,6 +821,8 @@ def _sync_mcp_config(
     backup_dir: Path,
     *,
     ai_memory_enabled: bool,
+    ai_memory_url: str | None,
+    previous_ai_memory_url: str | None,
     output: Callable[[str], None],
 ) -> None:
     destination = home / ".copilot" / "mcp-config.json"
@@ -858,10 +861,15 @@ def _sync_mcp_config(
             raise AdapterError("harness-conf/opencode.json não declara mcp.ai-memory.")
         desired = {
             "type": "http",
-            "url": AI_MEMORY_MCP_URL,
+            "url": ai_memory_url or AI_MEMORY_MCP_URL,
         }
         current = servers.get("ai-memory")
-        if current is not None and current != desired:
+        managed_servers = [
+            {"type": "http", "url": managed_url}
+            for managed_url in {AI_MEMORY_MCP_URL, previous_ai_memory_url}
+            if managed_url is not None
+        ]
+        if current is not None and current not in [desired, *managed_servers]:
             raise AdapterError(
                 f"mcpServers.ai-memory já existe em {destination} com outro "
                 "destino. Preserve a entrada ou remova-a após backup explícito."
@@ -869,13 +877,16 @@ def _sync_mcp_config(
         if current == desired:
             return
         servers["ai-memory"] = desired
-    elif servers.get("ai-memory") == {
-        "type": "http",
-        "url": AI_MEMORY_MCP_URL,
-    }:
-        del servers["ai-memory"]
     else:
-        return
+        current = servers.get("ai-memory")
+        managed_servers = [
+            {"type": "http", "url": managed_url}
+            for managed_url in {AI_MEMORY_MCP_URL, previous_ai_memory_url}
+            if managed_url is not None
+        ]
+        if current not in managed_servers:
+            return
+        del servers["ai-memory"]
 
     if servers:
         existing["mcpServers"] = servers
@@ -957,6 +968,8 @@ def synchronize(
     output: TextIO | None = None,
     error: TextIO | None = None,
     ai_memory_enabled: bool | None = None,
+    ai_memory_url: str | None = None,
+    previous_ai_memory_url: str | None = None,
 ) -> None:
     """Sincroniza todos os artefatos sem reescrever scripts de skills."""
 
@@ -973,6 +986,8 @@ def synchronize(
         if ai_memory_enabled is None
         else ai_memory_enabled
     )
+    if include_ai_memory and ai_memory_url is None:
+        ai_memory_url = ai_memory_mcp_url(resolved_dest_root)
     skill_plan = _build_skill_plan(resolved_repository, copilot_dir)
     skills_dir = skill_plan.discovery_directory
     agents_dir = copilot_dir / "agents"
@@ -1008,6 +1023,8 @@ def synchronize(
         resolved_dest_root,
         backup_dir,
         ai_memory_enabled=include_ai_memory,
+        ai_memory_url=ai_memory_url,
+        previous_ai_memory_url=previous_ai_memory_url,
         output=say,
     )
     say("")
@@ -1040,4 +1057,6 @@ class CopilotAdapter:
             output=options.output,
             error=options.error,
             ai_memory_enabled=ai_memory_enabled,
+            ai_memory_url=options.ai_memory_url,
+            previous_ai_memory_url=options.previous_ai_memory_url,
         )

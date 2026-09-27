@@ -169,6 +169,43 @@ def test_opencode_with_provisioned_ai_memory_keeps_canonical_config_link(
     assert "ai-memory" in json.loads(applied_config.read_text(encoding="utf-8"))["mcp"]
 
 
+@pytest.mark.integration
+@requires_symlink
+def test_opencode_materializes_internal_bridge_url_without_editing_canonical_config(
+    tmp_path: Path,
+) -> None:
+    require_symlink_support(tmp_path)
+    repository = make_repository(tmp_path)
+    canonical_config = repository / "harness-conf" / "opencode.json"
+    canonical_url = "http://127.0.0.1:49374/mcp"
+    bridge_url = "http://172.30.0.2:49374/mcp"
+    canonical_config.write_text(
+        json.dumps({"mcp": {"ai-memory": {"type": "remote", "url": canonical_url}}}),
+        encoding="utf-8",
+    )
+    home = tmp_path / "home"
+    adapter = OpenCodeAdapter(OpenCodePosix())
+
+    adapter.apply(
+        repository,
+        ApplyOptions(
+            home=home,
+            assume_yes=True,
+            ai_memory_enabled=True,
+            ai_memory_url=bridge_url,
+        ),
+    )
+
+    applied_config = home / ".config" / "opencode" / "opencode.json"
+    assert not applied_config.is_symlink()
+    assert json.loads(applied_config.read_text(encoding="utf-8"))["mcp"][
+        "ai-memory"
+    ]["url"] == bridge_url
+    assert json.loads(canonical_config.read_text(encoding="utf-8"))["mcp"][
+        "ai-memory"
+    ]["url"] == canonical_url
+
+
 @pytest.mark.unit
 def test_canonical_opencode_ai_memory_mcp_has_no_credentials(
     repo_root: Path,
