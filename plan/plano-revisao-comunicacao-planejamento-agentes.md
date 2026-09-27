@@ -67,6 +67,14 @@ limpa antes da mudança; mesmo diálogo depois; comparar respostas, uso de
 ferramentas e ações; em marcos, mostrar trecho curto da conversa ao
 humano para validar clareza.
 
+**Ramo do insumo 2 — Casos de teste (aprovado).** O insumo de testes de
+comportamento (`plan/insumo-testes-comportamento-agentes.md`) ganha
+seção com os casos derivados das regras aprovadas: cada regra vira
+roteiro de conversa que o teste verifica. Regra de comunicação: teste
+com qualquer agente. Regra de planejamento: teste com `smart-planner` e
+`devflow`. Os casos reutilizam as técnicas já decididas no insumo
+(execução real, asserção de trajetória, juiz com rubrica, consenso).
+
 **Item 1 — Abreviações (aprovado).** Destino: `AGENTS.base.md`, seção
 Comunicação, subseção "Sem abreviações":
 
