@@ -22,13 +22,10 @@ que a medição prova que importa.
 **Quando não usar:** sem evidência de problema, não otimize. Otimização
 prematura custa mais que a performance que ganha.
 
-## Core Web Vitals (alvos)
+## Core Web Vitals
 
-| Métrica | Bom | Precisa melhorar | Ruim |
-|---|---|---|---|
-| **LCP** (Largest Contentful Paint) | ≤ 2.5s | ≤ 4.0s | > 4.0s |
-| **INP** (Interaction to Next Paint) | ≤ 200ms | ≤ 500ms | > 500ms |
-| **CLS** (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.25 | > 0.25 |
+Consulte os alvos de LCP, INP e CLS em
+`references/performance-checklist.md`, a fonte única dos thresholds.
 
 ## Workflow
 
@@ -157,7 +154,7 @@ Lighthouse Performance: ≥ 90
 CI: `npx bundlesize --config bundlesize.config.json` e
 `npx lhci autorun`.
 
-Checklists detalhados, comandos de otimização e referência de
+Alvos de Core Web Vitals, checklists detalhados, comandos de otimização e
 anti-padrões: `references/performance-checklist.md`.
 
 ## Anti-racionalizações
@@ -181,7 +178,8 @@ em produção; `React.memo`/`useMemo` em tudo.
 
 - [ ] Medição antes e depois com números específicos
 - [ ] Gargalo identificado e endereçado
-- [ ] Core Web Vitals dentro de "Bom"
+- [ ] Core Web Vitals dentro das faixas definidas em
+      `references/performance-checklist.md`
 - [ ] Bundle não cresceu de forma relevante
 - [ ] Sem N+1 no código novo de fetching
 - [ ] Performance budget passa no CI (se configurado)
