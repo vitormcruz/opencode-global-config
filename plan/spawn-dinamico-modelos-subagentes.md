@@ -364,6 +364,13 @@ aplicação)
     com mode spawnável.
   - Nota em `docs/workflow-agentes-dev.md`: analista e
     curador-produto spawnados fazem perguntas via devflow.
+  - **Decisão do humano (2026-09-26): guarda cobre wildcard.** O
+    teste `test_task_spawnable_modes` passa a PROIBIR `task: "*":
+    allow` (brecha: permissão ampla não auditada; delegação a
+    agente primary falha em runtime com "Unknown subagent type").
+    Consequência aplicada junto: smart-planner troca o wildcard
+    pela lista nomeada dos agentes spawnáveis atuais. Ciclo de
+    ajuste iniciado (executor + novo revisor).
   - **Decisão REVISADA pelo humano (2026-09-26, pós-revisão):**
     `analista` NÃO é spawnado; volta a `primary` (agente não mediado,
     conversa direto com o humano; o workflow-definicao-escopo dizia
