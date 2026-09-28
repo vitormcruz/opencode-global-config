@@ -1,6 +1,7 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: CONSTRUÇÃO — Fase 0 do plano (inventário e linha de base)
+Status: CONSTRUÇÃO: Fase 1 (spike em sandbox) concluída, C1 PASS. Próxima:
+Fase 3 (implementação no repo, TDD).
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -432,11 +433,13 @@ Task 3: instalar e revisar o pacote em ambiente de teste.
   projeto (`.opencode/dcp.jsonc`) ou config local, sem `--global`; spec
   com versão fixa.
 - Critérios de aceitação:
-  - [ ] revisão de segurança do conteúdo instalado feita segundo a regra
+  - [x] revisão de segurança do conteúdo instalado feita segundo a regra
     do repo (ler todo o conteúdo: prompt injection, comandos, URLs,
     exfiltração), com checklist do GANCHO-SEC;
-  - [ ] versão testada registrada.
-- Verificação: artefato de revisão arquivado para o sec.
+  - [x] versão testada registrada.
+- Verificação: artefato de revisão arquivado para o sec
+  (`/tmp/opencode/dcp-spike/sec-review.md`; resumo nos Resultados da
+  Fase 1).
 - Dependências: C0.
 - Arquivos: fora do repo.
 - Escopo: M.
@@ -453,12 +456,12 @@ Task 4: validar semântica da tool e dos comandos.
   registrar se o hook do ai-memory dispara (ou não) sobre a compressão
   do DCP, sem construir integração.
 - Critérios de aceitação:
-  - [ ] evidência de cada item da descrição registrada;
-  - [ ] cenário do SEC-06 executado com ordem observada e integridade
+  - [x] evidência de cada item da descrição registrada;
+  - [x] cenário do SEC-06 executado com ordem observada e integridade
     do contexto registradas (gate: C1); se o cenário não puder ser
     exercitado na sandbox, impeditivo registrado e verificação movida
     para o C4;
-  - [ ] observação passiva do hook do ai-memory registrada (disparou ou
+  - [x] observação passiva do hook do ai-memory registrada (disparou ou
     não sobre o `compress` do DCP), sem erro de sessão atribuável.
 - Verificação: relato na subseção de resultados.
 - Dependências: Task 3.
@@ -930,6 +933,189 @@ fluem; push e exclusões seguem exigindo humano).
 - [ ] Testes novos: 0 (nenhum código produto alterado na Fase 0)
 - [ ] Análise estática: n/a (sem código alterado)
 - [ ] Gate de refatoração: n/a (sem código; plano sem mudança)
+
+### Resultados da Fase 1 (eng-software, 2026-09-28)
+
+Execução das Tasks 3 e 4 (spike em sandbox) e avaliação do gate C1.
+Nenhum código do repo alterado; nenhuma suíte executada (ferramenta de
+terceiro, sem código produto). O `~/.config/opencode` real ficou SEM
+nenhuma escrita; a única presença em user-space é o cache de pacotes
+(`~/.cache/opencode/packages/@tarquinen/`), previsto no plano como local
+de resolução.
+
+Sandbox: `/tmp/opencode/dcp-spike/` (FORA do repo). Isolamento efetivo:
+`XDG_CONFIG_HOME=/tmp/opencode/dcp-spike/xdg` (recoloca para dentro do
+sandbox TANTO o config global do OpenCode QUANTO o layer global do DCP;
+achado de isolamento: o plugin cria
+`<$XDG_CONFIG_HOME>/opencode/dcp.jsonc` default quando ausente, pois o
+layer global do DCP usa XDG e não `OPENCODE_CONFIG_DIR`),
+`OPENCODE_CONFIG_DIR=/tmp/opencode/dcp-spike/xdg/opencode`; plugin local
+ai-memory copiado byte a byte para `plugins/` do sandbox (para os hooks
+existirem); data dir (`~/.local/share/opencode/`, auth e sqlite) intacto.
+Ativação por nível projeto (`.opencode/dcp.jsonc`), nunca `--global`.
+Headless: `opencode serve` (127.0.0.1:4987, `--print-logs --log-level
+DEBUG`) dirigido pela API: `POST /session`, `POST /session/{id}/message`
+(prompt síncrono com `model` explícito `zai-coding-plan/glm-5.3-flash`),
+`POST /session/{id}/command` (`/dcp`, `/dcp-compress`) e
+`POST /session/{id}/summarize` (compactação nativa).
+
+#### Task 3: instalação e revisão (concluída)
+
+- Instalação: spec fixa `@tarquinen/opencode-dcp@3.1.15` declarada no
+  config do sandbox (array `plugin`); `autoUpdate: false` no
+  `dcp.jsonc` do sandbox. Resolvida em
+  `~/.cache/opencode/packages/@tarquinen/opencode-dcp@3.1.15/` (wrapper
+  + `node_modules/@tarquinen/opencode-dcp`). Versão testada: 3.1.15.
+- Checklist dos 9 itens do sec: EXECUTADO; artefato arquivado em
+  `/tmp/opencode/dcp-spike/sec-review.md` (destino: leitura do sec).
+  Resumo: (1) integridade do cache = registry (package-lock; diff byte
+  a byte vs tarball npm); (2) SEM scripts pre/postinstall (só
+  dev/build/test; `prepublishOnly` roda no publish do autor); 6
+  dependências diretas legítimas, sem typosquat aparente; (3) ZERO
+  `child_process`/`exec`/`spawn`/`eval`/`new Function`/`require` no
+  bundle e nas fontes; ZERO `import(` dinâmico; escritas locais
+  confinadas (config home, data home, logs); `process.env` lê só
+  XDG_CONFIG_HOME, XDG_DATA_HOME, OPENCODE_CONFIG_DIR,
+  OPENCODE_SERVER_PASSWORD/USERNAME (auth local do host); (4) egress:
+  schema no raw.githubusercontent é STRING de editor, não fetchada; 1
+  fetch real condicionado (`registry.npmjs.org/{pkg}/latest` em
+  `update.ts`, envia só o nome do pacote), dispara no startup APENAS
+  com `autoUpdate != false`; runtime medido com `autoUpdate: false` e 4
+  compressões: ZERO conexões externas do processo; nenhuma telemetria;
+  (5) sessão circula in-memory; persistência local só de estado
+  operacional (IDs, tokens, tópicos, âncoras); sem conteúdo de mensagem
+  gravado; (6) nudges são strings estáticas locais, com override só de
+  arquivos locais; (7) sem caminho de self-update com spec fixa
+  (`isAutoUpdatableSpec("3.1.15") = false`); com `autoUpdate: false` nem
+  a verificação roda; (8) proveniência registrada no artefato e aqui;
+  (9) bump = nova importação (checklist reexecutável; template no
+  artefato).
+- RESSALVA (não bloqueante sob a decisão vigente; condição
+  OBRIGATÓRIA): o fetch de versão do item 4 existe no código e rodaria
+  no startup com `autoUpdate` true, violando a barra SEC-02. A P7 já
+  decidiu "sem autoUpdate". A Task 7 DEVE materializar
+  `"autoUpdate": false` no `harness-conf/dcp.jsonc` canônico;
+  recomenda-se teste na Task 6 que fixe essa propriedade. Com
+  `autoUpdate` true, o item 4 do checklist vira bloqueante.
+
+#### Task 4: semântica em sessão descartável (concluída)
+
+As quatro evidências do C1, o cenário SEC-06 e a observação passiva,
+todos na sandbox (sessões `ses_f15d216f8ffeBwLW4BIpuj8fXd` e
+`ses_f159fc698ffe1goOKojQi6TSGv`):
+
+- Tool `compress` registrada: o modelo a lista entre as tools; parts
+  `compress` no sqlite; permissão avaliada no log do server
+  (`evaluated permission=compress pattern=* action.permission=co...`,
+  gate `allow` da P5, sem pausa de confirmação).
+- Comandos operam headless via `POST /session/{id}/command`:
+  `/dcp stats` entregou o painel como mensagem (barra de contexto,
+  "-38K removed, +438 summary"); `/dcp-compress <foco>` executou
+  compressão manual completa. RESSALVA: após o comando roubado pelo
+  plugin (hook de chat.message), o endpoint `command` do HOST devolve
+  `UnknownError` no server headless (fluxo de conclusão de comando do
+  OpenCode sem TUI; o conteúdo foi entregue; não é erro do DCP).
+- Nudge acima do threshold: instrumento = thresholds REDUZIDOS
+  20k/10k no `dcp.jsonc` do sandbox (documentado; o piloto usa os
+  defaults 100k/50k, P6/P10). Evidência: 1 `contextLimitAnchors` no
+  state file do DCP e o agente chamou `compress` 2x espontaneamente
+  após cruzar 20k. Quedas medidas na série step-finish
+  (input+cache.read+cache.write): 34.450 para 22.798 (-33,8%) e
+  35.423 para 10.313 (-70,9%).
+- `manualMode.enabled = true` (2ª sessão, server reiniciado): contexto
+  subiu 9.811 para 63.930 com ZERO chamadas de `compress`, zero nudges
+  e sem state file (caminho automático suprimido); `/dcp-compress`
+  manual funcionou (1 bloco, 55.483 tokens comprimidos). Auto desliga,
+  manual segue operando.
+- SEC-06 (mesma sessão): ordem observada = 3 `compress` do DCP (2 por
+  nudge + 1 por comando) e depois o summarize NATIVO via API
+  (23:27:10-23:27:34 UTC; mensagem assistant com `summary = true`
+  criada) e, por fim, `compress` do DCP pós-nativo: executou SEM erro;
+  os ranges `mNNNN` foram reenumerados no espaço pós-nativo (bloco 1
+  reancorado em m0001..m0002, 444 tokens). Integridade: sqlite com 21
+  mensagens, prompt original presente, state file coerente. Sem
+  corrupção; o modo de falha 2 (referências órfãs) NÃO se
+  materializou.
+- Observação passiva do hook ai-memory (P12; ponto de partida do
+  SEC-12): os hooks disparam SOMENTE no evento nativo. DB do ai-memory
+  (`~/.local/share/ai-memory/db/memory.sqlite`): 2 registros
+  `pre-compact` (23:27:10 e 23:27:34, exatamente a janela do summarize
+  nativo) e NENHUM nos 4 `compress` do DCP (22:42:06, 22:42:32,
+  23:26:42, 23:29:11). Confere com a análise estática: o bundle do DCP
+  não emite eventos de compactação nativa. Sem duplo sumário no
+  caminho DCP; sem erro de sessão atribuível.
+- Limitações registradas: (a) `session.time_compacting` permaneceu NULL
+  mesmo após o evento nativo headless; o instrumento do qa (SEC-05
+  medido, QA-ACC) deve considerar o detector alternativo "mensagem
+  assistant com `summary = true`" quando a sessão não for TUI
+  (registrar no C4); (b) o painel TUI do `/dcp` (modal) não é
+  exercitável headless; o que opera headless é o comando `/dcp` com
+  subcomandos de texto.
+
+Comandos salvos (replicáveis; mesma ordem do spike):
+
+```bash
+# sandbox (FORA do repo); server headless isolado por XDG:
+cd /tmp/opencode/dcp-spike && XDG_CONFIG_HOME=$PWD/xdg \
+  OPENCODE_CONFIG_DIR=$PWD/xdg/opencode \
+  opencode serve --port 4987 --hostname 127.0.0.1 \
+  --print-logs --log-level DEBUG
+# sessao e prompt (model obrigatorio no body):
+curl -s -X POST http://127.0.0.1:4987/session -d '{}' \
+  -H 'content-type: application/json'
+curl -s -X POST http://127.0.0.1:4987/session/$SID/message \
+  -H 'content-type: application/json' \
+  -d '{"model":{"providerID":"zai-coding-plan",
+      "modelID":"glm-5.3-flash"},
+      "parts":[{"type":"text","text":"..."}]}'
+# comando /dcp-compress e compactacao NATIVA:
+curl -s -X POST http://127.0.0.1:4987/session/$SID/command \
+  -H 'content-type: application/json' \
+  -d '{"command":"dcp-compress","arguments":"foco"}'
+curl -s -X POST http://127.0.0.1:4987/session/$SID/summarize \
+  -H 'content-type: application/json' \
+  -d '{"providerID":"zai-coding-plan",
+      "modelID":"glm-5.3-flash"}'
+```
+
+#### Gate C1 (veredito)
+
+Avaliado contra a condição pass/fall registrada na subseção
+`### Testes (qa)`:
+
+- Quatro evidências da Task 4: tool registrada (**atendida**); `/dcp` e
+  `/dcp-compress` operam (**atendida**, com a ressalva do endpoint
+  `command` do host headless, não atribuível ao DCP); nudge acima do
+  threshold (**atendida**: 1 âncora + 2 compress espontâneos); sessão
+  sem erro atribuível ao DCP (**atendida**).
+- Cenário SEC-06 com ordem observada e integridade registradas:
+  **atendido** na sandbox (sem fallback ao C4).
+- Checklist SEC de 9 itens: executado, ZERO bloqueantes sob a decisão
+  P7 (spec fixa, sem autoUpdate); 1 ressalva com condição obrigatória
+  para a Task 7 (`"autoUpdate": false` no `dcp.jsonc` canônico).
+- (fall): nenhuma evidência ausente; nenhum bloqueio SEC.
+
+**Veredito C1: PASS.** Fase 3 (implementação no repo) liberada nos
+termos da autonomia da Pergunta 13, com a condição da ressalva do
+item 4 do checklist a materializar na Task 7.
+
+### Evidências (eng-software): CONSTRUÇÃO (Fase 1)
+
+- [x] Task 3: instalação em sandbox com spec fixa e `autoUpdate: false`;
+      checklist SEC de 9 itens executado e arquivado
+      (`/tmp/opencode/dcp-spike/sec-review.md`); versão 3.1.15
+- [x] Task 4: 4 evidências + SEC-06 (ordem e integridade) + observação
+      passiva do hook (dispara só no nativo) + manualMode (auto off,
+      manual on)
+- [x] Gate C1: PASS (condição da ressalva: `autoUpdate` false na Task 7)
+- [x] Isolamento: `~/.config/opencode` intocado; repo intocado (exceto
+      este plano); instalação fora do repo; nenhuma exclusão
+- [ ] Testes novos: 0 (spike de ferramenta de terceiro; sem código
+      produto alterado)
+- [ ] Análise estática: varredura do pacote (bundle + fontes) feita;
+      lint do repo n/a (sem código alterado)
+- [ ] Gate de refatoração: n/a (sem código; plano sem mudança de
+      desenho)
 
 ### Segurança (sec)
 
