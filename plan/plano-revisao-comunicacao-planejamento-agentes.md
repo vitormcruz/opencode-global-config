@@ -492,6 +492,20 @@ agente, modelo e roteiro. Instrução ao insumo (protocolo de conferência):
 Verificação: cada regra aplicada tem arquivo de evidência com as duas
 transcrições e o resultado por critério.
 
+**Achado 6 (rodada 2) — Matriz de casos só com regra de comportamento
+(aprovado).** O revisor apontou ambiguidade entre regra comportamental e
+instrução de execução na tarefa de casos. Instrução à Task 3 (e à seção
+de casos do insumo de testes):
+
+- A seção de casos traz uma matriz explícita: para cada linha, a regra,
+  o roteiro do caso e o agente. Só regra de comportamento entra na
+  matriz. Instrução de execução (ordem de aplicação, compatibilização,
+  conferência antes/depois, evidência, sincronização de testes, commit
+  do plano) não vira caso.
+
+Verificação: a matriz cobre as regras de comportamento, uma a uma;
+nenhuma instrução de execução aparece como caso.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
