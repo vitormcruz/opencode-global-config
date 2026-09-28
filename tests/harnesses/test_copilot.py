@@ -719,11 +719,17 @@ def test_bootstrap_invokes_python_copilot_adapter(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_copilot_adapter_skips_opencode_only_agents(
+def test_copilot_adapter_does_not_materialize_removed_agents(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
     tmp_path: Path,
 ) -> None:
+    """Agentes excluídos do repo não viram `.agent.md` no Copilot.
+
+    `worker` e `revisor` foram excluídos do repo (2026-09-28); a guarda
+    impede ressurreição acidental no destino.
+    """
+
     status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
 
     assert status == 0
@@ -755,16 +761,16 @@ def test_copilot_adapter_does_not_skip_regular_agents(
 
 
 @pytest.mark.unit
-def test_copilot_adapter_excludes_opencode_only_agents_from_delegation_prose(
+def test_copilot_adapter_excludes_removed_agents_from_delegation_prose(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
     tmp_path: Path,
 ) -> None:
-    """A prosa de delegação não cita agentes que não existem no Copilot.
+    """A prosa de delegação não cita agentes excluídos do repo.
 
-    smart-planner usa ``"*": deny`` com lista nomeada de
-    delegação, que inclui worker e revisor (OpenCode-only);
-    a prosa do adapter deve excluí-los.
+    smart-planner usa ``"*": deny`` com lista nomeada de delegação;
+    `worker` e `revisor` saíram da lista com a exclusão dos agentes
+    (2026-09-28) e não podem reaparecer na prosa do adapter.
     """
 
     status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)

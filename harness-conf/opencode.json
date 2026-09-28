@@ -16,11 +16,6 @@
             "enabled": true
         }
     },
-    "agent": {
-        "worker": {
-            "reasoningEffort": "max"
-        }
-    },
     "permission": {
         "skill": {
             "aws-*": "deny",

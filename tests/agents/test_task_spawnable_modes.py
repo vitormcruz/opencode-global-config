@@ -157,11 +157,11 @@ def test_task_allow_targets_are_spawnable(repo_root: Path) -> None:
     offenders, total = _find_unspawnable_targets(agents_dir)
 
     # Guarda contra regressão à trivialidade do parser (estado atual:
-    # 19 alvos entre devflow, analista, curador-produto e
-    # smart-planner).
-    assert total >= 9, (
+    # 17 alvos entre devflow, analista, curador-produto e
+    # smart-planner; worker e revisor foram excluídos em 2026-09-28).
+    assert total >= 12, (
         f"Parser extraiu apenas {total} alvos de task: allow "
-        f"(esperado >= 9); possível regressão à trivialidade"
+        f"(esperado >= 12); possível regressão à trivialidade"
     )
 
     assert offenders == [], (

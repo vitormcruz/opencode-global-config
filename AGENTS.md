@@ -76,13 +76,6 @@ As variáveis de ambiente do pacote, incluindo os overrides de diagnóstico
 `OPENCODE_SKIP_*`, estão na seção "Variáveis de ambiente" do `README.md`.
 Não use esses overrides em uma validação completa.
 
-## Worker
-
-- O worker roda o modelo menor definido no frontmatter de
-  `harness-conf/agents/worker.md` (`model:`), que contorna a limitação da
-  tool `task` (sem modelo no spawn). Para trocar o modelo: edite o
-  frontmatter e reinicie o OpenCode.
-
 ## Upstream de Skills Externas
 
 - Skills baseadas em repositórios externos seguem o padrão de upstream:

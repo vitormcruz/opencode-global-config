@@ -45,12 +45,10 @@ _COPILOT_BUILTIN_AGENT_TYPES = frozenset(
         "task",
     }
 )
-_OPENCODE_ONLY_AGENTS = frozenset(
-    {
-        "worker",
-        "revisor",
-    }
-)
+# Agentes OpenCode-only, excluídos do sync Copilot. Hoje não há nenhum:
+# `worker` e `revisor` foram excluídos do repo (2026-09-28). O mecanismo
+# permanece para um futuro agente que exista só no OpenCode.
+_OPENCODE_ONLY_AGENTS = frozenset()
 # Nomes de agentes raiz que o adapter já materializou como `.agent.md`
 # em alguma execução (histórico de `harness-conf/agents/*.md`).
 #
@@ -75,10 +73,8 @@ _HISTORICALLY_SYNCED_AGENTS = frozenset(
         "qa",
         "rev",
         "revisor-historia",
-        "revisor",
         "sec",
         "smart-planner",
-        "worker",
     }
 )
 _MODEL_ID = re.compile(

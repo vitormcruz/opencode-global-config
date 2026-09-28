@@ -340,13 +340,6 @@ def test_agents_has_no_smartplanner_section(repo_root: Path) -> None:
     assert "SmartPlanner" not in agents
 
 
-def test_agents_documents_worker_model_mechanism(repo_root: Path) -> None:
-    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
-
-    assert "harness-conf/agents/worker.md" in agents
-    assert "reinicie o OpenCode" in agents
-
-
 def test_agents_mentions_required_recovery(repo_root: Path) -> None:
     count = _count_matching_lines(repo_root / "AGENTS.md", "Recovery obrigatório")
     assert count >= 1

@@ -451,7 +451,7 @@ def test_opencode_windows_materializes_copies(
     fake_winreg: FakeWinreg,
 ) -> None:
     repository = make_repository(tmp_path)
-    (repository / "harness-conf" / "agents" / "worker.md").write_text(
+    (repository / "harness-conf" / "agents" / "agente-exemplo.md").write_text(
         "agente", encoding="utf-8"
     )
     home = tmp_path / "home"
@@ -465,7 +465,7 @@ def test_opencode_windows_materializes_copies(
         destination = config_dir / name
         assert destination.is_dir()
         assert not destination.is_symlink()
-    assert (config_dir / "agents" / "worker.md").read_text(
+    assert (config_dir / "agents" / "agente-exemplo.md").read_text(
         encoding="utf-8"
     ) == "agente"
     assert (config_dir / "opencode.json").is_file()

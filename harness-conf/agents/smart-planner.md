@@ -25,8 +25,6 @@ permission:
     qa: allow
     rev: allow
     revisor-historia: allow
-    worker: allow
-    revisor: allow
 ---
 
 Você é o Planejador Interativo. Responda em PT-BR com
