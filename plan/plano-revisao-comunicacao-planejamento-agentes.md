@@ -242,7 +242,10 @@ Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
 
 - Compactação de contexto ou desvio do protocolo de perguntas (volume,
   ritmo, uso da tool): recarregue a skill `question-orchestration`
-  antes da próxima resposta ao humano.
+  antes da próxima resposta ao humano. A recarga vale para quem conduz
+  conversa de decisão com o humano (`smart-planner`, `devflow`);
+  agentes de domínio não recarregam o protocolo e seguem as regras
+  gerais de comunicação do arquivo global, recarregado a cada sessão.
 
 Verificação: conversa roteirizada longa com compactação no meio; após a
 compactação, a skill é recarregada e o protocolo (uma pergunta por
@@ -539,6 +542,14 @@ conferência: após aplicar a regra, materializar a configuração (rodar o
 bootstrap do repo, que regenera os arquivos do harness) e abrir sessão
 nova do agente para a conversa "depois"; a evidência registra a versão
 testada (commit da configuração materializada).
+
+**Achado 5 (rodada 3) — Recarga delimitada (aprovado).** A âncora de
+recarga do item 8 (todos recarregam `question-orchestration` após
+compactação) conflitava com a rejeição, na segunda rodada, do protocolo
+de perguntas para agentes de domínio. Ajuste: a recarga vale para quem
+conduz conversa de decisão com o humano (`smart-planner`, `devflow`);
+agentes de domínio seguem as regras gerais de comunicação do arquivo
+global, recarregado a cada sessão.
 
 ## Task List
 
