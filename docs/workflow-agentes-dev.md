@@ -213,6 +213,9 @@ prosseguir. Regras já registradas nunca são reperguntadas.
     Modificações no plano só na Revisão do Plano ou gate de
     refatoração. Histórico de mudanças registrado.
 20. **Contexto via arquivo** — não via histórico da conversa.
+20.1. **Rastreabilidade do executor**: cada subseção de registro de trabalho
+     informa `Executor: <agente> / <modelo>`. O campo registra o agente e o
+     modelo usados.
 
 ### Schema do arquivo de planejamento
 

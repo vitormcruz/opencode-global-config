@@ -970,3 +970,17 @@ def test_extract_skill_permission_entries_parses_quoted_wildcard() -> None:
         ("aws-*", "allow"),
         ("debugging-and-error-recovery", "allow"),
     ], f"Parser extraiu entradas erradas: {entries}"
+
+
+@pytest.mark.unit
+def test_work_records_require_executor_and_model(repo_root: Path) -> None:
+    workflow = (repo_root / "docs" / "workflow-agentes-dev.md").read_text(
+        encoding="utf-8"
+    )
+    planning_section = workflow.split(
+        "### Arquivo de planejamento", 1
+    )[1].split("### Schema do arquivo de planejamento", 1)[0]
+    normalized_section = " ".join(planning_section.split())
+
+    assert "cada subseção de registro de trabalho informa" in normalized_section
+    assert "`Executor: <agente> / <modelo>`" in normalized_section
