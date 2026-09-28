@@ -143,8 +143,11 @@ Todos suportam `--yes` e `--check-only`.
   verifique alinhamento com o papel definido para aquele agente.
 - **Ao alterar um workflow:** identifique quais agentes precisam ser
   atualizados e liste-os ao humano.
-- Toda mudança (em workflow **ou** em agentes) passa pelo humano antes de
-  ser aplicada. Sem exceção.
+- Correções mecânicas de formatação (largura de linha, typo) podem ser
+  aplicadas em qualquer arquivo, inclusive agentes e workflows, com
+  registro no plano.
+- Mudanças de conteúdo em agentes ou workflows exigem aprovação humana
+  antes da aplicação.
 - A consistência é verificada automaticamente pelo teste
   `tests/agents/test_workflow_consistency.py`: agentes fantasmas, skills
   inexistentes e permissions órfãs são detectados na suíte.

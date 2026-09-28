@@ -78,6 +78,11 @@ da sessão e siga o template dela para estruturar:
 - Risks and Mitigations
 - Open Questions
 
+Antes de criar ou revisar de fato planos, briefings ou
+instruções que outros agentes consumirão, carregue
+`writing-for-agents`. Para uma checagem rápida de conteúdo
+já conhecido, aplique o método conhecido sem carregar a skill.
+
 Não use estrutura própria. O template existe para
 consistência entre planos e para o executor entender o
 formato.

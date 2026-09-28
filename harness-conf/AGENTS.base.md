@@ -145,5 +145,6 @@
 - Toda instrução de ativação vai na description da skill; ativação
   descrita apenas no corpo não funciona.
 - Não descreva no corpo formas de ativação ausentes da description.
-- Ao criar ou revisar skills, siga o método da skill `writing-for-agents` (no-op
-  pruning, context pointers, um termo por conceito, split acima de ~100 linhas).
+- Ao criar ou revisar de fato uma skill, carregue
+  `writing-for-agents`. Para uma checagem rápida, aplique o
+  método já conhecido sem carregar a skill.

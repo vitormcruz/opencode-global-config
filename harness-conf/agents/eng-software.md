@@ -97,6 +97,11 @@ unidades lógicas seguindo `git-workflow-and-versioning`.
   foi criado e onde vive.
 - **Princípios de documentação**: ao escrever ou revisar
   documentação, consulte `agents/references/principios-documentacao.md`.
+  Antes de criar ou revisar de fato skills, instruções de
+  agentes ou outros documentos consumidos por agentes,
+  carregue `writing-for-agents`. Para uma checagem rápida de
+  conteúdo já conhecido, aplique o método conhecido sem
+  carregar a skill.
 - **Committer único**: você é o único committer do
   workflow. Recebe relatórios dos especialistas, revisa
   o diff produzido por eles e commita unidades lógicas
