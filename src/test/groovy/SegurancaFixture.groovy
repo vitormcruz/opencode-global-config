@@ -567,7 +567,16 @@ class SegurancaFixture {
         def servidorExistente = valorEsperado('SEC-10', 'Servidor preexistente')
         def urlExistente = valorEsperado('SEC-10', 'URL preexistente')
         def urlAiMemory = valorEsperado('SEC-10', 'URL MCP ai-memory')
-        def arquivoBackup = valorEsperado('SEC-10', 'Arquivo de backup')
+        def padrãoBackup = valorEsperado('SEC-10', 'Padrão do nome do backup')
+        def formatoTimestamp = valorEsperado('SEC-10', 'Formato do timestamp')
+        def localBackup = valorEsperado('SEC-10', 'Local do backup')
+        def prefixoSaida = valorEsperado('SEC-10', 'Prefixo da saída')
+        def formatoPython = [
+            'YYYYMMDD-HHMMSS': '%Y%m%d-%H%M%S',
+        ][formatoTimestamp]
+        def nomeBaseBackup = padrãoBackup.contains('<timestamp>')
+            ? padrãoBackup.substring(0, padrãoBackup.indexOf('<timestamp>'))
+            : ''
         def testeMerge = trechoDoTeste(
             'tests/harnesses/test_copilot.py',
             'test_copilot_adapter_merges_ai_memory_without_losing_existing_servers',
@@ -577,9 +586,21 @@ class SegurancaFixture {
             'def _sync_mcp_config(',
             '\ndef _print_plan(',
         )
+        def códigoBackup = trechoDeCódigo(
+            SYNC_LIB,
+            'def backup_copy_with_timestamp(',
+            '\ndef backup_move(',
+        )
+        def códigoCopilot = lerArquivo('src/opencode_config/harnesses/copilot.py')
         def caminhoConfig = expressãoDeCaminhoPython(arquivoConfig, 'home')
-        def posiçãoBackup = códigoMerge.indexOf('backup_copy(destination, backup_dir)')
-        def posiçãoEscrita = códigoMerge.indexOf('_write_utf8(', posiçãoBackup)
+        def posiçãoBackup = códigoMerge.indexOf(
+            'backup_path = backup_copy_with_timestamp(destination, backup_timestamp)',
+        )
+        def posiçãoSaída = códigoMerge.indexOf(
+            "output(f\"${prefixoSaida} {backup_path}\")",
+            posiçãoBackup,
+        )
+        def posiçãoEscrita = códigoMerge.indexOf('_write_utf8(', posiçãoSaída)
         resultado(
             tabelaCompleta(
                 'SEC-10',
@@ -587,11 +608,35 @@ class SegurancaFixture {
                 'Servidor preexistente',
                 'URL preexistente',
                 'URL MCP ai-memory',
-                'Arquivo de backup',
-            ) && !caminhoConfig.isEmpty() &&
+                'Padrão do nome do backup',
+                'Formato do timestamp',
+                'Local do backup',
+                'Prefixo da saída',
+            ) && !caminhoConfig.isEmpty() && formatoPython != null &&
+                padrãoBackup == 'mcp-config.json.<timestamp>[.<n>].bak' &&
+                localBackup == 'mesmo diretório da configuração' &&
+                nomeBaseBackup == 'mcp-config.json.' &&
+                códigoCopilot.contains(
+                    "datetime.now().strftime(\"${formatoPython}\")",
+                ) &&
                 códigoMerge.contains("destination = ${caminhoConfig}") &&
-                posiçãoBackup >= 0 && posiçãoEscrita > posiçãoBackup &&
-                códigoMerge.contains(arquivoBackup) && contém(
+                posiçãoBackup >= 0 && posiçãoSaída > posiçãoBackup &&
+                posiçãoEscrita > posiçãoSaída &&
+                códigoBackup.contains('path.with_name(') &&
+                códigoBackup.contains('f"{path.name}.{timestamp}.bak"') &&
+                códigoBackup.contains(
+                    'f"{path.name}.{timestamp}.{index}.bak"',
+                ) &&
+                códigoBackup.contains('shutil.copy2(path, candidate)') &&
+                testeMerge.contains("glob(\"${nomeBaseBackup}*.bak\")") &&
+                testeMerge.contains('backup_path.parent == config_path.parent') &&
+                testeMerge.contains(
+                    'backup_path.read_text(encoding="utf-8") == original_config_content',
+                ) &&
+                testeMerge.contains(
+                    "assert f\"${prefixoSaida} {backup_path}\" in output",
+                ) &&
+                contém(
                     'tests/harnesses/test_copilot.py',
                     'test_copilot_adapter_merges_ai_memory_without_losing_existing_servers',
                 ) && testeMerge.contains(servidorExistente) &&

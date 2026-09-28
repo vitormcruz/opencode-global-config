@@ -142,7 +142,10 @@ materializa uma cópia local com o endpoint ativo, sem editar a fonte canônica.
 Enquanto o ai-memory estiver desabilitado, o adapter materializa uma cópia
 filtrada que não declara esse MCP. No Copilot, o adapter mescla
 `mcpServers.ai-memory` e preserva as demais entradas. O adapter cria backup
-antes de alterar `~/.copilot/mcp-config.json`.
+antes de alterar `~/.copilot/mcp-config.json`. O backup fica no mesmo diretório
+e usa o padrão `mcp-config.json.<timestamp>[.<n>].bak`, com timestamp no formato
+`YYYYMMDD-HHMMSS`. Se o nome já existir, o adapter acrescenta um sufixo numérico.
+O bootstrap imprime o caminho antes de gravar a configuração.
 
 O bootstrap move `~/.config/opencode/opencode.jsonc` para
 `~/.config/opencode-backup/<timestamp>/opencode.jsonc`, sem editar o conteúdo.

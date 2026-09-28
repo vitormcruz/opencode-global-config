@@ -7,6 +7,7 @@ import pytest
 from platform_requirements import requires_symlink
 from opencode_config.lib.sync import (
     backup_copy,
+    backup_copy_with_timestamp,
     backup_move,
     copy_path,
     link_one,
@@ -50,6 +51,44 @@ def test_backup_copy_keeps_original(tmp_path: Path) -> None:
 
     assert target.read_text(encoding="utf-8") == "original"
     assert (backup_dir / "alvo.txt").read_text(encoding="utf-8") == "original"
+
+
+@pytest.mark.unit
+def test_backup_copy_with_timestamp_creates_adjacent_verifiable_copy(
+    tmp_path: Path,
+) -> None:
+    config_path = tmp_path / ".copilot" / "mcp-config.json"
+    config_path.parent.mkdir()
+    original_config_content = '{"mcpServers":{"existing-server":{}}}\n'
+    config_path.write_text(original_config_content, encoding="utf-8")
+
+    backup_path = backup_copy_with_timestamp(config_path, "20260928-153000")
+
+    assert backup_path == config_path.with_name(
+        "mcp-config.json.20260928-153000.bak"
+    )
+    assert backup_path.parent == config_path.parent
+    assert backup_path.read_text(encoding="utf-8") == original_config_content
+    assert config_path.read_text(encoding="utf-8") == original_config_content
+
+
+@pytest.mark.unit
+def test_backup_copy_with_timestamp_does_not_overwrite_existing_copy(
+    tmp_path: Path,
+) -> None:
+    config_path = tmp_path / "mcp-config.json"
+    config_path.write_text("primeira versão", encoding="utf-8")
+
+    first_backup = backup_copy_with_timestamp(config_path, "20260928-153000")
+    config_path.write_text("segunda versão", encoding="utf-8")
+    second_backup = backup_copy_with_timestamp(config_path, "20260928-153000")
+
+    assert first_backup is not None
+    assert second_backup == config_path.with_name(
+        "mcp-config.json.20260928-153000.1.bak"
+    )
+    assert first_backup.read_text(encoding="utf-8") == "primeira versão"
+    assert second_backup.read_text(encoding="utf-8") == "segunda versão"
 
 
 @pytest.mark.unit

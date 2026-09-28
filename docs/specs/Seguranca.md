@@ -155,8 +155,9 @@ uma instalação em user-space sem elevação.
 
 ### SEC-10: Merge Copilot (origem: [requisitos de E10][origem-sec])
 
-O adapter preserva servidores existentes e cria backup antes de gravar a
-declaração ai-memory.
+O adapter preserva servidores existentes. Antes de gravar a declaração
+ai-memory, o adapter cria um backup com timestamp no mesmo diretório da
+configuração. O adapter imprime o caminho do backup antes da gravação.
 
 | Entrada | Resultado esperado |
 |---|---|
@@ -164,7 +165,10 @@ declaração ai-memory.
 | Servidor preexistente | `existing-server` |
 | URL preexistente | `http://127.0.0.1:49375/mcp` |
 | URL MCP ai-memory | `http://127.0.0.1:49374/mcp` |
-| Arquivo de backup | `mcp-config.json` |
+| Padrão do nome do backup | `mcp-config.json.<timestamp>[.<n>].bak` |
+| Formato do timestamp | `YYYYMMDD-HHMMSS` |
+| Local do backup | `mesmo diretório da configuração` |
+| Prefixo da saída | `Backup da configuração Copilot:` |
 | Veredito | [pass](- "?=vereditoSec10") |
 
 [Executar SEC-10](- "verificarSec10()").

@@ -26,7 +26,12 @@ from opencode_config.lib.ai_memory import (
 from opencode_config.harnesses import ApplyOptions, HarnessError
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.paths import HARNESS_CONF_DIR
-from opencode_config.lib.sync import backup_copy, copy_path, remove_path
+from opencode_config.lib.sync import (
+    backup_copy,
+    backup_copy_with_timestamp,
+    copy_path,
+    remove_path,
+)
 
 _SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _TOOL_PERMISSIONS = ("edit", "bash", "webfetch", "websearch")
@@ -818,7 +823,7 @@ def _sync_agents_base(
 def _sync_mcp_config(
     repository: Path,
     home: Path,
-    backup_dir: Path,
+    backup_timestamp: str,
     *,
     ai_memory_enabled: bool,
     ai_memory_url: str | None,
@@ -892,7 +897,9 @@ def _sync_mcp_config(
         existing["mcpServers"] = servers
     else:
         existing.pop("mcpServers", None)
-    backup_copy(destination, backup_dir)
+    backup_path = backup_copy_with_timestamp(destination, backup_timestamp)
+    if backup_path is not None:
+        output(f"Backup da configuração Copilot: {backup_path}")
     _write_utf8(
         destination,
         json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
@@ -1021,7 +1028,7 @@ def synchronize(
     _sync_mcp_config(
         resolved_repository,
         resolved_dest_root,
-        backup_dir,
+        backup_name,
         ai_memory_enabled=include_ai_memory,
         ai_memory_url=ai_memory_url,
         previous_ai_memory_url=previous_ai_memory_url,

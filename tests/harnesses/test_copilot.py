@@ -907,9 +907,15 @@ def test_copilot_adapter_merges_ai_memory_without_losing_existing_servers(
             }
         },
     }
-    config_path.write_text(json.dumps(preexisting_config), encoding="utf-8")
+    original_config_content = json.dumps(preexisting_config)
+    config_path.write_text(original_config_content, encoding="utf-8")
 
-    status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
+    status, output, error = run_adapter(
+        monkeypatch,
+        repo_root,
+        tmp_path,
+        arguments=["--yes"],
+    )
 
     assert status == 0
     assert error == ""
@@ -923,9 +929,16 @@ def test_copilot_adapter_merges_ai_memory_without_losing_existing_servers(
         "type": "http",
         "url": "http://127.0.0.1:49374/mcp",
     }
-    backups = list((tmp_path / ".config" / "copilot-backup").rglob("mcp-config.json"))
-    assert backups
-    assert json.loads(backups[0].read_text(encoding="utf-8")) == preexisting_config
+    backups = list(config_path.parent.glob("mcp-config.json.*.bak"))
+    assert len(backups) == 1
+    backup_path = backups[0]
+    assert backup_path.parent == config_path.parent
+    assert re.fullmatch(
+        r"mcp-config\.json\.\d{8}-\d{6}(?:\.\d+)?\.bak",
+        backup_path.name,
+    )
+    assert backup_path.read_text(encoding="utf-8") == original_config_content
+    assert f"Backup da configuração Copilot: {backup_path}" in output
 
 
 @pytest.mark.unit
@@ -1021,7 +1034,7 @@ def test_copilot_adapter_removes_ai_memory_entry_when_provisioning_is_incomplete
     assert merged["mcpServers"] == {
         "user-server": existing_config["mcpServers"]["user-server"]
     }
-    backups = list((tmp_path / ".config" / "copilot-backup").rglob("mcp-config.json"))
+    backups = list(config_path.parent.glob("mcp-config.json.*.bak"))
     assert backups
 
 

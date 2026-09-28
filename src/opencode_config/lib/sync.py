@@ -51,6 +51,21 @@ def backup_copy(path: Path, backup_dir: Path) -> None:
     copy_path(path, _next_available_path(path, backup_dir))
 
 
+def backup_copy_with_timestamp(path: Path, timestamp: str) -> Path | None:
+    """Copia um arquivo ao lado do original com timestamp no nome."""
+    if not path.is_file():
+        return None
+
+    candidate = path.with_name(f"{path.name}.{timestamp}.bak")
+    index = 1
+    while candidate.exists() or candidate.is_symlink():
+        candidate = path.with_name(f"{path.name}.{timestamp}.{index}.bak")
+        index += 1
+
+    shutil.copy2(path, candidate)
+    return candidate
+
+
 def backup_move(path: Path, backup_dir: Path) -> None:
     """Move um caminho existente para backup_dir; original deixa de existir."""
     if not path.exists() and not path.is_symlink():
