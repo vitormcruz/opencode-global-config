@@ -391,6 +391,23 @@ Verificação: leitura dos trechos ajustados: ciclo de vida explícito e
 sem contradição com a regra do plano abstraído. Caso futuro da suíte de
 comunicação.
 
+**Achado 7 — Conferência manual na execução (aprovado).** O revisor
+apontou dependência de infraestrutura futura (simulação multi-turn) para
+a conferência antes/depois. Decisão: a conferência na execução é manual.
+Ajuste no protocolo de conferência (ramo do insumo 1):
+
+- A conferência na execução é manual: conversas reais com o agente, em
+  sessão limpa, antes e depois da mudança, com o mesmo roteiro. A
+  evidência é a transcrição das duas conversas conferida contra os
+  critérios objetivos da regra. A suíte automatizada de conversas é
+  futura, registrada no insumo de testes
+  (`plan/insumo-testes-comportamento-agentes.md`, seção de simulação
+  multi-turn), e substituirá a conferência manual quando construída.
+
+Verificação: o protocolo de conferência no insumo distingue conferência
+manual (execução) da suíte automatizada (futura, no insumo de testes).
+Caso futuro da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
