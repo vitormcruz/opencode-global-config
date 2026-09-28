@@ -428,6 +428,25 @@ Verificação: ao aplicar cada regra, o executor confere o arquivo de
 destino e ajusta trechos conflitantes; nenhum trecho contradiz a regra
 aplicada. Caso futuro da suíte de comunicação.
 
+### Ajustes da segunda rodada de revisão (discutidos com o humano)
+
+**Achado 1 (rodada 2) — Textos de verificação divergentes (aprovado).**
+As correções aprovadas na primeira rodada estavam em seção separada
+enquanto os textos originais das regras mantinham verificações antigas,
+mais duras. Decisão: aplicar as correções direto nos textos de
+verificação dos itens 1, 3, 4 e 9, existindo uma única versão; a seção
+de ajustes fica como registro do que foi decidido.
+
+**Achado 2 (rodada 2) — Alcance do protocolo de perguntas (rejeitado).**
+O revisor sugeriu regra global mandando todo agente carregar a skill de
+perguntas ao conversar com o humano. Decisão do humano: rejeitado.
+Agentes de domínio tipicamente não falam diretamente com o humano;
+passam pelo `devflow`, que media as perguntas. Chamados diretamente,
+fazem trabalho técnico e não precisam do protocolo de perguntas. As
+regras gerais de comunicação continuam valendo para todos via
+`AGENTS.base.md`; o protocolo de perguntas fica para quem conduz
+conversa de decisão (`smart-planner` e `devflow`).
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
