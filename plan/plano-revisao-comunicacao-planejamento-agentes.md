@@ -264,7 +264,7 @@ dúvida e a resolução; ação sem relação com a dúvida não é violação.
 Caso futuro da suíte de comunicação.
 
 **Item 10 — Cobertura total (aprovado).** Destinos: `smart-planner` e
-revisores (`rev`, `revisor`).
+revisor (`rev`).
 
 `smart-planner`:
 
@@ -273,7 +273,7 @@ revisores (`rev`, `revisor`).
   escopo; omissão ou postergação de item exige autorização explícita do
   humano.
 
-Revisores (`rev`, `revisor`):
+Revisor (`rev`):
 
 - Verifique cobertura total: o resultado cobre todo o escopo aprovado.
   Item faltante é achado, ainda que julgado simples ou postergável; a
@@ -374,7 +374,7 @@ protocolo de perguntas são validados com um agente só (a regra mora em
 arquivo global; um caso garante); regra específica de agente é validada
 com o agente afetado. Ajuste na Task 3: casos de comunicação e do
 protocolo de perguntas com um agente; casos de regras específicas com
-cada agente afetado (`smart-planner`, `devflow`, `rev`, `revisor`).
+cada agente afetado (`smart-planner`, `devflow`, `rev`).
 
 Verificação: a seção de casos define, para cada regra, o agente do caso:
 regra global, um agente; regra específica, o agente afetado. Caso futuro
@@ -506,6 +506,26 @@ de casos do insumo de testes):
 Verificação: a matriz cobre as regras de comportamento, uma a uma;
 nenhuma instrução de execução aparece como caso.
 
+### Ajustes da terceira rodada de revisão (discutidos com o humano)
+
+**Achado 1 (rodada 3) — Consolidação com conjunto completo (aprovado).**
+As tarefas de consolidar e revisar o insumo cobrem as três seções de
+decisões do plano (regras originais, ajustes da primeira rodada e
+ajustes da segunda rodada), incluindo sincronização de testes, commit do
+plano e evidência da conferência. Aplicado nas Tasks 1 e 2.
+
+**Achado 2 (rodada 3) — Tarefa de casos segue a matriz (aprovado).**
+A tarefa de casos passou a exigir a matriz (regra, roteiro, agente) só
+com regra de comportamento; instrução de execução não vira caso.
+Aplicado na Task 3.
+
+**Achado 3 (rodada 3) — Agente revisor inexistente no repo (aprovado).**
+O plano citava o agente "revisor" como destino, mas não existe arquivo
+dele em `harness-conf/agents/` (é agente exclusivo do OpenCode, definido
+fora do repo, sem arquivo editável por este projeto). Decisão: o destino
+da regra de cobertura total é o `rev`; as listas de agentes afetados
+perdem o "revisor".
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
@@ -576,7 +596,7 @@ nenhuma instrução de execução aparece como caso.
     commit do plano) não vira caso. Regra global de
     comunicação e protocolo de perguntas: caso com um agente. Regra
     específica de agente: caso com o agente afetado (`smart-planner`,
-    `devflow`, `rev`, `revisor`). Reutiliza as técnicas já decididas no
+    `devflow`, `rev`). Reutiliza as técnicas já decididas no
     insumo (execução real, asserção de trajetória, juiz com rubrica,
     consenso).
   - **Acceptance criteria:**
@@ -584,7 +604,7 @@ nenhuma instrução de execução aparece como caso.
           roteiro, agente); nenhuma instrução de execução vira caso.
     - [ ] Cobertura por regra: regra global de comunicação e protocolo
           de perguntas, caso com um agente; regra específica, caso com o
-          agente afetado (`smart-planner`, `devflow`, `rev`, `revisor`).
+          agente afetado (`smart-planner`, `devflow`, `rev`).
     - [ ] Separação comunicação/planejamento respeitada.
     - [ ] Seções existentes não renumeradas; decisões existentes não
           alteradas.
