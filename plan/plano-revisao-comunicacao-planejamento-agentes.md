@@ -70,10 +70,11 @@ humano para validar clareza.
 **Ramo do insumo 2 — Casos de teste (aprovado).** O insumo de testes de
 comportamento (`plan/insumo-testes-comportamento-agentes.md`) ganha
 seção com os casos derivados das regras aprovadas: cada regra vira
-roteiro de conversa que o teste verifica. Regra de comunicação: teste
-com qualquer agente. Regra de planejamento: teste com `smart-planner` e
-`devflow`. Os casos reutilizam as técnicas já decididas no insumo
-(execução real, asserção de trajetória, juiz com rubrica, consenso).
+roteiro de conversa que o teste verifica. Regra global de comunicação e
+protocolo de perguntas: caso com um agente. Regra específica de agente:
+caso com o agente afetado. Os casos reutilizam as técnicas já decididas
+no insumo (execução real, asserção de trajetória, juiz com rubrica,
+consenso).
 
 **Ramo do insumo 3 — Ordem de aplicação (aprovado).** Regras de
 comunicação primeiro (valem para todos os agentes e baseiam as conversas
@@ -482,9 +483,10 @@ aplicada. Caso futuro da suíte de comunicação.
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
     multi-turn), sem renumerar seções existentes. Cada regra aprovada
-    vira roteiro de conversa que o teste verifica. Regra de comunicação:
-    caso com qualquer agente. Regra de planejamento: caso com
-    `smart-planner` e `devflow`. Reutiliza as técnicas já decididas no
+    vira roteiro de conversa que o teste verifica. Regra global de
+    comunicação e protocolo de perguntas: caso com um agente. Regra
+    específica de agente: caso com o agente afetado (`smart-planner`,
+    `devflow`, `rev`, `revisor`). Reutiliza as técnicas já decididas no
     insumo (execução real, asserção de trajetória, juiz com rubrica,
     consenso).
   - **Acceptance criteria:**
