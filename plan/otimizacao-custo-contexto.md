@@ -5164,9 +5164,9 @@ versão 2.4.1.
 
 ## Backlog pós-ciclo 2 (consolidado em 2026-09-27)
 
-Dívidas aprovadas pelo humano ("tudo vira backlog"). Os itens 1-4 foram
-resolvidos na finalização. Os itens 5-8 seguem registrados, sem novo ciclo
-agendado.
+Dívidas aprovadas pelo humano ("tudo vira backlog"). Os itens 1-7 foram
+resolvidos na finalização. O item 8 permanece para execução do humano após o
+reinício do OpenCode.
 
 1. **sec-6 — RESOLVIDO:** o adapter cria backup adjacente com timestamp, imprime o
    caminho antes da gravação e preserva o conteúdo anterior.
@@ -5176,15 +5176,14 @@ agendado.
    E12, sem mudança de semântica.
 4. **Revisão, achado 6 — RESOLVIDO:** helpers ai-memory compartilhados movidos para
    `src/opencode_config/lib/`; os adapters não importam mais de bootstrap.
-5. Revisão, achado 7 (processo): subseções do plano devem registrar AGENTE
-   executor e modelo, não só o modelo.
-6. Flaky: 16 errors numa execução da suíte (não reproduzidos depois);
-   hipótese de corrida na coleta registrada no bloco do qa.
-7. Processo de spec: briefings de tasks com spec executável devem EXIGIR
-   que a fixture leia os valores das tabelas da spec (causa raiz da
-   auditoria da parte 2 do pacote final).
-8. Pós-restart (humano): reiniciar o OpenCode para validar RM-10 (MCP
-   ai-memory vivo na sessão) e carregar adapters atualizados.
+5. **Revisão, achado 7 (processo), RESOLVIDO:** subseções de registro do
+   plano identificam agente executor e modelo.
+6. **Flaky, 16 errors, RESOLVIDO:** diagnóstico encerrado; a causa exata não
+   foi confirmada. A análise e as reproduções estão no bloco de finalização.
+7. **Processo de spec, RESOLVIDO:** specs tabulares exigem fixtures que leem
+   os valores das tabelas, sem codificá-los à parte.
+8. **Pós-restart, PENDENTE DO HUMANO:** reiniciar o OpenCode para validar RM-10
+   (MCP ai-memory vivo na sessão) e carregar adapters atualizados.
 
 ## Ciclo 2 — FINALIZAÇÃO
 
@@ -5494,3 +5493,72 @@ em 2026-09-27. Mantive o campo `Status` sem alteração.
 #### Commit documental anterior
 
 - `aff0c73 docs(spec): alinha Seguranca.md ao protocolo spec-executavel`.
+
+### Backlog processo — 2026-09-27
+
+Executor: `eng-software` / `opencode-go/gpt-6-luna`.
+
+- **Item 6, flaky, diagnóstico concluído:** os agregadores #1 e #3 registraram
+  `887 passed`, `31 deselected` e `16 errors` em
+  `tests/scripts/bootstrap_repo/test_repo_state.py`, após 260,02 s e 236,37 s.
+  Os agregadores #2 e #4 passaram; três execuções isoladas do módulo passaram.
+  O registro do QA não preserva node IDs, traceback ou mensagem específica.
+- **Análise estática:** os 16 testes do módulo dependem da fixture
+  `bootstrapped_repo_state`, de escopo `module`. A fixture executa o adapter em
+  subprocesso antes dos testes; uma falha no setup gera erro para cada consumidor.
+  `repo_root` tem escopo `session`; o HOME temporário usa PID e UUID, fica sob a
+  raiz do repo e é removido no teardown. O primeiro teste executa o adapter de
+  novo, depois do setup. O pytest não carregou xdist; o plugin observado foi
+  `cov`. Não encontrei estado compartilhado externo ou vazamento de ambiente que
+  explique os dois agregadores com erro.
+- **Conclusão:** o gatilho exato não foi confirmado. Causa plausível: falha
+  transitória do subprocesso inicial do adapter no ambiente do agregador,
+  amplificada aos 16 testes pela fixture de módulo. A hipótese de corrida na
+  coleta não foi comprovada. O finding não contém dados para atribuir o gatilho.
+- **Reprodução, limite 2, em 2026-09-28:** ambas as execuções completas de
+  `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all` passaram com
+  926 testes, 31 deselected e 957 itens coletados. A primeira levou 214,17 s; a
+  segunda, 210,08 s. As execuções ocorreram antes das duas novas guardas abaixo.
+- **Detecção precoce:** se o finding reaparecer, execute imediatamente o módulo
+  com `-vv --tb=long` e preserve a saída integral. A fixture já inclui stdout e
+  stderr quando o subprocesso retorna código diferente de zero; o agregador não
+  preservou esse conteúdo.
+
+  ```bash
+  JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all \
+    tests/scripts/bootstrap_repo/test_repo_state.py -vv --tb=long
+  ```
+
+- **Item 5, resolvido:** `docs/workflow-agentes-dev.md` exige o campo
+  `Executor: <agente> / <modelo>` em cada subseção de registro de trabalho. A
+  guarda `test_work_records_require_executor_and_model` falhou antes da regra e
+  passou depois. `tests/agents/` terminou com 184 testes aprovados. Agentes
+  abrangidos: `devflow`, `eng-software`, `front`, `curador-produto`, `dba`, `sec`,
+  `rev` e `qa`. Não alterei os prompts individuais; o contrato permanece no
+  workflow.
+- **Item 7, resolvido:** `spec-executavel` não exigia explicitamente que a fixture
+  lesse valores de tabelas da spec. O item 8 do checklist agora exige essa ligação
+  e proíbe codificar os valores à parte. A guarda
+  `test_tabular_spec_fixture_reads_values_from_spec` falhou antes da regra e
+  passou depois. `tests/skills/` terminou com 84 testes aprovados.
+- **Análise estática:** `ruff check` nos dois testes novos passou. Consultei
+  `docs/README.md` e `harness-conf/agents/references/principios-documentacao.md`;
+  não há artefato adicional de spec ou ADR para estas regras.
+- **Commits:** `8a6816f` (`docs(workflow): exige executor e modelo nos registros`)
+  e `4636eb9` (`docs(skills): vincula fixtures às tabelas da spec`).
+- **Higiene final:** `git diff --check` passou; as linhas novas e alteradas
+  respeitam 120 colunas.
+
+### Evidências de Testes — FINALIZAÇÃO
+
+- [x] Testes novos: 2 guardas. Cada guarda falhou antes da alteração documental
+      correspondente e passou depois.
+- [x] Suíte completa: 2 execuções antes das guardas novas; cada uma coletou 957
+      itens, com 926 passagens e 31 deselected. Nenhuma falha reproduzida.
+- [x] Regressões após as alterações: `tests/agents/`, 184 passaram;
+      `tests/skills/`, 84 passaram.
+- [x] Análise estática: `ruff check` nos testes alterados passou.
+- [x] Higiene: `git diff --check` passou; as linhas novas e alteradas respeitam
+      120 colunas.
+- [x] Gate de refatoração: não se aplica; não houve alteração de código de
+      produção, escopo ou decisão arquitetural.
