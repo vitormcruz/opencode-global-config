@@ -447,6 +447,19 @@ regras gerais de comunicação continuam valendo para todos via
 `AGENTS.base.md`; o protocolo de perguntas fica para quem conduz
 conversa de decisão (`smart-planner` e `devflow`).
 
+**Achado 3 (rodada 2) — Sincronização de agente, workflow e testes
+(aprovado).** O revisor apontou que a remoção dos trechos duplicados no
+`devflow` quebra referências no workflow (`docs/workflow-agentes-dev.md`)
+e nos testes (`tests/agents/`). Instrução ao insumo (e à Task 1):
+
+- Mudança em agente ou workflow sincroniza os três lugares: a definição
+  do agente, o workflow em docs/ e os testes em tests/agents/. Ao final,
+  a suíte completa do ambiente corrente roda sem deixar teste de fora
+  (WSL/Linux: `.venv/bin/pytest -m all`; Windows:
+  `.\.venv\Scripts\pytest.exe -m all`).
+
+Verificação: suíte completa do ambiente corrente passa após as mudanças.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
