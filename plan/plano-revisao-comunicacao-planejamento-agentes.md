@@ -569,15 +569,19 @@ nenhuma instrução de execução aparece como caso.
   - **Description:** acrescentar a
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
-    multi-turn), sem renumerar seções existentes. Cada regra aprovada
-    vira roteiro de conversa que o teste verifica. Regra global de
+    multi-turn), sem renumerar seções existentes. Cada regra de
+    comportamento vira uma linha da matriz: a regra, o roteiro do caso e
+    o agente. Instrução de execução (ordem de aplicação,
+    compatibilização, conferência, evidência, sincronização de testes,
+    commit do plano) não vira caso. Regra global de
     comunicação e protocolo de perguntas: caso com um agente. Regra
     específica de agente: caso com o agente afetado (`smart-planner`,
     `devflow`, `rev`, `revisor`). Reutiliza as técnicas já decididas no
     insumo (execução real, asserção de trajetória, juiz com rubrica,
     consenso).
   - **Acceptance criteria:**
-    - [ ] Uma regra aprovada, um caso correspondente.
+    - [ ] Uma regra de comportamento, uma linha na matriz (regra,
+          roteiro, agente); nenhuma instrução de execução vira caso.
     - [ ] Cobertura por regra: regra global de comunicação e protocolo
           de perguntas, caso com um agente; regra específica, caso com o
           agente afetado (`smart-planner`, `devflow`, `rev`, `revisor`).
