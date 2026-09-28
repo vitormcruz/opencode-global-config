@@ -1,12 +1,18 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: CONSTRUÇÃO — 2º ciclo (fase DEVFLOW). Plano aprovado pelo humano
-(2026-09-24, condicionado à revisão delta; veredito APROVADO em
-2026-09-26) com 3 melhorias do delta incorporadas. Executar waves em
-ordem (E8 primeiro; E1→E2→E3→E4; E9/E13; E6→E14→E10; E7; E11/E12 no
-fechamento; bloco E-fix + curadoria E11(b) pelo curador-produto).
-Executor: worker glm-5.3-flash; revisor glm-5.3 (D12). Gate de
-refatoração: volta a REVISÃO DO PLANO. Sem UI e sem modelagem de dados.
+Status: FINALIZAÇÃO — 2º ciclo (fase DEVFLOW). Testes CONCLUÍDOS
+(2026-09-27): agregador `testes-produto` pass; suíte completa 916
+passed / 0 failed / 31 deselected; roteiros RM e sec fechados (RM-1
+BLOQUEADO por proteção do volume, RM-10 POST-RESTART, sec-6 FAIL
+melhoria); evidência VALIDADA pelo curador-produto (CA-T4 com baseline
+inicial 85%). Correções de integração Docker commitadas (d646b41,
+22fac4d, 2b41ef7, b5705b1). Working tree: plano pendente de commit
+final. Próximos passos: revisão final do curador (7.1); commit final
+do plano pelo eng-software; rodada única de decisões humanas (premissa
+7, SEC→spec, Q-Efix, sec-6, RM-1, dívidas ruff/6/7, pós-restart RM-10 +
+MCP após reiniciar OpenCode); depois exclusão de artefatos e push,
+ambos SÓ com confirmação humana. Executor: opencode/gpt-6-luna high;
+revisor: zai-coding-plan/glm-5.3. Sem UI e sem modelagem de dados.
 
 ## Overview
 
@@ -3399,6 +3405,11 @@ construção; E11(c) aguarda aprovação da premissa 7.
   configuração canônica exige exatamente `mcp.ai-memory` em
   `127.0.0.1`. A suíte final terminou com 897 passados, 0 falhos e 31
   deselecionados.
+- **Aprovação SEC→spec (achado 2 da revisão da construção) — PENDENTE DE
+  DECISÃO HUMANA:** o critério de aceite de E10 exige aprovação do humano
+  nas asserções executáveis de `docs/specs/Seguranca.md` (SEC-01..SEC-11,
+  SEC-21). Aprovar, rejeitar ou pedir ajuste? Registrar a decisão no
+  fechamento.
 - **Premissa 7 do workflow, seleção de modelo por fase:** aprovar, rejeitar ou
   pedir ajuste à proposta registrada em E13 antes de atualizar
   `docs/workflow-agentes-dev.md`? A leitura cruzada da E11 encontrou a redação
@@ -3420,6 +3431,17 @@ construção; E11(c) aguarda aprovação da premissa 7.
   um agente ou workflow que também requer aprovação humana?
 - **Q-Efix-13:** especificar em `AGENTS.base.md` se a regra exige carregar `writing-for-agents` ou
   aplicar seu método conhecido, e quais agentes podem receber essa instrução?
+- **RM sec-2, confiança nos artefatos upstream — RESPONDIDA (2026-09-27,
+  decisão humana: "usar a versão nova"):** aprovar a atualização dos pins
+  para o upstream atual (wrapper `v2.4.1`, SHA-256 `49c965a...`; imagem
+  `latest`, manifest `a626d11...`, linux/amd64 `5ce8700b...`), CONDICIONADA
+  à revalidação de segurança do sec ANTES de fixar (análise estática do
+  binário novo e das mudanças; nada executa antes do veredicto). Se a
+  revalidação achar algo suspeito, parar e voltar ao humano.
+- **RM sec-5, escrita concorrente no volume piloto (PENDENTE):** após o rollback, a pasta ainda existe
+  com mode `0700`, mas a contagem de arquivos e o hash agregado mudaram enquanto `opencode`, `python3`,
+  `git`, `docker` e shells usavam a pasta. A origem dessas escritas não foi confirmada. Identifique o
+  processo escritor antes de repetir testes que mutem o volume.
 
 ### Ajustes pós-revisão — 2026-09-27
 
@@ -3617,7 +3639,1589 @@ tasks dependem de E7.
 - Não rodei a suíte completa. Não alterei código, `Status` ou
   `plan/insumo-devflow-spawn-dinamico.md`. Não criei commit.
 
+## Ciclo 2 — REVISÃO DA CONSTRUÇÃO
+
+Revisão integrativa (rev, 2026-09-27, instância limpa, modelo
+zai-coding-plan/glm-5.3). Objeto: o LOTE commitado do ciclo, delimitado por
+`git diff 098a5b6..33f96eb` (base = commit anterior a `ca6ade1`; fechamento
+`33f96eb`), excluídos os planos paralelos citados no escopo. Insumos: plano
+aprovado (decisões P1-P5, S1/S2, Q1/Q2; tasks E1-E14 + E-fix; exigências
+SEC-01..SEC-21; testes T1-T15, lacunas L1-L5, CA-T1..CA-T8) e os blocos
+`## Ciclo 2 — CONSTRUÇÃO`. Verificações executadas: leitura do plano por
+trechos; diffs agregados e por commit (`git show`/`git diff --stat`); leitura
+de código (`src/opencode_config/bootstrap/ai_memory.py`,
+`cli/skills_sync.py`, `harnesses/copilot.py`, `harnesses/opencode.py`) e dos
+testes novos; coleta da suíte (`pytest --collect-only -m all`), sem execução
+da suíte completa (evidência E12 aceita como insumo).
+
+### Achados
+
+Resumo `achado · ação · severidade`; evidências por achado abaixo.
+
+| # | Achado | Ação | Severidade |
+|---|--------|------|------------|
+| 1 | T15/L4 ausente: sem guarda das seções aprovadas | `eng-software` criar T15 antes da fase Testes | alto |
+| 2 | Aprovação SEC→spec fora das pendências de fechamento | `devflow` incluir nas perguntas do fechamento | médio |
+| 3 | Guarda da config de integração perdida em E12 | `eng-software` restaurar asserção | baixo |
+| 4 | 2 commits do intervalo do lote sem registro no plano | `devflow` registrar como fluxo paralelo | baixo |
+| 5 | Negativo do campo freeze por subcomando incompleto | `eng-software` completar com T15 | baixo |
+| 6 | Import cruzado harnesses→bootstrap (fronteira de módulo) | Movimento para `lib/` em ciclo futuro | baixo |
+| 7 | Ambiguidade de executor em E11(b) (modelo vs agente) | Registrar agente executor em ciclos futuros | baixo |
+
+**1 (alto) · Lacuna T15/L4 · ação: delegar a `eng-software` · evidência:**
+o plano de testes exige âncoras das seções aprovadas (frases-chave de
+"Compactação de contexto" e "Chamadas de ferramentas" no
+`harness-conf/AGENTS.base.md`, ausência da regra de precedência da premissa
+7, regeneração do AGENTS.md global com as seções) em
+`tests/agents/test_workflow_consistency.py` +
+`tests/harnesses/test_opencode.py`. Grep em `tests/` não encontra guarda
+para "rede de segurança"/"fronteira foi perdida"/"dependência real"; nenhum
+commit do lote toca `test_workflow_consistency.py`. O próprio E11 registra
+que o teste de consistência "não decide essa divergência". Sem a guarda, um
+rollback silencioso do texto aprovado na P5 não falha suíte; CA-T6 exige
+T1-T15 presentes.
+
+**2 (médio) · Pendência de aprovação SEC→spec · ação: `devflow` · evidência:**
+critério de aceite de E10 exige "aprovação do humano na revisão" das
+asserções de `docs/specs/Seguranca.md`; o bloco E10 registra a pendência,
+mas nem o `Status` nem `## Perguntas` a incluem (citam premissa 7 e Q-Efix
+apenas). Risco de o critério passar batido no fechamento.
+
+**3 (baixo) · Redução de guarda não declarada em E12 · ação:
+`eng-software` · evidência:** o teste atualizado
+`test_opencode_canonical_declares_ai_memory_mcp`
+(`tests/test_mcp_wrapper_cleanup.py:8`) cobre só
+`harness-conf/opencode.json`; o antigo
+`test_opencode_configs_have_no_mcp_block` verificava também
+`tests/integration/config/opencode.test.json`. A garantia "config de
+integração sem MCP" ficou sem guarda; o arquivo segue sem MCP (sem dano
+imediato). A frase do E12 "não reduzi as garantias cobertas" é imprecisa
+nesse ponto.
+
+**4 (baixo) · Commits do intervalo sem registro · ação: `devflow` ·
+evidência:** `0698b1b` e `8852809` criam/editam
+`plan/plano-revisao-comunicacao-planejamento-agentes.md`, não constam da
+lista de commits do E12 nem de qualquer seção do ciclo. Dilui a fronteira
+auditável do lote (trabalho paralelo do humano/devflow sobre comunicação).
+
+**5 (baixo) · Negativo do campo freeze incompleto (T1) · ação:
+`eng-software` · evidência:** o mapa do qa pedia "teste negativo por
+subcomando (sync, update, list e detecção): caso skill não-congelada
+continua sem o campo após cada comando". Existe para list
+(`test_list_marks_frozen_skills_without_changing_metadata`) e para
+regeneração; falta caso análogo para sync/update/detect.
+
+**6 (baixo) · Fronteira de módulo · ação: backlog · evidência:**
+`src/opencode_config/harnesses/opencode.py` importa
+`opencode_config.bootstrap.ai_memory` (`filter_ai_memory_config`,
+`is_ai_memory_provisioned`). A regra do repo coloca utilitários
+compartilhados em `src/opencode_config/lib/`; o adapter (harnesses) passa a
+depender do módulo de provisionamento (bootstrap). Sem ciclo de import;
+funcionalmente correto.
+
+**7 (baixo) · Ambiguidade de executor em E11(b) · ação: registro futuro ·
+evidência:** a delegação aprovada atribuía a edição do `docs/README.md` ao
+`curador-produto`, e o `Status` afirma "E11(b) pelo curador-produto", mas o
+registro da subseção usa o mesmo campo "Executor: opencode/gpt-6-luna" das
+tasks do eng-software (o campo registra o modelo, não o agente). A trilha
+não distingue qual agente executou.
+
+### Especificações de teste alteradas na construção (conferência de
+### equivalência)
+
+Mudanças de spec autorizadas e conferidas contra as garantias anteriores:
+
+- `test_repo_state_opencode_json_symlink_points_to_repo` →
+  `test_repo_state_opencode_json_matches_a_valid_provisioning_state`
+  (`tests/scripts/bootstrap_repo/test_repo_state.py:153`): preserva a garantia
+  do symlink canônico no caminho provisionado e acrescenta a garantia
+  tudo-ou-nada (cópia filtrada igual ao canônico sem `mcp.ai-memory`).
+  Autorizada pelo devflow (E12). Equivalente e mais forte. OK.
+- `test_opencode_configs_have_no_mcp_block` →
+  `test_opencode_canonical_declares_ai_memory_mcp`: contrato P1 suplanta o
+  antigo; exige exatamente `ai-memory` em `127.0.0.1:49374/mcp`. Perda parcial
+  registrada como achado 3.
+- `test_render_adr_specs_task_derives_exactly_the_six_adr_specs` →
+  `test_render_adr_specs_task_derives_every_numbered_adr_spec` e
+  `test_build_includes_adr_fixtures_in_the_specialty_suite` →
+  `test_build_registers_each_adr_fixture_in_one_specialty_suite`
+  (`tests/product_tests/test_concordion_spec_infra.py`): generalização
+  autorizada pelo devflow (E2); deriva ADRs de `docs/adr/` e fortalece a
+  guarda (fixture registrada exatamente 1 vez no `build.gradle`). OK.
+- E6, quatro testes atualizados: o diff agregado do lote em
+  `tests/harnesses/test_copilot.py` remove só 2 linhas de path de fixture;
+  nenhuma asserção removida. Garantias reexpressas nos destinos P4. OK.
+
+### Verificações de convenção
+
+- Largura ≤120 colunas: varredura `awk length > 120` em todos os arquivos de
+  código, teste, ADR, spec e config do lote: 0 violações. T14
+  (`tests/agents/test_line_width.py`) vigente e no lote.
+- `skip`: nenhum `pytest.mark.skip`/`pytest.skip` novo no lote; único
+  `skipif` em `tests/skills_mgmt/test_sync.py:151` é pré-existente e de
+  plataforma (bash). Nomes contendo "skip" referem comportamento de pular
+  skill congelada, não skipping de teste.
+- Markers (ADR-0005): `test_upstream_detect.py` integration (T2-T4, git
+  local, conforme plano); `test_line_width.py`, `test_sync_upstream_command.py`,
+  `test_ai_memory_provision.py`, `test_mcp_wrapper_cleanup.py` unit; sem
+  marcador inválido.
+- Conventional Commits PT-BR: 21 commits funcionais + fechamento conferidos;
+  tipos usados (feat/fix/docs/style/refactor/test) todos da taxonomia do
+  repo; mensagens curtas sem filler; sem push (confirmado pelo humano no
+  Status).
+- Evidência E12 re-verificada por coleta: `pytest --collect-only -m all`
+  reporta 897/928 coletados, 31 deselected — bate com o registro
+  928/897/31 e com os artefatos (renomeação de `test_upstream_detect.py`
+  resolve a colisão com `tests/bootstrap/test_detect.py` pré-existente).
+
+### Checklist por task (conforme o plano)
+
+- E1 freeze: OK. Campo lido/preservado em `_write_upstream`; sync/update
+  pulam com status; list marca; regra documentada no AGENTS.md; T1 presente
+  (4 testes). Achado 5 cobre o negativo restante.
+- E2 detecção: OK. `detect` read-only, clone em tempdir fora do repo com
+  guarda anti-dentro, `--no-recurse-submodules`, `--no-ext-diff`,
+  fallback `--unshallow` (L1), SHA inválido com erro acionável, aviso NÃO
+  CONFIÁVEL por skill (SEC-14), repetição pós-recusa; comando
+  `sync-upstream-skills.md` reescrito para o fluxo P3; ADR-0007 + fixture +
+  registro no build.gradle; T2-T4 presentes.
+- E3 writing-for-agents: OK. `SPECS` + `_sync_writing_for_agents`;
+  `## Notas locais` preservada; extra_fields `description_lang`/`description_note`
+  no UPSTREAM.md; tabela do AGENTS.md com a linha nova; T5/T6 presentes (L2).
+- E4 checklist pós-sync: OK. Guarda de SHA novo e arquivos declarados
+  (fixture 2 commits); checklist do AGENTS.md separa automático/manual com
+  revisão de segurança explícita (SEC-14/15); T7 presente.
+- E5 description do command: OK. `_COMMAND_DESCRIPTIONS` com entrada
+  específica; T8 trava description e ausência do fallback genérico.
+- E6 poda Copilot: OK. Derivação do mapa `permission.skill` com wildcard;
+  10 globais em descoberta, 23 em `~/.copilot/referencias/skills/`; backup e
+  remoção de cópia legada; T9 com guarda de soma/partição/derivação (10/23
+  travados); README Adapters atualizado.
+- E7 auditoria: OK. Sem código; amostra 16 da P2 mantida; método e seed
+  declarados; 13 E-fix registrados; apêndice autocontido no plano.
+- E8 JAVA_HOME: OK. Causa raiz ambiente; correção no `~/.bashrc` (bloco
+  gerenciado); teste intocado (12 passed); sem commit, conforme plano.
+- E9 reflow: OK. 31 linhas em 8 arquivos; T14 criado antes (RED com 31
+  violações); suíte `tests/agents/` verde.
+- E10 ai-memory: OK no desenho de segurança. URL HTTPS fixa + SHA-256
+  constante do wrapper (SEC-01/02); `docker run` com bind
+  `127.0.0.1:49374:49374` (SEC-03) e rede `--internal` (SEC-21); porta
+  ocupada aborta com instrução (SEC-04); drift do plugin avisa (SEC-05);
+  idempotência sem re-download e hash divergente bloqueia com caminho de
+  upgrade (SEC-06); volume 0700 POSIX e tratado como sensível no README
+  (SEC-07); rollback preserva volume e remove declarações (SEC-08); Docker
+  ausente desativa marcador/MCP nos dois harnesses com instrução sem sudo
+  (SEC-09); merge Copilot aditivo com backup e colisão bloqueando (SEC-10);
+  canônica sem credenciais (SEC-11, T12); tudo-ou-nada via marcador
+  `.bootstrap-provisioned` + cópia filtrada sem escrever através do symlink;
+  T13 hermético (fakes + guarda autouse em `subprocess.Popen`); timeouts
+  separados total/idle (1800s/120s) no streaming; `docs/specs/Seguranca.md`
+  com SEC-01..11 e SEC-21 (aprovação pendente, achado 2); ADR-0008 +
+  fixture + build.gradle; README com provisionamento e rollback.
+- E11 docs: OK. README atualizado; leitura cruzada registrou a divergência da
+  premissa 7 (decisão humana pendente, conforme planejado); ADRs 0007-0009
+  confirmados com "Asserções executáveis".
+- E11(b): edit applied no `docs/README.md` (retrofit em tempo passado +
+  convenção 0007-0009); restrição "E10 não edita docs/README.md" respeitada
+  (edição veio por delegação); ver achado 7 sobre rastreabilidade de executor.
+- E12 gate: OK. Renomeação por colisão de módulo registrada; suíte final
+  897/0/31 coerente com coleta re-verificada; dívida ruff delimitada fora do
+  lote (25 achados listados); commits do lote listados (achado 4 sobre os 2
+  commits paralelos).
+- E13 seções aprovadas: OK. Diff confere texto verbatim da P5 (só reflow de
+  largura); regra de precedência da premissa 7 removida; proposta de redação
+  da premissa 7 registrada e aguardando humano, sem toque no workflow;
+  largura limpa. Falta a guarda T15 (achado 1).
+- E14 bloco de referência: OK. Bloco só na cópia, com marcadores próprios;
+  description completa (inclui YAML folded `>`); caminho absoluto na pasta
+  auxiliar; sem allow não recebe bloco (L5); fonte limpa; marcador externo
+  ausente (SEC-16); tmp_path com espaço (SEC-17); ADR-0009 + fixture +
+  build.gradle + diagramas.
+- E-fix: 5 aplicados (1, 5, 7, 8, 11) como correções objetivas de conteúdo,
+  um por vez, sem teste novo (conteúdo estático, fora do critério TDD de
+  comportamento); 8 convertidos em Q-Efix para decisão humana; escopo
+  respeitado (nenhum agente/permissão/workflow alterado).
+
+### Veredicto
+
+[ ] Aprovado sem ressalvas
+[x] Aprovado com melhorias opcionais — resolver achado 1 (alto) e achado 2
+    (médio) antes do fechamento do ciclo; demais baixos podem virar backlog
+[ ] Bloqueado — resolver achados bloqueantes antes de prosseguir
+
+### Disposição dos achados (2026-09-27, devflow)
+
+- **Achado 1 (alto):** corrigido pelo eng-software. T15 criado com âncoras
+  das seções aprovadas; mutações temporárias derrubaram 6 testes
+  (validação da guarda); commit `97a4e4b`.
+- **Achado 2 (médio):** registrado pelo devflow. Pendência
+  "Aprovação SEC→spec" adicionada a `## Perguntas` e ao `Status`.
+- **Achado 3 (baixo):** corrigido pelo eng-software. Asserção da config
+  de integração sem MCP restaurada no `test_mcp_wrapper_cleanup.py`
+  (commit `97a4e4b`).
+- **Achado 4 (baixo):** registrado pelo devflow. `0698b1b` e `8852809`
+  tocam `plan/plano-revisao-comunicacao-planejamento-agentes.md`:
+  fluxo paralelo do humano (comunicação de planejamento), FORA do lote
+  deste ciclo por decisão de escopo; fronteira do lote permanece
+  auditável pelos commits listados no E12 + `97a4e4b`.
+- **Achado 5 (baixo):** corrigido pelo eng-software. Negativo do freeze
+  por subcomando (sync/update/detect) completo (commit `97a4e4b`).
+- **Achado 6 (baixo):** dívida de ciclo futuro. Import
+  harnesses→bootstrap (`filter_ai_memory_config`,
+  `is_ai_memory_provisioned`) a mover para `lib/`.
+- **Achado 7 (baixo):** nota de processo para ciclos futuros. O campo
+  "Executor" das subseções do plano deve registrar AGENTE executor e
+  modelo (ex.: `curador-produto / opencode/gpt-6-luna`), não só o modelo.
+
+### Evidências (rev)
+
+- [x] Artefato lido: `plan/otimizacao-custo-contexto.md` (completo, por
+      trechos: Status; plano aprovado E1-E14/E-fix, sec, qa; blocos de
+      construção; Perguntas; apêndice E7)
+- [x] Lote inspecionado: `git diff 098a5b6..33f96eb` (51 arquivos,
+      +6.734/-280) e `git show` dos 23 commits do intervalo
+- [x] Plano aprovado consultado: sim (P1-P5, S1/S2, Q1/Q2, T1-T15, L1-L5,
+      SEC-01..SEC-21, CA-T1..CA-T8)
+- [x] Checklist integrativo: 8 dimensões (BD N/A — sem modelagem no ciclo;
+      segurança↔implementação; cobertura↔requisitos; docs↔docs/README.md;
+      spec↔docs/README.md; UI N/A; aderência ao plano; contradições/lacunas)
+- [x] Achados encontrados: 7 (0 críticos, 1 alto, 1 médio, 5 baixos)
+- [x] Coleta da suíte re-verificada sem execução: 897/928, 31 deselected
+      (confere com a evidência do E12)
+- [x] Skills de domínio carregadas: code-review-and-quality (obrigatória),
+      tests-as-spec, documentation-and-adrs, api-and-interface-design,
+      security-and-hardening (E10)
+
+## Otimizações de processo aprovadas (2026-09-27, humano)
+
+Aplicáveis a este ciclo:
+- ~~sec (6.2) roda em paralelo (`background`) com o restante da fase
+  Testes, restrito a verificações read-only na máquina.~~ REVERTIDA
+  (2026-09-27): task `background` neste ambiente entrega tools restritas
+  (sem bash/edit — o sec tem ambas no frontmatter, mas não as recebeu);
+  o roteiro manual exige shell e mutação de estado. sec volta ao serial
+  (foreground). Lição para o próximo ciclo: paralelização via background
+  só para trabalho puramente analítico/leitura.
+- Diagnóstico obrigatório da flakiness (16 errors da primeira execução
+  do agregador pelo qa) antes da validação da evidência pelo
+  curador-produto.
+
+Para os próximos ciclos:
+- Subseções compactas por task no plano (registro enxuto, não narrativa
+  completa).
+- `reasoning` default do executor em tarefas mecânicas (roteiros, docs);
+  `high` reservado a análise/projeto.
+- Rodada única de perguntas no fechamento (blocos adaptativos):
+  premissa 7, aprovação SEC→spec e Q-Efix numa só apresentação.
+- Diretriz humana (2026-09-27), vale JÁ neste ciclo: retomadas de
+  subagente usam INSTÂNCIA NOVA (nunca reutilizar sessão/task da
+  chamada anterior); o briefing autocontido aponta os blocos exatos do
+  plano a ler. Evita reenviar o histórico acumulado da sessão do
+  subagente.
+
+### Re-verificação (2026-09-27)
+
+Rev (instância limpa, zai-coding-plan/glm-5.3), a pedido do devflow. Escopo:
+resolução dos achados 1/3/5 (commit `97a4e4b`) e registros da disposição 2/4;
+sem re-execução da revisão integral e sem suíte completa.
+
+**Veredicto final: APROVADO.**
+
+- Achado 1 (T15): resolvido. Mapa T15 confere; implementado como
+  `test_approved_agents_base_sections_keep_their_anchors`
+  (`tests/agents/test_workflow_consistency.py`: âncoras "rede de
+  segurança"/"fronteira foi perdida" na seção "Compactação de contexto",
+  "dependência real" em "Chamadas de ferramentas", "premissa 7" ausente via
+  casefold) e `test_opencode_materializes_approved_sections_in_global_agents_md`
+  (`tests/harnesses/test_opencode.py`: AGENTS.md global regenerado pelo
+  adapter contém as seções e âncoras). Módulos verdes: 41 passed.
+- Achado 3: resolvido. `test_opencode_integration_config_does_not_declare_mcp`
+  restaura a asserção de `tests/integration/config/opencode.test.json` sem
+  `mcp`. Módulo verde: 7 passed.
+- Achado 5: resolvido. Negativos dedicados do freeze para skill não-congelada
+  após `sync` e `update` (`tests/skills_mgmt/test_sync.py`) e `detect`
+  (`tests/skills_mgmt/test_upstream_detect.py`, também compara bytes
+  inalterados); com o caso `list` pré-existente, o mapa por subcomando fica
+  completo. Módulos verdes: 58 passed.
+- Commit `97a4e4b` (= HEAD): diff limitado aos três ajustes + registro
+  "Ajustes pós-revisão" no plano; 6 testes novos (bate com a disposição);
+  sem código de produção alterado; mensagem Conventional Commits PT-BR
+  (`test(repo): restaura guardas contra regressões`); 0 linhas >120 colunas
+  nos 5 arquivos de teste e nas linhas adicionadas.
+- Disposição 2: registrada. Entrada "Aprovação SEC→spec (achado 2 da revisão
+  da construção) — PENDENTE DE DECISÃO HUMANA" em `## Perguntas` e citação
+  no `Status` (pendências do fechamento).
+- Disposição 4: registrada. `### Disposição dos achados` documenta
+  `0698b1b`/`8852809` como fluxo paralelo do humano, fora do lote.
+- Observação (informativa): a seção de revisão + disposição constam apenas do
+  working tree (não commitadas); consistente com o fluxo do ciclo, que
+  commita o plano no fechamento.
+
+Execução de testes (rev): 106 passed nos cinco módulos tocados
+(`test_workflow_consistency.py` + `test_opencode.py`: 41;
+`test_mcp_wrapper_cleanup.py`: 7; `test_sync.py` + `test_upstream_detect.py`:
+58), 0 falhas; coerente com as 107 do registro do eng-software (que inclui a
+guarda T14). Achados da re-verificação: 0 bloqueantes, 0 melhorias.
+
+## Ciclo 2 — TESTES
+
+### TESTES — qa — 2026-09-27
+
+#### Suítes automatizadas
+
+- A primeira tentativa do comando `JAVA_HOME=/home/vitor/.local/share/jdk
+  testes-produto` falhou com `/bin/bash: line 1: testes-produto: command not
+  found`. `testes-produto/README.md` orienta executar `python testes-produto`
+  no checkout. Usei `.venv/bin/python testes-produto` nas execuções seguintes.
+- Agregador #1: `JAVA_HOME=/home/vitor/.local/share/jdk
+  .venv/bin/python testes-produto` retornou `status=fail`. O finding bloqueante
+  resumiu 887 passed, 31 deselected e 16 errors em 260,02 s. Os 16 errors
+  vieram de `tests/scripts/bootstrap_repo/test_repo_state.py`.
+- Agregador #2 retornou `{"status":"pass","findings":[]}`. O agregador não
+  informou contagens nem duração.
+- Agregador #3 reproduziu o mesmo finding: 887 passed, 31 deselected e 16
+  errors em 236,37 s, no mesmo arquivo.
+- Agregador #4, após isolamento pontual, retornou
+  `{"status":"pass","findings":[]}`. Esta foi a execução final válida do
+  agregador. O agregador não informou contagens nem duração.
+- Isolamento após os erros: `JAVA_HOME=/home/vitor/.local/share/jdk
+  .venv/bin/pytest -m all tests/scripts/bootstrap_repo/test_repo_state.py -vv`
+  passou 16 testes em 2,03 s e, na segunda reprodução, 16 em 4,10 s. A primeira
+  execução isolada passou 16 testes em 2,56 s.
+- Diagnóstico da flakiness: os 16 testes dependem da fixture de módulo
+  `bootstrapped_repo_state`, que inicia o adapter em subprocesso. A execução
+  agregada falhou duas vezes, mas três execuções isoladas e duas suítes
+  completas diretas passaram. O agregador não expôs traceback nem stderr do
+  subprocesso. Causa raiz não confirmada. A hipótese mais fundamentada é falha
+  transitória do subprocesso da fixture no contexto da suíte completa, por
+  ordem ou estado compartilhado; não há evidência de paralelismo xdist.
+- Detecção precoce no próximo ciclo: após qualquer erro agregado desse arquivo,
+  executar imediatamente o comando isolado acima com `-vv` e preservar o output
+  completo. O resumo do agregador não basta para identificar o erro de setup.
+- Suíte completa, primeira execução direta: `JAVA_HOME=/home/vitor/.local/share/jdk
+  .venv/bin/pytest -m all` terminou com 903 passed e 31 deselected em 213,08 s.
+  A execução direta final terminou com 903 passed e 31 deselected em 232,46 s.
+  Cada execução coletou 934 itens; `agent_eval` ficou fora da seleção. A spec
+  Concordion `tests/product_tests/test_concordion_spec_infra.py` passou.
+- Cobertura do relatório `.coverage`: 85%. O gate de 70% foi atendido. O plano
+  não registra uma cobertura baseline numérica, então o delta não é calculável.
+- Diff `git diff 098a5b6..HEAD -- testes-produto/`: sem alterações em
+  scripts de suíte ou agregador. A suíte meta `testes-produto/tests/` não se
+  aplica e não foi executada.
+
+#### Resultado dos critérios CA-T
+
+| Critério | Resultado | Evidência |
+|---|---|---|
+| CA-T1 | PASS após `d646b41` | Agregador final retornou `pass` e `findings=[]`. |
+| CA-T2 | PASS | 904 passed, 0 falhas, 31 deselected em `-m all`. |
+| CA-T3 | PASS | Spec Concordion passou na suíte completa. |
+| CA-T4 | PARCIAL | Cobertura 85%, acima de 70%; baseline numérica ausente. |
+| CA-T5 | BLOQUEADO | RM-2, RM-5, RM-6 e RM-10 falharam; volume preservado. |
+| CA-T6 | PASS | Suíte completa passou, incluindo T1-T15 e os testes de `d646b41`. |
+| CA-T7 | PASS | Nenhuma mudança nos scripts do agregador; meta não aplicável. |
+| CA-T8 | PASS | Evidência persistida nesta seção do plano. |
+
+#### Roteiro manual RM, máquina real
+
+**Pré-condições observadas antes do bootstrap:** `docker ps -a --filter
+name=^/ai-memory$ --format '{{.Names}} {{.Status}}'` retornou `ai-memory Up
+24 hours (healthy)`. `docker port ai-memory` retornou
+`49374/tcp -> 127.0.0.1:49374`. O mount era
+`/home/vitor/.local/share/ai-memory -> /data`. `docker exec ai-memory
+ai-memory status` informou versão 2.4.0, 88 páginas atuais, 99 versões,
+163 sessões, 8.059 observações e 11,8 MiB. O volume tinha 138 arquivos
+Markdown e 591.041 bytes. O container usava a rede `bridge`.
+
+Antes do bootstrap, `~/.config/opencode/opencode.jsonc` existia com 181
+bytes, `~/.config/opencode/plugins/ai-memory.ts` existia e
+`~/.copilot/mcp-config.json` não existia. O wrapper tinha SHA-256
+`38986e85f8170866d7b3b8d91334985d05c15acc912f067c2a7ccadfe1f960bd`.
+O digest da imagem era `sha256:ad04782362fbf453495f90d07b6f6466899b1840a8eb429f511ff0f2cf2819ac`.
+
+Resumo por fase: A INCOMPLETA por RM-1; B PASS por RM-11; C BLOQUEADA por
+divergência SHA-256 em RM-12; D BLOQUEADA porque nenhum serviço novo iniciou.
+
+| RM | Comando ou ação | Resultado |
+|---|---|---|
+| RM-1 | Bootstrap sobre o piloto manual | FAIL, container existente recusado como imagem não autorizada. |
+| RM-2 | `docker port ai-memory` | PASS no preflight, `127.0.0.1:49374`. |
+| RM-3 | Hash do wrapper e digest da imagem | Registrados, sem comparação aprovada após RM-1 falhar. |
+| RM-4 | Segunda execução idempotente | Não verificável, RM-1 não provisionou. |
+| RM-5 | Servidor fake na porta 49374 | Não executado. O cenário ficou interrompido após RM-1. |
+| RM-6 | Rede restrita e consulta local | Não executado. O container antigo usava `bridge`. |
+| RM-7 | Merge de `~/.copilot/mcp-config.json` | Não executado. O arquivo não existia no preflight. |
+| RM-8 | Detecção contra upstream real | PASS, clone removido, avisos presentes, checkout sem mudança. |
+| RM-9 | Inspeção da cópia Copilot | PASS, 5 descrições e 5 caminhos absolutos válidos. |
+| RM-10 | Reiniciar OpenCode e validar MCP | BLOQUEADO, sem serviço novo; exige reinício humano. |
+| RM-11 | Rollback preservando o volume | PASS, rollback informou dados preservados e restaurou o JSONC. |
+| RM-12 | Re-provisionamento do zero | FAIL, verificação SHA-256 bloqueou o wrapper baixado. |
+| RM-13 | Ler wiki pelo serviço novo | BLOQUEADO, nenhum container novo ficou ativo. |
+
+**Saída relevante de RM-1:** o bootstrap inspecionou o container e informou:
+`ai-memory não provisionado: O container ai-memory existente não usa a imagem
+autorizada akitaonrails/ai-memory:latest; preserve os dados e revise o
+container antes de reexecutar. O bloco MCP foi desabilitado nos harnesses.`
+A inspeção retornou `Config.Image=docker.io/akitaonrails/ai-memory:latest`,
+mount `/home/vitor/.local/share/ai-memory:/data` e rede `bridge`. O container
+continuou ativo e saudável nessa tentativa. Suspeita para `eng-software`:
+validação da referência Docker normalizada. O QA não investigou código de
+produção.
+
+RM-8 usou `opencode-skills detect writing-for-agents`, que informou ausência
+de mudanças. A execução `opencode-skills detect addyosmani` encontrou mudanças
+em 10 skills e mostrou um aviso de conteúdo NÃO CONFIÁVEL para cada skill. O
+clone temporário `/tmp/opencode-skills-fno726nw/upstream` foi removido. O
+checkout não recebeu alterações novas. Nenhum conteúdo upstream foi executado.
+
+RM-9 verificou `~/.copilot/agents/sec.agent.md`. O bloco gerado continha 5
+descrições autorizadas e 5 caminhos absolutos existentes. O arquivo
+`~/.copilot/mcp-config.json` continuou ausente.
+
+RM-11 executou `~/.local/bin/opencode-bootstrap --rollback-ai-memory`. A saída
+confirmou `Rollback concluído; o volume de dados foi preservado`. O rollback
+removeu o container e o plugin, e restaurou
+`~/.config/opencode/opencode.jsonc`. O SHA-256 restaurado
+`a8e9b22dd587129d2535a23971ff463ff12ce7cf8c1dbac4241a6e34f6654eda` bateu
+com o backup de 181 bytes. O volume manteve o banco SQLite de 12.673.024 bytes
+e 138 arquivos Markdown.
+
+RM-12 executou `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes` após o
+rollback. O bootstrap bloqueou o wrapper baixado por divergência de integridade:
+esperado `4b2e5736195f0ac4cd38adf62f25b294922ebf81f5f4802a07803e1abbf9f72d`,
+encontrado `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`.
+O bootstrap desabilitou MCP e não criou o container. O finding é de segurança,
+encaminhamento `sec`. O QA não ignorou o SHA nem executou o wrapper.
+
+Após RM-12, o QA repetiu o rollback para restaurar o JSONC e limpar artefatos.
+No estado final, o container, o wrapper, o plugin e a rede internal estavam
+ausentes. O JSONC restaurado manteve o SHA original. O volume continuou no
+caminho `~/.local/share/ai-memory/`, com o banco e os 138 arquivos Markdown.
+RM-13 não passou porque nenhum serviço novo pôde ler a wiki. Não foi observada
+interferência do `sec`; o `git status` permaneceu sem mudanças novas após RM-8.
+
+#### Documentação e evidências
+
+- `docs/README.md#testes-por-especialidade` define as suítes e não exige
+  artefato permanente de plano separado. A evidência fica neste plano,
+  conforme o destino solicitado.
+- Nenhuma spec de produto foi criada ou alterada nesta fase.
+- Evidência anterior a `d646b41`: agregador #4 `pass`; duas execuções diretas
+  com 903 passed e 31 deselected; cobertura 85%; meta não aplicável.
+- Flakiness: 16 errors agregados reproduzidos duas vezes, mas não no arquivo
+  isolado nem nas suítes completas diretas. Hipótese e detecção precoce acima.
+- Retomada após `d646b41`: o agregador retornou `pass`; a suíte direta terminou
+  com 904 passed e 31 deselected em 188,03 s; cobertura 85%.
+- Roteiro atualizado: RM-11 passou, RM-12 provisionou a versão aprovada e RM-13
+  leu uma página anterior pelo novo serviço. RM-2, RM-5, RM-6 e RM-10 falharam.
+- Estado final: volume preservado, container novo healthy e rede internal. O
+  host não publicou `127.0.0.1:49374`; o MCP declarado não conecta do OpenCode.
+
+#### Retomada RM após `d646b41`, 2026-09-27
+
+O checkout estava em `1006797`, com `d646b41` na linhagem. Não havia diferenças
+posteriores no bootstrap ou em seus testes. O agregador final retornou
+`{"status":"pass","findings":[]}`. A suíte direta terminou com 904 passed,
+31 deselected e 188,03 s. A cobertura total foi 85%. A flakiness registrada
+acima não se reproduziu nesta execução.
+
+**Pré-condições:** o rollback anterior tinha removido container, wrapper e
+plugin. O JSONC manual estava restaurado com 181 bytes. O volume tinha owner
+`vitor:vitor`, mode `0700` e diretórios `db`, `wiki`, `hook-spool`, `logs` e
+`models`. O processo OpenCode PID 174606 continuava ativo. Não calculei hashes
+nem contagens exatas do volume.
+
+Fase A iniciou sem container antigo. O bootstrap executou
+`bash ./scripts/bootstrap_repo/configurar-repo.sh --yes`, baixou o wrapper
+aprovado e puxou a imagem amd64. O provisionamento terminou e declarou MCP nos
+dois harnesses. Como o rollback já tinha removido o piloto v2.4.0, esta execução
+validou instalação nova, não o caminho de upgrade de container existente.
+
+Resumo das fases: A BLOQUEADA por RM-2/RM-5/RM-6/RM-10; B PASS; C provisionou
+com o endpoint host inacessível; D PASS na leitura interna de página anterior.
+
+| RM | Evidência | Resultado |
+|---|---|---|
+| RM-1 | Bootstrap completo no estado limpo após rollback | PASS para instalação nova; upgrade antigo não repetido. |
+| RM-2 | `docker port ai-memory`, `ss`, `curl` | FAIL, sem porta publicada nem listener em loopback. |
+| RM-3 | SHA wrapper e digest da imagem | PASS, wrapper `49c965a0…e8b5502e6`, imagem amd64 `5ce8700b…d221ef6e`. |
+| RM-4 | Segunda execução do bootstrap | PASS, mesmo container, sem pull e com plugin `no-op`. |
+| RM-5 | Listener fake e nova execução do bootstrap | FAIL, bootstrap aceitou a porta ocupada e retornou 0. |
+| RM-6 | `docker inspect` da rede e consulta local | FAIL, rede internal ativa, host sem acesso ao serviço. |
+| RM-7 | Declarações OpenCode e Copilot | PARCIAL, MCP declarado; merge sem config prévia não testado. |
+| RM-8 | Detecção real de upstream, executada antes da retomada | PASS, sem mudança no checkout. |
+| RM-9 | Agente Copilot `sec`, executado antes da retomada | PASS, 5 descrições e caminhos absolutos existentes. |
+| RM-10 | `opencode mcp list` | FAIL, conexão recusada em `127.0.0.1:49374/mcp`; OpenCode não reiniciado. |
+| RM-11 | `~/.local/bin/opencode-bootstrap --rollback-ai-memory` | PASS, volume e estrutura preservados. |
+| RM-12 | Bootstrap completo após RM-11 | PASS para provisionamento, com a mesma falha de porta de RM-2. |
+| RM-13 | `ai-memory status` e `ai-memory read-page` no container | PASS, página anterior lida sem exibir conteúdo. |
+
+**Resultado de RM-3:** o wrapper instalado tinha SHA-256
+`49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`. O
+container usou `akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
+O mount continuou em `/home/vitor/.local/share/ai-memory:/data`.
+
+**Resultado de RM-4:** a segunda execução manteve o container ID, não executou
+`docker pull` e deixou o plugin como `no-op`. O `docker inspect` mostrou
+`HostConfig.PortBindings` com `127.0.0.1:49374`, mas
+`NetworkSettings.Ports` permaneceu `{"49374/tcp":null}`. `docker port ai-memory`
+não listou bind. `ss` não mostrou listener e o teste HTTP retornou connection
+refused.
+
+**Resultado de RM-5:** o QA parou o container e abriu um listener HTTP fake em
+`127.0.0.1:49374`. O listener recebeu 503 requisições durante a execução do
+bootstrap. O bootstrap retornou código 0, recriou o container e não mostrou
+erro de porta ocupada. O QA não deixou o fake listener ativo. A falha coincide
+com a ausência de publicação observada em RM-2; suspeita para `eng-software`.
+
+**Resultado de RM-6 e RM-10:** `ai-memory-internal` tinha `Internal=true` e o
+container estava saudável. O serviço respondeu a comandos executados com
+`docker exec`, mas o host não alcançou o endereço MCP de loopback. O CLI
+`opencode mcp list` confirmou falha de conexão. O QA não reiniciou o processo
+OpenCode PID 174606.
+
+**Resultado de RM-11:** o rollback confirmou preservação dos dados. Após o
+rollback, o volume manteve owner `vitor:vitor`, mode `0700` e a estrutura
+esperada. O JSONC manual foi restaurado. O QA não comparou bytes nem interrompeu
+o writer OpenCode.
+
+**Resultado de RM-13:** depois de RM-12, `ai-memory status` leu a base pelo
+mount, informou formato wiki `OKF v0.2` e FTS populado. O QA selecionou uma
+página criada antes do reprovisionamento. O comando `ai-memory read-page`
+retornou código 0 e corpo não vazio. O arquivo Markdown correspondente existia
+no volume. O QA suprimiu caminho, título e corpo no output. A validação usou
+existência, modo e estrutura, sem exigir snapshot byte a byte.
+
+**Estado atual e bloqueios:** o container v2.4.1 está healthy, usa a rede
+internal e monta o volume preservado. As configurações OpenCode e Copilot
+declaram o MCP. O OpenCode não conecta porque o host port 49374 não foi
+publicado. CA-T5 continua BLOQUEADO por RM-2, RM-5, RM-6 e RM-10. A preservação
+e leitura dos dados em RM-11/RM-13 passaram. O curador-produto ainda precisa de
+uma revalidação do bind de loopback e do cenário de porta ocupada após análise
+de `eng-software`. A rota de upgrade sobre container preexistente e o merge de
+servidores Copilot preexistentes seguem sem teste nesta retomada.
+O JSONC original foi movido para
+`/home/vitor/.config/opencode-backup/20260927-200753/opencode.jsonc`; o backup
+tem 181 bytes e mantém o SHA-256 original. O caminho de origem não existe após
+o bootstrap, conforme o contrato de provisionamento.
+
+Não observei interferência do `sec`; o `git status` não mostrou alterações de
+código durante a retomada. O QA não alterou código de produção, `Status`, nem
+planos paralelos. O QA não removeu nem hasheou o volume.
+
+### TESTES — sec — 2026-09-27
+
+#### Diagnóstico prioritário do SHA-256
+
+- O SHA que falhou é do wrapper. A imagem não foi objeto dessa validação. `src/opencode_config/bootstrap/ai_memory.py`
+  fixa `AI_MEMORY_WRAPPER_SHA256=4b2e5736195f0ac4cd38adf62f25b294922ebf81f5f4802a07803e1abbf9f72d` e baixa
+  `https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-wrapper`.
+- Comando de verificação, com TLS padrão e sem gravar nem executar o asset:
+
+  ```bash
+  python3 -c 'import hashlib, urllib.request
+  url = "https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-wrapper"
+  response = urllib.request.urlopen(url, timeout=30)
+  data = response.read()
+  print(response.status, len(data), hashlib.sha256(data).hexdigest())'
+  ```
+
+- A leitura HTTPS do asset retornou status 200, 38.971 bytes e SHA-256
+  `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`. A API pública do release
+  (`/repos/akitaonrails/ai-memory/releases/latest`) confirmou o mesmo digest para `v2.4.1`, publicado
+  em 2026-09-25.
+- A busca dos releases confirmou que o SHA fixado no código pertence ao wrapper `v2.0.3`, publicado
+  em 2026-09-04. O wrapper do piloto, SHA `38986e85f8170866d7b3b8d91334985d05c15acc912f067c2a7ccadfe1f960bd`,
+  corresponde ao asset `v2.4.0` publicado em 2026-09-21.
+- Comando para conferir a tag Docker remota: `docker buildx imagetools inspect akitaonrails/ai-memory:latest`.
+  Resultado: índice OCI `sha256:a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9`,
+  manifest linux/amd64 `sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6` e linux/arm64
+  `sha256:dc18b3b93bfe4fbef1175ae364784b657d8cbcc8cc4f01b08d8dfbc75b60cf33`.
+- A imagem em cache tem ID e `RepoDigest` `sha256:ad04782362fbf453495f90d07b6f6466899b1840a8eb429f511ff0f2cf2819ac`.
+  O digest remoto mudou. Nenhuma imagem foi puxada nem iniciada nesta execução.
+- O bootstrap recusou o wrapper antes de instalá-lo ou executá-lo. A tag `latest` remota também diverge
+  da imagem em cache. O ADR-0008 informa que o bootstrap não atualiza uma imagem já presente. S1 aceitou
+  a tag flutuante, mas a revisão do piloto cobriu o digest anterior. A decisão humana posterior
+  autorizou usar a versão nova, condicionada à revalidação abaixo.
+
+#### RM sec-1, bind de loopback
+
+- **Esperado:** `docker port ai-memory` lista somente `127.0.0.1:49374`.
+- **Comando:** `docker port ai-memory`.
+- **Obtido:** `Error response from daemon: No such container: ai-memory`.
+- **Resultado:** BLOQUEADO. O QA registrou loopback no preflight antes do rollback. Não havia serviço
+  para repetir a verificação depois do rollback.
+
+#### RM sec-2, integridade do wrapper e digest da imagem
+
+- **Esperado:** wrapper instalado com SHA esperado no código e digest da imagem registrado.
+- **Comandos:** download HTTPS do asset `releases/latest`, cálculo SHA-256 em memória,
+  `docker image inspect --format 'RepoTags={{json .RepoTags}} Id={{.Id}} Digests={{json .RepoDigests}}'
+  akitaonrails/ai-memory:latest` e `docker buildx imagetools inspect akitaonrails/ai-memory:latest`.
+- **Obtido:** wrapper ausente após o rollback; o asset `v2.4.1` tem SHA diferente do código. A imagem
+  em cache tem digest `ad047...`; a tag remota aponta para o índice OCI `a626...`.
+- **Resultado:** BLOQUEADO para provisionar artefatos novos. O bootstrap falhou fechado e não executou
+  o wrapper divergente. A decisão humana está registrada em `## Perguntas`.
+
+#### Revalidação de upstream, 2026-09-27
+
+**Wrapper `v2.4.1`**
+
+- Baixei o asset em `/tmp/opencode/ai-memory-wrapper-v2.4.1`. `file` classificou o arquivo como
+  script Bash UTF-8. SHA-256 calculado: `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`,
+  igual ao valor aprovado. Não executei o arquivo.
+- Baixei `v2.0.3` para comparação. O SHA-256 foi `4b2e5736195f0ac4cd38adf62f25b294922ebf81f5f4802a07803e1abbf9f72d`,
+  igual ao pin anterior. A comparação estática cobre 803 linhas antigas e 917 novas, com 196 linhas
+  adicionadas ou removidas.
+- Mudanças relevantes: fallback Docker → Podman; comparação separada dos digests OCI por arquitetura;
+  preservação dos modos dos mounts na reconstrução do comando; armazenamento do cliente nativo em
+  `XDG_DATA_HOME`; encaminhamento de `GEMINI_API_KEY`, `GOOGLE_API_KEY` e `OPENCODE_API_KEY` ao helper.
+- Li o script completo. As URLs fixas consultadas apontam para assets de release no GitHub oficial;
+  `AI_MEMORY_WRAPPER_URL`, `AI_MEMORY_WRAPPER_SHA256_URL` e `AI_MEMORY_SERVER_URL` são overrides explícitos.
+  Não encontrei `eval`, payload codificado, POST ou upload explícito. O wrapper encaminha variáveis de
+  credenciais ao container helper; não encontrei envio dessas variáveis a endpoint extra no wrapper.
+- Riscos herdados, também presentes em `v2.0.3`: `upgrade` baixa o wrapper e seu checksum da mesma origem,
+  executa a versão baixada e usa `docker pull` com a imagem configurada, cujo padrão é `latest`. No Linux,
+  o helper usa `--network host` quando não há `AI_MEMORY_SERVER_URL` e monta `$HOME` e `$PWD` para escrita.
+  Não usei `ai-memory upgrade` como caminho de atualização por digest.
+- **Veredicto: apto · atualizar pin.** Não encontrei código suspeito novo. A atualização continua sujeita
+  ao caminho controlado por digest proposto abaixo.
+
+**Imagem `latest`**
+
+- `docker buildx imagetools inspect --raw` mais SHA-256 confirmou o índice
+  `a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9`.
+- O índice referencia linux/amd64 `5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e` e linux/arm64
+  `dc18b3b93bfe4fbef1175ae364784b657d8cbcc8cc4f01b08d8dfbc75b60cf33`. O digest amd64 informado na tarefa,
+  terminado em `ef6`, foi rejeitado pelo Docker por comprimento inválido. O valor do índice termina em `ef6e`.
+- `docker manifest inspect --verbose` e `docker buildx imagetools inspect --format '{{json .Image}}'` mostraram
+  linux/amd64, `User=ai-memory`, porta `49374/tcp`, entrypoint `/usr/local/bin/ai-memory` e comando
+  `serve --transport http --bind 0.0.0.0:49374 --enable-web`. O histórico identifica Debian Bookworm,
+  instalação de certificados CA, criação do usuário de sistema e cópias de hooks e binário.
+- O manifest declara cinco camadas com digests e tamanhos. Os blobs das camadas não foram baixados nem
+  escaneados. A configuração de runtime coincide com a imagem local antiga; os digests das camadas de
+  instalação, hooks e binário diferem. A imagem local continua com ID `ad047...`.
+- Não fiz pull nem iniciei container. `docker ps -a` não listou `ai-memory`. **Veredicto: apto · atualizar
+  pin**, usando o digest amd64 corrigido acima. A avaliação cobre metadados e histórico, não o conteúdo
+  dos binários dentro das camadas.
+
+#### Lacuna de atualização no ADR-0008 e proposta
+
+O ADR-0008 afirma que o bootstrap não atualiza uma imagem existente, mas não registra um procedimento
+controlado para essa atualização. O `ai-memory upgrade` do wrapper usa `latest`, atualiza hooks e pode
+executar `compose up -d`; para instalações standalone, ele escreve um script de recriação. O comando não
+exige os digests revisados nesta tarefa.
+
+Proponho inserir esta redação no ADR-0008, em uma seção “Atualização de instalação existente”:
+
+> Para atualizar uma instalação existente, aprove previamente o SHA-256 do wrapper e os digests OCI do
+> índice e da plataforma. Baixe o wrapper em área temporária, valide o SHA aprovado e revise o diff sem
+> executá-lo. Inspecione manifest, configuração, histórico e digests das camadas da imagem escolhida.
+> Após aprovação, recrie o container usando `repositório@sha256:<digest>`, preserve o volume e mantenha o
+> bind em `127.0.0.1` e a rede `internal`. Registre a verificação de saúde e o rollback para os digests
+> anteriores. Não use `ai-memory upgrade` enquanto o comando depender da tag flutuante `latest`.
+
+Proponho estender SEC-06 com esta redação executável:
+
+> Uma atualização existente exige os digests aprovados do wrapper, do índice OCI e da plataforma. O
+> bootstrap valida essas identidades antes de substituir wrapper ou container. Se a validação falha, o
+> serviço anterior e o volume permanecem intactos. A atualização aprovada usa o digest imutável da
+> plataforma e mantém o bind em `127.0.0.1` e a rede `internal`.
+
+`docs/README.md` exige fitness function para ADR; o fixture Concordion e a suíte de segurança também
+precisarão de atualização após aprovação humana. Não alterei ADR, spec ou fixture.
+
+#### RM sec-3, segunda execução idempotente
+
+- **Esperado:** segunda execução sem novo download ou pull, com hashes estáveis ou aviso explícito.
+- **Obtido:** não houve provisionamento válido na primeira execução. As tentativas terminaram no gate
+  de integridade ou no teste de porta ocupada.
+- **Resultado:** BLOQUEADO. Não foi possível validar idempotência sem contornar o SHA divergente.
+
+#### RM sec-4, porta ocupada
+
+- **Preparação:** um listener fake escutou em `127.0.0.1:49374` e aceitou conexões durante o bootstrap.
+- **Comando:** `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes`.
+- **Obtido:** o bootstrap exibiu `A porta 127.0.0.1:49374 já está ocupada. Identifique o processo e
+  libere a porta antes de reexecutar.` e desabilitou MCP. O processo terminou com código 1.
+- **Resultado:** PASS. Uma primeira tentativa com listener sem loop de `accept` não manteve a porta
+  detectável. O teste foi repetido com loop de aceitação, que registrou 10 conexões.
+
+#### RM sec-5, rollback e preservação do volume
+
+- **Comando:** `~/.local/bin/opencode-bootstrap --rollback-ai-memory`.
+- **Obtido:** `Rollback concluído; o volume de dados foi preservado.` O container e a rede internal
+  ficaram ausentes. O wrapper e o plugin ficaram ausentes. O JSONC foi restaurado com 181 bytes e SHA-256
+  `a8e9b22dd587129d2535a23971ff463ff12ce7cf8c1dbac4241a6e34f6654eda`.
+- **Resultado:** PASS com ressalva. O diretório permaneceu com mode `0700`; os marcadores de provisionamento
+  foram removidos. A árvore tinha 932 arquivos e 114.434.376 bytes antes do roteiro, com SHA agregado
+  `8f71b32369541de15d1c726291e5ac385c14463ec9863a91dc2feeb7398d140d`. Depois, a árvore tinha 982 arquivos,
+  114.565.959 bytes e SHA agregado `396c091b1fa60e5d64e26310d10476d2df70dbe9bfacf5916fed49372c171776`.
+- `fuser -vm ~/.local/share/ai-memory` mostrou processos `opencode`, `python3`, `git`, `docker` e shells
+  usando o diretório. Quarenta e seis arquivos JSON tinham `mtime` posterior a 16h47. A origem das
+  escritas não foi confirmada. Nenhum comando desta execução apagou o diretório; a verificação byte a
+  byte ficou inconclusiva por atividade concorrente. Não executei nova mutação no volume.
+
+#### Diagnóstico read-only de RM sec-5, 2026-09-27
+
+- `stat` confirmou diretório `~/.local/share/ai-memory` com owner `vitor:vitor` e modo `0700`. A estrutura
+  contém `db/memory.sqlite`, seus arquivos WAL/SHM, `wiki`, `hook-spool`, `logs` e `models`.
+- `ps` encontrou OpenCode PID `174606`, iniciado às 14h38. Não encontrou processo `ai-memory` nem container
+  `ai-memory` em `docker ps -a`. O arquivo `.serve.lock.holder` diz `pid=1`, mas o PID 1 do host é systemd
+  e o arquivo tem mtime de 2026-09-26; o marcador não comprova serviço ativo.
+- `lsof +D` no volume e nos arquivos SQLite não mostrou descritores abertos; a saída avisou que não leu
+  um namespace Docker. `fuser -vm` listou processos do host, mas `-m` identifica uso do filesystem, não
+  escrita naquele diretório. A lista anterior não confirma autoria de escrita.
+- `hook-spool` tinha mtime `2026-09-27 17:17 -0300`, durante esta sessão. A origem provável é o fluxo de
+  hooks do processo OpenCode, que está ativo, mas não confirmei um descritor de escrita nem ligação com
+  o SQLite. Não executei comando de mutação; hooks automáticos podem ter gravado observações durante a
+  própria sessão.
+- **Diagnóstico:** OpenCode é o único processo persistente candidato observado. A autoria de escrita no
+  volume não ficou provada por `lsof`/`fuser`; não há serviço `ai-memory` local ativo confirmado.
+- **Política para testes que mutam o volume:** com writer ativo, valide existência, owner, modo `0700` e
+  estrutura esperada. Não exija contagem exata nem hash byte a byte. Para comparar bytes, interrompa ou
+  drene o writer com aprovação humana e só então tire snapshots antes/depois. Não pare o serviço como
+  parte implícita do teste.
+
+#### RM sec-6, merge Copilot com configuração preexistente
+
+- **Esperado:** preservar outros servers e criar backup antes da escrita.
+- **Obtido:** `~/.copilot/mcp-config.json` não existia. O provisionamento parou no SHA divergente.
+- **Resultado:** BLOQUEADO. Não criei uma configuração artificial nem contornei o gate de integridade.
+
+#### RM sec-7, detecção de upstream
+
+- **Comandos:** `opencode-skills detect writing-for-agents` e `opencode-skills detect addyosmani`.
+- **Obtido:** `writing-for-agents` sem mudanças. `addyosmani` mostrou mudanças em 10 skills e marcou
+  cada diff como conteúdo NÃO CONFIÁVEL. O clone `/tmp/opencode-skills-rd5r0sqb` foi removido.
+  `git status --short` ficou igual ao estado anterior ao roteiro.
+- **Resultado:** PASS. Nenhum conteúdo upstream foi executado nem aplicado.
+
+#### RM sec-8, cópia do agente Copilot
+
+- **Esperado:** descrições somente de skills autorizadas e caminhos absolutos existentes.
+- **Comando:** inspeção de `~/.copilot/agents/sec.agent.md` e verificação de existência das referências.
+- **Obtido:** 5 descrições e 5 caminhos absolutos. Os 5 arquivos referenciados existem.
+- **Resultado:** PASS.
+
+#### RM sec-9, rede restrita e serviço local
+
+- **Esperado:** container na rede Docker `internal`, com consulta MCP local respondendo.
+- **Comandos:** `docker inspect ai-memory` e `docker network inspect ai-memory-internal`.
+- **Obtido:** container e rede ausentes depois do rollback. Nenhuma consulta de status ou MCP foi possível.
+- **Resultado:** BLOQUEADO. O digest remoto foi inspecionado sem pull, mas o novo container não foi iniciado.
+
+#### Achados
+
+- **Achado histórico:** o SHA do wrapper novo divergia do pin antigo. **Ação:** revalidei o asset e a
+  comparação com `v2.0.3`; o novo pin está apto. **Severidade:** bloqueante antes da revalidação, resolvido.
+- **Achado histórico:** o manifest remoto divergia da imagem local. **Ação:** validei o índice e os
+  metadados da plataforma amd64 sem pull nem execução; corrigi o digest amd64 inválido informado.
+  **Severidade:** bloqueante antes da revalidação, resolvido.
+- **Melhoria de procedimento:** `ai-memory upgrade` atualiza por `latest` e não exige digests aprovados.
+  **Ação:** proposta de atualização do ADR-0008 e SEC-06 registrada acima, pendente de aprovação humana.
+
+### Evidências (sec) — Testes
+
+- [x] Roteiro manual: 9 itens, 4 passaram, 0 falharam e 5 ficaram bloqueados.
+- [x] Achados: 2 no total, 2 bloqueantes; as decisões de confiança estão em `## Perguntas`.
+- [x] Revalidação RM sec-2: wrapper e índice OCI conferidos por SHA-256; nenhuma execução ou pull.
+- [x] Imagem amd64: manifest/config/histórico e cinco digests de camada inspecionados; payload não baixado.
+- [x] RM sec-5: processo escritor não confirmado; política de integridade tolerante registrada.
+- [x] Upgrade: proposta para ADR-0008 e SEC-06 registrada no plano; alterações permanentes aguardam aprovação.
+- [x] Volume: diretório preservado pelo rollback; verificação byte a byte inconclusiva por escritas
+  concorrentes observadas.
+- [x] Documentação: `docs/README.md` aponta `docs/specs/Seguranca.md` e os ADRs como destino permanente.
+  A spec de segurança e o ADR-0008 já existem. Nenhum artefato de produto foi criado ou alterado nesta fase.
+
+### Ajuste de pins — 2026-09-27
+
+A decisão humana de usar a versão nova foi registrada em `## Perguntas`, RM sec-2. O sec aprovou os
+artefatos upstream revisados.
+
+- Wrapper: `v2.4.1`, URL versionada e SHA-256
+  `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`.
+- Imagem: tag `latest` qualificada pelo digest linux/amd64
+  `5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
+- Manifest OCI validado: `a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9`.
+- TDD: `test_ai_memory_upstream_release_pins_match_reviewed_artifacts` falhou com os pins antigos por
+  ausência de `AI_MEMORY_WRAPPER_VERSION`; passou após a atualização das constantes.
+- Testes E10 relacionados: `.venv/bin/pytest tests/bootstrap/ tests/harnesses/
+  tests/scripts/bootstrap_repo/test_repo_state.py -m all -q`, 212 passaram.
+- Ruff: `.venv/bin/ruff check src/opencode_config/bootstrap/ai_memory.py
+  tests/bootstrap/test_ai_memory_provision.py`, passou.
+- `git diff --check`: passou. Nenhum provisionamento real foi executado.
+- O caminho `tests/scripts/bootstrap_repo/test_ai_memory_provision.py` citado na solicitação não existe;
+  o módulo está em `tests/bootstrap/test_ai_memory_provision.py`.
+- Commit `d646b41`: `fix(bootstrap): atualiza pins do ai-memory para upstream atual`.
+
+### Correção porta MCP — 2026-09-27
+
+#### Diagnóstico da causa raiz
+
+- Hipótese confirmada neste ambiente: Docker Engine `29.5.2`, Linux,
+  `overlayfs`. O container `ai-memory` continuou `running` e `healthy`.
+- `docker inspect` mostrou `HostConfig.PortBindings` com
+  `127.0.0.1:49374`, mas `NetworkSettings.Ports` foi
+  `{"49374/tcp":null}`. `docker port ai-memory` não listou publicação;
+  `ss` não encontrou listener em loopback e `curl 127.0.0.1:49374` foi
+  recusado.
+- O container usa `ai-memory-internal`, com `Internal=true`, subnet
+  `172.19.0.0/16` e endereço `172.19.0.2`. O campo `Gateway` do endpoint
+  do container está vazio. A rota do host aponta para a bridge Docker.
+- A conexão TCP do host a `172.19.0.2:49374` passou. A rede mantém apenas
+  o container `ai-memory`. Não executei requisição que alterasse a wiki.
+- Causa: o bootstrap validava a configuração desejada em `HostConfig`, não
+  a publicação efetiva. Nesta combinação, `--publish` e `--internal`
+  coexistem no pedido Docker, mas o Engine não cria a publicação no host.
+
+#### Correção e garantias
+
+- O bootstrap usa loopback quando `NetworkSettings.Ports` confirma a
+  publicação em `127.0.0.1:49374` e o host alcança o endpoint.
+- Sem publicação efetiva, valida IPv4 privado da rede internal e conexão
+  TCP do host antes de habilitar MCP. Se encontrar endereço inválido,
+  publicação fora de loopback, endpoint inacessível ou peer já conectado
+  à rede internal, desativa MCP.
+- O fallback não abre listener nas interfaces do host. O serviço continua
+  na rede `internal`, sem rota de saída padrão. O host usa a interface da
+  bridge para alcançar o endereço privado do container.
+- O endpoint ativo é persistido em `.bootstrap-mcp-url` dentro do diretório
+  restrito do ai-memory. OpenCode e Copilot recebem o endpoint; hooks usam
+  a URL base. O OpenCode materializa uma cópia local quando precisa do
+  endereço da bridge, sem escrever na configuração canônica. Copilot
+  atualiza ou remove apenas entradas com URL gerenciada conhecida.
+- SEC-03 continua limitando qualquer publicação efetiva ao loopback. No
+  fallback não há porta publicada no host. SEC-21 permanece com a rede
+  Docker `internal`. Um container externo precisa de conexão explícita
+  àquela rede; o bootstrap recusa peers existentes.
+- Docs consultados: `docs/README.md`. Atualizei a seção ai-memory do
+  `README.md`, a descrição operacional do ADR-0008 e os diagramas C4 L1-L3.
+  Nenhuma spec executável mudou; SEC-03 e SEC-21 permanecem as garantias.
+
+#### Verificação
+
+- RED observado antes da implementação: testes de endpoint interno e de
+  URL dinâmica dos adapters falharam com `TypeError` por APIs ausentes.
+  O teste de rede compartilhada falhou porque o bootstrap baixou wrapper
+  antes de rejeitar o peer.
+- GREEN: 81 testes passaram em
+  `tests/bootstrap/test_ai_memory_provision.py`,
+  `tests/harnesses/test_opencode.py` e `tests/harnesses/test_copilot.py`.
+- Ruff passou nos oito módulos Python alterados. `git diff --check` passou.
+- Revalidação real somente leitura: container permaneceu saudável, com o
+  mesmo ID e mount `/home/vitor/.local/share/ai-memory:/data`. A rede
+  continuou internal, sem peer adicional; o probe TCP à bridge passou.
+  Não rodei bootstrap real, parei container nem alterei o volume do piloto.
+- Semântica de RM-2 no fallback: `docker port` permanece vazio por projeto.
+  A checagem deve validar endpoint MCP pela bridge e ausência de listener
+  publicado; o bind de loopback continua sendo usado quando o Engine o ativa.
+
+### TESTES — qa (re-execução) — 2026-09-27
+
+#### Escopo e segurança
+
+- Reexecutei RM-2, RM-5, RM-6, RM-10 e a fase A. Completei RM-7 com um
+  servidor Copilot temporário para representar uma entrada não gerenciada.
+  RM-1 continua bloqueado porque exige a transição real de uma imagem antiga.
+- Não reexecutei `testes-produto` nem a suíte `-m all`. Nenhum script de teste
+  ou teste do repo mudou neste lote. A última execução registrada continua
+  verde: agregador `pass`, 904 passed, 31 deselected e cobertura de 85%.
+- O preflight encontrou `ai-memory` healthy, container
+  `68c6dc0341d9...`, imagem em execução `5ce8700b...d221ef6e`, rede internal,
+  IP `172.19.0.2` e volume `/home/vitor/.local/share/ai-memory:/data`.
+- O volume terminou com owner `vitor:vitor`, modo `0700` e estrutura `db`,
+  `wiki`, `hook-spool`, `logs` e `models`. Não removi dados nem comparei hashes
+  ou contagens exatas. O bootstrap gravou `.bootstrap-mcp-url` com o endpoint
+  da bridge, conforme o fluxo testado. Writers automáticos continuaram ativos.
+- O processo OpenCode existente não foi reiniciado. O bootstrap atualizou a
+  configuração local para a bridge e criou backups de configuração sob
+  `~/.config/opencode-backup/`.
+
+#### Evidências por passo
+
+**RM-2, endpoint efetivo**
+
+- **Comandos:** `docker port ai-memory`; `docker inspect` de
+  `NetworkSettings.Ports` e da rede; conexão TCP Python a
+  `172.19.0.2:49374`; leitura de `.bootstrap-mcp-url`.
+- **Esperado:** sem publicação, usar IPv4 privado da rede internal, validar
+  conexão do host e não abrir listener no loopback.
+- **Obtido:** `docker port` vazio, `49374/tcp: null`, IP `172.19.0.2`, TCP
+  conectado e arquivo com `http://172.19.0.2:49374/mcp`. `ss` não mostrou
+  listener em `127.0.0.1:49374`.
+- **Resultado:** PARCIAL. Seleção e conectividade TCP do endpoint fallback
+  passaram. A validação HTTP de MCP falhou em RM-6/RM-10 por rejeição do Host.
+
+**RM-5, porta loopback ocupada**
+
+- **Comando/ação:** listener temporário em `127.0.0.1:49374`, respondendo
+  HTTP 503; em paralelo, `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes`.
+- **Esperado:** como Docker não publicou a porta, selecionar a bridge, sem
+  apontar MCP para o listener fake nem deixar o listener ativo.
+- **Obtido:** bootstrap informou `A publicação loopback não está ativa; usando
+  o endereço http://172.19.0.2:49374/mcp na bridge internal`, provisionou MCP
+  e terminou com exit 0. O listener recebeu 4 conexões e foi encerrado. `ss`
+  confirmou que a porta ficou livre.
+- **Resultado:** PASS para fallback sem publicação. O bootstrap não abortou
+  pelo listener local porque não usou a porta do host.
+
+**RM-6, rede restrita e consulta local**
+
+- **Comandos:** `docker network inspect`; `docker exec ai-memory ai-memory
+  status`; POST MCP `initialize` ao IP da bridge com `Host: localhost:49374`;
+  POST ao mesmo IP sem substituir o Host.
+- **Esperado:** rede internal sem peers externos e serviço local consultável.
+- **Obtido:** `Internal=true`, um peer (`ai-memory`), container healthy,
+  `ai-memory status` retornou versão 2.4.1 e FTS 99/99. O POST com Host
+  permitido retornou HTTP 200. O POST com Host `172.19.0.2:49374` retornou
+  HTTP 403 e `forbidden host`.
+- **Diagnóstico:** log do container diz `rejected request with disallowed Host
+  header`; a allowlist contém `localhost`, `127.0.0.1`, `::1` e
+  `host.docker.internal`, mas não o IP da bridge.
+- **Resultado:** PARCIAL. Rede e serviço local passaram; a URL configurada pelo
+  bootstrap não passa a validação HTTP de Host.
+
+**RM-7, merge Copilot com entrada preexistente**
+
+- **Backup:** antes do teste, salvei a configuração original em
+  `/tmp/opencode/copilot-mcp-config-20260927-pretest.json`. O arquivo original
+  tinha somente `ai-memory` em `127.0.0.1:49374`.
+- **Ação:** inseri temporariamente `qa-preserved-server` em
+  `~/.copilot/mcp-config.json` e executei o bootstrap. A saída declarou
+  `MCP ai-memory declarado`.
+- **Obtido:** o JSON resultante manteve `qa-preserved-server` e atualizou
+  `ai-memory` para `http://172.19.0.2:49374/mcp`.
+- **Restauração:** restaurei o JSON original, removi a cópia temporária e
+  confirmei que `qa-preserved-server` não permaneceu na configuração.
+- **Resultado:** PASS para backup, merge, preservação da entrada de teste e
+  restauração. A configuração original do Copilot não continha outro servidor
+  do usuário; a preservação foi exercitada com fixture temporária.
+
+**RM-10, conexão OpenCode**
+
+- **Comando:** `opencode mcp list` após o bootstrap atualizar
+  `~/.config/opencode/opencode.json` para a URL da bridge.
+- **Esperado:** `ai-memory` conectado pela bridge.
+- **Obtido:** `ai-memory failed`, `Non-200 status code (403)` em
+  `http://172.19.0.2:49374/mcp`. O log do container confirma rejeição do Host.
+  O processo OpenCode que já estava ativo não foi reiniciado.
+- **Resultado:** FAIL. A configuração aponta para a bridge, mas o cliente real
+  recebe 403. O reinício da sessão existente também ficou pendente.
+
+#### Fase A e atualização de imagem
+
+- **Fase A:** `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes` terminou
+  com `ai-memory provisionado; declaração MCP habilitada nos harnesses`. O
+  container manteve o mesmo ID, estado healthy e mount do volume. O bootstrap
+  gravou o endpoint dinâmico e atualizou a configuração OpenCode. O instalador
+  de hooks avisou que o SHA de `ai-memory.ts` mudou após `install-hooks`
+  (`99f24a9e...50abf2a` para `0da3ee2c...b67fe75`). `opencode mcp list`
+  continuou em 403. **Fase A incompleta**, aguardando correção da allowlist/Host
+  e reinício humano do OpenCode.
+- **RM-1, upgrade com imagem presente:** o bootstrap rodou sobre o container
+  que já usava o digest aprovado `5ce8700b...d221ef6e`; ele manteve o mesmo
+  container e não fez upgrade de imagem. A tag local
+  `akitaonrails/ai-memory:latest` ainda aponta para `ad047823...f2cf2819ac`.
+  Não executei `ai-memory upgrade` nem recriei o container. A seção
+  `TESTES — sec` registra que esse comando usa `latest` e que a proposta de
+  atualização controlada por digest aguarda aprovação humana. **BLOQUEADO**,
+  sem decisão para executar a transição de imagem.
+
+#### Quadro final RM-1..RM-13
+
+Resultados anteriores permanecem para itens não reexecutados. RM-2, RM-5,
+RM-6, RM-7 e RM-10 refletem a evidência desta reexecução.
+
+| RM | Resultado | Base |
+|---|---|---|
+| RM-1 | BLOQUEADO | Upgrade de imagem não executado; evidência anterior cobriu instalação nova. |
+| RM-2 | PARCIAL | Fallback TCP pela bridge passou; chamada HTTP de MCP retorna 403. |
+| RM-3 | PASS | SHA do wrapper e digest aprovado registrados anteriormente. |
+| RM-4 | PASS | Segunda execução idempotente registrada anteriormente. |
+| RM-5 | PASS | Listener fake não foi usado; bootstrap selecionou endpoint da bridge. |
+| RM-6 | PARCIAL | Rede e status locais passaram; HTTP no IP da bridge retorna 403. |
+| RM-7 | PASS | Merge preservou a entrada fixture; backup e restauração concluídos. |
+| RM-8 | PASS | Detecção de upstream sem mudanças no checkout, evidência anterior. |
+| RM-9 | PASS | Agente Copilot e referências validados anteriormente. |
+| RM-10 | FAIL | `opencode mcp list` retorna 403 por Host não permitido. |
+| RM-11 | PASS | Rollback preservou volume e estrutura, evidência anterior. |
+| RM-12 | PASS | Provisionamento após rollback passou anteriormente. |
+| RM-13 | PASS | Leitura de página pelo serviço passou anteriormente. |
+
+#### Evidências finais
+
+- [x] Roteiro manual reexecutado: 6 itens, 2 PASS, 2 PARCIAL, 1 FAIL e fase A
+  incompleta. RM-1 ficou BLOQUEADO porque não houve decisão para trocar imagem.
+- [x] Volume validado por existência, owner, modo `0700` e estrutura. Sem hash
+  byte a byte ou contagem exata.
+- [x] Configuração Copilot restaurada após o teste de merge.
+- [x] `testes-produto` e suíte completa não reexecutados; não houve alteração
+  em scripts/testes que justificasse nova execução. Evidência verde anterior
+  permanece: agregador `pass`, 904 passed, 31 deselected, cobertura 85%.
+- [x] `docs/README.md#testes-por-especialidade` não exige artefato permanente
+  separado. Registrei esta evidência no plano, sem criar spec de produto.
+
+### Correção Host 403 — 2026-09-27
+
+#### Causa e correção
+
+- O container real usava `AI_MEMORY_ALLOWED_HOSTS=localhost,127.0.0.1,::1,host.docker.internal`.
+  O endpoint configurado era `http://172.19.0.2:49374/mcp`; o Host `172.19.0.2:49374` não constava na lista.
+- Diagnóstico somente leitura, com `curl` GET para `/mcp`: Host `172.19.0.2:49374` retornou
+  `403 Forbidden`, corpo `forbidden host`. Os Hosts `localhost:49374`, `127.0.0.1:49374`,
+  `[::1]:49374` e `host.docker.internal:49374` retornaram `405 Method Not Allowed`, com
+  `Allow: POST`. O 405 confirma que a requisição passou pela validação de Host.
+- Containers novos iniciam com um comando `sh` fixado no bootstrap. O comando lê o IPv4 próprio
+  com `hostname -i` e configura `AI_MEMORY_ALLOWED_HOSTS` com esse endereço e os Hosts locais
+  anteriores. O bootstrap grava o label `opencode-config.ai-memory-host-policy=bridge-ip`.
+- O probe do bootstrap agora faz GET HTTP em `/mcp`: `405` significa que o Host passou pela
+  validação; `403` mantém o MCP desabilitado. Um teste cobre os dois códigos.
+- Containers antigos sem o label de política bloqueiam a habilitação. A mensagem orienta
+  executar `--rollback-ai-memory` e o bootstrap novamente. Não recriei nem reiniciei o container
+  real; a transição exigiria parar o serviço que usa o volume do piloto.
+- SEC-03 permanece atendido: o bootstrap solicita publicação somente em loopback. O fallback da
+  bridge não publica porta no host. SEC-21 permanece atendido: a rede Docker continua `internal`.
+  Nenhum peer adicional foi usado para a configuração da allowlist.
+
+#### Marcador e volume
+
+- `.bootstrap-mcp-url` é estado do bootstrap, não conteúdo da wiki. O novo caminho é
+  `~/.local/state/ai-memory/.bootstrap-mcp-url`, fora de `~/.local/share/ai-memory/`.
+  O diretório de estado usa modo `0700` em POSIX.
+- O leitor ainda reconhece o caminho legado no volume. Provisionamento e rollback removem somente
+  esse marcador legado, além do estado de provisionamento; não removem banco, wiki ou demais dados.
+  Não executei bootstrap, stop, rm ou operação de escrita sobre o volume do piloto. As únicas
+  requisições ao serviço foram GETs de probe.
+- `README.md`, seção ai-memory, descreve a allowlist da bridge, a migração de container antigo e
+  o caminho externo do marcador. `docs/README.md` não exige outra spec para este ajuste; SEC-03 e
+  SEC-21 não mudaram.
+
+#### Verificação
+
+- RED inicial: 4 testes falharam e 22 passaram no módulo focal. Um teste inicial de HTTP estava
+  coberto pelo stub autouse do runner; o teste foi ajustado para exercitar respostas HTTP simuladas.
+  O teste de caminho Windows também falhou antes do ajuste para usar o mesmo estado derivado de
+  `home` em todos os harnesses.
+- GREEN: `.venv/bin/pytest tests/bootstrap/test_ai_memory_provision.py -m all -q`, 26 passed.
+  Nenhuma suíte completa foi executada, conforme o escopo desta tarefa.
+- Análise estática: `ruff check` e `ruff format --check` nos dois módulos focais passaram;
+  `git diff --check` passou.
+- `curl` no container do piloto confirmou 403 para o Host da bridge e 405 para os Hosts aceitos.
+  `docker inspect` confirmou o mesmo container ID, estado `running` e o mesmo mount do volume.
+- Container descartável com a imagem fixada, rede `internal`, sem bind de porta e sem mounts:
+  GET `/mcp` com Host igual ao IPv4 da bridge retornou 405. A rede e o container descartáveis
+  foram removidos; não houve acesso ao volume do piloto.
+
+### Reaplicação 403 — 2026-09-27
+
+#### Diagnóstico do reset e recuperação
+
+- A execução ocorreu em `2026-09-28`. `git reflog -15` mostra `398df22`, o reset de
+  `HEAD~1` para `b0a4db8` e o commit seguinte `0094397`. Não reescrevi o histórico.
+- No primeiro `git status`, `README.md`, este plano, `src/opencode_config/bootstrap/ai_memory.py`
+  e `tests/bootstrap/test_ai_memory_provision.py` estavam modificados. Também havia alterações
+  em `plan/insumo-devflow-spawn-dinamico.md`, `plan/plugin-dcp-opencode.md` e o arquivo não
+  rastreado `plan/evidencia-revalidacao-spawn-dinamico.md`.
+- `git stash list` continha apenas os WIP de atualização do crawl4ai (`92db02c` e `a489979`).
+  Nenhum stash correspondia à correção do Host 403.
+- Recuperei a correção presente no working tree. O diff do plano alvo já tinha 1.106 adições e
+  7 remoções antes deste registro. Não incluí esse diff amplo nem os outros planos nos commits.
+  Este bloco permanece no working tree, sem commit isolado.
+
+#### Correção e commits
+
+- `2b41ef7 fix(bootstrap): permite host da bridge no ai-memory` adiciona o IPv4 do container
+  à allowlist, valida o endpoint por HTTP e move `.bootstrap-mcp-url` para o diretório de estado.
+- O primeiro bootstrap após o rollback criou o container novo, mas o probe HTTP ocorreu antes
+  de o servidor ficar pronto. O bootstrap desabilitou MCP. Os logs mostram o servidor pronto
+  cerca de 1,2 s após a inicialização.
+- Adicionei um teste de regressão para o estado `starting` seguido de `healthy`. O teste falhou
+  antes da correção de readiness. `b5705b1 fix(bootstrap): aguarda healthcheck antes do probe MCP`
+  aguarda o healthcheck usando a janela configurada pela imagem antes do probe HTTP.
+- O módulo focal terminou com 27 testes aprovados. Ruff, `ruff format --check` e
+  `git diff --check` passaram. Não executei a suíte completa.
+
+#### Rollback, bootstrap e volume
+
+- Antes do rollback, o container antigo `68c6dc0341d9...` estava healthy e montava
+  `/home/vitor/.local/share/ai-memory:/data`. A rede era internal e o marcador legado estava
+  no volume. O status informava 88 páginas, 99 versões, 165 sessões e 8.249 observações.
+- `bash ./scripts/bootstrap_repo/configurar-repo.sh --rollback-ai-memory` removeu o container
+  e a rede. O comando informou que preservou o volume. O diretório continuou com modo `0700`;
+  o banco SQLite, a wiki, `hook-spool`, `logs` e `models` permaneceram. O rollback removeu
+  apenas o marcador legado `.bootstrap-mcp-url` e os marcadores do bootstrap.
+- O bootstrap criou o container novo `434507ce8f7f...` com a imagem fixada
+  `sha256:5ce8700b...d221ef6e`, mount original e label `bridge-ip`. Após a correção do probe,
+  uma nova execução terminou com `ai-memory provisionado` e MCP declarado nos harnesses.
+- O estado final está healthy. `ai-memory status` manteve 88 páginas, 99 versões, 165 sessões
+  e 8.249 observações. Não calculei hash nem contagem de arquivos do volume.
+
+#### Validações finais
+
+- O endpoint configurado é `http://172.19.0.2:49374/mcp`. GET retornou HTTP 405 para o IP da
+  bridge, `localhost`, `127.0.0.1`, `[::1]` e `host.docker.internal`. Nenhum host aceito
+  retornou 403.
+- A rede `ai-memory-internal` está com `Internal=true` e contém somente `ai-memory`.
+- `docker port ai-memory` não listou bind. `NetworkSettings.Ports` manteve
+  `49374/tcp: null` e `ss` não encontrou listener na porta 49374 do host. O Docker conserva
+  apenas o pedido de bind loopback em `HostConfig`.
+- O marcador atual existe em `~/.local/state/ai-memory/.bootstrap-mcp-url`; o diretório tem
+  modo `0700`. O marcador legado não existe no volume.
+- `docs/README.md` não exige outro artefato para esta correção. SEC-03 e SEC-21 permanecem
+  atendidos. Não alterei `Status` nem os planos paralelos listados nesta tarefa.
+- O plugin e as declarações foram atualizados. O processo OpenCode já aberto não foi reiniciado;
+  ele precisa ser reiniciado para carregar o plugin gerado.
+
+### TESTES — qa (quadro final) — 2026-09-27
+
+#### Escopo e segurança
+
+- Revalidei RM-1, RM-2, RM-6, RM-10 e a fase A contra a instância corrigida.
+- Não executei rollback, bootstrap, upgrade, stop, rm ou gravação no volume do piloto.
+  A validação do volume limitou-se a existência, modo `0700` e estrutura.
+- Não reiniciei a sessão OpenCode existente. A verificação que depende dessa sessão ficou
+  registrada como pós-restart, sem bloquear a evidência dos demais itens.
+
+#### Evidências por passo
+
+**Fase A — PASS na instância corrigida**
+
+- A reaplicação real anterior registrou container novo, imagem aprovada, volume original montado
+  e MCP declarado (`Reaplicação 403`, “Rollback, bootstrap e volume”). Não repeti o bootstrap
+  para evitar operação de escrita sobre o piloto.
+- `docker inspect ai-memory`: container `running`, health `healthy`, imagem com digest
+  `5ce8700b…d221ef6e`, label `bridge-ip` e mount original em `/data`.
+- `docker exec ai-memory ai-memory status`: serviço respondeu na versão 2.4.1 e informou
+  wiki e índice FTS operacionais.
+- `opencode mcp list`: `ai-memory` aparece `connected` no endpoint da bridge.
+- O volume continua em `~/.local/share/ai-memory/`, modo `0700`, com `db`, `wiki`,
+  `hook-spool`, `logs` e `models`. Não comparei hashes nem contagens exatas.
+
+**RM-1 — BLOQUEADO**
+
+- A instalação corrigida atual está saudável, mas não exercitou a transição de upgrade sobre o
+  container antigo que RM-1 exige. A reaplicação usou rollback e provisionamento novo.
+- Não executei upgrade nem recriação adicional: isso alteraria o estado do serviço que monta o
+  volume inviolável. O teste de upgrade permanece sem evidência; não infiro PASS da instalação
+  nova.
+
+**RM-2 — PASS**
+
+- `docker port ai-memory` não listou publicação; `NetworkSettings.Ports` mostrou
+  `49374/tcp: null`; `ss` não encontrou listener do host na porta 49374.
+- O marcador `~/.local/state/ai-memory/.bootstrap-mcp-url` aponta para
+  `http://172.19.0.2:49374/mcp`, consistente com o endpoint conectado no OpenCode.
+- O endpoint não publica porta no host e a conexão MCP pelo CLI está ativa.
+
+**RM-6 — PASS**
+
+- `docker network inspect ai-memory-internal`: `Internal=true`, somente o container
+  `ai-memory` como peer.
+- `ai-memory status` respondeu sem erro. GET `/mcp` ao IP da bridge retornou HTTP 405 para
+  `172.19.0.2`, `localhost`, `127.0.0.1`, `[::1]` e `host.docker.internal`.
+- Controle negativo `Host: qa.invalid:49374` retornou HTTP 403. Assim, a allowlist aceita o
+  endpoint corrigido sem aceitar um Host arbitrário.
+
+**RM-10 — POST-RESTART**
+
+- `opencode mcp list` no CLI retornou `ai-memory connected` em
+  `http://172.19.0.2:49374/mcp`. A conexão do processo OpenCode já aberto ainda não foi
+  validada após reinício.
+- Verificação pós-restart do OpenCode: encerrar a sessão atual, abrir uma nova sessão OpenCode
+  neste repo, confirmar `opencode mcp list` como `connected` e invocar a ferramenta MCP
+  `ai-memory status` nessa sessão. Esperado: retorno de status sem erro, versão 2.4.1.
+
+#### Quadro final RM-1..RM-13
+
+| RM | Resultado | Referência de evidência |
+|---|---|---|
+| RM-1 | BLOQUEADO | Este bloco, “RM-1”; upgrade do container antigo não foi executado. |
+| RM-2 | PASS | Este bloco, “RM-2”; endpoint, porta, listener e MCP conectados. |
+| RM-3 | PASS | `TESTES — qa (re-execução)`, RM-3; digest e wrapper aprovados registrados. |
+| RM-4 | PASS | `TESTES — qa (re-execução)`, RM-4; segunda execução idempotente registrada. |
+| RM-5 | PASS | `TESTES — qa (re-execução)`, RM-5; fallback não usou listener fake. |
+| RM-6 | PASS | Este bloco, “RM-6”; rede internal, peer único e probes HTTP. |
+| RM-7 | PASS | `TESTES — qa (re-execução)`, RM-7; merge, preservação e restauração. |
+| RM-8 | PASS | `TESTES — qa (re-execução)`, RM-8; detecção de upstream sem mudança no checkout. |
+| RM-9 | PASS | `TESTES — qa (re-execução)`, RM-9; agente Copilot e caminhos validados. |
+| RM-10 | POST-RESTART | Este bloco, “RM-10”; CLI conectado, sessão viva requer reinício. |
+| RM-11 | PASS | `TESTES — qa`, RM-11; rollback preservou volume e estrutura. |
+| RM-12 | PASS | `TESTES — qa`, RM-12; provisionamento após rollback registrado. |
+| RM-13 | PASS | `TESTES — qa`, RM-13; leitura anterior pelo serviço registrada. |
+
+#### Agregador, suíte e evidências
+
+- Não reexecutei `testes-produto` nem `.venv/bin/pytest -m all` nesta revalidação manual.
+  Última execução completa registrada: agregador PASS, 904 passed, 31 deselected e cobertura
+  de 85%. A execução focal posterior à correção registrou 27 testes aprovados; não há suíte
+  completa posterior à correção neste registro.
+- Testes manuais revalidados: RM-2 PASS, RM-6 PASS e fase A PASS; RM-1 BLOQUEADO; RM-10
+  conectado no CLI, com verificação da sessão viva pendente pós-restart.
+- Variação de cobertura versus baseline: não calculável, baseline numérica ausente.
+- `docs/README.md#testes-por-especialidade` não exige artefato permanente separado. Não criei
+  spec de produto nesta fase.
+
+### TESTES — sec (fechamento) — 2026-09-27
+
+#### Escopo e segurança
+
+- Revalidei sec-1, sec-2, sec-3, sec-6 e sec-9 na instância corrigida.
+- Não executei rollback, `docker pull`, parada ou recriação do container. O volume do piloto não
+  recebeu comando de escrita. O bootstrap e o healthcheck consultaram o serviço durante a validação.
+- O container manteve ID `434507ce8f7f...`, estado `healthy`, digest de imagem
+  `5ce8700b...d221ef6e` e mount original. Não calculei hash nem contagem do volume.
+- O bootstrap instalou `pytest-cov` durante a verificação automática de dependências. Removi o
+  pacote e confirmei que `pip show pytest-cov` não encontra a distribuição.
+
+#### Evidências dos passos revalidados
+
+**sec-1 — PASS, endpoint MCP e publicação**
+
+- `docker port ai-memory` não listou publicação. `NetworkSettings.Ports` mostrou
+  `49374/tcp: null`. `ss -ltn '( sport = :49374 )'` não encontrou listener no host.
+- `HostConfig.PortBindings` ainda registra o pedido para `127.0.0.1:49374`, mas o Docker não
+  publicou a porta. O marcador externo aponta para `http://172.19.0.2:49374/mcp`.
+- O diretório `~/.local/state/ai-memory/` tem modo `0700`. O teste passou no fallback de bridge
+  previsto para esta instância.
+
+**sec-2 — PASS, integridade do wrapper e da imagem em execução**
+
+- O wrapper instalado tem SHA-256 `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`.
+- O container executa a imagem fixada em `sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
+- A tag local `latest` ainda resolve para a imagem antiga `ad047...`. O container ativo usa o
+  digest aprovado, não a tag local.
+
+**sec-3 — PASS, segunda execução idempotente**
+
+- `bash ./scripts/bootstrap_repo/configurar-repo.sh --yes` terminou com código 0.
+- O container manteve o mesmo ID, estado, imagem e digest. O SHA-256 do wrapper permaneceu igual.
+- O output não registrou pull nem recriação. O plugin OpenCode apareceu como `no-op`.
+- O bootstrap corrigiu o endpoint Copilot de teste para o valor do marcador, sem alterar o mount.
+
+**sec-6 — FAIL, merge Copilot com configuração preexistente**
+
+- A configuração inicial continha somente `ai-memory`. Acrescentei temporariamente
+  `sec-preserve-fixture` e substituí a URL gerenciada por `127.0.0.1:49374` para forçar uma escrita.
+- Após o bootstrap, `sec-preserve-fixture` continuou presente e `ai-memory` apontou para o endpoint
+  atual da bridge. A preservação e a atualização do endpoint passaram.
+- O bootstrap anunciou `~/.config/opencode-backup/20260928-090701`, mas não encontrei nesse backup
+  uma cópia da configuração Copilot temporária. O diretório ficou vazio e foi removido.
+- Restaurei `~/.copilot/mcp-config.json` byte a byte. O SHA-256 final voltou a
+  `8d1c2dadbb03c9b614dac6c15be05426e6b13fff4ad3ff529b28b2c82a90d7e9`.
+
+**sec-9 — PASS, rede internal e serviço local**
+
+- `docker network inspect ai-memory-internal` retornou `Internal=true` e um peer, `ai-memory`.
+- GET `/mcp` ao endereço da bridge retornou HTTP 405 para `172.19.0.2`, `localhost`, `127.0.0.1`,
+  `[::1]` e `host.docker.internal`. O controle `sec-check.invalid:49374` retornou HTTP 403.
+- `docker port` não listou bind efetivo. O marcador ficou fora do volume do piloto, no diretório
+  restrito `~/.local/state/ai-memory/`.
+
+#### Quadro final do roteiro manual sec
+
+| Passo | Resultado | Evidência |
+|---|---|---|
+| sec-1 | PASS | Fallback bridge ativo, sem porta publicada nem listener no host. |
+| sec-2 | PASS | SHA do wrapper e digest da imagem em execução conferidos. |
+| sec-3 | PASS | Bootstrap repetido sem recriação; ID, imagem e wrapper estáveis. |
+| sec-4 | PASS | Evidência anterior em `TESTES — sec`, teste de porta ocupada. |
+| sec-5 | PASS, ressalva | Rollback anterior preservou estrutura; comparação byte a byte ficou inconclusiva. |
+| sec-6 | FAIL | Fixture preservada e endpoint corrigido; backup Copilot não localizado. |
+| sec-7 | PASS | Evidência anterior em `TESTES — sec`, detecção de upstream. |
+| sec-8 | PASS | Evidência anterior em `TESTES — sec`, cópia do agente Copilot. |
+| sec-9 | PASS | Rede internal, peer único, probes HTTP e marcador externo conferidos. |
+
+Resultado consolidado: 8 PASS, 1 FAIL e 0 BLOQUEADOS. Os passos sec-4, sec-5, sec-7 e sec-8
+mantêm evidência anterior e não foram repetidos nesta validação.
+
+#### Achados
+
+- **Achado:** o bootstrap atualizou `mcp-config.json` sem cópia de backup Copilot localizada.
+  **Ação:** gerar backup antes da escrita e cobrir o arquivo Copilot no teste de merge.
+  **Severidade:** melhoria. O teste preservou a entrada não gerenciada e não demonstrou perda de dados.
+
+#### POST-RESTART, não bloqueante
+
+- **RM-10:** após reiniciar o OpenCode, abrir uma sessão nova neste repo, confirmar
+  `opencode mcp list` como `connected` e invocar `ai-memory status` pela ferramenta MCP.
+  A conexão do processo OpenCode já aberto não foi validada nesta execução.
+
+### Evidências (sec) — Testes
+
+- [x] Revalidação de cinco passos bloqueados: 4 PASS, 1 FAIL e 0 BLOQUEADOS.
+- [x] Quadro completo sec-1..sec-9: 8 PASS e 1 FAIL. Quatro PASS vieram da evidência anterior.
+- [x] Estado provisionado restaurado: mesmo container, imagem, mount, marcador e configurações ativas.
+- [x] Configuração Copilot restaurada com SHA-256 original; fixture de teste não permaneceu ativa.
+- [x] Nenhuma suíte automática foi executada; o escopo ficou restrito ao roteiro manual de segurança.
+- [x] `docs/README.md#testes-por-especialidade` consultado. Nenhuma spec de produto foi criada ou
+  alterada nesta fase.
+- [ ] sec-6: backup Copilot antes da escrita não foi localizado; melhoria registrada acima.
+- [ ] POST-RESTART RM-10: validar a sessão OpenCode nova após reinício; não bloqueia este fechamento.
+- [x] Achados: 1 melhoria, 0 bloqueantes.
+
+### TESTES — curador (validação) — 2026-09-27
+
+#### Resultado da validação
+
+- Veredicto: **EVIDÊNCIA INVÁLIDA** para fechar a fase Testes.
+- Não executei suítes. A validação cobre `docs/README.md#testes-por-especialidade`
+  e os blocos de teste deste ciclo.
+- A execução completa registrada passou antes das correções posteriores de porta MCP,
+  Host 403 e readiness. Falta uma execução completa do agregador sobre o estado final.
+
+#### Agregador e execução automatizada
+
+- O último resultado registrado do agregador é `{"status":"pass","findings":[]}`.
+  O comando usado nas execuções válidas foi:
+
+  ```bash
+  JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/python testes-produto
+  ```
+- O registro associa a retomada após `d646b41` a 904 testes aprovados, 31 deselected,
+  188,03 s e cobertura total de 85%. Uma execução anterior registrou 903 aprovados,
+  31 deselected e 213,08 s. O agregador não emitiu contagem, duração ou cobertura
+  no JSON; esses números vêm da execução direta de `pytest` e do relatório `.coverage`.
+- A flakiness inicial está documentada: duas execuções agregadas tiveram 16 errors
+  em `test_repo_state.py`; três execuções isoladas e duas suítes completas diretas
+  passaram. A hipótese registrada é falha transitória da fixture em subprocesso,
+  possivelmente por ordem ou estado compartilhado. A causa raiz não foi confirmada.
+- **Achado:** a última execução completa antecede correções posteriores e a reexecução
+  final dos roteiros. **Ação:** `qa` deve executar `testes-produto` e a suíte completa
+  no estado final, registrando comando, JSON, contagens, duração e cobertura.
+  **Severidade:** bloqueante para validar o gate da fase.
+
+#### Roteiros manuais
+
+- O quadro final do QA lista RM-1 como BLOQUEADO, RM-10 como POST-RESTART e os demais
+  estados de RM-1..RM-13. Os resultados apontam para evidências anteriores ou para
+  detalhes no próprio quadro. RM-1 não foi inferido como PASS da instalação nova.
+- RM-1 continua sem teste de upgrade sobre o container antigo, para não alterar o
+  serviço que monta o volume protegido. A conclusão exige decisão humana sobre a
+  transição segura; depois, `qa` registra a execução ou o impedimento aprovado.
+- RM-10 tem procedimento pós-restart explícito: abrir nova sessão, confirmar
+  `opencode mcp list` e chamar `ai-memory status`. O humano ainda precisa reiniciar
+  o OpenCode; `qa` registra o resultado nessa sessão.
+- O quadro final de segurança registra sec-1..sec-9, com oito PASS e sec-6 FAIL.
+  O FAIL tem severidade melhoria: não foi localizado backup Copilot, embora a entrada
+  tenha sido preservada e a configuração original restaurada. A ação proposta é gerar
+  o backup antes da escrita e cobrir esse arquivo no teste de merge.
+- Os estados e suas evidências são rastreáveis nos blocos `TESTES — qa`,
+  `TESTES — qa (re-execução)`, `TESTES — qa (quadro final)`, `TESTES — sec` e
+  `TESTES — sec (fechamento)`. Não há achado high/critical aberto nesses quadros.
+
+#### Critérios de aceite CA-T1..CA-T8
+
+- **CA-T1, PENDENTE:** agregador passou com `findings=[]`, antes das correções posteriores.
+  `qa` deve reexecutá-lo no estado final.
+- **CA-T2, PENDENTE:** 904 passed e 31 deselected foram registrados em `-m all`.
+  Falta repetir a suíte após as correções posteriores.
+- **CA-T3, PENDENTE:** Concordion passou na suíte completa registrada.
+  Falta confirmar na execução completa final.
+- **CA-T4, PARCIAL:** cobertura de 85% supera 70%. Sem baseline numérica, não foi
+  possível verificar ausência de queda. `qa` deve registrar a baseline e o delta.
+- **CA-T5, PENDENTE:** há registro por passo. RM-1 continua bloqueado e RM-10 aguarda
+  restart. Resolver RM-1 com decisão humana e concluir RM-10 após restart.
+- **CA-T6, PENDENTE:** T1-T15 passaram na execução completa registrada.
+  Falta revalidar os testes no estado final. A suíte meta não se aplica.
+- **CA-T7, ATENDIDO:** não houve mudança nos scripts de `testes-produto`.
+  A suíte meta não precisava rodar.
+- **CA-T8, NÃO ATENDIDO:** a evidência está nos blocos do ciclo, mas não existe
+  `## Evidências de Testes — Testes`. `curador-produto` deve reconciliar o destino
+  com aprovação humana.
+
+#### Divergências e encaminhamentos
+
+- **Achado:** execução completa desatualizada após mudanças no bootstrap. **Ação:**
+  `qa` executa agregador e suíte completa no estado final. **Severidade:** bloqueante.
+- **Achado:** baseline de cobertura ausente. **Ação:** `qa` registra baseline e delta;
+  se a baseline não existir, o humano decide como tratar CA-T4, sem dispensar o critério
+  por iniciativa do agente. **Severidade:** lacuna de evidência.
+- **Achado:** o destino exigido por CA-T8 não existe. **Ação:** `curador-produto`
+  propõe a reconciliação entre o destino do critério e os blocos existentes, sob
+  aprovação humana. **Severidade:** lacuna de documentação.
+- **Achado:** sec-6 falhou no backup Copilot. **Ação:** `eng-software` corrige o backup
+  e `sec` revalida o roteiro e o teste de merge. **Severidade:** melhoria.
+- **Achado:** RM-1 e RM-10 seguem sem conclusão. **Ação:** o humano decide sobre a
+  transição que afeta o volume e reinicia o OpenCode; `qa` registra os resultados.
+  **Severidade:** gate pendente.
+
+### TESTES — qa (re-execução final) — 2026-09-27
+
+#### Escopo e proteção do piloto
+
+- Executor: `opencode/gpt-6-luna`; HEAD: `b5705b1`.
+- Execução final: 2026-09-28; o título mantém a data solicitada para o bloco.
+- Não executei rollback, bootstrap, upgrade, stop, rm ou escrita no volume do piloto.
+- RM-1 permanece BLOQUEADO pela proteção do volume. RM-10 permanece POST-RESTART; não reiniciei
+  o processo OpenCode nesta execução.
+- Não alterei `Status` nem os planos paralelos.
+
+#### Agregador `testes-produto`
+
+- Primeira execução: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/python testes-produto`.
+  Duração: 53,282 s. Retorno `status=fail`; pytest rejeitou `--cov=src`, `--cov=scripts`,
+  `--cov=testes-produto`, `--cov-report=term-missing` e `--cov-fail-under=70` porque `pytest-cov`
+  não estava instalado. `pip show` confirmou a ausência; `pytest` era 9.1.1.
+- Diagnóstico e recuperação do ambiente: `requirements-dev.txt` declara `pytest-cov>=5,<8`.
+  Instalei somente essa dependência na `.venv` com
+  `.venv/bin/python -m pip install 'pytest-cov>=5,<8'`; versão instalada: 7.1.0.
+  Nenhum arquivo do repo foi alterado por essa instalação.
+- Reexecução válida: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/python testes-produto`.
+  Duração: 258,424 s. Saída: `{"status":"pass","findings":[{"severity":"melhoria",
+  "tool":"bandit","message":"...ai_memory.py:1017: Audit url open for permitted schemes..."}]}`.
+- Resultado: status `pass`, nenhum finding bloqueante; permanece uma melhoria Bandit na linha 1017
+  de `src/opencode_config/bootstrap/ai_memory.py`. O agregador não informa contagens de testes.
+
+#### Suíte completa e cobertura
+
+- Comando: `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`.
+- Resultado: 947 itens coletados, 916 selecionados; 916 passed, 31 deselected, 0 failed.
+  Pytest informou 191,51 s; duração de parede medida pelo shell: 193,588 s.
+- `tests/product_tests/test_concordion_spec_infra.py` passou dentro da suíte completa.
+  Os testes T1-T15 cobertos pela seleção `-m all` passaram.
+- Relatório de cobertura: 85% (4.405 statements, 646 missed), acima do gate de 70%.
+  A execução anterior registrada também mediu 85%; a variação aritmética para essa observação é
+  0 ponto percentual. O plano não definiu essa observação como baseline formal; o delta contra uma
+  baseline aprovada continua indisponível. CA-T4 fica PARCIAL, aguardando decisão humana.
+
+#### Suíte meta
+
+- Executei `git diff 098a5b6..HEAD -- testes-produto/`; não houve saída nem arquivos alterados.
+- Os scripts do agregador e das suítes não mudaram no intervalo. Suíte meta
+  `testes-produto/tests/`: não aplicável, não executada.
+
+#### CA-T1..CA-T8
+
+| Critério | Resultado | Evidência desta reexecução |
+|---|---|---|
+| CA-T1 | PASS | Agregador `status=pass`; zero findings bloqueantes. Uma melhoria Bandit permanece. |
+| CA-T2 | PASS | 916 passed, 0 failed e 31 deselected em `-m all`. |
+| CA-T3 | PASS | Spec Concordion passou na suíte completa. |
+| CA-T4 | PARCIAL | Cobertura 85%, referência anterior 85% (delta informativo: 0 p.p.); baseline formal ausente. |
+| CA-T5 | PENDENTE | RM-1 BLOQUEADO e RM-10 POST-RESTART seguem documentados, sem reexecução. |
+| CA-T6 | PASS | Suíte completa verde, incluindo os testes T1-T15 selecionados. |
+| CA-T7 | PASS | Sem alterações nos scripts; suíte meta não aplicável. |
+| CA-T8 | PASS | Evidência persistida na seção `## Evidências de Testes — Testes` criada após este bloco. |
+
+RM-10 só pode ser concluído após reinício humano do OpenCode. Passo exato: encerrar a sessão atual,
+abrir uma nova sessão OpenCode neste repo, executar `opencode mcp list` e confirmar `ai-memory
+connected`; depois invocar a ferramenta MCP `ai-memory status` e confirmar retorno sem erro,
+versão 2.4.1.
+
+## Evidências de Testes — Testes
+
+- [x] Plano de testes: cenários RM-1..RM-13 e testes T1-T15 definidos nos blocos anteriores.
+- [x] Testes executados: agregador `pass` sem finding bloqueante; 916 selecionados, 916 passaram,
+  31 ficaram deselected e 0 falharam na suíte completa.
+- [x] Cobertura: 85%; observação anterior 85%, diferença informativa de 0 p.p.; baseline formal
+  ausente, decisão sobre CA-T4 pendente do humano.
+- [x] Cenários não cobertos: RM-1 segue BLOQUEADO para proteger o volume; RM-10 aguarda o passo
+  pós-restart descrito no bloco `TESTES — qa (re-execução final)`.
+- [x] Suíte meta: não aplicável, sem mudanças em `testes-produto/` no intervalo `098a5b6..HEAD`.
+
+### TESTES — curador (revalidação) — 2026-09-27
+
+#### Resultado da revalidação
+
+- Veredicto: **EVIDÊNCIA VÁLIDA (com anotações)** para a validação evidencial da fase Testes.
+- A reexecução do QA registra HEAD `b5705b1`, agregador `pass` e suíte completa verde.
+- CA-T5 continua operacionalmente pendente. Este veredicto confirma a presença e a rastreabilidade
+  da evidência, não declara RM-1 ou RM-10 concluídos.
+
+#### Agregador e suíte completa
+
+- O agregador foi executado no HEAD final com o comando registrado no bloco do QA. O JSON retorna
+  `status=pass`, sem finding bloqueante. A melhoria Bandit permanece não bloqueante.
+- A suíte completa coletou 947 itens: 916 passaram, 31 ficaram deselected e 0 falharam.
+  A soma 916 + 31 corresponde aos 947 itens coletados.
+- A contagem final aumentou em 12 testes aprovados em relação aos 904 registrados antes das
+  correções. Essa diferença é coerente com o lote informado.
+- CA-T1, CA-T2, CA-T3 e CA-T6 estão atendidos pela reexecução final. CA-T8 também está atendido,
+  pois a seção `## Evidências de Testes — Testes` consta no plano.
+- CA-T7 permanece atendido. O QA registrou que os scripts não mudaram e que a suíte meta não se
+  aplica neste intervalo.
+
+#### CA-T4, cobertura
+
+- Registro a cobertura de 85% da primeira medição completa documentada no ciclo como
+  **BASELINE INICIAL**. A medição final também foi 85%, com delta de 0 p.p. A cobertura supera o
+  gate de 70%.
+- Não há histórico de cobertura anterior ao ciclo para comparação retrospectiva. Com essa
+  anotação explícita, CA-T4 fica atendido; não falta ação adicional de `qa` para este critério.
+
+#### CA-T5, roteiros manuais
+
+- RM-1 está registrado como BLOQUEADO pela proteção do volume. Não houve operação no volume do
+  piloto. O estado e a razão estão explícitos, sem conversão indevida para PASS.
+- RM-10 está registrado como POST-RESTART. O passo definido exige nova sessão OpenCode, consulta
+  a `opencode mcp list` e chamada de `ai-memory status`, com conferência da versão 2.4.1.
+- Os dois estados têm rastreabilidade nos blocos do QA e na seção de evidências. CA-T5 continua
+  PENDENTE até a decisão humana sobre RM-1 e a execução de RM-10 após o reinício.
+- Não restam lacunas de evidência para CA-T1, CA-T2, CA-T3, CA-T4, CA-T6, CA-T7 ou CA-T8.
+
 ## Ciclo 2 — FINALIZAÇÃO
+
+### Revisão final dos artefatos de spec — curador-produto — 2026-09-28
+
+Escopo: revisão do `docs/README.md`, dos blocos E11/E11(b) e Testes, dos ADRs 0007-0009,
+de `docs/specs/Seguranca.md`, do destino `docs/specs/regras-negocio.md` e da seção de dependências
+do `README.md`. Não alterei `Status`, planos paralelos ou artefatos de código/domínio. Não executei
+testes; usei a evidência final registrada na seção Testes.
+
+### Achados, ações e severidade
+
+1. **Testes por Especialidade — conforme.** `docs/README.md` define backend e segurança, o agregador,
+   a interface JSON e os dois níveis de teste. O nível 2 fica em `testes-produto/tests/`, fora de
+   `-m all`, e roda apenas quando os scripts mudam. O QA registrou que não houve mudança em
+   `testes-produto/`; não executar a suíte meta neste ciclo está correto.
+   **Ação:** nenhuma. **Severidade:** sem achado.
+
+2. **ADRs 0007-0009 — convenção referenciada; um link interno está desatualizado.** A subseção
+   `ADR (Arquitetura)` do `docs/README.md` registra os ADRs legados 0001-0006 no passado e exige a
+   mesma convenção para 0007-0009. Os três arquivos existem em `docs/adr/` e incluem asserções
+   executáveis. A convenção não exige índice adicional no README, conforme E11(b). Porém, o ADR-0007
+   aponta para `tests/skills_mgmt/test_detect.py`, caminho inexistente; o teste atual fica em
+   `tests/skills_mgmt/test_upstream_detect.py`.
+   **Ação:** `eng-software` corrigir a referência no ADR-0007.
+   **Severidade:** melhoria documental.
+
+3. **Spec de segurança — lacuna entre contrato documentado e estado implementado.**
+   `docs/specs/Seguranca.md` registra o SHA fixo do wrapper, mas não os pins aprovados no fechamento:
+   wrapper `v2.4.1`, SHA-256 `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`;
+   índice OCI `a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9`; imagem linux/amd64
+   `5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`. SEC-03 descreve publicação
+   somente em loopback, mas não registra o fallback sem publicação, pelo endpoint IPv4 privado da
+   bridge internal. A spec também não registra `.bootstrap-mcp-url` em
+   `~/.local/state/ai-memory/`, fora do volume de dados. O código e os testes cobrem os três pontos.
+   **Ação:** `sec` atualizar a spec após a decisão SEC→spec; `eng-software` alinhar fixture e asserções
+   Concordion após a aprovação humana. A aprovação permanece pendente em `## Perguntas`.
+   **Severidade:** bloqueante para encerrar a revisão dos artefatos de spec.
+
+4. **Regras de Negócio — artefato ausente.** `docs/specs/regras-negocio.md` não existe. A validação
+   inicial classificou a ausência como lacuna, e a resposta humana registrada em 2026-09-24 decidiu
+   criar o arquivo neste ciclo, com tarefa atribuída à curadoria. Não é uma decisão humana pendente.
+   **Ação:** `curador-produto` criar o artefato com base em regras aprovadas; se não houver fonte
+   aprovada, encaminhar a elicitação ao `analista` e ao humano, sem inferir regras.
+   **Severidade:** lacuna de documentação, impede encerrar a revisão.
+
+5. **README principal — dependências listadas; descrição do pin incompleta.** A tabela lista
+   `pytest-cov` na `.venv` via `requirements-dev.txt`; o arquivo declara `pytest-cov>=5,<8`, e o
+   bootstrap instala o pacote no ambiente da suíte. A entrada de ai-memory identifica Docker como
+   pré-requisito, e a seção anterior explica provisionamento e hooks pelo bootstrap. Porém, a seção
+   ai-memory diz apenas que a imagem usa `:latest`; o bootstrap agora acrescenta o digest da plataforma
+   linux/amd64 à referência.
+   **Ação:** `eng-software` explicitar no README a referência `latest@sha256` aprovada, sem alterar
+   código ou reabrir a decisão de pin.
+   **Severidade:** melhoria documental.
+
+### Veredicto
+
+**Lacunas a corrigir antes do encerramento.** A seção de testes e a convenção dos ADRs estão
+conformes. O destino de Regras de Negócio continua ausente, e a spec de segurança não cobre os pins,
+o endpoint via bridge nem o marcador externo de estado. A aprovação SEC→spec também continua pendente.
+Não editei `docs/README.md`: a correção prevista em E11(b) já está aplicada e a subseção está
+conforme.
 
 ### Correções finalização (eng) — 2026-09-27
 
@@ -3637,3 +5241,61 @@ tasks dependem de E7.
   gradle test -PproductSpecialty=seguranca --no-daemon` concluiu com
   `BUILD SUCCESSFUL`; `git diff --check` passou.
 - Não alterei `Status` nem os planos paralelos.
+
+### Revalidação finalização - 2026-09-27
+
+Escopo: revalidação dos achados da revisão final e criação de
+`docs/specs/regras-negocio.md`. Não executei suítes, não alterei `Status` e
+não toquei nos planos paralelos.
+
+### Checklist de evidências de curadoria
+
+- [x] Spec de segurança: `Seguranca.md` e `SegurancaFixture.groovy` conferem
+      pins, fallback da bridge, allowlist e marcador externo com `ai_memory.py`
+      e os testes existentes.
+- [x] Link do ADR-0007: o ADR aponta para
+      `tests/skills_mgmt/test_upstream_detect.py`, que existe.
+- [x] Digest no README: a referência linux/amd64 em `README.md` coincide com
+      `ai_memory.py` e `Seguranca.md`.
+- [x] Regras de Negócio: `docs/specs/regras-negocio.md` existe e registra
+      decisões do plano, ADRs, specs e testes existentes.
+- [ ] Consistência integral das regras: ADR-0008 ainda diverge sobre o efeito
+      do pin, conforme Achado 1.
+- [x] Suítes: não executei nenhuma suíte nesta revalidação, conforme a instrução.
+
+### Achado
+
+1. **ADR-0008 mantém uma consequência desatualizada sobre o digest.** O ADR
+   afirma que `:latest` pode divergir entre máquinas até uma instalação limpa.
+   O bootstrap agora qualifica `latest` pelo digest linux/amd64 aprovado, o que
+   fixa a imagem selecionada. A regra RN-003 registra o estado do código e da
+   spec, mas o ADR ainda não reflete a atualização de pin aprovada.
+   **Ação:** `eng-software` atualizar a decisão e as consequências do ADR-0008
+   para registrar o digest da plataforma. Conferir a fixture Concordion do ADR.
+   **Severidade:** bloqueante para declarar consistência documental completa.
+
+### Veredicto
+
+**Lacuna restante.** A spec de segurança, o link do ADR-0007 e o digest do
+README estão coerentes com o código consultado. O arquivo de regras foi criado.
+O ADR-0008 ainda descreve a imagem como sujeita a divergência entre máquinas;
+`eng-software` precisa atualizar o contrato antes do encerramento.
+
+### Fechamento docs (eng): 2026-09-27
+
+Escopo: resolvi a lacuna do Achado 1 da revalidação final. Não alterei código
+nem a fixture Concordion do ADR-0008.
+
+- O ADR-0008 registra a decisão humana de 2026-09-27, “usar a versão nova”,
+  após a revalidação do `sec`, com o digest linux/amd64 e o digest do índice OCI.
+- As consequências registram que a tag `latest` não atualiza a imagem
+  implicitamente. Upgrade exige decisão humana, revalidação de segurança e
+  atualização explícita dos pins do wrapper, do índice OCI e da plataforma.
+- A seção “Asserções executáveis” aponta para
+  `test_ai_memory_upstream_release_pins_match_reviewed_artifacts`. A fixture
+  Concordion não mudou, então não executei o Gradle da especialidade segurança.
+- O commit deste fechamento inclui o ADR-0008, o arquivo
+  `docs/specs/regras-negocio.md` criado pelo curador e este plano, que registra
+  somente atividades do ciclo 2.
+- `git diff --check` passou. A largura das linhas alteradas ficou em até 120
+  colunas. Não alterei os planos paralelos excluídos do escopo.

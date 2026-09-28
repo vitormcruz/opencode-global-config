@@ -23,8 +23,15 @@ depois de validar wrapper, imagem, container, volume e hooks. O bootstrap só
 permite a declaração MCP quando esse marcador existe.
 
 O wrapper vem de um release HTTPS do repositório oficial e passa por SHA-256
-fixado no código. A imagem permanece `akitaonrails/ai-memory:latest`, conforme
-decisão humana. O container solicita publicação de `127.0.0.1:49374`, monta
+fixado no código. Após a revalidação de segurança do `sec`, o humano decidiu
+“usar a versão nova” em 2026-09-27. A referência linux/amd64 aprovada é:
+
+`akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`
+
+O índice OCI validado tem o digest
+`sha256:a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9`.
+A referência preserva a tag `latest`, mas o digest fixa a imagem selecionada.
+O container solicita publicação de `127.0.0.1:49374`, monta
 `~/.local/share/ai-memory/` em `/data` e usa a rede Docker `internal`.
 O bootstrap inspeciona a publicação efetiva. Se o Docker não ativar o bind
 loopback nessa rede, o host usa o IPv4 privado do container na bridge
@@ -65,8 +72,11 @@ remove os wrappers e hooks gerados, remove as declarações gerenciadas, restaur
   local registra o endpoint e não altera o arquivo canônico.
 - O wrapper tem checksum esperado no código. Mudança de checksum bloqueia a
   substituição e informa como fazer backup antes do upgrade.
-- O bootstrap não atualiza uma imagem já presente; `:latest` pode divergir
-  entre máquinas até uma instalação limpa.
+- O bootstrap não atualiza uma imagem já presente. A imagem fixada por digest
+  não acompanha mudanças implícitas da tag `latest`.
+- Cada upgrade exige decisão humana e atualização explícita dos pins do wrapper,
+  do índice OCI e da plataforma, após revalidação de segurança. Esse processo
+  ocorreu em 2026-09-27, quando o humano aprovou “usar a versão nova”.
 - A rede internal impede rota de saída padrão para o container. Quando o Docker
   publica a porta, o host acessa pelo loopback. Sem publicação efetiva, o host
   acessa o IPv4 privado pela bridge internal; nenhum listener do host é aberto.
@@ -101,6 +111,8 @@ condicionalidade nos adapters e cobertura dos testes. A diretiva `assertEquals`
 fixa o veredito esperado.
 
 - [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+- `test_ai_memory_upstream_release_pins_match_reviewed_artifacts` verifica os
+  pins aprovados do wrapper, do índice OCI e da plataforma.
 - A spec `docs/specs/Seguranca.md` executa as asserções SEC-01..SEC-11 e
   SEC-21.
 - `tests/bootstrap/test_ai_memory_provision.py` usa fakes para download,
