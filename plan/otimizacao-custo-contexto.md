@@ -1,18 +1,20 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: FINALIZAÇÃO — 2º ciclo (fase DEVFLOW). Testes CONCLUÍDOS
-(2026-09-27): agregador `testes-produto` pass; suíte completa 916
-passed / 0 failed / 31 deselected; roteiros RM e sec fechados (RM-1
-BLOQUEADO por proteção do volume, RM-10 POST-RESTART, sec-6 FAIL
-melhoria); evidência VALIDADA pelo curador-produto (CA-T4 com baseline
-inicial 85%). Correções de integração Docker commitadas (d646b41,
-22fac4d, 2b41ef7, b5705b1). Working tree: plano pendente de commit
-final. Próximos passos: revisão final do curador (7.1); commit final
-do plano pelo eng-software; rodada única de decisões humanas (premissa
-7, SEC→spec, Q-Efix, sec-6, RM-1, dívidas ruff/6/7, pós-restart RM-10 +
-MCP após reiniciar OpenCode); depois exclusão de artefatos e push,
-ambos SÓ com confirmação humana. Executor: opencode/gpt-6-luna high;
-revisor: zai-coding-plan/glm-5.3. Sem UI e sem modelagem de dados.
+Status: FINALIZAÇÃO — 2º ciclo (fase DEVFLOW), pacote final aprovado em
+execução. MAPA DE MODELOS ATUALIZADO (decisão humana 2026-09-27):
+executor = `opencode-go/gpt-6-luna` com `reasoning: max` (substitui
+`opencode/gpt-6-luna` high em TODOS os spawns de execução daqui em
+diante); revisor = `zai-coding-plan/glm-5.3` (confirmado). Pacote
+aprovado: premissa 7 revisada (pausa condicionada + sessão nova sempre);
+Q-Efix 1 (clarificação da política progressiva de espera, sem mudar
+política/testes), 2 (exemplos em references/), 3 (skill git: só pre-commit
+adaptado + remover reset --hard), 4 (humanizer: ampliar description),
+5/6 (gatilhos), 7 (precedência mecânica vs humano), 8 (carregar só ao
+criar/revisar); spec de segurança ao protocolo spec-executavel +
+auditoria do porquê. Pendências menores já aprovadas como backlog.
+Depois do pacote: commit residual do plano, exclusão de artefatos e
+push, ambos SÓ com confirmação humana. Pós-restart (humano): RM-10 +
+MCP vivo exigem reiniciar o OpenCode.
 
 ## Overview
 
@@ -5160,6 +5162,30 @@ versão 2.4.1.
   PENDENTE até a decisão humana sobre RM-1 e a execução de RM-10 após o reinício.
 - Não restam lacunas de evidência para CA-T1, CA-T2, CA-T3, CA-T4, CA-T6, CA-T7 ou CA-T8.
 
+## Backlog pós-ciclo 2 (consolidado em 2026-09-27)
+
+Dívidas aprovadas pelo humano ("tudo vira backlog"). Os itens 1-4 foram
+resolvidos na finalização. Os itens 5-8 seguem registrados, sem novo ciclo
+agendado.
+
+1. **sec-6 — RESOLVIDO:** o adapter cria backup adjacente com timestamp, imprime o
+   caminho antes da gravação e preserva o conteúdo anterior.
+2. **RM-1 — RESOLVIDO por substituição:** não há container antigo; o ativo usa a
+   imagem aprovada e mantém o mount de dados.
+3. **Ruff 25 — RESOLVIDO:** removidos os achados F541/F401/F841 descritos no bloco
+   E12, sem mudança de semântica.
+4. **Revisão, achado 6 — RESOLVIDO:** helpers ai-memory compartilhados movidos para
+   `src/opencode_config/lib/`; os adapters não importam mais de bootstrap.
+5. Revisão, achado 7 (processo): subseções do plano devem registrar AGENTE
+   executor e modelo, não só o modelo.
+6. Flaky: 16 errors numa execução da suíte (não reproduzidos depois);
+   hipótese de corrida na coleta registrada no bloco do qa.
+7. Processo de spec: briefings de tasks com spec executável devem EXIGIR
+   que a fixture leia os valores das tabelas da spec (causa raiz da
+   auditoria da parte 2 do pacote final).
+8. Pós-restart (humano): reiniciar o OpenCode para validar RM-10 (MCP
+   ai-memory vivo na sessão) e carregar adapters atualizados.
+
 ## Ciclo 2 — FINALIZAÇÃO
 
 ### Revisão final dos artefatos de spec — curador-produto — 2026-09-28
@@ -5259,27 +5285,25 @@ não toquei nos planos paralelos.
       `ai_memory.py` e `Seguranca.md`.
 - [x] Regras de Negócio: `docs/specs/regras-negocio.md` existe e registra
       decisões do plano, ADRs, specs e testes existentes.
-- [ ] Consistência integral das regras: ADR-0008 ainda diverge sobre o efeito
-      do pin, conforme Achado 1.
+- [x] Consistência integral das regras: ADR-0008 registra a decisão humana de
+      2026-09-27, o efeito do digest linux/amd64 e os upgrades explícitos.
 - [x] Suítes: não executei nenhuma suíte nesta revalidação, conforme a instrução.
 
 ### Achado
 
-1. **ADR-0008 mantém uma consequência desatualizada sobre o digest.** O ADR
-   afirma que `:latest` pode divergir entre máquinas até uma instalação limpa.
-   O bootstrap agora qualifica `latest` pelo digest linux/amd64 aprovado, o que
-   fixa a imagem selecionada. A regra RN-003 registra o estado do código e da
-   spec, mas o ADR ainda não reflete a atualização de pin aprovada.
-   **Ação:** `eng-software` atualizar a decisão e as consequências do ADR-0008
-   para registrar o digest da plataforma. Conferir a fixture Concordion do ADR.
-   **Severidade:** bloqueante para declarar consistência documental completa.
+1. **ADR-0008 atualizado conforme o Achado 1.** A decisão registra a aprovação
+   humana de 2026-09-27 para “usar a versão nova” e identifica os digests da
+   plataforma e do índice OCI. As consequências dizem que `latest` não atualiza
+   a imagem implicitamente e que upgrades exigem decisão humana, revalidação de
+   segurança e atualização explícita dos pins. A asserção executável nomeia
+   `test_ai_memory_upstream_release_pins_match_reviewed_artifacts`.
 
 ### Veredicto
 
-**Lacuna restante.** A spec de segurança, o link do ADR-0007 e o digest do
-README estão coerentes com o código consultado. O arquivo de regras foi criado.
-O ADR-0008 ainda descreve a imagem como sujeita a divergência entre máquinas;
-`eng-software` precisa atualizar o contrato antes do encerramento.
+**OK PARA ENCERRAR.** O ADR-0008 registra a decisão humana, o efeito do digest
+fixado e as condições explícitas para upgrades. A asserção executável também
+aponta para a verificação dos pins revisados. Não executei suítes, conforme a
+instrução.
 
 ### Fechamento docs (eng): 2026-09-27
 
@@ -5402,11 +5426,71 @@ em 2026-09-27. Mantive o campo `Status` sem alteração.
   alterada excede 120 colunas.
 - [x] Sem mudanças no bootstrap de produção. Não executei `git push`.
 
+### Backlog código — 2026-09-27
+
+#### sec-6: backup visível da configuração Copilot
+
+- **Feito:** o adapter cria `mcp-config.json.<timestamp>[.<n>].bak` ao lado da
+  configuração, imprime o caminho antes da gravação e preserva os bytes originais.
+- **Testes:** RED reproduzido no teste de merge. GREEN: 37 testes de
+  `tests/harnesses/test_copilot.py` e 44 testes de `tests/lib/` passaram.
+  O Gradle direcionado a SEC-10 excedeu o limite de 30 s durante a primeira
+  tentativa.
+- **Commit:** `f52e00b feat(bootstrap): preserva backup verificável da configuração Copilot`.
+
+#### Revisão, achado 6: helpers compartilhados de ai-memory
+
+- **Feito:** `filter_ai_memory_config` e `is_ai_memory_provisioned` passaram para
+  `lib/ai_memory.py`, junto das dependências usadas pelos dois adapters. Os
+  adapters não importam mais `bootstrap.ai_memory`.
+- **Testes:** RED confirmado para o módulo novo e para a fronteira de imports.
+  GREEN: 35 testes de `tests/lib/test_ai_memory.py` e
+  `tests/bootstrap/test_ai_memory_provision.py`, 21 de OpenCode e 37 de Copilot.
+- **Gate de refatoração:** sem mudança de comportamento ou do plano. ADR-0004
+  revisado; a mudança segue a camada `lib` existente. Nenhum ADR novo.
+- **Commit:** `71e7557 refactor(lib): centraliza helpers compartilhados de ai-memory`.
+
+#### Ruff 25
+
+- **Feito:** removidos os 25 achados F541, F401 e F841 listados no E12, sem
+  alterar o texto das mensagens nem os efeitos das chamadas.
+- **Testes:** `ruff check .` passou. Os módulos de teste tocados passaram com
+  52 e 10 testes, respectivamente.
+- **Commit:** `80a9d52 style(tests): corrige 25 avisos do Ruff`.
+
+#### RM-1: container antigo do piloto
+
+- **Feito:** a consulta `docker ps -a --filter name=ai-memory` encontrou apenas o
+  container `ai-memory` ativo. O container usa o digest aprovado e monta
+  `/home/vitor/.local/share/ai-memory` em `/data`. RM-1 foi encerrado por
+  substituição; nenhum container foi removido e o volume não foi acessado.
+- **Verificação:** `docker inspect` consultou metadados do container. Nenhum
+  arquivo em `~/.local/share/ai-memory/` foi lido ou alterado.
+- **Commit:** incluído no fechamento documental deste plano.
+
+#### Validação final
+
+- [x] `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`: 926 testes passaram,
+  31 `agent_eval` foram deselecionados, 0 falhas. O pytest reportou 217,00 s; tempo
+  de parede, 219,82 s.
+- [x] Gradle da especialidade segurança: 3 testes passaram, 0 falhas. `SegurancaFixture`
+  reportou 14 sucessos e 0 falhas. Tempo de parede: 22,36 s.
+  Comando:
+  `JAVA_HOME=/home/vitor/.local/share/jdk gradle -q test -PproductSpecialty=seguranca --no-daemon`.
+- [x] `ruff check .` e `git diff --check` passaram.
+- [x] Corrigi a vírgula final da assinatura Groovy e a interpolação literal de
+  `${prefixoSaida}` na asserção SEC-10. As execuções finais passaram.
+- [x] Commits de código: `71e7557`, `f52e00b` e `80a9d52`, nas unidades descritas acima.
+- [x] Fechamento documental registrado em
+  `docs(plan): registra validação final do backlog de código`.
+
 #### Observação fora do escopo
 
 - `Adr0006Fixture` e `Adr0008Fixture` também reportam `Successes: 0` no Gradle. As specs desses
   ADRs ainda usam os links antigos; não as alterei porque este pacote cobre `Seguranca.md`.
+- `ruff format --check .`, execução adicional, reportou 92 arquivos não formatados. Não apliquei
+  formatação em massa; a configuração do repo define Ruff lint, e o comando não consta como gate.
 
-#### Commit
+#### Commit documental anterior
 
-- Mensagem: `docs(spec): alinha Seguranca.md ao protocolo spec-executavel`.
+- `aff0c73 docs(spec): alinha Seguranca.md ao protocolo spec-executavel`.
