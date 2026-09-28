@@ -408,6 +408,22 @@ Verificação: o protocolo de conferência no insumo distingue conferência
 manual (execução) da suíte automatizada (futura, no insumo de testes).
 Caso futuro da suíte de comunicação.
 
+**Achado 8 — Compatibilização na aplicação (aprovado).** O revisor apontou
+que a consolidação exigia cópia fiel sem etapa de compatibilização; o
+executor manteria trechos divergentes. Decisão do humano: a regra nova
+vale sobre o trecho antigo; o executor ajusta o trecho conflitante para
+seguir a regra nova, sem perguntar; volta ao humano só se o ajuste mudar
+comportamento que a regra nova não cobre. Ajuste na Task 1 (e no insumo):
+
+- Ao gravar cada regra no arquivo de destino, confira o arquivo por
+  trechos que conflitam com a regra nova e ajuste-os para segui-la: a
+  regra nova vale sobre o trecho antigo. Volte ao humano só se o ajuste
+  mudar comportamento que a regra nova não cobre.
+
+Verificação: ao aplicar cada regra, o executor confere o arquivo de
+destino e ajusta trechos conflitantes; nenhum trecho contradiz a regra
+aplicada. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
@@ -415,14 +431,18 @@ Caso futuro da suíte de comunicação.
 - [ ] **Task 1: Consolidar o insumo de revisão e ajuste.**
   - **Description:** criar
     `plan/insumo-revisao-comunicacao-planejamento-agentes.md`,
-    consolidando as regras da seção "Regras aprovadas" deste plano, com
-    texto completo, destino (arquivo e seção), protocolo de conferência
-    e instruções de execução ao `devflow` (ordem de aplicação, uma regra
-    por vez, conferência antes/depois). Estrutura do insumo: contexto de
-    origem; regras de comunicação (todos os agentes); regras de
-    planejamento (`smart-planner`, `devflow`, revisores); protocolo de
-    conferência; ordem de aplicação; casos de teste (referência à seção
-    nova do insumo de testes).
+    consolidando as regras das seções "Regras aprovadas" e "Ajustes da
+    revisão independente" deste plano, com texto completo, destino
+    (arquivo e seção), protocolo de conferência e instruções de execução
+    ao `devflow` (ordem de aplicação, uma regra por vez, conferência
+    antes/depois, compatibilização na aplicação). Estrutura do insumo:
+    contexto de origem; regras de comunicação (todos os agentes); regras
+    de planejamento (`smart-planner`, `devflow`, revisores); protocolo de
+    conferência; ordem de aplicação; compatibilização na aplicação
+    (regra nova vale sobre trecho antigo; conferir arquivo de destino por
+    conflitos; voltar ao humano só se o ajuste mudar comportamento não
+    coberto); casos de teste (referência à seção nova do insumo de
+    testes).
   - **Acceptance criteria:**
     - [ ] Todas as regras da seção "Regras aprovadas" estão no insumo,
           com texto idêntico ao aprovado e destino por arquivo e seção.
@@ -469,6 +489,9 @@ Caso futuro da suíte de comunicação.
     consenso).
   - **Acceptance criteria:**
     - [ ] Uma regra aprovada, um caso correspondente.
+    - [ ] Cobertura por regra: regra global de comunicação e protocolo
+          de perguntas, caso com um agente; regra específica, caso com o
+          agente afetado (`smart-planner`, `devflow`, `rev`, `revisor`).
     - [ ] Separação comunicação/planejamento respeitada.
     - [ ] Seções existentes não renumeradas; decisões existentes não
           alteradas.
