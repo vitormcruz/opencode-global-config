@@ -1,103 +1,205 @@
 # Specs executáveis de segurança
 
-As decisões de segurança e os caminhos de execução devem permanecer
-explícitos. A verificação da especialidade é
-[executada pela fixture](#execute=executarVerificacoes()).
+As tabelas definem as entradas e os resultados esperados. A fixture lê cada
+valor da spec e confere o código, a configuração e os testes relacionados.
+Os requisitos de segurança registrados para E10 são a [origem][origem-sec].
 
-O veredito esperado é [pass](#assertEquals=veredito).
+[origem-sec]:
+  ../../plan/otimizacao-custo-contexto.md#e10--ai-memory-no-bootstrap-e-config-canônica
+
+[Executar todas as verificações](- "executarVerificacoes()").
 
 ## Provisionamento local do ai-memory
 
-O provisionamento não habilita MCP antes de concluir wrapper, container,
-volume e hooks. As verificações abaixo cobrem os controles SEC-01..SEC-11 e
-SEC-21. Os testes pytest fornecem fixtures locais e não iniciam Docker.
+O provisionamento habilita o MCP somente depois de validar wrapper, container,
+rede, volume e hooks. Os testes pytest usam fakes e não iniciam Docker.
 
-### SEC-01 — Origem e TLS
+### SEC-01: Origem e TLS (origem: [requisitos de E10][origem-sec])
 
-No POSIX, o wrapper vem da release oficial `v2.4.1`, por URL HTTPS fixa do
-GitHub. O download mantém a validação TLS. O veredito é
-[pass](#assertEquals=vereditoSec01) após
-[executar a verificação](#execute=verificarSec01()).
+O wrapper vem da release oficial por HTTPS, com validação TLS ativa.
 
-### SEC-02 — Integridade do wrapper e pin da imagem
+| Entrada | Resultado esperado |
+|---|---|
+| Versão da release | `v2.4.1` |
+| URL de download | `https://github.com/akitaonrails/ai-memory/releases/download/v2.4.1/ai-memory-wrapper` |
+| Esquema da URL | `https` |
+| Veredito | [pass](- "?=vereditoSec01") |
 
-O bootstrap valida o wrapper pelo SHA-256
-`49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`.
-O código registra o digest do índice OCI
-`a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9` e
-usa a referência linux/amd64
-`akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
-O veredito é [pass](#assertEquals=vereditoSec02) após
-[executar a verificação](#execute=verificarSec02()).
+[Executar SEC-01](- "verificarSec01()").
 
-### SEC-03 — Bind de loopback
+### SEC-02: Integridade do wrapper e pin da imagem (origem: [requisitos de E10][origem-sec])
 
-O container publica a porta 49374 somente em `127.0.0.1`. Se Docker não
-publicar a porta, o bootstrap usa o IPv4 privado do container na rede
-`ai-memory-internal` como endpoint MCP, no formato
-`http://<ipv4-da-bridge>:49374/mcp`. O fallback não publica porta no host.
-O container define `AI_MEMORY_ALLOWED_HOSTS` com `localhost`, `127.0.0.1`,
-`::1`, `host.docker.internal` e o próprio IPv4. O probe HTTP aceita `405`
-após a validação de Host e rejeita `403`.
-O veredito é [pass](#assertEquals=vereditoSec03) após
-[executar a verificação](#execute=verificarSec03()).
+O bootstrap aceita o wrapper somente quando o SHA-256 corresponde ao pin.
+A referência da imagem mantém o digest linux/amd64 aprovado.
 
-### SEC-04 — Porta ocupada
+| Entrada | Resultado esperado |
+|---|---|
+| SHA-256 do wrapper | `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6` |
+| Digest do índice OCI | `a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9` |
+| Tag da imagem | `akitaonrails/ai-memory:latest` |
+| Digest linux/amd64 | `5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e` |
+| Referência | `akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e` |
+| Veredito | [pass](- "?=vereditoSec02") |
 
-A porta ocupada interrompe a criação e produz instrução acionável.
-O veredito é [pass](#assertEquals=vereditoSec04) após
-[executar a verificação](#execute=verificarSec04()).
+[Executar SEC-02](- "verificarSec02()").
 
-### SEC-05 — Drift do plugin
+### SEC-03: Bind de loopback e fallback (origem: [requisitos de E10][origem-sec])
 
-Drift do hash do plugin gerado produz aviso explícito.
-O veredito é [pass](#assertEquals=vereditoSec05) após
-[executar a verificação](#execute=verificarSec05()).
+O container publica a porta somente no loopback. Sem publicação efetiva, o
+bootstrap usa o IPv4 privado da bridge e valida o Host antes de habilitar MCP.
 
-### SEC-06 — Idempotência e upgrade
+| Entrada | Resultado esperado |
+|---|---|
+| Host do bind loopback | `127.0.0.1` |
+| Porta MCP | `49374` |
+| Bind Docker | `127.0.0.1:49374:49374` |
+| URL MCP no loopback | `http://127.0.0.1:49374/mcp` |
+| URL de bridge no teste | `http://172.30.0.2:49374/mcp` |
+| Hosts permitidos | `localhost,127.0.0.1,::1,host.docker.internal,$container_ip` |
+| Status HTTP aceito | `405` |
+| Status HTTP rejeitado | `403` |
+| Veredito | [pass](- "?=vereditoSec03") |
 
-A segunda execução não baixa wrapper nem imagem. Hash divergente bloqueia
-upgrade silencioso.
-O veredito é [pass](#assertEquals=vereditoSec06) após
-[executar a verificação](#execute=verificarSec06()).
+[Executar SEC-03](- "verificarSec03()").
 
-### SEC-07 — Dados sensíveis
+### SEC-04: Porta ocupada (origem: [requisitos de E10][origem-sec])
 
-O volume contém dados sensíveis. O diretório POSIX permite acesso somente ao
-usuário e permanece após rollback. O marcador `.bootstrap-mcp-url` fica em
-`~/.local/state/ai-memory/`, fora do volume `~/.local/share/ai-memory/`.
-O veredito é [pass](#assertEquals=vereditoSec07) após
-[executar a verificação](#execute=verificarSec07()).
+Uma porta ocupada interrompe o provisionamento antes da criação do container.
+O bootstrap informa como liberar o bind.
 
-### SEC-08 — Rollback
+| Entrada | Resultado esperado |
+|---|---|
+| Host ocupado | `127.0.0.1` |
+| Porta ocupada | `49374` |
+| Endereço ocupado | `127.0.0.1:49374` |
+| Trecho da mensagem | `libere a porta antes de reexecutar` |
+| Veredito | [pass](- "?=vereditoSec04") |
 
-O rollback remove container, hooks e MCP, restaura jsonc e preserva o volume.
-O veredito é [pass](#assertEquals=vereditoSec08) após
-[executar a verificação](#execute=verificarSec08()).
+[Executar SEC-04](- "verificarSec04()").
 
-### SEC-09 — Docker ausente
+### SEC-05: Drift do plugin (origem: [requisitos de E10][origem-sec])
 
-Docker ausente interrompe o provisionamento e não declara MCP em nenhum harness.
-O veredito é [pass](#assertEquals=vereditoSec09) após
-[executar a verificação](#execute=verificarSec09()).
+O bootstrap informa quando o instalador altera o hash do plugin gerado.
 
-### SEC-10 — Merge Copilot
+| Entrada | Resultado esperado |
+|---|---|
+| Caminho do plugin | `~/.config/opencode/plugins/ai-memory.ts` |
+| Aviso de drift | `AVISO: o hash de ai-memory.ts mudou após install-hooks` |
+| Veredito | [pass](- "?=vereditoSec05") |
 
-O merge Copilot preserva servers existentes e cria backup antes da escrita.
-O veredito é [pass](#assertEquals=vereditoSec10) após
-[executar a verificação](#execute=verificarSec10()).
+[Executar SEC-05](- "verificarSec05()").
 
-### SEC-11 — Segredos
+### SEC-06: Idempotência e upgrade (origem: [requisitos de E10][origem-sec])
 
-A declaração canônica não contém credenciais.
-O veredito é [pass](#assertEquals=vereditoSec11) após
-[executar a verificação](#execute=verificarSec11()).
+Uma segunda execução não baixa o wrapper nem puxa a imagem novamente. Um hash
+divergente bloqueia a substituição até o backup e a reexecução explícitos.
 
-### SEC-21 — Egress
+| Entrada | Resultado esperado |
+|---|---|
+| Execuções do provisionamento | `2` |
+| Downloads totais do wrapper | `1` |
+| Pulls totais da imagem | `1` |
+| Upgrade com hash divergente | `bloqueado` |
+| Trecho da instrução de backup | `backup` |
+| Trecho da instrução de reexecução | `reexecute` |
+| Veredito | [pass](- "?=vereditoSec06") |
 
-O container usa a rede Docker `internal`, sem rota de saída padrão. O fallback
-de SEC-03 usa o IPv4 privado dessa rede e não altera o isolamento.
-O veredito é [pass](#assertEquals=vereditoSec21) após
-[executar a verificação](#execute=verificarSec21()).
+[Executar SEC-06](- "verificarSec06()").
 
-O veredito agregado dessas asserções é [pass](#assertEquals=vereditoAiMemory).
+### SEC-07: Dados sensíveis (origem: [requisitos de E10][origem-sec])
+
+O volume contém dados sensíveis. No POSIX, o bootstrap restringe o acesso ao
+usuário. O marcador MCP fica fora do volume e o rollback preserva os dados.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Diretório de dados | `~/.local/share/ai-memory/` |
+| Marcador MCP | `~/.local/state/ai-memory/.bootstrap-mcp-url` |
+| Modo POSIX | `0700` |
+| Conteúdo após rollback | `preserved` |
+| Veredito | [pass](- "?=vereditoSec07") |
+
+[Executar SEC-07](- "verificarSec07()").
+
+### SEC-08: Rollback (origem: [requisitos de E10][origem-sec])
+
+O rollback remove os artefatos gerenciados, restaura a configuração anterior e
+preserva o volume.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Comando de rollback | `--rollback-ai-memory` |
+| Configuração restaurada | `~/.config/opencode/opencode.jsonc` |
+| Marcador removido | `~/.local/state/ai-memory/.bootstrap-mcp-url` |
+| Volume preservado | `~/.local/share/ai-memory/` |
+| Arquivo de dados preservado | `memory.sqlite` |
+| Veredito | [pass](- "?=vereditoSec08") |
+
+[Executar SEC-08](- "verificarSec08()").
+
+### SEC-09: Docker ausente (origem: [requisitos de E10][origem-sec])
+
+Sem Docker, o bootstrap desativa a declaração MCP nos dois harnesses e informa
+uma instalação em user-space sem elevação.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Condição | `Docker ausente` |
+| Chave MCP | `ai-memory` |
+| Resultado OpenCode | `ausente` |
+| Resultado Copilot | `ausente` |
+| Instrução sem elevação | `não use sudo` |
+| Veredito | [pass](- "?=vereditoSec09") |
+
+[Executar SEC-09](- "verificarSec09()").
+
+### SEC-10: Merge Copilot (origem: [requisitos de E10][origem-sec])
+
+O adapter preserva servidores existentes e cria backup antes de gravar a
+declaração ai-memory.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Arquivo de configuração Copilot | `~/.copilot/mcp-config.json` |
+| Servidor preexistente | `existing-server` |
+| URL preexistente | `http://127.0.0.1:49375/mcp` |
+| URL MCP ai-memory | `http://127.0.0.1:49374/mcp` |
+| Arquivo de backup | `mcp-config.json` |
+| Veredito | [pass](- "?=vereditoSec10") |
+
+[Executar SEC-10](- "verificarSec10()").
+
+### SEC-11: Segredos (origem: [requisitos de E10][origem-sec])
+
+O arquivo canônico declara o MCP sem campos de credencial.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Arquivo canônico | `harness-conf/opencode.json` |
+| Chave MCP | `ai-memory` |
+| URL MCP canônica | `http://127.0.0.1:49374/mcp` |
+| Campos de credencial | `headers,environment,token,apiKey` |
+| Veredito | [pass](- "?=vereditoSec11") |
+
+[Executar SEC-11](- "verificarSec11()").
+
+### SEC-21: Egress (origem: [requisitos de E10][origem-sec])
+
+O container usa uma rede Docker sem rota de saída padrão. O fallback da SEC-03
+continua dentro da bridge privada.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Rede Docker | `ai-memory-internal` |
+| Opção de isolamento | `--internal` |
+| Estado internal esperado | `true` |
+| Rota padrão de saída | `sem rota de saída padrão` |
+| Veredito | [pass](- "?=vereditoSec21") |
+
+[Executar SEC-21](- "verificarSec21()").
+
+O veredito agregado é [pass](- "?=vereditoAiMemory").
+
+[Verificar o veredito agregado](- "executarVerificacoesAiMemory()").
+
+O veredito da spec é [pass](- "?=veredito").

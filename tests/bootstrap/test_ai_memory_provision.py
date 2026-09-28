@@ -6,6 +6,7 @@ from hashlib import sha256
 from io import StringIO
 import json
 from pathlib import Path
+import re
 import stat
 from urllib.error import HTTPError
 
@@ -1022,11 +1023,143 @@ def test_ai_memory_security_spec_and_adr_declare_executable_assertions(
     build = (repo_root / "build.gradle").read_text(encoding="utf-8")
     for requirement in [*(f"SEC-{number:02d}" for number in range(1, 12)), "SEC-21"]:
         assert requirement in security_spec
-    assert "#execute=verificarSec01()" in security_spec
+    assert '[Executar SEC-01](- "verificarSec01()")' in security_spec
     assert "Asserções executáveis" in adr
     assert "executarVerificacoes()" in adr
     assert fixture.is_file()
     assert "Adr0008Fixture" in build
+
+
+def _read_security_spec_table(repo_root: Path, requirement: str) -> dict[str, str]:
+    spec = (repo_root / "docs" / "specs" / "Seguranca.md").read_text(encoding="utf-8")
+    section = re.search(
+        rf"^### {re.escape(requirement)}[^\n]*\n(?P<body>.*?)(?=^### |\Z)",
+        spec,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert section is not None, f"Seção ausente: {requirement}"
+
+    linhas = [
+        linha.strip()
+        for linha in section.group("body").splitlines()
+        if linha.strip().startswith("|")
+    ]
+    assert linhas, f"Tabela ausente: {requirement}"
+
+    def celulas(linha: str) -> list[str]:
+        return [valor.strip() for valor in linha.strip().strip("|").split("|")]
+
+    colunas = celulas(linhas[0])
+    assert colunas == ["Entrada", "Resultado esperado"]
+
+    valores: dict[str, str] = {}
+    for linha in linhas[1:]:
+        campos = celulas(linha)
+        if all(re.fullmatch(r":?-{3,}:?", campo) for campo in campos):
+            continue
+        assert len(campos) == len(colunas), f"Linha inválida em {requirement}: {linha}"
+        entrada, esperado = campos
+        link = re.fullmatch(
+            r'\[([^\]]+)\]\(-\s+"(?:\?=|c:assert-equals=)[^"]+"\)',
+            esperado,
+        )
+        codigo = re.fullmatch(r"`([^`]+)`", esperado)
+        if link:
+            esperado = link.group(1)
+        elif codigo:
+            esperado = codigo.group(1)
+        elif entrada == "Veredito":
+            pytest.fail(f"Assert-equals Concordion inválido em {requirement}: {linha}")
+        assert entrada and esperado, f"Valor vazio em {requirement}: {linha}"
+        assert entrada not in valores, f"Entrada duplicada em {requirement}: {entrada}"
+        valores[entrada] = esperado
+    return valores
+
+
+@pytest.mark.unit
+def test_ai_memory_security_spec_tables_use_bootstrap_values(
+    repo_root: Path,
+    tmp_path: Path,
+) -> None:
+    security_spec = (repo_root / "docs" / "specs" / "Seguranca.md").read_text(
+        encoding="utf-8"
+    )
+    requirements = [
+        *(f"SEC-{number:02d}" for number in range(1, 12)),
+        "SEC-21",
+    ]
+    tabelas = {
+        requirement: _read_security_spec_table(repo_root, requirement)
+        for requirement in requirements
+    }
+    for requirement, tabela in tabelas.items():
+        numero = requirement[-2:]
+        assert tabela.get("Veredito") == "pass"
+        assert f'[Executar {requirement}](- "verificarSec{numero}()")' in security_spec
+    assert (
+        '[Executar todas as verificações](- "executarVerificacoes()")' in security_spec
+    )
+    assert (
+        '[Verificar o veredito agregado](- "executarVerificacoesAiMemory()")'
+        in security_spec
+    )
+
+    paths = make_context(tmp_path / "security-spec-home").paths
+    volume = ai_memory.ai_memory_data_directory(paths)
+    marcador = ai_memory._mcp_url_marker(paths)
+    allowed_hosts = re.search(
+        r'AI_MEMORY_ALLOWED_HOSTS="([^"]+)"',
+        ai_memory.AI_MEMORY_CONTAINER_START_SCRIPT,
+    )
+    assert allowed_hosts is not None
+
+    diretório_dados = volume / "spec-probe"
+    ai_memory._secure_data_directory(diretório_dados, EnvironmentKind.LINUX)
+    modo = f"{stat.S_IMODE(diretório_dados.stat().st_mode):04o}"
+
+    valores_atuais = {
+        ("SEC-01", "Versão da release"): ai_memory.AI_MEMORY_WRAPPER_VERSION,
+        ("SEC-01", "URL de download"): ai_memory.AI_MEMORY_WRAPPER_URL,
+        ("SEC-02", "SHA-256 do wrapper"): ai_memory.AI_MEMORY_WRAPPER_SHA256,
+        ("SEC-02", "Digest do índice OCI"): ai_memory.AI_MEMORY_IMAGE_MANIFEST_SHA256,
+        ("SEC-02", "Digest linux/amd64"): ai_memory.AI_MEMORY_IMAGE_LINUX_AMD64_SHA256,
+        ("SEC-02", "Referência"): ai_memory.AI_MEMORY_IMAGE,
+        ("SEC-03", "Host do bind loopback"): ai_memory.AI_MEMORY_HOST,
+        ("SEC-03", "Porta MCP"): str(ai_memory.AI_MEMORY_PORT),
+        (
+            "SEC-03",
+            "Bind Docker",
+        ): f"{ai_memory.AI_MEMORY_HOST}:{ai_memory.AI_MEMORY_PORT}:"
+        f"{ai_memory.AI_MEMORY_PORT}",
+        ("SEC-03", "URL MCP no loopback"): ai_memory.AI_MEMORY_MCP_URL,
+        ("SEC-03", "Hosts permitidos"): allowed_hosts.group(1),
+        ("SEC-04", "Host ocupado"): ai_memory.AI_MEMORY_HOST,
+        ("SEC-04", "Porta ocupada"): str(ai_memory.AI_MEMORY_PORT),
+        (
+            "SEC-07",
+            "Diretório de dados",
+        ): f"~/{volume.relative_to(paths.home).as_posix()}/",
+        ("SEC-07", "Marcador MCP"): f"~/{marcador.relative_to(paths.home).as_posix()}",
+        ("SEC-07", "Modo POSIX"): modo,
+        ("SEC-11", "URL MCP canônica"): ai_memory.AI_MEMORY_MCP_URL,
+        ("SEC-21", "Rede Docker"): ai_memory.AI_MEMORY_NETWORK,
+    }
+    for (requirement, entrada), valor_atual in valores_atuais.items():
+        assert tabelas[requirement][entrada] == valor_atual
+
+    fixture = repo_root / "src" / "test" / "groovy" / "SegurancaFixture.groovy"
+    fixture_source = fixture.read_text(encoding="utf-8")
+    valores_sem_cópia = [
+        ("SEC-01", "Versão da release"),
+        ("SEC-02", "SHA-256 do wrapper"),
+        ("SEC-02", "Digest do índice OCI"),
+        ("SEC-02", "Digest linux/amd64"),
+        ("SEC-03", "Porta MCP"),
+        ("SEC-03", "URL de bridge no teste"),
+        ("SEC-07", "Marcador MCP"),
+    ]
+    for requirement, entrada in valores_sem_cópia:
+        assert tabelas[requirement][entrada] not in fixture_source
 
 
 @pytest.mark.unit

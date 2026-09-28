@@ -5353,3 +5353,60 @@ em 2026-09-27. Mantive o campo `Status` sem alteração.
 - `f46e294` `docs(skills): adapta comandos pre-commit ao repo`
 - `b3d6936` `docs(skills): amplia uso geral do humanizer`
 - Este registro: `docs(plan): registra pacote final workflow e skills`.
+
+### Pacote final (spec segurança) — 2026-09-27
+
+#### Auditoria da causa raiz
+
+- Sim, a task E10 pediu converter SEC-01..SEC-11 e SEC-21 em asserções da spec executável
+  `docs/specs/Seguranca.md`. O briefing não exigiu carregar `spec-executavel` nem definiu que a
+  fixture leria os valores das tabelas.
+- A skill existia: a auditoria E7, em 2026-09-27, a lista entre as skills locais. O registro E10
+  não informa se ela foi carregada. Não há evidência de omissão deliberada ou pressa.
+- A causa comprovada foi uma lacuna no protocolo e na validação: a spec usava links `#execute=...`
+  e `#assertEquals=...`, que Concordion-Markdown tratava como links comuns. Gradle reportou
+  `Successes: 0, Failures: 0`. A fixture guardava valores à parte, em Groovy, e a guarda pytest
+  validava presença de IDs e links, não a ligação spec → teste.
+
+#### Correção aplicada
+
+- Reescrevi `docs/specs/Seguranca.md` com tabelas de entrada e resultado esperado para cada SEC.
+  As tabelas contêm URLs, hashes, digests, bind, hosts, caminhos e demais valores usados nos testes.
+- Troquei os links fragmentados pela sintaxe Concordion-Markdown executável. O veredito agora muda
+  quando a fixture rejeita um valor da tabela.
+- Atualizei `src/test/groovy/SegurancaFixture.groovy` para ler cada tabela e comparar seus valores
+  com código, configuração e testes. A fixture não mantém cópias dos valores de release, hashes,
+  digests, porta, hosts ou marcador.
+- Atualizei `tests/bootstrap/test_ai_memory_provision.py` para validar a estrutura das tabelas,
+  conferir os valores contra o bootstrap e exigir links Concordion válidos para as 12 verificações.
+- Consultei `docs/README.md` e `harness-conf/agents/references/principios-documentacao.md`.
+  Mantive a spec no destino existente e não criei outro artefato ou ADR.
+
+#### Gate de refatoração
+
+- Sem alteração de comportamento do bootstrap ou decisão de domínio. Corrigir a sintaxe Concordion
+  foi necessário para executar as asserções previstas em E10. Não criei ADR.
+
+#### Evidências de Testes — FINALIZAÇÃO (spec segurança)
+
+- [x] RED: o novo teste falhou antes da criação das tabelas, com 1 failed e 27 deselected.
+  A guarda da sintaxe Concordion também falhou com 2 failed e 26 deselected antes da correção.
+- [x] Mutação: trocar temporariamente a porta da tabela SEC-03 de `49374` para `49375` fez o
+  Gradle falhar. Restaurei `49374` e a execução final passou.
+- [x] Pytest: `.venv/bin/pytest tests/bootstrap/test_ai_memory_provision.py -m all -q`,
+  28 passed.
+- [x] Concordion: `JAVA_HOME=/home/vitor/.local/share/jdk gradle -q test
+  -PproductSpecialty=seguranca --no-daemon`, 3 fixtures passaram. `SegurancaFixture` reportou
+  14 sucessos e 0 falhas.
+- [x] Ruff check e format passaram no módulo pytest. `git diff --check` passou. Nenhuma linha
+  alterada excede 120 colunas.
+- [x] Sem mudanças no bootstrap de produção. Não executei `git push`.
+
+#### Observação fora do escopo
+
+- `Adr0006Fixture` e `Adr0008Fixture` também reportam `Successes: 0` no Gradle. As specs desses
+  ADRs ainda usam os links antigos; não as alterei porque este pacote cobre `Seguranca.md`.
+
+#### Commit
+
+- Mensagem: `docs(spec): alinha Seguranca.md ao protocolo spec-executavel`.
