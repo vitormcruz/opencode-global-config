@@ -44,7 +44,7 @@ upstream é executado.
 - A busca do histórico completo ocorre somente quando o SHA base está ausente
   do clone shallow.
 - A fixture Concordion deste ADR valida a presença do comando e das guardas de
-  comportamento em `tests/skills_mgmt/test_detect.py`.
+  comportamento em `tests/skills_mgmt/test_upstream_detect.py`.
 
 ## Alternativas rejeitadas
 

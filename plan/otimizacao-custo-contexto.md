@@ -3616,3 +3616,24 @@ tasks dependem de E7.
 - `.venv/bin/pytest tests/agents/ -m all -q`: 182 passed em 4,90 s.
 - Não rodei a suíte completa. Não alterei código, `Status` ou
   `plan/insumo-devflow-spawn-dinamico.md`. Não criei commit.
+
+## Ciclo 2 — FINALIZAÇÃO
+
+### Correções finalização (eng) — 2026-09-27
+
+- Atualizei `docs/specs/Seguranca.md` para descrever o wrapper `v2.4.1`, os
+  digests da imagem, o endpoint IPv4 da bridge, a allowlist de Host e o marcador
+  fora do volume. Mantive as verificações SEC-03 e SEC-21.
+- Alinhei `SegurancaFixture.groovy` aos literais documentados, ao código e aos
+  testes que cobrem os pins, o fallback, a allowlist e o marcador.
+- Corrigi no ADR-0007 o caminho para `tests/skills_mgmt/test_upstream_detect.py`.
+- Registrei no `README.md` a referência da imagem com digest linux/amd64.
+- A instrução de finalização aprovou o alinhamento SEC→spec solicitado pelo
+  curador-produto.
+- Não criei `docs/specs/regras-negocio.md`; essa ação permanece com
+  `curador-produto`.
+- Evidências: `.venv/bin/pytest tests/bootstrap/test_ai_memory_provision.py
+  -m all -q` passou com 27 testes; `JAVA_HOME=/home/vitor/.local/share/jdk
+  gradle test -PproductSpecialty=seguranca --no-daemon` concluiu com
+  `BUILD SUCCESSFUL`; `git diff --check` passou.
+- Não alterei `Status` nem os planos paralelos.

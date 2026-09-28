@@ -14,19 +14,31 @@ SEC-21. Os testes pytest fornecem fixtures locais e não iniciam Docker.
 
 ### SEC-01 — Origem e TLS
 
-O wrapper vem de URL HTTPS fixa no GitHub. O download mantém a validação TLS.
-O veredito é [pass](#assertEquals=vereditoSec01) após
+No POSIX, o wrapper vem da release oficial `v2.4.1`, por URL HTTPS fixa do
+GitHub. O download mantém a validação TLS. O veredito é
+[pass](#assertEquals=vereditoSec01) após
 [executar a verificação](#execute=verificarSec01()).
 
-### SEC-02 — Integridade do wrapper
+### SEC-02 — Integridade do wrapper e pin da imagem
 
-O bootstrap valida o wrapper por SHA-256 fixado no código.
+O bootstrap valida o wrapper pelo SHA-256
+`49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6`.
+O código registra o digest do índice OCI
+`a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9` e
+usa a referência linux/amd64
+`akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
 O veredito é [pass](#assertEquals=vereditoSec02) após
 [executar a verificação](#execute=verificarSec02()).
 
 ### SEC-03 — Bind de loopback
 
-O container publica a porta 49374 somente em 127.0.0.1.
+O container publica a porta 49374 somente em `127.0.0.1`. Se Docker não
+publicar a porta, o bootstrap usa o IPv4 privado do container na rede
+`ai-memory-internal` como endpoint MCP, no formato
+`http://<ipv4-da-bridge>:49374/mcp`. O fallback não publica porta no host.
+O container define `AI_MEMORY_ALLOWED_HOSTS` com `localhost`, `127.0.0.1`,
+`::1`, `host.docker.internal` e o próprio IPv4. O probe HTTP aceita `405`
+após a validação de Host e rejeita `403`.
 O veredito é [pass](#assertEquals=vereditoSec03) após
 [executar a verificação](#execute=verificarSec03()).
 
@@ -52,7 +64,8 @@ O veredito é [pass](#assertEquals=vereditoSec06) após
 ### SEC-07 — Dados sensíveis
 
 O volume contém dados sensíveis. O diretório POSIX permite acesso somente ao
-usuário e permanece após rollback.
+usuário e permanece após rollback. O marcador `.bootstrap-mcp-url` fica em
+`~/.local/state/ai-memory/`, fora do volume `~/.local/share/ai-memory/`.
 O veredito é [pass](#assertEquals=vereditoSec07) após
 [executar a verificação](#execute=verificarSec07()).
 
@@ -82,7 +95,8 @@ O veredito é [pass](#assertEquals=vereditoSec11) após
 
 ### SEC-21 — Egress
 
-O container usa rede Docker internal, sem rota de saída padrão.
+O container usa a rede Docker `internal`, sem rota de saída padrão. O fallback
+de SEC-03 usa o IPv4 privado dessa rede e não altera o isolamento.
 O veredito é [pass](#assertEquals=vereditoSec21) após
 [executar a verificação](#execute=verificarSec21()).
 

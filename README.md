@@ -97,9 +97,10 @@ sync.
 ### ai-memory
 
 O bootstrap provisiona o ai-memory em user-space quando Docker está
-disponível. O wrapper vem de um release oficial do GitHub e passa por
-validação SHA-256 fixada no código. A imagem continua em `:latest`, conforme
-decisão do produto. O container solicita publicação em `127.0.0.1:49374` e
+disponível. O wrapper POSIX vem da release `v2.4.1` do GitHub e passa por
+validação SHA-256 fixada no código. O container usa a imagem
+`akitaonrails/ai-memory:latest@sha256:5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e`.
+O container solicita publicação em `127.0.0.1:49374` e
 usa uma rede Docker `internal`, sem rota de saída padrão. Se o Docker não
 materializar a publicação nessa rede, o bootstrap usa o IPv4 privado do
 container na bridge internal, após validar a conectividade do host. Esse
