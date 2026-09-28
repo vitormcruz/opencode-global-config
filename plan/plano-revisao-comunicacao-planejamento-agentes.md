@@ -513,27 +513,32 @@ nenhuma instrução de execução aparece como caso.
 - [ ] **Task 1: Consolidar o insumo de revisão e ajuste.**
   - **Description:** criar
     `plan/insumo-revisao-comunicacao-planejamento-agentes.md`,
-    consolidando as regras das seções "Regras aprovadas" e "Ajustes da
-    revisão independente" deste plano, com texto completo, destino
+    consolidando as regras e instruções das três seções de decisões
+    deste plano ("Regras aprovadas", "Ajustes da revisão independente" e
+    "Ajustes da segunda rodada de revisão"), com texto completo, destino
     (arquivo e seção), protocolo de conferência e instruções de execução
     ao `devflow` (ordem de aplicação, uma regra por vez, conferência
-    antes/depois, compatibilização na aplicação). Estrutura do insumo:
+    antes/depois, compatibilização na aplicação, sincronização de
+    agente/workflow/testes, commit do plano pelo orquestrador, evidência
+    da conferência). Estrutura do insumo:
     contexto de origem; regras de comunicação (todos os agentes); regras
     de planejamento (`smart-planner`, `devflow`, revisores); protocolo de
-    conferência; ordem de aplicação; compatibilização na aplicação
+    conferência com evidência; ordem de aplicação; compatibilização na aplicação
     (regra nova vale sobre trecho antigo; conferir arquivo de destino por
     conflitos; voltar ao humano só se o ajuste mudar comportamento não
-    coberto); casos de teste (referência à seção nova do insumo de
-    testes).
+    coberto); sincronização de agente, workflow e testes; casos de teste
+    (referência à seção nova do insumo de testes).
   - **Acceptance criteria:**
-    - [ ] Todas as regras da seção "Regras aprovadas" estão no insumo,
-          com texto idêntico ao aprovado e destino por arquivo e seção.
+    - [ ] Todas as regras e instruções das três seções de decisões estão
+          no insumo, com texto idêntico ao aprovado e destino por
+          arquivo e seção.
     - [ ] Nenhuma regra além das aprovadas; nada inventado.
-    - [ ] Protocolo de conferência e ordem de aplicação incluídos.
+    - [ ] Protocolo de conferência (com evidência), ordem de aplicação,
+          sincronização e commit do plano incluídos.
     - [ ] Autocontido: sem citar identificadores, números de item ou
           vocabulário interno deste plano.
   - **Verification:**
-    - [ ] Conferência item a item contra a seção "Regras aprovadas".
+    - [ ] Conferência item a item contra as três seções de decisões.
     - [ ] Busca por referências internas ao plano (números de item,
           "ramo", "task") no texto do insumo.
   - **Dependencies:** None
@@ -545,7 +550,8 @@ nenhuma instrução de execução aparece como caso.
   - **Description:** instância independente do revisor verifica o insumo
     contra este plano.
   - **Acceptance criteria:**
-    - [ ] Fidelidade: regras idênticas às aprovadas.
+    - [ ] Fidelidade: conjunto completo — regras e instruções das três
+          seções de decisões, idênticas às aprovadas.
     - [ ] Cobertura: os 11 problemas relatados têm regra.
     - [ ] Autocontenção confirmada.
   - **Verification:** relatório de revisão com aprovação ou achados.
