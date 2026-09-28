@@ -5299,3 +5299,57 @@ nem a fixture Concordion do ADR-0008.
   somente atividades do ciclo 2.
 - `git diff --check` passou. A largura das linhas alteradas ficou em até 120
   colunas. Não alterei os planos paralelos excluídos do escopo.
+
+### Pacote final (workflow+skills) — 2026-09-27
+
+Escopo: pacote de ajustes de workflow, agentes e skills aprovado pelo humano
+em 2026-09-27. Mantive o campo `Status` sem alteração.
+
+#### Aplicações
+
+- Substituí a premissa 7 pela redação aprovada e alinhei a seleção por chamada,
+  a troca manual condicionada e a política de sessão no agente `devflow`.
+- Esclareci sinais de conclusão, espera progressiva, tetos de timeout e
+  inatividade de streams/logs; movi exemplos para `references/` na skill.
+- Adaptei os comandos pre-commit ao pytest/ruff do repo e removi a sugestão de
+  `git reset --hard HEAD`.
+- Ampliei a description do `humanizer-br` para comunicação geral de chat e
+  atualizei `description_note`, mantendo `description_lang: pt-br`.
+- Registrei gatilhos para `planning-and-task-breakdown` e `writing-for-agents`,
+  sem mudar permissões; esclareci a precedência de formatação mecânica e a
+  regra de aprovação de conteúdo.
+
+#### Arquivos
+
+- `docs/workflow-agentes-dev.md`
+- `harness-conf/agents/devflow.md`
+- `harness-conf/agents/eng-software.md`
+- `harness-conf/agents/smart-planner.md`
+- `AGENTS.md`
+- `harness-conf/AGENTS.base.md`
+- `harness-conf/skills/reliable-async-operations/SKILL.md`
+- `harness-conf/skills/reliable-async-operations/references/exemplos-por-categoria.md`
+- `harness-conf/skills/git-workflow-and-versioning/SKILL.md`
+- `harness-conf/skills/humanizer-br/SKILL.md`
+- `harness-conf/skills/humanizer-br/UPSTREAM.md`
+- `plan/otimizacao-custo-contexto.md`
+
+#### Evidências
+
+- `.venv/bin/pytest tests/agents/ tests/skills/ tests/skills_mgmt/ -m all`:
+  347 passaram.
+- `git diff --check`: passou.
+- `tests/agents/` incluiu consistência e largura; nenhuma linha excedeu 120
+  colunas nos arquivos de agente e em `harness-conf/AGENTS.base.md`.
+- Largura: `tests/agents/` passou; as demais linhas novas do pacote ficaram em
+  até 120 colunas. Nenhum arquivo Python mudou; ruff não se aplica.
+- Consultei `docs/README.md`; o pacote não exige novo artefato de spec ou ADR.
+
+#### Commits
+
+- `9691c68` `docs(workflow): alinha seleção de modelo e sessões novas`
+- `1bdfe30` `docs(agents): registra gatilhos e precedência de escrita`
+- `77d0b99` `docs(skills): clarifica espera e move exemplos assíncronos`
+- `f46e294` `docs(skills): adapta comandos pre-commit ao repo`
+- `b3d6936` `docs(skills): amplia uso geral do humanizer`
+- Este registro: `docs(plan): registra pacote final workflow e skills`.
