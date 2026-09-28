@@ -501,7 +501,7 @@ def test_task_permissions_point_to_existing_agents(repo_root: Path) -> None:
     )
 
     assert orphans == [], (
-        f"Permissions órfãs (task: allow aponta para agente inexistente):\n"
+        "Permissions órfãs (task: allow aponta para agente inexistente):\n"
         + "\n".join(f"  - {o}" for o in orphans)
     )
 
@@ -616,7 +616,7 @@ def test_skill_tables_reference_existing_skills(repo_root: Path) -> None:
                 missing.append(f"{agent_name} -> skill: {skill_ref}")
 
     assert missing == [], (
-        f"Skills inexistentes referenciadas em tabelas de agentes:\n"
+        "Skills inexistentes referenciadas em tabelas de agentes:\n"
         + "\n".join(f"  - {m}" for m in missing)
     )
 
@@ -648,8 +648,8 @@ def test_workflow_agent_references_exist(repo_root: Path) -> None:
                 ghosts.append(f"{doc_name} -> `{ref}`")
 
     assert ghosts == [], (
-        f"Referências fantasmas em workflow docs "
-        f"(agente/skill inexistente):\n"
+        "Referências fantasmas em workflow docs "
+        "(agente/skill inexistente):\n"
         + "\n".join(f"  - {g}" for g in ghosts)
     )
 
@@ -683,7 +683,7 @@ def test_workflow_skill_references_exist(repo_root: Path) -> None:
             # (já coberto pelo teste de agentes fantasma acima)
 
     assert missing == [], (
-        f"Skills inexistentes referenciadas em workflow docs:\n"
+        "Skills inexistentes referenciadas em workflow docs:\n"
         + "\n".join(f"  - {m}" for m in missing)
     )
 
@@ -710,8 +710,8 @@ def test_agent_backtick_skill_references_exist(repo_root: Path) -> None:
                 missing.append(f"{agent_name} -> `{ref}`")
 
     assert missing == [], (
-        f"Referências de skill/agent inexistentes em backticks "
-        f"de agentes:\n"
+        "Referências de skill/agent inexistentes em backticks "
+        "de agentes:\n"
         + "\n".join(f"  - {m}" for m in missing)
     )
 
@@ -750,7 +750,7 @@ def test_removed_agents_not_referenced(repo_root: Path) -> None:
                 )
 
     assert violations == [], (
-        f"Referências a agentes/docs removidos ainda presentes:\n"
+        "Referências a agentes/docs removidos ainda presentes:\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
 
@@ -779,8 +779,8 @@ def test_denied_skills_have_at_least_one_allow(repo_root: Path) -> None:
         harness_dir / "skills", agents_dir, harness_dir / "opencode.json"
     )
     assert orphans == [], (
-        f"Skills órfãs (deny global sem nenhum allow, invisíveis a "
-        f"todos os agentes):\n"
+        "Skills órfãs (deny global sem nenhum allow, invisíveis a "
+        "todos os agentes):\n"
         + "\n".join(f"  - {o}" for o in orphans)
     )
 
@@ -816,8 +816,8 @@ def test_skill_allows_reference_existing_skills(repo_root: Path) -> None:
         harness_dir / "opencode.json",
     )
     assert missing == [], (
-        f"Allow de skill inexistente (sem pasta em skills/ e sem "
-        f"wildcard que case):\n"
+        "Allow de skill inexistente (sem pasta em skills/ e sem "
+        "wildcard que case):\n"
         + "\n".join(f"  - {m}" for m in missing)
     )
 
@@ -858,9 +858,9 @@ def test_domain_skills_have_global_deny(repo_root: Path) -> None:
         harness_dir / "skills", harness_dir / "opencode.json"
     )
     assert escaped == [], (
-        f"Skills de domínio sem deny global (escaparam do corte; "
-        f"adicione ao deny global ou mova para _GLOBAL_SKILLS com "
-        f"decisão do humano):\n"
+        "Skills de domínio sem deny global (escaparam do corte; "
+        "adicione ao deny global ou mova para _GLOBAL_SKILLS com "
+        "decisão do humano):\n"
         + "\n".join(f"  - {s}" for s in escaped)
     )
 
@@ -892,8 +892,8 @@ def test_opencode_agent_references_exist(repo_root: Path) -> None:
         harness_dir / "agents", harness_dir / "opencode.json"
     )
     assert ghosts == [], (
-        f"Agente fantasma na seção agent do opencode.json (sem arquivo "
-        f"em harness-conf/agents/):\n"
+        "Agente fantasma na seção agent do opencode.json (sem arquivo "
+        "em harness-conf/agents/):\n"
         + "\n".join(f"  - {g}" for g in ghosts)
     )
 

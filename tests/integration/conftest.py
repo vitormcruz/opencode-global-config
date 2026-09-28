@@ -46,7 +46,7 @@ def isolated_opencode(
     if not isinstance(kind, str):
         pytest.fail("O marcador agent_eval_context exige kind textual.")
 
-    context_dir = prepare_test_context(
+    prepare_test_context(
         repo_root,
         isolated_opencode_session.context_dir,
         kind=kind,

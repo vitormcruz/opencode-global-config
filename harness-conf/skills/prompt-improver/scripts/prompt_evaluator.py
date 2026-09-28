@@ -331,6 +331,6 @@ if __name__ == "__main__":
 
         suggestions = generate_improvement_suggestions(eval_result)
         if suggestions:
-            print(f"\nSuggestions:")
+            print("\nSuggestions:")
             for suggestion in suggestions:
                 print(f"  {suggestion}")

@@ -4,11 +4,7 @@ import re
 
 import pytest
 
-from opencode_config.bootstrap.detect import (
-    DependencyDetection,
-    DependencyStatus,
-)
-from opencode_config.bootstrap.installers import InstallContext, InstallResult
+from opencode_config.bootstrap.detect import DependencyDetection
 from opencode_config.harnesses import ApplyOptions, HarnessDefinition, HarnessError
 from opencode_config.lib.environment import EnvironmentKind
 
@@ -405,4 +401,3 @@ def test_windows_context_imports_persisted_user_path(
     entries = path_value.split(";")
     assert r"C:\Users\tester\.local\bin" in entries
     assert r"C:\Users\tester\AppData\npm" in entries
-

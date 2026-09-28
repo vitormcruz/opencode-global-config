@@ -1,6 +1,5 @@
 import json
 import platform
-import subprocess
 import sys
 
 import pytest
