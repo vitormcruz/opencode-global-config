@@ -460,6 +460,25 @@ e nos testes (`tests/agents/`). Instrução ao insumo (e à Task 1):
 
 Verificação: suíte completa do ambiente corrente passa após as mudanças.
 
+**Achado 4 (rodada 2) — Commit do plano pelo orquestrador (aprovado).**
+O revisor apontou o conflito entre plano commitado durante o trabalho e
+a permissão de terminal negada ao `devflow`. Decisão do humano: ajuste
+geral — o orquestrador é quem controla o plano e commita os checkpoints
+dele. Ajustes:
+
+- `devflow`: permissão de execução liberada para git, restrita ao
+  arquivo de planejamento (instrução: terminal apenas para checkpoint do
+  plano; mecanismo exato, pattern de permissão ou allow com restrição
+  escrita, é detalhe do executor).
+- `docs/workflow-agentes-dev.md` e roteamento em `AGENTS.base.md`:
+  `eng-software` permanece o único committer de código; o `devflow`
+  commita os checkpoints do arquivo de planejamento.
+- Princípio geral: quem controla o artefato persistente commita seus
+  checkpoints (o `smart-planner` já o pratica com o próprio plano).
+
+Verificação: o `devflow` cria checkpoint do arquivo do plano; a suíte de
+consistência (permissões e workflows) passa.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
