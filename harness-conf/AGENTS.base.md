@@ -129,8 +129,9 @@
   senão herda do pai) permanece canônica.
 - Use `model` explícito apenas quando o briefing do humano ou do plano
   pedir um modelo específico para a subtask.
-- `background: true` dá acesso local pleno ao subagente; use apenas com
-  escopo aprovado e preferindo `worktree: true` para escrita.
+- `background: true` roda o subagente em sandbox deny-all: apenas `read`,
+  `glob`, `grep` e `webfetch`; sem `bash` e sem `edit`. Use apenas com
+  escopo aprovado; para execução ou edição, spawn em foreground.
 - Prompts delegados não resolvem `@arquivo`: inclua o conteúdo no texto.
 
 ## Commits
