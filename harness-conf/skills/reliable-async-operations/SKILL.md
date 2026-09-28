@@ -56,7 +56,10 @@ Essa proibição não revoga o requisito de timeout explícito em toda chamada
 de rede (seção "Padrões por categoria" abaixo) — os dois se completam: o
 alvo da proibição é o número chutado como desencargo de consciência; o
 timeout exigido é rede de segurança ancorada a sinal de vida — tempo de
-inatividade — com valor justificado pelo recurso e pela operação.
+inatividade — com valor justificado pelo recurso e pela operação, derivado
+do pior caso conhecido. O timeout permitido funciona como teto de segurança,
+nunca como número mágico ou substituto do sinal de conclusão. Espera cega ou
+infinita continua proibida.
 
 ## Ordem de preferência (do melhor para o pior)
 
@@ -78,7 +81,9 @@ escreve** para lidar com operações de duração incerta. Quando for o
 próprio agente esperando por *suas* chamadas de ferramenta, vale o mesmo
 princípio — espere por um sinal determinístico de conclusão (evento,
 callback, polling de condição, resultado observável), nunca por uma
-estimativa de tempo.
+estimativa de tempo. Faça esperas progressivas em incrementos de 30 s. Antes
+de ultrapassar 30 s acumulados, peça confirmação ao humano. Uma delegação
+explícita de autonomia pode autorizar continuações sem nova confirmação.
 
 ## Contrato mínimo (qualquer linguagem, qualquer tipo de operação)
 
@@ -93,7 +98,9 @@ estimativa de tempo.
 4. Nunca engolir erro, rejeição ou timeout em `catch`/`except` silencioso —
    propagar causa e contexto.
 5. Registrar timestamp da última atividade: travamento é ausência de
-   progresso, não tempo total decorrido.
+   progresso, não tempo total decorrido. Em streams e logs, cada linha nova
+   sinaliza atividade e atualiza esse timestamp. A falha ocorre quando a
+   inatividade ultrapassa o limite definido, não pelo tempo total decorrido.
 6. Em UI: toda chamada assíncrona visível ao usuário (spinner, loading)
    precisa de timeout + tratamento de erro — nunca um estado de
    carregamento sem saída.
@@ -105,120 +112,21 @@ estimativa de tempo.
 
 ## Padrões por categoria (copiar, não reinventar)
 
+Exemplos completos de implementação estão em
+[Exemplos por categoria](references/exemplos-por-categoria.md). As regras
+por categoria seguem abaixo.
+
 ### 1. Processo externo (subprocess/exec/spawn/ProcessBuilder)
 
-#### Python
-
-```python
-import subprocess, time
-
-def run_streaming(cmd, idle_timeout=30, total_timeout=600):
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, text=True, bufsize=1)
-    start = last_output = time.monotonic()
-    while True:
-        line = proc.stdout.readline()
-        if line:
-            print(line, end="")
-            last_output = time.monotonic()
-        elif proc.poll() is not None:
-            break
-        now = time.monotonic()
-        if now - last_output > idle_timeout:
-            proc.kill()
-            raise TimeoutError(f"sem saída por {idle_timeout}s")
-        if now - start > total_timeout:
-            proc.kill()
-            raise TimeoutError(f"excedeu {total_timeout}s no total")
-    return proc.wait()
-```
-
-#### Node.js
-
-```js
-const { spawn } = require("child_process");
-
-function runStreaming(cmd, args, { idleTimeoutMs = 30000, totalTimeoutMs = 600000 } = {}) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] });
-    let lastOutput = Date.now();
-    const idle = setInterval(() => {
-      if (Date.now() - lastOutput > idleTimeoutMs) {
-        proc.kill("SIGKILL");
-        clearInterval(idle);
-        reject(new Error(`sem saída por ${idleTimeoutMs}ms`));
-      }
-    }, 1000);
-    proc.stdout.on("data", (d) => { process.stdout.write(d); lastOutput = Date.now(); });
-    proc.stderr.on("data", (d) => { process.stderr.write(d); lastOutput = Date.now(); });
-    proc.on("close", (code) => {
-      clearInterval(idle);
-      code === 0 ? resolve(code) : reject(new Error(`exit ${code}`));
-    });
-    setTimeout(() => {
-      proc.kill("SIGKILL"); clearInterval(idle); reject(new Error("timeout total"));
-    }, totalTimeoutMs);
-  });
-}
-```
-
-#### Bash
-
-```bash
-# timeout total protege o total; tee mantém a saída observável em log
-timeout --signal=TERM 600s ./build.sh 2>&1 | tee build.log
-# idle real (sem byte novo por N s) exige um watcher separado lendo o
-# mtime de build.log — não existe flag nativa de idle-timeout no `timeout`.
-```
-
-#### PowerShell
-
-```powershell
-$job = Start-Job { & ./build.ps1 }
-do {
-    Start-Sleep -Seconds 5
-    Receive-Job $job -Keep | Write-Host   # emite progresso incremental
-} while ($job.State -eq 'Running')
-Receive-Job $job
-```
-
-#### Java / Groovy
-
-```groovy
-def proc = new ProcessBuilder(cmdList).redirectErrorStream(true).start()
-def reader = proc.inputStream.newReader()
-def line
-while ((line = reader.readLine()) != null) {
-    println line   // nunca use consumeProcessOutput() sem buffer/callback
-}
-if (!proc.waitFor(30, TimeUnit.SECONDS)) {   // só após EOF do stream
-    proc.destroyForcibly()
-    throw new TimeoutException("processo não finalizou após EOF do stream")
-}
-```
+Os exemplos em Python, Node.js, Bash, PowerShell e Java/Groovy estão na
+referência acima.
 
 ### 2. Chamada de rede / HTTP
 
 Toda chamada de rede precisa de timeout explícito + cancelamento — o
 default de muitos clientes HTTP é espera infinita.
 
-```js
-// fetch (browser/Node 18+): AbortController separa timeout de cancelamento manual
-const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort("timeout"), 10_000);
-try {
-  const res = await fetch(url, { signal: controller.signal });
-  return await res.json();
-} finally {
-  clearTimeout(timeoutId);
-}
-```
-
-```python
-import httpx
-# connect timeout ≠ read timeout ≠ total: nunca deixe implícito
-httpx.get(url, timeout=httpx.Timeout(connect=5, read=15, write=5, pool=5))
-```
+Os exemplos de `fetch` e `httpx` estão na referência acima.
 
 Retry em rede: sempre com **backoff exponencial + teto de tentativas**,
 nunca retry infinito ou em loop apertado.
@@ -229,20 +137,7 @@ nunca retry infinito ou em loop apertado.
 deixa o `await` pendurado. Corra contra um timeout quando a duração não é
 garantida:
 
-```js
-function withTimeout(promise, ms, label) {
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error(`timeout: ${label} > ${ms}ms`)), ms));
-  return Promise.race([promise, timeout]);
-}
-
-await withTimeout(fetchUserProfile(id), 8000, "fetchUserProfile");
-```
-
-```python
-import asyncio
-await asyncio.wait_for(fetch_user_profile(id), timeout=8)
-```
+Os exemplos de JavaScript e Python estão na referência acima.
 
 "Loading infinito" na UI é o subprocess pendurado em roupa visual: mesma
 causa raiz, sinal de conclusão que nunca chega. Guarde também para
@@ -256,41 +151,21 @@ Nunca bloqueie esperando job de fila terminar. Publique e retorne um
 identificador; consulte status via polling com backoff ou via callback/
 webhook de conclusão:
 
-```text
-enqueue(job) -> job_id
-poll: status(job_id) -> queued | running | done | failed   (com backoff)
-ou: registrar callback/webhook chamado quando o job concluir
-```
+O fluxo de exemplo está na referência acima.
 
 ### 5. Lock / mutex / semáforo
 
 Lock sem prazo é espera infinita disfarçada de exclusão mútua. Adquirir
 sempre com timeout e liberar em `finally`/`try-with-resources`:
 
-```python
-acquired = lock.acquire(timeout=30)
-if not acquired:
-    raise TimeoutError("lock não adquirido em 30s")
-try:
-    ...
-finally:
-    lock.release()
-```
+O exemplo de Python está na referência acima.
 
 ### 6. Polling
 
 Polling sem backoff nem teto vira busy-wait silencioso. Sempre com
 intervalo crescente e número máximo de tentativas:
 
-```python
-delay = 1
-for attempt in range(max_attempts):
-    if is_done(job_id):
-        return get_result(job_id)
-    time.sleep(delay)
-    delay = min(delay * 2, 30)
-raise TimeoutError(f"job {job_id} não concluiu em {max_attempts} tentativas")
-```
+O exemplo de Python está na referência acima.
 
 ## Anti-padrões proibidos
 
