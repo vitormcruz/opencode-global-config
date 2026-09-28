@@ -92,8 +92,9 @@ Comunicação, subseção "Sem abreviações":
   exigem nome por extenso no primeiro uso, em linguagem simples.
 
 Verificação: conversa roteirizada em que o agente explica uma decisão;
-a transcrição não pode ter abreviação nem sigla sem definição. Caso
-futuro da suíte de comunicação.
+a transcrição não pode ter abreviação de palavra, sigla própria ou sigla
+interna sem definição; sigla técnica consagrada é aceita. Caso futuro da
+suíte de comunicação.
 
 **Item 2 — Referências ao plano (aprovado).** Destino: `AGENTS.base.md`,
 seção Comunicação, subseção "Conversa sobre plano" (reformulação):
@@ -125,7 +126,8 @@ seção Comunicação, seção Concisão (acréscimo operacional):
 
 Verificação: conversa roteirizada; nenhuma resposta concentra mais de
 uma ideia central por turno; resposta a reclamação de confusão menor
-que a original. Caso futuro da suíte de comunicação.
+que a original; entrega solicitada vem completa e não conta como
+violação do volume. Caso futuro da suíte de comunicação.
 
 **Item 4 — Perguntas múltiplas (aprovado).** Destinos: skill
 `question-orchestration` (trecho "Perguntas em blocos adaptativos",
@@ -148,10 +150,10 @@ Skill `question-orchestration`:
   converta em bullets antes de enviar.
 
 Verificação: conversa roteirizada com várias decisões pendentes; a
-transcrição mostra no máximo uma pergunta exigindo decisão por rodada;
-agrupamento só com perguntas triviais e independentes; contexto de
-pergunta sem abreviação nem confusão. Caso futuro da suíte de
-comunicação.
+transcrição mostra uma pergunta decisória por rodada; agrupamento só de
+perguntas triviais e independentes, cada uma entendível sem as outras;
+contexto de pergunta sem abreviação nem confusão. Caso futuro da suíte
+de comunicação.
 
 **Item 5 — Uso da tool de pergunta (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Uso da tool de pergunta"):
@@ -257,8 +259,9 @@ de decisões"):
   a dúvida primeiro.
 
 Verificação: conversa roteirizada com dúvida levantada no meio; a
-transcrição não mostra ação (edição, commit, spawn de agente) entre a
-dúvida e a resolução. Caso futuro da suíte de comunicação.
+transcrição não mostra ação dependente da dúvida pendente entre a
+dúvida e a resolução; ação sem relação com a dúvida não é violação.
+Caso futuro da suíte de comunicação.
 
 **Item 10 — Cobertura total (aprovado).** Destinos: `smart-planner` e
 revisores (`rev`, `revisor`).
