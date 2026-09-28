@@ -56,8 +56,8 @@ Riscos aceitos e mitigados (nenhum impede a adoção):
   propósito). Mitigação: pin exato no `opencode.json`, status PROVISÓRIO,
   deny rules do config como kill switch, remoção documentada no README.
 - `background: true` permite `webfetch` no sandbox do child. Mitigação:
-  guarda no `AGENTS.base.md` (usar só com escopo aprovado, preferindo
-  `worktree`/foreground para escrita).
+  guarda no `AGENTS.base.md` (usar só com escopo aprovado; para escrita,
+  prefira foreground).
 - Projeto de mantenedor único e baixa adoção; HEAD já tem um commit grande
   (`b66ff17`, 2026-09-04, controles de subagente + TUI) ainda sem release npm.
   Mitigação: pin na 1.3.1; nova revisão obrigatória antes de qualquer bump.
@@ -77,7 +77,8 @@ Riscos aceitos e mitigados (nenhum impede a adoção):
   #31694, #35800.
 
 Remover o plugin quando qualquer implementação nativa de `model` na `task`
-for mergeada e lançada; o procedimento está na seção "Plugins" do README.
+for mergeada e lançada; o procedimento executável está no
+`docs/adr/0010-remocao-plugin-task-model.md`.
 
 ## Como atualizar
 
@@ -90,3 +91,8 @@ for mergeada e lançada; o procedimento está na seção "Plugins" do README.
 
 Sem comando de sync automatizado: o repo não versiona o código do plugin,
 apenas este registro e o pin.
+
+## Licenca
+
+MIT License - Copyright (c) 2026 Lars Hagen
+https://github.com/lars-hagen/opencode-task-model/blob/v1.3.1/LICENSE

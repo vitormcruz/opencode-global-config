@@ -54,6 +54,7 @@ def specialtyFixtures = [
         'Adr0005Fixture',
         'Adr0007Fixture',
         'Adr0009Fixture',
+        'Adr0010Fixture',
     ],
     seguranca: [
         'SegurancaFixture',

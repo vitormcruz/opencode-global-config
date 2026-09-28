@@ -181,8 +181,8 @@ bootstrap; uma execução completa não deve usá-las:
 ## Plugins
 
 - `@slkiser/opencode-quota`: quota de tokens no toast/TUI.
-- `opencode-task-model@1.3.1` (PROVISÓRIO): adiciona `model`, `reasoning`,
-  `background` e `worktree` por chamada na tool `task`. Instalado porque o
+- `opencode-task-model@1.3.1` (PROVISÓRIO): adiciona `model`, `reasoning`
+  e `background` por chamada na tool `task`. Instalado porque o
   OpenCode nativo ainda não aceita modelo no spawn (rastreio: PR
   anomalyco/opencode#34947, issue #6651). Remover quando a versão nativa
   suportar `model` na task; o pin é atualizado manualmente com
