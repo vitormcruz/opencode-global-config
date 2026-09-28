@@ -26,9 +26,11 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import shutil
 import sqlite3
 import subprocess
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -50,6 +52,12 @@ PLUGIN_NAME = "opencode-task-model"
 OPENCODE_IDLE_TIMEOUT_S = 300
 OPENCODE_TOTAL_TIMEOUT_S = 900
 
+# Granularidade da checagem dos limites acima (não é limite próprio): o
+# loop consulta a fila de saída com esse passo e avalia idle/total a cada
+# retorno. Sentinel marca EOF na fila (str de linha | sentinel | None).
+_EOF_SENTINEL = object()
+_WATCHDOG_POLL_S = 1.0
+
 # Avaliado na coleta do módulo, antes de o fixture autouse `isolated_home`
 # trocar HOME para um diretório temporário.
 _REAL_HOME = Path.home()
@@ -68,6 +76,43 @@ PROMPT = (
 
 def _fail(motivo: str) -> None:
     pytest.fail(motivo, pytrace=False)
+
+
+def test_watchdog_mata_processo_silencioso(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Processo vivo e sem saída dispara o limite de inatividade.
+
+    Reprodução do defeito: o loop antigo avaliava os limites só depois
+    de `readline()` retornar, então um `opencode run` vivo e silencioso
+    pendurava o teste. Aqui o processo falso (`sleep`) não escreve nada;
+    o watchdog precisa matá-lo pelo limite de idle encurtado.
+    """
+
+    monkeypatch.setattr(f"{__name__}.OPENCODE_IDLE_TIMEOUT_S", 1)
+    monkeypatch.setattr(f"{__name__}.OPENCODE_TOTAL_TIMEOUT_S", 30)
+    real_popen = subprocess.Popen
+
+    def fake_popen(command: list[str], **kwargs: object) -> subprocess.Popen:
+        del command
+        return real_popen(
+            ["sleep", "15"],
+            cwd=str(tmp_path),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+    monkeypatch.setattr(f"{__name__}.subprocess.Popen", fake_popen)
+
+    start = time.monotonic()
+    with pytest.raises(pytest.fail.Exception, match="sem saída"):
+        _run_opencode("opencode", tmp_path, "watchdog-fake")
+    assert time.monotonic() - start < 10, (
+        "Watchdog demorou mais que o idle encurtado: o limite de "
+        "inatividade não disparou com processo vivo e silencioso."
+    )
 
 
 def _require_opencode_binary() -> str:
@@ -140,8 +185,38 @@ def _require_zai_provider() -> None:
         )
 
 
+def _pump_stdout(
+    process: subprocess.Popen, output_queue: "queue.Queue[object]"
+) -> None:
+    """Move linhas do stdout para a fila; sinaliza EOF com o sentinel."""
+
+    assert process.stdout is not None
+    try:
+        while True:
+            line = process.stdout.readline()
+            if not line:
+                break
+            output_queue.put(line)
+    finally:
+        output_queue.put(_EOF_SENTINEL)
+
+
+def _fail_timeout(chunks: list[str], limite_s: int, motivo: str) -> None:
+    ultima_saida = "".join(chunks)[-2000:]
+    pytest.fail(
+        f"`opencode run` {motivo} ({limite_s}s). Última saída: "
+        f"{ultima_saida}",
+        pytrace=False,
+    )
+
+
 def _run_opencode(binary: str, scratch: Path, title: str) -> subprocess.CompletedProcess:
-    """Executa `opencode run` com rede de segurança de inatividade + total."""
+    """Executa `opencode run` com rede de segurança de inatividade + total.
+
+    A leitura do stdout roda em thread dedicada alimentando uma fila: os
+    limites são avaliados por `queue.get(timeout=...)`, então um processo
+    vivo e silencioso dispara o watchdog em vez de pendurar o teste.
+    """
 
     env = dict(os.environ)
     env["HOME"] = str(_REAL_HOME)
@@ -158,9 +233,6 @@ def _run_opencode(binary: str, scratch: Path, title: str) -> subprocess.Complete
         str(scratch),
         PROMPT,
     ]
-    start = time.monotonic()
-    last_output = start
-    chunks: list[str] = []
     process = subprocess.Popen(
         command,
         cwd=scratch,
@@ -170,32 +242,38 @@ def _run_opencode(binary: str, scratch: Path, title: str) -> subprocess.Complete
         text=True,
         bufsize=1,
     )
-    assert process.stdout is not None
+    output_queue: "queue.Queue[object]" = queue.Queue()
+    reader = threading.Thread(
+        target=_pump_stdout, args=(process, output_queue), daemon=True
+    )
+    reader.start()
+
+    start = time.monotonic()
+    last_output = start
+    chunks: list[str] = []
     try:
         while True:
-            line = process.stdout.readline()
+            try:
+                item = output_queue.get(timeout=_WATCHDOG_POLL_S)
+            except queue.Empty:
+                item = None
             now = time.monotonic()
-            if line:
-                chunks.append(line)
-                last_output = now
-            elif process.poll() is not None:
+            if item is _EOF_SENTINEL:
                 break
+            if item:
+                chunks.append(str(item))
+                last_output = now
             if now - last_output > OPENCODE_IDLE_TIMEOUT_S:
                 process.kill()
-                _fail(
-                    "`opencode run` sem saída por "
-                    f"{OPENCODE_IDLE_TIMEOUT_S}s (processo morto). Última "
-                    f"saída: {''.join(chunks)[-2000:]}"
-                )
+                _fail_timeout(chunks, OPENCODE_IDLE_TIMEOUT_S, "sem saída")
             if now - start > OPENCODE_TOTAL_TIMEOUT_S:
                 process.kill()
-                _fail(
-                    "`opencode run` excedeu "
-                    f"{OPENCODE_TOTAL_TIMEOUT_S}s no total. Última saída: "
-                    f"{''.join(chunks)[-2000:]}"
+                _fail_timeout(
+                    chunks, OPENCODE_TOTAL_TIMEOUT_S, "excedeu o total"
                 )
     finally:
         process.wait(timeout=30)
+        reader.join(timeout=30)
     return subprocess.CompletedProcess(
         command, process.returncode, stdout="".join(chunks)
     )
