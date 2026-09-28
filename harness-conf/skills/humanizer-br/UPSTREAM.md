@@ -4,9 +4,9 @@ repositorio: https://github.com/carlosafjr-dev/humanizer-br.git
 branch: master
 description_lang: pt-br
 description_note: >
-  Mantida em PT-BR (lingua de origem) e enriquecida com triggers
-  explicitos, incluindo o uso em toda comunicacao do chat (secao "Tom
-  natural" do AGENTS.base.md).
+  Mantida em PT-BR (lingua de origem), ampliada para comunicacao geral
+  de chat (respostas informativas e conversas cotidianas) e enriquecida
+  com triggers explicitos.
 commit: 161aef327d7f72a06e466e5485f8afa73e770805
 data_commit: 2026-04-09 12:31:31 -0300
 sincronizado_em: 2026-09-07 01:35 UTC

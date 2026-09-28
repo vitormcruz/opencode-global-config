@@ -2,8 +2,9 @@
 name: humanizer-br
 version: 2.0.0
 description: >
-  Use em toda comunicação de chat e ao revisar texto que soe robótico,
-  genérico ou corporativo. Editor anti-IA: remove sinais de escrita gerada
+  Use em toda comunicação de chat, inclusive em respostas informativas e
+  conversas cotidianas. Aplique também ao revisar textos
+  robóticos, genéricos ou corporativos. Editor anti-IA: remove sinais de escrita gerada
   por IA (vocabulário e estruturas proibidos, pontuação, clichês de chatbot)
   e eleva naturalidade, ritmo e voz autoral, preservando o significado.
   Módulo complementar: references/aprofundador.md, densidade intelectual,
