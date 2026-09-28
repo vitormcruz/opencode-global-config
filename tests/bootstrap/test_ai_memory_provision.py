@@ -15,6 +15,7 @@ import pytest
 from opencode_config.bootstrap import ai_memory
 from opencode_config.bootstrap.installers import InstallContext
 from opencode_config.harnesses import HarnessDefinition
+from opencode_config.lib import ai_memory as shared_ai_memory
 from opencode_config.lib.environment import EnvironmentKind
 from opencode_config.lib.process import CommandResult
 from opencode_config.lib.paths import UserSpacePaths
@@ -268,7 +269,7 @@ def test_ai_memory_without_docker_warns_and_cleans_active_hooks(
 ) -> None:
     context = make_context(tmp_path / "home")
     data_directory = context.paths.data_dir / "ai-memory"
-    marker = data_directory / ai_memory.AI_MEMORY_READY_MARKER
+    marker = data_directory / shared_ai_memory.AI_MEMORY_READY_MARKER
     marker.parent.mkdir(parents=True)
     marker.write_text("ready", encoding="utf-8")
     plugin = tmp_path / "home" / ".config" / "opencode" / "plugins" / "ai-memory.ts"
@@ -375,7 +376,9 @@ def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
     assert (context.paths.data_dir / "ai-memory").is_dir()
     assert stat.S_IMODE((context.paths.data_dir / "ai-memory").stat().st_mode) == 0o700
     assert (
-        context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_READY_MARKER
+        context.paths.data_dir
+        / "ai-memory"
+        / shared_ai_memory.AI_MEMORY_READY_MARKER
     ).is_file()
     docker_run = next(command for command in runner.commands if command[1] == "run")
     assert "127.0.0.1:49374:49374" in docker_run
@@ -468,15 +471,17 @@ def test_ai_memory_uses_internal_bridge_url_when_docker_does_not_publish_loopbac
     assert runner.hook_environments[0]["AI_MEMORY_SERVER_URL"] == (
         "http://172.30.0.2:49374"
     )
-    marker = ai_memory.ai_memory_ready_marker(context.paths)
+    marker = shared_ai_memory.ai_memory_ready_marker(context.paths)
     assert json.loads(marker.read_text(encoding="utf-8"))["complete"] is True
-    url_marker = ai_memory._mcp_url_marker(context.paths)
+    url_marker = shared_ai_memory._mcp_url_marker(context.paths)
     assert url_marker.read_text(encoding="utf-8").strip() == expected_url
     assert stat.S_IMODE(url_marker.parent.stat().st_mode) == 0o700
     assert not (
-        context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+        context.paths.data_dir
+        / "ai-memory"
+        / shared_ai_memory.AI_MEMORY_URL_MARKER
     ).exists()
-    assert ai_memory.ai_memory_mcp_url(context.paths.home) == expected_url
+    assert shared_ai_memory.ai_memory_mcp_url(context.paths.home) == expected_url
 
 
 @pytest.mark.unit
@@ -581,7 +586,7 @@ def test_ai_memory_does_not_enable_mcp_when_internal_endpoint_is_unreachable(
     )
 
     assert not result.provisioned
-    assert not ai_memory.ai_memory_ready_marker(context.paths).exists()
+    assert not shared_ai_memory.ai_memory_ready_marker(context.paths).exists()
     assert "não está acessível pelo host" in result.message
 
 
@@ -680,10 +685,14 @@ def test_ai_memory_windows_verifies_both_user_space_wrapper_assets(
     for asset_name, contents in asset_contents.items():
         assert (bin_directory / asset_name).read_bytes() == contents
     expected_state_marker = (
-        home / ".local" / "state" / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+        home
+        / ".local"
+        / "state"
+        / "ai-memory"
+        / shared_ai_memory.AI_MEMORY_URL_MARKER
     )
-    assert ai_memory._mcp_url_marker(context.paths) == expected_state_marker
-    assert ai_memory.ai_memory_mcp_url(home) == result.mcp_url
+    assert shared_ai_memory._mcp_url_marker(context.paths) == expected_state_marker
+    assert shared_ai_memory.ai_memory_mcp_url(home) == result.mcp_url
     assert any(
         "powershell.exe" in argument
         for command in runner.commands
@@ -761,7 +770,9 @@ def test_ai_memory_download_hash_mismatch_blocks_installation(
     assert not result.provisioned
     assert not (context.paths.bin_dir / "ai-memory").exists()
     assert not (
-        context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_READY_MARKER
+        context.paths.data_dir
+        / "ai-memory"
+        / shared_ai_memory.AI_MEMORY_READY_MARKER
     ).exists()
     assert "SHA256" in result.message
 
@@ -922,7 +933,7 @@ def test_ai_memory_does_not_enable_mcp_when_container_exits_on_start(
     )
 
     assert not result.provisioned
-    assert not ai_memory.ai_memory_ready_marker(context.paths).exists()
+    assert not shared_ai_memory.ai_memory_ready_marker(context.paths).exists()
     assert not any("install-hooks" in command for command in runner.commands)
 
 
@@ -958,7 +969,7 @@ def test_ai_memory_rejects_container_with_an_untrusted_image(
 
     assert not result.provisioned
     assert "image" in result.message.lower()
-    assert not ai_memory.ai_memory_ready_marker(context.paths).exists()
+    assert not shared_ai_memory.ai_memory_ready_marker(context.paths).exists()
     assert not any("install-hooks" in command for command in runner.commands)
 
 
@@ -1105,8 +1116,8 @@ def test_ai_memory_security_spec_tables_use_bootstrap_values(
     )
 
     paths = make_context(tmp_path / "security-spec-home").paths
-    volume = ai_memory.ai_memory_data_directory(paths)
-    marcador = ai_memory._mcp_url_marker(paths)
+    volume = shared_ai_memory.ai_memory_data_directory(paths)
+    marcador = shared_ai_memory._mcp_url_marker(paths)
     allowed_hosts = re.search(
         r'AI_MEMORY_ALLOWED_HOSTS="([^"]+)"',
         ai_memory.AI_MEMORY_CONTAINER_START_SCRIPT,
@@ -1176,7 +1187,7 @@ def test_ai_memory_rollback_removes_runtime_but_preserves_data(
     data_directory = context.paths.data_dir / "ai-memory"
     data_directory.mkdir(parents=True)
     (data_directory / "memory.sqlite").write_text("preserved", encoding="utf-8")
-    marker = data_directory / ai_memory.AI_MEMORY_READY_MARKER
+    marker = data_directory / shared_ai_memory.AI_MEMORY_READY_MARKER
     marker.write_text(
         json.dumps({"complete": True, "network_created": True}),
         encoding="utf-8",
@@ -1264,7 +1275,7 @@ def test_ai_memory_rollback_removes_the_recorded_internal_bridge_endpoint(
     bridge_url = "http://172.30.0.2:49374/mcp"
     data_directory = context.paths.data_dir / "ai-memory"
     data_directory.mkdir(parents=True)
-    marker = data_directory / ai_memory.AI_MEMORY_READY_MARKER
+    marker = data_directory / shared_ai_memory.AI_MEMORY_READY_MARKER
     marker.write_text(
         json.dumps(
             {
@@ -1274,7 +1285,7 @@ def test_ai_memory_rollback_removes_the_recorded_internal_bridge_endpoint(
         ),
         encoding="utf-8",
     )
-    url_marker = data_directory / ai_memory.AI_MEMORY_URL_MARKER
+    url_marker = data_directory / shared_ai_memory.AI_MEMORY_URL_MARKER
     url_marker.write_text(f"{bridge_url}\n", encoding="utf-8")
     copilot_config = context.paths.home / ".copilot" / "mcp-config.json"
     copilot_config.parent.mkdir(parents=True)

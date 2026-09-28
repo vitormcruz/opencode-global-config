@@ -10,6 +10,8 @@ import org.junit.runner.RunWith
 class SegurancaFixture {
     private static final String SPEC = 'docs/specs/Seguranca.md'
     private static final String BOOTSTRAP = 'src/opencode_config/bootstrap/ai_memory.py'
+    private static final String AI_MEMORY_LIB = 'src/opencode_config/lib/ai_memory.py'
+    private static final String SYNC_LIB = 'src/opencode_config/lib/sync.py'
     private static final String PROVISION_TEST = 'tests/bootstrap/test_ai_memory_provision.py'
 
     private final Path root = Paths
@@ -134,6 +136,14 @@ class SegurancaFixture {
     }
 
     private boolean caminhoPythonConfere(String caminho, String constante) {
+        return caminhoPythonConfere(caminho, constante, BOOTSTRAP)
+    }
+
+    private boolean caminhoPythonConfere(
+        String caminho,
+        String constante,
+        String arquivo
+    ) {
         def relativo = caminho.replaceFirst('^~/', '').replaceAll('/+$', '')
         def partes = relativo.split('/')
         if (partes.length < 2) {
@@ -144,7 +154,7 @@ class SegurancaFixture {
             diretórios.collect { parte -> "\"${parte}\"" }.join(' / ') +
             " / ${constante}"
         def declaração = "${constante} = \"${partes.last()}\""
-        return contém(BOOTSTRAP, expressão, declaração)
+        return contém(arquivo, expressão, declaração)
     }
 
     private int contarOcorrencias(String texto, String trecho) {
@@ -290,10 +300,11 @@ class SegurancaFixture {
             bridgeUri.port.toString() == porta &&
             loopbackUri.path == bridgeUri.path
         def código = lerArquivo(BOOTSTRAP)
+        def códigoShared = lerArquivo(AI_MEMORY_LIB)
         def partesCodigo = [
             host: código.contains("AI_MEMORY_HOST = \"${host}\""),
             porta: código.contains("AI_MEMORY_PORT = ${porta}"),
-            url: código.contains("AI_MEMORY_MCP_URL = \"${loopback}\""),
+            url: códigoShared.contains("AI_MEMORY_MCP_URL = \"${loopback}\""),
             hosts: código.contains("AI_MEMORY_ALLOWED_HOSTS=\"${hosts}\""),
             status: código.contains("return error.code == ${statusAceito}"),
             bind: código.contains('f"{AI_MEMORY_HOST}:{AI_MEMORY_PORT}:{AI_MEMORY_PORT}"'),
@@ -440,8 +451,16 @@ class SegurancaFixture {
                 'Modo POSIX',
                 'Conteúdo após rollback',
             ) && !marcador.startsWith(volume) && modo.matches('0?[0-7]{3,4}') &&
-                caminhoPythonConfere(volume, 'AI_MEMORY_DATA_NAME') &&
-                caminhoPythonConfere(marcador, 'AI_MEMORY_URL_MARKER') && contém(
+                caminhoPythonConfere(
+                    volume,
+                    'AI_MEMORY_DATA_NAME',
+                    AI_MEMORY_LIB,
+                ) &&
+                caminhoPythonConfere(
+                    marcador,
+                    'AI_MEMORY_URL_MARKER',
+                    AI_MEMORY_LIB,
+                ) && contém(
                     'README.md',
                     volume,
                     marcadorDiretório,
@@ -494,7 +513,11 @@ class SegurancaFixture {
                 "opencode-bootstrap ${comando}",
                 configLegada,
                 volume,
-            ) && caminhoPythonConfere(marcador, 'AI_MEMORY_URL_MARKER') &&
+            ) && caminhoPythonConfere(
+                marcador,
+                'AI_MEMORY_URL_MARKER',
+                AI_MEMORY_LIB,
+            ) &&
                 testeRollback.contains("data_directory / \"${arquivoDados}\""),
         )
     }

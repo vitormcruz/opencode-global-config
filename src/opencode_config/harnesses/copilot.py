@@ -18,7 +18,7 @@ import shutil
 import sys
 from typing import TextIO
 
-from opencode_config.bootstrap.ai_memory import (
+from opencode_config.lib.ai_memory import (
     AI_MEMORY_MCP_URL,
     ai_memory_mcp_url,
     is_ai_memory_provisioned,

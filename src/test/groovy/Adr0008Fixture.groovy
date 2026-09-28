@@ -30,12 +30,13 @@ class Adr0008Fixture {
     }
 
     boolean provisionamentoExigeMarcadorCompleto() {
-        def codigo = lerArquivo('src/opencode_config/bootstrap/ai_memory.py')
-        return codigo != null &&
-            codigo.contains('AI_MEMORY_READY_MARKER') &&
-            codigo.contains('_write_ready_marker(context.paths, network_is_owned)') &&
-            codigo.contains('AI_MEMORY_WRAPPER_SHA256') &&
-            codigo.contains('"--internal"')
+        def bootstrap = lerArquivo('src/opencode_config/bootstrap/ai_memory.py')
+        def shared = lerArquivo('src/opencode_config/lib/ai_memory.py')
+        return bootstrap != null && shared != null &&
+            shared.contains('AI_MEMORY_READY_MARKER') &&
+            bootstrap.contains('_write_ready_marker(context.paths, network_is_owned)') &&
+            bootstrap.contains('AI_MEMORY_WRAPPER_SHA256') &&
+            bootstrap.contains('"--internal"')
     }
 
     boolean adaptersCondicionamORegistroMcp() {

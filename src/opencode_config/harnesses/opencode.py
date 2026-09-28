@@ -18,7 +18,7 @@ import sys
 from typing import Protocol, TextIO
 
 from opencode_config.harnesses import ApplyOptions, HarnessError
-from opencode_config.bootstrap.ai_memory import (
+from opencode_config.lib.ai_memory import (
     AI_MEMORY_MCP_URL,
     AiMemoryProvisionError,
     ai_memory_mcp_url,
