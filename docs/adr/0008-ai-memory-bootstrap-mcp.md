@@ -105,20 +105,54 @@ remove os wrappers e hooks gerados, remove as declarações gerenciadas, restaur
 
 ## Asserções executáveis
 
-A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
-A diretiva `execute` verifica configuração canônica, provisionamento,
-condicionalidade nos adapters e cobertura dos testes. A diretiva `assertEquals`
-fixa o veredito esperado.
+A fixture lê os valores das tabelas e os compara com a configuração, o código
+e os testes existentes. A spec `docs/specs/Seguranca.md` também executa os
+requisitos de segurança.
 
-- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
-- `test_ai_memory_upstream_release_pins_match_reviewed_artifacts` verifica os
-  pins aprovados do wrapper, do índice OCI e da plataforma.
-- A spec `docs/specs/Seguranca.md` executa as asserções SEC-01..SEC-11 e
-  SEC-21.
-- `tests/bootstrap/test_ai_memory_provision.py` usa fakes para download,
-  Docker, porta ocupada, idempotência, drift e rollback.
-- `tests/harnesses/test_opencode.py` verifica o filtro POSIX e a configuração
-  canônica sem credenciais.
-- `tests/harnesses/test_copilot.py` verifica o merge aditivo, o backup e a
-  preservação de entradas do usuário.
-- O veredito agregado da decisão é [pass](#assertEquals=veredito).
+### A8-01: declaração MCP sem credenciais (origem: [Decisão](#decisão))
+
+| Entrada | Resultado esperado |
+|---|---|
+| Arquivo de configuração canônica | `harness-conf/opencode.json` |
+| Campo de servidores MCP | `mcp` |
+| Chave do servidor | `ai-memory` |
+| URL MCP canônica | `http://127.0.0.1:49374/mcp` |
+| Campos de credencial proibidos | `headers,environment,token,apiKey` |
+| Veredito | [pass](- "?=vereditoA801") |
+
+[Executar A8-01](- "verificarA801()").
+
+### A8-02: marcador, isolamento e pins (origem: [Decisão](#decisão))
+
+| Entrada | Resultado esperado |
+|---|---|
+| Marcador de prontidão | `.bootstrap-provisioned` |
+| Chamada de gravação do marcador | `_write_ready_marker(context.paths, network_is_owned)` |
+| SHA-256 do wrapper | `49c965a0319dbe9c525d552a9a4c8b3464e5dd278e36d5dc7a03edee8b5502e6` |
+| Digest do índice OCI | `a626d115e0350afe934954c02c9064d30b708c58316763a9c6674ef5d0c8e3d9` |
+| Tag da imagem | `akitaonrails/ai-memory:latest` |
+| Digest linux/amd64 | `5ce8700b2d0a5243370a544c805f86c32d19aaca2251ecae32d66c09d221ef6e` |
+| Opção de rede isolada | `--internal` |
+| Teste dos pins aprovados | `test_ai_memory_upstream_release_pins_match_reviewed_artifacts` |
+| Veredito | [pass](- "?=vereditoA802") |
+
+[Executar A8-02](- "verificarA802()").
+
+### A8-03: adapters condicionais (origem: [Decisão](#decisão))
+
+| Entrada | Resultado esperado |
+|---|---|
+| Função de filtro OpenCode | `filter_ai_memory_config` |
+| Função de gate do marcador | `is_ai_memory_provisioned` |
+| Método de materialização filtrada | `materialize_filtered_config` |
+| Método de merge Copilot | `_sync_mcp_config` |
+| Teste OpenCode sem provisionamento | `test_opencode_without_provisioned_ai_memory_filters_symlink_config` |
+| Teste Copilot com servidor existente | `test_copilot_adapter_merges_ai_memory_without_losing_existing_servers` |
+| Teste Copilot sem provisionamento | `test_copilot_adapter_removes_ai_memory_entry_when_provisioning_is_incomplete` |
+| Veredito | [pass](- "?=vereditoA803") |
+
+[Executar A8-03](- "verificarA803()").
+
+[Executar as verificações deste ADR](- "executarVerificacoes()").
+
+O veredito agregado é [pass](- "?=veredito").

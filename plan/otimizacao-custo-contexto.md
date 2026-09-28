@@ -1,20 +1,17 @@
 # Plano: otimização de custo e contexto do repo
 
-Status: FINALIZAÇÃO — 2º ciclo (fase DEVFLOW), pacote final aprovado em
-execução. MAPA DE MODELOS ATUALIZADO (decisão humana 2026-09-27):
-executor = `opencode-go/gpt-6-luna` com `reasoning: max` (substitui
-`opencode/gpt-6-luna` high em TODOS os spawns de execução daqui em
-diante); revisor = `zai-coding-plan/glm-5.3` (confirmado). Pacote
-aprovado: premissa 7 revisada (pausa condicionada + sessão nova sempre);
-Q-Efix 1 (clarificação da política progressiva de espera, sem mudar
-política/testes), 2 (exemplos em references/), 3 (skill git: só pre-commit
-adaptado + remover reset --hard), 4 (humanizer: ampliar description),
-5/6 (gatilhos), 7 (precedência mecânica vs humano), 8 (carregar só ao
-criar/revisar); spec de segurança ao protocolo spec-executavel +
-auditoria do porquê. Pendências menores já aprovadas como backlog.
-Depois do pacote: commit residual do plano, exclusão de artefatos e
-push, ambos SÓ com confirmação humana. Pós-restart (humano): RM-10 +
-MCP vivo exigem reiniciar o OpenCode.
+Status: FINALIZAÇÃO — 2º ciclo (fase DEVFLOW) — CICLO CONCLUÍDO
+(2026-09-27). Todas as 14 tasks + E-fix + pacote final + backlog
+executados e commitados; backlog pós-ciclo itens 1-7 RESOLVIDOS
+(item 8: humano reinicia o OpenCode para MCP vivo/RM-10). Gate E12
+anterior: 926 passed / 0 failed / 31 agent_eval deselected (2 execuções).
+Revalidação após as guardas ADR (2026-09-28): 930 passed / 0 failed /
+31 agent_eval deselected (961 itens coletados; 232,52 s). Gradle segurança
+verde; `ruff check .` limpo no repo todo; evidência validada pelo
+curador-produto; revisões aprovadas. Mapa de modelos corrente: executor
+`opencode-go/gpt-6-luna` (reasoning max); revisor `zai-coding-plan/glm-5.3`.
+Pendente de decisão humana: destino deste arquivo (manter como registro ou
+excluir). O push fica para a task separada já aprovada; nada enviado.
 
 ## Overview
 
@@ -5562,3 +5559,42 @@ Executor: `eng-software` / `opencode-go/gpt-6-luna`.
       120 colunas.
 - [x] Gate de refatoração: não se aplica; não houve alteração de código de
       produção, escopo ou decisão arquitetural.
+
+### ADRs ao protocolo — 2026-09-27
+
+Executor: `eng-software` / `opencode-go/gpt-6-luna` (reasoning max).
+
+Esta alteração fecha a observação do backlog de código sobre as fixtures dos
+ADRs 0006 e 0008, que reportavam `Successes: 0`.
+
+- Substituí as URLs antigas `#execute=` e `#assertEquals=` pelos links ativos do
+  Concordion-Markdown e incluí tabelas com os valores verificados.
+- `Adr0006Fixture` agora lê a lista aprovada, o endpoint e a configuração
+  canônica da tabela. O ADR-0006 registra `ai-memory` como exceção aprovada pelo
+  ADR-0008.
+- `Adr0008Fixture` lê as tabelas de configuração, marcador, pins e adapters.
+  A fixture compara esses valores com os artefatos e testes atuais.
+- Adicionei uma guarda pytest para links ativos, tabelas e ausência de cópias
+  dos valores da spec nas fixtures.
+- Reorganizei a lista de decisões do ADR-0006 para manter as linhas em até 120
+  colunas. Nenhuma decisão mudou.
+
+#### Evidências de Testes — FINALIZAÇÃO (ADRs)
+
+- [x] RED: a nova guarda pytest falhou com 2 testes e 23 deselected antes dos
+      links, tabelas e leitores Groovy. GREEN: 2 passaram.
+- [x] Mutação do endpoint no ADR-0006 de `49374` para `49375`: o Gradle falhou;
+      `Adr0006Fixture` registrou `Successes: 0, Failures: 2`. Restaurei `49374`.
+- [x] Mutação do endpoint no ADR-0008 de `49374` para `49375`: o Gradle falhou;
+      `Adr0008Fixture` registrou `Successes: 2, Failures: 2`. Restaurei `49374`.
+- [x] Gradle final de segurança passou. `Adr0006Fixture` registrou 2 sucessos,
+      `Adr0008Fixture` registrou 4 e `SegurancaFixture` registrou 14, sem falhas.
+- [x] Revalidação final em 2026-09-28: comando
+      `JAVA_HOME=/home/vitor/.local/share/jdk .venv/bin/pytest -m all`:
+      930 passed, 31 `agent_eval` deselected (961 itens coletados), 0 falhas.
+      Duração informada pelo pytest: 232,52 s (0:03:52).
+- [x] `tests/product_tests/test_concordion_spec_infra.py -m all`: 25 passaram;
+      `tests/bootstrap/test_ai_memory_provision.py -m all`: 28 passaram.
+- [x] Ruff no teste pytest alterado, `git diff --check` e limite de 120 colunas
+      nas linhas alteradas passaram.
+- [x] Não executei `git push`. O push fica para a task separada aprovada.

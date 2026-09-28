@@ -18,13 +18,23 @@ podem entrar na camada MCP.
 
 O padrão permanece CLI-first. A camada MCP é opcional, por ferramenta:
 
-| ID | Decisão aceita |
-|---|---|
-| MD-1 | Adição de ferramenta à camada MCP exige decisão humana explícita, após avaliação de prós e contras. Nenhuma adição é automática. |
-| MD-2 | A avaliação verifica, pela ferramenta: suporte oficial (mantido pelo próprio projeto); instalação user-space simples, sem containers ou sidecars; uso pelo menos tão bom quanto o CLI atual; funcionamento nativo nos sistemas operacionais suportados, sem ponte complexa. Reprovada em qualquer critério, fica só CLI. |
-| MD-3 | A avaliação mede custo/benefício localmente (custo fixo de contexto por sessão vs custo por uso via CLI, break-even, ganhos de tempo e de confiabilidade) e cita fonte oficial. |
-| MD-4 | Aprovada, o adapter/bootstrap é o escritor único das entradas MCP nos arquivos canônicos de configuração de cada harness gerenciado, preservando servers definidos manualmente pelo humano; instaladores nativos das ferramentas não rodam. |
-| MD-5 | Toda ferramenta com modo MCP mantém o caminho CLI documentado na skill como plano B permanente (hierarquia: MCP > cli > busca textual). |
+- **MD-1:** A inclusão de uma ferramenta MCP exige decisão humana explícita,
+  após avaliação de prós e contras. Nenhuma inclusão é automática.
+- **MD-2:** A avaliação verifica, para cada ferramenta:
+  - suporte oficial, mantido pelo próprio projeto;
+  - instalação user-space simples, sem containers ou sidecars;
+  - uso pelo menos tão bom quanto o CLI atual;
+  - funcionamento nativo nos sistemas operacionais suportados, sem ponte
+    complexa. Se a ferramenta reprovar em qualquer critério, fica só em CLI.
+- **MD-3:** A avaliação mede localmente o custo-benefício: custo fixo de contexto
+  por sessão versus custo por uso via CLI, break-even, ganhos de tempo e
+  confiabilidade. A avaliação cita uma fonte oficial.
+- **MD-4:** Depois da aprovação, o adapter/bootstrap é o único escritor das
+  entradas MCP nos arquivos canônicos de cada harness gerenciado. O
+  adapter/bootstrap preserva servers definidos manualmente pelo humano. Instaladores
+  nativos das ferramentas não rodam.
+- **MD-5:** Toda ferramenta com modo MCP mantém o caminho CLI documentado na skill
+  como plano B permanente. A hierarquia é MCP, CLI e busca textual.
 
 ## Consequências
 
@@ -46,13 +56,25 @@ O padrão permanece CLI-first. A camada MCP é opcional, por ferramenta:
 
 ## Asserções executáveis
 
-A fixture Concordion deste ADR expõe `executarVerificacoes()` e `veredito`.
-A diretiva `execute` executa os checks preservados abaixo. A diretiva
-`assertEquals` fixa o veredito esperado da decisão.
+Novas integrações MCP exigem aprovação humana. O humano aprovou `ai-memory` no
+[ADR-0008](0008-ai-memory-bootstrap-mcp.md). A fixture compara o inventário
+canônico aos valores aprovados abaixo.
 
-- [Executar as verificações deste ADR](#execute=executarVerificacoes()).
+### MCP-01: entradas autorizadas (origem: [MD-1 e MD-4](#decisão))
 
-- Decisão de processo; sem testes novos obrigatórios.
-- Revisões verificam ausência de entradas MCP não aprovadas nas configs
-  canônicas dos harnesses gerenciados.
-- O veredito agregado da implementação é [pass](#assertEquals=veredito).
+Uma entrada ausente, não aprovada ou com URL divergente reprova a verificação.
+
+| Entrada | Resultado esperado |
+|---|---|
+| Configuração canônica | `harness-conf/opencode.json` |
+| Campo MCP canônico | `mcp` |
+| Chaves MCP aprovadas | `ai-memory` |
+| URL MCP aprovada | `http://127.0.0.1:49374/mcp` |
+| Campo alternativo proibido | `mcpServers` |
+| Veredito | [pass](- "?=vereditoMcp01") |
+
+[Executar MCP-01](- "verificarMcp01()").
+
+[Executar as verificações deste ADR](- "executarVerificacoes()").
+
+O veredito agregado é [pass](- "?=veredito").

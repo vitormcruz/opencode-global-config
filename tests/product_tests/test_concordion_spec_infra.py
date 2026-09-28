@@ -133,6 +133,55 @@ def test_fixtures_check_real_repository_artifacts() -> None:
         )
 
 
+def _adr_table_literals(spec: str) -> list[str]:
+    values: list[str] = []
+    for line in spec.splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) != 2 or cells[0] in {"Entrada", "Veredito"}:
+            continue
+        literal = re.fullmatch(r"`([^`]+)`", cells[1])
+        if literal:
+            values.append(literal.group(1))
+    return values
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("adr_number", "fixture_name", "criteria"),
+    [
+        ("0006", "Adr0006Fixture", ("MCP-01",)),
+        ("0008", "Adr0008Fixture", ("A8-01", "A8-02", "A8-03")),
+    ],
+)
+def test_mcp_adrs_execute_spec_tables_through_their_fixtures(
+    adr_number: str,
+    fixture_name: str,
+    criteria: tuple[str, ...],
+) -> None:
+    adr = next((REPOSITORY_ROOT / "docs" / "adr").glob(f"{adr_number}-*.md"))
+    fixture_file = GROOVY_DIR / f"{fixture_name}.groovy"
+    spec = adr.read_text(encoding="utf-8")
+    fixture = fixture_file.read_text(encoding="utf-8")
+
+    assert "#execute=" not in spec
+    assert "#assertEquals=" not in spec
+    assert re.search(r'\[[^\]]+\]\(- "[A-Za-z]\w*\(\)"\)', spec)
+    assert re.search(r'\[[^\]]+\]\(- "\?=veredito[^\"]*"\)', spec)
+    assert "| Entrada | Resultado esperado |" in spec
+    for criterion in criteria:
+        assert f"### {criterion}:" in spec
+
+    assert f"SPEC = 'docs/adr/{adr.name}'" in fixture
+    assert "lerValoresEsperados(" in fixture
+    assert "valorEsperado(" in fixture
+    for value in _adr_table_literals(spec):
+        assert f"'{value}'" not in fixture and f'"{value}"' not in fixture, (
+            f"{fixture_name} duplica valor da spec: {value}"
+        )
+
+
 @pytest.mark.unit
 def test_adr0006_fixture_checks_canonical_config_for_mcp_entries() -> None:
     body = (GROOVY_DIR / "Adr0006Fixture.groovy").read_text(encoding="utf-8")
