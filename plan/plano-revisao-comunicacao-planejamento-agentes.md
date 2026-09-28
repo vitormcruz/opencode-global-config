@@ -401,7 +401,11 @@ a conferência antes/depois. Decisão: a conferência na execução é manual.
 Ajuste no protocolo de conferência (ramo do insumo 1):
 
 - A conferência na execução é manual: conversas reais com o agente, em
-  sessão limpa, antes e depois da mudança, com o mesmo roteiro. A
+  sessão limpa, antes e depois da mudança, com o mesmo roteiro. Após
+  aplicar a regra, materialize a configuração (rode o bootstrap do
+  repo, que regenera os arquivos do harness) e abra sessão nova do
+  agente para a conversa "depois"; a evidência registra a versão
+  testada (commit da configuração materializada). A
   evidência é a transcrição das duas conversas conferida contra os
   critérios objetivos da regra. A suíte automatizada de conversas é
   futura, registrada no insumo de testes
@@ -525,6 +529,16 @@ dele em `harness-conf/agents/` (é agente exclusivo do OpenCode, definido
 fora do repo, sem arquivo editável por este projeto). Decisão: o destino
 da regra de cobertura total é o `rev`; as listas de agentes afetados
 perdem o "revisor".
+
+**Achado 4 (rodada 3) — Materialização da configuração na conferência
+(aprovado).** O arquivo de regras do repo (`harness-conf/`) não é o
+carregado pelo agente: o adapter materializa a configuração final no
+destino do harness (ex.: `~/.config/opencode/AGENTS.md`). Sessão limpa
+sozinha não garante configuração nova. Ajuste no protocolo de
+conferência: após aplicar a regra, materializar a configuração (rodar o
+bootstrap do repo, que regenera os arquivos do harness) e abrir sessão
+nova do agente para a conversa "depois"; a evidência registra a versão
+testada (commit da configuração materializada).
 
 ## Task List
 
