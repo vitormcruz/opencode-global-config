@@ -351,6 +351,18 @@ Verificação: conferência do texto de verificação de cada regra contra o
 texto da regra; nenhuma verificação reprova comportamento que a regra
 permite. Caso futuro da suíte de comunicação.
 
+**Achado 4 — Resumo fiel (aprovado).** O revisor apontou lacuna: nenhuma
+regra impede o resumo de atribuir ao humano decisão que ele não tomou
+(invenção de consenso). O humano confirmou a lacuna e aprovou regra.
+Destino: `AGENTS.base.md`, seção Concisão (acréscimo):
+
+- Resumo fiel: só atribua ao humano decisão, fato ou preferência que ele
+  escreveu; silêncio ou resposta ambígua não é aprovação.
+
+Verificação: conversa roteirizada em que o humano aprova um ponto e fica
+em silêncio sobre outro; o resumo seguinte não atribui decisão sobre o
+ponto em silêncio. Caso futuro da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
