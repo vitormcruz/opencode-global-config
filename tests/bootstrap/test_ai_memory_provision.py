@@ -44,6 +44,8 @@ class FakeAiMemoryRunner:
         self.container_available = False
         self.container_running = False
         self.container_host_policy = False
+        self.health_statuses = ["healthy"]
+        self.health_status: str | None = None
         self.container_starts = True
         self.container_image = ai_memory.AI_MEMORY_IMAGE
         self.published_loopback = False
@@ -90,6 +92,23 @@ class FakeAiMemoryRunner:
             self.image_available = True
             self.pull_count += 1
             return self._result(arguments, 0)
+        if docker_arguments[:3] == (
+            "inspect",
+            "--format",
+            "{{json .State}}",
+        ):
+            if self.health_statuses:
+                self.health_status = self.health_statuses.pop(0)
+            return self._result(
+                arguments,
+                0,
+                json.dumps(
+                    {
+                        "Running": self.container_running,
+                        "Health": {"Status": self.health_status},
+                    }
+                ),
+            )
         if docker_arguments[:1] == ("inspect",):
             return self._inspect_container(arguments)
         if docker_arguments[:1] == ("run",):
@@ -144,8 +163,21 @@ class FakeAiMemoryRunner:
                     if self.container_host_policy
                     else {}
                 ),
+                "Healthcheck": {
+                    "Interval": 30_000_000_000,
+                    "Timeout": 5_000_000_000,
+                    "StartPeriod": 5_000_000_000,
+                    "Retries": 3,
+                },
             },
-            "State": {"Running": self.container_running},
+            "State": {
+                "Running": self.container_running,
+                "Health": {
+                    "Status": self.health_statuses[0]
+                    if self.health_statuses
+                    else self.health_status or "healthy"
+                },
+            },
             "HostConfig": {
                 "NetworkMode": ai_memory.AI_MEMORY_NETWORK,
                 "PortBindings": {
@@ -358,6 +390,45 @@ def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
         command[1:3] == ("network", "create") and "--internal" in command
         for command in runner.commands
     )
+
+
+@pytest.mark.unit
+def test_ai_memory_waits_for_container_health_before_endpoint_probe(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    runner.health_statuses = ["starting", "healthy"]
+    wrapper_bytes = b"verified wrapper bytes"
+    observed_health_statuses: list[str | None] = []
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+    monkeypatch.setattr(
+        ai_memory,
+        "AI_MEMORY_WRAPPER_SHA256",
+        sha256(wrapper_bytes).hexdigest(),
+    )
+    monkeypatch.setattr(ai_memory.time, "sleep", lambda _seconds: None)
+
+    def endpoint_is_reachable(_url: str) -> bool:
+        observed_health_statuses.append(runner.health_status)
+        return runner.health_status == "healthy"
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        fetcher=lambda _url, destination: destination.write_bytes(wrapper_bytes),
+        port_is_in_use=lambda _host, _port: False,
+        endpoint_is_reachable=endpoint_is_reachable,
+        output=StringIO(),
+    )
+
+    assert result.provisioned
+    assert observed_health_statuses == ["healthy"]
 
 
 @pytest.mark.unit

@@ -81,6 +81,7 @@ AI_MEMORY_COMMAND_TIMEOUT_SECONDS = 1800
 AI_MEMORY_COMMAND_IDLE_TIMEOUT_SECONDS = 120
 _DOWNLOAD_IDLE_TIMEOUT_SECONDS = 30
 _HTTP_PROBE_TIMEOUT_SECONDS = 1
+_NANOSECONDS_PER_SECOND = 1_000_000_000
 _MAX_WRAPPER_BYTES = 1024 * 1024
 
 Runner = Callable[..., CommandResult]
@@ -255,6 +256,7 @@ def provision_ai_memory(
                     "Reinício do container ai-memory",
                 )
         container = _verify_container_running(docker, context, execute, stream)
+        _wait_for_container_health(docker, container, context, execute, stream)
         mcp_url = _resolve_mcp_url(container)
         probe_endpoint = (
             _endpoint_is_reachable
@@ -806,6 +808,136 @@ def _verify_container_running(
             "Consulte `docker logs ai-memory` antes de reexecutar."
         )
     return container
+
+
+def _wait_for_container_health(
+    docker: str,
+    container: dict[str, object],
+    context: InstallContext,
+    runner: Runner,
+    output: TextIO | None,
+) -> None:
+    interval, timeout, start_period, retries = _healthcheck_timing(container)
+    state = container.get("State")
+    if not isinstance(state, dict):
+        raise AiMemoryProvisionError("Inspeção Docker sem State válido.")
+
+    health_status = _container_health_status(state)
+    if health_status == "healthy":
+        return
+    if health_status == "unhealthy":
+        raise AiMemoryProvisionError(
+            "O healthcheck do container ai-memory informou unhealthy. "
+            "Consulte `docker logs ai-memory` antes de reexecutar."
+        )
+
+    deadline = (
+        time.monotonic() + start_period + (retries + 1) * interval + retries * timeout
+    )
+    poll_interval = min(interval / 10, timeout)
+    _write(output, "Aguardando o healthcheck do ai-memory antes do probe HTTP.")
+
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise AiMemoryProvisionError(
+                "O healthcheck do container ai-memory não ficou healthy dentro "
+                "da janela definida pela imagem. Consulte `docker logs ai-memory`."
+            )
+        time.sleep(min(poll_interval, remaining))
+        state = _read_container_state(docker, context, runner, output)
+        if state.get("Running") is not True:
+            raise AiMemoryProvisionError(
+                "O container ai-memory encerrou enquanto aguardava o healthcheck."
+            )
+
+        health_status = _container_health_status(state)
+        if health_status == "healthy":
+            return
+        if health_status == "unhealthy":
+            raise AiMemoryProvisionError(
+                "O healthcheck do container ai-memory informou unhealthy. "
+                "Consulte `docker logs ai-memory` antes de reexecutar."
+            )
+        poll_interval = min(poll_interval * 2, interval)
+
+
+def _healthcheck_timing(
+    container: dict[str, object],
+) -> tuple[float, float, float, int]:
+    configuration = container.get("Config")
+    healthcheck = (
+        configuration.get("Healthcheck") if isinstance(configuration, dict) else None
+    )
+    if not isinstance(healthcheck, dict):
+        raise AiMemoryProvisionError(
+            "A imagem do container ai-memory não declara healthcheck."
+        )
+
+    interval = healthcheck.get("Interval")
+    timeout = healthcheck.get("Timeout")
+    start_period = healthcheck.get("StartPeriod")
+    retries = healthcheck.get("Retries")
+    if (
+        type(interval) is not int
+        or interval <= 0
+        or type(timeout) is not int
+        or timeout <= 0
+        or type(start_period) is not int
+        or start_period < 0
+        or type(retries) is not int
+        or retries <= 0
+    ):
+        raise AiMemoryProvisionError(
+            "A imagem do container ai-memory declara healthcheck inválido."
+        )
+
+    return (
+        interval / _NANOSECONDS_PER_SECOND,
+        timeout / _NANOSECONDS_PER_SECOND,
+        start_period / _NANOSECONDS_PER_SECOND,
+        retries,
+    )
+
+
+def _read_container_state(
+    docker: str,
+    context: InstallContext,
+    runner: Runner,
+    output: TextIO | None,
+) -> dict[str, object]:
+    result = _execute(
+        [docker, "inspect", "--format", "{{json .State}}", AI_MEMORY_DATA_NAME],
+        context,
+        runner,
+        output,
+    )
+    _require_success(result, "Leitura do estado do healthcheck ai-memory")
+    try:
+        state = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        raise AiMemoryProvisionError(
+            "O Docker retornou um State inválido para o healthcheck ai-memory."
+        ) from error
+    if not isinstance(state, dict):
+        raise AiMemoryProvisionError(
+            "O Docker retornou um State inválido para o healthcheck ai-memory."
+        )
+    return state
+
+
+def _container_health_status(state: dict[str, object]) -> str:
+    health = state.get("Health")
+    status = health.get("Status") if isinstance(health, dict) else None
+    if not isinstance(status, str) or status not in {
+        "starting",
+        "healthy",
+        "unhealthy",
+    }:
+        raise AiMemoryProvisionError(
+            "O Docker não retornou um status válido para o healthcheck ai-memory."
+        )
+    return status
 
 
 def _resolve_mcp_url(container: dict[str, object]) -> str:
