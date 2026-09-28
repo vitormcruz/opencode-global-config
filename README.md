@@ -104,11 +104,16 @@ usa uma rede Docker `internal`, sem rota de saída padrão. Se o Docker não
 materializar a publicação nessa rede, o bootstrap usa o IPv4 privado do
 container na bridge internal, após validar a conectividade do host. Esse
 fallback não abre uma porta nas interfaces do host.
+O container permite o próprio IPv4 na `AI_MEMORY_ALLOWED_HOSTS`. O bootstrap
+valida uma resposta HTTP do endpoint MCP antes de habilitar as declarações.
 
 O volume fica em `~/.local/share/ai-memory/`. A wiki contém prompts em texto
 claro. Trate o diretório como dado sensível: não o versione nem o sincronize
 para um destino compartilhado. No POSIX, o bootstrap restringe o diretório ao
 usuário. O bootstrap não instala chaves de LLM.
+O marcador `.bootstrap-mcp-url` fica fora do volume, em
+`~/.local/state/ai-memory/` no Linux/WSL e em
+`%USERPROFILE%\.local\state\ai-memory\` no Windows.
 
 Depois de provisionar o container, o bootstrap executa `ai-memory install-hooks`
 para gerar o plugin OpenCode. O plugin é artefato local regenerável e não é
@@ -119,6 +124,9 @@ O bootstrap não substitui um wrapper com checksum divergente. A mensagem de
 erro informa o caminho para backup e remoção explícita antes de reexecutar.
 Container antigo com mount incompatível também bloqueia a injeção. Confira o
 mount de `/data` e faça uma cópia dos dados antes de reverter essa instalação.
+Container antigo sem a política de Host para o próprio IPv4 da bridge não é
+alterado automaticamente. Execute o rollback e o bootstrap para recriá-lo. O
+rollback preserva o volume.
 
 Sem Docker, o bootstrap avisa e orienta a instalação de um runtime em user-space,
 sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. Em Linux,

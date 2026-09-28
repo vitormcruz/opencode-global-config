@@ -18,6 +18,7 @@ import tempfile
 import threading
 import time
 from typing import TextIO
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 import urllib.request
 
@@ -42,6 +43,15 @@ AI_MEMORY_IMAGE = f"{AI_MEMORY_IMAGE_TAG}@sha256:{AI_MEMORY_IMAGE_LINUX_AMD64_SH
 AI_MEMORY_NETWORK = "ai-memory-internal"
 AI_MEMORY_HOST = "127.0.0.1"
 AI_MEMORY_PORT = 49374
+AI_MEMORY_HOST_POLICY_LABEL = "opencode-config.ai-memory-host-policy"
+AI_MEMORY_CONTAINER_START_SCRIPT = (
+    "for candidate in $(hostname -i); do "
+    'case "$candidate" in *.*) container_ip="$candidate"; break ;; esac; '
+    "done; "
+    '[ -n "$container_ip" ] || { printf "%s\\n" "IPv4 do container ausente" >&2; exit 1; }; '
+    'export AI_MEMORY_ALLOWED_HOSTS="localhost,127.0.0.1,::1,host.docker.internal,$container_ip"; '
+    'exec /usr/local/bin/ai-memory "$@"'
+)
 AI_MEMORY_MCP_URL = "http://127.0.0.1:49374/mcp"
 AI_MEMORY_DATA_NAME = "ai-memory"
 AI_MEMORY_READY_MARKER = ".bootstrap-provisioned"
@@ -70,7 +80,7 @@ AI_MEMORY_COMMAND_TIMEOUT_SECONDS = 1800
 # the existing installer ceiling bounds the total without hiding progress.
 AI_MEMORY_COMMAND_IDLE_TIMEOUT_SECONDS = 120
 _DOWNLOAD_IDLE_TIMEOUT_SECONDS = 30
-_TCP_CONNECT_TIMEOUT_SECONDS = 1
+_HTTP_PROBE_TIMEOUT_SECONDS = 1
 _MAX_WRAPPER_BYTES = 1024 * 1024
 
 Runner = Callable[..., CommandResult]
@@ -680,6 +690,17 @@ def _validate_existing_container(
             "do container e siga o caminho de upgrade documentado antes de reexecutar."
         )
 
+    labels = configuration.get("Labels")
+    if (
+        not isinstance(labels, dict)
+        or labels.get(AI_MEMORY_HOST_POLICY_LABEL) != "bridge-ip"
+    ):
+        raise AiMemoryProvisionError(
+            "O container ai-memory existente não tem a política de Host da bridge. "
+            "Preserve o volume; execute o rollback do ai-memory e reexecute o bootstrap "
+            "para recriar o container com a allowlist restrita."
+        )
+
     network = _execute(
         [docker, "network", "inspect", "--format", "{{.Internal}}", AI_MEMORY_NETWORK],
         context,
@@ -737,7 +758,20 @@ def _run_server(
         f"{data_directory.resolve()}:/data",
         "--label",
         "opencode-config.ai-memory=managed",
+        "--label",
+        f"{AI_MEMORY_HOST_POLICY_LABEL}=bridge-ip",
+        "--entrypoint",
+        "/bin/sh",
         AI_MEMORY_IMAGE,
+        "-ec",
+        AI_MEMORY_CONTAINER_START_SCRIPT,
+        "ai-memory",
+        "serve",
+        "--transport",
+        "http",
+        "--bind",
+        "0.0.0.0:49374",
+        "--enable-web",
     ]
     _require_success(
         _execute(command, context, runner, output),
@@ -847,12 +881,16 @@ def _endpoint_is_reachable(url: str) -> bool:
     if port != AI_MEMORY_PORT:
         return False
     try:
-        with socket.create_connection(
-            (endpoint.hostname, port),
-            timeout=_TCP_CONNECT_TIMEOUT_SECONDS,
-        ):
-            return True
-    except OSError:
+        request = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(
+            request,
+            timeout=_HTTP_PROBE_TIMEOUT_SECONDS,
+        ) as response:
+            return 200 <= response.status < 400
+    except HTTPError as error:
+        # The MCP endpoint rejects GET after the Host middleware accepts it.
+        return error.code == 405
+    except (OSError, URLError, ValueError):
         return False
 
 
@@ -1005,6 +1043,7 @@ def _backup_legacy_jsonc(home: Path) -> None:
 def _remove_ready_marker(paths: UserSpacePaths) -> None:
     ai_memory_ready_marker(paths).unlink(missing_ok=True)
     _mcp_url_marker(paths).unlink(missing_ok=True)
+    _legacy_mcp_url_marker(paths).unlink(missing_ok=True)
 
 
 def _marker_created_network(paths: UserSpacePaths) -> bool:
@@ -1054,20 +1093,29 @@ def _write_ready_marker(
 def _read_ready_mcp_url(paths: UserSpacePaths) -> str | None:
     if not ai_memory_ready_marker(paths).is_file():
         return None
-    try:
-        mcp_url = _mcp_url_marker(paths).read_text(encoding="utf-8").strip()
-    except OSError:
-        return None
-    return mcp_url if isinstance(mcp_url, str) and mcp_url else None
+    for marker in (_mcp_url_marker(paths), _legacy_mcp_url_marker(paths)):
+        try:
+            mcp_url = marker.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if mcp_url:
+            return mcp_url
+    return None
 
 
 def _mcp_url_marker(paths: UserSpacePaths) -> Path:
+    return paths.home / ".local" / "state" / "ai-memory" / AI_MEMORY_URL_MARKER
+
+
+def _legacy_mcp_url_marker(paths: UserSpacePaths) -> Path:
     return ai_memory_data_directory(paths) / AI_MEMORY_URL_MARKER
 
 
 def _write_mcp_url_marker(paths: UserSpacePaths, mcp_url: str) -> None:
     marker = _mcp_url_marker(paths)
-    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if os.name != "nt":
+        marker.parent.chmod(0o700)
     temporary = marker.with_suffix(".tmp")
     temporary.write_text(f"{mcp_url}\n", encoding="utf-8")
     os.replace(temporary, marker)

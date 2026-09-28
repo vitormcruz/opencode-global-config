@@ -7,6 +7,7 @@ from io import StringIO
 import json
 from pathlib import Path
 import stat
+from urllib.error import HTTPError
 
 import pytest
 
@@ -42,6 +43,7 @@ class FakeAiMemoryRunner:
         self.network_container_names: list[str] = []
         self.container_available = False
         self.container_running = False
+        self.container_host_policy = False
         self.container_starts = True
         self.container_image = ai_memory.AI_MEMORY_IMAGE
         self.published_loopback = False
@@ -93,6 +95,7 @@ class FakeAiMemoryRunner:
         if docker_arguments[:1] == ("run",):
             self.container_available = True
             self.container_running = self.container_starts
+            self.container_host_policy = True
             if "ai-memory" not in self.network_container_names:
                 self.network_container_names.append("ai-memory")
             return self._result(arguments, 0)
@@ -105,9 +108,7 @@ class FakeAiMemoryRunner:
         if docker_arguments[:1] == ("rm",):
             self.container_available = False
             self.network_container_names = [
-                name
-                for name in self.network_container_names
-                if name != "ai-memory"
+                name for name in self.network_container_names if name != "ai-memory"
             ]
             return self._result(arguments, 0)
         if "install-hooks" in arguments:
@@ -136,7 +137,14 @@ class FakeAiMemoryRunner:
             return self._result(arguments, 1, "container not found")
         source = self.home / ".local" / "share" / "ai-memory"
         inspected = {
-            "Config": {"Image": self.container_image},
+            "Config": {
+                "Image": self.container_image,
+                "Labels": (
+                    {"opencode-config.ai-memory-host-policy": "bridge-ip"}
+                    if self.container_host_policy
+                    else {}
+                ),
+            },
             "State": {"Running": self.container_running},
             "HostConfig": {
                 "NetworkMode": ai_memory.AI_MEMORY_NETWORK,
@@ -164,9 +172,7 @@ class FakeAiMemoryRunner:
                         else None
                     )
                 },
-                "Networks": {
-                    ai_memory.AI_MEMORY_NETWORK: {"IPAddress": "172.30.0.2"}
-                },
+                "Networks": {ai_memory.AI_MEMORY_NETWORK: {"IPAddress": "172.30.0.2"}},
             },
         }
         return self._result(arguments, 0, json.dumps(inspected))
@@ -179,12 +185,23 @@ def prevent_real_docker_processes(monkeypatch: pytest.MonkeyPatch) -> None:
             "Teste unitário não pode executar Docker real; injete um runner fake."
         )
 
+    def reject_mcp_get(request, *, timeout: float):
+        del timeout
+        if request.full_url.endswith("/mcp"):
+            raise HTTPError(
+                request.full_url,
+                405,
+                "Method Not Allowed",
+                None,
+                None,
+            )
+        pytest.fail("Teste unitário não pode executar requisições HTTP reais.")
+
     monkeypatch.setattr(ai_memory.subprocess, "Popen", reject_process)
     monkeypatch.setattr(
-        ai_memory,
-        "_endpoint_is_reachable",
-        lambda _url: True,
-        raising=False,
+        ai_memory.urllib.request,
+        "urlopen",
+        reject_mcp_get,
     )
 
 
@@ -330,6 +347,11 @@ def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
     docker_run = next(command for command in runner.commands if command[1] == "run")
     assert "127.0.0.1:49374:49374" in docker_run
     assert ai_memory.AI_MEMORY_NETWORK in docker_run
+    assert "--entrypoint" in docker_run
+    assert "/bin/sh" in docker_run
+    assert any("AI_MEMORY_ALLOWED_HOSTS" in argument for argument in docker_run)
+    assert any("hostname -i" in argument for argument in docker_run)
+    assert "opencode-config.ai-memory-host-policy=bridge-ip" in docker_run
     assert "--privileged" not in docker_run
     assert not any("insecure" in argument.lower() for argument in docker_run)
     assert any(
@@ -376,9 +398,86 @@ def test_ai_memory_uses_internal_bridge_url_when_docker_does_not_publish_loopbac
     )
     marker = ai_memory.ai_memory_ready_marker(context.paths)
     assert json.loads(marker.read_text(encoding="utf-8"))["complete"] is True
-    url_marker = context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+    url_marker = ai_memory._mcp_url_marker(context.paths)
     assert url_marker.read_text(encoding="utf-8").strip() == expected_url
+    assert stat.S_IMODE(url_marker.parent.stat().st_mode) == 0o700
+    assert not (
+        context.paths.data_dir / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+    ).exists()
     assert ai_memory.ai_memory_mcp_url(context.paths.home) == expected_url
+
+
+@pytest.mark.unit
+def test_ai_memory_endpoint_probe_rejects_disallowed_host_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def reject_host(request, *, timeout: float):
+        assert request.method == "GET"
+        assert request.full_url == "http://172.30.0.2:49374/mcp"
+        assert timeout > 0
+        raise HTTPError(
+            "http://172.30.0.2:49374/mcp",
+            403,
+            "forbidden host",
+            None,
+            None,
+        )
+
+    monkeypatch.setattr(ai_memory.urllib.request, "urlopen", reject_host)
+
+    assert not ai_memory._endpoint_is_reachable("http://172.30.0.2:49374/mcp")
+
+
+@pytest.mark.unit
+def test_ai_memory_endpoint_probe_accepts_method_not_allowed_from_mcp_get(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def reject_method(_request, *, timeout: float):
+        assert timeout > 0
+        raise HTTPError(
+            "http://172.30.0.2:49374/mcp",
+            405,
+            "Method Not Allowed",
+            None,
+            None,
+        )
+
+    monkeypatch.setattr(ai_memory.urllib.request, "urlopen", reject_method)
+
+    assert ai_memory._endpoint_is_reachable("http://172.30.0.2:49374/mcp")
+
+
+@pytest.mark.unit
+def test_ai_memory_does_not_adopt_existing_container_without_bridge_host_policy(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path / "home")
+    runner = FakeAiMemoryRunner(context.paths.home)
+    runner.network_available = True
+    runner.container_available = True
+    runner.container_running = True
+    data_directory = context.paths.data_dir / "ai-memory"
+    data_directory.mkdir(parents=True)
+    user_data = data_directory / "memory.sqlite"
+    user_data.write_bytes(b"pilot data")
+    monkeypatch.setattr(
+        ai_memory.shutil,
+        "which",
+        lambda *_args, **_kwargs: "/usr/bin/docker",
+    )
+
+    result = ai_memory.provision_ai_memory(
+        context,
+        runner=runner,
+        output=StringIO(),
+    )
+
+    assert not result.provisioned
+    assert runner.container_running
+    assert user_data.read_bytes() == b"pilot data"
+    assert not any("install-hooks" in command for command in runner.commands)
+    assert "preserve o volume" in result.message.lower()
 
 
 @pytest.mark.unit
@@ -441,8 +540,7 @@ def test_ai_memory_falls_back_to_bridge_when_reported_loopback_is_unreachable(
         runner=runner,
         fetcher=lambda _url, destination: destination.write_bytes(wrapper_bytes),
         port_is_in_use=lambda _host, _port: False,
-        endpoint_is_reachable=lambda url: probed_urls.append(url)
-        or url == bridge_url,
+        endpoint_is_reachable=lambda url: probed_urls.append(url) or url == bridge_url,
         output=StringIO(),
     )
 
@@ -509,6 +607,11 @@ def test_ai_memory_windows_verifies_both_user_space_wrapper_assets(
     assert all(url.startswith("https://github.com/akitaonrails/") for url in downloads)
     for asset_name, contents in asset_contents.items():
         assert (bin_directory / asset_name).read_bytes() == contents
+    expected_state_marker = (
+        home / ".local" / "state" / "ai-memory" / ai_memory.AI_MEMORY_URL_MARKER
+    )
+    assert ai_memory._mcp_url_marker(context.paths) == expected_state_marker
+    assert ai_memory.ai_memory_mcp_url(home) == result.mcp_url
     assert any(
         "powershell.exe" in argument
         for command in runner.commands
@@ -1120,9 +1223,7 @@ def test_bootstrap_passes_current_and_previous_mcp_urls_to_harnesses(
             return True
 
         def apply(self, _repository: Path, options) -> None:
-            received.append(
-                (options.ai_memory_url, options.previous_ai_memory_url)
-            )
+            received.append((options.ai_memory_url, options.previous_ai_memory_url))
 
     adapter = RecordingHarness()
     definition = HarnessDefinition(
