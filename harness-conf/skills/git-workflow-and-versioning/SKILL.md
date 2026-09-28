@@ -110,10 +110,8 @@ isoladas até o merge explícito.
 
 ## Save point pattern
 
-Fez uma mudança → testes passam? Commit e continue; falham? Reverta ao
-último commit e investigue. Repita por incremento. Assim nunca se perde
-mais que um incremento: `git reset --hard HEAD` volta ao último estado
-bom.
+Fez uma mudança → testes passam? Commit e continue; falham? Investigue
+antes do próximo incremento. Repita por incremento.
 
 ## Resumo de mudanças
 
@@ -143,9 +141,9 @@ Antes de todo commit:
 ```bash
 git diff --staged                                       # revise o que vai entrar
 git diff --staged | grep -i "password\|secret\|api_key\|token"  # sem segredos
-npm test                                                # testes
-npm run lint                                            # lint
-npx tsc --noEmit                                        # tipos
+.venv/bin/pytest -m all                                 # WSL/Linux
+ruff check .                                            # análise estática
+# Windows: .\.venv\Scripts\pytest.exe -m all
 ```
 
 Automatize com hooks (lint-staged + husky):
