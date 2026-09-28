@@ -363,6 +363,19 @@ Verificação: conversa roteirizada em que o humano aprova um ponto e fica
 em silêncio sobre outro; o resumo seguinte não atribui decisão sobre o
 ponto em silêncio. Caso futuro da suíte de comunicação.
 
+**Achado 5 — Cobertura de casos por regra (aprovado).** O revisor apontou
+que "caso com qualquer agente" não comprova alcance e que os revisores
+ficam sem caso. Decisão do humano: regra genérica de comunicação e
+protocolo de perguntas são validados com um agente só (a regra mora em
+arquivo global; um caso garante); regra específica de agente é validada
+com o agente afetado. Ajuste na Task 3: casos de comunicação e do
+protocolo de perguntas com um agente; casos de regras específicas com
+cada agente afetado (`smart-planner`, `devflow`, `rev`, `revisor`).
+
+Verificação: a seção de casos define, para cada regra, o agente do caso:
+regra global, um agente; regra específica, o agente afetado. Caso futuro
+da suíte de comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
