@@ -479,6 +479,19 @@ dele. Ajustes:
 Verificação: o `devflow` cria checkpoint do arquivo do plano; a suíte de
 consistência (permissões e workflows) passa.
 
+**Achado 5 (rodada 2) — Evidência da conferência (aprovado).** O revisor
+apontou que as transcrições antes/depois não têm destino nem controle de
+agente, modelo e roteiro. Instrução ao insumo (protocolo de conferência):
+
+- Cada conferência registra em arquivo de evidência (em `plan/`,
+  artefato auxiliar do workflow): as duas transcrições, antes e depois
+  da mudança, com agente, modelo, roteiro usado e data; e o resultado
+  por critério da regra (passou ou falhou). O arquivo acompanha o plano
+  no encerramento e é excluído junto.
+
+Verificação: cada regra aplicada tem arquivo de evidência com as duas
+transcrições e o resultado por critério.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
