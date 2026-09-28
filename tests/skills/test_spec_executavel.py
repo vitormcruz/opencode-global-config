@@ -113,6 +113,16 @@ def test_traceability_links_to_origin(skill_content: str) -> None:
 
 
 @pytest.mark.unit
+def test_tabular_spec_fixture_reads_values_from_spec(
+    skill_content: str,
+) -> None:
+    normalized_content = " ".join(skill_content.split()).casefold()
+
+    assert "a fixture lê os valores das tabelas da spec" in normalized_content
+    assert "a fixture não codifica esses valores à parte" in normalized_content
+
+
+@pytest.mark.unit
 def test_out_of_scope_content_stays_out(skill_content: str) -> None:
     """Fronteiras que moram em outros lugares não vazam para a skill."""
 

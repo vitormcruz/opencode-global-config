@@ -96,6 +96,8 @@ Esquema do Cenário: <frase curta> (origem: <requisito/regra>)
 8. **Link texto↔teste (princípio central)**: valores concretos e aspas
    duplas apenas para literais que mudam o veredito; ao máximo, o teste lê
    do texto os valores que a regra define.
+   Em specs tabulares, a fixture lê os valores das tabelas da spec. A
+   fixture não codifica esses valores à parte.
 9. **Persona/perfil**: inclua só quando o foco do cenário for
    permissão/controle de acesso.
 10. **`Esquema do Cenário` + `Exemplos`** para variações da mesma regra.
