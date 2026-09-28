@@ -376,6 +376,21 @@ Verificação: a seção de casos define, para cada regra, o agente do caso:
 regra global, um agente; regra específica, o agente afetado. Caso futuro
 da suíte de comunicação.
 
+**Achado 6 — Ciclo de vida do arquivo do plano (aprovado).** O revisor
+leu conflito entre a regra do plano abstraído (arquivo commitado e
+consultável para auditoria) e o ciclo de vida do plano no workflow de dev
+(temporário, excluído no encerramento). Decisão do humano: a regra de
+comunicação fica como aprovada, sem acréscimo; o problema é de redação no
+workflow e no `devflow`. Ajuste: nos trechos sobre o arquivo do plano em
+`docs/workflow-agentes-dev.md` e `devflow`, explicitar o ciclo de vida
+(commitado durante o trabalho como ponto de salvamento e consultável
+para auditoria; excluído no encerramento com autorização humana), sem
+contradizer a regra do plano abstraído.
+
+Verificação: leitura dos trechos ajustados: ciclo de vida explícito e
+sem contradição com a regra do plano abstraído. Caso futuro da suíte de
+comunicação.
+
 ## Task List
 
 ### Fase 1: Insumo de revisão e ajuste
