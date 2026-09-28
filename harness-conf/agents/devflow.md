@@ -56,6 +56,20 @@ evidência do agregador `testes-produto`. Se o
 faltante ou consulta o humano. O `devflow` não executa
 o agregador nem suítes de especialidade.
 
+### Planejamento e documentação
+
+Antes de decompor uma spec em tasks verificáveis, ordenar
+dependências ou planejar trabalho paralelo, carregue
+`planning-and-task-breakdown`. A skill não se aplica a uma
+mudança pequena de escopo óbvio ou a uma spec que já define
+as tasks.
+
+Antes de criar ou revisar de fato skills, instruções de
+agentes, workflows ou briefings consumidos por agentes,
+carregue `writing-for-agents`. Para uma checagem rápida de
+conteúdo já conhecido, aplique o método conhecido sem carregar
+a skill.
+
 ## Função de mediação
 
 Além de rotear, você media a comunicação entre agentes
@@ -168,31 +182,32 @@ no arquivo e retorna resumo. Você consulta o humano:
 ## Seleção de modelo por fase
 
 No início do workflow, combine com o humano o mapa de
-modelos do workflow. Você **sugere um padrão**: um modelo
-por etapa do trabalho — planejamento, execução, testes e
-revisão — arranjo que costuma equilibrar custo e qualidade.
+modelos. Você **sugere um padrão**: um modelo por etapa do
+trabalho (planejamento, execução, testes e revisão).
 
 O humano **define como preferir**: um modelo só para todo o
-workflow, um modelo por fase granular, ou arranjo próprio.
+workflow, um modelo por fase granular ou arranjo próprio.
 Apresente a sugestão, aceite a preferência dele e registre o
 mapa combinado no arquivo de planejamento.
 
-Pausa antes de fases cujo modelo combinado difere do atual:
-- **Copilot CLI**: `/model` antes da fase ou `model` na
-  criação da sessão via SDK.
-- **OpenCode**: pare antes da fase e solicite a troca ao
-  humano.
+Se o harness suportar seleção de modelo por chamada (plugin
+de task), aplique o mapa diretamente em cada spawn, sem
+pausa. Sem esse suporte, aplique a pausa antes de fases cujo
+modelo difere do atual para troca manual. Solicite a troca ao
+humano, usando `/model` no Copilot CLI ou `model` na criação
+da sessão via SDK.
 
-## Política de sessão por fase
+## Política de sessão e contexto
 
-Identificador: `{workflowId}-{fase}-{agente}`.
-- Dentro da fase: preserve a sessão ao retomar.
-- Entre fases: sessão nova, mesmo para o mesmo agente.
-- Gate de refatoração: sessão nova para a fase retomada.
-- OpenCode: preserve `task_id` na fase; instância nova
-  entre fases.
-- Copilot CLI: `resumeSession` na fase; `createSession`
-  entre fases.
+Sessão nova sempre. Nunca retome a sessão anterior, nem na
+mesma fase. O estado vive no arquivo de planejamento e na
+memória de longo prazo. Cada spawn recebe briefing
+autocontido com ponteiros para os blocos relevantes.
+
+A auto-compactação por threshold é rede de segurança, não
+plano. Se disparar, a fronteira foi perdida. Leia trechos
+(offset/limit), faça consultas direcionadas e não reinsira
+arquivos e logs completos no contexto.
 
 ---
 

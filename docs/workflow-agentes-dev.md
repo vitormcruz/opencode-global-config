@@ -151,14 +151,20 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    sugere um padrão (um modelo por etapa — planejamento,
    execução, testes, revisão) e o humano define como
    preferir: um modelo só, por fase granular ou arranjo
-   próprio. Mapa combinado registrado no arquivo. Pausa
-   antes de fases cujo modelo difere do atual. Política de
-   sessão: `{workflowId}-{fase}-{agente}`; retomada dentro
-   da fase, sessão nova entre fases. Exceção: quando os
-   critérios de compactação do `AGENTS.base.md` dispararem
-   (histórico como ruído; tarefa longa confirmada), a
-   política de compactação prevalece, mesmo dentro da mesma
-   fase (compactação ou nova sessão com estado persistido).
+   próprio. O mapa combinado fica registrado no arquivo.
+   Se o harness suportar seleção de modelo por chamada
+   (plugin de task), o mapa é aplicado diretamente em cada
+   spawn, sem pausa. Sem esse suporte, o workflow pausa
+   antes de fases cujo modelo difere do atual para troca
+   manual.
+   Sessão nova sempre: nunca retomar sessão anterior, nem na
+   mesma fase. O estado vive no arquivo de planejamento e na
+   memória de longo prazo; cada spawn recebe briefing
+   autocontido com ponteiros para os blocos relevantes.
+   A auto-compactação por threshold é rede de segurança, não
+   plano: se disparar, a fronteira foi perdida. O agente lê
+   trechos (offset/limit), faz consultas direcionadas e não
+   reinsere arquivos e logs completos no contexto.
 
 ### Governança
 
