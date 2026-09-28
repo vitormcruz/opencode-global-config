@@ -1,6 +1,9 @@
 # Insumo para o devflow: spawn dinâmico de subagentes com modelo por chamada
 
-Data: 2026-09-26. Status: PROVISÓRIO, aguardando revisão do devflow.
+Data: 2026-09-26. Status: CORREÇÕES — baseline verde no estado atual (930
+passed, 0 failed; consistência 26/26; HEAD 5d13e6a); mapa de modelos novo
+registrado no fim; correções em execução: curador-produto (docs) →
+eng-software (testes e exclusão worker/revisor) → suíte final e commit.
 Leitor esperado: o orquestrador devflow. Este documento é autocontido.
 
 ## Contexto
@@ -143,18 +146,39 @@ Passos reproduzíveis:
    liste as duas respostas recebidas."
    ```
 
-3. Verifique o modelo efetivo de cada child no storage (leitura
-   somente-leitura):
+3. Verifique o modelo efetivo de cada child no storage, com o módulo
+   `sqlite3` da biblioteca padrão e conexão somente-leitura (o CLI
+   `sqlite3` não existe no WSL desta máquina):
 
    ```
-   sqlite3 "file:$HOME/.local/share/opencode/opencode.db?mode=ro" \
-     "SELECT id, parent_id, agent, model FROM session
-      WHERE directory LIKE '$HOME/.local/state/runbook-spawn-dinamico%'"
+   python3 - <<'PY'
+   import json, os, sqlite3
+
+   data_root = (
+       os.environ.get("XDG_DATA_HOME")
+       or os.path.expanduser("~/.local/share")
+   )
+   db = os.path.join(data_root, "opencode", "opencode.db")
+   diretorio = os.path.expanduser(
+       "~/.local/state/runbook-spawn-dinamico"
+   )
+   con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+   linhas = con.execute(
+       "SELECT id, parent_id, agent, model FROM session "
+       "WHERE directory LIKE ? ORDER BY time_created",
+       (diretorio + "%",),
+   ).fetchall()
+   for session_id, parent_id, agent, model in linhas:
+       modelo = json.loads(model) if model else {}
+       print(session_id, parent_id, agent,
+             f"{modelo.get('providerID')}/{modelo.get('id')}")
+   PY
    ```
 
    A coluna `model` contém JSON com `providerID` e `id`. Para ver a
-   resposta de um child, consulte `SELECT data FROM part WHERE
-   session_id = '<id>'` e filtre `type = 'text'`.
+   resposta de um child, abra a conexão do mesmo jeito e consulte
+   `SELECT data FROM part WHERE session_id = '<id>'`, filtrando
+   `type = 'text'` no JSON da coluna `data`.
 
 Evidência registrada (execução de 2026-09-26 20:02:01 a 20:02:48,
 horário -03:00, duração 46,5 s, custo 0,0000):
@@ -191,6 +215,11 @@ Modos finais em `harness-conf/agents/`:
 Permissões: o `curador-produto` ganhou `eng-software: allow` no bloco
 `permission.task` (após `"*": deny`). O `devflow` mantém allows
 nomeados só para os especialistas spawnáveis.
+
+O `smart-planner` trocou o wildcard `task: "*": allow` por `"*": deny`
+com allows nomeados (10 entradas). A troca veio com segunda guarda em
+`tests/agents/test_task_spawnable_modes.py`: qualquer wildcard allow de
+`task` reprova (commits `b416dbe` e `9b185cb`, 2026-09-26).
 
 O adapter Copilot passou a espelhar a semântica dos modos na conversão
 de frontmatter: `primary` emite `disable-model-invocation: true`;
@@ -260,6 +289,22 @@ neste documento:
   plugin resolve. A exclusão envolve `harness-conf/opencode.json`, o
   adapter Copilot e testes.
 
+### Estado das pendências (atualização de 2026-09-28)
+
+- Pendência 4 (120 colunas): RESOLVIDA pelo ciclo vizinho; word-wrap
+  aplicado e busca sem linhas acima de 120 colunas em
+  `harness-conf/agents/*.md`.
+- Pendência 5 (wildcard do smart-planner): RESOLVIDA (classificação do
+  rev, 2026-09-27); `"*": deny` com allows nomeados e guarda contra
+  wildcard allow.
+- Pendência 6 (`JAVA_HOME`): RATIFICADA como premissa ambiental; o
+  bootstrap instala o JDK e persiste `JAVA_HOME`.
+- Pendência 7 (quota sem pin): DECIDIDA; o pacote permanece sem pin e
+  o teste de pin passa a emitir aviso de flutuação (warning), não
+  fail.
+- Pendência 8 (excluir `worker` e `revisor`): DECIDIDA; exclusão dos
+  dois agentes em execução nesta leva.
+
 ## Pedido ao devflow
 
 Revisar o implementado e promover a aderência ao repo. O escopo da
@@ -293,3 +338,174 @@ Checklist de revisão e aderência:
 7. Revise a seção "Consistência de agentes e adapters" contra o
    estado atual de `harness-conf/agents/` e do adapter Copilot, e
    avalie as "Pendências conhecidas" listadas.
+
+## Achados da revisão (rev, 2026-09-27)
+
+Revisão solo de aderência. Escopo fechado: itens 3, 4, 5 e 7 do
+checklist e as pendências conhecidas. Read-only: nada foi corrigido.
+Severidade: alta (corrigir antes do uso do recurso afetado), média,
+baixa. Formato: achado · ação · severidade.
+
+### Achados
+
+1. `worktree` citado como existente, sem marcação aspiracional, em três
+   docs: `harness-conf/AGENTS.base.md:125` (guarda recomenda
+   `worktree: true` para escrita em background), `README.md:116` (lista
+   `worktree` como funcionalidade do pin) e `UPSTREAM.md:60` (mitigação
+   cita `worktree`). O argumento não existe no pin 1.3.1; agente que
+   segue a guarda acredita ter isolamento e o spawn escreve no
+   diretório corrente. · Ação: remover a citação ou marcar
+   explicitamente aspiracional nos três arquivos; correção de texto,
+   eng-software. · Severidade: alta. (Pendência 1.)
+
+2. Timeout do teste de integração avaliado só após `readline()`
+   retornar (`tests/integration/test_task_model_spawn.py:175-196`): os
+   limites idle 300 s e total 900 s existem com kill + fail, mas
+   processo vivo e silencioso pendura o teste sem dispará-los. · Ação:
+   endurecer o loop com `select`/thread de leitura ou `pytest-timeout`;
+   qa com eng-software. · Severidade: média. (Pendência 3.)
+
+3. Insumo defasado frente ao repo: a pendência 5 descreve wildcard
+   `task: "*": allow` no smart-planner e teste cobrindo só entradas
+   nomeadas; o estado atual tem `"*": deny` + 10 allows nomeados
+   (`smart-planner.md:18-29`) e segunda guarda proibindo wildcard allow
+   (`test_task_spawnable_modes.py:204-249`, commits `b416dbe` e
+   `9b185cb`). A seção "Consistência" não registra essa troca. · Ação:
+   atualizar o insumo antes de arquivar a leva; devflow. · Severidade:
+   média. (Pendência 5.)
+
+4. Escopo da exclusão de `worker` e `revisor` (pendência 8) incompleto:
+   `smart-planner.md:28-29` mantém `worker: allow` e `revisor: allow`
+   (excluir os agentes sem limpar essas permissões quebra o teste de
+   guarda), e a seção "Worker" do `AGENTS.md` do repo e os workflows
+   ficam fora da lista, contra a regra de sincronização workflow ↔
+   agentes. · Ação: incluir esses artefatos no escopo da exclusão
+   quando executada; eng-software com curador-produto. · Severidade:
+   média. (Pendência 8.)
+
+5. `@slkiser/opencode-quota` sem pin (`opencode.json:4`) e sem registro
+   de revisão (`harness-conf/plugins/` só tem `opencode-task-model/`):
+   flutua para a versão mais recente a cada restart, sem revisão de
+   segurança. O teste de pin aceita pacote escoped sem versão
+   (`test_opencode_plugins.py:62-69`). · Ação: decidir pinar (com
+   revisão registrada) ou ratificar o critério atual; humano. ·
+   Severidade: média. (Pendência 7.)
+
+6. Procedimento de remoção completo (7 passos) vive só neste insumo;
+   `UPSTREAM.md:80` aponta para a seção "Plugins" do README, que
+   carrega só o gatilho em frase. A referência cruzada promete
+   procedimento que a doc durável não carrega. · Ação: mover o
+   procedimento para o `UPSTREAM.md` (ou README) na próxima leva de
+   docs; curador-produto. · Severidade: baixa.
+
+7. Caracterização de background diverge entre docs: a guarda diz "dá
+   acesso local pleno ao subagente"; o `UPSTREAM.md` descreve "sandbox
+   deny-all exceto `read`/`glob`/`grep`/`webfetch`". · Ação: alinhar a
+   caracterização nos dois textos; eng-software. · Severidade: baixa.
+
+8. `UPSTREAM.md` do plugin sem seção de licença dedicada; o padrão de
+   skills mantém "## Licenca" (a licença MIT aparece só no inventário
+   do pacote). · Ação: alinhar o formato na próxima edição;
+   eng-software. · Severidade: baixa.
+
+9. 31 linhas acima de 120 colunas em 8 arquivos de
+   `harness-conf/agents/*.md` (analista 12, revisor-historia 11, sec 2,
+   qa 2, curador-produto, dba, eng-software e rev com 1 cada). · Ação:
+   word-wrap; eng-software. · Severidade: baixa. (Pendência 4.)
+
+10. Runbook manual deste insumo usa o CLI `sqlite3`, ausente no WSL
+    desta máquina (`command -v sqlite3` vazio). · Ação: adaptar a
+    verificação para `python3` com o módulo `sqlite3` da biblioteca
+    padrão, como já faz o teste de integração; devflow ao atualizar o
+    insumo. · Severidade: baixa. (Pendência 2.)
+
+### Confirmações de aderência (sem achado)
+
+- Item 3: `UPSTREAM.md` do plugin aderente ao padrão do repo (origem,
+  SHA `baedc897...`, data 2026-07-30, revisão 2026-09-26, findings com
+  leitura na íntegra cobrindo comandos, URLs e exfiltração, paridade
+  tarball ↔ tag, decisão GO, instruções de atualização). Campos exigidos
+  por `test_provisory_plugin_has_upstream_review` presentes; pin do
+  config igual a `versao_pinada` (1.3.1).
+- Item 4: seção "Plugins" enxuta (2 bullets), com PROVISÓRIO explícito,
+  rastreio (PR #34947, issue #6651) e gatilho de remoção apontando para
+  o `UPSTREAM.md`.
+- Item 5: guarda aderente ao comportamento validado em `model` e
+  `reasoning` por chamada, precedência nativa sem argumentos,
+  `background` restrito a escopo aprovado e prompts que não resolvem
+  `@arquivo` (exceções: achados 1 e 7).
+- Item 7a: modos conformes. `primary`: analista, devflow, aws-analista,
+  smart-planner. `all`: eng-software, front, curador-produto, dba, sec,
+  qa, rev. `subagent`: revisor-historia, worker, revisor.
+- Item 7b: `curador-produto` com `"*": deny` + `eng-software: allow`;
+  `devflow` com 7 allows nomeados, todos alvo `mode: all`; nenhum
+  agente com wildcard allow.
+- Item 7c: `src/opencode_config/harnesses/copilot.py` conforme:
+  `primary` emite `disable-model-invocation: true` (linhas 300-303),
+  `subagent` mantém `user-invocable: false` (298-299), `all` não emite
+  propriedade; `_OPENCODE_ONLY_AGENTS` (worker, revisor) fica fora do
+  vocabulário de delegação e do sync (446-456); prune de órfãos com
+  backup e limitação documentada (42-53, 408-431).
+
+### Pendências conhecidas: classificação
+
+- Pendência 1 (`worktree`): PENDENTE. Achado 1; ocorrências em
+  `README.md:116`, `AGENTS.base.md:125` e `UPSTREAM.md:60`.
+- Pendência 2 (runbook `sqlite3`): PENDENTE. Achado 10; `command -v
+  sqlite3` vazio no WSL.
+- Pendência 3 (timeout silencioso): PENDENTE. Achado 2; loop
+  `readline` nas linhas 175-196 do teste.
+- Pendência 4 (120 colunas): PENDENTE. Achado 9; 31 linhas em 8
+  arquivos.
+- Pendência 5 (wildcard smart-planner): RESOLVIDA. `smart-planner.md`
+  trocou o wildcard por `"*": deny` + allows nomeados (linhas 18-29);
+  `test_task_spawnable_modes.py:204-249` proíbe wildcard allow com
+  fixture de detecção; commits `b416dbe` e `9b185cb` (2026-09-26).
+- Pendência 6 (`JAVA_HOME`): EXIGE DECISÃO HUMANA. JDK presente no
+  path citado; o bootstrap instala e persiste `JAVA_HOME`
+  (`installers/core.py:929-932`, teste em
+  `tests/bootstrap/test_product_dependencies.py:384`); a falha sem a
+  variável tem mensagem clara e acionável
+  (`test_concordion_spec_infra.py:57-64`), alinhada à regra do repo
+  (fail, não skip). Ratificar como premissa ambiental ou decidir
+  endurecimento.
+- Pendência 7 (quota sem pin): EXIGE DECISÃO HUMANA. Achado 5; a
+  pendência em si pede a decisão (pinar ou ajustar o critério do
+  teste).
+- Pendência 8 (excluir worker e revisor): EXIGE DECISÃO HUMANA.
+  `worker.md` e `revisor.md` presentes; o gatilho "validação OK em
+  uso" não tem critério objetivo; escopo da exclusão incompleto
+  (achado 4).
+
+Resumo: 1 resolvida, 4 pendentes, 3 exigem decisão humana.
+
+### Veredicto
+
+[ ] Aprovado sem ressalvas
+[x] Aprovado com ressalvas: nenhum achado bloqueia o escopo descrito;
+    o achado 1 (alta) é correção obrigatória antes de qualquer uso de
+    `background: true`; achados 3, 4 e 5 exigem atualização de registro
+    ou decisão humana.
+[ ] Bloqueado
+
+### Evidências (rev)
+
+- [x] Artefato lido: `plan/insumo-devflow-spawn-dinamico.md` (íntegro)
+- [x] Plano aprovado consultado: sim (insumo + `AGENTS.md` do repo +
+      `AGENTS.base.md`)
+- [x] Checklist integrativo: 5 dimensões (documentação ↔ padrão do
+      repo, aderência ao plano, contradições/lacunas, cobertura de
+      testes ↔ requisitos, segurança ↔ implementação)
+- [x] Achados encontrados: 10 total (1 alta, 4 médias, 5 baixas),
+      0 bloqueantes
+
+## Mapa de modelos
+
+Decidido com o humano em 2026-09-28; substitui o mapa do ciclo vizinho
+(executor opencode-go/gpt-6-luna com reasoning max, revisor glm-5.3):
+
+- Executor (eng-software e demais executores): `zai-coding-plan/glm-5.3-flash`
+- Revisor (rev): `zai-coding-plan/glm-5.3`
+- Reasoning: `default` (não especificado pelo humano; o mapa anterior usava
+  `max` no executor)
+- Aplicação: via plugin opencode-task-model, `model` por chamada de task.
