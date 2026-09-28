@@ -121,6 +121,9 @@
   globs e comandos sem dependência entre si saem juntos, em paralelo.
 - Espere só quando houver dependência real: se B precisa do resultado
   de A, A primeiro, B depois.
+- No shell, consolide verificações independentes em um único comando
+  (ex.: lint && testes && git diff --check) em vez de várias chamadas
+  equivalentes.
 
 ## Tool task (plugin opencode-task-model)
 
