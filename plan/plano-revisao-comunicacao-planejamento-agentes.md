@@ -151,9 +151,9 @@ Skill `question-orchestration`:
 
 Verificação: conversa roteirizada com várias decisões pendentes; a
 transcrição mostra uma pergunta decisória por rodada; agrupamento só de
-perguntas triviais e independentes, cada uma entendível sem as outras;
-contexto de pergunta sem abreviação nem confusão. Caso futuro da suíte
-de comunicação.
+perguntas autocontidas e independentes (entendíveis sem as outras, sem
+contexto novo), no máximo 4; contexto de pergunta sem abreviação nem
+confusão. Caso futuro da suíte de comunicação.
 
 **Item 5 — Uso da tool de pergunta (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Uso da tool de pergunta"):
@@ -290,8 +290,9 @@ Revisor (`rev`):
   decisão de aceitar a falta é do humano.
 
 Verificação: conversa roteirizada com escopo de pesos variados; o plano
-cobre todos os itens; o relatório do revisor aponta qualquer omissão.
-Caso futuro da suíte de comunicação.
+cobre todos os itens, salvo omissão ou adiamento com autorização
+explícita do humano registrada; o relatório do revisor aponta omissões
+não autorizadas. Caso futuro da suíte de comunicação.
 
 **Item 11 — Detalhe de implementação não se discute (aprovado).**
 Destino: skill `question-orchestration` (acréscimo, junto à regra de
@@ -640,6 +641,16 @@ agrupamento seguem exclusivamente a skill. Nota: a sugestão de limitar
 "confirmar cada ramo independente" às decisões que mudam o resultado já
 está coberta pelas regras dos itens 7 e 11 (perguntar só o que afeta o
 resultado; detalhe de implementação não se discute); sem regra nova.
+
+**Achado 5 (rodada 4) — Verificações alinhadas às exceções das regras
+(aprovado).** Duas verificações mais duras que as regras: a do item 4
+exigia perguntas "triviais" para agrupar (a regra permite autocontidas
+e independentes); a do item 10 exigia cobertura sem exceção (a regra
+permite omissão ou adiamento autorizado). Ajuste: verificação do item 4
+aceita agrupamento de perguntas autocontidas e independentes, no máximo
+4; verificação do item 10 aceita omissão ou adiamento com autorização
+explícita do humano registrada, e o revisor aponta omissões não
+autorizadas.
 
 ## Task List
 
