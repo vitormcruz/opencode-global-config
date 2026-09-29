@@ -161,10 +161,13 @@ prosseguir. Regras já registradas nunca são reperguntadas.
    mesma fase. O estado vive no arquivo de planejamento e na
    memória de longo prazo; cada spawn recebe briefing
    autocontido com ponteiros para os blocos relevantes.
-   A auto-compactação por threshold é rede de segurança, não
-   plano: se disparar, a fronteira foi perdida. O agente lê
-   trechos (offset/limit), faz consultas direcionadas e não
-   reinsere arquivos e logs completos no contexto.
+   No OpenCode com o plugin DCP, a tool `compress` é o
+   mecanismo preferido de compactação, acionada pelo próprio
+   agente; `/compact` é fallback. A auto-compactação por
+   threshold é rede de segurança, não plano: se disparar, a
+   fronteira foi perdida. O agente lê trechos (offset/limit),
+   faz consultas direcionadas e não reinsere arquivos e logs
+   completos no contexto.
 
 ### Governança
 

@@ -108,9 +108,17 @@
   muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
   custo da compactação supera a economia: não compacte.
 - Reduza o contexto por conta própria, com qualquer mecanismo
-  disponível no harness (compactação, nova sessão ou spawn com estado
-  persistido em arquivo, ou equivalente). Sem mecanismo disponível ou
-  suficiente, peça ao humano.
+  disponível no harness (nova sessão ou spawn com estado persistido em
+  arquivo, ou equivalente). Sem mecanismo disponível ou suficiente,
+  peça ao humano.
+- No OpenCode com o plugin DCP ativo, a tool `compress` é o mecanismo
+  preferido: o próprio agente comprime trechos antigos em resumo, sem
+  apagar o histórico. Dispare `compress` quando um nudge indicar
+  contexto acima do limite; `/compact` é comando do humano e fica como
+  fallback quando a tool não estiver disponível.
+- No Copilot CLI nada muda: a compactação é host-level, fora do
+  alcance do agente; recupere contexto com re-seed em chat novo,
+  salvando o estado antes.
 - Segure o crescimento: leia trechos (offset/limit) e consultas
   direcionadas; não reinsira arquivos e logs completos no contexto.
 - A auto-compactação por threshold é rede de segurança, não plano:
