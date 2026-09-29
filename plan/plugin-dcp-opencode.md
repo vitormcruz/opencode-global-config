@@ -1,8 +1,10 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: CONSTRUÇÃO: Fase 3 em andamento, Tasks 6 e 7 concluídas, commitadas
-e verificadas (suíte verde). Pendentes: Tasks 8 e 9, revisão da construção
-(rev) e materialização no user-space (Fase 4). Próxima: Task 8.
+Status: CONSTRUÇÃO: Fase 3 com a construção concluída. Tasks 6, 7, 8 e
+9 concluídas, commitadas e verificadas (suíte verde: 942 passed). Task
+8 aplicada em 2026-09-29 com aprovação humana (textos verbatim;
+correção de coerência no AGENTS.md da raiz junto). Pendentes: revisão
+da construção (rev) e materialização no user-space (Fase 4).
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -1122,7 +1124,7 @@ item 4 do checklist a materializar na Task 7.
 - [ ] Gate de refatoração: n/a (sem código; plano sem mudança de
       desenho)
 
-### Resultados da Fase 3 (eng-software, 2026-09-29, Tasks 6 e 7)
+### Resultados da Fase 3 (eng-software, 2026-09-29, Tasks 6 a 9)
 
 Verificação, completamento e fechamento das Tasks 6 e 7. Os artefatos
 foram implementados por instância anterior que não persistiu resultado
@@ -1131,6 +1133,13 @@ o estado. Worktree limpo ao fechar: a alteração alheia citada pelo
 devflow (`plan/plano-revisao-comunicacao-planejamento-agentes.md`) não
 está mais pendente no repositório (nada a isolar; nada commitado nesta
 passagem além deste plano).
+
+Extensão de 2026-09-29 (mesmo dia, passagem posterior): Task 9
+executada e commitada; Task 8 apenas RASCUNHADA, sem tocar os arquivos
+alvo (regra do repo: mudança em workflow/agentes exige aprovação
+humana ANTES da aplicação). Ver blocos próprios adiante. A alteração
+alheia voltou a aparecer no worktree nesta passagem e foi isolada do
+commit da Task 9 com `--only`.
 
 #### Commits verificados (Tasks 6 e 7)
 
@@ -1179,18 +1188,25 @@ backup e idempotência Windows.
   registrar. `test_workflow_consistency.py` dentro do lote verde.
 - `.venv/bin/ruff check src tests`: sem achados.
 
-#### Estado parcial do C3 (checklist do plano)
+#### Estado parcial do C3 (checklist do plano, pós-aplicação da Task 8)
 
-- [x] suíte `-m all` exit 0 no ambiente corrente;
+- [x] suíte `-m all` exit 0 no ambiente corrente (942 passed,
+  2026-09-29, re-executada após a aplicação da Task 8);
 - [x] Task 7 com checklist concluído (ver Commits e Simetria acima);
-- [ ] Tasks 8 (política de compactação) e 9 (ADR-0010 + README)
-  pendentes, fora do escopo desta passagem;
-- [ ] revisão da construção pelo rev pendente;
+- [x] Task 9 concluída e commitada (ADR-0011, fixture, build.gradle,
+  README);
+- [x] Task 8 aprovada pelo humano e aplicada verbatim (2026-09-29;
+  AGENTS.base.md, workflow-agentes-dev.md e AGENTS.md da raiz; bloco
+  próprio adiante);
+- [ ] revisão da construção pelo rev pendente (criterio "revisão sem
+  achado bloqueante" do gate C3);
 - [ ] materialização no user-space (bootstrap na máquina do humano)
-  pendente, prevista para a Fase 4 (Task 10).
+  pendente, prevista para a Fase 4 (Task 10; criterio "materialização
+  confirmada" do gate C3).
 
-C3 segue ABERTO. Próximo passo: Task 8, depois Task 9, depois revisão
-da construção.
+C3 segue ABERTO com dois itens pendentes: revisão da construção pelo
+rev e materialização no user-space (Fase 4). A construção da Fase 3
+(Tasks 7 a 9) está concluída e commitada.
 
 #### Evidências (eng-software) — CONSTRUÇÃO (Fase 3, Tasks 6-7)
 
@@ -1205,7 +1221,211 @@ da construção.
 - [x] Gate de refatoração: cenário "nada muda"; sem impacto no plano
   (extensão por tupla de destinos, padrão existente)
 - [x] Worktree limpo; alteração alheia citada não mais pendente;
-  nenhum commit novo de código nesta passagem
+      nenhum commit novo de código nesta passagem
+
+#### Task 9: documentação e ADR (concluída e commitada, 2026-09-29)
+
+- **ADR-0011 criado**: `docs/adr/0011-compactacao-dcp-opencode.md`,
+  com Contexto, Decisão, Consequências, Alternativas consideradas e
+  Asserções executáveis. REGISTRADO COMO 0011, não 0010: o número 0010
+  já estava ocupado por `docs/adr/0010-remocao-plugin-task-model.md`
+  (ciclo paralelo, commitado antes desta passagem); a numeração
+  sequencial do repo não permite reutilizar. Mensagem do commit
+  ajustada para `docs(adr): adr 0011 compactacao dcp e dependencias do
+  readme`.
+- **Fixture e registro (convenção de asserção executável)**: o
+  `docs/README.md` exige asserção executável OBRIGATÓRIA em todo ADR
+  novo, pertencente à suíte da especialidade. Criada
+  `src/test/groovy/Adr0011Fixture.groovy` com 4 verificações de
+  artefatos reais: spec do plugin pinada com versão fixa no array
+  `plugin`; `dcp.jsonc` com `autoUpdate` false e gate `allow`;
+  destino `dcp.jsonc` declarado nas duas strategies do OpenCode e
+  AUSENTE do adapter Copilot; README documentando o plugin.
+  Registrada como `Adr0011Fixture` na lista backend do `build.gradle`.
+  A asserção valida decisão já implementada (Tasks 6 e 7), no padrão
+  retrofit dos ADRs do repo.
+- **README atualizado**: entrada do DCP na seção Plugins (tool
+  `compress`, nudges, materialização via bootstrap, rollback `deny` e
+  remoção completa, bump como nova importação com checklist SEC);
+  `harness-conf/dcp.jsonc` na lista de estrutura do repo; destino novo
+  na lista de symlinks POSIX; parágrafo Windows passou de "quatro
+  destinos" para "cinco destinos".
+- **docs/README.md checado, NÃO editado** (arquivo do curador-produto;
+  registro pedido pelo devflow):
+  - (a) linhas 108-110: "Os ADRs novos (`docs/adr/0007`–`0009`) seguem
+    a mesma convenção" ficou desatualizado; ADRs 0010 (ciclo paralelo)
+    e 0011 (esta task) existem e seguem a convenção. Sugestão de
+    formulação: "Os ADRs novos a partir de `docs/adr/0007` seguem a
+    mesma convenção".
+  - (b) nenhuma menção a compactação ou a plugin no arquivo: nada mais
+    a atualizar nele.
+  - Achado de coerência FORA do docs/README.md: o `AGENTS.md` da raiz
+    ("Configuração Global dos Harnesses") diz "quatro destinos" de
+    `harness-conf/` no Windows; com `dcp.jsonc` são cinco. DESFECHO
+    (2026-09-29): correção aprovada junto com a Task 8 e aplicada na
+    mesma passagem ("quatro" → "cinco", `dcp.jsonc` na lista). O item
+    (a) acima segue pendência do curador-produto: docs/README.md não
+    editado.
+- **Verificação**: `gradle clean test -PproductSpecialty=backend`
+  verde, `Adr0011Fixture` com 1 teste, 0 falhas, 0 erros;
+  `.venv/bin/ruff check src tests` sem achados; `.venv/bin/pytest -m
+  all` = 942 passed, 31 deselected, 0 failed (WSL, 2026-09-29). Delta
+  de +2 testes sobre o lote anterior (940): os dois testes
+  parametrizados sobre ADRs numerados em
+  `tests/product_tests/test_concordion_spec_infra.py` ganham um caso
+  cada com o ADR-0011.
+
+#### Task 8 — aprovada pelo humano e aplicada (2026-09-29)
+
+APLICADA: o humano aprovou os rascunhos em 2026-09-29. Os textos
+"Depois (proposto)" abaixo foram aplicados VERBATIM em
+`harness-conf/AGENTS.base.md` (seção "Compactação de contexto",
+substituição completa) e em `docs/workflow-agentes-dev.md` (premissa
+7, trecho final). Correção de coerência aprovada junto: `AGENTS.md`
+da raiz, seção "Configuração Global dos Harnesses", corrigido de
+"quatro" para "cinco" destinos de `harness-conf/`, com `dcp.jsonc`
+incluído na lista. Suíte `-m all` (942 passed) e ruff verdes após a
+aplicação; evidências na seção própria. Os blocos "Antes/Depois"
+abaixo preservam o rascunho como histórico.
+
+Rascunhos produzidos em 2026-09-29 (regime original: só rascunho,
+NÃO aplicar; arquivos alvo intocados até a aprovação). Regra do repo:
+mudança de conteúdo em workflow ou agentes exige aprovação humana
+ANTES da aplicação. Textos redigidos pelo método
+`writing-for-agents`, autocontidos, sem códigos do plano, linhas
+≤ 120.
+
+**1. `harness-conf/AGENTS.base.md` — seção "Compactação de contexto"**
+
+Antes (estado atual, seção completa):
+
+```markdown
+## Compactação de contexto
+- Etapa concluída e resultado salvo: avalie compactar antes de iniciar
+  a próxima. Compensa quando o histórico já é grande e ainda virão
+  muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
+  custo da compactação supera a economia: não compacte.
+- Reduza o contexto por conta própria, com qualquer mecanismo
+  disponível no harness (compactação, nova sessão ou spawn com estado
+  persistido em arquivo, ou equivalente). Sem mecanismo disponível ou
+  suficiente, peça ao humano.
+- Segure o crescimento: leia trechos (offset/limit) e consultas
+  direcionadas; não reinsira arquivos e logs completos no contexto.
+- A auto-compactação por threshold é rede de segurança, não plano:
+  se ela disparar, a fronteira foi perdida.
+```
+
+Depois (proposto):
+
+```markdown
+## Compactação de contexto
+- Etapa concluída e resultado salvo: avalie compactar antes de iniciar
+  a próxima. Compensa quando o histórico já é grande e ainda virão
+  muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
+  custo da compactação supera a economia: não compacte.
+- Reduza o contexto por conta própria, com qualquer mecanismo
+  disponível no harness (nova sessão ou spawn com estado persistido em
+  arquivo, ou equivalente). Sem mecanismo disponível ou suficiente,
+  peça ao humano.
+- No OpenCode com o plugin DCP ativo, a tool `compress` é o mecanismo
+  preferido: o próprio agente comprime trechos antigos em resumo, sem
+  apagar o histórico. Dispare `compress` quando um nudge indicar
+  contexto acima do limite; `/compact` é comando do humano e fica como
+  fallback quando a tool não estiver disponível.
+- No Copilot CLI nada muda: a compactação é host-level, fora do
+  alcance do agente; recupere contexto com re-seed em chat novo,
+  salvando o estado antes.
+- Segure o crescimento: leia trechos (offset/limit) e consultas
+  direcionadas; não reinsira arquivos e logs completos no contexto.
+- A auto-compactação por threshold é rede de segurança, não plano:
+  se ela disparar, a fronteira foi perdida.
+```
+
+Notas do rascunho: a mecanismo automatizado preferido passa a ser o
+`compress` (nudges empurram a chamada); `/compact` vira fallback; a
+auto-compactação nativa permanece rede de segurança (último bullet
+inalterado); Copilot CLI explicitado como host-level com recuperação
+por re-seed. Único trecho removido do bullet 2: a palavra "compactação"
+na lista de mecanismos, para não duplicar o bullet novo.
+
+**2. `docs/workflow-agentes-dev.md` — premissa 7, exceção de
+compactação**
+
+Antes (trecho final da premissa 7):
+
+```markdown
+   Sessão nova sempre: nunca retomar sessão anterior, nem na
+   mesma fase. O estado vive no arquivo de planejamento e na
+   memória de longo prazo; cada spawn recebe briefing
+   autocontido com ponteiros para os blocos relevantes.
+   A auto-compactação por threshold é rede de segurança, não
+   plano: se disparar, a fronteira foi perdida. O agente lê
+   trechos (offset/limit), faz consultas direcionadas e não
+   reinsere arquivos e logs completos no contexto.
+```
+
+Depois (proposto):
+
+```markdown
+   Sessão nova sempre: nunca retomar sessão anterior, nem na
+   mesma fase. O estado vive no arquivo de planejamento e na
+   memória de longo prazo; cada spawn recebe briefing
+   autocontido com ponteiros para os blocos relevantes.
+   No OpenCode com o plugin DCP, a tool `compress` é o
+   mecanismo preferido de compactação, acionada pelo próprio
+   agente; `/compact` é fallback. A auto-compactação por
+   threshold é rede de segurança, não plano: se disparar, a
+   fronteira foi perdida. O agente lê trechos (offset/limit),
+   faz consultas direcionadas e não reinsere arquivos e logs
+   completos no contexto.
+```
+
+Notas do rascunho: a exceção de compactação da premissa ganha o
+mecanismo preferido no OpenCode; o resto da premissa fica intacto.
+Coerente com o rascunho 1 e com o comportamento configurado
+(`dcp.jsonc` com `compress.permission = "allow"`).
+
+#### Evidências (eng-software) — CONSTRUÇÃO (Fase 3, Tasks 8-9)
+
+- [x] Task 9: ADR-0011 com asserção executável verde; README
+      atualizado; docs/README.md checado, achados registrados, sem
+      edição
+- [x] Task 8: rascunhos produzidos e persistidos no bloco próprio;
+      arquivos alvo intocados; aplicação depende de aprovação humana
+- [x] Testes novos: fixture Concordion `Adr0011Fixture` (1 teste,
+      verde no primeiro run; decisão já implementada nas Tasks 6-7,
+      padrão retrofit de asserção; +2 casos parametrizados de infra)
+- [x] Testes totais: 942 passed, 31 deselected, 0 failed
+      (`.venv/bin/pytest -m all`, WSL, 2026-09-29); gradle backend
+      fixtures verde
+- [x] Análise estática: ruff sem achados
+- [x] Gate de refatoração: cenário "nada muda" no plano; único desvio
+      operacional é a numeração do ADR (0010 ocupado pelo ciclo
+      paralelo, registrado no resultado da Task 9)
+- [x] Worktree: commit da Task 9 com `--only` nos 4 arquivos dela;
+      alteração alheia citada pelo devflow (plano do ciclo paralelo)
+      isolada; rascunhos da Task 8 e os resultados desta seção entram
+      em commit posterior, após aprovação
+
+Passagem da aplicação (2026-09-29, após aprovação do humano):
+
+- [x] Task 8 aplicada verbatim: `harness-conf/AGENTS.base.md` (seção
+      "Compactação de contexto", substituição completa),
+      `docs/workflow-agentes-dev.md` (premissa 7, trecho final) e
+      correção de coerência no `AGENTS.md` da raiz ("cinco destinos",
+      `dcp.jsonc` na lista)
+- [x] Testes novos: nenhum (mudança só de documentação)
+- [x] Testes totais: 942 passed, 31 deselected, 0 failed
+      (`.venv/bin/pytest -m all`, WSL, 2026-09-29);
+      `tests/agents/test_workflow_consistency.py` confirmado à parte:
+      22 passed
+- [x] Análise estática: ruff sem achados (src, tests, adapters)
+- [x] Regressão incremental: suíte completa executada após a
+      aplicação; verde
+- [x] Gate de refatoração: n/a (sem código produtivo nesta passagem)
+- [x] Worktree: dois commits com `--only` (docs de agentes; plano com
+      rascunhos aprovados, resultados e pendências); sem alteração
+      alheia pendente nesta passagem
 
 ### Segurança (sec)
 
