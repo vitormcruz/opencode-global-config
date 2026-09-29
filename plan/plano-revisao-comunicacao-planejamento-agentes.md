@@ -241,6 +241,10 @@ apresentado na conversa). Peça nova aprovada: âncora de recarga.
 
 Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
 
+- Após compactação de contexto, antes de prosseguir a tarefa em
+  andamento, recarregue as skills cujo conteúdo sustenta essa tarefa. O
+  mesmo vale ao perceber que instruções de uma skill já adotada deixaram
+  de ser seguidas.
 - Compactação de contexto ou desvio do protocolo de perguntas (volume,
   ritmo, uso da tool): recarregue a skill `question-orchestration`
   antes da próxima resposta ao humano. A recarga vale para quem conduz
@@ -251,8 +255,9 @@ Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
 
 Verificação: conversa roteirizada longa com compactação no meio; após a
 compactação, a skill é recarregada e o protocolo (uma pergunta por
-rodada, volume por turno) se mantém. Caso futuro da suíte de
-comunicação.
+rodada, volume por turno) se mantém. Segundo roteiro, com skill de
+domínio carregada e compactação no meio: a skill é recarregada antes de
+prosseguir a tarefa. Casos futuros da suíte de comunicação.
 
 **Item 9 — Dúvida trava ação (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -608,6 +613,17 @@ humano usando `question-orchestration`. Ajuste no item 8: a recarga
 vale para quem conduz conversa de decisão com o humano usando a skill
 (`smart-planner`, `devflow`, `analista` em entrevista direta); demais
 agentes de domínio não recarregam o protocolo.
+
+**Decisão nova (rodada 4) — Recarga geral de skills após compactação
+(aprovada).** Levantada pelo humano ao discutir a recarga: a compactação
+apaga do histórico o conteúdo de qualquer skill carregada (o agente
+perde as instruções e a memória de tê-las carregado; só a lista de
+skills e as regras globais permanecem no prompt). Regra nova no item 8,
+arquivo global: após compactação, antes de prosseguir a tarefa em
+andamento, recarregar as skills cujo conteúdo sustenta a tarefa; o
+mesmo vale ao perceber que instruções de skill já adotada deixaram de
+ser seguidas. Vale para qualquer agente; verificação própria com skill
+de domínio.
 
 ## Task List
 
