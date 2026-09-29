@@ -27,6 +27,7 @@ def make_repository(root: Path) -> Path:
         (harness / directory).mkdir(parents=True)
     (repository / "scripts").mkdir()
     (harness / "opencode.json").write_text("{}", encoding="utf-8")
+    (harness / "dcp.jsonc").write_text("{}", encoding="utf-8")
     (harness / "AGENTS.base.md").write_text(
         "# Regras Globais\n\nConteudo da base.\n",
         encoding="utf-8",

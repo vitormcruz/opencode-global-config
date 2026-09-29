@@ -2,7 +2,8 @@
     "$schema": "https://opencode.ai/config.json",
     "plugin": [
         "@slkiser/opencode-quota",
-        "opencode-task-model@1.3.1"
+        "opencode-task-model@1.3.1",
+        "@tarquinen/opencode-dcp@3.1.15"
     ],
     "compaction": {
         "auto": true,

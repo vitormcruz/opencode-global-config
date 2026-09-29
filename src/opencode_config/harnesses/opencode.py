@@ -50,16 +50,18 @@ _POSIX_DESTINATIONS: tuple[tuple[str, str], ...] = (
     (f"{HARNESS_CONF_DIR}/agents", "agents"),
     (f"{HARNESS_CONF_DIR}/commands", "commands"),
     (f"{HARNESS_CONF_DIR}/opencode.json", "opencode.json"),
+    (f"{HARNESS_CONF_DIR}/dcp.jsonc", "dcp.jsonc"),
     (f"{HARNESS_CONF_DIR}/skills", "skills"),
     ("scripts", "scripts"),
 )
 
 # No Windows nao ha link para scripts/: a infra do repo fica acessivel
-# pelo proprio clone (ADR-0004); os 4 destinos de harness-conf bastam.
+# pelo proprio clone (ADR-0004); os destinos de harness-conf bastam.
 _WINDOWS_DESTINATIONS: tuple[tuple[str, str], ...] = (
     (f"{HARNESS_CONF_DIR}/agents", "agents"),
     (f"{HARNESS_CONF_DIR}/commands", "commands"),
     (f"{HARNESS_CONF_DIR}/opencode.json", "opencode.json"),
+    (f"{HARNESS_CONF_DIR}/dcp.jsonc", "dcp.jsonc"),
     (f"{HARNESS_CONF_DIR}/skills", "skills"),
 )
 
