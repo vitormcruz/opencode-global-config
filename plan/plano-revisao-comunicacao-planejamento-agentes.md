@@ -347,7 +347,11 @@ perguntas, mantendo só a referência à skill `question-orchestration`
 como fonte única (o `devflow` já a declara fonte única; os trechos
 duplicavam). Controles operacionais do mediador que não duplicam a skill
 (limite de rodadas de reformulação, continuidade da mediação, uso do
-prompt-improver para briefing) ficam. O `dba` fica como está: pergunta só
+prompt-improver para briefing) ficam. O checklist de qualidade de
+pergunta perde a exigência universal de opções com trade-offs (contraria
+o texto livre como padrão): mantém decisão explícita, contexto e
+pergunta autocontida; apresentação, alternativas e agrupamento seguem
+exclusivamente a skill. O `dba` fica como está: pergunta só
 o que falta no modelo (decisão de resultado) e consulta o registro antes
 de perguntar.
 
@@ -624,6 +628,18 @@ andamento, recarregar as skills cujo conteúdo sustenta a tarefa; o
 mesmo vale ao perceber que instruções de skill já adotada deixaram de
 ser seguidas. Vale para qualquer agente; verificação própria com skill
 de domínio.
+
+**Achado 4 (rodada 4) — Checklist do `devflow` sem exigência universal
+de opções (aprovado).** O checklist de qualidade de pergunta,
+preservado na primeira rodada como controle operacional, exige opções
+com trade-offs para toda pergunta, contrariando o texto livre como
+padrão. Ajuste: o checklist mantém decisão explícita, contexto e
+pergunta autocontida (e o limite de reformulações/continuidade), mas
+perde a exigência universal de opções; apresentação, alternativas e
+agrupamento seguem exclusivamente a skill. Nota: a sugestão de limitar
+"confirmar cada ramo independente" às decisões que mudam o resultado já
+está coberta pelas regras dos itens 7 e 11 (perguntar só o que afeta o
+resultado; detalhe de implementação não se discute); sem regra nova.
 
 ## Task List
 
