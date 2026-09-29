@@ -23,6 +23,7 @@ vive em `harness-conf/`:
 - `harness-conf/skills/` — skills (locais e importadas de upstream)
 - `harness-conf/commands/` — comandos
 - `harness-conf/opencode.json` — configuração do OpenCode
+- `harness-conf/dcp.jsonc` — configuração do plugin DCP (compactação)
 - `harness-conf/AGENTS.base.md` — regras globais para todos os harnesses
 
 A infraestrutura do próprio repo fica na raiz: `scripts/`, `src/`,
@@ -74,6 +75,7 @@ No Linux/WSL, o `configurar-repo.sh` cria links simbolicos em
 - `~/.config/opencode/agents` -> `harness-conf/agents`
 - `~/.config/opencode/commands` -> `harness-conf/commands`
 - `~/.config/opencode/opencode.json` -> `harness-conf/opencode.json`
+- `~/.config/opencode/dcp.jsonc` -> `harness-conf/dcp.jsonc`
 - `~/.config/opencode/skills` -> `harness-conf/skills`
 - `~/.config/opencode/scripts` -> `scripts` (infra do repo, fica na raiz)
 
@@ -88,11 +90,11 @@ e a execução paralela de chamadas independentes.
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um
 backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
-No Windows, os quatro destinos de `harness-conf/` (agents, commands, skills,
-`opencode.json`) sao materializados como copia sincronizada em
-`%USERPROFILE%\.config\opencode` a cada execucao do bootstrap, com backup do
-conteudo divergente. Divergencias entre execucoes sao realinhadas no proximo
-sync.
+No Windows, os cinco destinos de `harness-conf/` (agents, commands,
+skills, `opencode.json`, `dcp.jsonc`) sao materializados como copia
+sincronizada em `%USERPROFILE%\.config\opencode` a cada execucao do
+bootstrap, com backup do conteudo divergente. Divergencias entre
+execucoes sao realinhadas no proximo sync.
 
 ### ai-memory
 
@@ -181,6 +183,17 @@ bootstrap; uma execução completa não deve usá-las:
 ## Plugins
 
 - `@slkiser/opencode-quota`: quota de tokens no toast/TUI.
+- `@tarquinen/opencode-dcp` (spec pinada, versão fixa): compactação
+  acionável pelo agente. Registra a tool `compress`: o próprio agente
+  substitui trechos antigos por resumo, sem apagar o histórico. Injeta
+  nudges quando o contexto passa do limite configurado. O bootstrap
+  materializa `opencode.json` e a config canônica
+  `harness-conf/dcp.jsonc` (destino `~/.config/opencode/dcp.jsonc`).
+  Rollback rápido: `compress.permission = "deny"` no `dcp.jsonc`
+  desregistra a tool (reinicie o OpenCode); remoção completa tira a
+  spec do array `plugin` e o destino do adapter. Bump de versão é nova
+  importação, com revisão de segurança reexecutada. Decisão e
+  asserções: `docs/adr/0011-compactacao-dcp-opencode.md`.
 - `opencode-task-model@1.3.1` (PROVISÓRIO): adiciona `model`, `reasoning`
   e `background` por chamada na tool `task`. Instalado porque o
   OpenCode nativo ainda não aceita modelo no spawn (rastreio: PR
