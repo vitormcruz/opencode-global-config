@@ -320,6 +320,12 @@ conversa, completa. Destino: `AGENTS.base.md`, seção Concisão
   relacionados por vez; nunca tudo de uma vez, salvo pedido.
 - Entrega vai completa: densa e no formato pedido, sem as regras de
   ritmo da conversa.
+- O limite de ~5 linhas e o ritmo de uma ideia por resposta valem para
+  a conversa decisória com o humano e substituem a orientação anterior
+  de volume nesse contexto. Entregas solicitadas, relatos entre agentes
+  e evidências permanecem completos.
+- Numa pergunta, preserve primeiro o contexto e a consequência da
+  escolha; distribua por turnos apenas decisões independentes.
 
 Verificação: conversa roteirizada com conteúdo de múltiplos itens a
 validar; a transcrição mostra anúncio do total e apresentação por
@@ -582,6 +588,17 @@ de consolidar e revisar citam as quatro seções, com a regra de
 precedência ("em caso de conflito, prevalece a decisão posterior"), e a
 estrutura do insumo troca "revisores" por `rev`. Aplicado nas Tasks 1
 e 2.
+
+**Achado 2 (rodada 4) — Escopo das regras de volume (aprovado).** As
+regras de volume ("uma ideia central por resposta", ~5 linhas) valiam
+para qualquer comunicação e fragmentariam relatos entre agentes,
+evidências e o contexto necessário à decisão; conviviam em ambiguidade
+com a orientação atual de 20-30 linhas do arquivo global. Ajuste na
+regra da distinção comunicação/entrega: o limite e o ritmo valem para a
+conversa decisória com o humano e substituem a orientação anterior de
+volume nesse contexto; entregas, relatos entre agentes e evidências
+permanecem completos; numa pergunta, contexto e consequência vêm antes
+da divisão por turnos de decisões independentes.
 
 ## Task List
 
