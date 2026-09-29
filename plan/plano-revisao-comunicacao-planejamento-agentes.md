@@ -170,9 +170,10 @@ de comunicação.
   de enchimento.
 
 Verificação: conversa roteirizada; a tool aparece só depois do
-contexto apresentado em texto e apenas para escolhas fechadas; toda
-alternativa tem descrição de consequência real. Caso futuro da suíte de
-comunicação.
+contexto apresentado em texto, com entendimento confirmado (resposta do
+humano à apresentação) antes da chamada da tool, e apenas para escolhas
+fechadas; toda alternativa tem descrição de consequência real. Caso
+futuro da suíte de comunicação.
 
 **Item 6 — Contestação de premissa (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -550,6 +551,13 @@ de perguntas para agentes de domínio. Ajuste: a recarga vale para quem
 conduz conversa de decisão com o humano (`smart-planner`, `devflow`);
 agentes de domínio seguem as regras gerais de comunicação do arquivo
 global, recarregado a cada sessão.
+
+**Achado 6 (rodada 3) — Verificação com entendimento confirmado
+(aprovado).** A regra do item 5 exige questão "apresentada e entendida"
+antes da tool, mas a verificação checava só o contexto apresentado.
+Ajuste: a verificação passa a exigir que a transcrição mostre o
+entendimento confirmado (resposta do humano à apresentação em texto)
+antes da chamada da tool.
 
 ## Task List
 
