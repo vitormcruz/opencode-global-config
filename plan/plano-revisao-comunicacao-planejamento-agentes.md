@@ -365,11 +365,16 @@ regra impede o resumo de atribuir ao humano decisão que ele não tomou
 Destino: `AGENTS.base.md`, seção Concisão (acréscimo):
 
 - Resumo fiel: só atribua ao humano decisão, fato ou preferência que ele
-  escreveu; silêncio ou resposta ambígua não é aprovação.
+  escreveu; silêncio ou resposta ambígua não é aprovação. O resumo não
+  trata como conhecida informação que não foi apresentada na conversa;
+  conteúdo do plano necessário ao fechamento é reapresentado em uma
+  linha.
 
 Verificação: conversa roteirizada em que o humano aprova um ponto e fica
 em silêncio sobre outro; o resumo seguinte não atribui decisão sobre o
-ponto em silêncio. Caso futuro da suíte de comunicação.
+ponto em silêncio; plano contém ponto nunca apresentado na conversa e o
+resumo não o cita como conhecido (ou o reapresenta em uma linha). Caso
+futuro da suíte de comunicação.
 
 **Achado 5 — Cobertura de casos por regra (aprovado).** O revisor apontou
 que "caso com qualquer agente" não comprova alcance e que os revisores
@@ -558,6 +563,15 @@ antes da tool, mas a verificação checava só o contexto apresentado.
 Ajuste: a verificação passa a exigir que a transcrição mostre o
 entendimento confirmado (resposta do humano à apresentação em texto)
 antes da chamada da tool.
+
+**Achado 7 (rodada 3) — Resumo sem informação não apresentada
+(aprovado).** A regra do resumo fiel cobria atribuição de decisão não
+tomada, mas o sintoma original (resumo que cita como conhecida
+informação do plano nunca apresentada na conversa) não tinha teste
+direto. Ajuste: a regra do resumo fiel ganha "o resumo não trata como
+conhecida informação que não foi apresentada na conversa; conteúdo do
+plano necessário ao fechamento é reapresentado em uma linha"; a
+verificação ganha o roteiro do ponto nunca apresentado.
 
 ## Task List
 
