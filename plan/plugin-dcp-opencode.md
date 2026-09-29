@@ -1,7 +1,8 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: CONSTRUÇÃO: Fase 1 (spike em sandbox) concluída, C1 PASS. Próxima:
-Fase 3 (implementação no repo, TDD).
+Status: CONSTRUÇÃO: Fase 3 em andamento, Tasks 6 e 7 concluídas, commitadas
+e verificadas (suíte verde). Pendentes: Tasks 8 e 9, revisão da construção
+(rev) e materialização no user-space (Fase 4). Próxima: Task 8.
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -506,8 +507,10 @@ Task 6: testes do novo destino de sync (TDD, testes primeiro).
   `harness-conf/dcp.jsonc` para o user-space no POSIX (materialização
   da strategy) e no Windows (cópia sincronizada), incluindo backup.
 - Critérios de aceitação:
-  - [ ] testes novos escritos antes do código, falhando primeiro;
-  - [ ] suíte `-m all` verde no ambiente corrente.
+  - [x] testes novos escritos antes do código, falhando primeiro
+    (evidência: ordem dos commits; executada por instância anterior e
+    verificada em 2026-09-29);
+  - [x] suíte `-m all` verde no ambiente corrente.
 - Verificação: `.venv/bin/pytest -m all` (WSL/Linux) ou
   `.\.venv\Scripts\pytest.exe -m all` (Windows).
 - Dependências: C2.
@@ -520,10 +523,12 @@ Task 7: incorporar plugin e config canônica.
   `harness-conf/dcp.jsonc` com as decisões da Fase 2 e estender o
   contrato `HarnessAdapter` com o destino novo.
 - Critérios de aceitação:
-  - [ ] bootstrap materializa opencode.json e dcp.jsonc conforme a
-    strategy do SO;
-  - [ ] `tests/lib/` atualizado se utilitários compartilhados mudarem;
-  - [ ] `tests/agents/test_workflow_consistency.py` sem achado novo.
+  - [x] bootstrap materializa opencode.json e dcp.jsonc conforme a
+    strategy do SO (coberto por testes nas duas strategies);
+  - [x] `tests/lib/` atualizado se utilitários compartilhados mudarem
+    (n/a: nenhum utilitário alterado);
+  - [x] `tests/agents/test_workflow_consistency.py` sem achado novo
+    (dentro do lote verde de 2026-09-29).
 - Dependências: Task 6.
 - Arquivos prováveis: `harness-conf/opencode.json`,
   `harness-conf/dcp.jsonc` (novo),
@@ -1116,6 +1121,91 @@ item 4 do checklist a materializar na Task 7.
       lint do repo n/a (sem código alterado)
 - [ ] Gate de refatoração: n/a (sem código; plano sem mudança de
       desenho)
+
+### Resultados da Fase 3 (eng-software, 2026-09-29, Tasks 6 e 7)
+
+Verificação, completamento e fechamento das Tasks 6 e 7. Os artefatos
+foram implementados por instância anterior que não persistiu resultado
+no plano; esta passagem verificou o trabalho, rodou a suíte e registrou
+o estado. Worktree limpo ao fechar: a alteração alheia citada pelo
+devflow (`plan/plano-revisao-comunicacao-planejamento-agentes.md`) não
+está mais pendente no repositório (nada a isolar; nada commitado nesta
+passagem além deste plano).
+
+#### Commits verificados (Tasks 6 e 7)
+
+- `7ccc3ae` `test(harnesses): cobre sincronizacao do dcp.jsonc`: suíte
+  nova `tests/harnesses/test_opencode_dcp.py` (168 linhas, 5 testes).
+- `dc55da7` `feat(harness): incorpora plugin dcp com config canonica`:
+  `harness-conf/dcp.jsonc` (novo), spec `@tarquinen/opencode-dcp@3.1.15`
+  no array `plugin` do `harness-conf/opencode.json`, destino novo nas
+  duas strategies (`src/opencode_config/harnesses/opencode.py`) e
+  fixtures de teste atualizadas (`tests/adapters/
+  test_opencode_adapter.py`, `tests/harnesses/test_opencode.py`).
+- Ordem TDD verificável pelo histórico: commit de testes precede o
+  commit de código. A execução "falhando primeiro" não é reproduzível
+  retroativamente; aceita pela ordem dos commits e pela cobertura
+  registrada abaixo.
+
+#### Conteúdo da suíte nova (Task 6)
+
+`test_canonical_dcp_jsonc_pins_decided_configuration` fixa no artefato
+canônico toda a decisão da Fase 2: `allow`, `range`, 100000/50000,
+`protectUserMessages = false`, ausência de `protectedTools` e
+`protectedFilePatterns` (Pergunta 12), `allowSubAgents = true` (P8) e
+`autoUpdate = false` (condição obrigatória da ressalva SEC do C1).
+`test_canonical_opencode_json_declares_pinned_dcp_plugin` fixa a spec
+pinada (P7/SEC-04). Os três testes restantes cobrem a materialização:
+symlink POSIX (`requires_symlink`), cópia sincronizada Windows com
+backup e idempotência Windows.
+
+#### Simetria do contrato (Task 7)
+
+- Extensão feita nas tuplas de destinos das strategies do OpenCode
+  (`_POSIX_DESTINATIONS` e `_WINDOWS_DESTINATIONS`), forma canônica de
+  variação por SO; a interface `HarnessAdapter` em si não mudou.
+- `src/opencode_config/lib/` sem alteração nos dois commits: sem
+  duplicação de cópia sincronizada ou backup. Grep por "dcp" em `src/`
+  e `adapters/` só acerta `harnesses/opencode.py`.
+- Copilot sem o destino: `src/opencode_config/harnesses/copilot.py` e
+  `adapters/copilot-cli/` não mencionam dcp; nenhum dos dois commits
+  toca o harness Copilot. CONFIRMADO: `dcp.jsonc` é destino exclusivo
+  do OpenCode, coerente com a ressalva de escopo do insumo.
+
+#### Suíte completa e análise estática (verificação)
+
+- `.venv/bin/pytest -m all` (WSL/Linux, 2026-09-29): **940 passed,
+  31 deselected, 0 failed** em 222,41s. Nenhuma falha preexistente a
+  registrar. `test_workflow_consistency.py` dentro do lote verde.
+- `.venv/bin/ruff check src tests`: sem achados.
+
+#### Estado parcial do C3 (checklist do plano)
+
+- [x] suíte `-m all` exit 0 no ambiente corrente;
+- [x] Task 7 com checklist concluído (ver Commits e Simetria acima);
+- [ ] Tasks 8 (política de compactação) e 9 (ADR-0010 + README)
+  pendentes, fora do escopo desta passagem;
+- [ ] revisão da construção pelo rev pendente;
+- [ ] materialização no user-space (bootstrap na máquina do humano)
+  pendente, prevista para a Fase 4 (Task 10).
+
+C3 segue ABERTO. Próximo passo: Task 8, depois Task 9, depois revisão
+da construção.
+
+#### Evidências (eng-software) — CONSTRUÇÃO (Fase 3, Tasks 6-7)
+
+- [x] Testes novos: 5 em `tests/harnesses/test_opencode_dcp.py`; commit
+  de teste precede o commit de feat (primeiro-fail aceito pela ordem do
+  histórico; implementação da instância anterior, verificada nesta)
+- [x] Testes totais: 940 passed, 31 deselected, 0 failed
+  (`.venv/bin/pytest -m all`, WSL, 2026-09-29)
+- [x] Análise estática: ruff sem achados
+- [x] Regressão incremental: suíte completa executada na verificação;
+  verde
+- [x] Gate de refatoração: cenário "nada muda"; sem impacto no plano
+  (extensão por tupla de destinos, padrão existente)
+- [x] Worktree limpo; alteração alheia citada não mais pendente;
+  nenhum commit novo de código nesta passagem
 
 ### Segurança (sec)
 
