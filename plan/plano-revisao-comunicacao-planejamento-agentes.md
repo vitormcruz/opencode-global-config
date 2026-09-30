@@ -290,6 +290,9 @@ Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
   tarefa: skills em uso e decisões abertas. Após compactação, releia o
   registro e recarregue o que a tarefa precisa: a recarga não depende
   de lembrar o que a compactação apagou.
+- Sem artefato persistente, reconstrua as skills pelas instruções do
+  próprio agente e pela tarefa; decisão aberta que não puder ser
+  reconstruída, consulte o humano antes de ação dependente.
 - Após compactação de contexto, antes de prosseguir a tarefa em
   andamento, recarregue as skills cujo conteúdo sustenta essa tarefa. O
   mesmo vale ao perceber que instruções de uma skill já adotada deixaram
@@ -310,8 +313,11 @@ prosseguir a tarefa. Terceiro roteiro, sem compactação: o agente desvia
 do protocolo (volume, ritmo, uso da tool) no meio da conversa; a skill é
 recarregada antes da resposta seguinte e o protocolo volta a valer. Em
 todos, o registro de estado (skills em uso, decisões abertas) existe no
-artefato e permite reconstruir o que recarregar. Casos futuros da suíte
-de comunicação.
+artefato e permite reconstruir o que recarregar; roteiro adicional com
+agente sem artefato persistente: reconstrói as skills pelas próprias
+instruções e pela tarefa, e decisão aberta irreconstrutível vira
+consulta ao humano antes de ação dependente. Casos futuros da suíte de
+comunicação.
 
 **Item 9 — Dúvida trava ação (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -904,6 +910,13 @@ primeiro à dúvida concreta; reexplique só o ponto afetado, sem repetir
 blocos já entendidos; inclua a premissa ou o detalhe que faltou quando
 necessário, mesmo que a resposta não fique menor. Verificação
 atualizada.
+
+**Achado 3 (rodada 6, parte 1) — Registro de estado sem artefato
+(aprovado).** Agentes sem plano/artefato próprio ficavam sem caminho
+para a recarga. Novo bullet no item 8: sem artefato persistente,
+reconstrua as skills pelas instruções do próprio agente e pela tarefa;
+decisão aberta que não puder ser reconstruída, consulte o humano antes
+de ação dependente. Verificação estendida com roteiro adicional.
 
 ## Task List
 
