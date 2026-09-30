@@ -766,6 +766,18 @@ também se contradizia na mesma frase. Ajuste: a regra de volume vira
 regras e verificações: até quatro perguntas autocontidas e
 independentes podem ser agrupadas.
 
+**Achado 3 (rodada 5, parte 1) — Ordem de aplicação e atribuições
+(aprovado).** A Task 2 estava paralela à Task 1, mas as conferências
+das regras de planejamento dependem da skill de perguntas já corrigida
+(a conversa antes/depois exige que só a regra testada mudou); e a task
+atribuía apresentação abstraída ao `rev`. Ajustes: Task 2 depende da
+Task 1; cobertura total vai para `smart-planner` e `rev`; apresentação
+abstraída para `smart-planner` e `devflow`. Confirmado com o humano o
+fluxo geral: validação autônoma regra a regra no ambiente isolado,
+adequação ao padrão, e só então uma única sincronização da instalação
+oficial com tudo validado, antes do teste prático (passo explícito
+acrescentado à Task 6).
+
 ## Task List
 
 ### Fase 1: Aplicação direta das regras
@@ -798,10 +810,11 @@ independentes podem ser agrupadas.
 
 - [ ] **Task 2: Aplicar as regras de planejamento.**
   - **Description:** aplicar as regras de planejamento aprovadas nos
-    agentes e workflows: `smart-planner` e `rev` (cobertura total;
-    apresentação abstraída), `devflow` (remoção da duplicação do
-    protocolo de perguntas, sem exigência universal de opções;
-    ciclo de vida do arquivo do plano; plano abstraído na apresentação;
+    agentes e workflows: `smart-planner` (cobertura total; apresentação
+    abstraída), `rev` (cobertura total), `devflow` (remoção da
+    duplicação do protocolo de perguntas, sem exigência universal de
+    opções; ciclo de vida do arquivo do plano; plano abstraído na
+    apresentação;
     sem permissão de terminal e sem commit, revogado na rodada 4),
     skills `planning-and-task-breakdown` e `spec-driven-development`
     (sentido de "humano aprovou o plano") e
@@ -815,7 +828,8 @@ independentes podem ser agrupadas.
           permissão de terminal.
     - [ ] Evidências de conferência para as regras de comportamento.
   - **Verification:** revisão independente (Task 3); evidências.
-  - **Dependencies:** None (paralela à Task 1)
+  - **Dependencies:** Task 1 (comunicação primeiro: as conferências
+    desta tarefa dependem da skill de perguntas já corrigida)
   - **Files likely touched:** `harness-conf/agents/smart-planner.md`,
     `harness-conf/agents/devflow.md`, `harness-conf/agents/rev.md`,
     `harness-conf/skills/planning-and-task-breakdown/SKILL.md`,
@@ -898,7 +912,11 @@ independentes podem ser agrupadas.
 ### Fase 3: Teste prático do protocolo
 
 - [ ] **Task 6: Planejamento real de teste.**
-  - **Description:** após a aplicação e a adequação, o humano conduz um
+  - **Description:** após a aplicação e a adequação, sincronizar a
+    instalação oficial do humano com tudo o que foi validado (as
+    mudanças chegam juntas, uma única sincronização) e conferir que a
+    cópia que o assistente lê contém as regras novas. Então o humano
+    conduz, em sessão nova, um
     planejamento real com o agente planejador (`smart-planner`), tema
     escolhido pelo humano na hora, para exercitar o protocolo de
     comunicação no uso real (complemento das conferências regra a regra,
@@ -906,6 +924,8 @@ independentes podem ser agrupadas.
     confundiu, ajustes de regra necessários (que voltam ao ciclo de
     ajuste) e percepção do humano.
   - **Acceptance criteria:**
+    - [ ] Instalação oficial sincronizada antes do teste; a conversa
+          roda com as regras novas.
     - [ ] Planejamento conduzido com o protocolo novo.
     - [ ] Percepção do humano registrada (o que fluiu, o que confundiu).
     - [ ] Desvios encontrados registrados como ajuste de regra ou
