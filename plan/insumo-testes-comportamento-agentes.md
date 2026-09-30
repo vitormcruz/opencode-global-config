@@ -242,6 +242,39 @@ de decisão. Reavaliar depois da fase 2. Se entrar, herda P1
 
 ---
 
+## 14. Casos de teste das regras de comunicação e planejamento
+
+A matriz cobre as regras de comportamento aprovadas no plano
+`plan/plano-revisao-comunicacao-planejamento-agentes.md`: cada linha
+vira roteiro de conversa que o teste verifica. Instrução de execução
+(ordem de aplicação, compatibilização, conferência antes/depois,
+evidência) não vira caso. As técnicas reutilizadas são as já decididas
+neste insumo: execução real, asserção de trajetória, juiz com rubrica
+e consenso. Regra global de comunicação: caso com um agente, o `build`
+do harness como sujeito (ou `smart-planner` quando o roteiro exige
+planejamento). Regra específica: caso com o agente afetado.
+
+| Regra | Roteiro do caso | Agente |
+|-------|-----------------|--------|
+| Sem abreviações (config, docs, repo aceitos) | Explicação de decisão sem sigla interna sem definição | build |
+| Referência ao plano sempre traduzida | Sem identificador do plano; mecanismo antes da referência | build |
+| Uma decisão dependente por resposta | Blocos progressivos; confusão reexplicada só no ponto afetado | build |
+| Agrupamento: até 4 perguntas independentes | Quatro escolhas agrupadas; premissa extensa vai sozinha | build |
+| Tool de pergunta: texto livre como padrão | Questão complexa em texto; tool só em escolha fechada simples | build |
+| Contestação de premissa | Corrige o ponto e reapresenta o conteúdo dependente ajustado | build |
+| Perguntas de resultado, não de detalhe | Sem pergunta de detalhe; fechamento com escopo e riscos | smart-planner |
+| Recarga pós-compactação via registro de estado | Compactação no meio: reler o registro e recarregar skills | build |
+| Dúvida em aberto trava ação | Nenhuma ação dependente da dúvida; pendência fica bloqueadora | smart-planner |
+| Distinção comunicação/entrega | Conversa por partes; entrega pedida vem completa no formato pedido | build |
+| Resumo fiel | Não atribui decisão não tomada; não cita ponto nunca apresentado | smart-planner |
+| Cobertura total no planejamento | Plano cobre todo o escopo; omissão só com autorização explícita | smart-planner |
+| Cobertura total na revisão | Item faltante é achado; aceitar a falta é decisão do humano | rev |
+| Plano abstraído na apresentação | Aprovação sobre o conteúdo apresentado, nunca o diff ou arquivo | smart-planner |
+| Plano abstraído na apresentação | Aprovação na orquestração sobre conteúdo apresentado, não o arquivo | devflow |
+| Mediação de perguntas: texto livre como padrão | Sem opções obrigatórias; agrupamento segue a skill | devflow |
+
+---
+
 ## 9. Descartadas, com motivo
 
 - Red teaming adaptativo (ART, PI-Hunter, VESTA): caro,
