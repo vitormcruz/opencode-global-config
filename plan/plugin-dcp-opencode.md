@@ -1,10 +1,11 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: CONSTRUÇÃO: Fase 3 com a construção concluída. Tasks 6, 7, 8 e
-9 concluídas, commitadas e verificadas (suíte verde: 942 passed). Task
-8 aplicada em 2026-09-29 com aprovação humana (textos verbatim;
-correção de coerência no AGENTS.md da raiz junto). Pendentes: revisão
-da construção (rev) e materialização no user-space (Fase 4).
+Status: FASE 4 EM CURSO — Fase 3 concluída (Tasks 6-9, suíte 942
+passed), revisão do rev APROVADA COM RESSALVAS (2 melhorias remediadas
+em 2026-09-29) e materialização no user-space confirmada (Task 10,
+bootstrap de 2026-09-29 21:05; smoke da config de produção com a tool
+`compress` registrada). Gate C3: PASS. Pendente: piloto (critérios 2-3
+da Task 10) e Tasks 11-13.
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -546,8 +547,8 @@ Task 8: atualizar a política de compactação.
   Copilot CLI nada muda (compactação host-level; recuperação por re-seed
   em chat novo), conforme a ressalva de escopo do insumo.
 - Critérios de aceitação:
-  - [ ] textos coerentes entre si e com o comportamento configurado;
-  - [ ] passagem pelo humano (regra do repo para workflow e agentes).
+  - [x] textos coerentes entre si e com o comportamento configurado;
+  - [x] passagem pelo humano (regra do repo para workflow e agentes).
 - Dependências: Task 7.
 - Arquivos prováveis: `harness-conf/AGENTS.base.md`,
   `docs/workflow-agentes-dev.md`.
@@ -560,9 +561,9 @@ Task 9: documentação e ADR.
   atualizar a seção de dependências do `README.md` e checar o
   `docs/README.md` por artefatos de spec deste domínio.
 - Critérios de aceitação:
-  - [ ] ADR com contexto, alternativas e asserção executável;
-  - [ ] README com o que muda para o humano (nudges, tool compress);
-  - [ ] registro do artefato criado e sua localização nesta seção.
+  - [x] ADR com contexto, alternativas e asserção executável;
+  - [x] README com o que muda para o humano (nudges, tool compress);
+  - [x] registro do artefato criado e sua localização nesta seção.
 - Dependências: Task 8.
 - Arquivos prováveis: `docs/adr/0010-*.md`, `README.md`,
   `docs/README.md`.
@@ -581,7 +582,7 @@ Task 10: ativar e rodar um ciclo real.
   `experimental.allowSubAgents = true` (Pergunta 8: decisão humana
   CONTRA a recomendação de eng/sec/qa; risco experimental aceito).
 - Critérios de aceitação:
-  - [ ] evidência de ativação (config materializada, tool visível);
+  - [x] evidência de ativação (config materializada, tool visível);
   - [ ] sessão longa sem erro atribuível ao DCP;
   - [ ] fluxo multiagente exercitado (spawns via tool `task`), com
     sessões filhas validadas no QA-ACC-3.
@@ -1198,15 +1199,16 @@ backup e idempotência Windows.
 - [x] Task 8 aprovada pelo humano e aplicada verbatim (2026-09-29;
   AGENTS.base.md, workflow-agentes-dev.md e AGENTS.md da raiz; bloco
   próprio adiante);
-- [ ] revisão da construção pelo rev pendente (criterio "revisão sem
-  achado bloqueante" do gate C3);
-- [ ] materialização no user-space (bootstrap na máquina do humano)
-  pendente, prevista para a Fase 4 (Task 10; criterio "materialização
-  confirmada" do gate C3).
+- [x] revisão da construção pelo rev executada (veredito APROVADO COM
+  RESSALVAS: 0 bloqueantes, 0 importantes, 2 melhorias, ambas
+  remediadas; ver `## REVISÃO DA CONSTRUÇÃO`);
+- [x] materialização no user-space confirmada (Task 10, bootstrap de
+  2026-09-29 21:05; ver Resultados da Task 10).
 
-C3 segue ABERTO com dois itens pendentes: revisão da construção pelo
-rev e materialização no user-space (Fase 4). A construção da Fase 3
-(Tasks 7 a 9) está concluída e commitada.
+C3 FECHADO com PASS: suíte verde (942 passed, re-executada pelo rev),
+revisão da construção sem achado bloqueante e materialização no
+user-space confirmada com smoke da config de produção. A construção da
+Fase 3 (Tasks 7 a 9) está concluída e commitada.
 
 #### Evidências (eng-software) — CONSTRUÇÃO (Fase 3, Tasks 6-7)
 
@@ -2538,3 +2540,251 @@ próxima edição do plano, sem nova passagem do rev.
 - [x] Achados: 4 re-verificados (3 RESOLVIDOS, 1 PARCIAL); 2 novos
       (0 bloqueantes, 0 importantes, 2 melhorias)
 - [x] Suítes executadas: nenhuma (fase de revisão de plano; read-only)
+
+## REVISÃO DA CONSTRUÇÃO
+
+Revisão integrativa solo do rev em 2026-09-29 (instância limpa; quarto
+relatório do ciclo). Objeto: construção da Fase 3 (Tasks 6 a 9) do plano,
+nos commits `7ccc3ae` (testes), `dc55da7` (feat harness), `efd9ed5`
+(ADR-0011 + README) e `6953936` (docs agentes/workflow), mais a evolução
+do plano com evidências das Fases 0-3 (`ead9d85`, `d7abdbd`, `4322e71`,
+`3635fcc`). Base de comparação: `ead9d85^`. Método: leitura integral do
+plano, checklist multi-eixo com skills de domínio (tests-as-spec,
+documentation-and-adrs, security-and-hardening,
+code-review-and-quality), inspeção dos diffs commit a commit, execução
+da suíte completa e do ruff. Read-only sobre código; apenas esta seção
+foi acrescentada ao plano.
+
+**Veredito: APROVADO COM RESSALVAS** (nenhum achado bloqueante ou
+importante; 2 melhorias). O critério "revisão da construção sem achado
+bloqueante" do gate C3 fica atendido; a materialização no user-space
+segue pendente para a Fase 4, como o próprio plano registra.
+
+### Cobertura do checklist
+
+- **dcp.jsonc ↔ decisões da Fase 2**: EXATO. `permission: "allow"` (P5),
+  `mode: "range"` (P4), 100000/50000 (P6), `protectUserMessages: false`
+  (P12, P9 revertida), SEM `protectedTools`/`protectedFilePatterns`
+  (P12), `allowSubAgents: true` (P8) e `autoUpdate: false` (condição
+  obrigatória da ressalva SEC do C1). Guardado por teste
+  (`test_canonical_dcp_jsonc_pins_decided_configuration`) e pela fixture
+  `Adr0011Fixture`.
+- **opencode.json**: spec pinada `@tarquinen/opencode-dcp@3.1.15` no
+  array `plugin`; plugins pré-existentes (`@slkiser/opencode-quota`,
+  `opencode-task-model@1.3.1`) intactos; `compaction` nativo
+  (auto/prune/reserved 10000), `mcp` e `permission` inalterados.
+- **Contrato/strategies**: destino `dcp.jsonc` entra nas tuplas
+  `_POSIX_DESTINATIONS` e `_WINDOWS_DESTINATIONS` (forma canônica de
+  variação por SO); a interface `OpenCodeEnvStrategy` não mudou (desvio
+  da letra da Task 7 registrado no plano e justificado como alternativa
+  rejeitada no ADR-0011). `lib/sync.py` intocado (backup/cópia/link
+  reutilizados de `opencode_config.lib.sync`; sem duplicação). Copilot
+  sem qualquer menção a dcp (`copilot.py`, `adapters/`): destino
+  exclusivo do OpenCode, coerente com a ressalva de escopo do insumo.
+- **TDD (Task 6)**: `tests/harnesses/test_opencode_dcp.py` (5 testes)
+  cobre pinning das decisões, spec pinada, symlink POSIX
+  (`requires_symlink`), cópia Windows com backup de stale
+  (`{"autoUpdate": true}`) e idempotência Windows. Commit de teste
+  (`7ccc3ae`) precede o feat (`dc55da7`); "falhando primeiro" aceito
+  pela ordem do histórico, como o plano registra. Fixtures de
+  `test_opencode.py` e `test_opencode_adapter.py` criam o `dcp.jsonc`
+  no repo fake (atualização necessária; nenhum teste enumerava a lista
+  de destinos).
+- **ADR-0011**: seções da convenção (Contexto, Decisão, Consequências,
+  Alternativas, Asserções executáveis); autocontido; numeração 0011
+  justificada no plano (`0010-remocao-plugin-task-model.md` do ciclo
+  paralelo existe). Fixture `Adr0011Fixture.groovy` com 4 verificações
+  reais (spec pinada por regex de versão fixa; `autoUpdate` false +
+  gate `allow`; destino nas duas strategies e ausente no Copilot;
+  README documenta), registrada no `build.gradle:58`; pytest executado
+  por este rev confirma o lote verde declarado.
+- **README raiz**: entrada do DCP na seção Plugins (tool `compress`,
+  nudges, materialização, rollback `deny` e remoção, bump como nova
+  importação, apontamento ao ADR-0011); `dcp.jsonc` na estrutura do
+  repo, na lista de symlinks POSIX e no parágrafo "cinco destinos" do
+  Windows. Seção Dependências sem poluição (o DCP é resolvido pelo
+  OpenCode, não pelo bootstrap; a entrada vive na seção certa).
+- **Task 8 verbatim**: seção "Compactação de contexto" do
+  `harness-conf/AGENTS.base.md` e trecho final da premissa 7 de
+  `docs/workflow-agentes-dev.md` conferem linha a linha com os rascunhos
+  "Depois (proposto)" aprovados pelo humano; `AGENTS.md` da raiz com
+  "cinco destinos" e `dcp.jsonc` na lista do POSIX (correção aprovada
+  junto). Coerência entre os três textos e com o `dcp.jsonc` (`allow`).
+- **Higiene**: os 8 commits tocam apenas os arquivos esperados
+  (`git show --stat` conferido um a um; commits de outro ciclo
+  entrelaçados no range não contaminam os commits DCP); nenhum push
+  (`master-nova` ahead 25 de `origin/master-nova`); user-space
+  intocado pela construção (`~/.config/opencode/dcp.jsonc` ausente,
+  como exige o adiamento da materialização para a Fase 4; `plugins/
+  ai-memory.ts` preservado); nada de `~/.cache/opencode/packages/`
+  commitado (SEC-11); gates C0 e C1 com veredito PASS e evidência no
+  plano; C3 parcial honesto (2 pendências declaradas: esta revisão e a
+  materialização).
+- **Execução própria**: `.venv/bin/ruff check src tests` sem achados;
+  `.venv/bin/pytest -m all` = **942 passed, 0 failed, 31 deselected**
+  (196s), confirmando o verde declarado.
+
+### Achados
+
+1. Doc do adapter defasada: `adapters/opencode/README.md:19` diz
+   "quatro destinos" no Windows e o parágrafo POSIX (l.14-16) lista
+   agentes, comandos, skills e `opencode.json` sem `dcp.jsonc`.
+   Residual conhecido reportado pelo devflow; CONFIRMADO e estendido à
+   lista POSIX (não só à contagem Windows).
+   · Ação: eng-software atualiza os dois parágrafos (correção de
+   coerência em doc técnica do adapter; registro no plano).
+   · Severidade: melhoria · Resp.: eng-software · Localização:
+   `adapters/opencode/README.md:14-20`.
+
+2. Critérios de aceitação das Tasks 8 e 9 do plano permanecem
+   desmarcados (`[ ]`, l.547-548 e l.561-563) embora as tasks estejam
+   concluídas, commitadas e registradas nos Resultados da Fase 3 e no
+   C3 parcial; Tasks 6 e 7 estão `[x]`. Inconsistência formal de
+   registro, sem impacto executável.
+   · Ação: eng-software marca os checkboxes na próxima edição do plano.
+   · Severidade: melhoria · Resp.: eng-software · Localização:
+   l.547-548, 561-563.
+
+Observações sem achado: (a) `docs/README.md:108-110` (ADRs "0007-0009")
+segue desatualizado, mas é pendência já registrada do curador-produto
+na Task 9, fora do alcance desta construção; (b) a Task 9 previa
+"seção de dependências" do README e a entrada do DCP foi para a seção
+Plugins, semanticamente correta (o plugin não é dependência do
+bootstrap), atendendo ao critério "o que muda para o humano".
+
+Fluxo: devflow repassa os achados 1 e 2 ao eng-software; ambos são
+correções simples que dispensam nova passagem do rev. O rev não aplica
+correções.
+
+### Veredicto
+
+**APROVADO COM RESSALVAS.** A construção da Fase 3 está aderente ao
+plano aprovado e às decisões humanas P3 a P12: config canônica exata,
+spec pinada, extensão do adapter na forma canônica sem duplicação,
+suíte TDD cobrindo as decisões e as duas strategies, ADR-0011 com
+asserção executável, Task 8 aplicada verbatim com aprovação humana
+registrada, higiene de commits e de user-space, gates com evidência.
+Os 2 achados são melhorias de documentação/registro, não-bloqueantes.
+O gate C3 fica atendido no critério "revisão sem achado bloqueante";
+a materialização no user-space permanece para a Fase 4 (Task 10).
+
+### Evidências (rev) — REVISÃO DA CONSTRUÇÃO
+
+- [x] Artefato lido: `plan/plugin-dcp-opencode.md` (integral, 2538
+      linhas) + diffs dos commits `ead9d85`..`3635fcc` (8 commits,
+      base `ead9d85^`)
+- [x] Plano aprovado consultado: sim (Perguntas 1-13, Regras de
+      Produto, Fases 0-3, gates C0/C1/C3, rascunhos aprovados da
+      Task 8)
+- [x] Checklist integrativo: 9 dimensões (dcp.jsonc↔decisões,
+      opencode.json, contrato/strategies, TDD, ADR, README raiz,
+      Task 8 verbatim, higiene/gates, suíte executada)
+- [x] Achados encontrados: 2 (0 bloqueantes, 0 importantes,
+      2 melhorias)
+- [x] Suítes executadas: `.venv/bin/pytest -m all` = 942 passed,
+      0 failed, 31 deselected; ruff sem achados
+
+### Remediação (eng-software, 2026-09-29)
+
+- [x] Achado 1 (README do adapter defasado): CORRIGIDO em
+  `adapters/opencode/README.md`, commit `ad5c677`. Parágrafo POSIX
+  lista agora `dcp.jsonc` entre os links; parágrafo Windows diz
+  "cinco destinos". Mesma correção fática já aprovada para o README
+  da raiz; passagem pelo rev dispensada conforme o relatório.
+- [x] Achado 2 (checkboxes das Tasks 8-9 desmarcados): CORRIGIDO.
+  Critérios de aceitação das Tasks 8 e 9 marcados como concluídos
+  (Tasks 6 e 7 já estavam); coerência formal restabelecida com os
+  Resultados da Fase 3 e o C3 parcial.
+- Suítes: não executadas nesta remediação (só docs e registro no
+  plano; nenhum código produto alterado).
+
+## Resultados da Task 10 (eng-software, 2026-09-29): Fase 4, user-space
+
+### Bootstrap executado
+
+Comando aprovado no plano, rodado em 2026-09-29 21:05 (WSL):
+
+```bash
+bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
+```
+
+Saída: 33 skills sincronizadas, 12 agents, 4 commands, default
+artifacts e AGENTS.md base, todos OK; bootstrap concluiu com "Pronto."
+
+### Verificação da materialização (`~/.config/opencode/`)
+
+- **`dcp.jsonc`**: symlink novo (21:05) para
+  `/mnt/e/Projetos/opencode-global-config/harness-conf/dcp.jsonc`
+  (`readlink -f` confirmado). Conteúdo canônico no destino: `allow`,
+  `range`, 100000/50000, `protectUserMessages: false`.
+- **`opencode.json`**: arquivo regular (comportamento de
+  `materialize_config_override` do adapter POSIX, que permite override
+  local de terceiros) agora COM a spec pinada
+  `"@tarquinen/opencode-dcp@3.1.15"` no array `plugin` (linha 6).
+  Única divergência do canônico: URL do MCP do codebase-memory
+  adaptada ao container local (override local esperado, preservado
+  pelo adapter; IP não registrado aqui por higiene).
+- **Demais destinos intactos**: `agents`, `commands`, `skills` e
+  `scripts` continuam symlinks preexistentes (datas antigas
+  preservadas; nenhuma recriação).
+- **Backup**: `~/.config/opencode-backup/20260929-210501/` com o
+  `opencode.json` pré-DCP (1414 bytes, de 2026-09-28) e o `AGENTS.md`
+  anterior. `dcp.jsonc` era inexistente (novo), nada a fazer backup.
+
+### Resolução do pacote
+
+`~/.cache/opencode/packages/@tarquinen/opencode-dcp@3.1.15/` JÁ
+presente no cache (fetch já ocorrido em execução anterior do OpenCode).
+Nenhuma espera de install-time pendente: o primeiro start do OpenCode
+com o plugin resolve do cache local.
+
+### Smoke test da config de produção (não-sandbox)
+
+Diretório scratch fora do repo (`/tmp/opencode`), SEM
+`OPENCODE_CONFIG_DIR`/`OPENCODE_CONFIG` no ambiente (config global
+default), via `env -u` para garantir:
+
+```bash
+env -u OPENCODE_CONFIG_DIR -u OPENCODE_CONFIG opencode run "List only
+the exact names of all tools you have registered right now, one per
+line, nothing else."
+```
+
+- exit 0; resposta do modelo (build · big-pickle) lista 13 tools de
+  base + 23 do MCP ai-memory.
+- **Tool `compress` REGISTRADA** (2ª da lista): DCP carregou.
+- stderr sem nenhum erro de plugin (grep por
+  `error|failed|dcp|compress` só acerta a tool na resposta).
+
+### Avaliação do C3 (fechamento)
+
+- Suíte verde: 942 passed, 0 failed, 31 deselected
+  (`.venv/bin/pytest -m all`, WSL, 2026-09-29; re-executada pelo rev).
+- Revisão da construção sem achado bloqueante: veredito APROVADO COM
+  RESSALVAS do rev; as 2 melhorias remediadas nesta mesma passagem
+  (commit `ad5c677` + este plano).
+- Materialização confirmada: itens acima.
+
+**Veredito C3: PASS** (critérios do checkpoint da Fase 3 atendidos).
+
+### Pendências (piloto)
+
+Critérios 2 e 3 da Task 10 seguem para o uso real: sessão longa sem
+erro atribuível ao DCP e fluxo multiagente (spawns via tool `task`)
+validado no QA-ACC-3. Depois: Task 11 (medição) e Tasks 12-13.
+
+### Evidências (eng-software) — TASK 10 (Fase 4, materialização)
+
+- [x] Bootstrap: `configurar-repo.sh --yes`, "Pronto." (2026-09-29
+  21:05)
+- [x] `dcp.jsonc` symlink → canônico; conteúdo com as decisões P4-P6,
+  P9-revertida, P12
+- [x] `opencode.json` com spec `@tarquinen/opencode-dcp@3.1.15`;
+  destinos preexistentes intactos; backup em
+  `opencode-backup/20260929-210501/`
+- [x] Cache: `@tarquinen/opencode-dcp@3.1.15` presente
+- [x] Smoke produção: exit 0, `compress` registrada, sem erro de
+  plugin
+- [x] Suítes: nenhuma executada nesta passagem (nenhum código
+  alterado; verde 942 declarado e re-executado pelo rev no mesmo dia)
+- [x] Gate C3: PASS
