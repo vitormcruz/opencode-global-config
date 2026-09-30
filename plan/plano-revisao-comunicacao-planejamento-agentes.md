@@ -438,14 +438,21 @@ apontou dependência de infraestrutura futura (simulação multi-turn) para
 a conferência antes/depois. Decisão: a conferência na execução é manual.
 Ajuste no protocolo de conferência (ramo do insumo 1):
 
-- A conferência na execução é manual: conversas reais com o agente, em
-  sessão limpa, antes e depois da mudança, com o mesmo roteiro. Após
-  aplicar a regra, materialize a configuração (rode o bootstrap do
-  repo, que regenera os arquivos do harness) e abra sessão nova do
-  agente para a conversa "depois"; a evidência registra a versão
-  testada (commit da configuração materializada). A
-  evidência é a transcrição das duas conversas conferida contra os
-  critérios objetivos da regra. A suíte automatizada de conversas é
+- A conferência na execução é manual e roda em ambiente de teste
+  isolado: pasta temporária com instalação própria do assistente,
+  montada a partir de uma versão conhecida do repo (commit anotado). A
+  instalação oficial do usuário nunca é alterada; nenhum comando de
+  configuração é executado na máquina. Sequência: montar o ambiente
+  com a configuração original; conversa "antes" com o agente, em
+  sessão limpa, com o roteiro da regra; aplicar a regra nova no
+  arquivo específico do teste, dentro do ambiente isolado; conferir
+  que a regra está no arquivo final; conversa "depois" com o mesmo
+  agente, modelo e roteiro. A única diferença entre as duas conversas
+  é a regra testada. A
+  evidência é a transcrição das duas conversas, o commit do repo
+  usado e o resultado conferido contra os critérios objetivos da
+  regra. O mecanismo exato de montar o ambiente isolado é detalhe do
+  executor, validado antes do primeiro uso. A suíte automatizada de conversas é
   futura, registrada no insumo de testes
   (`plan/insumo-testes-comportamento-agentes.md`, seção de simulação
   multi-turn), e substituirá a conferência manual quando construída.
@@ -576,14 +583,17 @@ da regra de cobertura total é o `rev`; as listas de agentes afetados
 perdem o "revisor".
 
 **Achado 4 (rodada 3) — Materialização da configuração na conferência
-(aprovado).** O arquivo de regras do repo (`harness-conf/`) não é o
-carregado pelo agente: o adapter materializa a configuração final no
-destino do harness (ex.: `~/.config/opencode/AGENTS.md`). Sessão limpa
-sozinha não garante configuração nova. Ajuste no protocolo de
-conferência: após aplicar a regra, materializar a configuração (rodar o
-bootstrap do repo, que regenera os arquivos do harness) e abrir sessão
-nova do agente para a conversa "depois"; a evidência registra a versão
-testada (commit da configuração materializada).
+(aprovado; substituído na rodada 4 pelo ambiente isolado).** O arquivo
+de regras do repo (`harness-conf/`) não é o carregado pelo agente: o
+adapter materializa a configuração final no destino do harness (ex.:
+`~/.config/opencode/AGENTS.md`). Sessão limpa sozinha não garante
+configuração nova. Ajuste original no protocolo de conferência: após
+aplicar a regra, materializar a configuração (rodar o bootstrap do
+repo, que regenera os arquivos do harness) e abrir sessão nova do
+agente para a conversa "depois"; a evidência registra a versão testada
+(commit da configuração materializada). Na rodada 4, a decisão foi
+substituída pelo ambiente de teste isolado: o bootstrap da instalação
+oficial deixou de ser executado.
 
 **Achado 5 (rodada 3) — Recarga delimitada (aprovado).** A âncora de
 recarga do item 8 (todos recarregam `question-orchestration` após
@@ -703,6 +713,19 @@ por reversão).** O revisor apontou o risco de a restrição ao checkpoint
 existir só na instrução escrita, com permissão técnica ampla. Com a
 revogação acima, o `devflow` mantém o terminal negado e não há
 liberação a restringir; o achado fica resolvido sem ajuste adicional.
+
+**Achado 8 (rodada 4) — Identificação da configuração nas conversas
+(resolvido por decisão de ambiente isolado).** O revisor apontou que a
+conferência não garantia qual configuração o agente lia na conversa
+"antes" nem identificava com segurança a versão da configuração
+"depois", e que o bootstrap mexeria nos dois harnesses e no ambiente do
+usuário. Decisão do humano, em substituição ao bootstrap da instalação
+oficial: ambiente de teste isolado (pasta temporária com instalação
+própria do assistente, montada de uma versão conhecida do repo; a
+instalação oficial nunca é alterada). A versão das duas conversas fica
+conhecida por construção; a única diferença entre elas é a regra
+testada. Aplicado no protocolo de conferência (achado 7 da primeira
+rodada) e na substituição do achado 4 da terceira rodada.
 
 ## Task List
 
