@@ -257,7 +257,10 @@ Verificação: conversa roteirizada longa com compactação no meio; após a
 compactação, a skill é recarregada e o protocolo (uma pergunta por
 rodada, volume por turno) se mantém. Segundo roteiro, com skill de
 domínio carregada e compactação no meio: a skill é recarregada antes de
-prosseguir a tarefa. Casos futuros da suíte de comunicação.
+prosseguir a tarefa. Terceiro roteiro, sem compactação: o agente desvia
+do protocolo (volume, ritmo, uso da tool) no meio da conversa; a skill é
+recarregada antes da resposta seguinte e o protocolo volta a valer.
+Casos futuros da suíte de comunicação.
 
 **Item 9 — Dúvida trava ação (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -651,6 +654,13 @@ aceita agrupamento de perguntas autocontidas e independentes, no máximo
 4; verificação do item 10 aceita omissão ou adiamento com autorização
 explícita do humano registrada, e o revisor aponta omissões não
 autorizadas.
+
+**Achado 6 (rodada 4) — Verificação do gatilho de desvio (aprovado).**
+A regra de recarga tem dois gatilhos (compactação e desvio observado do
+protocolo), mas a verificação só cobria compactação. Ajuste: terceiro
+roteiro na verificação do item 8, sem compactação: o agente desvia do
+protocolo no meio da conversa; a skill é recarregada antes da resposta
+seguinte e o protocolo volta a valer.
 
 ## Task List
 
