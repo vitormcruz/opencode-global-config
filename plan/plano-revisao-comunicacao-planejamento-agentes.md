@@ -874,14 +874,34 @@ pedido; nada é aprovado sem ter sido apresentado antes. Regra nova no
 item 7 (fechamento do plano, skill `question-orchestration`), com
 verificação no fechamento da conversa.
 
+### Ajustes da sexta rodada de revisão (revisão dupla)
+
+**Diretiva do humano (rodada 6).** Achados puramente organizacionais do
+plano (contagem de seções, estrutura, redação de tarefas e riscos) são
+ajustados pelo planejador sem consulta ao humano; o que muda premissa,
+definição ou comportamento continua sendo discutido com ele.
+
+**Achados 1, 4 e 5 (rodada 6, parte 1) — Organizacionais (aplicados
+direto).** 1: tarefas e risco citavam quatro seções de decisões com o
+plano já tendo cinco rodadas; corrigido para "regras originais e as
+cinco rodadas de ajustes, prevalecendo a decisão posterior; texto
+revogado não é aplicado", e o critério "texto idêntico ao aprovado"
+passou a "texto fiel às regras vigentes". 4: risco de regressão agora
+declara que a suíte completa roda na sessão posterior de adequação e
+exige preservar a configuração anterior antes da sincronização única da
+instalação oficial, com restauração em caso de regressão no teste
+prático. 5: risco do teste prático sem decisão alinhado ao critério de
+teste inconclusivo.
+
 ## Task List
 
 ### Fase 1: Aplicação direta das regras
 
 - [ ] **Task 1: Aplicar as regras de comunicação.**
   - **Description:** aplicar nos arquivos de configuração as regras de
-    comunicação aprovadas nas quatro seções de decisões deste plano
-    (fonte: este plano; em conflito, prevalece a decisão posterior).
+    comunicação aprovadas nas seções de decisões deste plano (regras
+    originais e as cinco rodadas de ajustes; em conflito, prevalece a
+    decisão posterior; texto revogado não é aplicado).
     Destinos: `AGENTS.base.md` (itens 1, 2, 3, 8; acréscimos de Concisão
     do item 4; distinção comunicação/entrega com escopo de volume; resumo
     fiel; recarga geral de skills após compactação) e skill
@@ -892,13 +912,14 @@ verificação no fechamento da conversa.
     conferência antes/depois em ambiente isolado, com evidência
     (transcrições, commit do repo do ambiente, resultado por critério).
   - **Acceptance criteria:**
-    - [ ] Regras aplicadas com texto idêntico ao aprovado, no destino
-          correto.
+    - [ ] Regras aplicadas com texto fiel às regras vigentes
+          (precedência da decisão posterior), no destino correto.
     - [ ] Nenhum trecho dos arquivos de destino contradiz a regra
           aplicada.
     - [ ] Cada regra ou grupo com evidência de conferência completa.
-  - **Verification:** revisão independente (Task 3) contra as quatro
-    seções de decisões; evidências das conferências.
+  - **Verification:** revisão independente (Task 3) contra as regras
+    originais e as cinco rodadas de ajustes; evidências das
+    conferências.
   - **Dependencies:** None
   - **Files likely touched:** `harness-conf/AGENTS.base.md`,
     `harness-conf/skills/question-orchestration/SKILL.md`
@@ -918,8 +939,8 @@ verificação no fechamento da conversa.
     plano). Mesma compatibilização e conferência antes/depois (ambiente
     isolado) para as regras de comportamento.
   - **Acceptance criteria:**
-    - [ ] Regras aplicadas com texto idêntico ao aprovado, nos destinos
-          corretos.
+    - [ ] Regras aplicadas com texto fiel às regras vigentes
+          (precedência da decisão posterior), nos destinos corretos.
     - [ ] Nenhum trecho contradiz regra aplicada; `devflow` sem
           permissão de terminal.
     - [ ] Evidências de conferência para as regras de comportamento.
@@ -935,12 +956,14 @@ verificação no fechamento da conversa.
 
 - [ ] **Task 3: Revisão independente da aplicação.**
   - **Description:** instância independente do revisor confere a
-    aplicação: fidelidade ao aprovado (as quatro seções de decisões),
+    aplicação: fidelidade às regras vigentes (regras originais e as
+    cinco rodadas de ajustes, com precedência da posterior),
     compatibilização dos arquivos de destino e evidências das
     conferências. Relatório e veredito registrados no arquivo deste
     plano.
   - **Acceptance criteria:**
-    - [ ] Fidelidade: aplicado = aprovado.
+    - [ ] Fidelidade: aplicado = regras vigentes (precedência da
+          decisão posterior; texto revogado não aplicado).
     - [ ] Evidências de conferência completas.
   - **Verification:** relatório com aprovação ou achados.
   - **Dependencies:** Task 1, Task 2
@@ -1050,10 +1073,10 @@ verificação no fechamento da conversa.
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Regra redigida sem efeito no comportamento | Alta | Protocolo de conferência antes/depois com mesmo roteiro em ambiente isolado; não mudou, ajustar redação |
-| Executor aplicar regra divergente do aprovado | Alta | Revisão independente da aplicação (fidelidade às quatro seções de decisões); conferência item a item |
-| Regressão em testes de agentes/workflows | Alta | Revisar os asserts existentes ao sincronizar os três lugares; rodar a suíte completa após a aplicação |
+| Executor aplicar regra divergente do aprovado | Alta | Revisão independente da aplicação (fidelidade às regras vigentes: regras originais e cinco rodadas, precedência da posterior); conferência item a item |
+| Regressão em testes de agentes/workflows | Alta | Revisar os asserts existentes ao sincronizar os três lugares; suíte completa na sessão posterior de adequação; antes da sincronização única da instalação oficial, preservar a configuração anterior para reversão; regressão no teste prático: restaurar e registrar impedimento |
 | Ambiente isolado não reproduz a instalação oficial | Média | Validar o mecanismo antes do primeiro uso; conferir que o agente lê as regras do ambiente |
-| Teste prático sem tema definido | Baixa | Tema escolhido pelo humano na hora; qualquer planejamento serve ao propósito |
+| Teste prático sem tema definido | Baixa | Tema sem situação de decisão: registrar teste inconclusivo e repetir com outro tema; não declarar o protocolo validado |
 | Sessão paralela na worktree misturando commits | Média | Commits só com o arquivo próprio; conferir stat do commit |
 | Insumo de testes com decisões fechadas sendo alterado | Média | Acréscimo de seção sem renumerar; diff limitado ao acréscimo |
 
