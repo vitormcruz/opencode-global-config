@@ -1122,6 +1122,10 @@ fechamento.
   Decisões do humano sobre os achados:
   - Achado 1: APLICAR correção via executor (reformular o exemplo de
     smart-planner.md sem identificador interno do plano).
+  - Achado 2: APLICAR ajuste na description da skill
+    `question-orchestration` (registrar "uma pergunta por rodada como
+    padrão" junto do teto de 4 no agrupamento excepcional), na mesma
+    rodada do executor do achado 1.
   - **Description:** instância independente do revisor confere a
     aplicação: fidelidade às regras vigentes (regras originais e as
     cinco rodadas de ajustes, com precedência da posterior),
