@@ -806,6 +806,13 @@ vem em texto, nunca tool. Sem critério de entendimento na regra ou na
 verificação. Revoga o "entendimento confirmado" acrescentado na
 terceira rodada.
 
+**Achado 6 (rodada 5, parte 1) — Teste prático inconclusivo
+(aprovado).** A etapa do teste prático aceitava qualquer tema; um
+planejamento sem nenhuma situação de decisão terminaria "concluído" sem
+exercitar o protocolo. Ajuste na Task 5: registrar quais situações do
+protocolo ocorreram; sem situação de decisão, o teste é inconclusivo e
+repetido com outro tema; a etapa não registra aprovação sem observação.
+
 ## Task List
 
 ### Fase 1: Aplicação direta das regras
@@ -921,13 +928,19 @@ terceira rodada.
     planejamento real com o agente planejador (`smart-planner`), tema
     escolhido pelo humano na hora, para exercitar o protocolo de
     comunicação no uso real (complemento das conferências regra a regra,
-    não substituição). Ao fim, registro curto: o que fluiu, o que
+    não substituição). Registrar quais situações do protocolo ocorreram
+    (decisões pedidas, dúvidas, contestações, resumos). Se nenhuma
+    situação de decisão aparecer, o teste é inconclusivo: repetir com
+    outro tema; a etapa não registra aprovação sem ter observado o
+    protocolo em ação. Ao fim, registro curto: o que fluiu, o que
     confundiu, ajustes de regra necessários (que voltam ao ciclo de
     ajuste) e percepção do humano.
   - **Acceptance criteria:**
     - [ ] Instalação oficial sincronizada antes do teste; a conversa
           roda com as regras novas.
     - [ ] Planejamento conduzido com o protocolo novo.
+    - [ ] Situações do protocolo registradas; sem situação de decisão,
+          teste marcado inconclusivo e repetido.
     - [ ] Percepção do humano registrada (o que fluiu, o que confundiu).
     - [ ] Desvios encontrados registrados como ajuste de regra ou
           observação.
