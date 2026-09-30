@@ -128,8 +128,10 @@ comunicação.
 **Item 3 — Volume na comunicação (aprovado).** Destino: `AGENTS.base.md`,
 seção Comunicação, seção Concisão (acréscimo operacional):
 
-- Uma ideia central por resposta. Duas ou mais ideias? Separe e
-  apresente uma por turno.
+- Uma decisão dependente por resposta. Duas ou mais decisões
+  dependentes? Separe e apresente uma por turno. Exceção: até quatro
+  perguntas autocontidas e independentes podem ser agrupadas em uma
+  mensagem (regra de perguntas múltiplas).
 - Antes de enviar, confira: a resposta tem uma única ação ou decisão?
   Se não, corte o excedente e guarde para o turno seguinte.
 - Reclamação de confusão: reapresente o ponto em menos linhas do que a
@@ -138,9 +140,10 @@ seção Comunicação, seção Concisão (acréscimo operacional):
   uma linha o ponto da conversa a que ela se refere.
 
 Verificação: conversa roteirizada; nenhuma resposta concentra mais de
-uma ideia central por turno; resposta a reclamação de confusão menor
-que a original; entrega solicitada vem completa e não conta como
-violação do volume. Caso futuro da suíte de comunicação.
+uma decisão dependente por turno; agrupamento de até quatro perguntas
+autocontidas e independentes não é violação; resposta a reclamação de
+confusão menor que a original; entrega solicitada vem completa e não
+conta como violação do volume. Caso futuro da suíte de comunicação.
 
 **Item 4 — Perguntas múltiplas (aprovado).** Destinos: skill
 `question-orchestration` (trecho "Perguntas em blocos adaptativos",
@@ -163,10 +166,10 @@ Skill `question-orchestration`:
   converta em bullets antes de enviar.
 
 Verificação: conversa roteirizada com várias decisões pendentes; a
-transcrição mostra uma pergunta decisória por rodada; agrupamento só de
+transcrição mostra uma decisão dependente por rodada; até quatro
 perguntas autocontidas e independentes (entendíveis sem as outras, sem
-contexto novo), no máximo 4; contexto de pergunta sem abreviação nem
-confusão. Caso futuro da suíte de comunicação.
+contexto novo) podem ser agrupadas; contexto de pergunta sem abreviação
+nem confusão. Caso futuro da suíte de comunicação.
 
 **Item 5 — Uso da tool de pergunta (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Uso da tool de pergunta"):
@@ -754,6 +757,14 @@ nenhum caso; o agente traduz sempre; o humano só conhece os conceitos
 discutidos com ele e, mesmo assim, se passou muito tempo, pode não
 lembrar — conceito antigo é reapresentado em uma linha antes de novo
 uso. Aplicado no item 2 e na verificação.
+
+**Achado 2 (rodada 5, parte 1) — Volume e perguntas conciliados
+(aprovado).** O item 3 ("uma ideia central por resposta") contradizia o
+item 4 (agrupamento de até quatro perguntas); a verificação do item 4
+também se contradizia na mesma frase. Ajuste: a regra de volume vira
+"uma decisão dependente por resposta", com a exceção explícita nas duas
+regras e verificações: até quatro perguntas autocontidas e
+independentes podem ser agrupadas.
 
 ## Task List
 
