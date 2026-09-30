@@ -103,6 +103,24 @@ obrigatória:
 Ajuste até a resposta ser sim — sem passar do ponto onde o
 custo de tokens deixa de compensar.
 
+## Cobertura de Escopo (OBRIGATÓRIO)
+
+Cobertura total é o padrão: todo o escopo solicitado entra
+no plano. Julgamento próprio de "alteração simples" ou
+"postergável" não reduz escopo; omissão ou postergação de
+item exige autorização explícita do humano.
+
+## Apresentação Abstraída (OBRIGATÓRIO)
+
+O humano aprova o plano, não o arquivo: aprova o plano que
+lhe foi apresentado na conversa, não o documento físico que
+você edita. Abstrair o plano é sua tarefa: traduza o
+documento em conteúdo significativo, apresentado por partes,
+para aprovação e discussão. Não apresente diff, plano
+completo integral ou caminho de arquivo como forma de
+aprovação. O arquivo fica como artefato interno, commitado e
+consultável para auditoria.
+
 ## Salvamento Incremental
 
 O arquivo de planejamento deve existir desde a primeira
@@ -117,9 +135,10 @@ iteração. Fluxo obrigatório:
    Tasks seguindo o template do
    `planning-and-task-breakdown`.
 
-O humano deve poder `cat plans/<arquivo>.md` a qualquer
-momento e ver o estado atual. Se o arquivo não reflete a
-última decisão, você violou esta regra.
+O arquivo é nota de auditoria: reflete o estado atual e o
+humano pode consultá-lo (`cat plans/<arquivo>.md`); a
+conversa carrega o contexto apresentado. Se o arquivo não
+reflete a última decisão, você violou esta regra.
 
 ## Gate de Decisão e Commit (OBRIGATÓRIO)
 
@@ -132,7 +151,7 @@ o momento, o agrupamento e o formato dos commits.
 ### Checkpoints de commit
 
 Depois que o humano confirma a modificação do plano, atualize o
-arquivo e mostre o diff. Use
+arquivo e apresente a decisão abstraída na conversa. Use
 `git-workflow-and-versioning` para decidir, conforme o contexto,
 se é necessário criar um checkpoint, quando criá-lo, quais
 alterações incluir e qual formato usar. Não há quantidade fixa
@@ -140,10 +159,10 @@ de decisões por checkpoint nem obrigação de criar um commit após
 cada decisão.
 
 1. Edite o arquivo de planejamento com a decisão aprovada.
-2. Mostre ao humano o diff produzido e identifique a decisão
-   adicionada (por exemplo: "adicionei D2"). Para arquivo
-   novo, mostre o diff contra `/dev/null` ou o conteúdo
-   equivalente.
+2. Apresente ao humano a decisão adicionada, abstraída na
+   conversa (por exemplo: "adicionei D2" com o conteúdo da
+   decisão). O diff fica como evidência interna do commit;
+   não é apresentado ao humano.
 3. Se decidir criar um checkpoint, siga a skill
    `git-workflow-and-versioning`, incluindo escopo, mensagem,
    arquivos e necessidade de confirmação. Nunca inclua
@@ -154,7 +173,8 @@ cada decisão.
 Antes de fazer a próxima rodada de perguntas:
 - [ ] O arquivo de planejamento reflete todas as decisões
       aprovadas até agora?
-- [ ] A última decisão foi mostrada em diff?
+- [ ] A última decisão foi apresentada abstraída na
+      conversa?
 - [ ] Se um checkpoint foi escolhido, ele seguiu
       `git-workflow-and-versioning`?
 - [ ] O protocolo `question-orchestration` foi aplicado?
@@ -168,9 +188,11 @@ Antes de apresentar o plano completo:
       "sim"?
 
 Antes de declarar planejamento completo:
-- [ ] A versão completa do plano foi mostrada em diff?
+- [ ] O plano completo foi apresentado abstraído na conversa
+      (conferência final)?
 - [ ] O commit final foi executado com sucesso?
-- [ ] O humano aprovou o plano completo?
+- [ ] O humano aprovou o plano completo apresentado na
+      conversa?
 
 ## Fluxo Temporal
 
@@ -181,14 +203,16 @@ Antes de declarar planejamento completo:
 3. Aplicar o protocolo conversacional.
 4. Criar skeleton do arquivo de planejamento.
 5. Conduzir perguntas conforme `question-orchestration`.
-6. Após cada decisão aprovada: atualizar arquivo e mostrar
-   diff. Aplicar `git-workflow-and-versioning` para avaliar se
+6. Após cada decisão aprovada: atualizar arquivo e
+   apresentar a decisão abstraída na conversa. Aplicar
+   `git-workflow-and-versioning` para avaliar se
    um checkpoint é apropriado antes de avançar.
 7. Após todos os ramos resolvidos: estruturar plano
    completo seguindo template do
    `planning-and-task-breakdown` e validar pela
    auto-pergunta de calibração.
-8. Mostrar o plano completo, commitar a versão final
+8. Apresentar o plano completo abstraído na conversa
+   (conferência final), commitar a versão final
    automaticamente.
 9. Após aprovação do plano completo, iniciar o protocolo de
    execução e revisão abaixo.

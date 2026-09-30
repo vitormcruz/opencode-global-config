@@ -179,5 +179,6 @@ as tasks XL; sem checkpoint entre fases; ordem ignorando dependências.
 - [ ] Dependências identificadas e ordenadas
 - [ ] Nenhuma task toca mais de ~5 arquivos
 - [ ] Checkpoints entre fases grandes
-- [ ] Humano revisou e aprovou o plano
+- [ ] Humano revisou e aprovou o plano apresentado na
+      conversa (não o arquivo físico)
 - [ ] Nenhum artefato de produção cita identificadores do plano

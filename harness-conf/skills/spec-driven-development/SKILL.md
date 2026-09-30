@@ -35,6 +35,9 @@ SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
  reviews    reviews  reviews    reviews
 ```
 
+Each "Human reviews" gate means the human reviews the content presented
+in the conversation, not the physical file.
+
 ### Phase 1: Specify
 
 Start from the high-level vision. Ask clarifying questions until
@@ -143,8 +146,10 @@ With the validated spec, produce the technical plan:
 4. Identify what can run in parallel vs. sequential
 5. Define verification checkpoints between phases
 
-The plan must be reviewable: the human can read it and say "yes, that's
-the right approach" or "no, change X."
+The plan must be reviewable: present it abstracted in the conversation,
+in parts, so the human can say "yes, that's the right approach" or "no,
+change X." The human approves the plan as presented, not the physical
+file.
 
 ### Phase 3: Tasks
 

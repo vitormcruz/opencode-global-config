@@ -94,8 +94,12 @@ manutenção: `curador-produto`.
 ### 3. Arquivo de Planejamento
 
 Fonte de verdade temporária durante o workflow. Gerado pelos
-agentes, é entrada e saída de cada um. Descartável ao fim.
-Ver schema na seção "Schema do arquivo de planejamento".
+agentes, é entrada e saída de cada um. Ciclo de vida:
+commitado durante o trabalho como ponto de salvamento e
+consultável para auditoria; excluído no encerramento com
+autorização humana. A aprovação do humano é do plano
+apresentado na conversa, não do arquivo físico. Ver schema
+na seção "Schema do arquivo de planejamento".
 
 ### 4. Verificação das suítes
 
@@ -171,7 +175,9 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 
 ### Governança
 
-8. **Humano aprova o plano** antes da construção.
+8. **Humano aprova o plano** antes da construção. A
+   aprovação é do plano apresentado na conversa (abstraído,
+   por partes), não do arquivo físico.
 9. **Humano controla re-revisões** — sem loops automáticos.
 10. **Pós-planejamento, tudo se baseia no plano aprovado.**
 11. **Planeje perguntando, execute com autonomia** — no
@@ -204,8 +210,11 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 
 ### Arquivo de planejamento
 
-17. **Fonte de verdade temporária** — descartável ao fim.
-    `curador-produto` exclui plano e artefatos auxiliares.
+17. **Fonte de verdade temporária** — commitado durante o
+    trabalho como ponto de salvamento e consultável para
+    auditoria; excluído no encerramento com autorização
+    humana. `curador-produto` exclui plano e artefatos
+    auxiliares.
 17.1. **Seção de evidências** —
      `## Evidências de Testes — Testes`. `curador-produto`
      lê a evidência do agregador no fim da fase Testes.

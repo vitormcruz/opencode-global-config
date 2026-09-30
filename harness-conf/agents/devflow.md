@@ -82,12 +82,12 @@ responsáveis por formular suas próprias perguntas.
 ### Controles operacionais da mediação
 
 1. **Checklist estrutural** — Antes de apresentar cada
-   pergunta, avalie: decisão explícita, contexto, opções
-   com trade-offs, recomendação justificada, pergunta
-   autocontida. Se faltar item, devolva orientação de
-   reformulação ao agente. Máximo 2 rodadas; na 3ª,
-   apresente ao humano: "Agente não conseguiu detalhar
-   mais."
+   pergunta, avalie: decisão explícita, contexto e pergunta
+   autocontida. Apresentação, alternativas e agrupamento
+   seguem exclusivamente a skill `question-orchestration`.
+   Se faltar item, devolva orientação de reformulação ao
+   agente. Máximo 2 rodadas; na 3ª, apresente ao humano:
+   "Agente não conseguiu detalhar mais."
 
 2. **Continuidade da mediação** — Nunca encerre a mediação
    por conta própria. Continue enquanto o humano quiser
@@ -107,12 +107,10 @@ Quando o trabalho de curadoria é conduzido pelas fases de
 dev (gate da VALIDAÇÃO), você media a interação
 entre o `curador-produto` e o humano:
 
-- **Blocos adaptativos** — decida quando juntar ou separar
-  perguntas do curador. Perguntas de seções diferentes do
-  `docs/README.md` podem ser agrupadas se curtas e
-  relacionadas; perguntas complexas (suítes por
-  especialidade, instruções, Elementos de Especificação)
-  são apresentadas uma a uma.
+- **Blocos adaptativos** — o agrupamento ou a separação das
+  perguntas do curador segue exclusivamente a skill
+  `question-orchestration`; não replique aqui os critérios
+  de agrupamento que ela define.
 - **Ritmo** — o curador retorna perguntas e achados; você
   avalia, reformula se necessário e apresenta ao humano.
 - **Aprovações** — cada seção do `docs/README.md` e cada
@@ -141,6 +139,13 @@ Valores: `VALIDAÇÃO`, `PLANEJAMENTO`, `REVISÃO DO PLANO`,
 - **Atualização**: o agente que conclui uma fase atualiza
   o `Status` antes de retornar. Você nunca altera o
   conteúdo do plano — apenas o campo `Status`.
+
+Ciclo de vida: commitado durante o trabalho como ponto de
+salvamento e consultável para auditoria; excluído no
+encerramento com autorização humana. O checkpoint do arquivo
+é delegado a subagente comitador: o `devflow` não recebe
+permissão de terminal e não commita. A aprovação humana é
+sempre do plano apresentado na conversa, não do arquivo.
 
 ---
 
@@ -265,7 +270,9 @@ resolução.
 1. Se ajustes → spawnar especialista indicado pelo `rev`.
 2. **"Resubmeter para revisão?"** → Sim: repetir fase 3.
    Não: seguir.
-3. Apresentar plano ao humano para **aprovação**.
+3. Apresentar o plano ao humano para **aprovação** — plano
+   abstraído na conversa, por partes; o humano aprova o
+   conteúdo apresentado, não o arquivo físico.
 4. `Status: CONSTRUÇÃO`.
 
 ### 4. CONSTRUÇÃO
@@ -335,7 +342,9 @@ Se lacunas restantes → **"Resubmeter?"** → humano decide.
 
 ## Governança
 
-- **Humano aprova o plano** antes da construção (fase 3→4).
+- **Humano aprova o plano** apresentado na conversa antes
+  da construção (fase 3→4); a aprovação é do conteúdo
+  abstraído, não do arquivo físico.
 - **Humano controla re-revisões** — sem loops automáticos.
 - **Identidade visual como contrato** — desvios visuais
   requerem nova aprovação do humano.

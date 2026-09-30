@@ -150,6 +150,10 @@ diferentes e verificar integridade do conjunto.
      implementadas respeitam os protótipos aprovados?
    - **Aderência ao plano aprovado** — o que foi
      construído corresponde ao que foi planejado?
+   - **Cobertura total do escopo aprovado** — o resultado
+     cobre todo o escopo aprovado? Item faltante é achado,
+     ainda que julgado simples ou postergável; a decisão de
+     aceitar a falta é do humano.
    - **Contradições ou lacunas** — há informações
      conflitantes ou ausentes entre seções?
 4. Para cada achado, classificar tipo e severidade.
