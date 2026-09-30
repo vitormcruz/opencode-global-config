@@ -174,25 +174,23 @@ perguntas autocontidas e independentes (entendíveis sem as outras, sem
 contexto novo) podem ser agrupadas; contexto de pergunta sem abreviação
 nem confusão. Caso futuro da suíte de comunicação.
 
-**Item 5 — Uso da tool de pergunta (aprovado).** Destino: skill
-`question-orchestration` (acréscimo, seção "Uso da tool de pergunta"):
+**Item 5 — Uso da tool de pergunta (aprovado; simplificado na rodada
+5).** Destino: skill `question-orchestration` (acréscimo, seção "Uso da
+tool de pergunta"):
 
 - Pergunte em texto livre como padrão; a resposta do humano vem como
   veio.
-- Use a tool apenas quando: a questão já foi apresentada e entendida na
-  conversa, as alternativas são poucas, completas e mutuamente
-  exclusivas, e cada uma tem consequência distinta que o humano precisa
-  escolher.
-- Questão nova ou complexa: apresente em texto primeiro; a tool, se
-  couber, vem depois do entendimento confirmado.
+- A tool é exceção para casos muito simples: decisão clara e
+  alternativas enumeráveis e determinísticas (poucas, completas,
+  mutuamente exclusivas).
+- Questão nova ou complexa: texto, nunca tool.
 - Cada alternativa descreve a consequência real da escolha; nunca opção
   de enchimento.
 
-Verificação: conversa roteirizada; a tool aparece só depois do
-contexto apresentado em texto, com entendimento confirmado (resposta do
-humano à apresentação) antes da chamada da tool, e apenas para escolhas
-fechadas; toda alternativa tem descrição de consequência real. Caso
-futuro da suíte de comunicação.
+Verificação: conversa roteirizada; a tool aparece apenas para decisões
+claras com alternativas enumeráveis e determinísticas; questão nova ou
+complexa vem em texto; toda alternativa tem descrição de consequência
+real. Caso futuro da suíte de comunicação.
 
 **Item 6 — Contestação de premissa (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -797,6 +795,16 @@ adequar o que foi feito ao padrão do repo (sincronização de
 agente/workflow/testes, suíte completa, formato), em OUTRA sessão,
 acionada pelo humano; nada é executado pelo `devflow` aqui. Task List
 reescrita com a premissa; Overview ajustado.
+
+**Achado 5 (rodada 5, parte 1) — Verificação da tool (resolvido por
+simplificação do humano).** O revisor apontou que a verificação tratava
+qualquer resposta do humano como confirmação de entendimento. Ao
+discutir, o humano simplificou a regra inteira, rejeitando o critério de
+entendimento: a tool é exceção para casos muito simples — decisão clara
+e alternativas enumeráveis e determinísticas; questão nova ou complexa
+vem em texto, nunca tool. Sem critério de entendimento na regra ou na
+verificação. Revoga o "entendimento confirmado" acrescentado na
+terceira rodada.
 
 ## Task List
 
