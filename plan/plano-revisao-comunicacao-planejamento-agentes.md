@@ -271,6 +271,10 @@ apresentado na conversa). Peça nova aprovada: âncora de recarga.
 
 Destino: `AGENTS.base.md`, seção Compactação de contexto (acréscimo):
 
+- Mantenha registrado no artefato persistente (plano) o estado da
+  tarefa: skills em uso e decisões abertas. Após compactação, releia o
+  registro e recarregue o que a tarefa precisa: a recarga não depende
+  de lembrar o que a compactação apagou.
 - Após compactação de contexto, antes de prosseguir a tarefa em
   andamento, recarregue as skills cujo conteúdo sustenta essa tarefa. O
   mesmo vale ao perceber que instruções de uma skill já adotada deixaram
@@ -289,8 +293,10 @@ rodada, volume por turno) se mantém. Segundo roteiro, com skill de
 domínio carregada e compactação no meio: a skill é recarregada antes de
 prosseguir a tarefa. Terceiro roteiro, sem compactação: o agente desvia
 do protocolo (volume, ritmo, uso da tool) no meio da conversa; a skill é
-recarregada antes da resposta seguinte e o protocolo volta a valer.
-Casos futuros da suíte de comunicação.
+recarregada antes da resposta seguinte e o protocolo volta a valer. Em
+todos, o registro de estado (skills em uso, decisões abertas) existe no
+artefato e permite reconstruir o que recarregar. Casos futuros da suíte
+de comunicação.
 
 **Item 9 — Dúvida trava ação (aprovado).** Destino: skill
 `question-orchestration` (acréscimo, seção "Confirmação e continuidade
@@ -839,6 +845,13 @@ intervalo longo, ou ao sinal de confusão; responder integralmente ao
 que foi perguntado. Substitui o "divida acima de ~5 linhas ou 2
 parágrafos" e a reapresentação compulsória de toda mensagem. Aplicado
 nos itens 3 e 4.
+
+**Ajuste de alto impacto (rodada 5, parte 2) — Registro de estado para
+a recarga (aprovado).** A regra de recarga dependia de lembrar o que a
+compactação apagou. Ajuste no item 8: manter registrado no artefato
+persistente (plano) o estado da tarefa (skills em uso, decisões
+abertas); após compactação, reler o registro e recarregar o que a
+tarefa precisa. Verificação estendida aos três roteiros.
 
 ## Task List
 
