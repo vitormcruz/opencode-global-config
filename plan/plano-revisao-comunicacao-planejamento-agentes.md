@@ -999,9 +999,9 @@ intermediária em inglês; zona cinzenta fechamento × dúvida travada.
 **Decisão do humano (execução, achado 1): item 1 × jargão consagrado.**
 Aceito o empate: "config", "docs", "repo" e similares são jargão
 consagrado, não abreviação a expandir. Item 1 do plano atualizado com o
-bullet do jargão consagrado em inglês e verificação ajustada. Ajuste
-pendente de aplicação em `AGENTS.base.md` (fila do executor, junto com
-os demais ajustes pós-decisão).
+bullet do jargão consagrado em inglês e verificação ajustada. Aplicado
+em `AGENTS.base.md` no commit `0e07247` (junto com o bullet de pendência
+condicionante na skill `question-orchestration`).
 
 **Decisão do humano (execução, achado 2): fala intermediária em inglês
 nas corridas de conferência.** Ignorar, atribuindo ao modo de execução
@@ -1019,7 +1019,11 @@ fechamento.
 
 ### Fase 1: Aplicação direta das regras
 
-- [ ] **Task 1: Aplicar as regras de comunicação.**
+- [x] **Task 1: Aplicar as regras de comunicação.** CONCLUÍDA:
+  aplicação no commit `c4e90cd`; conferências antes/depois em ambiente
+  isolado (etapas 2a e 2b, evidências em `/tmp/opencode/conf-validacao/`);
+  três achados decididos pelo humano (`f9feec0`, `7f6ac87`, `d4f5e44`);
+  ajustes pós-decisão aplicados no commit `0e07247`.
   - **Description:** aplicar nos arquivos de configuração as regras de
     comunicação aprovadas nas seções de decisões deste plano (regras
     originais e as cinco rodadas de ajustes; em conflito, prevalece a
@@ -1034,11 +1038,11 @@ fechamento.
     conferência antes/depois em ambiente isolado, com evidência
     (transcrições, commit do repo do ambiente, resultado por critério).
   - **Acceptance criteria:**
-    - [ ] Regras aplicadas com texto fiel às regras vigentes
+    - [x] Regras aplicadas com texto fiel às regras vigentes
           (precedência da decisão posterior), no destino correto.
-    - [ ] Nenhum trecho dos arquivos de destino contradiz a regra
+    - [x] Nenhum trecho dos arquivos de destino contradiz a regra
           aplicada.
-    - [ ] Cada regra ou grupo com evidência de conferência completa.
+    - [x] Cada regra ou grupo com evidência de conferência completa.
   - **Verification:** revisão independente (Task 3) contra as regras
     originais e as cinco rodadas de ajustes; evidências das
     conferências.
