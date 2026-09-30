@@ -974,6 +974,19 @@ acessível no checkout do ambiente (cenário realista; condição comum às
 duas corridas). Transcrições em `transcripts/antes.md` e `depois.md` do
 ambiente.
 
+**Conferências antes/depois (Task 1, etapa 2b) — resultados.** 22
+corridas, ~38 min de modelo. Efeito comprovado: identificador interno
+(piloto), volume/resposta à confusão, blocos adaptativos, contestação
+de premissa, recomendação com contexto, fechamento com conferência.
+Sem contraste (já obedecia): distinção comunicação/entrega e resumo
+fiel. Não conferíveis no mecanismo (`--pure`): recarga pós-compactação
+(item 8) e dimensão tool da pergunta (item 5); validação fica para o
+teste prático (Fase 2). Sem efeito detectável: regra de abreviações
+(item 1). Evidências em `/tmp/opencode/conf-validacao/` (transcripts,
+relatorio-etapa2b.md, commits do ambiente 3c08c4e..aba1d26). Achados
+pendentes de decisão humana: item 1 × jargão consagrado; fala
+intermediária em inglês; zona cinzenta fechamento × dúvida travada.
+
 ### Fase 1: Aplicação direta das regras
 
 - [ ] **Task 1: Aplicar as regras de comunicação.**
