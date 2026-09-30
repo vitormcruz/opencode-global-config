@@ -107,10 +107,19 @@ seção Comunicação, subseção "Conversa sobre plano" (reformulação):
 - Apresente por partes: uma etapa ou decisão por vez. Resumo de etapas
   é permitido; ao encerrar, um resumo dirigido do todo, também por
   partes.
+- Antes de enviar a apresentação de um ponto ao humano, aplique o teste
+  da reapresentação: escreva a versão que você escreveria se ele
+  tivesse acabado de responder "não entendi", e envie essa. Nela, o
+  mecanismo concreto vem antes da referência ao plano; um exemplo vem
+  antes do geral; jargão interno (número de item, task, achado) só com
+  tradução imediata.
 
 Verificação: conversa roteirizada com várias decisões em jogo; a
 transcrição não pode ter número, código ou link do plano sem o conteúdo
-contextualizado. Caso futuro da suíte de comunicação.
+contextualizado; na apresentação de ponto técnico complexo, a primeira
+versão já traz mecanismo concreto e exemplo, sem jargão interno, e o
+humano não precisa pedir reapresentação. Caso futuro da suíte de
+comunicação.
 
 **Item 3 — Volume na comunicação (aprovado).** Destino: `AGENTS.base.md`,
 seção Comunicação, seção Concisão (acréscimo operacional):
@@ -661,6 +670,19 @@ protocolo), mas a verificação só cobria compactação. Ajuste: terceiro
 roteiro na verificação do item 8, sem compactação: o agente desvia do
 protocolo no meio da conversa; a skill é recarregada antes da resposta
 seguinte e o protocolo volta a valer.
+
+**Decisão nova (rodada 4) — Teste da reapresentação (aprovada).**
+Levantada pelo humano ao observar que a primeira apresentação de um
+ponto costuma sair pior que a reapresentação pedida após um "não
+entendi": na primeira, o agente escreve para quem acompanha o
+raciocínio interno (vocabulário do revisor, referências ao plano,
+mecanismo comprimido); só na segunda escreve para o humano sem o plano
+na cabeça. Regra nova no item 2, arquivo global: antes de enviar a
+apresentação de um ponto, escrever a versão que escreveria após um "não
+entendi" e enviar essa (mecanismo concreto antes da referência; exemplo
+antes do geral; jargão interno só com tradução imediata). Verificação
+própria: ponto técnico complexo apresentado certo de primeira, sem
+pedido de reapresentação.
 
 ## Task List
 
