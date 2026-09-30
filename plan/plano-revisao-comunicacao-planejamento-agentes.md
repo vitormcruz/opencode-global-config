@@ -951,9 +951,15 @@ mesmo sendo independente. Verificação atualizada.
 ## Task List
 
 **Modelos registrados para a execução (decisão do humano):** executor
-`opencode-go/glm-5.3-flash` (instâncias do `eng-software`); revisor
+`zai-coding-plan/glm-5.3-flash` (instâncias do `eng-software`); revisor
 `opencode/glm-5.3` (instâncias do `rev`). Reutilizar em novas
 instâncias até o humano alterá-las.
+
+**Diretiva de eficiência do executor (decisão do humano):** as
+instâncias executoras agrupam chamadas de ferramenta independentes numa
+mesma resposta e consolidam verificações num único comando sempre que
+possível, evitando requisições repetidas e gasto desnecessário de
+tokens.
 
 ### Fase 1: Aplicação direta das regras
 
