@@ -157,11 +157,12 @@ Ao spawnar um agente, instrua-o a:
 3. Não executar suítes por especialidade na Construção
    nem na Revisão da Construção. Na fase Testes, o `qa`
    persiste a evidência de `testes-produto`.
-4. **Nas fases de planejamento**, valide cada decisão
-   não-trivial com o humano antes de persistir. Dúvidas
-   que dependem de decisão → salve progresso parcial,
-   formule perguntas na seção `## Perguntas` e retorne.
-   Decisões triviais não precisam de validação.
+4. **Nas fases de planejamento**, suba ao humano o que
+   muda premissa, escopo, comportamento ou risco antes de
+   persistir. O resto o agente resolve no escopo aprovado.
+   Dúvidas que dependem de decisão → salve progresso
+   parcial, formule perguntas na seção `## Perguntas` e
+   retorne.
 5. Listar skills na ultima linha do resumo:
    `Skills: skill1, skill2` ou `Skills: nenhuma`.
 6. **Não precisa concluir a tarefa inteira antes de

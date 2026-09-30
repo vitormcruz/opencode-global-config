@@ -160,9 +160,10 @@ cada decisão.
 
 1. Edite o arquivo de planejamento com a decisão aprovada.
 2. Apresente ao humano a decisão adicionada, abstraída na
-   conversa (por exemplo: "adicionei D2" com o conteúdo da
-   decisão). O diff fica como evidência interna do commit;
-   não é apresentado ao humano.
+   conversa (por exemplo: "adicionei a decisão sobre
+   retenção de logs, com o conteúdo aprovado"). O diff fica
+   como evidência interna do commit; não é apresentado ao
+   humano.
 3. Se decidir criar um checkpoint, siga a skill
    `git-workflow-and-versioning`, incluindo escopo, mensagem,
    arquivos e necessidade de confirmação. Nunca inclua
