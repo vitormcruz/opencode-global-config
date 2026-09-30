@@ -1,11 +1,13 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: FASE 4 EM CURSO — Fase 3 concluída (Tasks 6-9, suíte 942
-passed), revisão do rev APROVADA COM RESSALVAS (2 melhorias remediadas
-em 2026-09-29) e materialização no user-space confirmada (Task 10,
-bootstrap de 2026-09-29 21:05; smoke da config de produção com a tool
-`compress` registrada). Gate C3: PASS. Pendente: piloto (critérios 2-3
-da Task 10) e Tasks 11-13.
+Status: TESTES — C3 PASS (Fases 0-3 + Task 10 concluídas; revisão do rev
+APROVADA COM RESSALVAS com 2 melhorias remediadas; materialização no
+user-space confirmada com smoke de produção ok). Em curso no workflow:
+agregador testes-produto (qa), roteiro manual do sec e piloto natural
+(C4, QA-ACC-1) com dados a partir do primeiro restart do OpenCode pelo
+humano; depois Tasks 11-13. CALIBRAÇÃO (2026-09-30, humano):
+`maxContextLimit` 100000 → 175000, `minContextLimit` 50000 mantido;
+ver `## Calibração do maxContextLimit (eng-software, 2026-09-30)`.
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -2788,3 +2790,437 @@ validado no QA-ACC-3. Depois: Task 11 (medição) e Tasks 12-13.
 - [x] Suítes: nenhuma executada nesta passagem (nenhum código
   alterado; verde 942 declarado e re-executado pelo rev no mesmo dia)
 - [x] Gate C3: PASS
+
+## Resultados da fase TESTES (qa, 2026-09-29)
+
+Execução da fase TESTES do workflow para este plano: agregador
+`testes-produto` (suítes backend e segurança), verificação do estado
+do piloto C4 (QA-ACC-1), registro do método de extração do QA-ACC-3
+e documentação da consulta de auditoria do QA-ACC-5 para o roteiro
+manual do sec. Leituras do sqlite em modo SOMENTE LEITURA
+(`file:...?mode=ro`). Nenhum arquivo fora deste plano foi alterado;
+nenhuma sessão sintética criada (P10: sessão longa natural); nenhum
+dado fabricado.
+
+### Agregador `testes-produto` (executado)
+
+- Comando: `python3 -m testes-produto`, na raiz do repo (stdout JSON
+  `{status, findings[]}`, stderr progresso), WSL/Linux, sem
+  argumentos, conforme `docs/README.md#testes-por-especialidade`.
+- 1ª execução: 2026-09-29 21:14:41 a 21:19:13 local (UTC-3),
+  ~4 min 32 s. Saída (JSON): `{"status":"pass","findings":[1]}`.
+- Exit code: capturado em 2ª execução (idempotência declarada pela
+  spec do agregador): `0`. Resultado idêntico nas duas execuções.
+- Finding único, severidade `melhoria` (não bloqueante pela spec da
+  especialidade): bandit `Audit url open for permitted schemes` em
+  `src/opencode_config/bootstrap/ai_memory.py:941`. Pré-existente do
+  provisionamento do MCP ai-memory (ciclo vizinho); nada atribuível
+  ao DCP.
+- Suítes executadas pelo agregador: `testes-produto/backend` (pytest
+  `-m all` do `.venv` do SO, ruff, shellcheck, PSScriptAnalyzer,
+  cobertura, Concordion backend) e `testes-produto/seguranca`
+  (gitleaks, pip-audit, bandit, Concordion segurança).
+- Falha de suíte: NENHUMA. Nada a rotear para eng-software ou sec.
+
+### Piloto C4 / QA-ACC-1: EM COLETA
+
+Cutoff da materialização (Task 10): 2026-09-29 21:05 local (UTC-3) =
+epoch ms `1790726700000`. DCP ativo no user-space a partir do restart
+do OpenCode; o smoke da Task 10 (21:05-21:07) já carregou o plugin
+(tool `compress` registrada).
+
+Estado medido no sqlite (somente leitura) nesta passagem:
+
+- Sessões criadas pós-cutoff: 3. Duas de smoke (`big-pickle`, agent
+  `build`, 1 step-finish cada, pico de contexto ~31,5k) e esta
+  sessão do qa (filha de spawn via tool `task`, `glm-5.3-flash`,
+  21 step-finish, pico 109.201). Nenhuma sessão natural de piloto.
+- Eventos de `compress` pós-cutoff: ZERO. Varredura ampla (`data`
+  LIKE `%"tool":"compress"%`, sobreestima por natureza) sobre parts
+  de todas as sessões: 0 linhas, logo a contagem estrita
+  (`json_extract(p.data,'$.tool') = 'compress'`) também é 0.
+- Histórico total de `compress`: 5 eventos, todos do spike de sandbox
+  de 2026-09-27 (sessões `misty-forest` e `neon-tiger`), FORA do
+  escopo do piloto; usados apenas para validar as consultas do
+  QA-ACC-5.
+- Ressalva de medição: 9 parts `step-finish` desta sessão vieram sem
+  objeto `tokens`; extratores devem tolerar parts sem usage (padrão
+  já tolerado no comando da Task 2 com ajuste trivial).
+- Leitura: piloto em COLETA NATURAL. As 3 sessões existentes não são
+  amostra (smokes e a própria sessão do qa; a presença do DCP no
+  processo desta sessão não é verificável pelo banco, pois a sessão
+  pai é pré-materialização e retomada).
+
+Critério de extração das métricas (quando houver volume): >= 3
+eventos de `compress` em sessões reais pós-restart. A amostragem
+mínima do procedimento (passo 7) permanece como régua de fechamento
+do C4: >= 1 sessão com >= 2 eventos, >= 10 steps entre compressões,
+>= 2 spawns via tool `task` com o compress das filhas medido, 100%
+dos sumários revisados (<= 5 eventos; senão amostra de 3). As
+métricas do QA-ACC-1 (`(P0−P1)/P0 >= 20%` por evento, média >= 37%,
+payback <= 3 steps) serão calculadas sobre a série `step-finish`
+(input + cache.read + cache.write, comando salvo na Task 2), com P0 =
+último step antes da part `compress` e P1 = primeiro depois. C4 segue
+EM COLETA até a coleta natural atingir o volume; fall continua
+definido exclusivamente pelos QA-ABT-1 a 6.
+
+Consulta de monitoramento (rodar quando houver sessões novas;
+somente leitura):
+
+```sql
+SELECT count(*) FROM part
+WHERE time_created >= 1790726700000
+  AND data LIKE '%"tool":"compress"%';
+```
+
+### QA-ACC-3 (multiagente): pendente de coleta, método registrado
+
+Depende do piloto natural (>= 2 spawns via tool `task` de agentes
+especialistas com DCP ativo). Método exato de extração, a rodar no
+sqlite em modo somente leitura quando houver coleta:
+
+1. Identificar as filhas do piloto:
+
+```sql
+SELECT id, parent_id, agent, model, time_created
+FROM session
+WHERE parent_id IS NOT NULL AND time_created >= 1790726700000;
+```
+
+2. Para cada filha, conferir que `session.model` corresponde ao
+   modelo passado na chamada da task (part `tool` da task na sessão
+   pai; o plugin task-model registra a injeção de `model`/
+   `reasoning`) e que o agente chamado é um especialista do workflow.
+3. Extrair a série `step-finish` da própria filha (comando salvo na
+   Task 2) e medir os eventos `compress` dela com a régua do
+   QA-ACC-1 (eventos de compress em filhas são ESPERADOS e medidos,
+   conforme a spec emendada do QA-ACC-3).
+4. Verificar conclusão sem erro atribuível ao DCP (sem crash, sem
+   part de erro atribuída) e sem corrupção (histórico íntegro;
+   contagem de mensagens coerente com a sessão).
+
+Evidência de exequibilidade do método: a própria sessão desta
+passagem é uma filha (`parent_id` preenchido, `session.model` com
+provider e modelo, agent `qa`, criada pós-cutoff via tool `task`).
+
+### QA-ACC-5 (auditoria pós-fato): consultas para o sec
+
+Estrutura do part `tool` `compress` confirmada no banco:
+`state.status`, `state.input.content[]` com `startId`/`endId`/
+`summary`, `state.output`, `callID`; o `message_id` do part aponta a
+mensagem assistant autora da chamada. Consultas validadas contra os
+5 eventos do spike (saída conferida: autor `glm-5.3-flash`, faixas
+`m0001..m0002` etc., `status` `completed`). Rodar sempre com URI
+`file:...?mode=ro`.
+
+Consulta A (por evento: autor, sessão, faixas, resultado):
+
+```sql
+SELECT s.slug AS sessao, p.session_id,
+       p.time_created AS quando_ms,
+       json_extract(m.data, '$.modelID') AS autor_modelo,
+       json_extract(p.data, '$.state.status') AS status,
+       (SELECT group_concat(json_extract(c.value, '$.startId')
+                              || '..' ||
+                            json_extract(c.value, '$.endId'), ' + ')
+          FROM json_each(p.data, '$.state.input.content') c
+       ) AS faixas,
+       (SELECT count(*)
+          FROM json_each(p.data, '$.state.input.content') c
+       ) AS blocos,
+       json_extract(p.data, '$.state.output') AS resultado
+FROM part p
+JOIN message m ON m.id = p.message_id
+JOIN session s ON s.id = p.session_id
+WHERE json_extract(p.data, '$.tool') = 'compress'
+ORDER BY p.time_created;
+```
+
+Consulta B (por faixa: o sumário escrito pelo modelo, para o sec
+comparar cada bloco original com o sumário produzido):
+
+```sql
+SELECT s.slug AS sessao, p.time_created AS quando_ms,
+       json_extract(c.value, '$.startId') AS de,
+       json_extract(c.value, '$.endId') AS ate,
+       json_extract(c.value, '$.summary') AS sumario
+FROM part p
+JOIN session s ON s.id = p.session_id,
+     json_each(p.data, '$.state.input.content') c
+WHERE json_extract(p.data, '$.tool') = 'compress'
+ORDER BY p.time_created;
+```
+
+Mapeamento de `mNNNN` para as mensagens persistidas (o DCP numera
+mensagens por posição na sessão; a posição 1-based vem do
+`time_created`; `:inicio`/`:fim` derivam de `startId`/`endId` sem o
+prefixo `m`):
+
+```sql
+WITH num AS (
+  SELECT session_id, id, time_created,
+         ROW_NUMBER() OVER (PARTITION BY session_id
+                            ORDER BY time_created) AS pos
+  FROM message
+)
+SELECT session_id, pos, id FROM num
+WHERE session_id = :sid AND pos BETWEEN :inicio AND :fim;
+```
+
+Caveats para o sec: (a) após compactação NATIVA na mesma sessão, os
+IDs `mNNNN` são reancorados no espaço pós-nativo (observado no
+spike, Task 4); o mapeamento por posição vale para o histórico
+persistido corrente, que o DCP nunca altera; ao auditar sessões com
+evento nativo, ancorar pela janela temporal do evento; (b) o campo
+`state.input.content[].summary` é o texto que substituiu o bloco no
+envio ao LLM; o histórico no sqlite permanece completo (modo de
+falha 4 do sec: comparar sempre armazenado vs sumário, nunca
+armazenado vs enviado).
+
+### Estado do gate C4: EM COLETA
+
+Nem pass nem fall. Pass exige QA-ACC-1 a 5 verdes na amostragem
+mínima do passo 7; fall exige algum QA-ABT-1 a 6. Nenhum disparo de
+aborto e nenhuma métrica calculável nesta passagem (0 eventos de
+`compress` pós-cutoff). Próxima verificação: reexecutar a consulta
+de monitoramento quando existirem sessões naturais pós-restart com
+>= 3 eventos de `compress` (ou a pedido do devflow antes disso).
+
+### Verificação de artefatos de documentação
+
+Checagem contra o `docs/README.md`: nenhum artefato de spec de testes
+exige criação nesta fase (a validação do DCP é de ferramenta de
+terceiro; as suítes por especialidade permanecem como estão), em
+linha com o registro da subseção `### Testes (qa)` do planejamento.
+Nada criado além deste plano.
+
+### Evidências (qa) — TESTES
+
+- [x] Plano de testes: pré-existente (5 critérios QA-ACC, 6 abortos,
+      6 rollbacks, pass/fall C0-C5); sem mudança de spec nesta fase
+- [x] Agregador `testes-produto`: executado 2x (`python3 -m
+      testes-produto`); status `pass`, exit code `0`; 1 finding
+      `melhoria` (bandit, ai_memory.py:941, não bloqueante,
+      pré-existente); duração ~4 min 32 s por execução
+- [x] Falhas: nenhuma; nada roteado a eng-software ou sec
+- [x] Piloto C4/QA-ACC-1: EM COLETA (0 eventos `compress`
+      pós-cutoff; 3 sessões pós-materialização, nenhuma amostra
+      válida; consulta de monitoramento registrada)
+- [x] QA-ACC-3: pendente de coleta; método de extração registrado
+      (4 passos) com evidência de exequibilidade
+- [x] QA-ACC-5: consultas A e B + mapeamento `mNNNN` documentadas e
+      validadas contra os 5 eventos do spike, entregues ao sec
+- [ ] Cobertura: não se aplica (ferramenta de terceiro, sem baseline
+      de cobertura)
+- [ ] Cenários não cobertos: modo `message` (P4, decidido `range`);
+      Copilot CLI (ressalva de escopo); nudges não são persistidos
+      no sqlite (QA-ACC-4 dependerá de observação direta em sessão
+      do piloto, como previsto na spec do critério)
+- [ ] Gate C4: fechamento pendente de coleta natural (>= 3 eventos
+      `compress` em sessões reais + amostragem mínima do passo 7)
+
+## Resultados da fase TESTES (sec, 2026-09-29)
+
+Execução do roteiro manual de segurança da subseção `### Segurança
+(sec)` (5 passos). Nenhuma suíte automática executada (agregador já
+rodado pelo qa, exit 0); nenhuma correção de código. Inspeção estática
+do código instalado em
+`~/.cache/opencode/packages/@tarquinen/opencode-dcp@3.1.15/` (bundle
+`dist/index.js` + fontes `lib/`). Leituras do sqlite em modo SOMENTE
+LEITURA (`file:...?mode=ro`). Único arquivo alterado: este plano.
+
+### Passo 1: conformidade da config de produção — PASS
+
+- `~/.config/opencode/dcp.jsonc` é symlink para
+  `harness-conf/dcp.jsonc` (readlink confirma; sem cópia divergente).
+- `diff` vazio entre materializado e canônico.
+- Valores conferem com o revisado: `permission: allow`, `mode:
+  range`, `maxContextLimit: 100000`, `minContextLimit: 50000`,
+  `protectUserMessages: false`, sem `protectedTools`/`patterns`,
+  `experimental.allowSubAgents: true`, `autoUpdate: false`.
+
+### Passo 2: validação do artefato da Fase 1 — PERDIDO; essenciais reexecutados
+
+- `/tmp/opencode/dcp-spike/sec-review.md` NÃO EXISTE MAIS (tmp
+  limpado; `/tmp/opencode/` guarda só saídas do agregador). Perda
+  registrada aqui; o conteúdo do checklist permanece resumido na
+  Task 3 (linhas 979-1000 deste plano).
+- Itens essenciais reexecutados contra o cache instalado, MESMO
+  resultado da Fase 1 (zero bloqueante):
+  - Item 2 (scripts de install): sem pre/postinstall (só
+    clean/build/verify/check/prepublishOnly/dev/typecheck/test/
+    format/dcp); 6 deps diretas idênticas à Fase 1
+    (`@anthropic-ai/tokenizer`, `@opencode-ai/sdk`,
+    `@opentui/core`, `@opentui/solid`, `jsonc-parser`, `solid-js`).
+  - Item 3 (exec dinâmica): ZERO `child_process`/`exec`/`spawn`/
+    `eval`/`new Function`/`import(` dinâmico em `dist` + `lib`
+    (`.d.ts` excluídos da varredura).
+  - Item 4 (egress): únicas ocorrências de rede = string `$schema`
+    (raw.githubusercontent, não fetchada) e o fetch de
+    `registry.npmjs.org/{pkg}/latest` em `lib/update.ts:132` /
+    `dist/index.js:7848`.
+  - Item 5 (persistência): escritas confinadas a `lib/logger.ts` e
+    `lib/state/persistence.ts` (`mkdir`/`writeFile`); `rm` só em
+    `update.ts` (caminho de update); sem gravação de conteúdo de
+    mensagem.
+  - Item 7 (self-update): `isAutoUpdatableSpec("3.1.15")` = false
+    (spec fixa não casa `latest`/`*`/`~`/`^`/range) e
+    `startAutoUpdate` retorna imediatamente com `enabled` false
+    (`if (!enabled) return` em `lib/update.ts`).
+- Itens NÃO reexecutados nesta passada: item 1 (integridade cache vs
+  registry npm: exigiria egress; coberto pelo registro da Fase 1);
+  itens 6, 8 e 9 (nudges sem vetor de rede, confirmado pela
+  varredura de egress do passo 3; proveniência e regra de bump = nova
+  importação são registros vigentes deste plano).
+- Condição obrigatória da ressalva da Fase 1 (`autoUpdate: false`)
+  VIGENTE na produção (passo 1) e fixada por teste do repo
+  (`tests/harnesses/test_opencode_dcp.py:93`).
+
+### Passo 3: postura de egress em produção — PASS
+
+- `dist/index.js:7914` chama `startAutoUpdate(ctx, config.autoUpdate)`;
+  com `autoUpdate: false` a função retorna sem criar o
+  AbortController nem agendar `checkAutoUpdate` → ZERO chamada de
+  rede em runtime.
+- Confirmado por varredura: nenhum `WebSocket`/`sendBeacon`/
+  `EventSource`/`net.connect`/`dgram` em `dist` + `lib`.
+- O fetch de `registry.npmjs.org` só existe no caminho de
+  update/resolução (aceitável pelo roteiro) e está desligado.
+- Observação (reforço da ressalva da Fase 1): o default do código é
+  `autoUpdate: true` (`dist/index.js:1312`); remover a propriedade
+  do `dcp.jsonc` reativaria o fetch de startup (envia só o nome do
+  pacote).
+
+### Passo 4: auditoria QA-ACC-5 — PASS
+
+- Consultas do qa (A por evento, B por faixa, mapeamento `mNNNN`)
+  permitem auditar cada `compress`: A retorna autor (modelo),
+  sessão, faixas `mNNNN`, blocos, status e resultado; B expõe o
+  sumário de cada faixa, permitindo a comparação armazenado vs
+  sumário (modo de falha 4), nunca armazenado vs enviado.
+- Amostra executada: Consulta A em URI `file:...?mode=ro` contra
+  `~/.local/share/opencode/opencode.db`. Retorno: 5 eventos, todos
+  do spike de 2026-09-27 (`misty-forest`, `neon-tiger`), autor
+  `glm-5.3-flash`, `status = completed`, faixas `m0001..m0002`,
+  `m0003..m0005`, `m0007..m0009`, `m0001..m0002` (pós-nativo) e
+  `m0002..m0006`, coerente com o registro do qa. ZERO eventos
+  pós-cutoff (coerente com o gate C4 EM COLETA).
+
+### Veredito do roteiro: APTO COM RESSALVAS
+
+Nenhum bloqueante. Ressalvas (melhoria, não bloqueantes):
+
+1. **Achado**: artefato da revisão de importação da Fase 1 perdido
+   (armazenado em `/tmp`, sujeito a limpeza); item 1 do checklist
+   (integridade cache vs registry) não reexecutável sem egress.
+   **Ação**: reexecução dos itens essenciais registrada nesta
+   subseção, com o mesmo resultado da Fase 1; recomendação:
+   artefatos de revisão de segurança em local durável (repo ou
+   `~/.local/share`), nunca `/tmp`. **Severidade**: melhoria.
+2. **Achado**: default do código é `autoUpdate: true`
+   (`dist/index.js:1312`); a barra SEC-02 depende da propriedade
+   explícita no `dcp.jsonc`. **Ação**: manter a propriedade no
+   canônico e o teste que a fixa (`test_opencode_dcp.py:93`) no
+   acordão de qualquer bump (bump = nova importação, item 9).
+   **Severidade**: melhoria.
+
+### Evidências (sec) — TESTES
+
+- [x] Roteiro manual: 5 passos, 5 executados, 5 pass (1 artefato
+      perdido, mitigado por reexecução dos itens essenciais)
+- [x] Achados: 2 (2 melhoria, 0 bloqueantes)
+- [x] Condição `autoUpdate: false` vigente (config canônica,
+      symlink de produção, teste do repo)
+- [x] Consulta de amostra QA-ACC-5 executada em modo ro (5 eventos)
+- [ ] Documentação de spec: nada a criar (verificação do qa na
+      subseção `### Verificação de artefatos de documentação`
+      permanece válida para o domínio sec; ferramenta de terceiro)
+
+## Calibração do maxContextLimit (eng-software, 2026-09-30)
+
+### Decisão humana
+
+Em 2026-09-30 o humano decidiu (override da P6, calibração antecipada):
+`maxContextLimit` de 100000 para **175000**, mantendo
+`minContextLimit: 50000`. Motivo: cascata de compressões no mesmo round
+observada na sessão real "Otimização de custo: início da fase DEVFLOW"
+(banda 100k/50k considerada pequena). A P6 continua registrada como a
+decisão do piloto (100k/50k); esta seção é nota de calibração, não
+reescrita de histórico. Os limites de produção por modelo seguem
+candidatos a calibração no gate C4.
+
+### Dependências verificadas do valor 100000
+
+- `tests/harnesses/test_opencode_dcp.py`
+  (`test_canonical_dcp_jsonc_pins_decided_configuration`): assert
+  `maxContextLimit == 100000` atualizado para `175000`, com comentário
+  curto de calibração (decisão humana 2026-09-30; padrão do piloto era
+  100k/50k). `minContextLimit == 50000` permanece.
+- Fixture Concordion do ADR-0011 (`Adr0011Fixture.groovy`): sem
+  dependência do valor (asserts de plugin pinado, `allow`, `autoUpdate
+  false`, destinos e README). Nada a mudar.
+- `docs/adr/0011-compactacao-dcp-opencode.md`: não cita 100000/100k
+  (menção genérica a "cruza o limite"). Nada a mudar.
+- `README.md`: não cita 100000/100k (só referencia `dcp.jsonc` e o
+  rollback `deny`). Nada a mudar.
+- Menções históricas a 100k neste plano: mantidas (histórico).
+
+### User-space (symlink)
+
+- `~/.config/opencode/dcp.jsonc` é symlink ao canônico
+  `harness-conf/dcp.jsonc`; verificado com `grep maxContextLimit` logo
+  após o edit: reflete `175000` sem bootstrap.
+- Sessões já abertas mantêm a config carregada no start; só sessões
+  novas passam a operar com 175k/50k.
+
+### Evidência da cascata (QA-ACC-5, sqlite somente leitura)
+
+Sessão: "Otimização de custo: início da fase DEVFLOW"
+(`ses_f2f750021ffeLerqvDxJyLQYhN`). Cutoff da materialização
+`1790726700000` ms. Consultas: `part` com `data LIKE '%"compress"%'`
+e `json_extract(p.data,'$.tool') = 'compress'`, pós-cutoff; contexto
+aproximado por usage da API da mensagem que chama `compress` e da
+próxima mensagem `assistant` (input + cache.read + cache.write).
+
+5 chamadas `compress` pós-cutoff, todas `status = completed`
+(2026-09-30, horários UTC):
+
+| # | Hora | Gap | Msgs comprimidas | Contexto antes | Contexto depois |
+|---|------|-----|------------------|----------------|-----------------|
+| 1 | 20:07:10 | - | 34 | 108.774 | 111.235 |
+| 2 | 20:09:07 | 117 s | 3 | 111.235 | 127.012 |
+| 3 | 20:14:04 | 297 s | 4 | 127.012 | 116.856 |
+| 4 | 20:14:58 | 54 s | 7 | 116.856 | 115.025 |
+| 5 | 20:15:24 | 26 s | 9 | 115.025 | - |
+
+- Janela total: 8 min 14 s; gaps de 26 s e 54 s caracterizam eventos a
+  segundos de distância (cascata no mesmo round).
+- Contexto antes de cada chamada: sempre acima do max da época (100k):
+  108.774 / 111.235 / 127.012 / 116.856 / 115.025.
+- Variação entre chamadas consecutivas (efeito durável): +2,3%,
+  +14,2%, -8,0%, -1,6%. Nenhuma volta à banda (nada próximo do min
+  50k); o pico continuou subindo após compressões (127k no evento 3).
+- Ressalva de medição: usage da API não isola o efeito da compressão
+  (a chamada seguinte inclui novos turnos e resultados de tool); os
+  números medem a tendência, não o delta exato do sumário.
+
+### Itens de vigilância
+
+1. Se cascata no mesmo round persistir sob 175k/50k, candidatar
+   `minContextLimit` 75-90k no fechamento do C4 (decisão humana).
+2. As métricas do QA-ACC-1 passam a valer sob 175k/50k (baseline de
+   banda alterada; comparar contra 175k/50k, não contra 100k/50k).
+
+### Evidências (eng-software) — CALIBRAÇÃO
+
+- [x] Testes novos: 0 (ajuste de valor em assert existente; spec de
+      conteúdo atualizada por decisão humana)
+- [x] Testes totais: 942 passed, 31 deselected, 0 failed
+      (`.venv/bin/pytest -m all`, WSL, 2026-09-30; 1 warning
+      preexistente de flutuação de versão do plugin opencode-quota)
+- [x] Análise estática: `ruff check .` — All checks passed
+- [x] Regressão incremental: suíte completa executada após o edit
+- [x] Gate de refatoração: sem impacto no plano (ajuste de constante;
+      decisão e motivo registrados nesta seção)
+- [x] Symlink user-space reflete 175000 imediatamente (verificado)
+- [x] Commits: config+teste (atômico) e plano, sem push
