@@ -21,6 +21,8 @@
   próprias.
 - Sigla consagrada da área técnica (TDD, API, CI) pode aparecer sem
   expansão.
+- Termo técnico em inglês de uso consagrado (config, docs, repo e
+  similares) é jargão consagrado: não é abreviação a expandir.
 - Sigla interna do projeto ou do plano, e termo de domínio afastado,
   exigem nome por extenso no primeiro uso, em linguagem simples.
 

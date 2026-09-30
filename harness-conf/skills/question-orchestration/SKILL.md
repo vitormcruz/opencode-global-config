@@ -150,6 +150,10 @@ pressuposto.
   sem resposta, ou uma contestação estiver em resolução, não execute
   ação dependente (editar, delegar, commitar, avançar de fase). Resolva
   a dúvida primeiro.
+- Fechamento com pendência: o plano pode ser concluído com pendência
+  condicionante desde que a tarefa dependente fique travada como
+  bloqueadora e a decisão pendente seja explícita; a aprovação do plano
+  não aprova a pendência.
 
 ## Fechamento do plano
 
