@@ -66,15 +66,43 @@ ao humano.
 - Pergunta elaborada, múltipla ou volumosa → serialize no próprio protocolo,
   apresentando uma pergunta por vez.
 
+## Plano abstraído
+
+- O humano aprova o plano, não o arquivo: aprova o plano que lhe foi
+  apresentado na conversa, não o documento físico que o agente edita.
+  Cabe ao agente abstrair o plano físico: traduzir o documento em
+  conteúdo significativo, apresentado por partes, para aprovação e
+  discussão. O arquivo fica como artefato interno, commitado e
+  consultável para auditoria.
+
+## O que perguntar
+
+- Pergunte só o que tem efeito no resultado para o humano: decisão de
+  escopo, comportamento ou risco. Detalhe de escrita do plano ou do
+  artefato é do agente: resolva dentro do escopo aprovado e registre,
+  sem perguntar.
+- Antes de perguntar ou pedir confirmação, classifique a questão: é
+  detalhe de implementação ou decisão de resultado? Detalhe de
+  implementação não se discute com o humano: decida dentro do escopo
+  aprovado, registre no artefato e siga. Só traz ao humano o que muda
+  premissa, escopo, comportamento ou risco, ou algo novo não abordado
+  no planejamento.
+
 ## Perguntas em blocos adaptativos
 
-Conduza a conversa por perguntas em blocos adaptativos, com no máximo 4
-perguntas por rodada, inclusive durante a triagem de contexto inicial.
+Uma pergunta por rodada é o padrão, inclusive durante a triagem de
+contexto inicial.
 
-- Perguntas complexas, dependentes entre si ou com muitos tópicos distintos
-  devem ser apresentadas uma pergunta por vez.
-- Perguntas provavelmente simples podem ser numeradas e enviadas juntas.
-- Para cada pergunta, ofereça recomendação com justificativa.
+- Agrupe só quando as duas condições valem: cada pergunta é entendível
+  sem as outras, e nenhuma exige contexto novo nem lembrança de turnos
+  anteriores. Mesmo assim, no máximo 4 perguntas por rodada.
+- Perguntas dependentes entre si: uma pergunta por vez, na ordem da
+  dependência.
+- Pergunta que exige contexto novo: apresente sozinha, com o contexto
+  reapresentado.
+- Ofereça recomendação com justificativa quando houver contexto
+  suficiente para comparar consequências; em pergunta de descoberta,
+  peça o contexto sem antecipar uma escolha.
 
 Pense explicitamente em como apresentar as perguntas para que a discussão
 **não seja cansativa**: nem por muitas rodadas de micro-perguntas simples,
@@ -91,6 +119,17 @@ as opções apresentadas. Quando a UI da tool aceitar resposta custom, o
 escape ainda deve estar visível no enunciado ou nas opções — nunca
 pressuposto.
 
+## Uso da tool de pergunta
+
+- Pergunte em texto livre como padrão; a resposta do humano vem como
+  veio.
+- A tool é exceção para casos muito simples: decisão clara e
+  alternativas enumeráveis e determinísticas (poucas, completas,
+  mutuamente exclusivas).
+- Questão nova ou complexa: texto, nunca tool.
+- Cada alternativa descreve a consequência real da escolha; nunca opção
+  de enchimento.
+
 ## Confirmação e continuidade de decisões
 
 - Não repita decisão já registrada no artefato de contexto aplicável.
@@ -102,3 +141,21 @@ pressuposto.
   aprova o registro.
 - NUNCA pule um ramo independente por parecer óbvio. Cada ramo da árvore de
   decisões deve receber sua própria pergunta e aprovação.
+- Contestação de premissa ou de parte do que foi explicado: assuma que o
+  humano não leu o restante da mensagem original. Corrija o ponto
+  contestado, verifique o que dependia da premissa contestada e
+  reapresente o conteúdo dependente, ajustado se necessário. Não presuma
+  que o restante foi lido ou aceito.
+- Dúvida em aberto trava ação: enquanto uma pergunta ao humano estiver
+  sem resposta, ou uma contestação estiver em resolução, não execute
+  ação dependente (editar, delegar, commitar, avançar de fase). Resolva
+  a dúvida primeiro.
+
+## Fechamento do plano
+
+- Ao fechar o plano, apresente uma conferência final resumida: escopo
+  coberto (tópicos curtos), o que ficou de fora (só com autorização
+  registrada) e os riscos que poderiam mudar a escolha. Peça a aprovação
+  em seguida. Aprofunde um tópico somente se o humano pedir. Nada é
+  aprovado sem ter sido apresentado antes; o resumo não substitui a
+  apresentação.
