@@ -1097,7 +1097,29 @@ fechamento.
     `docs/workflow-agentes-dev.md`
   - **Estimated scope:** M
 
-- [ ] **Task 3: Revisão independente da aplicação.**
+- [x] **Task 3: Revisão independente da aplicação.** CONCLUÍDA:
+  instância nova do revisor (opencode/glm-5.3) auditou os commits
+  `c4e90cd`, `0e07247`, `34d6b83` e `f9c61d6` contra as regras vigentes
+  (originais + cinco rodadas, precedência da posterior). Veredito:
+  **APROVADO COM RESSALVAS**. Seis eixos OK (fidelidade, revogação,
+  compatibilização, matriz do insumo, evidências, não-regressão).
+  4 achados, nenhum bloqueante:
+  1. (média) `smart-planner.md` mantém exemplo residual com
+     identificador interno do plano ("adicionei D2"), em conflito com a
+     proibição total do item 2; o revisor classifica como correção
+     mecânica de decisão já aprovada (compatibilização de trechos
+     conflitantes, rodada 1).
+  2. (baixa) description da skill `question-orchestration` resume
+     "blocos adaptativos (até 4 perguntas por rodada)" sem capturar o
+     padrão novo "uma pergunta por rodada"; opcional.
+  3. (baixa) `devflow.md` usa critério "decisão não-trivial/trivial" no
+     contrato com agentes spawnados, divergente do critério vigente da
+     skill (sobe ao humano o que muda premissa, escopo, comportamento ou
+     risco); zona cinzenta, opcional.
+  4. (baixa) bullet de recomendação na skill fundiu texto novo com
+     antigo; semântica preservada, localização diverge do aprovado;
+     opcional.
+  Decisões do humano sobre os achados: pendentes (mediação em curso).
   - **Description:** instância independente do revisor confere a
     aplicação: fidelidade às regras vigentes (regras originais e as
     cinco rodadas de ajustes, com precedência da posterior),
@@ -1105,9 +1127,9 @@ fechamento.
     conferências. Relatório e veredito registrados no arquivo deste
     plano.
   - **Acceptance criteria:**
-    - [ ] Fidelidade: aplicado = regras vigentes (precedência da
+    - [x] Fidelidade: aplicado = regras vigentes (precedência da
           decisão posterior; texto revogado não aplicado).
-    - [ ] Evidências de conferência completas.
+    - [x] Evidências de conferência completas.
   - **Verification:** relatório com aprovação ou achados.
   - **Dependencies:** Task 1, Task 2
   - **Files likely touched:** nenhum (relatório no plano)
