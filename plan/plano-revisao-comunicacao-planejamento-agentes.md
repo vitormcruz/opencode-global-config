@@ -135,18 +135,30 @@ seção Comunicação, seção Concisão (acréscimo operacional):
   dependentes? Separe e apresente uma por turno. Exceção: até quatro
   perguntas autocontidas e independentes podem ser agrupadas em uma
   mensagem (regra de perguntas múltiplas).
+- Sem limite fixo de linhas: a resposta inclui o contexto e a
+  consequência necessários à decisão em andamento.
+- Explicação longa vira blocos progressivos: apresente um bloco por
+  vez. O retorno do humano orienta: seguindo o fio (responde, concorda,
+  continua), bloco entendido, avance para o próximo; dúvida ou
+  reclamação num bloco, resolva aquele bloco antes de avançar. Blocos
+  já entendidos não são repetidos.
 - Antes de enviar, confira: a resposta tem uma única ação ou decisão?
   Se não, corte o excedente e guarde para o turno seguinte.
 - Reclamação de confusão: reapresente o ponto em menos linhas do que a
   mensagem original. Nunca reescreva tudo nem acrescente detalhe.
-- Cada resposta se sustenta sozinha: antes da novidade, reapresente em
-  uma linha o ponto da conversa a que ela se refere.
+- Retomada do ponto anterior só ao mudar de assunto, após intervalo
+  longo, ou ao sinal de confusão; não em toda mensagem.
+- Responda integralmente ao que foi perguntado.
 
 Verificação: conversa roteirizada; nenhuma resposta concentra mais de
 uma decisão dependente por turno; agrupamento de até quatro perguntas
-autocontidas e independentes não é violação; resposta a reclamação de
-confusão menor que a original; entrega solicitada vem completa e não
-conta como violação do volume. Caso futuro da suíte de comunicação.
+autocontidas e independentes não é violação; explicação longa aparece
+em blocos apresentados um por vez; bloco com dúvida ou reclamação é
+resolvido antes de avançar; blocos entendidos não são repetidos;
+retomada apenas em mudança de assunto, intervalo ou confusão; resposta
+a reclamação de confusão menor que a original; entrega solicitada vem
+completa e não conta como violação do volume. Caso futuro da suíte de
+comunicação.
 
 **Item 4 — Perguntas múltiplas (aprovado).** Destinos: skill
 `question-orchestration` (trecho "Perguntas em blocos adaptativos",
@@ -165,8 +177,9 @@ Skill `question-orchestration`:
 `AGENTS.base.md` (Concisão):
 
 - Menor é melhor, desde que não gere abreviação nem confusão.
-- Texto acima de ~5 linhas ou 2 parágrafos: divida em partes ou
-  converta em bullets antes de enviar.
+- Sem limite fixo de linhas: inclua o contexto e a consequência
+  necessários à decisão em andamento; explicação longa vira blocos
+  progressivos (regra do item 3) ou bullets.
 
 Verificação: conversa roteirizada com várias decisões pendentes; a
 transcrição mostra uma decisão dependente por rodada; até quatro
@@ -812,6 +825,20 @@ planejamento sem nenhuma situação de decisão terminaria "concluído" sem
 exercitar o protocolo. Ajuste na Task 5: registrar quais situações do
 protocolo ocorreram; sem situação de decisão, o teste é inconclusivo e
 repetido com outro tema; a etapa não registra aprovação sem observação.
+
+**Decisão nova (rodada 5) — Blocos progressivos de contexto
+(aprovada).** Ao discutir a crítica da parte 2 ao limite fixo de
+tamanho (~5 linhas, retomada em toda mensagem), o humano propôs
+apresentar o contexto em blocos, um por vez: o retorno do humano
+orienta (seguindo o fio, bloco entendido, avance; dúvida ou reclamação
+num bloco, resolva-o antes de avançar; blocos entendidos não são
+repetidos). Ajustes: sem limite fixo de linhas (a resposta inclui o
+contexto e a consequência necessários à decisão em andamento); a
+retomada do ponto anterior acontece só ao mudar de assunto, após
+intervalo longo, ou ao sinal de confusão; responder integralmente ao
+que foi perguntado. Substitui o "divida acima de ~5 linhas ou 2
+parágrafos" e a reapresentação compulsória de toda mensagem. Aplicado
+nos itens 3 e 4.
 
 ## Task List
 
