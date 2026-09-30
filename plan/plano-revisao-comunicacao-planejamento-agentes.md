@@ -727,84 +727,129 @@ conhecida por construção; a única diferença entre elas é a regra
 testada. Aplicado no protocolo de conferência (achado 7 da primeira
 rodada) e na substituição do achado 4 da terceira rodada.
 
+**Decisão nova (rodada 4) — Reestruturação do produto do plano
+(aprovada).** O humano redirecionou o final do plano: as regras
+aprovadas são aplicadas diretamente nos arquivos de configuração
+(Fase 1, executor orquestrado daqui com revisão independente); o insumo
+ao `devflow` encolhe para a adequação das mudanças ao padrão do
+projeto (sincronização de agente/workflow/testes, suíte completa,
+formato, Fase 2); e nova Fase 3 de teste prático: um planejamento real
+conduzido pelo humano com o agente planejador, tema escolhido na hora,
+para exercitar o protocolo de comunicação no uso real. As conferências
+rego a regra (ambiente isolado) e o teste prático se complementam: os
+dois permanecem. Task List reescrita.
+
 ## Task List
 
-### Fase 1: Insumo de revisão e ajuste
+### Fase 1: Aplicação direta das regras
 
-- [ ] **Task 1: Consolidar o insumo de revisão e ajuste.**
-  - **Description:** criar
-    `plan/insumo-revisao-comunicacao-planejamento-agentes.md`,
-    consolidando as regras e instruções das quatro seções de decisões
-    deste plano ("Regras aprovadas", "Ajustes da revisão independente",
-    "Ajustes da segunda rodada de revisão" e "Ajustes da terceira rodada
-    de revisão"), prevalecendo a decisão posterior em caso de conflito,
-    com texto completo, destino
-    (arquivo e seção), protocolo de conferência e instruções de execução
-    ao `devflow` (ordem de aplicação, uma regra por vez, conferência
-    antes/depois, compatibilização na aplicação, sincronização de
-    agente/workflow/testes, checkpoint do plano delegado a subagente
-    comitador, evidência
-    da conferência). Estrutura do insumo:
-    contexto de origem; regras de comunicação (todos os agentes); regras
-    de planejamento (`smart-planner`, `devflow`, `rev`); protocolo de
-    conferência com evidência; ordem de aplicação; compatibilização na aplicação
-    (regra nova vale sobre trecho antigo; conferir arquivo de destino por
-    conflitos; voltar ao humano só se o ajuste mudar comportamento não
-    coberto); sincronização de agente, workflow e testes; casos de teste
-    (referência à seção nova do insumo de testes).
+- [ ] **Task 1: Aplicar as regras de comunicação.**
+  - **Description:** aplicar nos arquivos de configuração as regras de
+    comunicação aprovadas nas quatro seções de decisões deste plano
+    (fonte: este plano; em conflito, prevalece a decisão posterior).
+    Destinos: `AGENTS.base.md` (itens 1, 2, 3, 8; acréscimos de Concisão
+    do item 4; distinção comunicação/entrega com escopo de volume; resumo
+    fiel; recarga geral de skills após compactação) e skill
+    `question-orchestration` (itens 4, 5, 6, 7, 9, 11). Ao gravar cada
+    regra, compatibilizar o arquivo de destino (regra nova vale sobre o
+    trecho antigo; voltar ao humano só se o ajuste mudar comportamento
+    não coberto). Cada regra ou grupo pequeno é validado pela
+    conferência antes/depois em ambiente isolado, com evidência
+    (transcrições, commit do repo do ambiente, resultado por critério).
   - **Acceptance criteria:**
-    - [ ] Todas as regras e instruções das quatro seções de decisões estão
-          no insumo, com texto idêntico ao aprovado e destino por
-          arquivo e seção.
-    - [ ] Nenhuma regra além das aprovadas; nada inventado.
-    - [ ] Protocolo de conferência (com evidência), ordem de aplicação,
-          sincronização e checkpoint do plano (delegado a subagente
-          comitador) incluídos.
-    - [ ] Autocontido: sem citar identificadores, números de item ou
-          vocabulário interno deste plano.
-  - **Verification:**
-    - [ ] Conferência item a item contra as quatro seções de decisões.
-    - [ ] Busca por referências internas ao plano (números de item,
-          "ramo", "task") no texto do insumo.
+    - [ ] Regras aplicadas com texto idêntico ao aprovado, no destino
+          correto.
+    - [ ] Nenhum trecho dos arquivos de destino contradiz a regra
+          aplicada.
+    - [ ] Cada regra ou grupo com evidência de conferência completa.
+  - **Verification:** revisão independente (Task 3) contra as quatro
+    seções de decisões; evidências das conferências.
   - **Dependencies:** None
-  - **Files likely touched:**
-    `plan/insumo-revisao-comunicacao-planejamento-agentes.md` (novo)
-  - **Estimated scope:** S
+  - **Files likely touched:** `harness-conf/AGENTS.base.md`,
+    `harness-conf/skills/question-orchestration/SKILL.md`
+  - **Estimated scope:** M
 
-- [ ] **Task 2: Revisão independente do insumo.**
-  - **Description:** instância independente do revisor verifica o insumo
-    contra este plano.
+- [ ] **Task 2: Aplicar as regras de planejamento.**
+  - **Description:** aplicar as regras de planejamento aprovadas nos
+    agentes e workflows: `smart-planner` e `rev` (cobertura total;
+    apresentação abstraída), `devflow` (remoção da duplicação do
+    protocolo de perguntas, sem exigência universal de opções;
+    ciclo de vida do arquivo do plano; plano abstraído na apresentação;
+    sem permissão de terminal e sem commit, revogado na rodada 4),
+    skills `planning-and-task-breakdown` e `spec-driven-development`
+    (sentido de "humano aprovou o plano") e
+    `docs/workflow-agentes-dev.md` (sentido corrigido; ciclo de vida do
+    plano). Mesma compatibilização e conferência antes/depois (ambiente
+    isolado) para as regras de comportamento.
   - **Acceptance criteria:**
-    - [ ] Fidelidade: conjunto completo — regras e instruções das quatro
-          seções de decisões, idênticas às aprovadas, com a decisão
-          posterior prevalecendo em conflito.
-    - [ ] Cobertura: os 11 problemas relatados têm regra.
-    - [ ] Autocontenção confirmada.
-  - **Verification:** relatório de revisão com aprovação ou achados.
-  - **Dependencies:** Task 1
-  - **Files likely touched:** nenhum (relatório)
+    - [ ] Regras aplicadas com texto idêntico ao aprovado, nos destinos
+          corretos.
+    - [ ] Nenhum trecho contradiz regra aplicada; `devflow` sem
+          permissão de terminal.
+    - [ ] Evidências de conferência para as regras de comportamento.
+  - **Verification:** revisão independente (Task 3); evidências.
+  - **Dependencies:** None (paralela à Task 1)
+  - **Files likely touched:** `harness-conf/agents/smart-planner.md`,
+    `harness-conf/agents/devflow.md`, `harness-conf/agents/rev.md`,
+    `harness-conf/skills/planning-and-task-breakdown/SKILL.md`,
+    `harness-conf/skills/spec-driven-development/SKILL.md`,
+    `docs/workflow-agentes-dev.md`
+  - **Estimated scope:** M
+
+- [ ] **Task 3: Revisão independente da aplicação.**
+  - **Description:** instância independente do revisor confere a
+    aplicação: fidelidade ao aprovado (as quatro seções de decisões),
+    compatibilização dos arquivos de destino e evidências das
+    conferências. Relatório e veredito registrados no arquivo deste
+    plano.
+  - **Acceptance criteria:**
+    - [ ] Fidelidade: aplicado = aprovado.
+    - [ ] Evidências de conferência completas.
+  - **Verification:** relatório com aprovação ou achados.
+  - **Dependencies:** Task 1, Task 2
+  - **Files likely touched:** nenhum (relatório no plano)
   - **Estimated scope:** S
 
-### Checkpoint: Insumo pronto
-- [ ] Insumo revisado e aprovado
-- [ ] Apresentação das partes ao humano para aprovação
+### Checkpoint: Aplicação revisada
+- [ ] Aplicação conferida pelo revisor e aprovada pelo humano
 
-### Fase 2: Casos de teste
+### Fase 2: Adequação ao padrão do projeto
 
-- [ ] **Task 3: Seção de casos no insumo de testes.**
+- [ ] **Task 4: Insumo de adequação ao `devflow`.**
+  - **Description:** registrar insumo curto ao `devflow` com a
+    adequação das mudanças ao padrão do projeto: sincronização dos três
+    lugares (definição do agente, workflow em docs/, testes em
+    tests/agents/), suíte completa do ambiente corrente sem deixar
+    teste de fora (WSL/Linux: `.venv/bin/pytest -m all`; Windows:
+    `.\.venv\Scripts\pytest.exe -m all`), ajustes de formato e
+    consistência. Sem especificação de aplicação de regras (já
+    aplicadas na Fase 1). O checkpoint dos artefatos do plano é
+    delegado a subagente comitador.
+  - **Acceptance criteria:**
+    - [ ] Suíte completa do ambiente corrente passa.
+    - [ ] Nenhuma referência órfã (agente, workflow, permissão).
+    - [ ] `devflow` executa a adequação sem permissão de terminal além
+          da delegação existente.
+  - **Verification:** suíte verde; relatório do `devflow`.
+  - **Dependencies:** Task 3
+  - **Files likely touched:** `plan/insumo-adequacao-padrao-comunicacao.md`
+    (novo), `tests/agents/`, `docs/workflow-agentes-dev.md`
+  - **Estimated scope:** M
+
+- [ ] **Task 5: Seção de casos no insumo de testes.**
   - **Description:** acrescentar a
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
     multi-turn), sem renumerar seções existentes. Cada regra de
-    comportamento vira uma linha da matriz: a regra,     o roteiro do caso e
+    comportamento vira uma linha da matriz: a regra, o roteiro do caso e
     o agente. Instrução de execução (ordem de aplicação,
     compatibilização, conferência, evidência, sincronização de testes,
-    checkpoint do plano delegado a subagente comitador) não vira caso. Regra global de
-    comunicação e protocolo de perguntas: caso com um agente. Regra
-    específica de agente: caso com o agente afetado (`smart-planner`,
-    `devflow`, `rev`). Reutiliza as técnicas já decididas no
-    insumo (execução real, asserção de trajetória, juiz com rubrica,
-    consenso).
+    checkpoint do plano delegado a subagente comitador) não vira caso.
+    Regra global de comunicação e protocolo de perguntas: caso com um
+    agente. Regra específica de agente: caso com o agente afetado
+    (`smart-planner`, `devflow`, `rev`). Reutiliza as técnicas já
+    decididas no insumo (execução real, asserção de trajetória, juiz com
+    rubrica, consenso).
   - **Acceptance criteria:**
     - [ ] Uma regra de comportamento, uma linha na matriz (regra,
           roteiro, agente); nenhuma instrução de execução vira caso.
@@ -820,27 +865,41 @@ rodada) e na substituição do achado 4 da terceira rodada.
   - **Files likely touched:** `plan/insumo-testes-comportamento-agentes.md`
   - **Estimated scope:** S
 
-- [ ] **Task 4: Revisão independente final.**
-  - **Description:** instância independente nova do revisor verifica o
-    conjunto (insumo + seção de casos).
+### Checkpoint: Padrão verificado
+- [ ] Suíte completa verde; casos de teste registrados
+
+### Fase 3: Teste prático do protocolo
+
+- [ ] **Task 6: Planejamento real de teste.**
+  - **Description:** após a aplicação e a adequação, o humano conduz um
+    planejamento real com o agente planejador (`smart-planner`), tema
+    escolhido pelo humano na hora, para exercitar o protocolo de
+    comunicação no uso real (complemento das conferências regra a regra,
+    não substituição). Ao fim, registro curto: o que fluiu, o que
+    confundiu, ajustes de regra necessários (que voltam ao ciclo de
+    ajuste) e percepção do humano.
   - **Acceptance criteria:**
-    - [ ] Achados da Task 2 resolvidos (se houve).
-    - [ ] Seção de casos fiel às regras e às técnicas do insumo.
-  - **Verification:** relatório de revisão com aprovação ou achados.
-  - **Dependencies:** Task 3
-  - **Files likely touched:** nenhum (relatório)
+    - [ ] Planejamento conduzido com o protocolo novo.
+    - [ ] Percepção do humano registrada (o que fluiu, o que confundiu).
+    - [ ] Desvios encontrados registrados como ajuste de regra ou
+          observação.
+  - **Verification:** transcrição e registro do resultado no plano.
+  - **Dependencies:** Task 4, Task 5
+  - **Files likely touched:** nenhum (registro no plano)
   - **Estimated scope:** S
 
-### Checkpoint: Conjunto completo
-- [ ] Insumo e seção de casos revisados
-- [ ] Apresentação final ao humano
+### Checkpoint: Protocolo validado no uso real
+- [ ] Humano valida o protocolo no uso real
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Regra redigida sem efeito no comportamento | Alta | Protocolo de conferência antes/depois com mesmo roteiro; não mudou, ajustar redação |
-| Executor inventar regra não aprovada | Alta | Revisor confere fidelidade item a item; critério "nenhuma regra além das aprovadas" |
+| Regra redigida sem efeito no comportamento | Alta | Protocolo de conferência antes/depois com mesmo roteiro em ambiente isolado; não mudou, ajustar redação |
+| Executor aplicar regra divergente do aprovado | Alta | Revisão independente da aplicação (fidelidade às quatro seções de decisões); conferência item a item |
+| Regressão em testes de agentes/workflows | Alta | Revisar os asserts existentes ao sincronizar os três lugares; rodar a suíte completa após a aplicação |
+| Ambiente isolado não reproduz a instalação oficial | Média | Validar o mecanismo antes do primeiro uso; conferir que o agente lê as regras do ambiente |
+| Teste prático sem tema definido | Baixa | Tema escolhido pelo humano na hora; qualquer planejamento serve ao propósito |
 | Sessão paralela na worktree misturando commits | Média | Commits só com o arquivo próprio; conferir stat do commit |
 | Insumo de testes com decisões fechadas sendo alterado | Média | Acréscimo de seção sem renumerar; diff limitado ao acréscimo |
 
