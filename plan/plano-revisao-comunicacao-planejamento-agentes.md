@@ -91,13 +91,16 @@ Comunicação, subseção "Sem abreviações":
   próprias.
 - Sigla consagrada da área técnica (TDD, API, CI) pode aparecer sem
   expansão.
+- Termo técnico em inglês de uso consagrado (config, docs, repo e
+  similares) é jargão consagrado: não é abreviação a expandir.
 - Sigla interna do projeto ou do plano, e termo de domínio afastado,
   exigem nome por extenso no primeiro uso, em linguagem simples.
 
 Verificação: conversa roteirizada em que o agente explica uma decisão;
 a transcrição não pode ter abreviação de palavra, sigla própria ou sigla
-interna sem definição; sigla técnica consagrada é aceita. Caso futuro da
-suíte de comunicação.
+interna sem definição; sigla técnica consagrada e jargão consagrado em
+inglês (config, docs, repo) são aceitos. Caso futuro da suíte de
+comunicação.
 
 **Item 2 — Referências ao plano (aprovado).** Destino: `AGENTS.base.md`,
 seção Comunicação, subseção "Conversa sobre plano" (reformulação):
@@ -986,6 +989,13 @@ teste prático (Fase 2). Sem efeito detectável: regra de abreviações
 relatorio-etapa2b.md, commits do ambiente 3c08c4e..aba1d26). Achados
 pendentes de decisão humana: item 1 × jargão consagrado; fala
 intermediária em inglês; zona cinzenta fechamento × dúvida travada.
+
+**Decisão do humano (execução, achado 1): item 1 × jargão consagrado.**
+Aceito o empate: "config", "docs", "repo" e similares são jargão
+consagrado, não abreviação a expandir. Item 1 do plano atualizado com o
+bullet do jargão consagrado em inglês e verificação ajustada. Ajuste
+pendente de aplicação em `AGENTS.base.md` (fila do executor, junto com
+os demais ajustes pós-decisão).
 
 ### Fase 1: Aplicação direta das regras
 
