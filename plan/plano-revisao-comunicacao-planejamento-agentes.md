@@ -997,6 +997,13 @@ bullet do jargão consagrado em inglês e verificação ajustada. Ajuste
 pendente de aplicação em `AGENTS.base.md` (fila do executor, junto com
 os demais ajustes pós-decisão).
 
+**Decisão do humano (execução, achado 2): fala intermediária em inglês
+nas corridas de conferência.** Ignorar, atribuindo ao modo de execução
+headless dos testes (`opencode run --pure`), não às regras nem ao modelo
+de interação com o humano. Sem registro no insumo do devflow e sem ação
+neste escopo; se reaparecer em conversa interativa real, tratar como
+problema novo.
+
 ### Fase 1: Aplicação direta das regras
 
 - [ ] **Task 1: Aplicar as regras de comunicação.**
