@@ -961,6 +961,19 @@ mesma resposta e consolidam verificações num único comando sempre que
 possível, evitando requisições repetidas e gasto desnecessário de
 tokens.
 
+**Piloto da conferência antes/depois (Task 1, etapa 2a) — mecanismo
+validado.** Ambiente isolado com HOME/XDG próprios em
+`/tmp/opencode/conf-validacao/`; corridas com `opencode run --pure
+--format json`, mesmo modelo nas duas (`zai-coding-plan/glm-5.3-flash`),
+roteiro idêntico; estado ANTES do commit 31dddfe, regra aplicada via
+hunk isolado de c4e90cd; `AGENTS.md` do ambiente regenerado após edição.
+Regra piloto (item 2, identificador interno): ANTES violou, DEPOIS
+traduziu por extenso. Instalação oficial intacta (checksum). Custo:
+1-2 min por regra. Decisão do planejador: o plano do repo permanece
+acessível no checkout do ambiente (cenário realista; condição comum às
+duas corridas). Transcrições em `transcripts/antes.md` e `depois.md` do
+ambiente.
+
 ### Fase 1: Aplicação direta das regras
 
 - [ ] **Task 1: Aplicar as regras de comunicação.**
