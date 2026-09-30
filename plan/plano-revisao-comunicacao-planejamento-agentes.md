@@ -116,15 +116,17 @@ seção Comunicação, subseção "Conversa sobre plano" (reformulação):
 - Antes de enviar a apresentação de um ponto ao humano, aplique o teste
   da reapresentação: escreva a versão que você escreveria se ele
   tivesse acabado de responder "não entendi", e envie essa. Nela, o
-  mecanismo concreto vem antes da referência ao plano; um exemplo vem
-  antes do geral; jargão interno não aparece: todo conceito é
-  apresentado por extenso, na conversa.
+  mecanismo concreto vem antes da referência ao plano; jargão interno
+  não aparece: todo conceito é apresentado por extenso, na conversa. O
+  exemplo é ferramenta condicional: um exemplo curto quando o ponto for
+  abstrato ou complexo e o exemplo ajudar o humano a decidir.
 
 Verificação: conversa roteirizada com várias decisões em jogo; a
 transcrição não contém número, código ou identificador interno do
 plano: todo conceito chega traduzido e conceito antigo é reapresentado
 ao ser retomado; na apresentação de ponto técnico complexo, a primeira
-versão já traz mecanismo concreto e exemplo, sem jargão interno, e o
+versão já traz mecanismo concreto, sem jargão interno, e, quando o
+ponto for abstrato ou complexo, exemplo curto que ajuda a decidir; o
 humano não precisa pedir reapresentação. Caso futuro da suíte de
 comunicação.
 
@@ -917,6 +919,13 @@ para a recarga. Novo bullet no item 8: sem artefato persistente,
 reconstrua as skills pelas instruções do próprio agente e pela tarefa;
 decisão aberta que não puder ser reconstruída, consulte o humano antes
 de ação dependente. Verificação estendida com roteiro adicional.
+
+**Reformulação 2 (rodada 6, parte 2) — Exemplo no teste da
+reapresentação (aprovado).** "Exemplo antes do geral" virou obrigação
+de exemplo sempre, texto extra em ponto simples. Ajuste no item 2: o
+exemplo é ferramenta condicional; exemplo curto quando o ponto for
+abstrato ou complexo e o exemplo ajudar o humano a decidir. Verificação
+atualizada.
 
 ## Task List
 
