@@ -1051,7 +1051,23 @@ fechamento.
     `harness-conf/skills/question-orchestration/SKILL.md`
   - **Estimated scope:** M
 
-- [ ] **Task 2: Aplicar as regras de planejamento.**
+- [x] **Task 2: Aplicar as regras de planejamento.** CONCLUÍDA:
+  aplicação no commit `34d6b83` (6 arquivos, +88/-36); conferências
+  antes/depois em ambiente isolado (montagem ANTES `3b55c0a` = comunicação
+  `0e07247` + planejamento `31dddfe`; DEPOIS `e889854` = planejamento
+  `34d6b83`). Resultados: cobertura total do planejador com contraste
+  forte (viola → obedece); plano abstraído do orquestrador com contraste
+  parcial; cobertura do revisor sem contraste (já apontava omissão);
+  pergunta em texto livre sem contraste; apresentação abstraída do
+  planejador INCONCLUSIVA no mecanismo (roteiro não provocou o momento
+  da apresentação após 2 tentativas) — validação comportamental fica
+  para o teste prático (Fase 2), cenário real do comportamento. Efeito
+  colateral observado apenas no ambiente de conferência: `bash: deny`
+  no frontmatter do orquestrador provoca erro 403 determinístico do
+  provider no modo `opencode run` (contorno `bash: allow` local);
+  registrado como observação para o insumo do `devflow` (Fase 3), sem
+  ação neste escopo. Evidências em
+  `/tmp/opencode/conf-validacao/relatorio-task2-conferencias.md`.
   - **Description:** aplicar as regras de planejamento aprovadas nos
     agentes e workflows: `smart-planner` (cobertura total; apresentação
     abstraída), `rev` (cobertura total), `devflow` (remoção da
@@ -1065,11 +1081,12 @@ fechamento.
     plano). Mesma compatibilização e conferência antes/depois (ambiente
     isolado) para as regras de comportamento.
   - **Acceptance criteria:**
-    - [ ] Regras aplicadas com texto fiel às regras vigentes
+    - [x] Regras aplicadas com texto fiel às regras vigentes
           (precedência da decisão posterior), nos destinos corretos.
-    - [ ] Nenhum trecho contradiz regra aplicada; `devflow` sem
-          permissão de terminal.
-    - [ ] Evidências de conferência para as regras de comportamento.
+    - [x] Nenhum trecho contradiz regra aplicada; `devflow` sem
+          permissão de terminal (confirmado: `bash: deny`, sem commit
+          próprio; `eng-software` único committer).
+    - [x] Evidências de conferência para as regras de comportamento.
   - **Verification:** revisão independente (Task 3); evidências.
   - **Dependencies:** Task 1 (comunicação primeiro: as conferências
     desta tarefa dependem da skill de perguntas já corrigida)
