@@ -339,11 +339,17 @@ de decisões"):
   sem resposta, ou uma contestação estiver em resolução, não execute
   ação dependente (editar, delegar, commitar, avançar de fase). Resolva
   a dúvida primeiro.
+- Fechamento com pendência: o plano pode ser concluído com pendência
+  condicionante desde que a tarefa dependente fique travada como
+  bloqueadora e a decisão pendente seja explícita; a aprovação do plano
+  não aprova a pendência.
 
 Verificação: conversa roteirizada com dúvida levantada no meio; a
 transcrição não mostra ação dependente da dúvida pendente entre a
-dúvida e a resolução; ação sem relação com a dúvida não é violação.
-Caso futuro da suíte de comunicação.
+dúvida e a resolução; ação sem relação com a dúvida não é violação; no
+fechamento com pendência, a tarefa dependente aparece travada como
+bloqueadora e a decisão pendente explícita. Caso futuro da suíte de
+comunicação.
 
 **Item 10 — Cobertura total (aprovado).** Destinos: `smart-planner` e
 revisor (`rev`).
@@ -1003,6 +1009,13 @@ headless dos testes (`opencode run --pure`), não às regras nem ao modelo
 de interação com o humano. Sem registro no insumo do devflow e sem ação
 neste escopo; se reaparecer em conversa interativa real, tratar como
 problema novo.
+
+**Decisão do humano (execução, achado 3): fechamento com pendência
+condicionante.** Esclarecido no item 9: o plano pode ser concluído com
+pendência condicionante desde que a tarefa dependente fique travada
+como bloqueadora e a decisão pendente seja explícita; a aprovação do
+plano não aprova a pendência. Verificação do item 9 estendida ao
+fechamento.
 
 ### Fase 1: Aplicação direta das regras
 
