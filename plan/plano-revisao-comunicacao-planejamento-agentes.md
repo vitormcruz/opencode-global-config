@@ -1126,6 +1126,10 @@ fechamento.
     `question-orchestration` (registrar "uma pergunta por rodada como
     padrão" junto do teto de 4 no agrupamento excepcional), na mesma
     rodada do executor do achado 1.
+  - Achado 3: APLICAR alinhamento do critério de escalonamento em
+    `devflow.md` (substituir "decisão trivial/não-trivial" pelo critério
+    objetivo: sobe ao humano o que muda premissa, escopo, comportamento
+    ou risco), na mesma rodada do executor.
   - **Description:** instância independente do revisor confere a
     aplicação: fidelidade às regras vigentes (regras originais e as
     cinco rodadas de ajustes, com precedência da posterior),
