@@ -136,7 +136,8 @@ seção Comunicação, seção Concisão (acréscimo operacional):
 - Uma decisão dependente por resposta. Duas ou mais decisões
   dependentes? Separe e apresente uma por turno. Exceção: até quatro
   perguntas autocontidas e independentes podem ser agrupadas em uma
-  mensagem (regra de perguntas múltiplas).
+  mensagem (regra de perguntas múltiplas); pergunta que exija premissa
+  extensa sai do grupo e vai sozinha.
 - Sem limite fixo de linhas: a resposta inclui o contexto e a
   consequência necessários à decisão em andamento.
 - Explicação longa vira blocos progressivos: apresente um bloco por
@@ -156,7 +157,8 @@ seção Comunicação, seção Concisão (acréscimo operacional):
 
 Verificação: conversa roteirizada; nenhuma resposta concentra mais de
 uma decisão dependente por turno; agrupamento de até quatro perguntas
-autocontidas e independentes não é violação; explicação longa aparece
+autocontidas e independentes não é violação; pergunta de premissa
+extensa não entra em grupo; explicação longa aparece
 em blocos apresentados um por vez; bloco com dúvida ou reclamação é
 resolvido antes de avançar; blocos entendidos não são repetidos;
 retomada apenas em mudança de assunto, intervalo ou confusão; resposta
@@ -939,6 +941,12 @@ regra de perguntas do item 7: recomende uma opção quando houver
 contexto suficiente para comparar consequências; em pergunta de
 descoberta, peça o contexto sem antecipar uma escolha. Verificação
 atualizada.
+
+**Ajuste de alto impacto (rodada 6, parte 2) — Agrupamento e premissa
+extensa (aprovado).** A maior parte da sugestão já estava coberta pela
+regra de agrupamento aprovada na rodada 5. Refinamento aprovado no item
+3: pergunta que exija premissa extensa sai do grupo e vai sozinha,
+mesmo sendo independente. Verificação atualizada.
 
 ## Task List
 
