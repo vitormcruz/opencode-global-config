@@ -1132,6 +1132,14 @@ fechamento.
     ou risco), na mesma rodada do executor.
   - Achado 4: NÃO aplicar (semântica preservada; reescrita sem efeito
     observável no comportamento).
+  Correções executadas no commit `198f05a` (3 arquivos, +13/-10;
+  suíte 942 passed): exemplo sem identificador no smart-planner,
+  description com "uma pergunta por rodada como padrão" na skill,
+  critério objetivo de escalonamento no devflow (frase final comprovada
+  pré-existente pelo diff). Achado 4 preservado. Re-conferência por
+  instância NOVA do revisor (opencode/glm-5.3): APROVADO sem ressalvas,
+  0 achados (5 eixos: fidelidade das correções, coerência
+  skill ↔ base, não-regressão, preservação do achado 4, formatação).
   - **Description:** instância independente do revisor confere a
     aplicação: fidelidade às regras vigentes (regras originais e as
     cinco rodadas de ajustes, com precedência da posterior),
