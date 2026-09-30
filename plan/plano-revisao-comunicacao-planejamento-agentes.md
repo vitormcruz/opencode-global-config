@@ -102,8 +102,11 @@ seção Comunicação, subseção "Conversa sobre plano" (reformulação):
 - Plano e artefatos de estado são do agente; o humano não os lê.
 - Toda pergunta, decisão ou discussão é autocontida: traga a fase atual,
   o trecho relevante e o escopo da questão, em termos simples.
-- Nunca referencie número, código, sigla ou link interno do plano:
-  apresente o conteúdo discutido, contextualizado.
+- Traduza sempre: o humano só conhece os conceitos discutidos com ele.
+  Nunca use número, código, sigla ou identificador interno do plano na
+  conversa; apresente o conceito, contextualizado. Conceito discutido
+  há muito tempo é reapresentado em uma linha antes de novo uso: o
+  humano pode não lembrar.
 - Apresente por partes: uma etapa ou decisão por vez. Resumo de etapas
   é permitido; ao encerrar, um resumo dirigido do todo, também por
   partes.
@@ -111,12 +114,13 @@ seção Comunicação, subseção "Conversa sobre plano" (reformulação):
   da reapresentação: escreva a versão que você escreveria se ele
   tivesse acabado de responder "não entendi", e envie essa. Nela, o
   mecanismo concreto vem antes da referência ao plano; um exemplo vem
-  antes do geral; jargão interno (número de item, task, achado) só com
-  tradução imediata.
+  antes do geral; jargão interno não aparece: todo conceito é
+  apresentado por extenso, na conversa.
 
 Verificação: conversa roteirizada com várias decisões em jogo; a
-transcrição não pode ter número, código ou link do plano sem o conteúdo
-contextualizado; na apresentação de ponto técnico complexo, a primeira
+transcrição não contém número, código ou identificador interno do
+plano: todo conceito chega traduzido e conceito antigo é reapresentado
+ao ser retomado; na apresentação de ponto técnico complexo, a primeira
 versão já traz mecanismo concreto e exemplo, sem jargão interno, e o
 humano não precisa pedir reapresentação. Caso futuro da suíte de
 comunicação.
@@ -738,6 +742,18 @@ conduzido pelo humano com o agente planejador, tema escolhido na hora,
 para exercitar o protocolo de comunicação no uso real. As conferências
 rego a regra (ambiente isolado) e o teste prático se complementam: os
 dois permanecem. Task List reescrita.
+
+### Ajustes da quinta rodada de revisão (revisão dupla, discutidos com o humano)
+
+**Achado 1 (rodada 5, parte 1) — Tradução sempre, identificador nunca
+(aprovado com reforço do humano).** Contradição entre "nunca
+referencie identificador" (item 2 original) e "jargão interno só com
+tradução imediata" (teste da reapresentação). Decisão do humano, mais
+rígida que as duas: sem referência a internalidades do plano em
+nenhum caso; o agente traduz sempre; o humano só conhece os conceitos
+discutidos com ele e, mesmo assim, se passou muito tempo, pode não
+lembrar — conceito antigo é reapresentado em uma linha antes de novo
+uso. Aplicado no item 2 e na verificação.
 
 ## Task List
 
