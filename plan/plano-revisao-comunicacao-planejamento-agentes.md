@@ -1119,7 +1119,9 @@ fechamento.
   4. (baixa) bullet de recomendação na skill fundiu texto novo com
      antigo; semântica preservada, localização diverge do aprovado;
      opcional.
-  Decisões do humano sobre os achados: pendentes (mediação em curso).
+  Decisões do humano sobre os achados:
+  - Achado 1: APLICAR correção via executor (reformular o exemplo de
+    smart-planner.md sem identificador interno do plano).
   - **Description:** instância independente do revisor confere a
     aplicação: fidelidade às regras vigentes (regras originais e as
     cinco rodadas de ajustes, com precedência da posterior),
