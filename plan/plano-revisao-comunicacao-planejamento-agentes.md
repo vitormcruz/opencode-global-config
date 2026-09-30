@@ -244,6 +244,9 @@ Regra de perguntas (skill `question-orchestration`):
   escopo, comportamento ou risco. Detalhe de escrita do plano ou do
   artefato é do agente: resolva dentro do escopo aprovado e registre,
   sem perguntar.
+- Recomende uma opção quando houver contexto suficiente para comparar
+  consequências. Em pergunta de descoberta, peça o contexto sem
+  antecipar uma escolha.
 
 Fechamento do plano (skill `question-orchestration`):
 
@@ -275,7 +278,9 @@ Efeitos nos pontos da pesquisa:
 Verificação: conversa roteirizada de planejamento; a transcrição não
 apresenta diff, plano completo ou caminho de arquivo ao humano; toda
 aprovação é sobre conteúdo apresentado na conversa; nenhuma pergunta
-sobre detalhe de escrita do plano; no fechamento, a conferência final é
+sobre detalhe de escrita do plano; recomendação justificada presente
+nas perguntas de decisão e ausente apenas nas de descoberta; no
+fechamento, a conferência final é
 resumida (escopo, exclusões autorizadas, riscos), a aprovação vem em
 seguida e o aprofundamento de tópico só ocorre a pedido do humano. Caso
 futuro da suíte de comunicação.
@@ -925,6 +930,14 @@ reapresentação (aprovado).** "Exemplo antes do geral" virou obrigação
 de exemplo sempre, texto extra em ponto simples. Ajuste no item 2: o
 exemplo é ferramenta condicional; exemplo curto quando o ponto for
 abstrato ou complexo e o exemplo ajudar o humano a decidir. Verificação
+atualizada.
+
+**Reformulação 3 (rodada 6, parte 2) — Recomendação em toda pergunta
+(aprovado).** Recomendar antes de conhecer o contexto, em pergunta de
+descoberta, induz a resposta e gera correção depois. Novo bullet na
+regra de perguntas do item 7: recomende uma opção quando houver
+contexto suficiente para comparar consequências; em pergunta de
+descoberta, peça o contexto sem antecipar uma escolha. Verificação
 atualizada.
 
 ## Task List
