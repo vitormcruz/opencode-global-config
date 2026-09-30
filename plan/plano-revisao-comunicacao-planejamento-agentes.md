@@ -240,6 +240,15 @@ Regra de perguntas (skill `question-orchestration`):
   artefato é do agente: resolva dentro do escopo aprovado e registre,
   sem perguntar.
 
+Fechamento do plano (skill `question-orchestration`):
+
+- Ao fechar o plano, apresente uma conferência final resumida: escopo
+  coberto (tópicos curtos), o que ficou de fora (só com autorização
+  registrada) e os riscos que poderiam mudar a escolha. Peça a
+  aprovação em seguida. Aprofunde um tópico somente se o humano pedir.
+  Nada é aprovado sem ter sido apresentado antes; o resumo não
+  substitui a apresentação.
+
 Efeitos nos pontos da pesquisa:
 
 - `smart-planner`: substituir "mostre o diff ao humano" e "mostrar o
@@ -261,7 +270,10 @@ Efeitos nos pontos da pesquisa:
 Verificação: conversa roteirizada de planejamento; a transcrição não
 apresenta diff, plano completo ou caminho de arquivo ao humano; toda
 aprovação é sobre conteúdo apresentado na conversa; nenhuma pergunta
-sobre detalhe de escrita do plano. Caso futuro da suíte de comunicação.
+sobre detalhe de escrita do plano; no fechamento, a conferência final é
+resumida (escopo, exclusões autorizadas, riscos), a aprovação vem em
+seguida e o aprofundamento de tópico só ocorre a pedido do humano. Caso
+futuro da suíte de comunicação.
 
 **Item 8 — Esquecer o protocolo e resumo não apresentado (aprovado).**
 Sintomas já cobertos por outros itens: texto demais, pelo item 3
@@ -852,6 +864,15 @@ compactação apagou. Ajuste no item 8: manter registrado no artefato
 persistente (plano) o estado da tarefa (skills em uso, decisões
 abertas); após compactação, reler o registro e recarregar o que a
 tarefa precisa. Verificação estendida aos três roteiros.
+
+**Ajuste de alto impacto (rodada 5, parte 2) — Conferência final
+resumida do plano (aprovado).** Antes da aprovação final, o agente
+confere com o humano: escopo coberto, exclusões autorizadas e riscos
+que poderiam mudar a escolha. Com a modulação do humano: a conferência
+é resumida por padrão (tópicos curtos); aprofunda um tópico somente a
+pedido; nada é aprovado sem ter sido apresentado antes. Regra nova no
+item 7 (fechamento do plano, skill `question-orchestration`), com
+verificação no fechamento da conversa.
 
 ## Task List
 
