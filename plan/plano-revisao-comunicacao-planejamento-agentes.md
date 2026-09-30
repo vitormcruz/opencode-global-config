@@ -144,8 +144,10 @@ seção Comunicação, seção Concisão (acréscimo operacional):
   já entendidos não são repetidos.
 - Antes de enviar, confira: a resposta tem uma única ação ou decisão?
   Se não, corte o excedente e guarde para o turno seguinte.
-- Reclamação de confusão: reapresente o ponto em menos linhas do que a
-  mensagem original. Nunca reescreva tudo nem acrescente detalhe.
+- Ao sinal de confusão, responda primeiro à dúvida concreta:
+  reexplique só o ponto afetado, sem repetir blocos já entendidos.
+  Inclua a premissa ou o detalhe que faltou quando necessário, mesmo
+  que a resposta não fique menor.
 - Retomada do ponto anterior só ao mudar de assunto, após intervalo
   longo, ou ao sinal de confusão; não em toda mensagem.
 - Responda integralmente ao que foi perguntado.
@@ -156,9 +158,10 @@ autocontidas e independentes não é violação; explicação longa aparece
 em blocos apresentados um por vez; bloco com dúvida ou reclamação é
 resolvido antes de avançar; blocos entendidos não são repetidos;
 retomada apenas em mudança de assunto, intervalo ou confusão; resposta
-a reclamação de confusão menor que a original; entrega solicitada vem
-completa e não conta como violação do volume. Caso futuro da suíte de
-comunicação.
+a reclamação de confusão foca o ponto afetado, sem repetir blocos
+entendidos, e inclui premissa faltante quando é o caso; entrega
+solicitada vem completa e não conta como violação do volume. Caso
+futuro da suíte de comunicação.
 
 **Item 4 — Perguntas múltiplas (aprovado).** Destinos: skill
 `question-orchestration` (trecho "Perguntas em blocos adaptativos",
@@ -892,6 +895,15 @@ exige preservar a configuração anterior antes da sincronização única da
 instalação oficial, com restauração em caso de regressão no teste
 prático. 5: risco do teste prático sem decisão alinhado ao critério de
 teste inconclusivo.
+
+**Achado 2 (rodada 6, parte 1 e reformulação 1 da parte 2) — Resposta à
+confusão (aprovado).** A regra anterior (menos linhas que a original,
+nunca acrescentar detalhe) podia impedir a correção de premissa e a
+resposta integral. Nova regra no item 3: ao sinal de confusão, responda
+primeiro à dúvida concreta; reexplique só o ponto afetado, sem repetir
+blocos já entendidos; inclua a premissa ou o detalhe que faltou quando
+necessário, mesmo que a resposta não fique menor. Verificação
+atualizada.
 
 ## Task List
 
