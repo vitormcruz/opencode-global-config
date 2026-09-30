@@ -2,7 +2,7 @@
     "compress": {
         "permission": "allow",
         "mode": "range",
-        "maxContextLimit": 100000,
+        "maxContextLimit": 175000,
         "minContextLimit": 50000,
         "protectUserMessages": false
     },

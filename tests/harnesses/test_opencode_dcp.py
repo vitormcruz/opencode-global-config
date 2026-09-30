@@ -84,7 +84,9 @@ def test_canonical_dcp_jsonc_pins_decided_configuration(
     compress = config["compress"]
     assert compress["permission"] == "allow"
     assert compress["mode"] == "range"
-    assert compress["maxContextLimit"] == 100000
+    # Calibracao humana (2026-09-30): 175k/50k, antes 100k/50k do piloto
+    # (cascata de compressoes no mesmo round na sessao real).
+    assert compress["maxContextLimit"] == 175000
     assert compress["minContextLimit"] == 50000
     assert compress["protectUserMessages"] is False
     assert "protectedTools" not in compress
