@@ -1113,7 +1113,13 @@ fechamento.
   - **Files likely touched:** nenhum (relatório no plano)
   - **Estimated scope:** S
 
-- [ ] **Task 4: Seção de casos no insumo de testes.**
+- [x] **Task 4: Seção de casos no insumo de testes.** CONCLUÍDA:
+  seção "14. Casos de teste das regras de comunicação e planejamento"
+  em `plan/insumo-testes-comportamento-agentes.md`, inserida após a
+  seção de técnicas futuras sem renumerar as existentes (numeração 9-13
+  mantida); matriz com 16 linhas (11 regras globais + 5 específicas de
+  agente); diff limitado ao acréscimo (33 inserções, 0 remoções).
+  Commit `f9c61d6`.
   - **Description:** acrescentar a
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
@@ -1127,13 +1133,13 @@ fechamento.
     decididas no insumo (execução real, asserção de trajetória, juiz com
     rubrica, consenso).
   - **Acceptance criteria:**
-    - [ ] Uma regra de comportamento, uma linha na matriz (regra,
+    - [x] Uma regra de comportamento, uma linha na matriz (regra,
           roteiro, agente); nenhuma instrução de execução vira caso.
-    - [ ] Cobertura por regra: regra global de comunicação e protocolo
+    - [x] Cobertura por regra: regra global de comunicação e protocolo
           de perguntas, caso com um agente; regra específica, caso com o
           agente afetado (`smart-planner`, `devflow`, `rev`).
-    - [ ] Separação comunicação/planejamento respeitada.
-    - [ ] Seções existentes não renumeradas; decisões existentes não
+    - [x] Separação comunicação/planejamento respeitada.
+    - [x] Seções existentes não renumeradas; decisões existentes não
           alteradas.
   - **Verification:** conferência da seção contra as regras aprovadas;
     diff limitado ao acréscimo.
