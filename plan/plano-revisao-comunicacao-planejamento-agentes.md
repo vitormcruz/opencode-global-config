@@ -5,9 +5,12 @@
 O humano anotou problemas de comunicação e de planejamento no uso dos
 agentes. Este plano percorre os problemas item a item: para cada um,
 ajustamos a formulação da regra e conferimos o resultado esperado
-(comportamento observável e forma de verificar). O produto final é um
-insumo de revisão e ajuste, autocontido, a ser executado pelo `devflow`,
-que adapta ao projeto global (`harness-conf/`) o que for validado aqui.
+(comportamento observável e forma de verificar). As regras aprovadas
+são aplicadas diretamente nos arquivos de configuração, validadas regra
+a regra e testadas em uso real com o humano. Ao final, o trabalho gera
+um insumo para o `devflow` adequar as mudanças ao padrão do repo, em
+outra sessão, acionada pelo humano: o `devflow` não participa da
+execução deste plano.
 
 Duas frentes, já acordadas em conversa anterior:
 
@@ -778,6 +781,23 @@ adequação ao padrão, e só então uma única sincronização da instalação
 oficial com tudo validado, antes do teste prático (passo explícito
 acrescentado à Task 6).
 
+**Achado 4 (rodada 5, parte 1) — Execução da adequação (resolvido por
+revisão de premissa).** A fase de adequação misturava registro e
+execução sem dizer como o `devflow`, sem terminal, executaria a suíte.
+A pergunta do humano ("por que o devflow vai fazer alguma coisa agora?
+Ele nem está sendo utilizado") expôs a premissa errada de todo o plano.
+
+**Decisão nova (rodada 5) — Premissa de execução sem `devflow`
+(aprovada).** O `devflow` não participa da execução deste plano.
+Toda a execução é orquestrada pelo planejador com o humano: executor
+aplica as regras e valida (ambiente isolado), revisor independente
+confere, humano testa em uso real com a instalação oficial
+sincronizada. Ao terminar, o trabalho gera um insumo para o `devflow`
+adequar o que foi feito ao padrão do repo (sincronização de
+agente/workflow/testes, suíte completa, formato), em OUTRA sessão,
+acionada pelo humano; nada é executado pelo `devflow` aqui. Task List
+reescrita com a premissa; Overview ajustado.
+
 ## Task List
 
 ### Fase 1: Aplicação direta das regras
@@ -851,41 +871,14 @@ acrescentado à Task 6).
   - **Files likely touched:** nenhum (relatório no plano)
   - **Estimated scope:** S
 
-### Checkpoint: Aplicação revisada
-- [ ] Aplicação conferida pelo revisor e aprovada pelo humano
-
-### Fase 2: Adequação ao padrão do projeto
-
-- [ ] **Task 4: Insumo de adequação ao `devflow`.**
-  - **Description:** registrar insumo curto ao `devflow` com a
-    adequação das mudanças ao padrão do projeto: sincronização dos três
-    lugares (definição do agente, workflow em docs/, testes em
-    tests/agents/), suíte completa do ambiente corrente sem deixar
-    teste de fora (WSL/Linux: `.venv/bin/pytest -m all`; Windows:
-    `.\.venv\Scripts\pytest.exe -m all`), ajustes de formato e
-    consistência. Sem especificação de aplicação de regras (já
-    aplicadas na Fase 1). O checkpoint dos artefatos do plano é
-    delegado a subagente comitador.
-  - **Acceptance criteria:**
-    - [ ] Suíte completa do ambiente corrente passa.
-    - [ ] Nenhuma referência órfã (agente, workflow, permissão).
-    - [ ] `devflow` executa a adequação sem permissão de terminal além
-          da delegação existente.
-  - **Verification:** suíte verde; relatório do `devflow`.
-  - **Dependencies:** Task 3
-  - **Files likely touched:** `plan/insumo-adequacao-padrao-comunicacao.md`
-    (novo), `tests/agents/`, `docs/workflow-agentes-dev.md`
-  - **Estimated scope:** M
-
-- [ ] **Task 5: Seção de casos no insumo de testes.**
+- [ ] **Task 4: Seção de casos no insumo de testes.**
   - **Description:** acrescentar a
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
     multi-turn), sem renumerar seções existentes. Cada regra de
     comportamento vira uma linha da matriz: a regra, o roteiro do caso e
     o agente. Instrução de execução (ordem de aplicação,
-    compatibilização, conferência, evidência, sincronização de testes,
-    checkpoint do plano delegado a subagente comitador) não vira caso.
+    compatibilização, conferência, evidência) não vira caso.
     Regra global de comunicação e protocolo de perguntas: caso com um
     agente. Regra específica de agente: caso com o agente afetado
     (`smart-planner`, `devflow`, `rev`). Reutiliza as técnicas já
@@ -906,13 +899,13 @@ acrescentado à Task 6).
   - **Files likely touched:** `plan/insumo-testes-comportamento-agentes.md`
   - **Estimated scope:** S
 
-### Checkpoint: Padrão verificado
-- [ ] Suíte completa verde; casos de teste registrados
+### Checkpoint: Aplicação revisada
+- [ ] Aplicação conferida pelo revisor e aprovada pelo humano
 
-### Fase 3: Teste prático do protocolo
+### Fase 2: Teste prático em uso real
 
-- [ ] **Task 6: Planejamento real de teste.**
-  - **Description:** após a aplicação e a adequação, sincronizar a
+- [ ] **Task 5: Sincronizar instalação oficial e testar em uso real.**
+  - **Description:** após a aplicação revisada, sincronizar a
     instalação oficial do humano com tudo o que foi validado (as
     mudanças chegam juntas, uma única sincronização) e conferir que a
     cópia que o assistente lê contém as regras novas. Então o humano
@@ -931,12 +924,44 @@ acrescentado à Task 6).
     - [ ] Desvios encontrados registrados como ajuste de regra ou
           observação.
   - **Verification:** transcrição e registro do resultado no plano.
-  - **Dependencies:** Task 4, Task 5
+  - **Dependencies:** Task 3, Task 4
   - **Files likely touched:** nenhum (registro no plano)
   - **Estimated scope:** S
 
 ### Checkpoint: Protocolo validado no uso real
 - [ ] Humano valida o protocolo no uso real
+
+### Fase 3: Insumo para o `devflow`
+
+- [ ] **Task 6: Gerar insumo de adequação ao padrão do repo.**
+  - **Description:** ao terminar o trabalho (aplicação, revisão e teste
+    prático), registrar
+    `plan/insumo-adequacao-padrao-comunicacao.md` para o `devflow`
+    adequar o que foi feito ao padrão do repo, em outra sessão,
+    acionada pelo humano. Conteúdo: o que mudou (arquivos e regras
+    aplicadas); a adequação necessária — sincronização dos três lugares
+    (definição do agente, workflow em docs/, testes em tests/agents/),
+    execução da suíte completa do ambiente corrente sem deixar teste de
+    fora (WSL/Linux: `.venv/bin/pytest -m all`; Windows:
+    `.\.venv\Scripts\pytest.exe -m all`), ajustes de formato e
+    consistência. Nada é executado pelo `devflow` nesta sessão; o
+    insumo é o entregável final deste trabalho, e o `devflow` o executa
+    com sua delegação própria (checkpoint delegado a subagente
+    comitador).
+  - **Acceptance criteria:**
+    - [ ] Insumo autocontido: o `devflow` executa a adequação sem
+          contexto desta sessão.
+    - [ ] Lista completa de mudanças e da sincronização necessária.
+    - [ ] Sem execução de adequação nesta sessão.
+  - **Verification:** leitura do insumo contra as mudanças aplicadas.
+  - **Dependencies:** Task 5
+  - **Files likely touched:** `plan/insumo-adequacao-padrao-comunicacao.md`
+    (novo)
+  - **Estimated scope:** S
+
+### Checkpoint: Insumo pronto
+- [ ] Insumo registrado para o humano acionar o `devflow` em outra
+      sessão
 
 ## Risks and Mitigations
 
