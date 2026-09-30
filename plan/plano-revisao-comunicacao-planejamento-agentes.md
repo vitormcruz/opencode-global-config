@@ -502,7 +502,8 @@ e nos testes (`tests/agents/`). Instrução ao insumo (e à Task 1):
 
 Verificação: suíte completa do ambiente corrente passa após as mudanças.
 
-**Achado 4 (rodada 2) — Commit do plano pelo orquestrador (aprovado).**
+**Achado 4 (rodada 2) — Commit do plano pelo orquestrador (aprovado;
+revogado na rodada 4).**
 O revisor apontou o conflito entre plano commitado durante o trabalho e
 a permissão de terminal negada ao `devflow`. Decisão do humano: ajuste
 geral — o orquestrador é quem controla o plano e commita os checkpoints
@@ -520,6 +521,12 @@ dele. Ajustes:
 
 Verificação: o `devflow` cria checkpoint do arquivo do plano; a suíte de
 consistência (permissões e workflows) passa.
+
+Revogação (rodada 4, decisão do humano): o `devflow` não commita e não
+recebe permissão de terminal; o checkpoint do arquivo de planejamento é
+delegado a subagente comitador, como no funcionamento atual.
+`eng-software` permanece o único committer de código. Sem mudança em
+`docs/workflow-agentes-dev.md` nem no roteamento de `AGENTS.base.md`.
 
 **Achado 5 (rodada 2) — Evidência da conferência (aprovado).** O revisor
 apontou que as transcrições antes/depois não têm destino nem controle de
@@ -542,8 +549,8 @@ de casos do insumo de testes):
 - A seção de casos traz uma matriz explícita: para cada linha, a regra,
   o roteiro do caso e o agente. Só regra de comportamento entra na
   matriz. Instrução de execução (ordem de aplicação, compatibilização,
-  conferência antes/depois, evidência, sincronização de testes, commit
-  do plano) não vira caso.
+  conferência antes/depois, evidência, sincronização de testes,
+  checkpoint do plano delegado a subagente comitador) não vira caso.
 
 Verificação: a matriz cobre as regras de comportamento, uma a uma;
 nenhuma instrução de execução aparece como caso.
@@ -675,7 +682,7 @@ seguinte e o protocolo volta a valer.
 Levantada pelo humano ao observar que a primeira apresentação de um
 ponto costuma sair pior que a reapresentação pedida após um "não
 entendi": na primeira, o agente escreve para quem acompanha o
-raciocínio interno (vocabulário do revisor, referências ao plano,
+racicínio interno (vocabulário do revisor, referências ao plano,
 mecanismo comprimido); só na segunda escreve para o humano sem o plano
 na cabeça. Regra nova no item 2, arquivo global: antes de enviar a
 apresentação de um ponto, escrever a versão que escreveria após um "não
@@ -683,6 +690,19 @@ entendi" e enviar essa (mecanismo concreto antes da referência; exemplo
 antes do geral; jargão interno só com tradução imediata). Verificação
 própria: ponto técnico complexo apresentado certo de primeira, sem
 pedido de reapresentação.
+
+**Decisão nova (rodada 4) — Revogação do commit pelo orquestrador
+(aprovada).** Ao discutir o risco de liberação de terminal ampla, o
+humano revogou a decisão da segunda rodada: o `devflow` não commita o
+plano e não recebe permissão de terminal; o checkpoint do arquivo de
+planejamento é delegado a subagente comitador, como no funcionamento
+atual. `eng-software` permanece o único committer de código.
+
+**Achado 7 (rodada 4) — Permissão de terminal do `devflow` (resolvido
+por reversão).** O revisor apontou o risco de a restrição ao checkpoint
+existir só na instrução escrita, com permissão técnica ampla. Com a
+revogação acima, o `devflow` mantém o terminal negado e não há
+liberação a restringir; o achado fica resolvido sem ajuste adicional.
 
 ## Task List
 
@@ -699,7 +719,8 @@ pedido de reapresentação.
     (arquivo e seção), protocolo de conferência e instruções de execução
     ao `devflow` (ordem de aplicação, uma regra por vez, conferência
     antes/depois, compatibilização na aplicação, sincronização de
-    agente/workflow/testes, commit do plano pelo orquestrador, evidência
+    agente/workflow/testes, checkpoint do plano delegado a subagente
+    comitador, evidência
     da conferência). Estrutura do insumo:
     contexto de origem; regras de comunicação (todos os agentes); regras
     de planejamento (`smart-planner`, `devflow`, `rev`); protocolo de
@@ -714,7 +735,8 @@ pedido de reapresentação.
           arquivo e seção.
     - [ ] Nenhuma regra além das aprovadas; nada inventado.
     - [ ] Protocolo de conferência (com evidência), ordem de aplicação,
-          sincronização e commit do plano incluídos.
+          sincronização e checkpoint do plano (delegado a subagente
+          comitador) incluídos.
     - [ ] Autocontido: sem citar identificadores, números de item ou
           vocabulário interno deste plano.
   - **Verification:**
@@ -751,10 +773,10 @@ pedido de reapresentação.
     `plan/insumo-testes-comportamento-agentes.md` seção com os casos de
     teste de comunicação, após a seção de técnicas futuras (simulação
     multi-turn), sem renumerar seções existentes. Cada regra de
-    comportamento vira uma linha da matriz: a regra, o roteiro do caso e
+    comportamento vira uma linha da matriz: a regra,     o roteiro do caso e
     o agente. Instrução de execução (ordem de aplicação,
     compatibilização, conferência, evidência, sincronização de testes,
-    commit do plano) não vira caso. Regra global de
+    checkpoint do plano delegado a subagente comitador) não vira caso. Regra global de
     comunicação e protocolo de perguntas: caso com um agente. Regra
     específica de agente: caso com o agente afetado (`smart-planner`,
     `devflow`, `rev`). Reutiliza as técnicas já decididas no
