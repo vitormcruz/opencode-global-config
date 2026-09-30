@@ -950,6 +950,11 @@ mesmo sendo independente. Verificação atualizada.
 
 ## Task List
 
+**Modelos registrados para a execução (decisão do humano):** executor
+`opencode-go/glm-5.3-flash` (instâncias do `eng-software`); revisor
+`opencode/glm-5.3` (instâncias do `rev`). Reutilizar em novas
+instâncias até o humano alterá-las.
+
 ### Fase 1: Aplicação direta das regras
 
 - [ ] **Task 1: Aplicar as regras de comunicação.**
