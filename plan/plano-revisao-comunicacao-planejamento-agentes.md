@@ -1200,6 +1200,13 @@ fechamento.
 ### Fase 2: Teste prático em uso real
 
 - [ ] **Task 5: Sincronizar instalação oficial e testar em uso real.**
+  ANDAMENTO (2026-09-30): sincronização executada. Backup anterior em
+  `/tmp/opencode/backup-instalacao-20260930/` (AGENTS.md e opencode.json);
+  bootstrap `--yes` regenerou o `AGENTS.md` global (186 → 263 linhas, md5
+  `1d97518f...`), com as regras novas presentes, blocos gerenciados por
+  terceiros (codebase-memory-mcp) preservados e `opencode.json` inalterado.
+  Symlinks de skills/agentes já apontavam para o repo. Pendente: teste
+  prático com `smart-planner` em sessão nova, tema do humano na hora.
   - **Description:** após a aplicação revisada, sincronizar a
     instalação oficial do humano com tudo o que foi validado (as
     mudanças chegam juntas, uma única sincronização) e conferir que a
