@@ -1190,7 +1190,12 @@ fechamento.
   - **Estimated scope:** S
 
 ### Checkpoint: Aplicação revisada
-- [ ] Aplicação conferida pelo revisor e aprovada pelo humano
+- [x] Aplicação conferida pelo revisor e aprovada pelo humano
+  (2026-09-30). Revisão inicial aprovada com ressalvas: 4 achados
+  (`57cea06`); correções 1-3 aplicadas em `198f05a` (achado 4 dispensado
+  por decisão do humano); re-conferência por instância nova do revisor:
+  aprovado sem ressalvas, 0 achados (`76913bc`). Suíte 942 passed nos
+  dois pontos.
 
 ### Fase 2: Teste prático em uso real
 
