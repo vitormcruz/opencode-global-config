@@ -389,22 +389,25 @@ sequenceDiagram
     participant qa as qa
     participant rev as rev
 
+    rect rgb(255, 255, 230)
+    Note over Humano, rev: INICIALIZAÇÃO
     Humano ->> devflow: Nova funcionalidade ou escopo
 
-    alt Escopo já definido na conversa ou em arquivo
-        devflow ->> devflow: Confirma o escopo com o humano
-    else Escopo ainda precisa ser definido
+    alt Escopo ainda precisa ser definido
         devflow ->> Humano: O analista é mais adequado para elicitação. Trocar?
         alt Humano usa o analista
-            Note over Humano: O escopo é definido fora deste workflow
+            Note over Humano, devflow: O escopo é definido fora deste workflow
             Humano ->> devflow: Escopo definido na conversa ou em artefato
         else Humano continua com devflow
             devflow ->> Humano: Perguntas para organizar o escopo
             Humano -->> devflow: Escopo definido
         end
+    else Escopo já definido na conversa ou em arquivo
+        devflow ->> devflow: Confirma o escopo com o humano
     end
 
     devflow ->> devflow: Cria arquivo<br/>Status: VALIDAÇÃO
+    end
 
     rect rgb(255, 230, 230)
     Note over Humano, rev: VALIDAÇÃO (gate de curadoria)
