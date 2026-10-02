@@ -236,6 +236,12 @@ user-space conforme a seleção interativa ou `--yes`:
 | JDK | OpenJDK portatil no cache user-space | OpenJDK portatil no cache user-space |
 | Gradle | distribuicao portatil no cache user-space | distribuicao portatil no cache user-space |
 
+O build Gradle usa o mirror Maven indicado por
+`OPENCODE_MAVEN_REPOSITORY`. Se a variável não existir, ele lê o primeiro
+mirror com `mirrorOf=*` em `~/.m2/settings.xml`; sem mirror configurado, usa
+Maven Central. Em rede corporativa, configure o mirror aprovado antes de
+executar as specs Concordion.
+
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
 `aws-add-account-sso`; após o bootstrap, abra um novo PowerShell no Windows

@@ -13,8 +13,9 @@ Definição de Escopo, Elementos de Especificação,
 Estratégias de Indexação de Código e **Testes por
 Especialidade** — que traduz regras de qualidade em suítes
 (backend, dados, segurança, frontend) e no agregador
-`testes-produto`. O `AGENTS.md` mantém só a tabela índice
-com link para a seção. Sem esse artefato, eu (curador) não
+`testes-produto`. O `AGENTS.md` mantém o link geral para
+`docs/README.md`, a tabela índice com link para a seção e
+as Instruções por Agente. Sem esse artefato, eu (curador) não
 tenho critério objetivo para validar aderência.
 
 **Recomendação:** trate a curadoria agora, sem sair do workflow —

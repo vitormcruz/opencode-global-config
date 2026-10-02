@@ -1,8 +1,9 @@
 # Regras do Repo — opencode-global-config
 
-As regras globais (que valem para todos os harnesses) vivem em
-`harness-conf/AGENTS.base.md`. Este arquivo cobre apenas o específico
-deste repo.
+## Mapa do Produto
+
+Consulte [`docs/README.md`](docs/README.md), fonte de verdade do produto,
+antes de planejar ou implementar mudanças neste repo.
 
 ## Descoberta de Código e Documentação
 
@@ -191,7 +192,7 @@ Agregador: `testes-produto`
 Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
 `curador-produto`.
 
-Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
+Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-especialidade)
 
 ## README
 
@@ -202,8 +203,8 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
 
 ## Sincronização dos Adaptadores
 
-- A fonte canônica fica em `harness-conf/` (agentes, skills, commands,
-  `opencode.json`, `AGENTS.base.md`); infra do repo fica na raiz
+-   A fonte canônica fica em `harness-conf/` (agentes, skills, commands e
+  configurações dos harnesses); infra do repo fica na raiz
   (`scripts/`, `src/`, `tests/`, `docs/`, `adapters/`, `plan/`).
 - O comportamento canônico fica em `src/opencode_config/harnesses/`:
   contrato `HarnessAdapter`, registry e factory com injeção de strategy

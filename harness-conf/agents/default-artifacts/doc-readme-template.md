@@ -178,9 +178,11 @@ remoção — reporte finding com instrução de instalação.
    alterando ferramentas ou critérios por orientação do
    humano —, nunca no ciclo normal de desenvolvimento.
 
-O `AGENTS.md` do projeto mantém apenas a tabela índice das
-suítes com link para esta seção
-(`docs/README.md#testes-por-especialidade`).
+O `AGENTS.md` do projeto mantém o link geral para
+`docs/README.md`, a tabela índice das suítes com link para
+esta seção (`docs/README.md#testes-por-especialidade`) e as
+Instruções por Agente. A especificação detalhada não é
+copiada para o `AGENTS.md`.
 
 ### backend
 

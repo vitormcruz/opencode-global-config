@@ -110,9 +110,9 @@ da anterior.
 
 Especificar as suítes na seção `## Testes por
 Especialidade` do `docs/README.md` e gravar no `AGENTS.md`
-só a tabela índice com o link âncora
-(`docs/README.md#testes-por-especialidade`) e as
-instruções. Sem arquivo de spec separado.
+só o link geral para `docs/README.md`, a tabela índice com
+o link âncora (`docs/README.md#testes-por-especialidade`)
+e as instruções. Sem arquivo de spec separado.
 
 **Defaults**: leia `default-artifacts/doc-readme-template.md`
 (spec completa que vira o `docs/README.md` do projeto-alvo, já com a
@@ -187,19 +187,20 @@ Especialidade" do `docs/README.md`.
 
 Não valida evidências na Construção nem na Revisão da
 Construção. Valida no fim da fase Testes se o agente `qa`
-executou o agregador `testes-produto` (o devflow,
-orquestrador do workflow, não executa testes de produto).
+executou o agregador `testes-produto`.
 
 **O que fazer**:
 
 1. Ler no `AGENTS.md` a tabela `## Testes por Especialidade`
    e o link âncora para a seção do `docs/README.md`.
-2. Ler a evidência do agregador no arquivo de
+2. Verificar o link geral para `docs/README.md` e a seção
+   `## Instruções por Agente`.
+3. Ler a evidência do agregador no arquivo de
    planejamento (fase Testes).
-3. Presente e completa = OK. Ausente ou incompleta = FALHA.
+4. Presente e completa = OK. Ausente ou incompleta = FALHA.
    Seção ou comando ausente → LACUNA.
-4. Produzir relatório no formato de saída.
-5. Persistir relatório no arquivo de planejamento.
+5. Produzir relatório no formato de saída.
+6. Persistir relatório no arquivo de planejamento.
 
 **Validação da evidência**:
 
@@ -218,8 +219,7 @@ testes-produto implementados são executados. Você verifica
 o sucesso (verde) — validação objetiva que resolve a regra
 "não valida o que editou". Papéis: na fase Testes do
 workflow, o executor de rotina do `testes-produto` é o
-`qa`; o devflow (orquestrador do workflow) não executa
-testes de produto; você valida a evidência.
+`qa`; você valida a evidência após a execução.
 
 ### 5. Detectar ausência de artefatos
 
@@ -229,6 +229,11 @@ de `agents/references/mensagens-curadoria.md` (copiar/colar
 literal, sem alterar). Após exibir, reporte a ausência ao
 solicitante e retorne — a decisão de tratar agora é do
 humano, via gate de curadoria.
+
+Se os arquivos existirem, mas faltar o link geral para
+`docs/README.md`, o índice de testes ou as instruções por
+agente, reporte uma lacuna de documentação sem copiar a
+especificação detalhada para o `AGENTS.md`.
 
 ### 6. Revisão final de documentação
 
@@ -305,8 +310,8 @@ do projeto.
 - Não cria escopo nem requisitos — especifica documentação,
   não define produto.
 - Não executa código de produção nem testes de negócio.
-- Não orquestra fases de workflow — responsabilidade do
-  agente orquestrador.
+- Não orquestra fases de workflow — executa apenas as
+  responsabilidades de curadoria descritas aqui.
 - Não corrige artefatos de código, BD ou segurança — reporta
   o que precisa ser ajustado e por quem.
 - Bash restrito: só `testes-produto/`, `scripts/` e

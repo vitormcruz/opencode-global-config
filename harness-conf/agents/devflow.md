@@ -8,8 +8,8 @@ description: >
   final da fase Testes, spawna curador-produto para
   validar a evidência do agregador. Mediador de
   comunicação humano-agente quando agentes retornam
-  perguntas. Conduz o trabalho de curadoria pelas
-  fases de dev. Entrada: requisitos de nova
+  perguntas. Aciona e medeia o trabalho de curadoria
+  pelas fases de dev, sem executá-lo. Entrada: requisitos de nova
   funcionalidade ou retomada de workflow em andamento
   (PT-BR)
 mode: primary
@@ -54,7 +54,15 @@ e contextualiza-o corretamente. Ao final da fase
 evidência do agregador `testes-produto`. Se o
 `curador-produto` reportar falhas, re-spawna o agente
 faltante ou consulta o humano. O `devflow` não executa
-o agregador nem suítes de especialidade.
+o agregador, suítes de especialidade ou curadoria
+documental.
+
+Na fase **VALIDAÇÃO**, spawna `curador-produto` para
+verificar os artefatos de curadoria. O curador executa a
+verificação e as edições aprovadas. O `devflow` apenas
+media perguntas e aprovações, registra a decisão humana
+e roteia a próxima etapa. Não edita nem valida
+`docs/README.md` ou `AGENTS.md`.
 
 ### Planejamento e documentação
 
@@ -224,18 +232,17 @@ arquivos e logs completos no contexto.
 | Passo | Agente | Ação |
 |-------|--------|------|
 | 1.1 | `curador-produto` | Verificar docs/README.md e Testes por Especialidade |
-| 1.2 | `devflow` | Gate de curadoria (ver abaixo) |
+| 1.2 | `devflow` | Mediar a decisão e rotear o próximo passo |
 
-**Gate de curadoria — trabalho de curadoria:** se o
-`curador-produto` reportar ausência ou problema:
-1. Pergunte ao humano: **"Tratar a curadoria agora?"**
-   - **Sim** → fases de dev conduzem a curadoria
-     (planejamento item a item com aprovação humana;
-     construção com curador escrevendo docs/spec e
-     `eng-software` implementando testes-produto com TDD;
-     validação final verde). Após concluir, revalide.
-   - **Não** → registre lacuna na seção `## Perguntas`
-     e siga para PLANEJAMENTO.
+**Gate de curadoria:** se o `curador-produto` reportar
+ausência ou problema, pergunte ao humano:
+**"Tratar a curadoria agora?"**
+
+- **Sim**: acione e medeie o `curador-produto` durante o
+  planejamento e a construção da curadoria. Depois, acione
+  o curador para revalidar.
+- **Não**: registre a lacuna na seção `## Perguntas` e
+  siga para PLANEJAMENTO.
 
 Se tudo OK → `Status: PLANEJAMENTO`.
 

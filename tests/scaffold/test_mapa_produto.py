@@ -224,6 +224,8 @@ def test_testes_produto_scaffold_creates_section(tmp_path: Path) -> None:
 
     assert status == 0
     content = destination.read_text(encoding="utf-8")
+    assert "## Mapa do Produto" in content
+    assert "[`docs/README.md`](docs/README.md)" in content
     assert "## Testes por Especialidade" in content
     assert "## Harness por Agente" not in content
 
@@ -271,6 +273,7 @@ def test_testes_produto_scaffold_is_idempotent(tmp_path: Path) -> None:
 
     assert first_status == 0
     assert second_status == 0
+    assert content.count("## Mapa do Produto") == 1
     assert content.count("## Testes por Especialidade") == 1
 
 
@@ -284,6 +287,8 @@ def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
+    assert "## Mapa do Produto" in content
+    assert "[`docs/README.md`](docs/README.md)" in content
     assert "docs/README.md#testes-por-especialidade" in content
     assert "docs/testes-produto.md" not in content
     assert "harness/agregar" not in content
@@ -395,6 +400,8 @@ def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
         / "harness-conf/agents/default-artifacts/testes-por-especialidade-template.md"
     ).read_text(encoding="utf-8")
 
+    assert "## Mapa do Produto" in content
+    assert "[`docs/README.md`](docs/README.md)" in content
     assert "## Testes por Especialidade" in content
     for specialty in SPECIALTIES:
         assert f"| {specialty} " in content

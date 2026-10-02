@@ -15,16 +15,15 @@ otimizado para:
 
 ```
 devflow
-  └── VALIDAÇÃO (gate de curadoria)  ← Verifica docs/README.md e Testes por Especialidade
+  └── VALIDAÇÃO  ← curador executa; devflow aciona e medeia
   └── workflow-definicao-escopo.md   ← Elicita requisitos
   └── workflow-agentes-dev.md        ← Desenvolvimento (este arquivo)
 ```
 
-- **Gate de curadoria** (fase VALIDAÇÃO) — garante que
-  docs/README.md e Testes por Especialidade existem e estão
-  válidos. Se lacuna, o humano decide se trata a curadoria
-  agora (conduzida pelas fases de dev) ou segue com lacuna
-  registrada. Ver seção "Trabalho de curadoria" abaixo.
+- **Validação** — o `curador-produto` verifica `docs/README.md` e os
+  índices do `AGENTS.md`. O `devflow` aciona o curador, medeia a
+  comunicação e encaminha a decisão humana. O `devflow` não edita nem
+  valida o conteúdo desses artefatos.
 - [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md) —
   elicita requisitos e produz o Arquivo de Planejamento.
 - Este workflow — executa o ciclo completo de desenvolvimento
@@ -79,17 +78,27 @@ executa `git push` sem confirmação explícita do humano.
 
 ### 1. docs/README.md
 
-Contrato de documentação do projeto. Contém 3 seções:
-Definição de Escopo, Elementos de Especificação e
-Estratégias de Indexação de Código. Criação e manutenção:
-`curador-produto` (via gate de curadoria ou trabalho de curadoria).
+Contrato de documentação do projeto. Contém quatro seções:
+
+1. Definição de Escopo
+2. Elementos de Especificação
+3. Estratégias de Indexação de Código
+4. Testes por Especialidade
+
+`Regras de Documentação` é uma subseção de `Elementos de Especificação`.
+O `curador-produto` cria e mantém o documento. O `devflow` apenas aciona
+e medeia o trabalho do curador.
 
 ### 2. Testes por Especialidade
 
 Suítes (backend, dados, segurança, frontend) e o
 agregador `testes-produto`. Tabela e link no
-`AGENTS.md`; spec na pasta de docs. Criação e
-manutenção: `curador-produto`.
+`AGENTS.md`; spec na seção correspondente do `docs/README.md`.
+Criação e manutenção: `curador-produto`.
+
+O `AGENTS.md` também mantém o link geral para `docs/README.md` e a
+seção `Instruções por Agente`. A especificação detalhada não é copiada
+para o `AGENTS.md`.
 
 ### 3. Arquivo de Planejamento
 
@@ -261,10 +270,9 @@ Status: <FASE> [— detalhe opcional]
 ### docs/README.md
 
 21. **O workflow exige um docs/README.md** — criação e
-    manutenção pelo `curador-produto`. Gate de curadoria detecta
-    ausência ou problema. Se humano decidir tratar agora,
-    fases de dev conduzem a curadoria. Se não, lacuna
-    registrada e segue.
+    manutenção pelo `curador-produto`. A fase de VALIDAÇÃO detecta
+    ausência ou problema. O `devflow` aciona e medeia o curador,
+    sem editar ou validar o conteúdo.
 21.1. **Regras de Produto — preenchimento incremental** —
      `eng-software` inicializa no planejamento. Campos sem
      definição: `(a definir)`. Agentes consultam, perguntam
@@ -294,10 +302,12 @@ Status: <FASE> [— detalhe opcional]
 
 ### Testes por Especialidade
 
-32. **Tabela e link no AGENTS.md** — criação pelo
-    `curador-produto`. Spec na seção "Testes por
-    Especialidade" do `<pasta-docs>/README.md`; o
-    `AGENTS.md` mantém só a tabela com link âncora.
+32. **Índices no AGENTS.md** — criação pelo
+    `curador-produto`. O `AGENTS.md` mantém o link geral para o
+    `docs/README.md`, a tabela de Testes por Especialidade com link
+    âncora e as Instruções por Agente. A spec fica na seção "Testes por
+    Especialidade" do `<pasta-docs>/README.md`; o conteúdo detalhado
+    não é copiado para o `AGENTS.md`.
     Suítes não rodam na Construção nem na Revisão.
 33. **Fase Testes** — `qa` executa só `testes-produto` e
     manuais do plano. `sec` executa só o roteiro manual.
@@ -338,13 +348,13 @@ sequenceDiagram
     devflow ->> devflow: Cria arquivo<br/>Status: VALIDAÇÃO
 
     rect rgb(255, 230, 230)
-    Note over Humano, rev: VALIDAÇÃO (gate de curadoria)
+    Note over Humano,rev: VALIDAÇÃO, curador executa e devflow medeia
     devflow ->> prod: Verificar docs/README.md e Testes por Especialidade
     prod -->> devflow: Relatório de lacunas
     alt Lacuna detectada
         devflow ->> Humano: Tratar a curadoria agora?
         alt Sim
-            Note over Humano, rev: Fases de dev conduzem curadoria
+            Note over Humano,rev: curador executa e devflow medeia
             devflow ->> prod: Revalidar após curadoria
         else Não
             devflow ->> devflow: Registra lacuna em Perguntas
@@ -355,7 +365,7 @@ sequenceDiagram
     end
 
     rect rgb(230, 245, 255)
-    Note over Humano, rev: PLANEJAMENTO
+    Note over Humano,rev: PLANEJAMENTO
     devflow ->> eng: Planejar implementação
     eng -->> devflow: Plano (resumo curto)
     devflow ->> front: Prototipar telas (se UI)
@@ -370,7 +380,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 245, 230)
-    Note over Humano, rev: REVISÃO DO PLANO
+    Note over Humano,rev: REVISÃO DO PLANO
     devflow ->> rev: Revisão solo com skills
     rev -->> devflow: Achados (achado·ação·severidade)
     opt Achados requerem correção
@@ -384,7 +394,7 @@ sequenceDiagram
     end
 
     rect rgb(230, 255, 230)
-    Note over Humano, rev: CONSTRUÇÃO
+    Note over Humano,rev: CONSTRUÇÃO
     devflow ->> dba: Modelo e migrações
     dba -->> devflow: Artefatos BD (resumo curto)
     opt UI
@@ -400,7 +410,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 245, 230)
-    Note over Humano, rev: REVISÃO DA CONSTRUÇÃO
+    Note over Humano,rev: REVISÃO DA CONSTRUÇÃO
     devflow ->> rev: Revisão solo com skills
     rev -->> devflow: Achados
     opt Correção
@@ -413,7 +423,7 @@ sequenceDiagram
     end
 
     rect rgb(245, 230, 255)
-    Note over Humano, rev: TESTES
+    Note over Humano,rev: TESTES
     devflow ->> qa: testes-produto + manuais
     qa -->> devflow: Resultado
     devflow ->> sec: Roteiro manual
@@ -438,7 +448,7 @@ sequenceDiagram
     end
 
     rect rgb(255, 255, 230)
-    Note over Humano, rev: FINALIZAÇÃO
+    Note over Humano,rev: FINALIZAÇÃO
     devflow ->> prod: Revisão final de spec
     prod -->> devflow: Lacunas por domínio
     loop Revalidação
@@ -455,33 +465,34 @@ sequenceDiagram
 ## Trabalho de curadoria
 
 O trabalho de curadoria (criação e manutenção do
-`docs/README.md` e testes por especialidade) é conduzido pelas
-fases de dev quando o gate de curadoria da VALIDAÇÃO detecta lacuna
-e o humano decide tratar agora.
+`docs/README.md` e dos índices do `AGENTS.md`) ocorre dentro da fase
+de VALIDAÇÃO quando o curador detecta uma lacuna e o humano decide
+tratar o problema naquele ciclo.
 
 ### Gate de curadoria na VALIDAÇÃO
 
-1. `curador-produto` verifica docs/README.md e suítes.
-2. Se lacuna: `devflow` pergunta **"Tratar a curadoria
-   agora?"**
-   - **Sim** → fases de dev conduzem a curadoria. Após
-     concluir, volta ao gate para revalidar.
-   - **Não** → registra lacuna em `## Perguntas` e segue.
-3. Se tudo OK → segue para PLANEJAMENTO.
+1. `devflow` aciona `curador-produto`.
+2. `curador-produto` verifica `docs/README.md` e os índices do
+   `AGENTS.md`, e retorna um relatório.
+3. Se houver lacuna, `devflow` pergunta **"Tratar a curadoria agora?"**
+   - **Sim**: `devflow` aciona e medeia o trabalho do curador.
+     Depois, aciona o curador novamente para revalidar.
+   - **Não**: `devflow` registra a lacuna em `## Perguntas` e segue.
+4. Se tudo estiver OK, segue para PLANEJAMENTO.
 
 ### Planejamento da curadoria (item a item)
 
-`devflow` spawna `curador-produto` para percorrer cada
-seção com o humano (mediação via blocos adaptativos da
-`question-orchestration`):
+`devflow` aciona `curador-produto` e medeia a interação com o humano.
+O curador percorre cada seção usando os blocos adaptativos da
+`question-orchestration`:
 
 - **docs/README.md** — Definição de Escopo, Elementos de
-  Especificação, Regras de Documentação, Estratégias de
-  Indexação. Cada seção requer aprovação explícita.
-- **Suítes** — pasta de docs, seção "Testes por
-  Especialidade" no `docs/README.md`, especialidades,
-  agregador, depois instruções. Cada entrada requer
-  aprovação explícita.
+  Especificação, Estratégias de Indexação de Código e Testes por
+  Especialidade. `Regras de Documentação` é uma subseção de
+  Elementos de Especificação. Cada seção requer aprovação explícita.
+- **AGENTS.md** — link geral para o mapa, índice de Testes por
+  Especialidade e Instruções por Agente. Cada entrada requer aprovação
+  explícita.
 
 ### Construção da curadoria
 

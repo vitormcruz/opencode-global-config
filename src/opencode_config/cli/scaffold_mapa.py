@@ -169,6 +169,15 @@ DOC_TEMPLATE = dedent(
     """
 )
 
+MAPA_PRODUTO_TEMPLATE = dedent(
+    """
+    ## Mapa do Produto
+
+    Consulte [`docs/README.md`](docs/README.md), fonte de verdade do produto,
+    antes de planejar ou implementar mudanças neste repo.
+    """
+)
+
 TESTES_PRODUTO_TEMPLATE = dedent(
     """
     ## Testes por Especialidade
@@ -223,8 +232,17 @@ def scaffold_doc(destination: Path) -> str:
 
 
 def scaffold_testes_produto(destination: Path) -> str:
-    """Cria o scaffold de testes-produto sem duplicar a tabela."""
+    """Cria os índices de documentação e testes sem duplicar seções."""
 
+    _append_scaffold(
+        destination,
+        marker="## Mapa do Produto",
+        template=MAPA_PRODUTO_TEMPLATE,
+        created_message="Índice do mapa do produto criado em: {destination}",
+        existing_message=(
+            "Índice do mapa do produto já existe em {destination}. Nada a fazer."
+        ),
+    )
     return _append_scaffold(
         destination,
         marker="## Testes por Especialidade",

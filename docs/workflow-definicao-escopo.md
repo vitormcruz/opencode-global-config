@@ -6,14 +6,13 @@ Workflow de elicitação que produz o Arquivo de
 Planejamento com requisitos e critérios definidos pelo
 humano.
 
-**Premissa:** a curadoria já foi executada antes deste
-workflow (docs/README.md e Testes por Especialidade
-presentes e válidos). Ver gate de curadoria no
-`workflow-agentes-dev.md`.
+**Premissa:** a documentação do produto em
+`docs/README.md` já está presente e válida antes deste
+workflow.
 
-O `devflow` executa este workflow após a curadoria e,
-ao final, transiciona para o workflow de desenvolvimento
-(que começa em PLANEJAMENTO).
+O `devflow` executa este workflow e, ao final,
+transiciona para o workflow de desenvolvimento (que
+começa em PLANEJAMENTO).
 
 ## Agentes
 
@@ -27,11 +26,9 @@ ao final, transiciona para o workflow de desenvolvimento
 
 1. **`devflow` como roteador stateless** — spawna agentes,
    não lê, não valida. Recebe resumo curto de volta.
-2. **Curadoria já foi concluída** — docs/README.md e
-   Testes por Especialidade existem e estão válidos. Este
-   workflow assume isso como pré-condição. A validação é
-   feita pelo gate de curadoria do `devflow`, que rodou
-   antes.
+2. **Documentação do produto já está disponível** —
+   `docs/README.md` existe e está válido. Este workflow
+   assume essa pré-condição.
 3. **`analista` nunca edita `docs/README.md`** — apenas
    lê a seção Definição de Escopo para contextualizar
    a elicitação.
@@ -88,7 +85,7 @@ sequenceDiagram
 
     %% ── ELICITAÇÃO ───────────────────────────
     rect rgb(230, 245, 255)
-    Note over Humano, ana: ELICITAÇÃO
+    Note over Humano,ana: ELICITAÇÃO
 
     devflow ->> ana: Elicitar requisitos e critérios
     Note right of ana: Lê docs/README.md<br/>(seção Definição de Escopo)
@@ -116,8 +113,7 @@ sequenceDiagram
 ## Regras Críticas
 
 - `analista` **nunca** edita `docs/README.md`
-- `curador-produto` cria a seção Definição de Escopo no
-  `docs/README.md` **antes** do analista atuar (via gate
-  de curadoria do devflow)
+- `docs/README.md` contém a seção Definição de Escopo
+  **antes** da atuação do `analista`
 - `devflow` é roteador stateless — só spawna, não lê,
   não valida

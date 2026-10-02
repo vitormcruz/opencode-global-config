@@ -32,6 +32,8 @@ def test_build_renders_adr_specs_with_fixture_names(repo_root: Path) -> None:
     assert "renderAdrSpecs" in build
     assert "docs/adr" in build
     assert "Adr" in build
+    assert "OPENCODE_MAVEN_REPOSITORY" in build
+    assert "mirrorOf" in build
 
 
 @pytest.mark.integration

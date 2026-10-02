@@ -91,6 +91,52 @@ def test_development_workflow_references_question_protocol_skill(
 
 
 @pytest.mark.unit
+def test_development_workflow_mermaid_notes_use_supported_syntax(
+    repo_root: Path,
+) -> None:
+    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
+        encoding="utf-8"
+    )
+    mermaid = workflow.split("```mermaid", 1)[1].split("```", 1)[0]
+
+    for line in mermaid.splitlines():
+        if line.strip().startswith("Note over "):
+            assert re.search(r"Note over [^:]+,\s+", line) is None
+
+
+@pytest.mark.unit
+def test_development_workflow_defines_curator_ownership(
+    repo_root: Path,
+) -> None:
+    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(workflow.split())
+
+    for section in (
+        "Definição de Escopo",
+        "Elementos de Especificação",
+        "Estratégias de Indexação de Código",
+        "Testes por Especialidade",
+    ):
+        assert section in workflow
+    assert "O `curador-produto` cria e mantém" in normalized
+    assert "O `devflow` apenas aciona e medeia" in normalized
+
+
+@pytest.mark.unit
+def test_devflow_mediates_but_does_not_execute_curation(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert "aciona e medeia o trabalho de curadoria" in normalized
+    assert "não edita nem valida `docs/readme.md` ou `agents.md`" in normalized
+    assert "curador-produto: allow" in content
+
+
+@pytest.mark.unit
 def test_devflow_contract_has_item_six(repo_root: Path) -> None:
     content = devflow_content(repo_root)
     assert re.search(r"^6\.", content, re.MULTILINE) is not None
