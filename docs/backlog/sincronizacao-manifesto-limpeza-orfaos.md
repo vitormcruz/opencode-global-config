@@ -5,15 +5,15 @@ Desejo que a sincronização registre os artefatos materializados em manifesto e
 Para que recursos e perfis descontinuados não permaneçam ativos no ambiente local, preservando arquivos personalizados
 
 ## Regras de Negócio
-- RN1: Preservação de arquivos locais — Arquivos no diretório de destino que não foram gerados pela sincronização nem constam no manifesto de controle não podem ser alterados nem removidos.
-- RN2: Exclusão de órfãos do manifesto — Arquivos registrados no manifesto de sincronização anterior que deixarem de ser gerados na sincronização atual devem ser excluídos do diretório de destino.
-- RN3: Backup obrigatório prévio — Todo arquivo a ser excluído por ser órfão do manifesto deve ter uma cópia de backup preservada antes da sua remoção do diretório de destino.
-- RN4: Registro de artefatos em manifesto — Arquivos materializados por cópia durante a sincronização de um harness devem ser registrados no manifesto local para controle de ciclo de vida e rastreamento de órfãos.
+- RN-012: Preservação de arquivos locais — Arquivos no diretório de destino que não foram gerados pela sincronização nem constam no manifesto de controle não podem ser alterados nem removidos.
+- RN-013: Exclusão de órfãos do manifesto — Arquivos registrados no manifesto de sincronização anterior que deixarem de ser gerados na sincronização atual devem ser excluídos do diretório de destino.
+- RN-014: Backup obrigatório prévio — Todo arquivo a ser excluído por ser órfão do manifesto deve ter uma cópia de backup preservada antes da sua remoção do diretório de destino.
+- RN-015: Registro de artefatos em manifesto — Arquivos materializados por cópia durante a sincronização de um harness devem ser registrados no manifesto local para controle de ciclo de vida e rastreamento de órfãos.
 
 ## Requisitos Funcionais
-- RF1: O sistema deve registrar em manifesto local os arquivos materializados durante a sincronização de um harness (atende RN4).
-- RF2: O sistema deve remover do diretório de destino os arquivos que constavam no manifesto anterior e não foram gerados na sincronização atual, gerando backup prévio (atende RN2 e RN3).
-- RF3: O sistema deve manter inalterados no diretório de destino arquivos que não foram gerados pela sincronização nem constam no manifesto de controle (atende RN1).
+- RF1: O sistema deve registrar em manifesto local os arquivos materializados durante a sincronização de um harness (atende RN-015).
+- RF2: O sistema deve remover do diretório de destino os arquivos que constavam no manifesto anterior e não foram gerados na sincronização atual, gerando backup prévio (atende RN-013 e RN-014).
+- RF3: O sistema deve manter inalterados no diretório de destino arquivos que não foram gerados pela sincronização nem constam no manifesto de controle (atende RN-012).
 
 ## Notas (opcional)
 - Decisão de arquitetura: A lógica de controle de manifesto, validação de autoria e limpeza deve residir em módulo compartilhado na biblioteca central (`opencode_config.lib`), aplicável a agentes, skills e qualquer outro artefato sincronizado por cópia em qualquer harness.
