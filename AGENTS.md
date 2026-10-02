@@ -223,6 +223,17 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
   seus testes (`tests/harnesses/`, `tests/lib/`). Verifique também o
   outro harness quando a mudança afetar o contrato entre plataformas.
 
+## Mapa do Produto e Artefatos Gerados
+
+- Neste projeto, `docs/README.md` é o Mapa do Produto e a fonte de verdade
+  dos elementos de especificação ativos.
+- `harness-conf/agents/default-artifacts/` contém artefatos gerados por este
+  projeto para provisionar e orientar outros projetos. Eles são saídas deste
+  repositório, mas não definem os agentes, workflows ou elementos de
+  especificação ativos deste produto.
+- Alterações no Mapa do Produto deste projeto não alteram esses artefatos
+  automaticamente. A evolução deles exige decisão e escopo próprios.
+
 ## Commits
 
 - Conventional Commits em PT-BR: `tipo(escopo): descrição curta`, tipos:

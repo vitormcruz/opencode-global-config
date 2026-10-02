@@ -52,6 +52,7 @@ O analista deve elicitar, para cada história de usuário:
 | Arquitetura (Diagrama Gerado) | Mermaid — C4 L1/L2/L3 gerado dos ADRs | eng-software | docs/adr/diagrama-c4-l1.md, docs/adr/diagrama-c4-l2.md, docs/adr/diagrama-c4-l3.md |
 | UPSTREAM.md (skills externas) | Markdown padronizado | eng-software | harness-conf/skills/<skill>/UPSTREAM.md |
 | README — Dependências | Markdown (seção do README) | eng-software | README.md |
+| Workflows de Agentes de IA | Markdown | eng-software | docs/workflow-*.md |
 
 ### Regras de Documentação
 
@@ -127,6 +128,20 @@ O analista deve elicitar, para cada história de usuário:
   C4Component para L3)
 - Regenerar sempre que um ADR for adicionado ou superseded
 - Não editar manualmente — é artefato gerado
+
+##### Workflows de Agentes de IA
+- Os workflows documentam os papéis dos agentes, a sequência de trabalho,
+  os handoffs, os gates e os contratos entre fases.
+- São especificações documentais, não especificações executáveis. Não usam
+  Concordion e não pertencem às suítes `testes-produto`.
+- O `eng-software` mantém os workflows deste produto. Antes de criar ou
+  revisar um workflow, carrega `writing-for-agents`.
+- Toda alteração em `harness-conf/agents/` deve ser refletida nos workflows
+  relacionados.
+- Toda alteração em `docs/workflow-*.md` deve ser refletida nos agentes
+  relacionados.
+- A consistência entre agentes e workflows deve ser verificada pelos testes
+  estruturais do repositório.
 
 ##### UPSTREAM.md (skills externas)
 - Regra canônica na seção "Upstream de Skills Externas" do `AGENTS.md`;

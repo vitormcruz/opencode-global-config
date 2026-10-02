@@ -984,3 +984,46 @@ def test_work_records_require_executor_and_model(repo_root: Path) -> None:
 
     assert "cada subseção de registro de trabalho informa" in normalized_section
     assert "`Executor: <agente> / <modelo>`" in normalized_section
+
+
+@pytest.mark.unit
+def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
+    """O Mapa do Produto registra workflows como documentação não executável."""
+
+    product_map = (repo_root / "docs" / "README.md").read_text(
+        encoding="utf-8"
+    )
+    elements_section = product_map.split(
+        "## Elementos de Especificação", 1
+    )[1].split("### Regras de Documentação", 1)[0]
+    workflow_rules = product_map.split(
+        "##### Workflows de Agentes de IA", 1
+    )[1].split("##### UPSTREAM.md", 1)[0]
+
+    assert (
+        "| Workflows de Agentes de IA | Markdown | eng-software | "
+        "docs/workflow-*.md |"
+    ) in elements_section
+    assert "especificações documentais, não especificações executáveis" in (
+        workflow_rules
+    )
+    assert "writing-for-agents" in workflow_rules
+    assert "harness-conf/agents/" in workflow_rules
+    assert "docs/workflow-*.md" in workflow_rules
+
+
+@pytest.mark.unit
+def test_agents_md_distinguishes_product_map_from_generated_artifacts(
+    repo_root: Path,
+) -> None:
+    """O AGENTS.md separa o mapa ativo dos artefatos gerados do projeto."""
+
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    section = agents.split("## Mapa do Produto e Artefatos Gerados", 1)[1]
+    section = section.split("## Commits", 1)[0]
+    section = " ".join(section.split())
+
+    assert "`docs/README.md` é o Mapa do Produto" in section
+    assert "artefatos gerados por este projeto" in section
+    assert "não definem os agentes, workflows ou elementos de" in section
+    assert "A evolução deles exige decisão e escopo próprios" in section
