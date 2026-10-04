@@ -84,10 +84,14 @@ def test_canonical_dcp_jsonc_pins_decided_configuration(
     compress = config["compress"]
     assert compress["permission"] == "allow"
     assert compress["mode"] == "range"
-    # Calibracao humana (2026-09-30): 175k/50k, antes 100k/50k do piloto
-    # (cascata de compressoes no mesmo round na sessao real).
-    assert compress["maxContextLimit"] == 175000
-    assert compress["minContextLimit"] == 50000
+    # Compactacao por decisao do agente (design 2026-09-30): sem limite
+    # fixo operante; os limites existem so como valores inertes (nunca
+    # disparam nudge) e o modo manual fica DESLIGADO, pois ele bloqueia
+    # a chamada da tool pelo proprio agente (evidencia da validacao
+    # funcional no plugin 3.1.15, ver plano).
+    assert compress["maxContextLimit"] == 999999999
+    assert compress["minContextLimit"] == 999999999
+    assert config.get("manualMode", {}).get("enabled", False) is False
     assert compress["protectUserMessages"] is False
     assert "protectedTools" not in compress
     assert "protectedFilePatterns" not in compress

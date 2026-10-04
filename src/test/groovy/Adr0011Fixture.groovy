@@ -5,7 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-// ADR-0011: compactacao DCP como mecanismo preferido no OpenCode.
+// ADR-0011: compactacao de contexto por decisao do agente.
 @RunWith(ConcordionRunner)
 class Adr0011Fixture {
     private final Path root = Paths
@@ -31,8 +31,10 @@ class Adr0011Fixture {
             entrada ==~ /@tarquinen\/opencode-dcp@\d+\.\d+\.\d+/
     }
 
-    // A config propria do plugin existe, com autoUpdate desligado e gate
-    // allow na tool compress (o rollback rapido segue sendo deny).
+    // A config propria do plugin existe sem gatilho operante: autoUpdate
+    // desligado, gate allow na tool compress (rollback rapido deny),
+    // compactacao por decisao do agente (modo manual desligado, pois ele
+    // bloqueia a tool) e limites de contexto so como valores inertes.
     private boolean configPropriaValida() {
         def config = lerArquivo('harness-conf/dcp.jsonc')
         if (config == null) {
@@ -42,8 +44,16 @@ class Adr0011Fixture {
             .replaceAll(/(?s)\/\*.*?\*\//, '')
             .replaceAll(/(?m)\/\/.*$/, '')
         def parsed = new groovy.json.JsonSlurper().parseText(semComentarios)
+        def compress = parsed.compress
+        def maximo = compress?.maxContextLimit
+        def minimo = compress?.minContextLimit
         return parsed.autoUpdate == false &&
-            parsed.compress?.permission == 'allow'
+            compress?.permission == 'allow' &&
+            parsed.get('manualMode')?.enabled != true &&
+            maximo != null && (maximo instanceof Number) &&
+            ((Number) maximo).longValue() >= 1000000000L &&
+            minimo != null && (minimo instanceof Number) &&
+            ((Number) minimo).longValue() >= 1000000000L
     }
 
     // As duas strategies do OpenCode declaram o destino dcp.jsonc; o

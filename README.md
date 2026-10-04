@@ -185,8 +185,9 @@ bootstrap; uma execução completa não deve usá-las:
 - `@slkiser/opencode-quota`: quota de tokens no toast/TUI.
 - `@tarquinen/opencode-dcp` (spec pinada, versão fixa): compactação
   acionável pelo agente. Registra a tool `compress`: o próprio agente
-  substitui trechos antigos por resumo, sem apagar o histórico. Injeta
-  nudges quando o contexto passa do limite configurado. O bootstrap
+  substitui trechos antigos por resumo, sem apagar o histórico. A
+  chamada é decisão do agente: o `dcp.jsonc` canônico não tem gatilho
+  operante (limites inertes, sem nudges). O bootstrap
   materializa `opencode.json` e a config canônica
   `harness-conf/dcp.jsonc` (destino `~/.config/opencode/dcp.jsonc`).
   Rollback rápido: `compress.permission = "deny"` no `dcp.jsonc`
