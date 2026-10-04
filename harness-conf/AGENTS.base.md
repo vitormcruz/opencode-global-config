@@ -59,11 +59,11 @@
   itens é anunciado no total e apresentado item por item, ou poucos
   relacionados por vez; nunca tudo de uma vez, salvo pedido.
 - Entrega vai completa: densa e no formato pedido, sem as regras de ritmo
-  da conversa.
+  da conversa; relatos entre agentes e evidências também permanecem
+  completos.
 - O ritmo de uma decisão dependente por resposta e os blocos progressivos
   valem para a conversa decisória com o humano e substituem a orientação
-  anterior de volume nesse contexto. Entregas solicitadas, relatos entre
-  agentes e evidências permanecem completos.
+  anterior de volume nesse contexto.
 - Numa pergunta, preserve primeiro o contexto e a consequência da escolha;
   distribua por turnos apenas decisões independentes.
 - Resumo fiel: só atribua ao humano decisão, fato ou preferência que ele

@@ -3314,3 +3314,69 @@ Nenhum bloqueante. Ressalvas (melhoria, não bloqueantes):
       subseção `### Verificação de artefatos de documentação`
       permanece válida para o domínio sec; ferramenta de terceiro)
 
+## Revisão de forma do AGENTS.base.md (eng-software, 2026-10-04)
+
+Autorização do humano (2026-10-04): revisão do `harness-conf/AGENTS.base.md`
+INTEIRO pela skill `writing-for-agents`. Regras: ajuste de forma aplica
+direto; achado que mude comportamento ou significado não aplica e volta ao
+humano. Sem push; `--only` para arquivos alheios.
+
+Escopo e método: leitura integral do arquivo (247 linhas antes da edição;
+17 seções) e aplicação do método (instrução verificável, palavra de
+condução, redundância entre bullets, no-op pruning, largura ≤ 120 colunas,
+estrutura preservada). Nenhum bloco gerenciado por terceiros no arquivo
+(grep por marcadores: zero ocorrências). A seção "Compactação de contexto"
+foi tratada como texto negociado (decisão governante de 2026-09-30 e
+emenda de 2026-10-04, registradas verbatim neste plano): nenhuma edição.
+O arquivo já incorpora redação anterior feita com o mesmo método (rascunhos
+da Task 8), o que explica o volume baixo de ajustes.
+
+Mudança de forma aplicada (1):
+
+- Seção "Concisão": a frase "Entregas solicitadas, relatos entre agentes e
+  evidências permanecem completos." (fim do bullet do ritmo) repetia a
+  regra de completude do bullet "Entrega vai completa", que é a fonte
+  única dessa regra. Fundida nele como "; relatos entre agentes e
+  evidências também permanecem completos." As três categorias (entrega,
+  relatos entre agentes, evidências) seguem cobertas; significado
+  preservado.
+
+Correções mecânicas: nenhuma necessária (0 linhas com mais de 120 colunas,
+verificado com awk; nenhum typo encontrado).
+
+Achados comportamentais pendentes de decisão do humano (4; nada aplicado):
+
+1. `### Concisão` · oração "distribua por turnos apenas decisões
+   independentes" (bullet "Numa pergunta...") duplica e tensiona com o
+   bullet "Uma decisão dependente por resposta" (que manda apresentar
+   dependentes uma por turno e permite agrupar até quatro independentes em
+   uma mensagem) · cortar ou reescrever exige decidir qual leitura vale;
+   hoje há duas leituras conflitantes da mesma regra.
+2. `### Concisão` · cláusula "substituem a orientação anterior de volume
+   nesse contexto" (bullet do ritmo) não tem referente no arquivo · cortar
+   (sedimento sem efeito) ou nomear o que ela supersede (se for o bullet
+   "Menor é melhor", em caso de conflito) muda a resolução de conflito
+   entre bullets.
+3. `### Escrita natural` + `### Tom natural` · humanizer-br e
+   portugues-tecnico-controlado têm gatilhos sobrepostos ("specs, docs,
+   texto denso/técnico") · para uma spec, a escolha da skill fica sem
+   critério · delimitar gatilhos ou definir precedência é decisão de
+   comportamento.
+4. `### Perfil do Humano` · "não explique conceitos básicos desses
+   domínios" é negação; o método prefere formulação positiva ("use jargão
+   sem cerimônia" já a implica) · converter pode enfraquecer a guarda;
+   manter custa pouco · decisão humana.
+
+### Evidências (eng-software) — REVISÃO DE FORMA (2026-10-04)
+
+- [x] Escopo: arquivo inteiro, 17 seções; método writing-for-agents
+- [x] Mudanças de forma: 1 (fusão de duplicata na seção Concisão)
+- [x] Correções mecânicas: 0 necessárias; 0 linhas com mais de 120 colunas
+- [x] Achados comportamentais: 4 listados, 0 aplicados
+- [x] Suíte: `.venv/bin/pytest -m all` verde (942 passed, 31 deselected,
+      0 failed, WSL, 2026-10-04)
+- [x] Análise estática: ruff sem achados
+- [x] Bootstrap: `configurar-repo.sh --yes` executado; AGENTS.md global
+      regenerado no user-space
+- [x] Commit único: base + plano (Conventional Commits; sem push)
+
