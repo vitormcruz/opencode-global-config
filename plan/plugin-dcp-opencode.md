@@ -3367,6 +3367,21 @@ Achados comportamentais pendentes de decisão do humano (4; nada aplicado):
    sem cerimônia" já a implica) · converter pode enfraquecer a guarda;
    manter custa pouco · decisão humana.
 
+Desfecho (decisão do humano, 2026-10-04): achados 1, 2 (opção A) e 3
+aplicados com aprovação humana; achado 4 mantido como está.
+
+1. Aplicado: oração "distribua por turnos apenas decisões independentes"
+   cortada do bullet "Numa pergunta..." (Concisão).
+2. Aplicado (opção A): cláusula "substituem a orientação anterior de
+   volume nesse contexto" cortada do bullet do ritmo (Concisão).
+3. Aplicado: gatilho do humanizer-br delimitado a texto denso para o
+   humano na conversa (respostas longas, comunicações importantes);
+   gatilho do portugues-tecnico-controlado delimitado a artefato técnico
+   consumido fora da conversa (procedimento, runbook, doc de sistema,
+   mensagem de erro, doc bilíngue).
+4. Mantido: "não explique conceitos básicos desses domínios" permanece
+   como está (guarda preservada).
+
 ### Evidências (eng-software) — REVISÃO DE FORMA (2026-10-04)
 
 - [x] Escopo: arquivo inteiro, 17 seções; método writing-for-agents
@@ -3376,6 +3391,21 @@ Achados comportamentais pendentes de decisão do humano (4; nada aplicado):
 - [x] Suíte: `.venv/bin/pytest -m all` verde (942 passed, 31 deselected,
       0 failed, WSL, 2026-10-04)
 - [x] Análise estática: ruff sem achados
+- [x] Bootstrap: `configurar-repo.sh --yes` executado; AGENTS.md global
+      regenerado no user-space
+- [x] Commit único: base + plano (Conventional Commits; sem push)
+
+### Evidências (eng-software) — DESFECHO DOS ACHADOS (2026-10-04)
+
+- [x] Edições aplicadas: 4 (achado 1; achado 2 opção A; achado 3 nas
+      seções Escrita natural e Tom natural); nada mais alterado no
+      `harness-conf/AGENTS.base.md`
+- [x] Desfecho registrado: achados 1, 2 (opção A) e 3 aplicados com
+      aprovação humana; achado 4 mantido como está
+- [x] Suíte: `.venv/bin/pytest -m all` verde (942 passed, 31 deselected,
+      0 failed, WSL, 2026-10-04)
+- [x] Análise estática: ruff sem achados; 0 linhas novas com mais de 120
+      colunas (2 longas pré-existentes no plano, fora do diff)
 - [x] Bootstrap: `configurar-repo.sh --yes` executado; AGENTS.md global
       regenerado no user-space
 - [x] Commit único: base + plano (Conventional Commits; sem push)

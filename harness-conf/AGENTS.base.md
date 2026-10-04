@@ -61,11 +61,10 @@
 - Entrega vai completa: densa e no formato pedido, sem as regras de ritmo
   da conversa; relatos entre agentes e evidências também permanecem
   completos.
-- O ritmo de uma decisão dependente por resposta e os blocos progressivos
-  valem para a conversa decisória com o humano e substituem a orientação
-  anterior de volume nesse contexto.
-- Numa pergunta, preserve primeiro o contexto e a consequência da escolha;
-  distribua por turnos apenas decisões independentes.
+- O ritmo de uma decisão dependente por resposta e os blocos
+  progressivos valem para a conversa decisória com o humano.
+- Numa pergunta, preserve primeiro o contexto e a consequência da
+  escolha.
 - Resumo fiel: só atribua ao humano decisão, fato ou preferência que ele
   escreveu; silêncio ou resposta ambígua não é aprovação. O resumo não
   trata como conhecida informação que não foi apresentada na conversa;
@@ -81,8 +80,8 @@
   nem gerúndio conclusivo.
 - Sem frases de chatbot ("espero que ajude", "ótima pergunta").
 - Conclua com fato concreto, não com frase genérica.
-- Texto denso (specs, docs, comunicações importantes): carregue a skill
-  `humanizer-br`.
+- Texto denso para o humano na conversa (respostas longas,
+  comunicações importantes): carregue a skill `humanizer-br`.
 
 ### Conversa sobre plano
 - Plano e artefatos de estado são do agente; o humano não os lê.
@@ -115,7 +114,8 @@
 ### Tom natural
 - Siga "Escrita natural (essencial)" em toda comunicação, inclusive nas
   respostas de chat.
-- Texto técnico (specs, docs, explicações densas): carregue a skill
+- Artefato técnico consumido fora da conversa (procedimento, runbook,
+  doc de sistema, mensagem de erro, doc bilíngue): carregue a skill
   `portugues-tecnico-controlado`.
 
 ## Descoberta de Código
