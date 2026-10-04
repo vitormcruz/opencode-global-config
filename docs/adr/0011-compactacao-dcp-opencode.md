@@ -42,6 +42,12 @@ definida por capacidade do harness, sem enumerar produtos:
    essencial em arquivo e segue em sessão nova, lendo só o que importa;
    não pede compactação ao humano.
 
+O julgamento é inclinado pelo tamanho do contexto, estimado sem
+medidor: passado ~150k tokens, o desperdício cresce e cada fronteira
+de etapa seguinte dá mais peso à compactação; aos 200k tokens, o
+agente assume desperdício e comprime se necessário. Os degraus são
+peso no julgamento do agente, nunca gatilho automático.
+
 No OpenCode, o `dcp.jsonc` canônico não configura nenhum gatilho
 operante: os limites de contexto do plugin existem apenas como valores
 inertes (inatingíveis, portanto sem nudges) e o modo manual do plugin

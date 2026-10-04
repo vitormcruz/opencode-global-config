@@ -169,6 +169,12 @@
 - Comprima por decisão própria quando o contexto estiver grande e o
   conteúdo antigo já não servir à tarefa corrente, sem esperar limite
   ou aviso.
+- A inclinação cresce com o contexto: o desperdício também cresce.
+  Estime o tamanho sem medidor (volume de arquivos lidos, tamanho
+  das saídas de ferramentas, número de turnos); passado ~150k
+  tokens, assume desperdício crescente: dê mais peso à compactação
+  em cada fronteira de etapa seguinte; aos 200k tokens, assume
+  desperdício e comprima de fato se necessário.
 - Com tool de compactação que preserve o histórico no harness,
   use-a: comprima você mesmo os trechos antigos em resumo, sem apagar
   o histórico.
