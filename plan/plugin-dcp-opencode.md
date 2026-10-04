@@ -1,13 +1,11 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: TESTES — C3 PASS (Fases 0-3 + Task 10 concluídas; revisão do rev
-APROVADA COM RESSALVAS com 2 melhorias remediadas; materialização no
-user-space confirmada com smoke de produção ok). Em curso no workflow:
-agregador testes-produto (qa), roteiro manual do sec e piloto natural
-(C4, QA-ACC-1) com dados a partir do primeiro restart do OpenCode pelo
-humano; depois Tasks 11-13. CALIBRAÇÃO (2026-09-30, humano):
-`maxContextLimit` 100000 → 175000, `minContextLimit` 50000 mantido;
-ver `## Calibração do maxContextLimit (eng-software, 2026-09-30)`.
+Status: VALIDAÇÃO FUNCIONAL EM CURSO — design final de compactação
+por decisão do agente, SEM limite fixo de tokens (decisão humana de
+2026-09-30; ver `## Decisão governante`). Fases 0-3 concluídas,
+C3 PASS, materialização no user-space confirmada. Restante: validação
+funcional comportamental (eventos iniciados pelo agente + fallback) e
+fechamento do ciclo.
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -18,6 +16,156 @@ e exclusões sempre exigem humano).
 
 Histórico de controle (2026-09-27): "esperar para tudo" vigorou até a
 decisão de estender o ciclo.
+
+## Decisão governante (2026-09-30): compactação sem limite fixo
+
+Literal do humano (2026-09-30, aprovação da refação do mecanismo):
+
+> NÃO QUERO LIMITE FIXO DE TOKENS. Eu só quero que o agente possa
+> chamar a compressão, e quero que ele seja orientado a fazer quando o
+> contexto estiver grande, sem informações mais relevantes para o que
+> ele está fazendo agora. Se ele puder fazer automaticamente, ok, se
+> não, ele pede ao humano, já orientando a mensagem de compactação.
+
+Política aprovada, por CAPACIDADE do harness (sem enumerar produtos):
+
+1. Tool de compactação que preserva o histórico: o agente comprime por
+   decisão própria, quando o contexto está grande e o conteúdo antigo
+   já não serve à tarefa corrente, sem esperar limite ou aviso.
+2. Só comando manual de compactação: o agente pede ao humano já com a
+   mensagem de compactação redigida.
+3. Sem compactação ao alcance do agente: salva o estado essencial em
+   arquivo e segue em sessão nova; não pede compactação ao humano.
+
+Desdobramentos desta decisão (aplicados em 2026-10-04):
+
+- `harness-conf/dcp.jsonc` sem nenhum parâmetro numérico de gatilho de
+  contexto e com `manualMode.enabled = true`: a compressão acontece só
+  por chamada do agente; nudges não existem.
+- ADR-0011 reescrito do zero no design certo (sem menção a gatilho
+  numérico, calibração ou evolução dele), com fixture atualizada.
+- Seção "Compactação de contexto" do `harness-conf/AGENTS.base.md`
+  substituída pela escada por capacidade (texto verbatim acima).
+- Toda passagem deste plano que trate gatilho por limite de contexto
+  (calibração de valores, posicionamento de gatilho do plugin contra o
+  nativo, ajuste de limites por modelo, literais numéricos de banda)
+  está SUPERADA por esta decisão, inclusive nas subseções históricas
+  de especialistas; onde o texto executável dependia disso, recebeu
+  anotação explícita de supersessão.
+
+Escopo da refação aprovado pelo humano em 2026-09-30 (executado em
+2026-10-04): refação completa do mecanismo; ADR sem histórico (design
+certo como se o gatilho numérico nunca tivesse existido); plano sem
+nada disso; política por capacidade; teste funcional refeito. Sem
+push; `--only` para arquivos alheios; parar só em bloqueante.
+
+EMENDA de execução (2026-10-04, evidência do plugin 3.1.15): o
+rascunho de config do briefing (`manualMode.enabled = true`) é
+inexequível para o requisito central. No plugin, o modo manual não só
+desliga o gatilho automático como BLOQUEIA a execução da tool pelo
+agente até que o humano rode `/dcp-compress` (o pipeline recusa com
+"Do not retry until `<compress triggered manually>` appears"; o único
+setter de `compress-pending` é o comando). Evidência: primeira sessão
+do sandbox — o agente tentou `compress` seguindo a política e o plugin
+recusou. Config final que cumpre o literal do humano: modo manual
+DESLIGADO (ausente do `dcp.jsonc`) e limites de contexto inertes
+(`maxContextLimit`/`minContextLimit` = 999999999, inatingíveis: o
+caminho de nudge nunca dispara; `overMinLimit` só alimenta nudge,
+conferido no código). O teste, o ADR-0011, a fixture e o README foram
+emendados para este desenho.
+
+## Validação funcional (design sem limite fixo, 2026-10-04)
+
+Critérios comportamentais da decisão governante (QA-ACC-1 redefinido).
+Ambiente: sandbox `/tmp/opencode/dcp-spike/` (FORA do repo),
+`XDG_CONFIG_HOME=/tmp/opencode/dcp-spike/xdg`,
+`OPENCODE_CONFIG_DIR=.../xdg/opencode`, server headless
+`opencode serve --port 4987/4988`, modelo
+`zai-coding-plan/glm-5.3-flash`, config de projeto `.opencode/dcp.jsonc`
+igual ao canônico, `AGENTS.md` do projeto sandbox com a política nova
+(seção "Compactação de contexto" verbatim). Histórico persistido no
+sqlite real (modo somente leitura nas medições). Nenhum touch no
+user-space.
+
+Sessão COM plugin (`ses_...` sid2; server 4987):
+
+- (a) 3 eventos de `compress` iniciados pelo PRÓPRIO agente, todos
+  `completed`, nenhum por comando humano e nenhum por nudge
+  (0 ocorrências de "nudge" nos logs):
+  1. 18:22:33 UTC, faixa `m0003..m0007` (leituras integrais dos 6
+     arquivos de `dados/`, ~336 KB); resposta declara: "Compactação
+     aplicada antes de responder (histórico grande e já inútil à
+     tarefa, conforme AGENTS.md)".
+  2. 18:29:22 UTC, faixa `m0012..m0014` (leituras da auditoria 1).
+  3. 18:30:57 UTC, faixa `m0020..m0023` (leituras da auditoria 2).
+- (b) cada evento comprime blocos antigos (as leituras), nunca os
+  turnos recentes da conversa (faixas acima; turnos recentes ficam
+  fora).
+- (c) cada evento liberta contexto de verdade (série step-finish,
+  `input + cache.read + cache.write`):
+  1. 103.307 → 11.414 tokens (queda 88,9% do pico da sessão);
+  2. 43.665 → 12.302 (queda 71,8%);
+  3. 43.665 → 12.929 (queda 70,4%).
+- Julgamento reverso correto: numa rodada final com contexto pequeno e
+  pouco trabalho restante, o agente recusou a compressão ("contexto já
+  pequeno e pouco trabalho restante, custo supera a economia,
+  conforme AGENTS.md").
+- Integridade: histórico persistido completo (12 mensagens na sessão
+  no sqlite); sumário do evento 1 revisado, coerente com o conteúdo
+  comprimido.
+
+Sessão SEM plugin (fallback; server 4988, config sem DCP, mesma
+política no `AGENTS.md`):
+
+- (d) demonstração do degrau sem tool. Rodada 1: o agente escolheu o
+  degrau "salvar estado em arquivo" (`estado-sessao.md` na raiz) por
+  não saber da existência de comando manual. Rodada 2 (fato do
+  ambiente informado: sem tool para o agente; `/compact` existe, só o
+  humano executa): o agente pediu ao humano com a mensagem de
+  compactação REDIGIDA, literal:
+
+  > Por favor, execute `/compact` com a seguinte mensagem de
+  > compactação: Comprimir todo o histórico anterior às Fases 2–3: as
+  > leituras integrais dos seis arquivos de `dados/` (2400 linhas de
+  > registros) e os despachos das fases 1 e 2. Preservar apenas: (1)
+  > Fase 1 concluída — arquivos lidos integralmente, conteúdo
+  > irrelevante para tarefas futuras, não reler nem reinsira; (2)
+  > Fase 2 concluída — compactação feita via `estado-sessao.md` na
+  > raiz do projeto, que é a única fonte de estado; (3) regra do
+  > AGENTS.md de localizar antes de ler e não reinserir
+  > arquivos/logs completos. Manter esta instrução e a resposta a ela
+  > no contexto.
+
+Veredito da validação funcional: PASS nos quatro critérios, com a
+ressalva de que o critério (a) em SESSÕES REAIS (uso natural pós
+restart do OpenCode pelo humano) segue em coleta: os 3 eventos acima
+são de sandbox dirigido; a contagem natural continua pela consulta de
+monitoramento já registrada na fase TESTES.
+
+Verificação de artefatos de documentação: o `docs/README.md` não
+registra compactação nem plugin (checado no ciclo anterior); nenhum
+artefato de spec de domínio a criar nesta fase além do ADR-0011
+(refeito) e da fixture Concordion (emendada), já cobertos no commit
+de feat.
+
+### Evidências (eng-software) — VALIDAÇÃO FUNCIONAL (2026-10-04)
+
+- [x] Config final no canônico: sem modo manual, limites inertes
+      999999999, `allow`, `range`, `protectUserMessages false`,
+      `allowSubAgents true`, `autoUpdate false`
+- [x] Teste de spec emendado (2 ciclos red→green na mesma passagem:
+      primeiro para a config do briefing, depois para a config
+      emendada pela evidência do plugin)
+- [x] Suíte: `.venv/bin/pytest -m all` e ruff executados após a
+      emenda final (ver Evidências de construção abaixo)
+- [x] Fixture Concordion `Adr0011Fixture`: gradle backend verde
+- [x] (a) 3 eventos iniciados pelo agente no sandbox, 0 nudges
+- [x] (b) faixas só sobre blocos antigos; (c) quedas 88,9% / 71,8% /
+      70,4%; recusa correta quando não compensa
+- [x] (d) fallback com mensagem de compactação redigida (literal
+      registrada acima)
+- [ ] (a) em sessões reais: coleta natural pós-restart (consulta de
+      monitoramento existente)
 
 ## Insumo do humano (2026-09-27)
 
@@ -160,10 +308,9 @@ Mapa definitivo (humano, 2026-09-28; provider sempre zai):
    (caminho QA-ACC-5 com `allow`). Divergência eng (allow) vs sec (ask
    inicial) resolvida pelo lado da engenharia; `deny` segue como rollback
    instantâneo.
-6. RESOLVIDA (2026-09-27, humano): defaults no piloto (`maxContextLimit`
-   100000 / `minContextLimit` 50000); limites de PRODUÇÃO por modelo
-   (`modelMaxLimits`/`modelMinLimits`) calibrados no gate C4 com os dados
-   medidos, antes do rollout geral (decisão de intenção registrada).
+6. SUPERSEDED (2026-09-30, humano): a decisão sobre gatilho numérico
+   de contexto deixou de existir; a compactação não tem limite fixo de
+   tokens e é chamada por decisão do agente. Ver `## Decisão governante`.
 7. RESOLVIDA (2026-09-27, humano): spec com versão fixa
    (`@tarquinen/opencode-dcp@X.Y.Z`, sem autoUpdate), com acréscimo do
    humano: criar rotina de verificação e atualização de versões defasadas
@@ -180,8 +327,10 @@ Mapa definitivo (humano, 2026-09-28; provider sempre zai):
    reconsulta ao ai-memory.
 10. RESOLVIDA (2026-09-27, humano): sessão longa natural no piloto (opção
     a do qa); sem thresholds reduzidos como instrumento.
-11. RESOLVIDA (2026-09-27, humano): literais do QA-ACC-1 endossados: ≥ 20%
-    de queda por evento, média ≥ 37%, payback ≤ 3 steps.
+11. SUPERSEDED (2026-09-27 endossada; 2026-09-30 suplantada): os
+    literais numéricos de queda média e payback deixaram de ser
+    critério; a validação passou a ser comportamental (ver
+    `## Decisão governante` e `## Validação funcional`).
 12. REGISTRADA (2026-09-27, humano, na revisão do plano): princípio de
     simplicidade — comportamento o mais próximo possível do padrão do
     DCP; sem mecanismos de proteção ou integrações inventadas. Efeitos:
@@ -365,8 +514,7 @@ da Pergunta 12 aplicadas na revisão do plano). Nenhum campo
 |---|---|
 | `compress.permission` | `allow` já no spike (Pergunta 5); auditoria pós-fato no sqlite (QA-ACC-5); `deny` = rollback |
 | `compress.mode` | `range` (Pergunta 4) |
-| `compress.maxContextLimit` | `100000` no piloto; limites de produção por modelo calibrados no gate C4 (Pergunta 6) |
-| `compress.minContextLimit` | `50000` no piloto; limites de produção por modelo calibrados no gate C4 (Pergunta 6) |
+| gatilho de contexto | NENHUM: compactação sem limite fixo de tokens, por decisão do agente; `manualMode.enabled = true` (decisão governante 2026-09-30) |
 | `compress.protectUserMessages` | `false` (default; Pergunta 9 revertida pela 12; SEC-08 superado) |
 | `compress.protectedTools` | REMOVIDO (Pergunta 12; histórico da Pergunta 4: `memory_query`, `memory_read_page`) |
 | `compress.protectedFilePatterns` | REMOVIDO (Pergunta 12; histórico: `plan/**` do SEC-07, superado) |
@@ -606,23 +754,26 @@ Task 11: medir e comparar.
 - Escopo: M.
 
 Checkpoint C4 (gate de adoção):
-- Decisão: adotar, ajustar thresholds ou reverter. Critério explícito:
-  se os tokens não caírem ou houver instabilidade, rollback; não afinar
-  às cegas.
+- Decisão (SUPERSEDED pela decisão governante de 2026-09-30 no que
+  dependia de gatilho numérico; substituído pela validação funcional
+  comportamental, seção `## Validação funcional`): adotar ou reverter
+  pelos critérios comportamentais (eventos iniciados pelo agente,
+  blocos antigos, queda ≥ 20% do total, fallback demonstrado).
 
 #### Fase 5: Rollout geral e fechamento
 
 Task 12: generalizar, documentar e fazer a retro.
-- Descrição: aplicar os limites calibrados de produção por modelo
-  (Pergunta 6, decididos no C4 com os dados medidos) em
-  `harness-conf/dcp.jsonc` (`modelMaxLimits`/`modelMinLimits`), com
-  commit e bootstrap (materialização no user-space); se a Pergunta 3
-  for global, comunicar o que muda nos demais projetos (nudges, tool
-  compress); consolidar a documentação; registrar lições para o ciclo
-  vizinho de otimização de custo.
+- Descrição (SUPERSEDED em parte pela decisão governante de
+  2026-09-30: NÃO há mais limites calibrados por modelo a aplicar; o
+  plugin não tem gatilho numérico): aplicar o restante do fechamento
+  em `harness-conf/dcp.jsonc` com commit e bootstrap (materialização
+  no user-space); comunicar o que muda nos demais projetos (tool
+  `compress` por decisão do agente, sem nudges); consolidar a
+  documentação; registrar lições para o ciclo vizinho de otimização de
+  custo.
 - Critérios de aceitação:
-  - [ ] limites de produção por modelo aplicados no
-    `harness-conf/dcp.jsonc`, com commit e bootstrap executado;
+  - [ ] fechamento do `harness-conf/dcp.jsonc` (estado final do
+    design) commitado, com bootstrap executado;
   - [ ] documentação final coerente (README, AGENTS.base.md, ADR);
   - [ ] itens pendentes em backlog (ex.: pin da spec do quota plugin,
     risco aceito pré-existente citado pelo sec).
@@ -1470,9 +1621,11 @@ dos requisitos 1 a 11 inalterado.
 - **SEC-04** (bloqueante). Spec com versão fixa e reexecução do checklist
   a cada bump (bump é nova importação; regra do repo). Risco:
   comportamento ou egress muda sem aviso.
-- **SEC-05** (bloqueante para adoção). Thresholds do DCP posicionados
-  para disparar antes do `compaction.auto` nativo (DCP primário; nativo
-  como rede de segurança). Risco: duplo sumário concorrente.
+- **SEC-05** (SUPERADO pela decisão governante de 2026-09-30; texto
+  histórico). Posicionamento de thresholds do DCP contra o gatilho do
+  `compaction.auto` nativo. Sem gatilho numérico no plugin (modo
+  manual), não existe nada a posicionar; o nativo segue como rede de
+  segurança e nenhum `compress` do DCP é provocado por limite.
   Instrumento de verificação (achado 3 do rev), em dois níveis:
   - Por construção, na Fase 3 (gate C3): comparar no config materializado
     os thresholds do DCP (`maxContextLimit`/`minContextLimit` e, após a
@@ -1880,14 +2033,18 @@ Literais numéricos são valores de veredito (Pergunta 11). Origem: ponto
 (~88,6k para ~55,4k tokens/chamada), payback ~1,1 chamada (Task 12 do
 ciclo vizinho, 2026-09-23).
 
-- **QA-ACC-1 — queda de contexto após `compress`** (fonte: série
-  step-finish da sessão do piloto):
-  - por evento: `(P0−P1)/P0 ≥ 20%`, sendo P0 o último step-finish
-    antes da tool `compress` e P1 o primeiro depois;
-  - média dos eventos ≥ 37% (paridade com `/compact` nativo);
-  - payback ≤ 3 steps: menor k com `k·(P0−P1) ≥` custo do evento
-    (`output + reasoning` dos steps entre o nudge e o fim do
-    compress).
+- **QA-ACC-1 — compactação por decisão do agente (comportamental;**
+  **redefinido pela decisão governante de 2026-09-30;** fonte: sessões
+  reais e sandbox):
+  - ≥ 3 eventos de `compress` iniciados pelo PRÓPRIO agente em sessões
+    reais (sem comando do humano, sem nudge: nudges não existem);
+  - cada evento comprime blocos antigos, não os turnos recentes da
+    conversa;
+  - cada evento liberta contexto de verdade: queda ≥ 20% do total da
+    sessão, medida na série step-finish
+    (`input + cache.read + cache.write`);
+  - uma demonstração do degrau sem tool: o agente pede ao humano a
+    compactação já com a mensagem redigida (o que comprimir e como).
 - **QA-ACC-2 — prompt cache não degradado** (fonte: `cache.read`/
   `cache.write` por step):
   - em regime estável (≥ 10 steps sem compress): taxa média de acerto
@@ -1909,7 +2066,10 @@ ciclo vizinho, 2026-09-23).
     step-finish da própria filha (substitui o antigo "0 tools
     `compress` em sessões filhas", que pressupunha `false`);
   - sem crash ou corrupção nas sessões filhas.
-- **QA-ACC-4 — nudges sem loop** (fonte: log de eventos do piloto):
+- **QA-ACC-4 — nudges sem loop** (SUPERSEDED pela decisão governante
+  de 2026-09-30: em modo manual não existe gatilho nem nudge; o critério
+  operacional equivalente é "nenhum nudge observado em sessão nenhuma";
+  fonte: log de eventos):
   - ≥ 1 nudge observado acima de `maxContextLimit` (contagem
     registrada);
   - loop = ≥ 3 nudges consecutivos sem compressão eficaz entre eles
@@ -2013,16 +2173,16 @@ Critérios de aborto do piloto (disparam contenção e rollback):
 
 | ID | Gatilho |
 |---|---|
-| QA-ABT-1 | QA-ACC-1 falha em todos os eventos (nenhuma queda ≥ 20%) |
+| QA-ABT-1 | validação funcional falha: menos de 3 eventos iniciados pelo agente, evento comprimindo turnos recentes, ou nenhuma queda ≥ 20% do total da sessão |
 | QA-ABT-2 | loop de nudge (definição do QA-ACC-4) |
 | QA-ABT-3 | erro de sessão atribuível ao DCP (crash, corrupção, sessão inutilizável) |
 | QA-ABT-4 | regressão multiagente: spawn falha, sessão filha fora do modelo chamado ou filha com crash/corrupção |
 | QA-ABT-5 | degradação sustentada de cache (fall do QA-ACC-2) |
 | QA-ABT-6 | qualquer bloqueante SEC violado (encaminhar ao sec) |
 
-Regra de ajuste (espelha o C4): uma única rodada de reajuste de
-thresholds com hipótese documentada, se a falha for isoladamente de
-threshold; segunda rodada sem verde → rollback (não afinar às cegas).
+Regra de ajuste (SUPERSEDED pela decisão governante de 2026-09-30:
+não existe mais ajuste de gatilho numérico; falha na validação
+comportamental devolve ao design ou vira rollback).
 
 #### Condições pass/fall dos checkpoints C0-C5
 
@@ -2048,9 +2208,10 @@ Objetivação proposta pelo qa; não substitui a redação da engenharia.
   da construção sem achado bloqueante; Tasks 7-9 com checklists
   concluídos; materialização no user-space confirmada (spec no
   opencode.json; dcp.jsonc no destino). (fall): qualquer item pendente.
-- **C4** (pass): QA-ACC-1 a 5 verdes na amostragem mínima. (fall):
-  QA-ABT-1 a 6; ou falha só de threshold (uma rodada de ajuste);
-  segunda rodada sem verde → rollback.
+- **C4** (pass; SUPERSEDED pela decisão governante de 2026-09-30 no
+  critério antigo de gatilho numérico): validação funcional
+  comportamental verde (seção `## Validação funcional`). (fall):
+  QA-ABT-1 a 6.
 - **C5** (pass): Task 12 com checklist concluído; evidências QA
   persistidas no plano; procedimento de rollback validado (executado ou
   verificado por inspeção); pendências em backlog (decisão final do
@@ -3136,91 +3297,3 @@ Nenhum bloqueante. Ressalvas (melhoria, não bloqueantes):
       subseção `### Verificação de artefatos de documentação`
       permanece válida para o domínio sec; ferramenta de terceiro)
 
-## Calibração do maxContextLimit (eng-software, 2026-09-30)
-
-### Decisão humana
-
-Em 2026-09-30 o humano decidiu (override da P6, calibração antecipada):
-`maxContextLimit` de 100000 para **175000**, mantendo
-`minContextLimit: 50000`. Motivo: cascata de compressões no mesmo round
-observada na sessão real "Otimização de custo: início da fase DEVFLOW"
-(banda 100k/50k considerada pequena). A P6 continua registrada como a
-decisão do piloto (100k/50k); esta seção é nota de calibração, não
-reescrita de histórico. Os limites de produção por modelo seguem
-candidatos a calibração no gate C4.
-
-### Dependências verificadas do valor 100000
-
-- `tests/harnesses/test_opencode_dcp.py`
-  (`test_canonical_dcp_jsonc_pins_decided_configuration`): assert
-  `maxContextLimit == 100000` atualizado para `175000`, com comentário
-  curto de calibração (decisão humana 2026-09-30; padrão do piloto era
-  100k/50k). `minContextLimit == 50000` permanece.
-- Fixture Concordion do ADR-0011 (`Adr0011Fixture.groovy`): sem
-  dependência do valor (asserts de plugin pinado, `allow`, `autoUpdate
-  false`, destinos e README). Nada a mudar.
-- `docs/adr/0011-compactacao-dcp-opencode.md`: não cita 100000/100k
-  (menção genérica a "cruza o limite"). Nada a mudar.
-- `README.md`: não cita 100000/100k (só referencia `dcp.jsonc` e o
-  rollback `deny`). Nada a mudar.
-- Menções históricas a 100k neste plano: mantidas (histórico).
-
-### User-space (symlink)
-
-- `~/.config/opencode/dcp.jsonc` é symlink ao canônico
-  `harness-conf/dcp.jsonc`; verificado com `grep maxContextLimit` logo
-  após o edit: reflete `175000` sem bootstrap.
-- Sessões já abertas mantêm a config carregada no start; só sessões
-  novas passam a operar com 175k/50k.
-
-### Evidência da cascata (QA-ACC-5, sqlite somente leitura)
-
-Sessão: "Otimização de custo: início da fase DEVFLOW"
-(`ses_f2f750021ffeLerqvDxJyLQYhN`). Cutoff da materialização
-`1790726700000` ms. Consultas: `part` com `data LIKE '%"compress"%'`
-e `json_extract(p.data,'$.tool') = 'compress'`, pós-cutoff; contexto
-aproximado por usage da API da mensagem que chama `compress` e da
-próxima mensagem `assistant` (input + cache.read + cache.write).
-
-5 chamadas `compress` pós-cutoff, todas `status = completed`
-(2026-09-30, horários UTC):
-
-| # | Hora | Gap | Msgs comprimidas | Contexto antes | Contexto depois |
-|---|------|-----|------------------|----------------|-----------------|
-| 1 | 20:07:10 | - | 34 | 108.774 | 111.235 |
-| 2 | 20:09:07 | 117 s | 3 | 111.235 | 127.012 |
-| 3 | 20:14:04 | 297 s | 4 | 127.012 | 116.856 |
-| 4 | 20:14:58 | 54 s | 7 | 116.856 | 115.025 |
-| 5 | 20:15:24 | 26 s | 9 | 115.025 | - |
-
-- Janela total: 8 min 14 s; gaps de 26 s e 54 s caracterizam eventos a
-  segundos de distância (cascata no mesmo round).
-- Contexto antes de cada chamada: sempre acima do max da época (100k):
-  108.774 / 111.235 / 127.012 / 116.856 / 115.025.
-- Variação entre chamadas consecutivas (efeito durável): +2,3%,
-  +14,2%, -8,0%, -1,6%. Nenhuma volta à banda (nada próximo do min
-  50k); o pico continuou subindo após compressões (127k no evento 3).
-- Ressalva de medição: usage da API não isola o efeito da compressão
-  (a chamada seguinte inclui novos turnos e resultados de tool); os
-  números medem a tendência, não o delta exato do sumário.
-
-### Itens de vigilância
-
-1. Se cascata no mesmo round persistir sob 175k/50k, candidatar
-   `minContextLimit` 75-90k no fechamento do C4 (decisão humana).
-2. As métricas do QA-ACC-1 passam a valer sob 175k/50k (baseline de
-   banda alterada; comparar contra 175k/50k, não contra 100k/50k).
-
-### Evidências (eng-software) — CALIBRAÇÃO
-
-- [x] Testes novos: 0 (ajuste de valor em assert existente; spec de
-      conteúdo atualizada por decisão humana)
-- [x] Testes totais: 942 passed, 31 deselected, 0 failed
-      (`.venv/bin/pytest -m all`, WSL, 2026-09-30; 1 warning
-      preexistente de flutuação de versão do plugin opencode-quota)
-- [x] Análise estática: `ruff check .` — All checks passed
-- [x] Regressão incremental: suíte completa executada após o edit
-- [x] Gate de refatoração: sem impacto no plano (ajuste de constante;
-      decisão e motivo registrados nesta seção)
-- [x] Symlink user-space reflete 175000 imediatamente (verificado)
-- [x] Commits: config+teste (atômico) e plano, sem push
