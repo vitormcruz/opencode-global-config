@@ -53,6 +53,23 @@ Desdobramentos desta decisão (aplicados em 2026-10-04):
   de especialistas; onde o texto executável dependia disso, recebeu
   anotação explícita de supersessão.
 
+Emenda da decisão governante (2026-10-04, humano): incomodação
+progressiva por tamanho de contexto. O julgamento do agente ganha peso
+de compactação conforme o contexto cresce: passado ~150k tokens,
+desperdício crescente (mais peso à compactação em cada fronteira de
+etapa); aos 200k tokens, assume desperdício e comprima de fato se
+necessário. Degraus de peso no julgamento, sem gatilho automático.
+Texto aplicado como bullet novo da seção "Compactação de contexto" do
+`harness-conf/AGENTS.base.md`, logo após o bullet "Comprima por
+decisão própria...":
+
+> A inclinação cresce com o contexto: o desperdício também cresce.
+> Estime o tamanho sem medidor (volume de arquivos lidos, tamanho
+> das saídas de ferramentas, número de turnos); passado ~150k
+> tokens, assume desperdício crescente: dê mais peso à compactação
+> em cada fronteira de etapa seguinte; aos 200k tokens, assume
+> desperdício e comprima de fato se necessário.
+
 Escopo da refação aprovado pelo humano em 2026-09-30 (executado em
 2026-10-04): refação completa do mecanismo; ADR sem histórico (design
 certo como se o gatilho numérico nunca tivesse existido); plano sem
