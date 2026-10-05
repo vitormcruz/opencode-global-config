@@ -1200,13 +1200,40 @@ fechamento.
 ### Fase 2: Teste prático em uso real
 
 - [ ] **Task 5: Sincronizar instalação oficial e testar em uso real.**
-  ANDAMENTO (2026-09-30): sincronização executada. Backup anterior em
+  ANDAMENTO: sincronização executada (2026-10-05; registro anterior
+  datava 2026-09-30 por erro). Backup anterior em
   `/tmp/opencode/backup-instalacao-20260930/` (AGENTS.md e opencode.json);
   bootstrap `--yes` regenerou o `AGENTS.md` global (186 → 263 linhas, md5
   `1d97518f...`), com as regras novas presentes, blocos gerenciados por
   terceiros (codebase-memory-mcp) preservados e `opencode.json` inalterado.
-  Symlinks de skills/agentes já apontavam para o repo. Pendente: teste
-  prático com `smart-planner` em sessão nova, tema do humano na hora.
+  Symlinks de skills/agentes já apontavam para o repo.
+
+  **Teste prático em andamento** (repo `investimentos`, sessão
+  `ses_ef246fe11ffeLsGKxRP50ns2lL`, tema "Modificações no relatório",
+  agente `smart-planner`, conduzido pelo humano). Observações parciais:
+
+  - Protocolo de perguntas funcionou: pergunta única com alternativas e
+    recomendação; agrupamento de autocontidas curtas; decisões
+    registradas com o conteúdo aprovado.
+  - Desvio central: respostas explicativas e propostas empacotadas;
+    quatro respostas entre ~1,2 e ~2,1 mil caracteres, violando as
+    regras vigentes de apresentação por partes e da checagem pré-envio.
+    Reclamação explícita do humano: "Vc escreveu muita coisa de uma
+    vez, não li tudo".
+  - Diagnóstico do humano: o modelo não consegue se auto-restringir
+    para dividir a explicação; prefere despejar tudo de uma vez.
+  - Efeito cascata relatado: dúvida no primeiro item de uma resposta
+    longa é lida como dúvida local; o agente presume leitura integral,
+    e o restante da resposta contamina o fluxo.
+  - Meta-observação: o próprio planejador (modelo maior) produziu
+    textão ao apresentar o diagnóstico deste episódio e foi corrigido
+    pelo humano; a falha não é exclusiva do modelo menor.
+  - Decisão do humano (2026-10-05): registrar sem ajuste de regra
+    agora; soluções serão pensadas de forma consolidada ao fim do
+    teste. Pendências acumuladas para consolidação: (a) reforço da
+    checagem pré-envio com exemplo de proposta multi-frente; (b) regra
+    de presunção de leitura na resposta à confusão (item questionado
+    não implica leitura do resto).
   - **Description:** após a aplicação revisada, sincronizar a
     instalação oficial do humano com tudo o que foi validado (as
     mudanças chegam juntas, uma única sincronização) e conferir que a
