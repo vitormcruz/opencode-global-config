@@ -1,6 +1,6 @@
 # Skill agent-introspection-debugging + rename harness-skills
 
-Status: REVISÃO DA CONSTRUÇÃO
+Status: TESTES
 
 ## Insumo do humano (cronologia)
 
@@ -189,11 +189,12 @@ via relatório de revisão e briefing do lote.
 | # | Severidade | Ação aplicada | Arquivos |
 |---|-----------|---------------|----------|
 | 1 | média | Pathspec da família ECC vigia também o LICENSE raiz copiado pelo sync; teste novo de detect (fixture git local) prova que mudança no LICENSE raiz aparece no relatório | `src/opencode_config/cli/skills_sync.py`; `tests/skills_mgmt/test_agent_introspection_family.py` |
-| 2 | baixa | `description_lang: pt-br` top-level: handler passa `extra_fields`; UPSTREAM.md realinhado (campo no cabeçalho, nota mantida na seção de adaptação); teste atualizado | `src/opencode_config/cli/skills_sync.py`; `harness-conf/skills/agent-introspection-debugging/UPSTREAM.md`; `tests/skills/test_agent_introspection_debugging.py` |
-| 3 | baixa | Teste novo: spec injetada sem handler conhecido levanta `SyncError` (guarda do branch `else` do dispatch) | `tests/skills_mgmt/test_sync.py` |
-| 4 | baixa | Identificadores de teste renomeados para o nome novo do comando | `tests/skills_mgmt/test_sync.py`; `tests/skills/test_writing_for_agents.py` |
-| 5 | baixa | `pip install -e .` regenerou os entry points; `opencode-skills` removido do `.venv/bin`; `harness-skills list --help` verificado | ambiente (`.venv`, não versionado) |
-| 6 | baixa | `local_skill.mkdir(parents=True, exist_ok=True)` antes do `copy2` do LICENSE | `src/opencode_config/cli/skills_sync.py` |
+| 2 | média | Registro da revisão de segurança da importação gravado pelo `sec` em seção preservada (`## Notas locais`), com data, escopo, método, veredito (limpo) e recomendação de revisar diff a cada sync | `harness-conf/skills/agent-introspection-debugging/UPSTREAM.md` |
+| 3 | baixa | `description_lang: pt-br` top-level: handler passa `extra_fields`; UPSTREAM.md realinhado (campo no cabeçalho, nota mantida na seção de adaptação); teste atualizado | `src/opencode_config/cli/skills_sync.py`; `harness-conf/skills/agent-introspection-debugging/UPSTREAM.md`; `tests/skills/test_agent_introspection_debugging.py` |
+| 4 | baixa | Teste novo: spec injetada sem handler conhecido levanta `SyncError` (guarda do branch `else` do dispatch) | `tests/skills_mgmt/test_sync.py` |
+| 5 | baixa | Identificadores de teste renomeados para o nome novo do comando | `tests/skills_mgmt/test_sync.py`; `tests/skills/test_writing_for_agents.py` |
+| 6 | baixa | `pip install -e .` regenerou os entry points; `opencode-skills` removido do `.venv/bin`; `harness-skills list --help` verificado | ambiente (`.venv`, não versionado) |
+| 7 | baixa | `local_skill.mkdir(parents=True, exist_ok=True)` antes do `copy2` do LICENSE | `src/opencode_config/cli/skills_sync.py` |
 
 - Notas locais do sec preservadas: `_write_upstream` mantém as seções
   `## Notas locais` e `## Adaptacao da description` na regeneração
@@ -214,3 +215,176 @@ via relatório de revisão e briefing do lote.
       (74 passed) antes da suíte completa.
 - [x] Gate de refatoração: cenário "nada muda"; refatoração sem impacto
       no plano.
+
+## Revisão das Correções
+
+Revisor: `rev` (instância nova, skill `code-review-and-quality`).
+Objeto: correções declaradas na seção anterior, verificadas nos commits
+`34e05d2` (código+testes+skill) e `94c5c45` (plano) via `git show` e leitura
+dos arquivos em HEAD. Data: 2026-10-05.
+
+### Veredicto por achado da Revisão da Construção
+
+| # | Achado original | Veredicto | Evidência curta |
+|---|-----------------|-----------|-----------------|
+| 1 | detect não vigiava o LICENSE raiz (média) | resolvido | `_skill_diff_paths` da família ECC retorna `("skills/{nome}/", "LICENSE")`; teste `test_detect_reports_change_in_root_license` (fixture git local) sinaliza mudança do LICENSE raiz no detect |
+| 2 | registro da revisão de segurança ausente (média) | resolvido | UPSTREAM.md tem `## Notas locais` com `### Revisão de segurança da importação` (data, escopo, método, veredito); `_write_upstream` extrai e reanexa `_local_notes_section`, então a seção sobrevive à regeneração |
+| 3 | `description_lang` divergente das irmãs (baixa) | resolvido | handler passa `extra_fields=["description_lang: pt-br"]`; UPSTREAM.md linha 5 com o campo top-level; `test_upstream_documents_ptbr_description_decision` agora checa o cabeçalho |
+| 4 | branch `else: raise SyncError` sem teste (baixa) | resolvido | `test_sync_rejects_family_without_known_handler` injeta spec desconhecida no dispatch e espera `SyncError` com "sem handler" |
+| 5 | identificadores de teste com nome velho (baixa) | resolvido | `test_harness_skills_entrypoint_is_registered` (tests/skills_mgmt/test_sync.py:38) e `test_skill_registrada_no_harness_skills` (tests/skills/test_writing_for_agents.py:86); `git grep` em rastreados sem `opencode-skills`/`opencode_skills` fora de plan/ |
+| 6 | entrypoint do `.venv` desatualizado (baixa) | resolvido | `.venv/bin/harness-skills` existe e executa `list --help`; `.venv/bin/opencode-skills` ausente |
+| 7 | `mkdir` ausente antes do `copy2` (baixa) | resolvido | `local_skill.mkdir(parents=True, exist_ok=True)` imediatamente antes de `shutil.copy2` do LICENSE no handler |
+
+### Achados desta revisão
+
+| # | Achado | Ação recomendada | Severidade |
+|---|--------|------------------|------------|
+| 1 | Desvio de documentação no plano: a tabela "Correções da Revisão da Construção" omite a linha do achado 2 (registro da revisão de segurança) e numera as demais de 1 a 6, desalinhada dos achados originais 1 a 7. A correção em si foi aplicada e verificada no UPSTREAM.md e no commit `34e05d2`; é apenas o registro na tabela que ficou incompleto. | Renumerar a tabela para 7 linhas conforme os achados originais na próxima edição do plano pelo eng-software | melhoria |
+
+Resolução: tabela renumerada para 7 linhas (achado 2 incluído como linha do `sec`)
+
+### Regressão
+
+- Suíte completa executada pelo rev (autorizado na tarefa):
+  `.venv/bin/pytest -m all` → 960 passed, 31 deselected (agent_eval exige
+  Docker), 1 warning, 201s. O warning é o monitor de flutuação do plugin
+  `@slkiser/opencode-quota` (4.10.6 → 5.0.1), pré-existente e alheio a
+  este lote.
+- Testes existentes não enfraquecidos: os diffs de `34e05d2` trocam nome do
+  executável e identificadores sem relaxar asserções (conferido linha a
+  linha no diff de testes).
+- Seções `## Notas locais` e `## Adaptacao da description` preservadas no
+  UPSTREAM.md em HEAD; largura até 120 colunas conferida nos 7 arquivos
+  tocados (awk sem achados).
+- Imports e sintaxe íntegros (suíte verde cobre os módulos tocados).
+
+### Veredicto
+
+[ ] Aprovado sem ressalvas
+[x] Aprovado com melhorias opcionais — 7/7 achados resolvidos, sem regressão;
+    1 achado novo de documentação do plano (melhoria, não bloqueante)
+[ ] Bloqueado — resolver achados bloqueantes antes de prosseguir
+
+### Evidências (rev)
+
+- [x] Artefatos lidos: plano (Revisão da Construção e Correções), diffs dos
+      commits `34e05d2` e `94c5c45`, `src/opencode_config/cli/skills_sync.py`
+      (handler, `_write_upstream`, `_skill_diff_paths`, dispatch), UPSTREAM.md
+      da skill, 4 arquivos de teste tocados.
+- [x] Plano aprovado consultado: sim.
+- [x] Checklist integrativo: verificação ponto a ponto dos 7 achados +
+      checagem de regressão (suíte, rename versionado, largura de linha,
+      preservação de seções do UPSTREAM.md, ambiente `.venv`).
+- [x] Achados desta revisão: 1 total (documentação do plano), 0 bloqueantes.
+- [x] Comandos: `git show`, `git grep`, `grep`, `awk`, `ls`, execução do
+      entrypoint `.venv/bin/harness-skills list --help`; suíte completa
+      executada uma única vez.
+
+## Evidências da Fase de Testes
+
+Executor: `qa`. Data/hora: 2026-10-05 08:45 (-03). Ambiente: WSL/Linux,
+Python 3.12.3 (`.venv`). Objeto do lote: importação da skill
+`agent-introspection-debugging` + rename `opencode-skills` →
+`harness-skills` + correções de revisão (commits `34e05d2`, `94c5c45`).
+
+### 1. Suíte completa do repo
+
+- Comando: `.venv/bin/pytest -m all -q`, seleção integral do ambiente
+  corrente (nenhuma redução).
+- Resultado: 960 passed, 0 failed, 31 deselected, 1 warning, 186.64s
+  (0:03:06).
+- Deselected: `-m agent_eval` (exige Docker + llama-server local
+  Qwen3-0.6B), deselect de ambiente declarado na ADR-0005, não lacuna do
+  lote. Nenhum `skip` simples apareceu no relatório.
+- Warning: monitor de flutuação do plugin `@slkiser/opencode-quota`
+  (4.10.6 → 5.0.1), pré-existente, alheio ao lote, já registrado na
+  revisão anterior.
+- Convergente com as duas execuções anteriores do lote (960 passed).
+
+### 2. Bateria por especialidade (`testes-produto`)
+
+- Investigação: o agregador (`src/opencode_config/product_tests/
+  aggregator.py`) executa as suítes `backend` e `seguranca`:
+  - backend: suíte pytest completa com gate de cobertura
+    (`--cov-fail-under=70`), ruff em src/scripts/testes-produto,
+    shellcheck (*.sh), PSScriptAnalyzer (*.ps1) e specs Concordion
+    backend;
+  - seguranca: gitleaks (segredos), pip-audit (dependências do `.venv`),
+    bandit (SAST) e specs Concordion seguranca.
+- Decisão de aplicabilidade — AMBAS se aplicam (lote de infra de repo:
+  CLI + skill + docs):
+  - backend: o lote altera código Python produtivo
+    (`src/opencode_config/cli/skills_sync.py`), entrypoint no
+    `pyproject.toml` e testes; gate de cobertura, lint e specs Concordion
+    backend se aplicam diretamente.
+  - seguranca: o lote importa conteúdo externo (skill do repo ECC) e toca
+    `src/`; varredura de segredos, auditoria de dependências e SAST são
+    gates de repo inteiro. A revisão de segurança manual do conteúdo
+    importado já foi feita pelo `sec` (registrada no UPSTREAM.md); aqui
+    rodou apenas a suíte automática, papel do `testes-produto`.
+- Execução: `.venv/bin/python testes-produto` (modo checkout, conforme
+  `testes-produto/README.md`) → exit 0, status `pass`.
+  - Findings: 1 `melhoria` (bandit:
+    `src/opencode_config/bootstrap/ai_memory.py:941`, "Audit url open for
+    permitted schemes"), pré-existente, fora do lote, não bloqueante.
+  - Zero findings bloqueantes; gate de cobertura 70% atendido (exit 0).
+- Suíte meta `testes-produto/tests/`: não aplicável — roda somente quando
+  os scripts de `testes-produto/` mudam; este lote não os tocou (justified,
+  não omissão silenciosa).
+
+### 3. Smoke do CLI renomeado
+
+- `harness-skills list` (user-space `~/.local/bin`): OK, 17 skills,
+  `agent-introspection-debugging` presente.
+- `harness-skills detect --help`: OK; usage lista
+  `agent-introspection-debugging` entre as 7 famílias de sync.
+- `.venv/bin/harness-skills list`: OK, mesma lista de 17 skills.
+- `.venv/bin/opencode-skills`: inexistente (confirmado com `test -e`).
+
+### Veredicto da fase
+
+APROVADO. Suíte completa verde em terceira execução convergente; bateria
+por especialidade pass sem achado bloqueante; smoke do rename OK.
+
+### Evidências (qa)
+
+- [x] Plano de testes: roteiro da fase executado conforme tarefa (suíte
+      integral + baterias por especialidade + smoke); nenhum teste manual
+      adicional planejado (nenhuma UI/RNF no escopo).
+- [x] Testes executados: 960 passed, 0 failed, 31 deselected (agent_eval/
+      Docker) + agregador `testes-produto` (backend + seguranca) exit 0.
+- [x] Cobertura: gate `--cov-fail-under=70` atendido no agregador; delta
+      numérico vs. baseline não mensurado (baseline não registrado no
+      plano).
+- [x] Cenários não cobertos: nenhum novo; `-m agent_eval` é deselect de
+      ambiente declarado, e a suíte meta não se aplica (scripts não
+      mudaram).
+- [x] Falhas a reportar: nenhuma (nenhum bloqueante; 1 melhoria bandit
+      pré-existente, fora do lote).
+
+### Validação do curador
+
+Veredito: EVIDÊNCIA VÁLIDA (validação documental, sem reexecução;
+2026-10-05, curador-produto).
+
+- Completude: suíte completa com comando, counts (960 passed, 0 failed,
+  31 deselected), tempo e warning justificado; agregador com comando,
+  exit 0, status `pass` e gate de cobertura 70% atendido; smoke do CLI
+  com 4 checagens e resultados. Quem não executou nada consegue
+  reconstituir o que rodou, quando (2026-10-05 08:45 -03) e em qual
+  ambiente (WSL/Linux, Python 3.12.3, `.venv`).
+- Decisões: aplicabilidade de backend e seguranca justificada (código
+  Python produtivo; conteúdo externo importado, gates de repo inteiro);
+  suíte meta justificada como não aplicável (scripts de `testes-produto/`
+  não mudaram no lote).
+- Consistência: 960 passed coerente nas três execuções do lote
+  (correções, revisão das correções, fase de Testes), com baseline 958 +
+  2 testes novos documentado; findings do agregador coerentes com o spec
+  de `docs/README.md#testes-por-especialidade` (bandit severidade média =
+  melhoria, não bloqueante; gate de cobertura = 70% bloqueante).
+- Rastreabilidade: todos os comandos citados na evidência.
+- Observação (melhoria, não invalida): em "Evidências (qa)", o item
+  Cobertura diz "baseline não registrado no plano"; no contexto, refere-se
+  ao percentual de cobertura (de fato ausente do plano). O baseline de
+  testes (958 → 960) está registrado. Redação ambígua, sem impacto no
+  veredicto.
