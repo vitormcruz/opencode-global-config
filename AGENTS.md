@@ -224,6 +224,17 @@ Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-espe
   seus testes (`tests/harnesses/`, `tests/lib/`). Verifique também o
   outro harness quando a mudança afetar o contrato entre plataformas.
 
+## Mapa do Produto e Artefatos Gerados
+
+- Neste projeto, `docs/README.md` é o Mapa do Produto e a fonte de verdade
+  dos elementos de especificação ativos.
+- `harness-conf/agents/default-artifacts/` contém artefatos gerados por este
+  projeto para provisionar e orientar outros projetos. Eles são saídas deste
+  repositório, mas não definem os agentes, workflows ou elementos de
+  especificação ativos deste produto.
+- Alterações no Mapa do Produto deste projeto não alteram esses artefatos
+  automaticamente. A evolução deles exige decisão e escopo próprios.
+
 ## Commits
 
 - Conventional Commits em PT-BR: `tipo(escopo): descrição curta`, tipos:
@@ -234,8 +245,15 @@ Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-espe
 
 ## Instruções por Agente
 
-Cada agente lê a própria subseção no início de qualquer
-tarefa. Esta seção não contém comando de suíte.
+Toda vez que um agente desta seção for utilizado, ele deve
+consultar a subseção com seu nome antes de executar a tarefa.
+Deve procurar instruções específicas para aquela utilização e
+cumpri-las quando existirem. A consulta vale tanto quando o
+agente é acionado pelo `devflow` quanto quando é chamado
+diretamente pelo humano.
+
+`SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
+instrução adicional. Esta seção não contém comando de suíte.
 
 ### eng-software
 

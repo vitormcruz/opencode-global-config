@@ -184,6 +184,42 @@ def test_devflow_gate_curadoria(repo_root: Path) -> None:
     assert "Tratar a curadoria agora?" in content
     assert "curador-produto" in content
     assert "docs/README.md" in content
+
+
+@pytest.mark.unit
+def test_devflow_defines_scope_before_creating_plan(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+
+    assert "## Definição de escopo antes do plano" in content
+    assert "Só depois que o humano confirmar que o escopo está definido" in content
+    assert "crie o Arquivo de Planejamento com `Status: VALIDAÇÃO`" in content
+
+
+@pytest.mark.unit
+def test_scope_workflow_is_independent_and_has_no_plan_contract(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "docs" / "workflow-definicao-escopo.md"
+    ).read_text(encoding="utf-8")
+    normalized = " ".join(content.split())
+
+    assert "devflow" not in content
+    assert "Arquivo de Planejamento" not in content
+    assert "seção Definição de Escopo do Mapa do Produto" in content
+    assert "nenhum arquivo é criado" in normalized
+
+
+@pytest.mark.unit
+def test_development_workflow_does_not_link_scope_workflow(
+    repo_root: Path,
+) -> None:
+    content = (
+        repo_root / "docs" / "workflow-agentes-dev.md"
+    ).read_text(encoding="utf-8")
+
+    assert "workflow-definicao-escopo.md" not in content
+    assert "O Arquivo de Planejamento só é criado depois que o escopo está" in content
     assert "lacuna" in content.lower()
 
 

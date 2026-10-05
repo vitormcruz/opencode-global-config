@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 EXECUTORS = ("dba", "front", "rev", "eng-software", "qa", "sec")
+INSTRUCTION_AGENTS = (*EXECUTORS, "curador-produto")
 
 
 def _agent_text(repo_root: Path, name: str) -> str:
@@ -34,14 +35,31 @@ def test_executors_do_not_run_suites_in_construction_or_review(
 
 
 @pytest.mark.unit
-def test_executors_read_own_instructions_at_task_start(
+def test_agents_consult_own_instructions_when_used(
     repo_root: Path,
 ) -> None:
-    for name in EXECUTORS:
-        content = _agent_text(repo_root, name)
-        assert "Instruções por Agente" in content, name
-        assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content, name
-        assert "início de qualquer tarefa" in content, name
+    for name in INSTRUCTION_AGENTS:
+        content = _flat(_agent_text(repo_root, name))
+        assert "instruções por agente" in content, name
+        assert "sempre que" in content and "for utilizado" in content, name
+        assert "antes de executar a tarefa" in content, name
+        assert "procure instruções específicas" in content, name
+        assert "sem instruções a pedido do humano" in content, name
+
+
+@pytest.mark.unit
+def test_workflow_defines_per_use_instruction_lookup(repo_root: Path) -> None:
+    workflow = _flat(
+        (repo_root / "docs/workflow-agentes-dev.md").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert "### 6. instruções por agente" in workflow
+    assert "toda vez que esse agente for utilizado" in workflow
+    assert "antes de executar a tarefa" in workflow
+    assert "procura instruções para aquela utilização" in workflow
+    assert "independentemente da fase" in workflow
 
 
 @pytest.mark.unit

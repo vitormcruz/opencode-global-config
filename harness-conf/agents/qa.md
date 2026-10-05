@@ -54,11 +54,12 @@ analisa código de produção ou faz revisão integrativa.
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento para
   esclarecer dúvidas da sua especialidade.
-- **Instruções**: no início de qualquer tarefa, leia a
-  subseção própria em `## Instruções por Agente` no
-  `AGENTS.md`. Se constar
-  `SEM INSTRUÇÕES A PEDIDO DO HUMANO`, siga sem
-  instrução extra. Não procure spec de suíte
+- **Instruções por Agente**: sempre que você for utilizado,
+  antes de executar a tarefa, consulte a subseção com seu
+  nome em `## Instruções por Agente` no `AGENTS.md`. Procure
+  instruções específicas para esta utilização e cumpra-as se
+  houver. Se constar `SEM INSTRUÇÕES A PEDIDO DO HUMANO`,
+  siga sem instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
   conter") no `AGENTS.md`; o comando está na tabela
   `## Testes por Especialidade` e o spec na seção

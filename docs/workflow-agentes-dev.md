@@ -11,36 +11,64 @@ otimizado para:
 - **higiene de contexto** — cada fase roda em instância
   nova, usando o arquivo de planejamento como handoff.
 
-## Sequência de Workflows
+## Navegação
 
-```
-devflow
-  └── VALIDAÇÃO  ← curador executa; devflow aciona e medeia
-  └── workflow-definicao-escopo.md   ← Elicita requisitos
-  └── workflow-agentes-dev.md        ← Desenvolvimento (este arquivo)
-```
+- [Entrada do Workflow](#entrada-do-workflow)
+- [Agentes](#agentes)
+- [Commits](#commits)
+- [Contratos do Workflow](#contratos-do-workflow)
+- [Premissas](#premissas)
+- [Schema do arquivo de planejamento](#schema-do-arquivo-de-planejamento)
+- [Testes por Especialidade](#testes-por-especialidade)
+- [Fluxo, Diagrama de Sequência](#fluxo--diagrama-de-sequência)
+- [Trabalho de curadoria](#trabalho-de-curadoria)
+- [Notas de Implementação](#notas-de-implementação)
 
-- **Validação** — o `curador-produto` verifica `docs/README.md` e os
-  índices do `AGENTS.md`. O `devflow` aciona o curador, medeia a
-  comunicação e encaminha a decisão humana. O `devflow` não edita nem
-  valida o conteúdo desses artefatos.
-- [`workflow-definicao-escopo.md`](workflow-definicao-escopo.md) —
-  elicita requisitos e produz o Arquivo de Planejamento.
-- Este workflow — executa o ciclo completo de desenvolvimento
-  a partir do Arquivo de Planejamento já preenchido.
+## Entrada do Workflow
+
+Antes de criar o Arquivo de Planejamento, o `devflow` confirma
+com o humano qual escopo será trabalhado. O escopo pode estar:
+
+- na conversa;
+- em uma história, requisito ou outro arquivo indicado pelo
+  humano.
+
+Se o humano estiver tentando fazer uma elicitação aberta no
+início do fluxo, o `devflow` pode avisar que o `analista` é mais
+adequado para essa tarefa. O humano decide se troca para o
+analista ou continua com o `devflow`. Se continuar, o
+`devflow` ajuda a organizar o escopo por perguntas mediadas,
+sem assumir o papel de especialista.
+
+O Arquivo de Planejamento só é criado depois que o escopo está
+definido. Quando o humano confirma que o escopo está pronto, o
+`devflow` cria o arquivo com `Status: VALIDAÇÃO` e registra nele
+o escopo recebido. Se o humano usar o analista, retorna com o
+escopo pela conversa ou por um artefato indicado por ele antes
+da criação do plano.
+
+Depois disso, o gate de curadoria verifica se `docs/README.md` e
+Testes por Especialidade existem e estão válidos. Se houver
+lacuna, o humano decide se trata a curadoria agora ou segue com
+a lacuna registrada. O procedimento está em
+[Trabalho de curadoria](#trabalho-de-curadoria).
 
 ## Agentes
 
-| Sigla | Nome completo | Tipo | Fases onde atua |
-|---|---|---|---|
-| `devflow` | Orquestrador | Roteador | Todas; apenas roteia |
-| `eng-software` | Engenheiro de Software | Executor/Committer | Planejamento e construção |
-| `front` | Engenheiro Frontend | Executor | Planejamento, construção e revisões |
-| `curador-produto` | Curador de Produto | Executor | Validação, testes e finalização |
-| `dba` | Analista de BD | Executor | Planejamento, construção e revisões |
-| `sec` | Analista Cyber | Executor | Planejamento, construção, revisões e testes |
-| `rev` | Revisor Integrativo | Executor | Revisões do plano e da construção |
-| `qa` | Testador | Executor | Planejamento, revisões e testes |
+A tabela a seguir identifica os agentes e as fases em que participam.
+A tabela de especialidades detalha a responsabilidade de cada agente
+por etapa.
+
+| Sigla | Nome completo | Fases onde atua |
+|---|---|---|
+| `devflow` | Orquestrador | Todas; apenas roteia |
+| `eng-software` | Engenheiro de Software | Planejamento e construção |
+| `front` | Engenheiro Frontend | Planejamento, construção e revisões |
+| `curador-produto` | Curador de Produto | Validação, testes e finalização |
+| `dba` | Analista de BD | Planejamento, construção e revisões |
+| `sec` | Analista Cyber | Planejamento, construção, revisões e testes |
+| `rev` | Revisor Integrativo | Revisões do plano e da construção |
+| `qa` | Testador | Planejamento, revisões e testes |
 
 ## Commits
 
@@ -59,6 +87,10 @@ executa `git push` sem confirmação explícita do humano.
 
 ### Especialidades
 
+A tabela seguinte complementa a tabela de agentes. Ela mostra
+o tipo de contribuição de cada agente no planejamento, na
+construção e na validação.
+
 | Agente | Planejamento | Construção | Validação |
 |---|---|---|---|
 | `devflow` | Roteia fases e mantém Status | Roteia fases e mantém Status | Roteia fases |
@@ -70,13 +102,12 @@ executa `git push` sem confirmação explícita do humano.
 | `front` | Prototipa telas | Implementa UI | Revisa identidade visual |
 | `rev` | — | — | Revisão solo com skills de domínio |
 
-> **Nota de sequenciamento:** `sec` analisa requisitos
-> de segurança com base no plano do `eng-software` — por
-> isso é spawnado após o engenheiro no planejamento.
-
 ## Contratos do Workflow
 
-### 1. docs/README.md
+O workflow se apoia em seis contratos. Cada contrato tem
+uma seção própria e deve permanecer verificável.
+
+### 1. [docs/README.md](README.md)
 
 Contrato de documentação do projeto. Contém quatro seções:
 
@@ -93,7 +124,7 @@ e medeia o trabalho do curador.
 
 Suítes (backend, dados, segurança, frontend) e o
 agregador `testes-produto`. Tabela e link no
-`AGENTS.md`; spec na seção correspondente do `docs/README.md`.
+[`AGENTS.md`](../AGENTS.md); spec na seção correspondente do `docs/README.md`.
 Criação e manutenção: `curador-produto`.
 
 O `AGENTS.md` também mantém o link geral para `docs/README.md` e a
@@ -102,19 +133,23 @@ para o `AGENTS.md`.
 
 ### 3. Arquivo de Planejamento
 
-Fonte de verdade temporária durante o workflow. Gerado pelos
-agentes, é entrada e saída de cada um. Ciclo de vida:
+Fonte de verdade temporária durante o workflow. Criado pelo
+`devflow` depois da definição do escopo, é entrada e saída de
+cada agente. Ciclo de vida:
 commitado durante o trabalho como ponto de salvamento e
 consultável para auditoria; excluído no encerramento com
 autorização humana. A aprovação do humano é do plano
 apresentado na conversa, não do arquivo físico. Ver schema
 na seção "Schema do arquivo de planejamento".
 
-### 4. Verificação das suítes
+### 4. Evidência de testes
 
-Evidência do agregador `testes-produto`. O
-`curador-produto` valida no fim da fase **Testes**.
-O `devflow` decide a ação sobre falhas.
+Na fase **Testes**, o `qa` executa o agregador `testes-produto` e
+registra no arquivo de planejamento a evidência no formato definido.
+Ao final da fase, o `curador-produto` verifica se essa evidência está
+presente e completa. Se houver falha ou lacuna, o `curador-produto`
+registra o achado e o `devflow` encaminha a correção ao agente
+responsável ou consulta o humano quando a decisão depender dele.
 
 ### 5. Elementos de Especificação
 
@@ -131,17 +166,44 @@ planejamento com restrições técnicas de domínio por campo.
 perguntam ao humano se ausente, registram antes de
 prosseguir. Regras já registradas nunca são reperguntadas.
 
+### 6. Instruções por Agente
+
+O `AGENTS.md` mantém uma subseção para cada agente que recebe
+instruções específicas. Toda vez que esse agente for utilizado,
+ele consulta a subseção com seu nome antes de executar a tarefa
+e procura instruções para aquela utilização. Se encontrar
+instruções, cumpre-as. `SEM INSTRUÇÕES A PEDIDO DO HUMANO`
+significa que não há instrução adicional.
+
+Essa consulta vale independentemente da fase e de o agente ser
+acionado pelo `devflow` ou diretamente pelo humano. O próprio
+agente faz a consulta; o `devflow` apenas encaminha a tarefa.
+
 ## Premissas
+
+> **Nota sobre a numeração:** os números das premissas são
+> identificadores estáveis para referências no workflow e em
+> documentos relacionados. Por isso, a sequência pode conter
+> lacunas ou subitens.
+
+### Entrada e escopo
+
+Antes da criação do Arquivo de Planejamento, o `devflow`
+confirma se o escopo está definido. Se o humano quiser fazer
+uma elicitação especializada, pode recomendar o `analista`.
+Se o humano preferir continuar, o `devflow` ajuda a definir o
+escopo por perguntas mediadas. O plano só nasce depois dessa
+definição.
 
 ### Orquestração
 
-1. **`devflow` como roteador stateless** — lê o arquivo,
-   identifica a fase pelo `Status`, spawna o agente adequado
-   e recebe resumo curto. **Nunca executa** tarefas de
-   domínio. Ao final da fase Testes, spawna
-   `curador-produto` para validar a evidência do
-   agregador. Se falhas, re-spawna agente ou consulta
-   humano.
+1. **`devflow` como roteador stateless**:
+   - Lê o arquivo, identifica a fase pelo `Status`, spawna o
+     agente adequado e recebe resumo curto.
+   - **Nunca executa** tarefas de domínio.
+   - Ao final da fase Testes, spawna `curador-produto` para
+     validar a evidência do agregador.
+   - Se houver falhas, re-spawna o agente ou consulta o humano.
 2. **Contrato de retorno** — todo agente persiste resultado
    no arquivo e retorna resumo curto (≤ 5 linhas). Ultima
    linha: `Skills: skill1, skill2` ou `Skills: nenhuma`.
@@ -160,27 +222,29 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 6. **Agentes são agnósticos do workflow** — prompts descrevem
    capacidades, nunca fases. Apenas `devflow` conhece o
    workflow.
-7. **Seleção de modelo por fase** — ao iniciar, `devflow`
-   sugere um padrão (um modelo por etapa — planejamento,
-   execução, testes, revisão) e o humano define como
-   preferir: um modelo só, por fase granular ou arranjo
-   próprio. O mapa combinado fica registrado no arquivo.
-   Se o harness suportar seleção de modelo por chamada
-   (plugin de task), o mapa é aplicado diretamente em cada
-   spawn, sem pausa. Sem esse suporte, o workflow pausa
-   antes de fases cujo modelo difere do atual para troca
-   manual.
-   Sessão nova sempre: nunca retomar sessão anterior, nem na
-   mesma fase. O estado vive no arquivo de planejamento e na
-   memória de longo prazo; cada spawn recebe briefing
-   autocontido com ponteiros para os blocos relevantes.
-   No OpenCode com o plugin DCP, a tool `compress` é o
-   mecanismo preferido de compactação, acionada pelo próprio
-   agente; `/compact` é fallback. A auto-compactação por
-   threshold é rede de segurança, não plano: se disparar, a
-   fronteira foi perdida. O agente lê trechos (offset/limit),
-   faz consultas direcionadas e não reinsere arquivos e logs
-   completos no contexto.
+7. **Seleção de modelo por fase**:
+   - Ao iniciar, `devflow` sugere um padrão, com um modelo
+     por etapa de planejamento, execução, testes e revisão.
+     O humano define se prefere um modelo só, modelos por
+     fase granular ou outro arranjo. O mapa combinado fica
+     registrado no arquivo.
+   - Se o harness suportar seleção de modelo por chamada
+     (plugin de task), o mapa é aplicado diretamente em cada
+     spawn, sem pausa.
+   - Sem esse suporte, o workflow pausa antes de fases cujo
+     modelo difere do atual para troca manual.
+   - A sessão é sempre nova. O workflow nunca retoma sessão
+     anterior, nem na mesma fase.
+   - O estado vive no arquivo de planejamento e na memória de
+     longo prazo. Cada spawn recebe briefing autocontido, com
+     ponteiros para os blocos relevantes.
+   - No OpenCode com o plugin DCP, a tool `compress` é o
+     mecanismo preferido de compactação, acionada pelo próprio
+     agente. `/compact` é fallback.
+   - A auto-compactação por threshold é rede de segurança, não
+     plano. Se disparar, a fronteira foi perdida. O agente lê
+     trechos (offset/limit), faz consultas direcionadas e não
+     reinsere arquivos e logs completos no contexto.
 
 ### Governança
 
@@ -200,13 +264,14 @@ prosseguir. Regras já registradas nunca são reperguntadas.
 
 ### Revisão
 
-13. **Revisão solo do `rev` com skills de domínio** — carrega
-    skills aplicáveis (security-and-hardening, data-modeling,
-    frontend-ui-engineering, tests-as-spec,
-    api-and-interface-design, documentation-and-adrs) e
-    revisa com checklist. **Não corrige** — reporta achados:
-    `achado · ação · severidade`. `devflow` repassa ao
-    especialista responsável.
+13. **Revisão solo do `rev` com skills de domínio**:
+    - Carrega skills aplicáveis (security-and-hardening,
+      data-modeling, frontend-ui-engineering, tests-as-spec,
+      api-and-interface-design, documentation-and-adrs).
+    - Revisa com checklist.
+    - **Não corrige**. Reporta achados no formato
+      `achado · ação · severidade`.
+    - `devflow` repassa o achado ao especialista responsável.
 14. **Instâncias novas com contexto limpo** — obrigatório,
     sem exceção. Elimina viés de confirmação.
 15. **Base de revisão** — plano aprovado e insumos originais
@@ -229,10 +294,12 @@ prosseguir. Regras já registradas nunca são reperguntadas.
      lê a evidência do agregador no fim da fase Testes.
 18. **Campo `Status` obrigatório** no topo. O agente que
     conclui uma fase atualiza o status antes de retornar.
-19. **Regras de escrita:** na construção, apenas marca
-    etapas concluídas. Na revisão, resumos são persistidos.
-    Modificações no plano só na Revisão do Plano ou gate de
-    refatoração. Histórico de mudanças registrado.
+19. **Regras de escrita:**
+    - Na construção, apenas marca etapas concluídas.
+    - Na revisão, resumos são persistidos.
+    - Modificações no plano só na Revisão do Plano ou no gate
+      de refatoração.
+    - O histórico de mudanças é registrado.
 20. **Contexto via arquivo** — não via histórico da conversa.
 20.1. **Rastreabilidade do executor**: cada subseção de registro de trabalho
      informa `Executor: <agente> / <modelo>`. O campo registra o agente e o
@@ -267,7 +334,7 @@ Status: <FASE> [— detalhe opcional]
   agregador `testes-produto`.
 - **Perguntas**: pendências de decisão humana.
 
-### docs/README.md
+### [docs/README.md](README.md)
 
 21. **O workflow exige um docs/README.md** — criação e
     manutenção pelo `curador-produto`. A fase de VALIDAÇÃO detecta
@@ -302,7 +369,7 @@ Status: <FASE> [— detalhe opcional]
 
 ### Testes por Especialidade
 
-32. **Índices no AGENTS.md** — criação pelo
+32. **Índices no [`AGENTS.md`](../AGENTS.md)** — criação pelo
     `curador-produto`. O `AGENTS.md` mantém o link geral para o
     `docs/README.md`, a tabela de Testes por Especialidade com link
     âncora e as Instruções por Agente. A spec fica na seção "Testes por
@@ -314,8 +381,10 @@ Status: <FASE> [— detalhe opcional]
 34. **Evidência** — JSON `{ status, findings[] }` do
     agregador, persistida na fase Testes.
 35. **Validação pelo `curador-produto`** — no fim da fase
-    Testes, confere se o agregador rodou. Reporta
-    OK/FALHA/LACUNA. `devflow` decide ação.
+    Testes, confere se o agregador rodou e se a evidência está
+    presente e completa. Registra OK/FALHA/LACUNA e encaminha o
+    achado ao `devflow`. O `devflow` encaminha a correção ao agente
+    responsável ou consulta o humano quando a decisão depender dele.
 36. **Falha de suíte** — backend → `eng-software`; dados →
     `dba`; segurança automática → `sec`; frontend →
     `front`. Depois `eng-software` normaliza e commita.
@@ -344,8 +413,25 @@ sequenceDiagram
     participant qa as qa
     participant rev as rev
 
-    Humano ->> devflow: Nova funcionalidade
+    rect rgb(255, 255, 230)
+    Note over Humano,rev: INICIALIZAÇÃO
+    Humano ->> devflow: Nova funcionalidade ou escopo
+
+    alt Escopo ainda precisa ser definido
+        devflow ->> Humano: O analista é mais adequado para elicitação. Trocar?
+        alt Humano usa o analista
+            Note over Humano,devflow: O escopo é definido fora deste workflow
+            Humano ->> devflow: Escopo definido na conversa ou em artefato
+        else Humano continua com devflow
+            devflow ->> Humano: Perguntas para organizar o escopo
+            Humano -->> devflow: Escopo definido
+        end
+    else Escopo já definido na conversa ou em arquivo
+        devflow ->> devflow: Confirma o escopo com o humano
+    end
+
     devflow ->> devflow: Cria arquivo<br/>Status: VALIDAÇÃO
+    end
 
     rect rgb(255, 230, 230)
     Note over Humano,rev: VALIDAÇÃO, curador executa e devflow medeia

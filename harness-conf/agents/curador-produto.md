@@ -291,6 +291,12 @@ Quando chamado por outro agente, retorne resumo curto
 - Quando chamado diretamente pelo humano: interaja
   normalmente, sem restrição de formato.
 - **Pode consultar o humano** a qualquer momento.
+- **Instruções por Agente**: sempre que você for utilizado,
+  antes de executar a tarefa, consulte a subseção com seu
+  nome em `## Instruções por Agente` no `AGENTS.md`. Procure
+  instruções específicas para esta utilização e cumpra-as se
+  houver. Se constar `SEM INSTRUÇÕES A PEDIDO DO HUMANO`,
+  siga sem instrução extra.
 - **Falha**: se não conseguir completar, registre o
   impedimento e informe o solicitante.
 - **Nunca commita** — reporte `[arquivos alterados +
