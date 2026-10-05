@@ -19,6 +19,7 @@ from local_model_server import (
     LocalModelServer,
     LocalModelServerError,
 )
+from platform_requirements import requires_posix
 
 
 pytestmark = pytest.mark.unit
@@ -107,6 +108,7 @@ def test_endpoint_identity_is_checked_before_reusing_server(
         ((12, 7), "cuda-12.4-x64"),
     ],
 )
+@requires_posix
 def test_select_llama_asset_maps_cuda_to_fixed_release(
     monkeypatch: pytest.MonkeyPatch,
     cuda_version: tuple[int, int],
@@ -126,6 +128,7 @@ def test_select_llama_asset_maps_cuda_to_fixed_release(
     assert asset.startswith("llama-prism-b9596-9fcaed7-bin-linux-")
 
 
+@requires_posix
 def test_select_llama_asset_probes_both_cuda_runtime_libraries(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -141,6 +144,7 @@ def test_select_llama_asset_probes_both_cuda_runtime_libraries(
     assert loaded == ["libcudart.so.12", "libcublas.so.12"]
 
 
+@requires_posix
 def test_missing_cuda_runtime_rebaixa_to_vulkan_with_one_notice(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -170,6 +174,7 @@ def test_missing_cuda_runtime_rebaixa_to_vulkan_with_one_notice(
     assert "Usando backend Vulkan" in output[0]
 
 
+@requires_posix
 def test_missing_cuda_runtime_rebaixa_to_cpu_without_vulkan(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -203,6 +208,7 @@ def test_missing_cuda_runtime_rebaixa_to_cpu_without_vulkan(
         (None, "ubuntu-x64"),
     ],
 )
+@requires_posix
 def test_select_llama_asset_detects_non_cuda_backends(
     monkeypatch: pytest.MonkeyPatch,
     available_command: str | None,
@@ -223,6 +229,7 @@ def test_select_llama_asset_detects_non_cuda_backends(
     assert expected_fragment in LocalModelServer._select_llama_asset()
 
 
+@requires_posix
 def test_find_executable_downloads_and_extracts_cached_release(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -434,6 +441,7 @@ def test_ensure_up_does_not_kill_or_start_over_an_unowned_server(
     kill.assert_not_called()
 
 
+@requires_posix
 def test_pid_file_ownership_requires_a_known_llama_server_command(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -522,6 +530,7 @@ def test_ensure_up_does_not_download_present_artifacts(
     server.ensure_up()
 
 
+@requires_posix
 def test_start_process_uses_jinja_and_native_idle_sleep(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -555,6 +564,7 @@ def test_start_process_uses_jinja_and_native_idle_sleep(
     assert popen.call_args.kwargs["start_new_session"] is True
 
 
+@requires_posix
 def test_start_process_fails_before_prism_when_libgomp_is_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -574,6 +584,7 @@ def test_start_process_fails_before_prism_when_libgomp_is_missing(
     popen.assert_not_called()
 
 
+@requires_posix
 def test_launch_command_uses_elf_library_path_without_ld_library_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

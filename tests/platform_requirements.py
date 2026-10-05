@@ -9,7 +9,12 @@ import os
 
 import pytest
 
-requires_symlink = pytest.mark.skipif(
+requires_posix = pytest.mark.skipif(
     os.name != "posix",
-    reason="exige symlink (POSIX)",
+    reason="exige sistema POSIX",
+)
+
+requires_windows = pytest.mark.skipif(
+    os.name != "nt",
+    reason="exige Windows",
 )

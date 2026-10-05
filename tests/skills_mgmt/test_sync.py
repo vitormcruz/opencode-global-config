@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from platform_requirements import requires_posix
 from opencode_config.cli import skills_sync
 
 
@@ -148,10 +149,7 @@ def test_documented_command_rejects_executable_outside_whitelist(
 
 
 @pytest.mark.unit
-@pytest.mark.skipif(
-    shutil.which("bash") is None,
-    reason="exige bash (POSIX)",
-)
+@requires_posix
 def test_documented_command_preserves_quoted_arguments(tmp_path: Path) -> None:
     script = tmp_path / "echo_args.sh"
     script.write_text(

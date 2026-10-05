@@ -6,11 +6,12 @@ import zipfile
 import pytest
 
 from fake_winreg import FakeWinreg
-from platform_requirements import requires_symlink
+from platform_requirements import requires_posix
 from opencode_config.bootstrap.installers import (
     InstallContext,
     InstallResult,
     InstallerError,
+    ensure_env_var,
     ensure_path_entry,
     download_file,
     install_aws_cli,
@@ -185,7 +186,7 @@ def test_libgomp_runtime_reuses_a_valid_cache_without_network(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_libgomp_runtime_rejects_missing_provenance_metadata(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -342,6 +343,73 @@ def test_windows_path_persistence_skips_broadcast_when_present(
 
 
 @pytest.mark.unit
+def test_windows_path_persistence_does_not_store_isolated_test_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fake_winreg: FakeWinreg,
+) -> None:
+    import os
+
+    from opencode_config.bootstrap.installers import core
+
+    monkeypatch.setattr(os, "name", "nt")
+    isolated_path = (
+        tmp_path
+        / "pytest-of-user"
+        / "test_bootstrap"
+        / ".isolated-home"
+        / ".local"
+        / "bin"
+    )
+
+    core._persist_windows_user_path(str(isolated_path))
+
+    assert fake_winreg.values == {}
+    assert fake_winreg.set_calls == []
+
+
+@pytest.mark.unit
+def test_windows_path_persistence_removes_old_isolated_test_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fake_winreg: FakeWinreg,
+) -> None:
+    import os
+
+    from opencode_config.bootstrap.installers import core
+
+    monkeypatch.setattr(os, "name", "nt")
+    monkeypatch.setattr(core, "broadcast_environment_change", lambda: None)
+    target = tmp_path / "new-bin"
+    target.mkdir()
+    old_isolated_paths = [
+        tmp_path
+        / "pytest-of-user"
+        / f"test_previous_{index}"
+        / ".isolated-home"
+        / ".local"
+        / "bin"
+        for index in range(400)
+    ]
+    polluted_path = ";".join(
+        [
+            *(str(path) for path in old_isolated_paths),
+            r"C:\Windows\System32",
+            r"c:\windows\system32",
+        ]
+    )
+    assert len(polluted_path) > 8191
+    fake_winreg.values["Path"] = polluted_path
+
+    core._persist_windows_user_path(str(target))
+
+    assert fake_winreg.values["Path"] == (
+        f"{target};C:\\Windows\\System32"
+    )
+    assert len(fake_winreg.values["Path"]) <= 8191
+
+
+@pytest.mark.unit
 def test_install_npm_global_uses_user_prefix(tmp_path: Path) -> None:
     context = make_context(tmp_path)
     commands: list[tuple[str, ...]] = []
@@ -440,6 +508,32 @@ def test_install_crwl_uses_pipx_bin_and_checks_entrypoints(
         ("crawl4ai-setup",),
     ]
     assert str(context.paths.pipx_bin) in context.current_environment["PATH"]
+
+
+@pytest.mark.unit
+def test_ensure_env_var_keeps_other_variables_in_same_profile(
+    tmp_path: Path,
+) -> None:
+    profile = tmp_path / ".bashrc"
+
+    for name, value in (("JAVA_HOME", "/jdk"), ("OUTRA", "x")):
+        ensure_env_var(
+            name,
+            value,
+            environment_kind=EnvironmentKind.LINUX,
+            profile_path=profile,
+        )
+    ensure_env_var(
+        "JAVA_HOME",
+        "/jdk2",
+        environment_kind=EnvironmentKind.LINUX,
+        profile_path=profile,
+    )
+
+    persisted = profile.read_text(encoding="utf-8")
+    assert 'export JAVA_HOME="/jdk2"' in persisted
+    assert 'export OUTRA="x"' in persisted
+    assert "/jdk\"" not in persisted
 
 
 @pytest.mark.unit

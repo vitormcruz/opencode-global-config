@@ -2,20 +2,32 @@ plugins {
     id 'groovy'
 }
 
-def mavenMirror = System.getenv('OPENCODE_MAVEN_REPOSITORY')?.trim()
-if (!mavenMirror) {
-    def mavenSettings = file("${System.getProperty('user.home')}/.m2/settings.xml")
-    if (mavenSettings.isFile()) {
-        def settings = new XmlSlurper().parse(mavenSettings)
-        mavenMirror = settings.mirrors.mirror.find { mirror ->
-            mirror.mirrorOf.text().trim() == '*'
-        }?.url?.text()?.trim()
-    }
-}
-
 repositories {
-    if (mavenMirror) {
-        maven { url = uri(mavenMirror) }
+    def mirrorUrl = System.getenv('GRADLE_MAVEN_MIRROR')
+    if (!mirrorUrl) {
+        def candidates = [
+            new File(System.getProperty('user.home'), '.m2/settings.xml'),
+            new File(System.getenv('USERPROFILE') ?: '', '.m2/settings.xml'),
+        ]
+        def userName = System.getProperty('user.name')
+        if (userName) {
+            candidates << new File("C:/Users/${userName}/.m2/settings.xml")
+            candidates << new File("/home/${userName}/.m2/settings.xml")
+        }
+        def m2Settings = candidates.find { it.exists() }
+        if (m2Settings) {
+            try {
+                def xml = new XmlParser().parse(m2Settings)
+                def mirror = xml.mirrors.mirror.find { it.mirrorOf.text() == '*' || it.mirrorOf.text() == 'central' }
+                if (mirror && mirror.url.text()) {
+                    mirrorUrl = mirror.url.text().trim()
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+    if (mirrorUrl) {
+        maven { url mirrorUrl }
     } else {
         mavenCentral()
     }

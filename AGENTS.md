@@ -156,6 +156,11 @@ Todos suportam `--yes` e `--check-only`.
   conftest para `unit or integration`). No WSL/Linux, use
   `.venv/bin/pytest -m all`; no Windows, use
   `.\.venv\Scripts\pytest.exe -m all`.
+- Rode SEMPRE pela `.venv` do checkout atual (cada worktree tem a sua).
+  Não existe `.venv`? Crie: `python -m venv .venv` e, nela,
+  `python -m pip install -r requirements-dev.txt -e .`. Nunca use o Python
+  global nem `PYTHONPATH` para contornar; o `tests/conftest.py` aborta a
+  execução nesses casos.
 - Execute os testes no ambiente alvo. `-m agent_eval` requer Docker e o
   llama-server local do Qwen3-0.6B no WSL/Linux; `-m integration` exige as
   ferramentas e binários que cada teste declara como premissa.
@@ -164,10 +169,10 @@ Todos suportam `--yes` e `--check-only`.
   iniciar manualmente:
   `python3 tests/integration/model/local_model_server.py --up`.
 - Rode sempre a suíte completa do ambiente corrente, sem deixar teste de
-  fora. `skipif` por plataforma (ex.: "exige symlink (POSIX)") é mecanismo
-  da suíte, declarado no próprio teste, que o relatório mostra como skip
-  com motivo onde a capacidade não se aplica; não autoriza deixar de rodar
-  teste nem reduzir a seleção.
+  fora. `requires_posix` e `requires_windows` são marcadores de plataforma
+  declarados no próprio teste. O relatório mostra como skip, com motivo,
+  o que não se aplica ao sistema corrente; isso não autoriza deixar de
+  rodar teste nem reduzir a seleção.
 - Nenhum teste pode usar `skip`: sem pré-requisito externo disponível, use
   `pytest.fail` com mensagem clara e acionável. Silenciar testes esconde
   problemas de ambiente.

@@ -1,6 +1,4 @@
-import os
-import subprocess
-import sys
+import io
 
 import pytest
 
@@ -28,7 +26,9 @@ def test_bootstrap_does_not_orchestrate_removed_crawl4ai_installer(repo_root):
 
 
 @pytest.mark.unit
-def test_bootstrap_removes_legacy_crawl4ai_bashrc_block(repo_root, tmp_path):
+def test_bootstrap_removes_legacy_crawl4ai_bashrc_block(
+    repo_root, tmp_path, monkeypatch
+):
     home = tmp_path / "home"
     home.mkdir()
     bashrc = home / ".bashrc"
@@ -41,31 +41,19 @@ def test_bootstrap_removes_legacy_crawl4ai_bashrc_block(repo_root, tmp_path):
         encoding="utf-8",
     )
 
-    environment = os.environ.copy()
-    environment.update(
-        {
-            "HOME": str(home),
-            "OPENCODE_SKIP_DEPS": "1",
-            "OPENCODE_SKIP_COPILOT_ADAPTER": "1",
-            "OPENCODE_SKIP_OPENCODE_ADAPTER": "1",
-        }
-    )
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "opencode_config.bootstrap.main",
-            "--quiet",
-            "--repo-root",
-            str(repo_root),
-        ],
-        cwd=repo_root,
-        env=environment,
-        capture_output=True,
-        text=True,
-        check=False,
+    from opencode_config.bootstrap import main as bootstrap_main
+
+    # No mesmo processo para que o fake_winreg autouse proteja o PATH real.
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("OPENCODE_SKIP_DEPS", "1")
+    monkeypatch.setenv("OPENCODE_SKIP_COPILOT_ADAPTER", "1")
+    monkeypatch.setenv("OPENCODE_SKIP_OPENCODE_ADAPTER", "1")
+    status = bootstrap_main.run(
+        ["--quiet", "--repo-root", str(repo_root)],
+        output=io.StringIO(),
+        error=io.StringIO(),
     )
 
-    assert result.returncode == 0
+    assert status == 0
     assert "Crawl4AI MCP" not in bashrc.read_text(encoding="utf-8")
     assert "CRAWL4AI_API_TOKEN" not in bashrc.read_text(encoding="utf-8")

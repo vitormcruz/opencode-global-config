@@ -8,6 +8,7 @@ import sys
 import pytest
 
 from fake_winreg import FakeWinreg
+from environment_guard import environment_problem, normalize_windows_path
 from taxonomy import translate_all_alias
 
 
@@ -22,6 +23,23 @@ def pytest_configure(config: pytest.Config) -> None:
     config.option.markexpr = translate_all_alias(config.option.markexpr)
 
 
+def pytest_sessionstart(session: pytest.Session) -> None:
+    """Recusa rodar fora da .venv do checkout ou com pacote de outro clone."""
+
+    if os.name == "nt":
+        os.environ["PATH"] = normalize_windows_path(os.environ.get("PATH", ""))
+
+    import opencode_config
+
+    problem = environment_problem(
+        repo_root=Path(__file__).resolve().parents[1],
+        package_file=Path(opencode_config.__file__),
+        prefix=Path(sys.prefix),
+    )
+    if problem is not None:
+        pytest.exit(problem, returncode=3)
+
+
 @pytest.fixture(scope="session")
 def repo_root() -> Path:
     """Retorna a raiz do repositorio sob teste."""
@@ -29,7 +47,7 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def fake_winreg(monkeypatch: pytest.MonkeyPatch) -> FakeWinreg:
     """Injeta um winreg falso em sys.modules; nenhum registro real e tocado."""
 
@@ -49,6 +67,8 @@ def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+    monkeypatch.setenv("LOCALAPPDATA", str(home / "AppData" / "Local"))
+    monkeypatch.setenv("APPDATA", str(home / "AppData" / "Roaming"))
     if "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
         browser_cache = (
             Path(original_local_app_data) / "ms-playwright"
@@ -61,6 +81,30 @@ def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         huggingface_cache = original_home / ".cache" / "huggingface"
         if huggingface_cache.is_dir():
             monkeypatch.setenv("HF_HOME", str(huggingface_cache))
+    if "GRADLE_USER_HOME" not in os.environ:
+        gradle_cache = original_home / ".gradle"
+        if gradle_cache.is_dir():
+            monkeypatch.setenv("GRADLE_USER_HOME", str(gradle_cache))
+    if "GRADLE_MAVEN_MIRROR" not in os.environ:
+        m2_settings = original_home / ".m2" / "settings.xml"
+        if m2_settings.is_file():
+            try:
+                import xml.etree.ElementTree as ET
+                tree = ET.parse(m2_settings)
+                root = tree.getroot()
+                for mirror in root.findall(".//{*}mirror"):
+                    mirror_of = mirror.find("{*}mirrorOf")
+                    url = mirror.find("{*}url")
+                    if (
+                        mirror_of is not None
+                        and mirror_of.text in ("*", "central")
+                        and url is not None
+                        and url.text
+                    ):
+                        monkeypatch.setenv("GRADLE_MAVEN_MIRROR", url.text.strip())
+                        break
+            except Exception:
+                pass
     return home
 
 

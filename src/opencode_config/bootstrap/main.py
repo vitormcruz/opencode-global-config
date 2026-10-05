@@ -182,6 +182,21 @@ def _read_windows_user_path() -> str:
     return str(value)
 
 
+CMD_PATH_LIMIT = 8191
+
+
+def _fit_cmd_path_limit(entries: list[str], separator: str) -> list[str]:
+    """Descarta pastas inexistentes se o PATH passar do limite do cmd.
+
+    O cmd.exe não enxerga nenhum comando quando o PATH excede 8191
+    caracteres; só afeta o ambiente dos subprocessos, nunca o registro.
+    """
+
+    if len(separator.join(entries)) <= CMD_PATH_LIMIT:
+        return entries
+    return [entry for entry in entries if os.path.isdir(entry)]
+
+
 def _merge_path_values(
     current: Mapping[str, str],
     user_path: str,
@@ -215,6 +230,8 @@ def _merge_path_values(
             for existing in unique
         ):
             unique.append(entry)
+    if environment is EnvironmentKind.WINDOWS:
+        unique = _fit_cmd_path_limit(unique, separator)
     merged[path_key] = separator.join(unique)
     for name in list(merged):
         if name.casefold() == "path" and name != path_key:

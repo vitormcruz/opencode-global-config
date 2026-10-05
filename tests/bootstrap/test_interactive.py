@@ -514,3 +514,153 @@ def test_manual_block_uses_explicit_copyable_command(
     manual = rendered.split("Comandos manuais pendentes:\n", 1)[1]
     assert "python -m pip install --user example-tool" in manual
     assert "metodo descritivo user-space" not in manual
+
+
+def _crwl_policy_written(profile: Path) -> bool:
+    return profile.is_file() and (
+        'export LITELLM_LOCAL_MODEL_COST_MAP="True"'
+        in profile.read_text(encoding="utf-8")
+    )
+
+
+@pytest.mark.unit
+def test_bootstrap_blocks_litellm_downloads_when_crwl_is_already_present(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    detections = (
+        make_detection("crwl", required=True, status=DependencyStatus.PRESENT),
+    )
+
+    run_bootstrap(
+        context=context,
+        detections=detections,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert _crwl_policy_written(context.profile_path)
+    assert context.current_environment["LITELLM_LOCAL_MODEL_COST_MAP"] == "True"
+    assert (
+        context.current_environment["LITELLM_LOCAL_ANTHROPIC_BETA_HEADERS"]
+        == "True"
+    )
+
+
+@pytest.mark.unit
+def test_bootstrap_blocks_litellm_downloads_after_installing_crwl(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    detections = (make_detection("crwl", required=True),)
+
+    run_bootstrap(
+        context=context,
+        detections=detections,
+        installer=lambda names, _context: tuple(
+            InstallResult(name=name, success=True, changed=True, message="ok")
+            for name in names
+        ),
+        assume_yes=True,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert _crwl_policy_written(context.profile_path)
+
+
+@pytest.mark.unit
+def test_bootstrap_check_only_does_not_write_litellm_policy(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    detections = (
+        make_detection("crwl", required=True, status=DependencyStatus.PRESENT),
+    )
+
+    run_bootstrap(
+        context=context,
+        detections=detections,
+        check_only=True,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert not _crwl_policy_written(context.profile_path)
+    assert "LITELLM_LOCAL_MODEL_COST_MAP" not in context.current_environment
+
+
+@pytest.mark.unit
+def test_bootstrap_without_crwl_does_not_write_litellm_policy(
+    tmp_path: Path,
+) -> None:
+    context = make_context(tmp_path)
+    detections = (
+        make_detection("other", required=True, status=DependencyStatus.PRESENT),
+    )
+
+    run_bootstrap(
+        context=context,
+        detections=detections,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert not _crwl_policy_written(context.profile_path)
+
+
+@pytest.mark.unit
+def test_bootstrap_checks_pytest_cov_in_the_repo_venv_not_global_pytest(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    detections = (
+        make_detection(
+            "pytest-cov",
+            required=False,
+            status=DependencyStatus.ERROR,
+        ),
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.interactive.is_pytest_cov_ready",
+        lambda _context: True,
+    )
+
+    result = run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert result.selected == ()
+    assert result.detections[0].status is DependencyStatus.PRESENT
+
+
+@pytest.mark.unit
+def test_bootstrap_installs_pytest_cov_when_venv_cannot_import_it(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    detections = (
+        make_detection(
+            "pytest-cov",
+            required=False,
+            status=DependencyStatus.PRESENT,
+        ),
+    )
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.interactive.is_pytest_cov_ready",
+        lambda _context: False,
+    )
+
+    result = run_bootstrap(
+        context=make_context(tmp_path),
+        detections=detections,
+        installer=lambda names, _context: (),
+        assume_yes=True,
+        input_stream=StringIO(),
+        output=StringIO(),
+    )
+
+    assert result.selected == ("pytest-cov",)

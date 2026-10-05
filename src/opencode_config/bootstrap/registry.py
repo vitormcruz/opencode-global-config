@@ -476,6 +476,7 @@ PRODUCT_DEPENDENCY_REGISTRY: tuple[DependencySpec, ...] = (
     DependencySpec(
         name="java",
         commands=("java",),
+        version_args=("-version",),
         install_methods=_methods("JDK portatil em user-space"),
         manual_commands=_commands(
             "opencode-bootstrap --yes",

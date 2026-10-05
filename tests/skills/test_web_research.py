@@ -1,9 +1,17 @@
-from pathlib import Path
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
+from pathlib import Path
 import shutil
 import subprocess
+import threading
 
 import pytest
+
+from crwl_diagnostics import CrwlTimeoutError, run_crwl
+from opencode_config.bootstrap.installers.core import (
+    LITELLM_LOCAL_ONLY_ENVIRONMENT,
+)
 
 
 @pytest.fixture
@@ -90,6 +98,23 @@ def test_skill_has_executable_crwl_example_for_each_operation(skill_content: str
         assert example in skill_content
 
 
+class _LocalExampleHandler(SimpleHTTPRequestHandler):
+    def do_GET(self) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        body = (
+            "<!DOCTYPE html><html><head><title>Example Domain</title></head>"
+            "<body><h1>Example Domain</h1>"
+            "<p>This domain is for use in illustrative examples.</p>"
+            '<a href="/subpage">Subpage link</a></body></html>'
+        )
+        self.wfile.write(body.encode("utf-8"))
+
+    def log_message(self, format: str, *args: object) -> None:
+        pass
+
+
 @pytest.mark.integration
 def test_published_crwl_examples_execute(
     tmp_path: Path,
@@ -101,16 +126,26 @@ def test_published_crwl_examples_execute(
             "`pipx install crawl4ai` antes deste teste"
         )
 
-    url = "https://example.com"
+    server = ThreadingHTTPServer(("127.0.0.1", 0), _LocalExampleHandler)
+    host, port = server.server_address
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    url = f"http://{host}:{port}/"
 
     def run_example(arguments: list[str]) -> subprocess.CompletedProcess[str]:
-        result = subprocess.run(
-            [crwl, "crawl", *arguments],
-            capture_output=True,
-            text=True,
-            timeout=180,
-            check=False,
-        )
+        try:
+            result = run_crwl(
+                crwl,
+                arguments,
+                timeout_seconds=180,
+                environment={**os.environ, **LITELLM_LOCAL_ONLY_ENVIRONMENT},
+            )
+        except CrwlTimeoutError as error:
+            timeout_message = str(error)
+        else:
+            timeout_message = None
+        if timeout_message is not None:
+            pytest.fail(timeout_message, pytrace=False)
         if result.returncode != 0:
             pytest.fail(
                 f"exemplo crwl falhou (exit {result.returncode}): "
@@ -118,29 +153,33 @@ def test_published_crwl_examples_execute(
             )
         return result
 
-    markdown = run_example([url, "-o", "md-fit"])
-    assert markdown.stdout.strip()
+    try:
+        markdown = run_example([url, "-o", "md-fit"])
+        assert markdown.stdout.strip()
 
-    html_path = tmp_path / "page.json"
-    run_example([url, "-o", "all", "-O", str(html_path)])
-    assert html_path.stat().st_size > 0
-    json.loads(html_path.read_text(encoding="utf-8"))
+        html_path = tmp_path / "page.json"
+        run_example([url, "-o", "all", "-O", str(html_path)])
+        assert html_path.stat().st_size > 0
+        json.loads(html_path.read_text(encoding="utf-8"))
 
-    javascript = run_example(
-        [url, "-c", "js_code=document.title", "-o", "md-fit"]
-    )
-    assert javascript.stdout.strip()
+        javascript = run_example(
+            [url, "-c", "js_code=document.title", "-o", "md-fit"]
+        )
+        assert javascript.stdout.strip()
 
-    screenshot_path = tmp_path / "saida.json"
-    run_example(
-        [url, "-c", "screenshot=true", "-o", "all", "-O", str(screenshot_path)]
-    )
-    assert screenshot_path.stat().st_size > 0
+        screenshot_path = tmp_path / "saida.json"
+        run_example(
+            [url, "-c", "screenshot=true", "-o", "all", "-O", str(screenshot_path)]
+        )
+        assert screenshot_path.stat().st_size > 0
 
-    deep = run_example(
-        [url, "--deep-crawl", "bfs", "--max-pages", "1", "-o", "md-fit"]
-    )
-    assert deep.stdout.strip()
+        deep = run_example(
+            [url, "--deep-crawl", "bfs", "--max-pages", "1", "-o", "md-fit"]
+        )
+        assert deep.stdout.strip()
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 @pytest.mark.unit

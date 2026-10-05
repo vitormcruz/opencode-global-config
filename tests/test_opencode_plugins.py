@@ -19,6 +19,7 @@ import pytest
 PROVISORY_PLUGIN = "opencode-task-model"
 QUOTA_PLUGIN = "@slkiser/opencode-quota"
 PLUGIN_DIR = "harness-conf/plugins"
+_REAL_HOME = Path.home()
 UPSTREAM_REQUIRED_FIELDS = (
     "plugin:",
     "versao_pinada:",
@@ -150,6 +151,32 @@ def _quota_rated_version(repo_root: Path) -> str:
     return match.group(1)
 
 
+def _npm_query_command(
+    npm: str,
+    package: str,
+    user_home: Path = _REAL_HOME,
+) -> list[str]:
+    command = [npm, "view", package, "version"]
+    # A fixture global troca HOME. Preserve o npmrc do usuário para manter
+    # o registro corporativo configurado fora do ambiente isolado.
+    user_config = user_home / ".npmrc"
+    if user_config.is_file():
+        command[1:1] = ["--userconfig", str(user_config)]
+    return command
+
+
+def _configured_npm_registry(user_home: Path = _REAL_HOME) -> str:
+    """Devolve o registro do npmrc do usuário ou o padrão público."""
+
+    user_config = user_home / ".npmrc"
+    if user_config.is_file():
+        for line in user_config.read_text(encoding="utf-8").splitlines():
+            key, _, value = line.partition("=")
+            if key.strip() == "registry" and value.strip():
+                return value.strip()
+    return "https://registry.npmjs.org/"
+
+
 def _query_npm_version(package: str) -> str:
     """Consulta a versão mais recente do pacote no registro npm."""
 
@@ -162,9 +189,10 @@ def _query_npm_version(package: str) -> str:
         )
     # 60 s é rede de segurança sobre consulta que costuma levar poucos
     # segundos; estouro vira fail acionável, nunca espera infinita.
+    command = _npm_query_command(npm, package)
     try:
         result = subprocess.run(
-            [npm, "view", package, "version"],
+            command,
             capture_output=True,
             text=True,
             timeout=60,
@@ -179,7 +207,9 @@ def _query_npm_version(package: str) -> str:
     except subprocess.TimeoutExpired:
         pytest.fail(
             f"`npm view {package} version` excedeu 60s (processo morto). "
-            "Verifique rede/registro npm e execute novamente.",
+            f"Registro configurado: {_configured_npm_registry()}. Confirme "
+            "que ele está acessível (VPN/rede corporativa) e execute "
+            "novamente.",
             pytrace=False,
         )
     except subprocess.CalledProcessError as error:
@@ -192,6 +222,46 @@ def _query_npm_version(package: str) -> str:
     version = result.stdout.strip()
     assert version, f"`npm view {package} version` devolveu saída vazia"
     return version
+
+
+@pytest.mark.unit
+def test_npm_query_preserves_user_config_outside_isolated_home(
+    tmp_path: Path,
+) -> None:
+    user_config = tmp_path / ".npmrc"
+    user_config.write_text(
+        "registry=https://registry.example.invalid/\n",
+        encoding="utf-8",
+    )
+
+    assert _npm_query_command("npm", "package", tmp_path) == [
+        "npm",
+        "--userconfig",
+        str(user_config),
+        "view",
+        "package",
+        "version",
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("npmrc", "expected"),
+    [
+        ("registry=https://mirror.example.invalid/npm/\n", "https://mirror.example.invalid/npm/"),
+        ("strict-ssl=true\n", "https://registry.npmjs.org/"),
+        (None, "https://registry.npmjs.org/"),
+    ],
+)
+def test_configured_npm_registry_prefers_user_mirror(
+    tmp_path: Path,
+    npmrc: str | None,
+    expected: str,
+) -> None:
+    if npmrc is not None:
+        (tmp_path / ".npmrc").write_text(npmrc, encoding="utf-8")
+
+    assert _configured_npm_registry(tmp_path) == expected
 
 
 def _check_quota_flutuacao(ratified: str, current: str) -> None:
