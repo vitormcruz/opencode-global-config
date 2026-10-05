@@ -1228,6 +1228,14 @@ fechamento.
   - Meta-observação: o próprio planejador (modelo maior) produziu
     textão ao apresentar o diagnóstico deste episódio e foi corrigido
     pelo humano; a falha não é exclusiva do modelo menor.
+  - Reincidência (mesma sessão, logo após): diante de "Não entendi do
+    3 em diante, lembra que vc tacou um texto enorme e não li?", o
+    agente reexplicou os itens 3 a 6 novamente empacotados numa única
+    mensagem (~1,6 mil caracteres), anunciando "vou reexplicar um por
+    um" mas despejando todos de vez. Reforça o diagnóstico de
+    incapacidade estrutural do modelo: nem o sinal explícito de
+    confusão com pedido de divisão induz o comportamento de bloco por
+    bloco.
   - Decisão do humano (2026-10-05): registrar sem ajuste de regra
     agora; soluções serão pensadas de forma consolidada ao fim do
     teste. Pendências acumuladas para consolidação: (a) reforço da
