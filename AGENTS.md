@@ -244,8 +244,15 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
 
 ## Instruções por Agente
 
-Cada agente lê a própria subseção no início de qualquer
-tarefa. Esta seção não contém comando de suíte.
+Toda vez que um agente desta seção for utilizado, ele deve
+consultar a subseção com seu nome antes de executar a tarefa.
+Deve procurar instruções específicas para aquela utilização e
+cumpri-las quando existirem. A consulta vale tanto quando o
+agente é acionado pelo `devflow` quanto quando é chamado
+diretamente pelo humano.
+
+`SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
+instrução adicional. Esta seção não contém comando de suíte.
 
 ### eng-software
 

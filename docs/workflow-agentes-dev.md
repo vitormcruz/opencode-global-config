@@ -104,7 +104,7 @@ construção e na validação.
 
 ## Contratos do Workflow
 
-O workflow se apoia em cinco contratos. Cada contrato tem
+O workflow se apoia em seis contratos. Cada contrato tem
 uma seção própria e deve permanecer verificável.
 
 ### 1. [docs/README.md](README.md)
@@ -155,6 +155,19 @@ planejamento com restrições técnicas de domínio por campo.
 `eng-software` inicializa ao planejar; agentes consultam,
 perguntam ao humano se ausente, registram antes de
 prosseguir. Regras já registradas nunca são reperguntadas.
+
+### 6. Instruções por Agente
+
+O `AGENTS.md` mantém uma subseção para cada agente que recebe
+instruções específicas. Toda vez que esse agente for utilizado,
+ele consulta a subseção com seu nome antes de executar a tarefa
+e procura instruções para aquela utilização. Se encontrar
+instruções, cumpre-as. `SEM INSTRUÇÕES A PEDIDO DO HUMANO`
+significa que não há instrução adicional.
+
+Essa consulta vale independentemente da fase e de o agente ser
+acionado pelo `devflow` ou diretamente pelo humano. O próprio
+agente faz a consulta; o `devflow` apenas encaminha a tarefa.
 
 ## Premissas
 
