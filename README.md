@@ -337,8 +337,8 @@ seu harness no formato do sistema corrente. O bootstrap executa ambos
 automaticamente quando os harnesses estão instalados.
 
 O adapter OpenCode não altera arquivos da fonte canônica. Para revisar mudanças
-sem alterar skills, execute `opencode-skills detect FAMÍLIA`. Depois da decisão
-humana e das edições aprovadas, sincronize com `opencode-skills sync FAMÍLIA`.
+sem alterar skills, execute `harness-skills detect FAMÍLIA`. Depois da decisão
+humana e das edições aprovadas, sincronize com `harness-skills sync FAMÍLIA`.
 
 Destinos sincronizados pelo Copilot CLI:
 

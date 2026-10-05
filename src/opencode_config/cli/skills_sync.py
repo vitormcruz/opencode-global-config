@@ -24,7 +24,7 @@ SKILL_COMMAND_TIMEOUT_SECONDS = 300
 
 # Executáveis aceitos em comandos documentados no UPSTREAM.md de uma skill.
 _DOCUMENTED_EXECUTABLES = frozenset(
-    {"bash", "sh", "python", "python3", "opencode-skills"}
+    {"bash", "sh", "python", "python3", "harness-skills"}
 )
 
 
@@ -102,6 +102,11 @@ SPECS = {
     "prompt-improver": SyncSpec(
         "prompt-improver",
         "https://github.com/ckelsoe/prompt-architect.git",
+        "main",
+    ),
+    "agent-introspection-debugging": SyncSpec(
+        "agent-introspection-debugging",
+        "https://github.com/affaan-m/ECC.git",
         "main",
     ),
 }
@@ -336,7 +341,7 @@ def _sync_accessibility(
         repository=SPECS["accessibility-audit"].repository,
         branch=SPECS["accessibility-audit"].branch,
         files=["resources/implementation-playbook.md"],
-        update_command="opencode-skills sync accessibility-audit",
+        update_command="harness-skills sync accessibility-audit",
         license_text=(
             "MIT License + CC BY 4.0\n"
             "- MIT: Copyright (c) sickn33/antigravity-awesome-skills\n"
@@ -383,7 +388,7 @@ def _sync_addyosmani(
             repository=SPECS["addyosmani"].repository,
             branch=SPECS["addyosmani"].branch,
             files=files,
-            update_command="opencode-skills sync addyosmani",
+            update_command="harness-skills sync addyosmani",
             license_text=license_text,
         )
 
@@ -444,12 +449,37 @@ def _sync_prompt_improver(
         repository=SPECS["prompt-improver"].repository,
         branch=SPECS["prompt-improver"].branch,
         files=files,
-        update_command="opencode-skills sync prompt-improver",
+        update_command="harness-skills sync prompt-improver",
         license_text=(
             "MIT License - Copyright (c) 2025-2026 prompt-architect contributors\n"
             "Autoria original: Charles Kelsoe\n"
         ),
         extra_fields=extra_fields,
+    )
+
+
+def _sync_agent_introspection_debugging(
+    repo_root: Path,
+    upstream_dir: Path,
+    metadata: dict[str, str],
+) -> None:
+    upstream_skill = upstream_dir / "skills" / "agent-introspection-debugging"
+    if not (upstream_skill / "SKILL.md").is_file():
+        raise SyncError("SKILL.md da agent-introspection-debugging nao encontrado.")
+
+    local_skill = _skills_root(repo_root) / "agent-introspection-debugging"
+    # O SKILL.md local é versão adaptada (PT-BR): o sync nunca o copia.
+    local_skill.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(upstream_dir / "LICENSE", local_skill / "LICENSE")
+    _write_upstream(
+        local_skill,
+        metadata=metadata,
+        repository=SPECS["agent-introspection-debugging"].repository,
+        branch=SPECS["agent-introspection-debugging"].branch,
+        files=["LICENSE"],
+        update_command="harness-skills sync agent-introspection-debugging",
+        license_text="MIT License\n- Copyright (c) affaan-m/ECC\n",
+        extra_fields=["description_lang: pt-br"],
     )
 
 
@@ -483,7 +513,7 @@ def _sync_humanizer_br(
         repository=SPECS["humanizer-br"].repository,
         branch=SPECS["humanizer-br"].branch,
         files=files,
-        update_command="opencode-skills sync humanizer-br",
+        update_command="harness-skills sync humanizer-br",
         license_text=(
             "MIT License - Copyright (c) 2026 carlosafjr-dev\n"
             "https://github.com/carlosafjr-dev/humanizer-br/blob/master/LICENSE"
@@ -519,7 +549,7 @@ def _sync_writing_for_agents(
             "SKILL-MECHANICS.md  "
             "(skills/productivity/writing-for-agents/SKILL-MECHANICS.md)"
         ],
-        update_command="opencode-skills sync writing-for-agents",
+        update_command="harness-skills sync writing-for-agents",
         license_text=(
             "MIT License - Copyright (c) 2026 Matt Pocock\n"
             "https://github.com/mattpocock/skills/blob/main/LICENSE"
@@ -558,7 +588,7 @@ def _sync_portugues_tecnico_controlado(
         repository=SPECS["portugues-tecnico-controlado"].repository,
         branch=SPECS["portugues-tecnico-controlado"].branch,
         files=files,
-        update_command="opencode-skills sync portugues-tecnico-controlado",
+        update_command="harness-skills sync portugues-tecnico-controlado",
         license_text=(
             "MIT License - Copyright (c) 2026 Kayque Rotondo (kayquer)\n"
             "https://github.com/kayquer/portugues-tecnico-controlado/"
@@ -608,8 +638,12 @@ def sync_skill(
         _sync_writing_for_agents(repo_root, upstream_dir, metadata)
     elif name == "portugues-tecnico-controlado":
         _sync_portugues_tecnico_controlado(repo_root, upstream_dir, metadata)
-    else:
+    elif name == "agent-introspection-debugging":
+        _sync_agent_introspection_debugging(repo_root, upstream_dir, metadata)
+    elif name == "prompt-improver":
         _sync_prompt_improver(repo_root, upstream_dir, metadata)
+    else:
+        raise SyncError(f"Upstream sem handler de sincronizacao: {name}")
     return SyncResult("success", frozen_skills)
 
 
@@ -656,8 +690,8 @@ def _run_documented_command(
         tokens = shlex.split(command)
         if not tokens:
             return 1, ""
-        if tokens[0] == "opencode-skills":
-            executable = shutil.which("opencode-skills")
+        if tokens[0] == "harness-skills":
+            executable = shutil.which("harness-skills")
             if executable:
                 argv = [executable, *tokens[1:]]
             else:
@@ -706,7 +740,7 @@ def _supports_assume_yes(command: str, repo_root: Path) -> bool:
         return False
     if "--yes" in tokens:
         return True
-    if len(tokens) >= 2 and tokens[:2] == ["opencode-skills", "sync"]:
+    if len(tokens) >= 2 and tokens[:2] == ["harness-skills", "sync"]:
         return True
     if not tokens:
         return False
@@ -871,7 +905,7 @@ def _clone_upstream(
             temporary_parent = repository.parent
 
     temporary = tempfile.TemporaryDirectory(
-        prefix="opencode-skills-",
+        prefix="harness-skills-",
         dir=temporary_parent,
     )
     destination = Path(temporary.name) / "upstream"
@@ -988,6 +1022,11 @@ def _ensure_base_commit(
 
 
 def _skill_diff_paths(family: str, skill_name: str) -> tuple[str, ...]:
+    if family == "agent-introspection-debugging":
+        # Monorepo: o diff precisa ficar restrito ao subdiretório da skill,
+        # senão qualquer commit em outra skill do ECC sinaliza mudança.
+        # O LICENSE copiado pelo sync vive na raiz do upstream.
+        return (f"skills/{skill_name}/", "LICENSE")
     if family != "addyosmani":
         return ()
 
@@ -1111,7 +1150,7 @@ def _detect_upstream(family: str, repo_root: Path) -> str:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="opencode-skills",
+        prog="harness-skills",
         description="Lista, detecta e sincroniza skills externas.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1211,7 +1250,7 @@ def run(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Executa o entrypoint `opencode-skills`."""
+    """Executa o entrypoint `harness-skills`."""
 
     return run(
         list(sys.argv[1:] if argv is None else argv),

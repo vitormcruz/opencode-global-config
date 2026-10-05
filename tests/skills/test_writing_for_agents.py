@@ -83,7 +83,7 @@ def test_upstream_metadados_completos(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_skill_registrada_no_opencode_skills(repo_root: Path) -> None:
+def test_skill_registrada_no_harness_skills(repo_root: Path) -> None:
     """A skill aparece no inventario de skills atualizaveis do helper."""
 
     assert "writing-for-agents" in list_updatable(repo_root)

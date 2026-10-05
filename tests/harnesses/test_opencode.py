@@ -318,7 +318,7 @@ def test_opencode_does_not_mutate_repository(
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
     marker = repository / "mutation.txt"
-    fake_skills_cli = fake_bin / "opencode-skills"
+    fake_skills_cli = fake_bin / "harness-skills"
     fake_skills_cli.write_text(
         "#!/usr/bin/env python3\n"
         "import os\n"

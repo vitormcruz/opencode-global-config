@@ -22,11 +22,11 @@ sincronizado_em: 2026-06-05 13:39 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync prompt-improver
+    harness-skills sync prompt-improver
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync prompt-improver --check-only
+    harness-skills sync prompt-improver --check-only
 
 ## Licenca
 

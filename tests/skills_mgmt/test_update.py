@@ -10,8 +10,8 @@ def write_upstream_metadata(
     repo: Path,
     skill: str,
     *,
-    update_command: str | None = "opencode-skills sync prompt-improver",
-    check_command: str | None = "opencode-skills sync prompt-improver --check-only",
+    update_command: str | None = "harness-skills sync prompt-improver",
+    check_command: str | None = "harness-skills sync prompt-improver --check-only",
 ) -> Path:
     skill_dir = repo / "harness-conf" / "skills" / skill
     skill_dir.mkdir(parents=True, exist_ok=True)
@@ -166,14 +166,14 @@ def test_update_without_documented_command_reports_no_clear_update_flow(
         tmp_path,
         "prompt-improver",
         update_command=None,
-        check_command="opencode-skills sync prompt-improver --check-only",
+        check_command="harness-skills sync prompt-improver --check-only",
     )
 
     result = skills_sync.update_skill(tmp_path, "prompt-improver")
 
     assert result.status == "no-clear-update-flow"
     assert upstream.read_text(encoding="utf-8").endswith(
-        "opencode-skills sync prompt-improver --check-only\n"
+        "harness-skills sync prompt-improver --check-only\n"
     )
 
 
@@ -186,8 +186,8 @@ def test_update_with_multiple_commands_reports_ambiguous_flow(tmp_path: Path) ->
             [
                 "## Como atualizar",
                 "",
-                "    opencode-skills sync prompt-improver",
-                "    opencode-skills sync prompt-improver --yes",
+                "    harness-skills sync prompt-improver",
+                "    harness-skills sync prompt-improver --yes",
             ]
         )
         + "\n",
@@ -197,7 +197,7 @@ def test_update_with_multiple_commands_reports_ambiguous_flow(tmp_path: Path) ->
     result = skills_sync.update_skill(tmp_path, "prompt-improver")
 
     assert result.status == "ambiguous-update-flow"
-    assert "opencode-skills sync prompt-improver" in result.output
+    assert "harness-skills sync prompt-improver" in result.output
 
 
 @pytest.mark.unit
@@ -297,7 +297,7 @@ def test_update_appends_yes_to_native_command(
     result = skills_sync.update_skill(tmp_path, "prompt-improver")
 
     assert result.status == "success"
-    assert commands == ["opencode-skills sync prompt-improver --yes"]
+    assert commands == ["harness-skills sync prompt-improver --yes"]
 
 
 @pytest.mark.unit

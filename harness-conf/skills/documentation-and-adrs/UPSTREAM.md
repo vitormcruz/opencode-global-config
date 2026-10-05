@@ -18,11 +18,11 @@ sincronizado_em: 2026-07-03 16:44 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync addyosmani
+    harness-skills sync addyosmani
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync addyosmani --check-only
+    harness-skills sync addyosmani --check-only
 
 ## Licenca
 

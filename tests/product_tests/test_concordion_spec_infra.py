@@ -198,5 +198,5 @@ def test_adr0007_fixture_checks_upstream_detection() -> None:
 
     assert backend_fixtures is not None
     assert "Adr0007Fixture" in backend_fixtures.group(1)
-    assert "opencode-skills detect" in body
+    assert "harness-skills detect" in body
     assert "test_upstream_detect.py" in body

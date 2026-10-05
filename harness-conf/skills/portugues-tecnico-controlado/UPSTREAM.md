@@ -24,11 +24,11 @@ sincronizado_em: 2026-09-07 01:35 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync portugues-tecnico-controlado
+    harness-skills sync portugues-tecnico-controlado
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync portugues-tecnico-controlado --check-only
+    harness-skills sync portugues-tecnico-controlado --check-only
 
 ## Licenca
 

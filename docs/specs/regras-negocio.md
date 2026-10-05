@@ -56,7 +56,7 @@ existente. Esta edição não cria testes.
 
 ## Atualização de skills externas
 
-6. **RN-006, detecção somente leitura.** `opencode-skills detect` compara
+6. **RN-006, detecção somente leitura.** `harness-skills detect` compara
    commits e mostra mudanças sem gravar metadados ou aplicar conteúdo. O clone
    temporário fica fora do checkout e não usa submódulos. Se o clone shallow
    não contiver o SHA base, o comando busca o histórico completo. Conteúdo

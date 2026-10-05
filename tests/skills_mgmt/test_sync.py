@@ -35,10 +35,10 @@ def git_upstream(tmp_path: Path, files: dict[str, str]) -> Path:
 
 
 @pytest.mark.unit
-def test_opencode_skills_entrypoint_is_registered(repo_root: Path) -> None:
+def test_harness_skills_entrypoint_is_registered(repo_root: Path) -> None:
     pyproject = (repo_root / "pyproject.toml").read_text(encoding="utf-8")
 
-    assert 'opencode-skills = "opencode_config.cli.skills_sync:main"' in pyproject
+    assert 'harness-skills = "opencode_config.cli.skills_sync:main"' in pyproject
 
 
 @pytest.mark.unit
@@ -47,7 +47,7 @@ def test_sync_help_returns_success(capsys: pytest.CaptureFixture[str]) -> None:
         skills_sync.main(["--help"])
 
     assert raised.value.code == 0
-    assert "opencode-skills" in capsys.readouterr().out
+    assert "harness-skills" in capsys.readouterr().out
 
 
 @pytest.mark.unit
@@ -604,6 +604,24 @@ def test_sync_rejects_upstream_without_mit_license(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_sync_rejects_family_without_known_handler(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    upstream = git_upstream(tmp_path, {"LICENSE": "MIT License"})
+    monkeypatch.setitem(
+        skills_sync.SPECS,
+        "familia-sem-handler",
+        skills_sync.SyncSpec(
+            "familia-sem-handler", "https://example.com/fantasma.git", "main"
+        ),
+    )
+
+    with pytest.raises(skills_sync.SyncError, match="sem handler"):
+        skills_sync.sync_skill("familia-sem-handler", tmp_path / "repo", upstream)
+
+
+@pytest.mark.unit
 def test_sync_help_mentions_writing_skills_targets(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -686,7 +704,7 @@ def test_portugues_tecnico_controlado_sync_copies_references(
     for reference in ("ingles.md", "lexico.md", "ortografia-ptbr.md"):
         assert (local_skill / "references" / reference).is_file()
     metadata = (local_skill / "UPSTREAM.md").read_text(encoding="utf-8")
-    assert "opencode-skills sync portugues-tecnico-controlado" in metadata
+    assert "harness-skills sync portugues-tecnico-controlado" in metadata
     assert "references/lexico.md" in metadata
 
 
@@ -756,7 +774,7 @@ def test_humanizer_br_sync_copies_aprofundador_and_license(
         "MIT License"
     )
     metadata = (local_skill / "UPSTREAM.md").read_text(encoding="utf-8")
-    assert "opencode-skills sync humanizer-br" in metadata
+    assert "harness-skills sync humanizer-br" in metadata
     assert "references/aprofundador.md" in metadata
 
 
@@ -880,8 +898,8 @@ def test_update_skips_frozen_skill_without_running_commands(
         "\n"
         "## Como atualizar\n"
         "\n"
-        "    opencode-skills sync accessibility-audit\n"
-        "    opencode-skills sync accessibility-audit --check-only\n",
+        "    harness-skills sync accessibility-audit\n"
+        "    harness-skills sync accessibility-audit --check-only\n",
         encoding="utf-8",
     )
     frozen_before = frozen_metadata.read_bytes()
@@ -893,8 +911,8 @@ def test_update_skips_frozen_skill_without_running_commands(
         "\n"
         "## Como atualizar\n"
         "\n"
-        "    opencode-skills sync accessibility-audit\n"
-        "    opencode-skills sync accessibility-audit --check-only\n",
+        "    harness-skills sync accessibility-audit\n"
+        "    harness-skills sync accessibility-audit --check-only\n",
         encoding="utf-8",
     )
 
@@ -951,7 +969,7 @@ def test_update_keeps_unfrozen_skill_without_freeze_field(
         "\n"
         "## Como atualizar\n"
         "\n"
-        "    opencode-skills sync accessibility-audit\n",
+        "    harness-skills sync accessibility-audit\n",
         encoding="utf-8",
     )
     assert "sincronizacao:" not in metadata_path.read_text(encoding="utf-8")
@@ -1028,7 +1046,7 @@ def test_upstream_regeneration_preserves_synchronization_field(
         repository="https://example.invalid/upstream.git",
         branch="main",
         files=["references/example.md"],
-        update_command="opencode-skills sync example",
+        update_command="harness-skills sync example",
         license_text="MIT License",
     )
 
@@ -1146,9 +1164,9 @@ def test_sync_table_documents_every_cli_family(repo_root: Path) -> None:
         "\n### ", 1
     )[0]
     documented_families = {
-        row.split("opencode-skills sync ", 1)[1].split("`", 1)[0]
+        row.split("harness-skills sync ", 1)[1].split("`", 1)[0]
         for row in sync_table.splitlines()
-        if "opencode-skills sync " in row
+        if "harness-skills sync " in row
     }
     cli_families = set(skills_sync.SPECS)
 

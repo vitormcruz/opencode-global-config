@@ -519,7 +519,7 @@ def test_copilot_adapter_routes_skills_from_global_permissions(
         path.name for path in auxiliary_skills.iterdir() if path.is_dir()
     }
 
-    assert len(global_skills) == 10
+    assert len(global_skills) == 11
     assert len(domain_skills) == 23
     assert global_skills.isdisjoint(domain_skills)
     assert global_skills | domain_skills == source_skills
