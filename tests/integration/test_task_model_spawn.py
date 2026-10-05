@@ -37,7 +37,9 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.integration
+from platform_requirements import requires_posix
+
+pytestmark = [pytest.mark.integration, requires_posix]
 
 # Modelos da validação (provider já configurado no ambiente do usuário).
 MODEL_FLASH = "zai-coding-plan/glm-5.3-flash"

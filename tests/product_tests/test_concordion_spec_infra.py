@@ -57,10 +57,14 @@ def test_render_adr_specs_task_derives_every_numbered_adr_spec(
             "(install_gradle)"
         )
     java_home = os.environ.get("JAVA_HOME", "")
-    if not java_home or not Path(java_home, "bin", "java").exists():
+    java_executable = "java.exe" if os.name == "nt" else "java"
+    if not java_home or not Path(java_home, "bin", java_executable).exists():
+        java_environment = (
+            "no ambiente do usuário do Windows" if os.name == "nt" else "no .bashrc"
+        )
         pytest.fail(
             "JAVA_HOME ausente ou invalido; execute o bootstrap user-space "
-            "(install_java) e carregue o PATH persistido no .bashrc"
+            f"(install_java) e carregue o PATH persistido {java_environment}"
         )
 
     environment = {**os.environ, "JAVA_HOME": java_home}

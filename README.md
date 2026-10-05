@@ -372,14 +372,48 @@ Taxonomia de markers agnóstica de SO e harness (detalhes em
 
 `-m all` é tradução literal de atalho feita pelo conftest antes da seleção;
 nunca inclui `agent_eval` e não acrescenta nem remove nada além do token
-`all`. Teste que exige capacidade de SO declara `skipif` no próprio teste
-(ex.: "exige symlink (POSIX)"): a suíte não o executa onde a capacidade não
-se aplica e o relatório mostra o skip com o motivo.
+`all`. Teste que exige um sistema operacional usa no próprio teste
+`requires_posix` ou `requires_windows`: a suíte não o executa onde a
+premissa não se aplica e o relatório mostra o skip com o motivo.
 
 No Windows, use o executável da virtualenv pelo PowerShell:
 
 ```powershell
 .\.venv\Scripts\pytest.exe -m all
+```
+
+### Rede e mirrors corporativos
+
+Os testes seguem a configuração global do usuário e nunca desligam TLS:
+
+- npm: `~/.npmrc` real (`--userconfig`), mesmo com HOME isolado.
+- Gradle: `GRADLE_MAVEN_MIRROR` ou o mirror `*`/`central` de
+  `~/.m2/settings.xml`; sem mirror, usa o Maven Central.
+- `crwl`: servidor HTTP local em `127.0.0.1`. O `litellm`, dependência do
+  crawl4ai, baixa tabelas do GitHub ao ser importado; o bootstrap grava
+  `LITELLM_LOCAL_MODEL_COST_MAP=True` e
+  `LITELLM_LOCAL_ANTHROPIC_BETA_HEADERS=True` no ambiente do usuário
+  (`HKCU\Environment` no Windows, bloco no perfil do shell no Linux/WSL)
+  sempre que o `crwl` está presente ou foi instalado, e os testes as
+  definem no subprocesso. Shells já abertos só as veem após reabrir.
+- pip, git e Maven leem a própria configuração global.
+
+Máquina sem mirror configurado usa a internet direta. Mirror configurado
+e inacessível (por exemplo, fora da VPN) faz o teste falhar com o registro
+configurado na mensagem; não há fallback silencioso para a internet.
+
+### Ambiente Python dos testes
+
+A suíte só roda na `.venv` do próprio checkout, com `opencode_config`
+instalado em modo editável a partir dele. O `tests/conftest.py` encerra a
+execução (código 3) com instruções quando o interpretador não é a `.venv`
+do checkout ou o pacote vem de outro clone (`pip install -e .` no Python
+global vale para a máquina inteira e aponta para um único clone). Cada
+worktree precisa da própria `.venv`:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -e .
 ```
 
 ### Testes de integração (Camada 2)

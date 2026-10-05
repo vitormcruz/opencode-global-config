@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from fake_winreg import FakeWinreg
-from platform_requirements import requires_symlink
+from platform_requirements import requires_posix
 from opencode_config.harnesses import ApplyOptions
 from opencode_config.harnesses.opencode import (
     OpenCodeAdapter,
@@ -109,7 +109,7 @@ def test_canonical_opencode_json_declares_pinned_dcp_plugin(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_posix_materializes_dcp_jsonc_symlink(
     tmp_path: Path,
 ) -> None:

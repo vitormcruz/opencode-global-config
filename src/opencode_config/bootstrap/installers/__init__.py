@@ -18,6 +18,7 @@ from .core import (
     POWERSHELL_SHA256_WINDOWS,
     SHELLCHECK_SHA256_WINDOWS,
     download_file,
+    ensure_crwl_environment,
     ensure_env_var,
     ensure_path_entry,
     install_aws_cli,
@@ -48,6 +49,7 @@ from .core import (
     install_pytest_cov,
     install_ruff,
     install_shellcheck,
+    is_pytest_cov_ready,
     is_pytest_environment_ready,
     SHELLCHECK_VERSION,
 )
@@ -70,6 +72,7 @@ __all__ = [
     "POWERSHELL_SHA256_WINDOWS",
     "SHELLCHECK_SHA256_WINDOWS",
     "download_file",
+    "ensure_crwl_environment",
     "ensure_env_var",
     "ensure_path_entry",
     "install_aws_cli",
@@ -100,6 +103,7 @@ __all__ = [
     "install_pytest_cov",
     "install_ruff",
     "install_shellcheck",
+    "is_pytest_cov_ready",
     "is_pytest_environment_ready",
     "SHELLCHECK_VERSION",
 ]

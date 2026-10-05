@@ -39,14 +39,14 @@ O marker utilitário de fixture `opencode_context` passa a ser
 
 ## Requisito de ambiente declarado no próprio teste
 
-Teste que exige capacidade de SO declara a restrição em si mesmo via
-`skipif` com reason claro — hoje `requires_symlink` ("exige symlink
-(POSIX)"), definido em `tests/platform_requirements.py` e aplicado aos 17
-testes que exercitam symlink real. A suíte não executa o teste onde a
-capacidade não se aplica e o relatório mostra o que não rodou e por quê. O
-mecanismo é simétrico: testes exclusivos de Windows no futuro declaram o
-próprio `skipif` pelo mesmo padrão. Nenhum hook escondido altera a seleção
-pedida — quem seleciona é sempre a expressão `-m` do comando.
+Teste que exige um sistema operacional declara a restrição em si mesmo via
+`skipif` com reason claro. `requires_posix` e `requires_windows`, definidos
+em `tests/platform_requirements.py`, agrupam essas premissas sem amarrá-las a
+uma capacidade isolada, como symlink. A suíte não executa o teste onde a
+premissa não se aplica e o relatório mostra o que não rodou e por quê. Novas
+diferenças entre sistemas devem usar um desses marcadores, sem criar uma
+anotação para cada capacidade. Nenhum hook escondido altera a seleção pedida,
+quem seleciona é sempre a expressão `-m` do comando.
 
 ## Fronteira suíte/agente
 

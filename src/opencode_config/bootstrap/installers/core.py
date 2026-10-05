@@ -42,6 +42,13 @@ GRADLE_VERSION = "8.10.2"
 GITLEAKS_VERSION = "8.24.2"
 SHELLCHECK_VERSION = "0.10.0"
 JDK_VERSION_TAG = "jdk-21.0.6%2B7"
+WINDOWS_CMD_PATH_LIMIT = 8191
+# O litellm, dependência do crawl4ai, baixa tabelas do GitHub ao ser
+# importado; estas variáveis o mantêm nas cópias empacotadas.
+LITELLM_LOCAL_ONLY_ENVIRONMENT = {
+    "LITELLM_LOCAL_MODEL_COST_MAP": "True",
+    "LITELLM_LOCAL_ANTHROPIC_BETA_HEADERS": "True",
+}
 
 # SHA-256 fixados dos releases portaveis. Fontes dos valores:
 # - Gradle: services.gradle.org/distributions/gradle-8.10.2-bin.zip.sha256
@@ -138,8 +145,59 @@ def _same_path(
     return first == second
 
 
+def _is_isolated_test_path(path: str) -> bool:
+    normalized = path.replace("\\", "/").casefold()
+    return "pytest-of-" in normalized and "/.isolated-home/" in normalized
+
+
+def _windows_user_path_entries(
+    current: object,
+    target: str,
+) -> tuple[list[str], bool]:
+    target_is_isolated = _is_isolated_test_path(target)
+    entries: list[str] = []
+    seen: set[str] = set()
+
+    if not target_is_isolated:
+        entries.append(target)
+        seen.add(target.casefold())
+
+    for entry in str(current).split(";"):
+        if not entry or _is_isolated_test_path(entry):
+            continue
+        normalized = entry.casefold()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        entries.append(entry)
+
+    return entries, not target_is_isolated
+
+
+def _fit_windows_user_path(
+    entries: list[str],
+    *,
+    preserve_first: bool,
+) -> list[str]:
+    if len(";".join(entries)) <= WINDOWS_CMD_PATH_LIMIT:
+        return entries
+
+    fitted = [
+        entry
+        for index, entry in enumerate(entries)
+        if (preserve_first and index == 0)
+        or os.path.isdir(os.path.expandvars(entry))
+    ]
+    if len(";".join(fitted)) > WINDOWS_CMD_PATH_LIMIT:
+        raise InstallerError(
+            "O PATH do usuário continua acima do limite de "
+            f"{WINDOWS_CMD_PATH_LIMIT} caracteres do cmd.exe."
+        )
+    return fitted
+
+
 def _persist_windows_user_path(target: str) -> None:
-    """Persiste um caminho no PATH do usuário sem exigir elevação."""
+    """Persiste um caminho válido no PATH do usuário sem exigir elevação."""
 
     if os.name != "nt":
         return
@@ -159,10 +217,13 @@ def _persist_windows_user_path(target: str) -> None:
             current = ""
             value_type = winreg.REG_EXPAND_SZ
 
-        entries = [
-            entry for entry in str(current).split(";") if entry
-        ]
-        if any(entry.casefold() == target.casefold() for entry in entries):
+        entries, preserve_first = _windows_user_path_entries(current, target)
+        entries = _fit_windows_user_path(
+            entries,
+            preserve_first=preserve_first,
+        )
+        persisted = ";".join(entries)
+        if persisted == str(current):
             return
 
         winreg.SetValueEx(
@@ -170,7 +231,7 @@ def _persist_windows_user_path(target: str) -> None:
             "Path",
             0,
             value_type,
-            ";".join([target, *entries]),
+            persisted,
         )
 
     broadcast_environment_change()
@@ -186,8 +247,9 @@ def ensure_env_var(
 ) -> None:
     """Persiste uma variavel de ambiente do bootstrap para shells novos.
 
-    Com profile_path, grava o bloco marcado ``bootstrap-env`` (idempotente,
-    mesmo mecanismo do PATH) no formato do SO. No Windows, quando ``persist``
+    Com profile_path, grava um bloco marcado ``bootstrap-env-<NOME>`` por
+    variavel (idempotente, mesmo mecanismo do PATH) no formato do SO. No
+    Windows, quando ``persist``
     esta ativo e o SO e Windows de fato, grava tambem em HKCU\\Environment
     com broadcast. Sem profile_path, nada e escrito.
     """
@@ -203,7 +265,7 @@ def ensure_env_var(
         content = f'export {name}="{value}"'
 
     if profile_path is not None:
-        update_marked_block(profile_path, "bootstrap-env", content)
+        update_marked_block(profile_path, f"bootstrap-env-{name}", content)
 
 
 def ensure_path_entry(
@@ -1023,6 +1085,20 @@ def install_crwl(
     )
 
 
+def ensure_crwl_environment(context: InstallContext) -> None:
+    """Mantem o litellm do crawl4ai fora da internet (idempotente)."""
+
+    for name, value in LITELLM_LOCAL_ONLY_ENVIRONMENT.items():
+        context.current_environment[name] = value
+        ensure_env_var(
+            name,
+            value,
+            environment_kind=context.environment,
+            profile_path=context.profile_path,
+            persist=context.persist_paths,
+        )
+
+
 def install_npm_global(
     context: InstallContext,
     package: str,
@@ -1405,9 +1481,7 @@ def _venv_python_path(context: InstallContext) -> Path:
     return context.repo_root / ".venv" / python_name
 
 
-def is_pytest_environment_ready(context: InstallContext) -> bool:
-    """Verifica se a virtualenv consegue importar o pacote do repositorio."""
-
+def _venv_runs(context: InstallContext, code: str) -> bool:
     if context.repo_root is None:
         return False
     python_path = _venv_python_path(context)
@@ -1419,16 +1493,23 @@ def is_pytest_environment_ready(context: InstallContext) -> bool:
         if name.casefold() not in {"pythonpath", "pythonhome"}
     }
     result = run_command(
-        [
-            python_path,
-            "-c",
-            "import opencode_config; import pytest",
-        ],
+        [python_path, "-c", code],
         cwd=context.repo_root,
         env=environment,
     )
     return result.succeeded
 
+
+def is_pytest_environment_ready(context: InstallContext) -> bool:
+    """Verifica se a virtualenv consegue importar o pacote do repositorio."""
+
+    return _venv_runs(context, "import opencode_config; import pytest")
+
+
+def is_pytest_cov_ready(context: InstallContext) -> bool:
+    """Verifica se a virtualenv do repositorio importa o pytest-cov."""
+
+    return _venv_runs(context, "import pytest_cov")
 
 def install_pytest(
     context: InstallContext,

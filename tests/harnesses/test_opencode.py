@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from fake_winreg import FakeWinreg
-from platform_requirements import requires_symlink
+from platform_requirements import requires_posix
 from opencode_config.harnesses import ApplyOptions
 from opencode_config.harnesses.opencode import (
     OpenCodeAdapter,
@@ -75,7 +75,7 @@ def require_symlink_support(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -104,6 +104,7 @@ def test_opencode_creates_canonical_symlinks(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
+@requires_posix
 def test_opencode_without_provisioned_ai_memory_filters_symlink_config(
     tmp_path: Path,
 ) -> None:
@@ -138,6 +139,7 @@ def test_opencode_without_provisioned_ai_memory_filters_symlink_config(
 
 
 @pytest.mark.integration
+@requires_posix
 def test_opencode_with_provisioned_ai_memory_keeps_canonical_config_link(
     tmp_path: Path,
 ) -> None:
@@ -171,7 +173,7 @@ def test_opencode_with_provisioned_ai_memory_keeps_canonical_config_link(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_materializes_internal_bridge_url_without_editing_canonical_config(
     tmp_path: Path,
 ) -> None:
@@ -222,7 +224,7 @@ def test_canonical_opencode_ai_memory_mcp_has_no_credentials(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_agents_md_preserves_managed_blocks(
     tmp_path: Path,
 ) -> None:
@@ -254,7 +256,7 @@ def test_opencode_agents_md_preserves_managed_blocks(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_agents_md_is_idempotent(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -268,7 +270,7 @@ def test_opencode_agents_md_is_idempotent(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_backs_up_existing_destination(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"
@@ -288,7 +290,7 @@ def test_opencode_backs_up_existing_destination(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_is_idempotent_without_spurious_backup(
     tmp_path: Path,
 ) -> None:
@@ -307,7 +309,7 @@ def test_opencode_is_idempotent_without_spurious_backup(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_does_not_mutate_repository(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -344,7 +346,7 @@ def test_opencode_does_not_mutate_repository(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_removes_legacy_test_library_block(
     tmp_path: Path,
 ) -> None:
@@ -366,7 +368,7 @@ def test_opencode_removes_legacy_test_library_block(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_removes_legacy_local_binary_comment(
     tmp_path: Path,
 ) -> None:
@@ -387,7 +389,7 @@ def test_opencode_removes_legacy_local_binary_comment(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_opencode_accepts_quiet(tmp_path: Path) -> None:
     repository = make_repository(tmp_path)
     home = tmp_path / "home"

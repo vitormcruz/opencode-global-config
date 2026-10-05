@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from platform_requirements import requires_symlink
+from platform_requirements import requires_posix
 
 
 def invoke_cli(
@@ -108,7 +108,7 @@ def test_svgtoimage_without_playwright_fails_with_hint(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_svgtoimage_generates_png_with_correct_dimensions(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
