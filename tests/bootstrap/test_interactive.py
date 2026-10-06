@@ -1,4 +1,6 @@
+from collections.abc import MutableMapping
 from io import StringIO
+import os
 from pathlib import Path
 
 import pytest
@@ -48,7 +50,16 @@ def make_detection(
     )
 
 
-def make_context(tmp_path: Path) -> InstallContext:
+def make_context(
+    tmp_path: Path,
+    current_environment: MutableMapping[str, str] | None = None,
+) -> InstallContext:
+    if current_environment is None:
+        current_environment = {
+            key: value
+            for key, value in os.environ.items()
+            if not key.startswith("LITELLM_LOCAL_")
+        }
     return InstallContext(
         environment=EnvironmentKind.LINUX,
         paths=resolve_user_space_paths(
@@ -57,6 +68,7 @@ def make_context(tmp_path: Path) -> InstallContext:
         ),
         repo_root=tmp_path,
         profile_path=tmp_path / ".profile",
+        current_environment=current_environment,
     )
 
 

@@ -59,13 +59,12 @@
   itens é anunciado no total e apresentado item por item, ou poucos
   relacionados por vez; nunca tudo de uma vez, salvo pedido.
 - Entrega vai completa: densa e no formato pedido, sem as regras de ritmo
-  da conversa.
-- O ritmo de uma decisão dependente por resposta e os blocos progressivos
-  valem para a conversa decisória com o humano e substituem a orientação
-  anterior de volume nesse contexto. Entregas solicitadas, relatos entre
-  agentes e evidências permanecem completos.
-- Numa pergunta, preserve primeiro o contexto e a consequência da escolha;
-  distribua por turnos apenas decisões independentes.
+  da conversa; relatos entre agentes e evidências também permanecem
+  completos.
+- O ritmo de uma decisão dependente por resposta e os blocos
+  progressivos valem para a conversa decisória com o humano.
+- Numa pergunta, preserve primeiro o contexto e a consequência da
+  escolha.
 - Resumo fiel: só atribua ao humano decisão, fato ou preferência que ele
   escreveu; silêncio ou resposta ambígua não é aprovação. O resumo não
   trata como conhecida informação que não foi apresentada na conversa;
@@ -81,8 +80,8 @@
   nem gerúndio conclusivo.
 - Sem frases de chatbot ("espero que ajude", "ótima pergunta").
 - Conclua com fato concreto, não com frase genérica.
-- Texto denso (specs, docs, comunicações importantes): carregue a skill
-  `humanizer-br`.
+- Texto denso para o humano na conversa (respostas longas,
+  comunicações importantes): carregue a skill `humanizer-br`.
 
 ### Conversa sobre plano
 - Plano e artefatos de estado são do agente; o humano não os lê.
@@ -115,7 +114,8 @@
 ### Tom natural
 - Siga "Escrita natural (essencial)" em toda comunicação, inclusive nas
   respostas de chat.
-- Texto técnico (specs, docs, explicações densas): carregue a skill
+- Artefato técnico consumido fora da conversa (procedimento, runbook,
+  doc de sistema, mensagem de erro, doc bilíngue): carregue a skill
   `portugues-tecnico-controlado`.
 
 ## Descoberta de Código
@@ -166,20 +166,28 @@
   a próxima. Compensa quando o histórico já é grande e ainda virão
   muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
   custo da compactação supera a economia: não compacte.
-- Reduza o contexto por conta própria, com qualquer mecanismo
-  disponível no harness (nova sessão ou spawn com estado persistido em
-  arquivo, ou equivalente). Sem mecanismo disponível ou suficiente,
-  peça ao humano.
-- No OpenCode com o plugin DCP ativo, a tool `compress` é o mecanismo
-  preferido: o próprio agente comprime trechos antigos em resumo, sem
-  apagar o histórico. Dispare `compress` quando um nudge indicar
-  contexto acima do limite; `/compact` é comando do humano e fica como
-  fallback quando a tool não estiver disponível.
-- No Copilot CLI nada muda: a compactação é host-level, fora do
-  alcance do agente; recupere contexto com re-seed em chat novo,
-  salvando o estado antes.
-- Segure o crescimento: leia trechos (offset/limit) e consultas
-  direcionadas; não reinsira arquivos e logs completos no contexto.
+- Comprima por decisão própria quando o contexto estiver grande e o
+  conteúdo antigo já não servir à tarefa corrente, sem esperar limite
+  ou aviso.
+- A inclinação cresce com o contexto: o desperdício também cresce.
+  Estime o tamanho sem medidor (volume de arquivos lidos, tamanho
+  das saídas de ferramentas, número de turnos); passado ~150k
+  tokens, assume desperdício crescente: dê mais peso à compactação
+  em cada fronteira de etapa seguinte; aos 200k tokens, assume
+  desperdício e comprima de fato se necessário.
+- Com tool de compactação que preserve o histórico no harness,
+  use-a: comprima você mesmo os trechos antigos em resumo, sem apagar
+  o histórico.
+- Sem tool, mas com comando manual de compactação no harness: peça ao
+  humano já com a mensagem de compactação redigida (o que comprimir
+  e como).
+- Harness sem compactação ao alcance do agente: salve o estado
+  essencial em arquivo e continue em sessão nova, lendo só o que
+  importa; não peça compactação ao humano.
+- Segure o crescimento: localize antes de ler (busca por padrão,
+  índice de código, sumário) e leia só o trecho necessário;
+  paginação com offset/limit é último recurso; não reinsira arquivos
+  e logs completos no contexto.
 - A auto-compactação por threshold é rede de segurança, não plano:
   se ela disparar, a fronteira foi perdida.
 - Mantenha registrado no artefato persistente (plano) o estado da

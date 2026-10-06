@@ -25,5 +25,5 @@ O bootstrap principal também executa este adapter automaticamente. Para
 evitar sua execução, use `OPENCODE_SKIP_OPENCODE_ADAPTER=1`.
 
 O adapter não altera os arquivos do repositório. Para revisar mudanças upstream
-sem alterar skills, execute `opencode-skills detect FAMÍLIA`. Execute
-`opencode-skills sync FAMÍLIA` somente após a decisão humana e as edições aprovadas.
+sem alterar skills, execute `harness-skills detect FAMÍLIA`. Execute
+`harness-skills sync FAMÍLIA` somente após a decisão humana e as edições aprovadas.

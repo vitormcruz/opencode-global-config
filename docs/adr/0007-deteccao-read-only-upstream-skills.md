@@ -2,7 +2,7 @@
 
 - **Status:** Aceita
 - **Data:** 2026-09-27
-- **Escopo:** CLI `opencode-skills` e fluxo de atualização de skills externas
+- **Escopo:** CLI `harness-skills` e fluxo de atualização de skills externas
 
 ## Contexto
 
@@ -17,7 +17,7 @@ intenção.
 
 ## Decisão
 
-O CLI oferece `opencode-skills detect FAMILY` como operação separada de `sync`.
+O CLI oferece `harness-skills detect FAMILY` como operação separada de `sync`.
 O comando compara o campo `commit` de cada `UPSTREAM.md` não congelado com o
 commit atual da família. O comando não grava metadados nem aplica conteúdo.
 

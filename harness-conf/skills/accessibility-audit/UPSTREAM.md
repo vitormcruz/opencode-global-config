@@ -18,11 +18,11 @@ sincronizado_em: 2026-08-08 12:24 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync accessibility-audit
+    harness-skills sync accessibility-audit
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync accessibility-audit --check-only
+    harness-skills sync accessibility-audit --check-only
 
 ## Licenca
 

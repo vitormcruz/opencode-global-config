@@ -20,11 +20,11 @@ sincronizado_em: 2026-09-22 23:30 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync writing-for-agents
+    harness-skills sync writing-for-agents
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync writing-for-agents --check-only
+    harness-skills sync writing-for-agents --check-only
 
 ## Licenca
 

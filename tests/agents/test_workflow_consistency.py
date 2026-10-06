@@ -270,6 +270,7 @@ _GLOBAL_SKILLS: set[str] = {
     "tls-certificate-recovery",
     "svg-to-image",
     "web-research-exa-crawl4ai",
+    "agent-introspection-debugging",
 }
 
 

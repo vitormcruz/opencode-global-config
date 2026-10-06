@@ -5,7 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-// ADR-0007: o contrato CLI é `opencode-skills detect FAMILY`.
+// ADR-0007: o contrato CLI é `harness-skills detect FAMILY`.
 @RunWith(ConcordionRunner)
 class Adr0007Fixture {
     private final Path root = Paths

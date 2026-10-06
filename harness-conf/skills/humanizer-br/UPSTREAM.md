@@ -24,11 +24,11 @@ sincronizado_em: 2026-09-07 01:35 UTC
 
 Execute a partir da raiz do repo:
 
-    opencode-skills sync humanizer-br
+    harness-skills sync humanizer-br
 
 Para verificar se ha atualizacoes sem sincronizar:
 
-    opencode-skills sync humanizer-br --check-only
+    harness-skills sync humanizer-br --check-only
 
 ## Licenca
 
