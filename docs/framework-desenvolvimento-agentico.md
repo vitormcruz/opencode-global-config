@@ -13,9 +13,9 @@ insumo para que os humanos possam entender o sistema e orientar os agentes.
 
 A Governança de Produto é a dimensão responsável por estabelecer, organizar e manter a memória viva do sistema. Seu papel é definir a estrutura das especificações de negócio, os contratos técnicos, as suítes de validação e as instruções operacionais que servem de contexto e *harness* para todo o ciclo de vida do software.
 
-O **`curador-produto`** é o único agente responsável por conduzir entrevistas estruturadas com o humano com o objetivo de criar ou modificar as Diretrizes e Regras de Produto. Ele também revisa e valida se as diretrizes foram seguidas em um fluxo de desenvolviento qualquer.
+O **`curador-produto`** é o único agente responsável por conduzir entrevistas estruturadas com o humano para criar ou modificar as Diretrizes e Regras de Produto. Ele também revisa e valida se as diretrizes foram seguidas em um fluxo de desenvolvimento.
 
-As diretrizes e Regras de Produto servem de guia definitivo para os agentes seguirem, e de documentação de especificação para o Humano.
+As Diretrizes e Regras de Produto orientam o trabalho dos agentes e documentam as decisões de especificação para o humano.
 
 ### Diretrizes e Regras de Produto
 
@@ -34,21 +34,20 @@ referenciados aqui:
 
 - **Especificação do Produto:** descreve o escopo, os elementos de
   especificação, as regras de documentação e os links para os documentos
-  que detalham cada parte do produto. Por exemplo, é nele que são definidos como o projeto 
-  guarda os requisitos, se faz critérios de aceitação ou casos de uso, se organiza o escopo
-  por história de usuário, se armazenda diagramas de modelos de dados etc.
+  que detalham cada parte do produto. Ele registra como o projeto guarda
+  requisitos, critérios de aceitação, casos de uso, histórias e diagramas, 
+  preferencialmente como **Especificações Executáveis**.
   [Consultar template](../harness-conf/agents/default-artifacts/doc-readme-template.md)
 
 - **Testes por Especialidade:** define as suítes de validação do produto,
-  os testes de cada especialidade, os critérios de execução, os limites e o formato dos 
-  resultados. A ideia é definir os testes que tem que ser feitos para considerar modificações 
-  aceitas como DONE, ou seja, somente se esses scripts passarem é que as modificações 
-  podem ser consideradas finalizadas.
+  os testes de cada especialidade, os critérios de execução, os limites e
+  o formato dos resultados. Define os testes necessários para considerar
+  uma alteração concluída.
   [Consultar template](../harness-conf/agents/default-artifacts/testes-por-especialidade-template.md)
 
 - **Instruções por Agente:** registra as orientações específicas que cada
   agente deve seguir em um repositório. Fica dentro do `AGENTS.md`, junto
-  da seção de Diretrizes e Regras de Produto para reforçar o uso para o agente.
+  da seção de Diretrizes e Regras de Produto, para servir de reforço aos agentes.
   [Consultar template](../harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md)
 
 ## Ideação

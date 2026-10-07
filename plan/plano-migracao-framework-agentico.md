@@ -84,3 +84,67 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
    - Ajustar o CLI de scaffold para refletir a nova estrutura de arquivos.
 6. **Fase 6 — Validação e Testes**:
    - Rodar suíte completa de testes (`pytest -m all`) e corrigir eventuais regressões.
+
+---
+
+## 4. Decisões Consolidadas para a Próxima Revisão
+
+### 4.1. Separação entre especificação do produto e especificação de testes
+
+- A **Especificação do Produto** não deve conter a especificação detalhada
+  de Testes por Especialidade.
+- **Testes por Especialidade** permanece em arquivo próprio, na mesma pasta
+  da Especificação do Produto.
+- O arquivo de Especificação do Produto pode manter apenas uma referência
+  curta para o arquivo de testes, porque a governança anterior definiu que
+  esse vínculo deve existir. Essa referência não deve reproduzir conteúdo
+  da especificação de testes.
+- O `AGENTS.md` também referencia o arquivo efetivo de Testes por
+  Especialidade dentro da seção **Diretrizes e Regras de Produto**.
+
+### 4.2. Separação entre regras de teste e instruções operacionais
+
+- O arquivo **Testes por Especialidade** define:
+  - suítes e scripts;
+  - contrato de saída;
+  - critérios;
+  - limites;
+  - ferramentas;
+  - escopo de cada especialidade;
+  - agregador.
+- O arquivo **Instruções por Agente** define quem executa cada atividade
+  e em qual etapa do workflow.
+- A execução do agregador pelo `qa` deve ficar nas instruções de `qa`.
+- A validação da evidência pelo `curador-produto` deve ficar nas
+  instruções de `curador-produto`.
+- Na próxima revisão, remover do template de Testes por Especialidade as
+  referências operacionais ao `qa`, ao `curador-produto` e à etapa do
+  workflow, caso elas não sejam necessárias para definir o contrato da
+  suíte.
+
+### 4.3. Flexibilidade das Instruções por Agente
+
+- As instruções são copiadas para o `AGENTS.md` de cada projeto e podem
+  ser ajustadas pelo responsável do projeto.
+- O template deve fornecer um padrão inicial, não bloquear variações
+  justificadas por tecnologia, estrutura de testes ou processo local.
+- A flexibilidade não deve remover os contratos definidos nas
+  especificações. Uma instrução local pode mudar o executor ou o momento
+  de uma atividade, mas deve continuar apontando para as especificações
+  vigentes e preservar os critérios de validação aprovados.
+
+### 4.4. Estado observado nos templates
+
+- `doc-readme-template.md` já não contém a seção detalhada de Testes por
+  Especialidade. Ainda mantém uma referência ao arquivo próprio, o que é
+  compatível com a arquitetura se essa referência curta for mantida.
+- `testes-por-especialidade-template.md` já é uma especificação
+  independente, mas ainda contém frases que atribuem sua execução ao
+  `qa` e a validação da evidência ao `curador-produto`. Essas frases
+  precisam ser revistas em conjunto com as instruções por agente.
+- `instrucoes-por-agente-template.md` já recebeu as instruções de
+  execução do `qa` e de validação do `curador-produto`. Essas instruções
+  devem ser tratadas como defaults ajustáveis por projeto.
+- O framework já descreve os três documentos, mas a redação deve deixar
+  explícito que o template de testes define o contrato e o template de
+  instruções define a operação.
