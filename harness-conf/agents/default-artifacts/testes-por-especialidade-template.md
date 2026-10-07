@@ -30,8 +30,8 @@ finding com instrução de instalação.
 ## Dois níveis de teste
 
 1. **Testes da aplicação:** validam o produto em desenvolvimento.
-   Rodam via suítes e agregador `testes-produto`, executados pelo
-   agente `qa` na fase Testes do workflow.
+   Rodam via suítes e agregador `testes-produto` durante a validação
+   do produto.
 2. **Testes dos scripts de teste:** os scripts de suíte e o agregador
    são código e têm testes próprios em `testes-produto/tests/`.
    Eles rodam somente quando esses scripts mudam, nunca no ciclo
@@ -119,5 +119,4 @@ Chama as quatro suítes (`testes-produto/backend`,
 `testes-produto/dados`, `testes-produto/seguranca`,
 `testes-produto/frontend`) e consolida o relatório. `status` é
 `fail` se qualquer suíte falhar. Não reabre entrevista nem inventa
-check. É executado pelo agente `qa` na fase Testes do workflow, e a
-evidência da execução é validada pelo `curador-produto`.
+check.

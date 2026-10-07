@@ -102,7 +102,7 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 - O `AGENTS.md` também referencia o arquivo efetivo de Testes por
   Especialidade dentro da seção **Diretrizes e Regras de Produto**.
 
-### 4.2. Separação entre regras de teste e instruções operacionais
+### 4.2. Separação entre regras de teste e configuração por agente
 
 - O arquivo **Testes por Especialidade** define:
   - suítes e scripts;
@@ -112,11 +112,15 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   - ferramentas;
   - escopo de cada especialidade;
   - agregador.
-- O arquivo **Instruções por Agente** define quem executa cada atividade
-  e em qual etapa do workflow.
-- A execução do agregador pelo `qa` deve ficar nas instruções de `qa`.
-- A validação da evidência pelo `curador-produto` deve ficar nas
-  instruções de `curador-produto`.
+- O arquivo **Instruções por Agente** funciona como um ponto de
+  configuração por repositório. Ele reúne as instruções específicas que
+  o responsável pelo projeto decidir fixar para cada agente.
+- Ainda está em decisão quais regras do framework serão obrigatórias para
+  todos os agentes e quais poderão ser definidas ou ajustadas nesse
+  ponto de configuração.
+- As instruções atuais do `qa` e do `curador-produto` são uma proposta de
+  configuração, não uma decisão final sobre o que ficará amarrado ao
+  framework.
 - Na próxima revisão, remover do template de Testes por Especialidade as
   referências operacionais ao `qa`, ao `curador-produto` e à etapa do
   workflow, caso elas não sejam necessárias para definir o contrato da
@@ -126,12 +130,12 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 
 - As instruções são copiadas para o `AGENTS.md` de cada projeto e podem
   ser ajustadas pelo responsável do projeto.
-- O template deve fornecer um padrão inicial, não bloquear variações
-  justificadas por tecnologia, estrutura de testes ou processo local.
-- A flexibilidade não deve remover os contratos definidos nas
-  especificações. Uma instrução local pode mudar o executor ou o momento
-  de uma atividade, mas deve continuar apontando para as especificações
-  vigentes e preservar os critérios de validação aprovados.
+- O template deve funcionar como um hotspot de configuração, sem
+  presumir que todo comportamento operacional será igual em todos os
+  repositórios.
+- A fronteira entre regras obrigatórias do framework e instruções abertas
+  por projeto ainda será decidida. Essa decisão deve ser registrada antes
+  da atualização definitiva dos agentes e do scaffold.
 
 ### 4.4. Estado observado nos templates
 
@@ -147,4 +151,4 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   devem ser tratadas como defaults ajustáveis por projeto.
 - O framework já descreve os três documentos, mas a redação deve deixar
   explícito que o template de testes define o contrato e o template de
-  instruções define a operação.
+  instruções oferece um ponto de configuração por repositório.

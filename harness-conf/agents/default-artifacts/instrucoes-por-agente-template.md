@@ -4,7 +4,8 @@
 ### Instruções por Agente
 
 Cada agente lê a própria subseção no início de qualquer
-tarefa. Esta seção não contém comando de suíte.
+tarefa. Esta seção não contém comando de suíte. A ideia é 
+orientar ações para agentes específicos em fases delimitadas
 
 Se o humano recusar instrução para um agente, registre
 `SEM INSTRUÇÕES A PEDIDO DO HUMANO`.
