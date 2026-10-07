@@ -7,12 +7,31 @@ produto, contexto e harness para que agentes consigam evoluir no desenvolvimento
 insumo para que os humanos possam entender o sistema e orientar os agentes.
 
 ![Fluxo de Produto](./svgImage/FwcAgenticoBase.svg)
-> 📍 **Navegar pelo diagrama:** [Desenvolvimento](#desenvolvimento)
-
+📍 **Navegar pelo diagrama:** [Governança de Produto](#governanca) · [Ideação](#ideacao)  · [Desenvolvimento](#desenvolvimento)
 
 ## Governança de Produto
 
+A Governança de Produto é a dimensão responsável por estabelecer, organizar e manter a memória viva do sistema. Seu papel é definir a estrutura das especificações de negócio, os contratos técnicos, as suítes de validação e as instruções operacionais que servem de contexto e *harness* para todo o ciclo de vida do software.
 
+O **`curador-produto`** é o único agente responsável por conduzir entrevistas estruturadas com o humano com o objetivo de criar ou modificar as Diretrizes e Regras de Produto. Ele também revisa e valida se as diretrizes foram seguidas em um fluxo de desenvolviento qualquer.
+
+As diretrizes e Regras de Produto servem de guia definitivo para os agentes seguirem, e de documentação de especificação para o Humano.
+
+### Diretrizes e Regras de Produto
+
+As Diretrizes e Regras de Produto reúnem os documentos que orientam a organização, a especificação e a validação do produto.
+
+![Estrutura das Diretrizes e Regras de Produto](./svgImage/DiretrizesRegrasProduto.svg)
+
+O `AGENTS.md` mantém a seção central de diretrizes. Ela aponta para a **Especificação Geral do Produto**, referencia o arquivo de **Testes por Especialidade** e contém, inline, as **Instruções por Agente**.
+
+O `curador-produto` é responsável por criar, atualizar e validar esse conjunto. Os demais agentes consultam a seção de diretrizes do `AGENTS.md` e seguem as referências encontradas nela, sem depender de caminhos fixos em seus próprios prompts.
+
+Os detalhes de cada artefato estão nos documentos de referência:
+
+- [Template da Especificação Geral do Produto](../harness-conf/agents/default-artifacts/doc-readme-template.md)
+- [Template de Testes por Especialidade](../harness-conf/agents/default-artifacts/testes-por-especialidade-template.md)
+- [Template de Instruções por Agente](../harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md)
 
 ## Ideação
 
