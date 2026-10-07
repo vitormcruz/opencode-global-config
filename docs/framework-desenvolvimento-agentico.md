@@ -113,7 +113,7 @@ executa `git push` sem confirmação explícita do humano.
 O workflow se apoia em seis contratos. Cada contrato tem
 uma seção própria e deve permanecer verificável.
 
-#### 1. [docs/README.md](README.md)
+#### 1. Diretrizes e Regras de Produto
 
 Contrato de documentação do projeto. Contém quatro seções:
 
@@ -126,7 +126,10 @@ Contrato de documentação do projeto. Contém quatro seções:
 O `curador-produto` cria e mantém o documento. O `devflow` apenas aciona
 e medeia o trabalho do curador.
 
-#### 2. Testes por Especialidade
+
+-----
+
+Testes por Especialidade
 
 Suítes (backend, dados, segurança, frontend) e o
 agregador `testes-produto`. Tabela e link no
@@ -136,6 +139,8 @@ Criação e manutenção: `curador-produto`.
 O `AGENTS.md` também mantém o link geral para `docs/README.md` e a
 seção `Instruções por Agente`. A especificação detalhada não é copiada
 para o `AGENTS.md`.
+
+
 
 #### 3. Arquivo de Planejamento
 
