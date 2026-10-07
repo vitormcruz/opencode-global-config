@@ -11,7 +11,8 @@ Se o humano recusar instrução para um agente, registre
 
 ### eng-software
 
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
+Sempre execute os testes automatizados relacionados às modificações feitas por vc, de modo a 
+verificar se ocorreu alguma regressão. Corrija imadiatamente se alçgum erro ocorrer.
 
 ### dba
 
@@ -19,7 +20,8 @@ SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
 ### front
 
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
+Sempre execute os testes automatizados relacionados às modificações feitas por vc, de modo a 
+verificar se ocorreu alguma regressão. Corrija imadiatamente se alçgum erro ocorrer.
 
 ### sec
 

@@ -20,7 +20,7 @@
 
     <g filter="url(#shadow)">
         <rect x="70" y="165" width="250" height="92" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
-        <text x="195" y="192" font-size="15" fill="#92400e" font-weight="bold" text-anchor="middle">Especificação Geral</text>
+        <text x="195" y="192" font-size="15" fill="#92400e" font-weight="bold" text-anchor="middle">Especificação</text>
         <text x="195" y="213" font-size="15" fill="#92400e" font-weight="bold" text-anchor="middle">do Produto</text>
         <text x="195" y="237" font-size="12" fill="#92400e" text-anchor="middle">escopo, elementos e links</text>
     </g>

@@ -9,7 +9,7 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
 | Aspecto | Modelo Anterior | Novo Framework |
 |---|---|---|
 | **Conceito Central de Governança** | Regras e links dispersos ("Mapa do Produto") | **Diretrizes e Regras de Produto** como conceito unificador |
-| **Especificação Geral** | `docs/README.md` como "Mapa do Produto", com 4 seções | **Especificação Geral do Produto**, com foco em escopo, elementos de especificação e documentação |
+| **Especificação** | `docs/README.md` como "Mapa do Produto", com 4 seções | **Especificação do Produto**, com foco em escopo, elementos de especificação e documentação |
 | **Validação de Links** | Curador não validava links para as especificações | `curador-produto` orienta e **valida ativamente a integridade dos links** das especificações |
 | **Indexação de Código** | Seção obrigatória nas diretrizes de produto | **Removida** das diretrizes de produto (tratada como infraestrutura de tooling) |
 | **Testes por Especialidade** | Seção embutida dentro do `docs/README.md` | **Arquivo próprio** (`docs/testes-por-especialidade.md`) referenciado pela especificação geral |
@@ -24,7 +24,7 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
 ### 2.1. Documentação de Especificação
 - [ ] `docs/framework-desenvolvimento-agentico.md`: Documento em construção com as três dimensões (Governança, Ideação, Desenvolvimento).
 - [ ] `docs/workflow-agentes-dev.md`: Documento legado a ser atualizado ou substituído após a conclusão do novo framework.
-- [ ] `docs/README.md`: Atualizar estrutura para refletir a Especificação Geral do Produto (separando Testes por Especialidade em arquivo próprio).
+- [ ] `docs/README.md`: Atualizar estrutura para refletir a Especificação do Produto (separando Testes por Especialidade em arquivo próprio).
 
 ### 2.2. Agente Guardião da Governança (`curador-produto`)
 - [ ] `harness-conf/agents/curador-produto.md`:
@@ -36,7 +36,7 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
 
 ### 2.3. Templates em `default-artifacts`
 - [ ] `harness-conf/agents/default-artifacts/doc-readme-template.md`:
-  - Renomear título e cabeçalho para **Especificação Geral do Produto**.
+  - Renomear título e cabeçalho para **Especificação do Produto**.
   - Remover seção `## Estratégias de Indexação de Código`.
   - Remover seção `## Testes por Especialidade` (passa a apenas linkar o arquivo dedicado).
 - [ ] `harness-conf/agents/default-artifacts/testes-por-especialidade-template.md`:

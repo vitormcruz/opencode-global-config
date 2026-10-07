@@ -23,15 +23,33 @@ As Diretrizes e Regras de Produto reúnem os documentos que orientam a organiza�
 
 ![Estrutura das Diretrizes e Regras de Produto](./svgImage/DiretrizesRegrasProduto.svg)
 
-O `AGENTS.md` mantém a seção central de diretrizes. Ela aponta para a **Especificação Geral do Produto**, referencia o arquivo de **Testes por Especialidade** e contém, inline, as **Instruções por Agente**.
+O `AGENTS.md` mantém a seção central de diretrizes. Ela aponta para a **Especificação do Produto**, referencia o arquivo de **Testes por Especialidade** e contém, inline, as **Instruções por Agente**.
 
 O `curador-produto` é responsável por criar, atualizar e validar esse conjunto. Os demais agentes consultam a seção de diretrizes do `AGENTS.md` e seguem as referências encontradas nela, sem depender de caminhos fixos em seus próprios prompts.
 
-Os detalhes de cada artefato estão nos documentos de referência:
+As Diretrizes e Regras de Produto são formadas pelos documentos abaixo.
+Cada repositório mantém os links para as versões vigentes de suas
+especificações. Os templates usados pelo `curador-produto` estão
+referenciados aqui:
 
-- [Template da Especificação Geral do Produto](../harness-conf/agents/default-artifacts/doc-readme-template.md)
-- [Template de Testes por Especialidade](../harness-conf/agents/default-artifacts/testes-por-especialidade-template.md)
-- [Template de Instruções por Agente](../harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md)
+- **Especificação do Produto:** descreve o escopo, os elementos de
+  especificação, as regras de documentação e os links para os documentos
+  que detalham cada parte do produto. Por exemplo, é nele que são definidos como o projeto 
+  guarda os requisitos, se faz critérios de aceitação ou casos de uso, se organiza o escopo
+  por história de usuário, se armazenda diagramas de modelos de dados etc.
+  [Consultar template](../harness-conf/agents/default-artifacts/doc-readme-template.md)
+
+- **Testes por Especialidade:** define as suítes de validação do produto,
+  os testes de cada especialidade, os critérios de execução, os limites e o formato dos 
+  resultados. A ideia é definir os testes que tem que ser feitos para considerar modificações 
+  aceitas como DONE, ou seja, somente se esses scripts passarem é que as modificações 
+  podem ser consideradas finalizadas.
+  [Consultar template](../harness-conf/agents/default-artifacts/testes-por-especialidade-template.md)
+
+- **Instruções por Agente:** registra as orientações específicas que cada
+  agente deve seguir em um repositório. Fica dentro do `AGENTS.md`, junto
+  da seção de Diretrizes e Regras de Produto para reforçar o uso para o agente.
+  [Consultar template](../harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md)
 
 ## Ideação
 

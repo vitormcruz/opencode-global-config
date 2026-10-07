@@ -23,5 +23,3 @@ Concordion, quando o projeto usa spec executável). Executado pelo
 agente `qa` na fase Testes; a evidência é validada pelo
 `curador-produto`. Testes dos scripts de suíte e do agregador:
 `testes-produto/tests/`.
-
-Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
