@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="100%" height="100%" style="font-family: system-ui, -apple-system, sans-serif;">
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669" />
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- 1. Planejamento -> Execução (Curva externa direita) -->
+  <path d="M 535 135 Q 740 240 685 375" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- 2. Execução -> Planejamento (Curva interna de retorno) -->
+  <path d="M 585 375 Q 610 250 480 165" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow-slate)"/>
+
+  <!-- 3. Testes -> Execução (Curva horizontal superior) -->
+  <path d="M 315 395 Q 425 345 535 395" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow-slate)"/>
+
+  <!-- 4. Execução -> Testes (Curva horizontal inferior) -->
+  <path d="M 555 440 Q 425 495 295 440" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+
+  <!-- 5. Testes -> Planejamento (Curva externa esquerda) -->
+  <path d="M 185 375 Q 180 225 365 165" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-emerald)"/>
+
+  <!-- AUTO-LOOP PLANEJAMENTO (Topo) -->
+  <path d="M 505 95 C 555 40, 480 15, 435 68" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow-blue)"/>
+  <rect x="480" y="24" width="96" height="24" rx="12" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="528" y="40" font-size="11" fill="#0369a1" font-weight="bold" text-anchor="middle">🔍 Revisão</text>
+
+  <!-- AUTO-LOOP EXECUÇÃO (Lateral Direita) -->
+  <path d="M 740 380 C 815 370, 825 435, 745 440" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow-amber)"/>
+  <rect x="765" y="393" width="96" height="24" rx="12" fill="#ffffff" stroke="#d97706" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="813" y="409" font-size="11" fill="#b45309" font-weight="bold" text-anchor="middle">🔍 Revisão</text>
+
+  <!-- Planejamento (Azul) -->
+  <g filter="url(#shadow)">
+    <ellipse cx="425" cy="125" rx="130" ry="48" fill="#f0f9ff" stroke="#0284c7" stroke-width="3"/>
+    <text x="425" y="122" font-size="20" text-anchor="middle">📋</text>
+    <text x="425" y="144" font-size="16" fill="#0369a1" font-weight="bold" text-anchor="middle">Planejamento</text>
+  </g>
+
+  <!-- Testes (Verde) -->
+  <g filter="url(#shadow)">
+    <ellipse cx="215" cy="415" rx="125" ry="48" fill="#f0fdf4" stroke="#059669" stroke-width="3"/>
+    <text x="215" y="412" font-size="20" text-anchor="middle">🧪</text>
+    <text x="215" y="434" font-size="16" fill="#047857" font-weight="bold" text-anchor="middle">Testes</text>
+  </g>
+
+  <!-- Execução (Âmbar) -->
+  <g filter="url(#shadow)">
+    <ellipse cx="635" cy="415" rx="125" ry="48" fill="#fefce8" stroke="#d97706" stroke-width="3"/>
+    <text x="635" y="412" font-size="20" text-anchor="middle">⚙️</text>
+    <text x="635" y="434" font-size="16" fill="#b45309" font-weight="bold" text-anchor="middle">Execução</text>
+  </g>
+</svg>

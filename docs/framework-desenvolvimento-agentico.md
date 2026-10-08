@@ -13,7 +13,7 @@ insumo para que os humanos possam entender o sistema e orientar os agentes.
 
 A Governança de Produto é a dimensão responsável por estabelecer, organizar e manter a memória viva do sistema. Seu papel é definir a estrutura das especificações de negócio, os contratos técnicos, as suítes de validação e as instruções operacionais que servem de contexto e *harness* para todo o ciclo de vida do software.
 
-O **`curador-produto`** é o único agente responsável por conduzir entrevistas estruturadas com o humano para criar ou modificar as Diretrizes e Regras de Produto. Ele também revisa e valida se as diretrizes foram seguidas em um fluxo de desenvolvimento.
+O **`curador-produto`** é o único agente responsável por conduzir entrevistas estruturadas com o humano para criar ou modificar as Diretrizes e Regras de Produto, mas ele pode ser intermediado por outros agentes. Ele também revisa e valida se as diretrizes foram seguidas em um fluxo de desenvolvimento.
 
 As Diretrizes e Regras de Produto orientam o trabalho dos agentes e documentam as decisões de especificação para o humano.
 
@@ -56,55 +56,17 @@ referenciados aqui:
 
 ## Desenvolvimento
 
-- [Agentes](#agentes)
+![Ciclo de Desenvolvimento](./svgImage/FluxoDesenvolvimento.svg)
+
 - [Contratos do Workflow](#contratos-do-workflow)
-- [Premissas](#premissas)
-- [Schema do arquivo de planejamento](#schema-do-arquivo-de-planejamento)
-- [Testes por Especialidade](#testes-por-especialidade)
+- [Agentes](#agentes)
+- [Planejamento]
+- [Construção]
+- [Testes]
+- [Orquestração](#orquestração)
 - [Fluxo de Desenvolvimento](#fluxo-de-desenvolvimento)
 - [Trabalho de curadoria](#trabalho-de-curadoria)
 - [Notas de Implementação](#notas-de-implementação)
-
-
-### Agentes
-
-A tabela a seguir identifica os agentes, as fases em que participam no workflow de desenvilvimento e a responsabilidade de cada um por 
-fase.
-
-| Agente            | Planejamento                 | Construção                   | Validação                                          | 
-|-------------------|------------------------------|------------------------------|----------------------------------------------------|
-| `devflow`         | Roteia fases e mantém Status | Roteia fases e mantém Status | Roteia fases                                       | 
-| `curador-produto` | —                            | —                            | Valida docs/README.md, testes-produto e evidências | 
-| `eng-software`    | Planeja o código             | TDD e ajustes integrativos   | —                                                  | 
-| `front`           | Prototipa telas              | Implementa UI                | Revisa identidade visual                           | 
-| `dba`             | Modela dados                 | Atualiza modelo e scripts    | Revisa artefatos de BD                             | 
-| `sec`             | Analisa segurança            | Gera configurações           | Revisa segurança e testa                           | 
-| `rev`             | —                            | —                            | Revisão solo com skills de domínio                 | 
-| `qa`              | Planeja testes               | —                            | Revisa cobertura e executa testes                  | 
-
-A disposição dos agentes no processo de desenvolvimento foi otimizado para:
-
-- **separação de contexto** por especialidade;
-- **redução de consumo de tokens** via delegação focada;
-- **qualidade** através de gates de revisão obrigatórios;
-- **governança** com o humano no loop em pontos-chave;
-- **higiene de contexto** — cada fase roda em instância
-  nova, usando o arquivo de planejamento como handoff.
-
-#### Commits
-
-O `eng-software` é o **único committer** do workflow.
-Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
-`curador-produto`) são subagentes: editam arquivos e
-reportam `[arquivos alterados + resumo]` ao
-solicitante. O `eng-software` revisa o diff do especialista
-antes de commitar.
-
-O `eng-software` carrega e segue a skill
-`git-workflow-and-versioning`: commits atômicos por unidade
-lógica, higiene pré-commit, mensagens Conventional Commit.
-Nunca inclui alterações alheias não reportadas. Nunca
-executa `git push` sem confirmação explícita do humano.
 
 
 ### Contratos do Workflow
@@ -162,7 +124,58 @@ O arquivo é o handoff entre instâncias. Os agentes consultam o
 arquivo para recuperar o contexto do workflow, em vez de depender
 do histórico da conversa.
 
-## Premissas
+### Governança (sair?  acho que pode ser desmembrado entre as seções de planejamento, construção e revisão)
+
+8. **Humano aprova o plano** antes da construção. A
+   aprovação é do plano apresentado na conversa (abstraído,
+   por partes), não do arquivo físico.
+9. **Humano controla re-revisões** — sem loops automáticos.
+10. **Pós-planejamento, tudo se baseia no plano aprovado.**
+11. **Planeje perguntando, execute com autonomia** — no
+    planejamento, valide decisões não-triviais com o humano.
+    Na construção, execute com autonomia. Exceção: gate de
+    refatoração (premissa 31).
+12. **Granularidade sensível ao contexto** — arquivo grande =
+    escopo grande. `devflow` alerta e sugere divisão.
+12.1. **Identidade visual como contrato** — desvios visuais
+     requerem nova aprovação do humano.
+
+## Planejamento
+
+### Construção
+
+29. **Construção em três etapas (TDD):** testes primeiro →
+    código → análise de refatoração. Testes são
+    especificação executável (ver skill `tests-as-spec`).
+30. **Autonomia na construção** — sem consultar o humano,
+    seguindo o plano aprovado.
+31. **Gate de refatoração** — acomodar código novo ao
+    existente pode mudar o plano. `eng-software` consulta
+    humano: nada muda, ajuste mínimo (propõe e registra),
+    ou mudança significativa (volta ao planejamento).
+
+### Revisão
+
+13. **Revisão solo do `rev` com skills de domínio**:
+    - Carrega skills aplicáveis (security-and-hardening,
+      data-modeling, frontend-ui-engineering, tests-as-spec,
+      api-and-interface-design, documentation-and-adrs).
+    - Revisa com checklist.
+    - **Não corrige**. Reporta achados no formato
+      `achado · ação · severidade`.
+    - `devflow` repassa o achado ao especialista responsável.
+14. **Instâncias novas com contexto limpo** — obrigatório,
+    sem exceção. Elimina viés de confirmação.
+15. **Base de revisão** — plano aprovado e insumos originais
+    do humano. Formato não prescrito.
+16. **Formato do resumo:** achado · ação · severidade
+    (bloqueante ou melhoria).
+27. **`qa` não analisa código** — foca em execução de testes.
+28. **Roteiro manual de segurança é do `sec`**. A suíte
+    automática entra no agregador executado pelo `qa`.
+
+
+### Testes
 
 ### Orquestração
 
@@ -215,56 +228,47 @@ do histórico da conversa.
      trechos (offset/limit), faz consultas direcionadas e não
      reinsere arquivos e logs completos no contexto.
 
-### Governança
+### Agentes
 
-8. **Humano aprova o plano** antes da construção. A
-   aprovação é do plano apresentado na conversa (abstraído,
-   por partes), não do arquivo físico.
-9. **Humano controla re-revisões** — sem loops automáticos.
-10. **Pós-planejamento, tudo se baseia no plano aprovado.**
-11. **Planeje perguntando, execute com autonomia** — no
-    planejamento, valide decisões não-triviais com o humano.
-    Na construção, execute com autonomia. Exceção: gate de
-    refatoração (premissa 31).
-12. **Granularidade sensível ao contexto** — arquivo grande =
-    escopo grande. `devflow` alerta e sugere divisão.
-12.1. **Identidade visual como contrato** — desvios visuais
-     requerem nova aprovação do humano.
+A tabela a seguir identifica os agentes, as fases em que participam no workflow de desenvilvimento e a responsabilidade de cada um por 
+fase.
 
-### Revisão
+| Agente            | Planejamento                 | Construção                   | Validação                                          | 
+|-------------------|------------------------------|------------------------------|----------------------------------------------------|
+| `devflow`         | Roteia fases e mantém Status | Roteia fases e mantém Status | Roteia fases                                       | 
+| `curador-produto` | —                            | —                            | Valida docs/README.md, testes-produto e evidências | 
+| `eng-software`    | Planeja o código             | TDD e ajustes integrativos   | —                                                  | 
+| `front`           | Prototipa telas              | Implementa UI                | Revisa identidade visual                           | 
+| `dba`             | Modela dados                 | Atualiza modelo e scripts    | Revisa artefatos de BD                             | 
+| `sec`             | Analisa segurança            | Gera configurações           | Revisa segurança e testa                           | 
+| `rev`             | —                            | —                            | Revisão solo com skills de domínio                 | 
+| `qa`              | Planeja testes               | —                            | Revisa cobertura e executa testes                  | 
 
-13. **Revisão solo do `rev` com skills de domínio**:
-    - Carrega skills aplicáveis (security-and-hardening,
-      data-modeling, frontend-ui-engineering, tests-as-spec,
-      api-and-interface-design, documentation-and-adrs).
-    - Revisa com checklist.
-    - **Não corrige**. Reporta achados no formato
-      `achado · ação · severidade`.
-    - `devflow` repassa o achado ao especialista responsável.
-14. **Instâncias novas com contexto limpo** — obrigatório,
-    sem exceção. Elimina viés de confirmação.
-15. **Base de revisão** — plano aprovado e insumos originais
-    do humano. Formato não prescrito.
-16. **Formato do resumo:** achado · ação · severidade
-    (bloqueante ou melhoria).
-27. **`qa` não analisa código** — foca em execução de testes.
-28. **Roteiro manual de segurança é do `sec`**. A suíte
-    automática entra no agregador executado pelo `qa`.
+A disposição dos agentes no processo de desenvolvimento foi otimizado para:
 
+- **separação de contexto** por especialidade;
+- **redução de consumo de tokens** via delegação focada;
+- **qualidade** através de gates de revisão obrigatórios;
+- **governança** com o humano no loop em pontos-chave;
+- **higiene de contexto** — cada fase roda em instância
+  nova, usando o arquivo de planejamento como handoff.
 
-### Construção
+#### Commits
 
-29. **Construção em três etapas (TDD):** testes primeiro →
-    código → análise de refatoração. Testes são
-    especificação executável (ver skill `tests-as-spec`).
-30. **Autonomia na construção** — sem consultar o humano,
-    seguindo o plano aprovado.
-31. **Gate de refatoração** — acomodar código novo ao
-    existente pode mudar o plano. `eng-software` consulta
-    humano: nada muda, ajuste mínimo (propõe e registra),
-    ou mudança significativa (volta ao planejamento).
+O `eng-software` é o **único committer** do workflow.
+Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
+`curador-produto`) são subagentes: editam arquivos e
+reportam `[arquivos alterados + resumo]` ao
+solicitante. O `eng-software` revisa o diff do especialista
+antes de commitar.
 
-### Testes por Especialidade
+O `eng-software` carrega e segue a skill
+`git-workflow-and-versioning`: commits atômicos por unidade
+lógica, higiene pré-commit, mensagens Conventional Commit.
+Nunca inclui alterações alheias não reportadas. Nunca
+executa `git push` sem confirmação explícita do humano.
+
+### Testes por Especialidade (sair?  acho que pode ser desmembrado entre as seções de planejamento, construção e revisão)
 
 32. **Índices no [`AGENTS.md`](../AGENTS.md)** — criação pelo
     `curador-produto`. O `AGENTS.md` mantém o link geral para o
