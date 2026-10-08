@@ -59,14 +59,14 @@ referenciados aqui:
 ![Ciclo de Desenvolvimento](./svgImage/FluxoDesenvolvimento.svg)
 
 - [Contratos do Workflow](#contratos-do-workflow)
-- [Agentes](#agentes)
-- [Planejamento]
-- [Construção]
-- [Testes]
-- [Orquestração](#orquestração)
-- [Fluxo de Desenvolvimento](#fluxo-de-desenvolvimento)
-- [Trabalho de curadoria](#trabalho-de-curadoria)
-- [Notas de Implementação](#notas-de-implementação)
+- [Agentes e responsabilidades](#agentes-e-responsabilidades)
+- [Planejamento](#planejamento)
+- [Construção](#construcao)
+- [Revisão](#revisao)
+- [Testes](#testes)
+- [Orquestração](#orquestracao)
+- [Fluxo entre etapas](#fluxo-entre-etapas)
+- [Notas de Implementação](#notas-de-implementacao)
 
 
 ### Contratos do Workflow
@@ -88,7 +88,8 @@ Quando existem, os agentes baseiam a implementação nas diretrizes.
 Antes da criação do Arquivo de Planejamento, o `devflow`
 confirma se o novo escopo está definido. Se o humano quiser fazer
 uma elicitação especializada, pode recomendar o `analista`, seguindo o
-fluxo da [Ideação](#ideação).
+fluxo da [Ideação](#ideacao).
+
 Se o humano preferir continuar, o `devflow` ajuda a definir o
 escopo por perguntas mediadas. O plano só nasce depois dessa
 definição.
@@ -124,60 +125,67 @@ O arquivo é o handoff entre instâncias. Os agentes consultam o
 arquivo para recuperar o contexto do workflow, em vez de depender
 do histórico da conversa.
 
-### Governança (sair?  acho que pode ser desmembrado entre as seções de planejamento, construção e revisão)
+### Planejamento
 
-8. **Humano aprova o plano** antes da construção. A
-   aprovação é do plano apresentado na conversa (abstraído,
-   por partes), não do arquivo físico.
-9. **Humano controla re-revisões** — sem loops automáticos.
-10. **Pós-planejamento, tudo se baseia no plano aprovado.**
-11. **Planeje perguntando, execute com autonomia** — no
-    planejamento, valide decisões não-triviais com o humano.
-    Na construção, execute com autonomia. Exceção: gate de
-    refatoração (premissa 31).
-12. **Granularidade sensível ao contexto** — arquivo grande =
-    escopo grande. `devflow` alerta e sugere divisão.
-12.1. **Identidade visual como contrato** — desvios visuais
-     requerem nova aprovação do humano.
-
-## Planejamento
+- **Humano aprova o plano** antes da construção. A aprovação é
+  do plano apresentado na conversa, não do arquivo físico.
+- **Humano controla re-revisões**. Não há loops automáticos.
+- Depois do planejamento, todo trabalho se baseia no plano aprovado.
+- O planejamento valida decisões não triviais com o humano. A
+  construção segue o plano com autonomia, exceto no gate de
+  refatoração.
+- Arquivos grandes podem exigir divisão de escopo. O `devflow`
+  alerta o humano e propõe a divisão.
+- Desvios de identidade visual exigem nova aprovação do humano.
 
 ### Construção
 
-29. **Construção em três etapas (TDD):** testes primeiro →
-    código → análise de refatoração. Testes são
-    especificação executável (ver skill `tests-as-spec`).
-30. **Autonomia na construção** — sem consultar o humano,
-    seguindo o plano aprovado.
-31. **Gate de refatoração** — acomodar código novo ao
-    existente pode mudar o plano. `eng-software` consulta
-    humano: nada muda, ajuste mínimo (propõe e registra),
-    ou mudança significativa (volta ao planejamento).
+- **TDD:** testes primeiro, código depois e análise de
+  refatoração ao final. Testes são especificação executável
+  (ver skill `tests-as-spec`).
+- A construção segue o plano aprovado sem novas consultas ao
+  humano, exceto quando o gate de refatoração for acionado.
+- Se a integração exigir mudança no plano, o `eng-software`
+  consulta o humano: mantém o plano, propõe ajuste mínimo ou
+  retorna ao planejamento para mudança significativa.
 
 ### Revisão
 
-13. **Revisão solo do `rev` com skills de domínio**:
-    - Carrega skills aplicáveis (security-and-hardening,
-      data-modeling, frontend-ui-engineering, tests-as-spec,
-      api-and-interface-design, documentation-and-adrs).
-    - Revisa com checklist.
-    - **Não corrige**. Reporta achados no formato
-      `achado · ação · severidade`.
-    - `devflow` repassa o achado ao especialista responsável.
-14. **Instâncias novas com contexto limpo** — obrigatório,
-    sem exceção. Elimina viés de confirmação.
-15. **Base de revisão** — plano aprovado e insumos originais
-    do humano. Formato não prescrito.
-16. **Formato do resumo:** achado · ação · severidade
-    (bloqueante ou melhoria).
-27. **`qa` não analisa código** — foca em execução de testes.
-28. **Roteiro manual de segurança é do `sec`**. A suíte
-    automática entra no agregador executado pelo `qa`.
+Revisão não é uma etapa independente. Ocorre ao final do
+Planejamento e da Construção, com instâncias novas do `rev`.
 
+- O `rev` faz revisão independente com as skills de domínio
+  aplicáveis, usando o plano aprovado e os insumos originais
+  do humano.
+- O `rev` não corrige. Reporta `achado · ação · severidade`.
+  O `devflow` encaminha o achado ao especialista responsável.
+- Cada revisão usa uma instância nova, sem histórico da fase
+  anterior.
+- O `qa` executa testes e não analisa código.
+- O roteiro manual de segurança pertence ao `sec`; a suíte
+  automática é executada pelo `qa`.
 
 ### Testes
 
+- O planejamento consulta as especificações de Testes por
+  Especialidade e define as verificações do ciclo.
+- A construção produz ou atualiza os testes relacionados às
+  alterações, conforme o plano aprovado.
+- A revisão verifica se a implementação e os testes atendem ao
+  plano e às especificações vigentes.
+- Na etapa de Testes, o `qa` executa `testes-produto` e os
+  testes manuais previstos no plano. O `sec` executa o roteiro
+  manual de segurança.
+- A evidência do agregador usa o formato JSON
+  `{ status, findings[] }` e é registrada no arquivo de
+  planejamento.
+- O `curador-produto` verifica a presença e a completude da
+  evidência. Falhas são encaminhadas pelo `devflow` ao agente
+  responsável.
+
 ### Orquestração
+
+#### Regras de orquestração
 
 1. **`devflow` como roteador stateless**:
    - Lê o arquivo, identifica a fase pelo `Status`, spawna o
@@ -228,23 +236,23 @@ do histórico da conversa.
      trechos (offset/limit), faz consultas direcionadas e não
      reinsere arquivos e logs completos no contexto.
 
-### Agentes
+#### Agentes e responsabilidades
 
-A tabela a seguir identifica os agentes, as fases em que participam no workflow de desenvilvimento e a responsabilidade de cada um por 
+A tabela a seguir identifica os agentes, as fases em que participam no workflow de desenvolvimento e a responsabilidade de cada um por
 fase.
 
-| Agente            | Planejamento                 | Construção                   | Validação                                          | 
-|-------------------|------------------------------|------------------------------|----------------------------------------------------|
-| `devflow`         | Roteia fases e mantém Status | Roteia fases e mantém Status | Roteia fases                                       | 
-| `curador-produto` | —                            | —                            | Valida docs/README.md, testes-produto e evidências | 
-| `eng-software`    | Planeja o código             | TDD e ajustes integrativos   | —                                                  | 
-| `front`           | Prototipa telas              | Implementa UI                | Revisa identidade visual                           | 
-| `dba`             | Modela dados                 | Atualiza modelo e scripts    | Revisa artefatos de BD                             | 
-| `sec`             | Analisa segurança            | Gera configurações           | Revisa segurança e testa                           | 
-| `rev`             | —                            | —                            | Revisão solo com skills de domínio                 | 
-| `qa`              | Planeja testes               | —                            | Revisa cobertura e executa testes                  | 
+| Agente            | Planejamento             | Construção                | Revisão                      | Testes                 |
+|-------------------|--------------------------|---------------------------|------------------------------|------------------------|
+| `devflow`         | Roteia e mantém status   | Roteia e mantém status    | Roteia a revisão             | Roteia e mantém status |
+| `curador-produto` | Valida diretrizes       | —                         | Valida aderência             | Valida evidências     |
+| `eng-software`    | Planeja o código         | TDD e integração          | Corrige achados              | —                      |
+| `front`           | Prototipa telas          | Implementa a UI           | Corrige achados visuais      | —                      |
+| `dba`             | Modela dados             | Atualiza modelo e scripts | Corrige achados de dados     | —                      |
+| `sec`             | Analisa requisitos       | Gera configurações        | Corrige achados de segurança | Executa roteiro manual |
+| `rev`             | —                        | —                         | Faz revisão independente     | —                      |
+| `qa`              | Planeja testes           | —                         | —                            | Executa as suítes      |
 
-A disposição dos agentes no processo de desenvolvimento foi otimizado para:
+A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 
 - **separação de contexto** por especialidade;
 - **redução de consumo de tokens** via delegação focada;
@@ -268,134 +276,40 @@ lógica, higiene pré-commit, mensagens Conventional Commit.
 Nunca inclui alterações alheias não reportadas. Nunca
 executa `git push` sem confirmação explícita do humano.
 
-### Testes por Especialidade (sair?  acho que pode ser desmembrado entre as seções de planejamento, construção e revisão)
+#### Fluxo entre etapas
 
-32. **Índices no [`AGENTS.md`](../AGENTS.md)** — criação pelo
-    `curador-produto`. O `AGENTS.md` mantém o link geral para o
-    `docs/README.md`, a tabela de Testes por Especialidade com link
-    âncora e as Instruções por Agente. A spec fica na seção "Testes por
-    Especialidade" do `<pasta-docs>/README.md`; o conteúdo detalhado
-    não é copiado para o `AGENTS.md`.
-    Suítes não rodam na Construção nem na Revisão.
-33. **Fase Testes** — `qa` executa só `testes-produto` e
-    manuais do plano. `sec` executa só o roteiro manual.
-34. **Evidência** — JSON `{ status, findings[] }` do
-    agregador, persistida na fase Testes.
-35. **Validação pelo `curador-produto`** — no fim da fase
-    Testes, confere se o agregador rodou e se a evidência está
-    presente e completa. Registra OK/FALHA/LACUNA e encaminha o
-    achado ao `devflow`. O `devflow` encaminha a correção ao agente
-    responsável ou consulta o humano quando a decisão depender dele.
-36. **Falha de suíte** — backend → `eng-software`; dados →
-    `dba`; segurança automática → `sec`; frontend →
-    `front`. Depois `eng-software` normaliza e commita.
-    Então "re-executar?".
+1. **Planejamento**
+   - `devflow` confirma o escopo e cria o Arquivo de Planejamento.
+   - O `curador-produto` verifica as Diretrizes e Regras de
+     Produto e registra as lacunas encontradas.
+   - Os especialistas elaboram o plano de implementação, os
+     critérios de teste e os demais insumos de domínio.
+   - O `rev` revisa o plano. O `devflow` encaminha correções,
+     apresenta o plano ao humano e aguarda sua aprovação.
 
-## Fluxo de Desenvolvimento
+2. **Construção**
+   - `devflow` aciona os especialistas conforme o plano aprovado.
+   - O `eng-software` coordena TDD, integração e commits.
+   - O gate de refatoração devolve o trabalho ao planejamento
+     quando a implementação exigir mudança significativa.
 
-1. **Inicialização & Escopo**
-   - `devflow` alinha/confirma o escopo com o Humano (sugere `analista` se for elicitação aberta).
-   - `devflow` cria o Arquivo de Planejamento com `Status: VALIDAÇÃO`.
+3. **Revisão da construção**
+   - `devflow` aciona uma nova instância do `rev` para verificar
+     a implementação contra o plano e as especificações.
+   - Achados são encaminhados aos especialistas responsáveis.
+   - Depois das correções, o humano decide se haverá nova revisão.
 
-2. **Validação (Gate de Curadoria)**
-   - `devflow` pede ao `curador-produto`: verificar integridade de `docs/README.md` e `AGENTS.md`.
-   - Se houver lacuna, `devflow` pergunta ao Humano se trata agora ou registra para seguir.
-   - `devflow` atualiza status para `PLANEJAMENTO`.
+4. **Testes**
+   - `qa` executa o agregador e os testes previstos no plano.
+   - `sec` executa o roteiro manual de segurança.
+   - `curador-produto` verifica a evidência produzida.
+   - Falhas retornam à Construção. Mudanças de escopo ou de
+     comportamento retornam ao Planejamento.
 
-3. **Planejamento**
-   - `devflow` despacha tarefas pontuais de domínio para cada especialista:
-     - `eng-software`: arquitetura, plano de código e inicialização das Regras de Produto.
-     - `front`: prototipação de telas (se houver UI).
-     - `dba`: modelagem de dados.
-     - `sec`: requisitos e análise de segurança.
-     - `qa`: estratégia e planejamento de testes.
-   - Cada especialista apenas cumpre sua tarefa, registra no plano e devolve resumo (≤ 5 linhas).
-   - `devflow` atualiza status para `REVISÃO DO PLANO`.
-
-4. **Revisão do Plano**
-   - `devflow` pede ao `rev`: auditar o plano com checklists de domínio.
-   - Se houver apontamentos, `devflow` aciona o especialista responsável para ajustar e pede revalidação ao `rev`.
-   - `devflow` apresenta o plano consolidado ao Humano para aprovação explícita.
-   - `devflow` atualiza status para `CONSTRUÇÃO`.
-
-5. **Construção**
-   - `devflow` aciona a execução conforme o plano aprovado:
-     - `dba`: scripts de banco e migrações.
-     - `front`: implementação de interface (se houver).
-     - `eng-software`: TDD (testes → código), integração do lote e commits.
-   - *Gate de refatoração*: se o código exigir mudança no plano, `eng-software` alerta o `devflow`, que consulta o Humano antes de prosseguir.
-   - `devflow` atualiza status para `REVISÃO DA CONSTRUÇÃO`.
-
-6. **Revisão da Construção**
-   - `devflow` pede ao `rev`: auditar a implementação contra o plano aprovado.
-   - Se houver correções, `devflow` direciona ao especialista adequado, `eng-software` normaliza/commita e `devflow` consulta o Humano sobre re-revisão.
-   - `devflow` atualiza status para `TESTES`.
-
-7. **Testes**
-   - `devflow` pede ao `qa`: rodar `testes-produto` + testes manuais e registrar evidência JSON.
-   - `devflow` pede ao `sec`: executar roteiro manual de segurança.
-   - `devflow` pede ao `curador-produto`: validar presença e completude da evidência do agregador.
-   - Em caso de falha em suítes, `devflow` aciona o especialista da área (backend/dados/segurança/front) para corrigir e `eng-software` para commitar.
-   - `devflow` atualiza status para `FINALIZAÇÃO`.
-
-Na fase **Testes**, o `qa` executa o agregador `testes-produto` e
-registra no arquivo de planejamento a evidência no formato definido.
-Ao final da fase, o `curador-produto` verifica se essa evidência está
-presente e completa. Se houver falha ou lacuna, o `curador-produto`
-registra o achado e o `devflow` encaminha a correção ao agente
-responsável ou consulta o humano quando a decisão depender dele.
-
-8. **Finalização**
-   - `devflow` pede ao `curador-produto`: auditar existência dos artefatos de especificação mapeados no `docs/README.md`.
-   - Havendo lacuna, `devflow` aciona `eng-software` para criar e `curador-produto` para revalidar.
-   - `devflow` pede confirmação ao Humano e aciona `curador-produto` para excluir o plano temporário.
-
-## Trabalho de curadoria
-
-O trabalho de curadoria (criação e manutenção do
-`docs/README.md` e dos índices do `AGENTS.md`) ocorre dentro da fase
-de VALIDAÇÃO quando o curador detecta uma lacuna e o humano decide
-tratar o problema naquele ciclo.
-
-### Gate de curadoria na VALIDAÇÃO
-
-1. `devflow` aciona `curador-produto`.
-2. `curador-produto` verifica `docs/README.md` e os índices do
-   `AGENTS.md`, e retorna um relatório.
-3. Se houver lacuna, `devflow` pergunta **"Tratar a curadoria agora?"**
-   - **Sim**: `devflow` aciona e medeia o trabalho do curador.
-     Depois, aciona o curador novamente para revalidar.
-   - **Não**: `devflow` registra a lacuna em `## Perguntas` e segue.
-4. Se tudo estiver OK, segue para PLANEJAMENTO.
-
-### Planejamento da curadoria (item a item)
-
-`devflow` aciona `curador-produto` e medeia a interação com o humano.
-O curador percorre cada seção usando os blocos adaptativos da
-`question-orchestration`:
-
-- **docs/README.md** — Definição de Escopo, Elementos de
-  Especificação, Estratégias de Indexação de Código e Testes por
-  Especialidade. `Regras de Documentação` é uma subseção de
-  Elementos de Especificação. Cada seção requer aprovação explícita.
-- **AGENTS.md** — link geral para o mapa, índice de Testes por
-  Especialidade e Instruções por Agente. Cada entrada requer aprovação
-  explícita.
-
-### Construção da curadoria
-
-1. `curador-produto` escreve o `docs/README.md` aprovado.
-2. `curador-produto` spawna `eng-software` com briefing para
-   implementar scripts de testes-produto com TDD.
-3. `curador-produto` registra tabela no `AGENTS.md`.
-
-### Validação da curadoria
-
-1. `eng-software` roda os scripts de testes-produto
-   implementados.
-2. `curador-produto` verifica o verde — validação objetiva
-   (resolve "não valida o que editou").
-3. Verde → curadoria concluída. `devflow` volta ao gate de curadoria.
+5. **Encerramento**
+   - `devflow` confirma que os gates foram concluídos.
+   - O humano autoriza a exclusão do Arquivo de Planejamento e
+     dos artefatos auxiliares.
 
 ## Notas de Implementação
 
