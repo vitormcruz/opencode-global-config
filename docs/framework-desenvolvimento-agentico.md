@@ -57,7 +57,6 @@ referenciados aqui:
 ## Desenvolvimento
 
 - [Agentes](#agentes)
-- [Commits](#commits)
 - [Contratos do Workflow](#contratos-do-workflow)
 - [Premissas](#premissas)
 - [Schema do arquivo de planejamento](#schema-do-arquivo-de-planejamento)
@@ -110,22 +109,24 @@ executa `git push` sem confirmação explícita do humano.
 
 ### Contratos do Workflow
 
-O workflow se apoia em seis contratos. Cada contrato tem
+O workflow se apoia em três contratos. Cada contrato tem
 uma seção própria e deve permanecer verificável.
 
 #### 1. Diretrizes e Regras de Produto
 
-As [Diretrizes e Regras de Produto](# Diretrizes-e-Regras-de-Produto) são insumos para o 
-workflow. O devflow deve avaliar se elas existem e sugerir a sua criação quando não. O 
-processo pode continuar sem diretrizes, o agente perde a âncora para o desenvolvimento 
-e o devflow deve alertar isso, mas se tudo estiver definido, os agentes do workflow vão 
-amarrar toda a implementação às diretrizes.
+As [Diretrizes e Regras de Produto](#diretrizes-e-regras-de-produto)
+são insumos para o workflow.
+O `devflow` verifica se elas existem e sugere sua criação quando
+estão ausentes. O processo pode continuar sem elas, mas o `devflow`
+deve alertar que os agentes perderam essa âncora de desenvolvimento.
+Quando existem, os agentes baseiam a implementação nas diretrizes.
 
 #### 2. Novo escopo
 
 Antes da criação do Arquivo de Planejamento, o `devflow`
-confirma se o [novo escopo](#) está definido. Se o humano quiser fazer
-uma elicitação especializada, pode recomendar o `analista`, seguindo o fluxo da [Ideação](#ideação).
+confirma se o novo escopo está definido. Se o humano quiser fazer
+uma elicitação especializada, pode recomendar o `analista`, seguindo o
+fluxo da [Ideação](#ideação).
 Se o humano preferir continuar, o `devflow` ajuda a definir o
 escopo por perguntas mediadas. O plano só nasce depois dessa
 definição.
@@ -134,12 +135,32 @@ definição.
 
 Fonte de verdade temporária durante o workflow. Criado pelo
 `devflow` depois da definição do escopo, é entrada e saída de
-cada agente. Ciclo de vida:
-commitado durante o trabalho como ponto de salvamento e
-consultável para auditoria; excluído no encerramento com
-autorização humana. A aprovação do humano é do plano
-apresentado na conversa, não do arquivo físico. Ver schema
-na seção "Schema do arquivo de planejamento".
+cada agente. É commitado durante o trabalho como ponto de
+salvamento e consultado para retomada e auditoria. É excluído
+no encerramento com autorização humana. A aprovação do humano
+é do plano apresentado na conversa, não do arquivo físico.
+
+##### Formato do arquivo
+
+O arquivo de planejamento segue o template definido pela skill
+`planning-and-task-breakdown`.
+
+Para permitir a retomada do workflow, mantém:
+
+- `Status` no topo, indicando a fase atual;
+- `## Perguntas`, para decisões pendentes do humano;
+- `## Evidências de Testes — <fase>`, para evidências produzidas;
+- o executor e o modelo utilizados nos registros de trabalho;
+- o histórico das alterações relevantes.
+
+O agente que conclui uma fase atualiza o `Status` antes de
+retornar. Na construção, o arquivo registra etapas concluídas.
+Na revisão, registra os resumos dos agentes. Alterações no plano
+ocorrem na Revisão do Plano ou no gate de refatoração.
+
+O arquivo é o handoff entre instâncias. Os agentes consultam o
+arquivo para recuperar o contexto do workflow, em vez de depender
+do histórico da conversa.
 
 ## Premissas
 
@@ -230,78 +251,6 @@ na seção "Schema do arquivo de planejamento".
 28. **Roteiro manual de segurança é do `sec`**. A suíte
     automática entra no agregador executado pelo `qa`.
 
-### Arquivo de planejamento
-
-17. **Fonte de verdade temporária** — commitado durante o
-    trabalho como ponto de salvamento e consultável para
-    auditoria; excluído no encerramento com autorização
-    humana. `curador-produto` exclui plano e artefatos
-    auxiliares.
-17.1. **Seção de evidências** —
-     `## Evidências de Testes — Testes`. `curador-produto`
-     lê a evidência do agregador no fim da fase Testes.
-18. **Campo `Status` obrigatório** no topo. O agente que
-    conclui uma fase atualiza o status antes de retornar.
-19. **Regras de escrita:**
-    - Na construção, apenas marca etapas concluídas.
-    - Na revisão, resumos são persistidos.
-    - Modificações no plano só na Revisão do Plano ou no gate
-      de refatoração.
-    - O histórico de mudanças é registrado.
-20. **Contexto via arquivo** — não via histórico da conversa.
-20.1. **Rastreabilidade do executor**: cada subseção de registro de trabalho
-     informa `Executor: <agente> / <modelo>`. O campo registra o agente e o
-     modelo usados.
-
-##### Schema do arquivo de planejamento
-
-Seções obrigatórias na ordem:
-
-```markdown
-Status: <FASE> [— detalhe opcional]
-
-##### Regras de Produto
-
-| Campo | Tam. máx | Tipo/Formato | Máscara | Limite | Obs |
-|-------|----------|-------------|---------|--------|-----|
-
-##### Evidências de Testes — <fase>
-
-(evidências de cada agente que atuou na fase)
-
-##### Perguntas
-
-(perguntas pendentes de decisão humana)
-```
-
-- **Status**: `VALIDAÇÃO`, `PLANEJAMENTO`, `REVISÃO DO PLANO`,
-  `CONSTRUÇÃO`, `GATE-REFATORAÇÃO — volta ao planejamento`,
-  `REVISÃO DA CONSTRUÇÃO`, `TESTES`, `FINALIZAÇÃO`.
-- **Regras de Produto**: tabela de restrições de domínio.
-- **Evidências de Testes — Testes**: evidência do
-  agregador `testes-produto`.
-- **Perguntas**: pendências de decisão humana.
-
-### [docs/README.md](README.md)
-
-21. **O workflow exige um docs/README.md** — criação e
-    manutenção pelo `curador-produto`. A fase de VALIDAÇÃO detecta
-    ausência ou problema. O `devflow` aciona e medeia o curador,
-    sem editar ou validar o conteúdo.
-21.1. **Regras de Produto — preenchimento incremental** —
-     `eng-software` inicializa no planejamento. Campos sem
-     definição: `(a definir)`. Agentes consultam, perguntam
-     se ausente, registram antes de prosseguir.
-21.2. **Especificação evolutiva** — pode mudar durante o
-     planejamento. Mudanças de "o quê" alteram spec;
-     mudanças de "como" não. `curador-produto` verifica
-     consistência.
-21.3. **Documentação de spec por domínio** — docs/README.md
-     define artefatos, formato e destino por agente/fase.
-25. **`curador-produto` valida aderência ao docs/README.md** —
-    não cria escopo nem requisitos. Na finalização, verifica
-    existência de artefatos obrigatórios. Guarda do humano:
-    após correção, pergunta se resubmete ou segue.
 
 ### Construção
 
