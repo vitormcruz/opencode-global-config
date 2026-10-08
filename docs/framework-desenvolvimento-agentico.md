@@ -59,13 +59,14 @@ referenciados aqui:
 ![Ciclo de Desenvolvimento](./svgImage/FluxoDesenvolvimento.svg)
 
 - [Contratos do Workflow](#contratos-do-workflow)
-- [Agentes e responsabilidades](#agentes-e-responsabilidades)
-- [Planejamento](#planejamento)
-- [Construção](#construcao)
-- [Revisão](#revisao)
-- [Testes](#testes)
+- [Etapas/Fases](#etapasfases)
+  - [Planejamento](#planejamento)
+  - [Construção](#construcao)
+  - [Revisão](#revisao)
+  - [Testes](#testes)
 - [Orquestração](#orquestracao)
-- [Fluxo entre etapas](#fluxo-entre-etapas)
+  - [Agentes e responsabilidades](#agentes-e-responsabilidades)
+  - [Fluxo entre etapas](#fluxo-entre-etapas)
 - [Notas de Implementação](#notas-de-implementacao)
 
 
@@ -125,7 +126,9 @@ O arquivo é o handoff entre instâncias. Os agentes consultam o
 arquivo para recuperar o contexto do workflow, em vez de depender
 do histórico da conversa.
 
-### Planejamento
+### Etapas/Fases
+
+#### Planejamento
 
 - **Humano aprova o plano** antes da construção. A aprovação é
   do plano apresentado na conversa, não do arquivo físico.
@@ -138,7 +141,7 @@ do histórico da conversa.
   alerta o humano e propõe a divisão.
 - Desvios de identidade visual exigem nova aprovação do humano.
 
-### Construção
+#### Construção
 
 - **TDD:** testes primeiro, código depois e análise de
   refatoração ao final. Testes são especificação executável
@@ -149,7 +152,7 @@ do histórico da conversa.
   consulta o humano: mantém o plano, propõe ajuste mínimo ou
   retorna ao planejamento para mudança significativa.
 
-### Revisão
+#### Revisão
 
 Revisão não é uma etapa independente. Ocorre ao final do
 Planejamento e da Construção, com instâncias novas do `rev`.
@@ -165,7 +168,7 @@ Planejamento e da Construção, com instâncias novas do `rev`.
 - O roteiro manual de segurança pertence ao `sec`; a suíte
   automática é executada pelo `qa`.
 
-### Testes
+#### Testes
 
 - O planejamento consulta as especificações de Testes por
   Especialidade e define as verificações do ciclo.
