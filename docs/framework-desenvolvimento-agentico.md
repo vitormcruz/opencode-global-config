@@ -115,32 +115,20 @@ uma seção própria e deve permanecer verificável.
 
 #### 1. Diretrizes e Regras de Produto
 
-Contrato de documentação do projeto. Contém quatro seções:
+As [Diretrizes e Regras de Produto](# Diretrizes-e-Regras-de-Produto) são insumos para o 
+workflow. O devflow deve avaliar se elas existem e sugerir a sua criação quando não. O 
+processo pode continuar sem diretrizes, o agente perde a âncora para o desenvolvimento 
+e o devflow deve alertar isso, mas se tudo estiver definido, os agentes do workflow vão 
+amarrar toda a implementação às diretrizes.
 
-1. Definição de Escopo
-2. Elementos de Especificação
-3. Estratégias de Indexação de Código
-4. Testes por Especialidade
+#### 2. Novo escopo
 
-`Regras de Documentação` é uma subseção de `Elementos de Especificação`.
-O `curador-produto` cria e mantém o documento. O `devflow` apenas aciona
-e medeia o trabalho do curador.
-
-
------
-
-Testes por Especialidade
-
-Suítes (backend, dados, segurança, frontend) e o
-agregador `testes-produto`. Tabela e link no
-[`AGENTS.md`](../AGENTS.md); spec na seção correspondente do `docs/README.md`.
-Criação e manutenção: `curador-produto`.
-
-O `AGENTS.md` também mantém o link geral para `docs/README.md` e a
-seção `Instruções por Agente`. A especificação detalhada não é copiada
-para o `AGENTS.md`.
-
-
+Antes da criação do Arquivo de Planejamento, o `devflow`
+confirma se o [novo escopo](#) está definido. Se o humano quiser fazer
+uma elicitação especializada, pode recomendar o `analista`, seguindo o fluxo da [Ideação](#ideação).
+Se o humano preferir continuar, o `devflow` ajuda a definir o
+escopo por perguntas mediadas. O plano só nasce depois dessa
+definição.
 
 #### 3. Arquivo de Planejamento
 
@@ -153,60 +141,9 @@ autorização humana. A aprovação do humano é do plano
 apresentado na conversa, não do arquivo físico. Ver schema
 na seção "Schema do arquivo de planejamento".
 
-#### 4. Evidência de testes
+## Premissas
 
-Na fase **Testes**, o `qa` executa o agregador `testes-produto` e
-registra no arquivo de planejamento a evidência no formato definido.
-Ao final da fase, o `curador-produto` verifica se essa evidência está
-presente e completa. Se houver falha ou lacuna, o `curador-produto`
-registra o achado e o `devflow` encaminha a correção ao agente
-responsável ou consulta o humano quando a decisão depender dele.
-
-#### 5. Elementos de Especificação
-
-O docs/README.md define para cada elemento: o que é,
-formato/ferramenta, qual agente cria, em qual fase, onde
-vive permanentemente. O padrão de preenchimento —
-inicializar, enriquecer incrementalmente, nunca
-re-perguntar o que já está registrado, curador valida —
-aplica-se a **todos** os elementos mapeados.
-
-**Exemplo: Regras de Produto** — seção no arquivo de
-planejamento com restrições técnicas de domínio por campo.
-`eng-software` inicializa ao planejar; agentes consultam,
-perguntam ao humano se ausente, registram antes de
-prosseguir. Regras já registradas nunca são reperguntadas.
-
-#### 6. Instruções por Agente
-
-O `AGENTS.md` mantém uma subseção para cada agente que recebe
-instruções específicas. Toda vez que esse agente for utilizado,
-ele consulta a subseção com seu nome antes de executar a tarefa
-e procura instruções para aquela utilização. Se encontrar
-instruções, cumpre-as. `SEM INSTRUÇÕES A PEDIDO DO HUMANO`
-significa que não há instrução adicional.
-
-Essa consulta vale independentemente da fase e de o agente ser
-acionado pelo `devflow` ou diretamente pelo humano. O próprio
-agente faz a consulta; o `devflow` apenas encaminha a tarefa.
-
-### Premissas
-
-> **Nota sobre a numeração:** os números das premissas são
-> identificadores estáveis para referências no workflow e em
-> documentos relacionados. Por isso, a sequência pode conter
-> lacunas ou subitens.
-
-#### Entrada e escopo
-
-Antes da criação do Arquivo de Planejamento, o `devflow`
-confirma se o escopo está definido. Se o humano quiser fazer
-uma elicitação especializada, pode recomendar o `analista`.
-Se o humano preferir continuar, o `devflow` ajuda a definir o
-escopo por perguntas mediadas. O plano só nasce depois dessa
-definição.
-
-#### Orquestração
+### Orquestração
 
 1. **`devflow` como roteador stateless**:
    - Lê o arquivo, identifica a fase pelo `Status`, spawna o
@@ -257,7 +194,7 @@ definição.
      trechos (offset/limit), faz consultas direcionadas e não
      reinsere arquivos e logs completos no contexto.
 
-#### Governança
+### Governança
 
 8. **Humano aprova o plano** antes da construção. A
    aprovação é do plano apresentado na conversa (abstraído,
@@ -273,7 +210,7 @@ definição.
 12.1. **Identidade visual como contrato** — desvios visuais
      requerem nova aprovação do humano.
 
-#### Revisão
+### Revisão
 
 13. **Revisão solo do `rev` com skills de domínio**:
     - Carrega skills aplicáveis (security-and-hardening,
@@ -293,7 +230,7 @@ definição.
 28. **Roteiro manual de segurança é do `sec`**. A suíte
     automática entra no agregador executado pelo `qa`.
 
-#### Arquivo de planejamento
+### Arquivo de planejamento
 
 17. **Fonte de verdade temporária** — commitado durante o
     trabalho como ponto de salvamento e consultável para
@@ -447,6 +384,13 @@ Status: <FASE> [— detalhe opcional]
    - `devflow` pede ao `curador-produto`: validar presença e completude da evidência do agregador.
    - Em caso de falha em suítes, `devflow` aciona o especialista da área (backend/dados/segurança/front) para corrigir e `eng-software` para commitar.
    - `devflow` atualiza status para `FINALIZAÇÃO`.
+
+Na fase **Testes**, o `qa` executa o agregador `testes-produto` e
+registra no arquivo de planejamento a evidência no formato definido.
+Ao final da fase, o `curador-produto` verifica se essa evidência está
+presente e completa. Se houver falha ou lacuna, o `curador-produto`
+registra o achado e o `devflow` encaminha a correção ao agente
+responsável ou consulta o humano quando a decisão depender dele.
 
 8. **Finalização**
    - `devflow` pede ao `curador-produto`: auditar existência dos artefatos de especificação mapeados no `docs/README.md`.
