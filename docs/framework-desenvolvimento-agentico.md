@@ -64,10 +64,10 @@ referenciados aqui:
   - [Construção](#construcao)
   - [Revisão](#revisao)
   - [Testes](#testes)
-- [Fluxo de Etapas/Fases](#fluxo-de-etapasfases)
+- [Fluxo das Etapas/Fases](#fluxo-das-etapasfases)
   - [Agentes e responsabilidades](#agentes-e-responsabilidades)
-  - [Sequência e transições](#sequencia-e-transicoes)
-  - [Commits e pontos de salvamento](#commits-e-pontos-de-salvamento)
+  - [Premissas](#premissas)
+  - [Fluxo Detalhado](#fluxo-detalhado)
 - [Notas de Implementação](#notas-de-implementacao)
 
 
@@ -131,7 +131,7 @@ do histórico da conversa.
 
 As etapas descrevem o tipo de trabalho realizado, seu resultado e
 os agentes que podem participar. A ordem, os gates e os retornos
-ficam no [Fluxo de Etapas/Fases](#fluxo-de-etapasfases).
+ficam no [Fluxo das Etapas/Fases](#fluxo-das-etapasfases).
 
 #### Planejamento
 
@@ -194,49 +194,51 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 
 #### Premissas
 
+0. **Commits e pontos de salvamento**
+   - O `eng-software` é o **único committer** do workflow.
+     Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
+     `curador-produto`) são subagentes: editam arquivos e
+     reportam `[arquivos alterados + resumo]` ao solicitante.
+     O `eng-software` revisa o diff do especialista antes de
+     commitar.
+   - O `eng-software` carrega e segue a skill
+     `git-workflow-and-versioning`: commits atômicos por unidade
+     lógica, higiene pré-commit e mensagens Conventional Commit.
+     Nunca inclui alterações alheias não reportadas. Nunca
+     executa `git push` sem confirmação explícita do humano.
 
-0. Commits e pontos de salvamento
-
-  - O `eng-software` é o **único committer** do workflow.
-  Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
-  `curador-produto`) são subagentes: editam arquivos e
-  reportam `[arquivos alterados + resumo]` ao
-  solicitante. O `eng-software` revisa o diff do especialista
-  antes de commitar.
-
-  - O `eng-software` carrega e segue a skill
-  `git-workflow-and-versioning`: commits atômicos por unidade
-  lógica, higiene pré-commit, mensagens Conventional Commit.
-  Nunca inclui alterações alheias não reportadas. Nunca
-  executa `git push` sem confirmação explícita do humano.
-
-
-1. **`devflow` como roteador stateless**:
-   - Lê o arquivo, identifica a fase pelo `Status`, spawna o
-     agente adequado e recebe resumo curto.
+1. **Papel do `devflow`**
+   - O `devflow` conhece o workflow e atua como roteador stateless.
    - **Nunca executa** tarefas de domínio.
-   - Ao final da fase Testes, spawna `curador-produto` para
-     validar a evidência do agregador.
-   - Se houver falhas, re-spawna o agente ou consulta o humano.
-2. **Contrato de retorno**: todo agente persiste resultado
-   no arquivo e retorna resumo curto, com no máximo cinco linhas.
-   A última linha informa `Skills: skill1, skill2` ou
-   `Skills: nenhuma`.
-3. **Instância nova a cada fase**: é obrigatória nas voltas,
-   como gate de refatoração e re-revisões, e recomendada para
-   todas as transições.
-4. **Mediação de perguntas**: agentes com dúvidas formulam
-   perguntas, salvam o progresso parcial e retornam ao
-   `devflow`, que faz a mediação pela skill
-   `question-orchestration`. O `devflow` usa o Checklist estrutural,
-   a Continuidade da mediação e o Prompt-improver para o handoff,
-   conforme `harness-conf/agents/devflow.md`.
-5. **Falha de agente**: registra o impedimento e retorna.
-   O `devflow` consulta o humano sobre corrigir e retentar,
-   ajustar o escopo ou pular com registro.
-6. **Agentes são agnósticos do workflow**: seus prompts descrevem
-   capacidades, nunca fases. Apenas o `devflow` conhece o workflow.
-7. **Seleção de modelo por fase**:
+
+2. **Contrato de retorno**
+   - Todo agente persiste o resultado no arquivo e retorna resumo
+     curto, com no máximo cinco linhas.
+   - A última linha informa `Skills: skill1, skill2` ou
+     `Skills: nenhuma`.
+
+3. **Instâncias**
+   - Voltas por gate de refatoração, re-revisões e reexecuções usam
+     instâncias novas.
+   - Cada transição deve preferir uma instância nova.
+   - O workflow nunca retoma uma sessão anterior, nem na mesma fase.
+
+4. **Mediação de perguntas**
+   - Perguntas dos agentes passam pelo `devflow`.
+   - A mediação usa a skill `question-orchestration`, o Checklist
+     estrutural, a Continuidade da mediação e o Prompt-improver
+     para handoff, conforme `harness-conf/agents/devflow.md`.
+
+5. **Falhas**
+   - Falhas de agentes são registradas e encaminhadas ao `devflow`.
+   - O `devflow` consulta o humano sobre corrigir e retentar,
+     ajustar o escopo ou pular com registro.
+
+6. **Agnosticismo dos agentes**
+   - Os prompts dos agentes descrevem capacidades, nunca fases.
+   - Apenas o `devflow` conhece o workflow.
+
+7. **Seleção de modelo, estado e contexto**
    - Ao iniciar, o `devflow` sugere um modelo por etapa.
      O humano define se prefere um modelo único, modelos por
      fase ou outro arranjo. O mapa combinado fica registrado
@@ -244,8 +246,6 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - Se o harness suportar seleção de modelo por chamada,
      o mapa é aplicado em cada spawn. Sem esse suporte, o
      workflow pausa antes de uma fase que exija outro modelo.
-   - A sessão é sempre nova. O workflow nunca retoma sessão
-     anterior, nem na mesma fase.
    - O estado vive no arquivo de planejamento e na memória de
      longo prazo. Cada spawn recebe briefing autocontido, com
      ponteiros para os blocos relevantes.
@@ -258,12 +258,19 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 
 #### Fluxo Detalhado
 
+Em cada transição, o `devflow` lê o Arquivo de Planejamento,
+identifica a fase pelo `Status`, aciona o agente adequado e recebe
+um resumo curto. Se houver falha, re-spawna o agente ou consulta
+o humano conforme as regras de falha.
+
 1. **Planejamento**
-   - `devflow` confirma o escopo e cria o Arquivo de Planejamento.
+   - O `devflow` confirma o escopo e cria o Arquivo de Planejamento.
    - O `curador-produto` verifica as Diretrizes e Regras de
      Produto e registra as lacunas encontradas.
    - Os especialistas elaboram o plano de implementação, os
      critérios de teste e os demais insumos de domínio.
+   - Agentes com dúvidas salvam o progresso parcial e retornam
+     ao `devflow` para mediação.
    - Decisões não triviais são mediadas com o humano. Arquivos
      grandes podem exigir divisão de escopo. Desvios de identidade
      visual exigem nova aprovação.
@@ -307,8 +314,8 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - A evidência do agregador usa o formato JSON
      `{ status, findings[] }` e é registrada no arquivo de
      planejamento.
-   - O `curador-produto` verifica a presença e a completude da
-     evidência.
+   - Ao final dos testes, o `devflow` aciona o
+     `curador-produto` para validar a evidência do agregador.
    - Falhas de suíte são encaminhadas pelo `devflow` ao agente
      responsável e retornam à Construção. Mudanças de escopo ou
      comportamento retornam ao Planejamento.
