@@ -1,28 +1,25 @@
 # Mensagens Pré-definidas — Curadoria
 
-## docs/README.md ou Testes por Especialidade não encontrado(s)
+## Artefatos de produto ou testes não encontrado(s)
 
-Este projeto ainda não possui o **docs/README.md** e/ou a
-seção **Testes por Especialidade** — o artefato que
-sustenta este workflow de desenvolvimento.
+Este projeto ainda não possui o **docs/README.md**,
+**docs/testes-por-especialidade.md** e/ou o índice de
+**Testes por Especialidade** no `AGENTS.md`.
 
 O **docs/README.md** é o contrato mínimo de especificação
-e documentação do projeto: define o quê deve existir, como
-é confeccionado e onde fica. Contém 4 seções obrigatórias:
-Definição de Escopo, Elementos de Especificação,
-Estratégias de Indexação de Código e **Testes por
-Especialidade** — que traduz regras de qualidade em suítes
-(backend, dados, segurança, frontend) e no agregador
-`testes-produto`. O `AGENTS.md` mantém o link geral para
-`docs/README.md`, a tabela índice com link para a seção e
-as Instruções por Agente. Sem esse artefato, eu (curador) não
-tenho critério objetivo para validar aderência.
+e documentação do projeto. Define o escopo, os elementos de
+especificação, as estratégias de indexação e as regras de
+documentação. O **docs/testes-por-especialidade.md** define
+as suítes, a interface, os critérios, os orçamentos e as
+proibições de validação. O `AGENTS.md` mantém os links para
+esses documentos, o índice das suítes e as Instruções por
+Agente. Sem esses artefatos, eu (curador) não tenho critério
+objetivo para validar aderência.
 
-**Recomendação:** trate a curadoria agora, sem sair do workflow —
-responda ao `devflow` que quer tratar, e as fases de desenvolvimento
-conduzirão o trabalho: o `devflow` media o processo seção a seção com
-sua aprovação, o `curador-produto` especifica os artefatos, o
-`eng-software` implementa os scripts e o `qa` executa o
-`testes-produto` na fase Testes. Se preferir seguir
-sem os artefatos agora, a lacuna será registrada no arquivo de
-planejamento e o desenvolvimento continua.
+**Recomendação:** trate a curadoria agora, sem sair do workflow.
+Responda ao `devflow` que quer tratar. O `devflow` media o
+processo seção a seção com sua aprovação, o `curador-produto`
+especifica os artefatos, o `eng-software` implementa os scripts
+e o `qa` executa o `testes-produto` na fase Testes. Se preferir
+seguir sem os artefatos agora, a lacuna será registrada no
+arquivo de planejamento e o desenvolvimento continua.

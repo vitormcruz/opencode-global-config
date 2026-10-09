@@ -126,17 +126,25 @@ def test_curador_produto_references_default_artifacts(
     )
     # O curador explica o papel de cada template, não só os paths.
     normalized = " ".join(curador_content.split()).lower()
-    assert "spec completa que vira o" in normalized
-    assert "tabela-índice colada no" in normalized
+    assert "especificação do produto que vira o" in normalized
+    assert "especificação própria das suítes de validação" in normalized
     assert "snippet das instruções por agente" in normalized
-    spec = (
+    product_spec = (
         repo_root
         / "harness-conf/agents/default-artifacts/doc-readme-template.md"
     ).read_text(
         encoding="utf-8"
     )
-    assert "testes-produto/target/" in spec
-    assert "harness/target/" not in spec
+    tests_spec = (
+        repo_root
+        / "harness-conf/agents/default-artifacts/"
+        "testes-por-especialidade-template.md"
+    ).read_text(encoding="utf-8")
+    assert "[Testes por Especialidade](testes-por-especialidade.md)" in (
+        product_spec
+    )
+    assert "testes-produto/target/" in tests_spec
+    assert "harness/target/" not in tests_spec
     assert not (
         repo_root / "harness-conf/agents/default-artifacts/testes-produto.md"
     ).exists()
@@ -184,10 +192,8 @@ def test_curador_produto_persists_and_returns_after_approval(
 ) -> None:
     assert "persista o resultado" in curador_normalized
     assert "retorne o resumo ao solicitante" in curador_normalized
-    assert "docs/README.md#testes-por-especialidade" in curador_content
-    assert "docs/testes-produto.md" not in curador_content.split(
-        "PROIBIDO gravar spec de suíte em arquivo separado"
-    )[0]
+    assert "docs/testes-por-especialidade.md" in curador_content
+    assert "docs/testes-produto.md" not in curador_content
 
 
 @pytest.mark.unit
@@ -206,10 +212,8 @@ def test_curador_produto_documents_two_test_levels(
 def test_curador_produto_forbids_separate_spec_file(
     curador_content: str,
 ) -> None:
-    assert "PROIBIDO gravar spec de suíte em arquivo separado" in (
-        curador_content
-    )
-    assert "único spec" in curador_content
+    assert "PROIBIDO copiar a especificação de testes" in curador_content
+    assert "Não crie outro arquivo de spec de testes" in curador_content
 
 
 @pytest.mark.unit
@@ -419,16 +423,16 @@ def test_mensagens_curadoria_references_curador_produto(
 
 
 @pytest.mark.unit
-def test_mensagens_curadoria_documents_single_artifact(
+def test_mensagens_curadoria_documents_separate_test_spec(
     repo_root: Path,
 ) -> None:
     content = (
         repo_root / "harness-conf/agents/references/mensagens-curadoria.md"
     ).read_text(encoding="utf-8")
 
-    assert "4 seções obrigatórias" in content
     assert "Testes por Especialidade" in content
-    assert "tabela índice" in content
+    assert "docs/testes-por-especialidade.md" in content
+    assert "índice das suítes" in content
     assert "docs/testes-produto.md" not in content
 
 

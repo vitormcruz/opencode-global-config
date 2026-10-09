@@ -103,69 +103,10 @@ DOC_TEMPLATE = dedent(
 
     ## Testes por Especialidade
 
-    Scripts por especialidade e o agregador `testes-produto`.
-    Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
-    exit 1 = fail. Sem argumentos. O agregador chama as suítes
-    definidas nesta seção e consolida o relatório; falha se qualquer
-    suíte falhar. Critérios e ferramentas saem da entrevista de
-    curadoria.
-
-    **PROIBIDO:** bypassar, comentar, remover ou condicionar
-    qualquer verificação. Ferramenta ausente não justifica
-    remoção — reporte finding com instrução de instalação.
-
-    ### backend
-
-    **Arquivo:** `testes-produto/backend`
-
-    - pytest completo, ruff, shellcheck, PSScriptAnalyzer e pytest-cov
-    - cobertura mínima de 70%
-    - Specs executáveis da especialidade backend em Concordion-Markdown,
-      rodadas via Concordion com tradutor Python interno à suíte
-
-    ### segurança
-
-    **Arquivo:** `testes-produto/seguranca`
-
-    - gitleaks, pip-audit e bandit
-    - Specs executáveis da especialidade segurança em Concordion-Markdown,
-      rodadas via Concordion com tradutor Python interno à suíte
-
-    ### Agregador
-
-    **Arquivo:** `testes-produto`
-
-    Chama as suítes definidas nesta seção, conforme a curadoria do
-    projeto-alvo, consolida `findings` e não chama Concordion diretamente.
-    O agente `qa` executa o agregador na fase Testes; o `curador-produto`
-    valida a evidência. A suíte meta vive em `testes-produto/tests/`.
-    Artefatos temporários de uma instalação genérica ficam em
-    `testes-produto/target/` e não são versionados.
-
-    ### Dois níveis de teste
-
-    1. **Testes da aplicação** — validam o produto em
-       desenvolvimento. Rodam via suítes/agregador
-       `testes-produto` na fase Testes do workflow, sempre
-       que se desenvolve funcionalidade.
-    2. **Testes dos scripts de teste** — os scripts de suíte
-       e o agregador são código e têm testes próprios.
-       Esta seção é a especificação executável deles: os
-       testes dos scripts cobrem exatamente o que ela define.
-       Rodam SOMENTE quando os scripts mudam, nunca no ciclo
-       normal de desenvolvimento.
-
-    O `AGENTS.md` do projeto mantém apenas a tabela índice das
-    suítes com link para esta seção
-    (`docs/README.md#testes-por-especialidade`).
-
-    ### Suítes
-
-    - backend: `testes-produto/backend`
-    - segurança: `testes-produto/seguranca`
-    - Agregador: `testes-produto`
-
-    Novas especialidades entram por curadoria do projeto-alvo.
+    A especificação das suítes fica em
+    `testes-por-especialidade.md`, no mesmo diretório deste arquivo.
+    Consulte esse documento para definir testes da aplicação, testes dos
+    scripts de teste, interface JSON, critérios, orçamento e proibições.
     """
 )
 
@@ -195,7 +136,7 @@ TESTES_PRODUTO_TEMPLATE = dedent(
     e consolida o relatório. O agente `qa` executa; o `curador-produto` valida
     a evidência. Testes dos scripts: `testes-produto/tests/`.
 
-    Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
+    Spec: [docs/testes-por-especialidade.md](docs/testes-por-especialidade.md)
     """
 )
 

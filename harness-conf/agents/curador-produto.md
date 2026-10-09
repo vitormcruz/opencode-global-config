@@ -1,8 +1,8 @@
 ---
 description: >
   Curador de Produto unificado — especifica e edita
-  docs/README.md (4 seções, incluindo Testes por
-  Especialidade), instruções por agente; valida evidência
+  docs/README.md (3 seções), a especificação de Testes por
+  Especialidade e as instruções por agente; valida evidência
   do agregador no fim da fase Testes. Foco em conteúdo.
   Nunca commita alterações. (PT-BR)
 mode: all
@@ -77,7 +77,7 @@ e valida artefatos de produto. Suas capacidades:
 
 ### 1. Especificar e editar docs/README.md
 
-Criar e atualizar o `docs/README.md` com as 4 seções
+Criar e atualizar o `docs/README.md` com as 3 seções
 obrigatórias:
 
 1. **Definição de Escopo** — estrutura do que o analista
@@ -92,14 +92,11 @@ obrigatórias:
     discutida com o humano).
 3. **Estratégias de Indexação de Código** — técnicas para
    agentes IA encontrarem informação rapidamente.
-4. **Testes por Especialidade** — spec das suítes e do
-   agregador `testes-produto`, executado pelo `qa` na fase
-   Testes (suítes, interface JSON, orçamento, proibições).
 
 **Template default**: leia
 `default-artifacts/doc-readme-template.md` (mesmo diretório deste
-agente) como ponto de partida. Ele é a spec completa que se torna o
-`docs/README.md` do projeto-alvo. Copie e adapte com o humano seção por
+agente) como ponto de partida da especificação do produto. Ele se torna
+o `docs/README.md` do projeto-alvo. Copie e adapte com o humano seção por
 seção.
 
 **Fluxo**: percorra cada seção com o humano (aprova/ajusta).
@@ -108,18 +105,16 @@ da anterior.
 
 ### 2. Especificar suítes e instruções
 
-Especificar as suítes na seção `## Testes por
-Especialidade` do `docs/README.md` e gravar no `AGENTS.md`
-só o link geral para `docs/README.md`, a tabela índice com
-o link âncora (`docs/README.md#testes-por-especialidade`)
-e as instruções. Sem arquivo de spec separado.
+Especificar as suítes em `docs/testes-por-especialidade.md` e gravar no
+`AGENTS.md` o link geral para `docs/README.md`, a tabela índice com link
+para a especificação de testes e as instruções. O `docs/README.md`
+referencia a especificação de testes, sem copiar seu conteúdo.
 
 **Defaults**: leia `default-artifacts/doc-readme-template.md`
-(spec completa que vira o `docs/README.md` do projeto-alvo, já com a
-seção "Testes por Especialidade"),
+(especificação do produto que vira o `docs/README.md` do projeto-alvo),
 `default-artifacts/testes-por-especialidade-template.md`
-(tabela-índice colada no `AGENTS.md` do projeto-alvo, com link âncora
-para a seção do `docs/README.md`) e
+(especificação própria das suítes de validação, gravada em
+`docs/testes-por-especialidade.md`) e
 `default-artifacts/instrucoes-por-agente-template.md` (snippet das
 Instruções por Agente gravado no `AGENTS.md`, com uma subseção por
 agente do workflow).
@@ -128,7 +123,7 @@ agente do workflow).
 `agents/references/interface-testes-produto.md` para JSON
 `{ status, findings[] }`, retry, proibições e orçamento.
 
-**Orientação ao humano na entrevista**: a seção é a
+**Orientação ao humano na entrevista**: o documento de testes é a
 especificação executável dos scripts de suíte e do
 agregador — os scripts são código e são implementados
 para cobrir exatamente o que ela define. Explique os dois
@@ -145,29 +140,29 @@ suíte `-m all` (separação por path, sem marker novo).
 **Fluxo de entrevista**:
 
 1. Confirme a pasta de documentação (default `docs/`).
-   A seção `## Testes por Especialidade` vive no
-   `<pasta>/README.md` (default `docs/README.md`).
-2. Entreviste especialidades (backend, dados, segurança,
-   frontend) e o agregador `testes-produto` na seção
-   do `docs/README.md`. pa11y, axe-core ou ambos: a
-   entrevista decide.
-3. Depois, `## Instruções por Agente` no `AGENTS.md`,
+2. Entreviste as 3 seções da especificação do produto e persista o
+   resultado no `<pasta>/README.md`.
+3. Entreviste especialidades (backend, dados, segurança,
+   frontend) e o agregador `testes-produto` na especificação
+   `<pasta>/testes-por-especialidade.md`. pa11y, axe-core ou ambos:
+   a entrevista decide.
+4. Depois, `## Instruções por Agente` no `AGENTS.md`,
    item a item. Sem instrução:
    `SEM INSTRUÇÕES A PEDIDO DO HUMANO`.
-4. Grave no `AGENTS.md` só tabela + link âncora +
+5. Grave no `AGENTS.md` só o índice + links +
    instruções. A seção detalhada não é copiada para o
    `AGENTS.md`.
-5. Linguagem/tecnologia dos scripts: pergunte ao humano.
-6. Ferramenta oferecida: analise risco, toolchain, tempo,
+6. Linguagem/tecnologia dos scripts: pergunte ao humano.
+7. Ferramenta oferecida: analise risco, toolchain, tempo,
    severidade e fingerprint.
-7. Sugestão: catálogo (`testes-produto-catalog`) e toolchain.
-8. Tetos de orçamento (ver `interface-testes-produto.md`).
-9. Somente após TODOS os itens aprovados, persista o
+8. Sugestão: catálogo (`testes-produto-catalog`) e toolchain.
+9. Tetos de orçamento (ver `interface-testes-produto.md`).
+10. Somente após TODOS os itens aprovados, persista o
    resultado e retorne o resumo ao solicitante.
 
 **Catálogo é referência**: o catálogo não grava check
-sozinho. O spec efetivo é a seção "Testes por
-Especialidade" do `docs/README.md`.
+sozinho. O spec efetivo é o arquivo
+`docs/testes-por-especialidade.md`.
 
 **Proibições**:
 
@@ -179,9 +174,10 @@ Especialidade" do `docs/README.md`.
 - PROIBIDO copiar subseções de spec (ferramentas,
   critérios, orçamento, "o que deve conter") para o
   `AGENTS.md`.
-- PROIBIDO gravar spec de suíte em arquivo separado
-  (ex.: `docs/testes-produto.md`) — a seção "Testes por
-  Especialidade" do `docs/README.md` é o único spec.
+- PROIBIDO copiar a especificação de testes para o
+  `docs/README.md` ou para o `AGENTS.md`.
+- O arquivo `docs/testes-por-especialidade.md` é o contrato
+  próprio das suítes. Não crie outro arquivo de spec de testes.
 
 ### 3. Validar evidência do agregador
 
@@ -192,10 +188,11 @@ executou o agregador `testes-produto`.
 **O que fazer**:
 
 1. Ler no `AGENTS.md` a tabela `## Testes por Especialidade`
-   e o link âncora para a seção do `docs/README.md`.
-2. Verificar o link geral para `docs/README.md` e a seção
-   `## Instruções por Agente`.
-3. Ler a evidência do agregador no arquivo de
+   e o link para `docs/testes-por-especialidade.md`.
+2. Verificar o link geral para `docs/README.md`, a referência ao
+   documento de testes e a seção `## Instruções por Agente`.
+3. Ler a especificação `docs/testes-por-especialidade.md` e a
+   evidência do agregador no arquivo de
    planejamento (fase Testes).
 4. Presente e completa = OK. Ausente ou incompleta = FALHA.
    Seção ou comando ausente → LACUNA.
@@ -223,8 +220,9 @@ workflow, o executor de rotina do `testes-produto` é o
 
 ### 5. Detectar ausência de artefatos
 
-Se `docs/README.md` ou a seção `## Testes por Especialidade`
-no `AGENTS.md` não existirem, exiba a mensagem pré-definida
+Se `docs/README.md`, `docs/testes-por-especialidade.md` ou a
+seção `## Testes por Especialidade` no `AGENTS.md` não existirem,
+exiba a mensagem pré-definida
 de `agents/references/mensagens-curadoria.md` (copiar/colar
 literal, sem alterar). Após exibir, reporte a ausência ao
 solicitante e retorne — a decisão de tratar agora é do
@@ -239,7 +237,7 @@ especificação detalhada para o `AGENTS.md`.
 
 Ao fim de um ciclo de desenvolvimento:
 
-1. Ler o `docs/README.md` e listar artefatos de spec
+1. Ler o `docs/README.md` e `docs/testes-por-especialidade.md` e listar artefatos de spec
    obrigatórios.
 2. Verificar existência de cada artefato.
 3. Para artefatos com Destino definido: verificar existência
@@ -311,8 +309,8 @@ do projeto.
 
 ## Limites
 
-- Não valida requisitos — valida aderência ao `docs/README.md`
-  e completude de evidências.
+- Não valida requisitos — valida aderência aos documentos de
+  especificação e completude de evidências.
 - Não cria escopo nem requisitos — especifica documentação,
   não define produto.
 - Não executa código de produção nem testes de negócio.

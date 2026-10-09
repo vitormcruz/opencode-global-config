@@ -289,7 +289,8 @@ def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
     assert status == 0
     assert "## Mapa do Produto" in content
     assert "[`docs/README.md`](docs/README.md)" in content
-    assert "docs/README.md#testes-por-especialidade" in content
+    assert "docs/testes-por-especialidade.md" in content
+    assert "docs/README.md#testes-por-especialidade" not in content
     assert "docs/testes-produto.md" not in content
     assert "harness/agregar" not in content
     assert "## Agregador de Harness" not in content
@@ -299,7 +300,7 @@ def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
 
 
 @pytest.mark.unit
-def test_doc_scaffold_contains_testes_por_especialidade_section(
+def test_doc_scaffold_references_testes_por_especialidade_spec(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "test-doc.md"
@@ -308,29 +309,24 @@ def test_doc_scaffold_contains_testes_por_especialidade_section(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
+    assert "testes-por-especialidade.md" in content
     assert "## Testes por Especialidade" in content
-    assert "{ status, findings[] }" in content
-    assert "testes-produto/target/" in content
-    assert "PROIBIDO" in content
-    assert "docs/README.md#testes-por-especialidade" in content
+    assert "{ status, findings[] }" not in content
+    assert "testes-produto/target/" not in content
+    assert "PROIBIDO" not in content
     assert "docs/testes-produto.md" not in content
 
 
 @pytest.mark.unit
-def test_doc_scaffold_declares_two_test_levels(tmp_path: Path) -> None:
+def test_doc_scaffold_does_not_absorb_test_spec(tmp_path: Path) -> None:
     destination = tmp_path / "test-doc.md"
 
     status, _, _ = run_scaffold("--doc", str(destination))
     content = destination.read_text(encoding="utf-8")
-    normalized = " ".join(content.split()).lower()
-
     assert status == 0
-    assert "dois níveis de teste" in normalized
-    assert "testes da aplicação" in normalized
-    assert "testes dos scripts de teste" in normalized
-    assert "especificação executável" in normalized
-    assert "somente quando os scripts mudam" in normalized
-    assert "fase testes do workflow" in normalized
+    assert "## Dois níveis de teste" not in content
+    assert "testes-produto/backend" not in content
+    assert "testes-produto/seguranca" not in content
 
 
 @pytest.mark.unit
@@ -392,7 +388,7 @@ def test_default_artifacts_contains_specs_destination(
 
 
 @pytest.mark.unit
-def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
+def test_testes_produto_template_declares_specialty_contract(
     repo_root: Path,
 ) -> None:
     content = (
@@ -400,47 +396,31 @@ def test_testes_produto_snippet_lists_specialties_orchestrator_and_spec_link(
         / "harness-conf/agents/default-artifacts/testes-por-especialidade-template.md"
     ).read_text(encoding="utf-8")
 
-    assert "## Mapa do Produto" in content
-    assert "[`docs/README.md`](docs/README.md)" in content
-    assert "## Testes por Especialidade" in content
+    assert "# Testes por Especialidade" in content
+    assert "## Contrato das Suítes" in content
     for specialty in SPECIALTIES:
         assert f"| {specialty} " in content
     for script in SPECIALTY_SCRIPTS:
         assert script in content
     assert "testes-produto" in content
-    assert "docs/README.md#testes-por-especialidade" in content
     assert "docs/testes-produto.md" not in content
     assert "harness/agregar" not in content
     assert '"prompt"' not in content
-    assert "O que deve conter" not in content
+    assert "O que deve conter" in content
 
 
 @pytest.mark.unit
-def test_doc_readme_template_absorbed_testes_produto_spec(
+def test_doc_readme_template_references_separate_test_spec(
     repo_root: Path,
 ) -> None:
     content = (
         repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
     ).read_text(encoding="utf-8")
 
-    assert "## Testes por Especialidade" in content
-    for specialty in SPECIALTIES:
-        assert f"### {specialty}" in content
-    for heading in (
-        "Ferramentas",
-        "Critérios",
-        "Orçamento",
-        "O que deve conter",
-    ):
-        assert heading in content
-    assert "testes-produto" in content
-    assert "harness/agregar" not in content
-    assert "pa11y" in content
-    assert "axe-core" in content
-    assert "testes-produto/target/" in content
-    assert "harness/target/" not in content
-    assert "{ status, findings[] }" in content
-    assert "PROIBIDO" in content
+    assert "# Especificação do Produto" in content
+    assert "[Testes por Especialidade](testes-por-especialidade.md)" in content
+    assert "## Testes por Especialidade" not in content
+    assert "testes-produto" not in content
 
 
 @pytest.mark.unit
@@ -448,17 +428,16 @@ def test_doc_readme_template_declares_two_test_levels(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/doc-readme-template.md"
+        repo_root
+        / "harness-conf/agents/default-artifacts/"
+        "testes-por-especialidade-template.md"
     ).read_text(encoding="utf-8")
     normalized = " ".join(content.split()).lower()
 
     assert "dois níveis de teste" in normalized
     assert "testes da aplicação" in normalized
     assert "testes dos scripts de teste" in normalized
-    assert "especificação executável" in normalized
-    assert "somente quando os scripts mudam" in normalized
-    assert "fase testes do workflow" in normalized
-    assert "docs/readme.md#testes-por-especialidade" in normalized
+    assert "somente quando esses scripts mudam" in normalized
 
 
 @pytest.mark.unit
@@ -510,13 +489,13 @@ def test_default_artifact_templates_declare_their_role(
 ) -> None:
     roles = {
         "harness-conf/agents/default-artifacts/doc-readme-template.md": (
-            "spec completa que vira o docs/readme.md do projeto-alvo"
+            "especificação do produto que vira o readme.md da pasta de documentação"
         ),
         (
             "harness-conf/agents/default-artifacts/"
             "testes-por-especialidade-template.md"
         ): (
-            "tabela-índice das suítes colada no agents.md do projeto-alvo"
+            "especificação própria das suítes de validação do projeto-alvo"
         ),
         (
             "harness-conf/agents/default-artifacts/"

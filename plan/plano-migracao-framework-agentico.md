@@ -27,19 +27,22 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
 - [ ] `docs/README.md`: Atualizar estrutura para refletir a Especificação do Produto (separando Testes por Especialidade em arquivo próprio).
 
 ### 2.2. Agente Guardião da Governança (`curador-produto`)
-- [ ] `harness-conf/agents/curador-produto.md`:
-  - Atualizar descrição e escopo de atuação.
+- [x] `harness-conf/agents/curador-produto.md`:
+  - Atualizar descrição e escopo de atuação para três seções na Especificação do Produto.
   - Inverter a proibição: agora **deve** gerar e manter Testes por Especialidade em arquivo próprio.
-  - Adicionar capacidade/instrução para validação ativa de links na tabela de Elementos de Especificação.
+  - Atualizar o fluxo de entrevista, validação e detecção de artefatos para a especificação separada.
+- [ ] `harness-conf/agents/curador-produto.md`:
+  - Adicionar validação ativa de links na tabela de Elementos de Especificação.
   - Remover referências à seção "Estratégias de Indexação de Código".
-  - Atualizar formato de saída e mensagens de lacuna (`agents/references/mensagens-curadoria.md`).
+- [x] `harness-conf/agents/references/mensagens-curadoria.md`:
+  - Atualizar mensagens de lacuna para considerar `docs/testes-por-especialidade.md`
+    e o índice correspondente no `AGENTS.md`.
 
 ### 2.3. Templates em `default-artifacts`
-- [ ] `harness-conf/agents/default-artifacts/doc-readme-template.md`:
+- [x] `harness-conf/agents/default-artifacts/doc-readme-template.md`:
   - Renomear título e cabeçalho para **Especificação do Produto**.
-  - Remover seção `## Estratégias de Indexação de Código`.
   - Remover seção `## Testes por Especialidade` (passa a apenas linkar o arquivo dedicado).
-- [ ] `harness-conf/agents/default-artifacts/testes-por-especialidade-template.md`:
+- [x] `harness-conf/agents/default-artifacts/testes-por-especialidade-template.md`:
   - Adaptar para servir de template do arquivo independente `docs/testes-por-especialidade.md`.
 - [ ] `harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md`:
   - Integrar à nova estrutura da seção `## Diretrizes e Regras de Produto`.
@@ -58,13 +61,20 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 - [ ] Reestruturar a âncora de governança para o bloco em destaque `## Diretrizes e Regras de Produto`, com links para a especificação geral, testes por especialidade e instruções inline.
 
 ### 2.6. Tooling e Código de Scaffold
+- [x] `src/opencode_config/cli/scaffold_mapa.py`:
+  - Atualizar as constantes de documentação para referenciar o contrato separado.
+  - Remover do scaffold do README a cópia detalhada da especificação de testes.
+  - Atualizar o índice de testes para apontar para `docs/testes-por-especialidade.md`.
 - [ ] `src/opencode_config/cli/scaffold_mapa.py`:
-  - Atualizar constantes de templates (`HARNESS_TEMPLATE`, seções de documentação).
-  - Remover geração de `Estratégias de Indexação de Código`.
-  - Gerar o arquivo dedicado para `testes-por-especialidade.md`.
+  - Decidir e implementar, se necessário, a geração direta do arquivo dedicado
+    `testes-por-especialidade.md`.
 
 ### 2.7. Suíte de Testes Automatizados
-- [ ] `tests/scaffold/test_mapa_produto.py`: Atualizar asserções de templates e scaffolds.
+- [x] `tests/scaffold/test_mapa_produto.py`: Atualizar asserções de templates e scaffolds.
+- [x] `tests/cli/test_scaffold_mapa_curadoria.py`: Atualizar asserções do scaffold
+  para a especificação separada.
+- [x] `tests/agents/test_curador_produto.py`: Atualizar asserções do contrato do
+  curador e das mensagens de lacuna.
 - [ ] `tests/agents/test_workflow_consistency.py`: Garantir consistência das menções e skills.
 - [ ] `tests/agents/test_devflow.py`: Atualizar asserções que validam comportamento do orquestrador.
 
@@ -74,15 +84,15 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 
 1. **Fase 1 — Conceitualização (Em andamento)**:
    - Concluir redação de Governança, Ideação e Desenvolvimento no novo framework (`docs/framework-desenvolvimento-agentico.md`).
-2. **Fase 2 — Adaptação dos Templates**:
+2. **Fase 2 — Adaptação dos Templates (parcialmente concluída)**:
    - Ajustar `doc-readme-template.md`, `testes-por-especialidade-template.md` e `instrucoes-por-agente-template.md`.
-3. **Fase 3 — Atualização do `curador-produto`**:
+3. **Fase 3 — Atualização do `curador-produto` (parcialmente concluída)**:
    - Implementar novas regras e validação ativa de links no prompt do agente curador.
 4. **Fase 4 — Desacoplamento dos Agentes Operacionais**:
    - Atualizar os prompts dos agentes especialistas para consumir apenas as diretrizes no `AGENTS.md`.
-5. **Fase 5 — Atualização de Código e Scaffold**:
+5. **Fase 5 — Atualização de Código e Scaffold (parcialmente concluída)**:
    - Ajustar o CLI de scaffold para refletir a nova estrutura de arquivos.
-6. **Fase 6 — Validação e Testes**:
+6. **Fase 6 — Validação e Testes (concluída para esta fatia)**:
    - Rodar suíte completa de testes (`pytest -m all`) e corrigir eventuais regressões.
 
 ---
@@ -143,12 +153,27 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   Especialidade. Ainda mantém uma referência ao arquivo próprio, o que é
   compatível com a arquitetura se essa referência curta for mantida.
 - `testes-por-especialidade-template.md` já é uma especificação
-  independente, mas ainda contém frases que atribuem sua execução ao
-  `qa` e a validação da evidência ao `curador-produto`. Essas frases
-  precisam ser revistas em conjunto com as instruções por agente.
+  independente e não atribui mais a execução a um agente ou fase
+  específicos. As instruções operacionais continuam no template de
+  Instruções por Agente.
 - `instrucoes-por-agente-template.md` já recebeu as instruções de
   execução do `qa` e de validação do `curador-produto`. Essas instruções
   devem ser tratadas como defaults ajustáveis por projeto.
 - O framework já descreve os três documentos, mas a redação deve deixar
   explícito que o template de testes define o contrato e o template de
   instruções oferece um ponto de configuração por repositório.
+
+### 4.5. Atualização desta revisão — 2026-10-09
+
+- O `curador-produto` passou a tratar `docs/README.md` como a
+  Especificação do Produto e `docs/testes-por-especialidade.md` como o
+  contrato separado das suítes.
+- As mensagens de curadoria passaram a detectar a ausência dos dois
+  documentos e do índice de testes no `AGENTS.md`.
+- O scaffold deixou de copiar a especificação detalhada de testes para o
+  README e passou a apontar o índice para o arquivo separado.
+- Os testes de agentes, scaffold e CLI foram atualizados. A suíte completa
+  passou com `961 passed, 42 skipped, 31 deselected`.
+- Permanecem para as próximas fatias a validação ativa dos links, a
+  integração das Instruções por Agente à nova estrutura e o desacoplamento
+  dos agentes operacionais e do `AGENTS.md` raiz.
