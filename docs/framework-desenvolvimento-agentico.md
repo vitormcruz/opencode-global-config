@@ -102,8 +102,14 @@ Fonte de verdade temporária durante o workflow. Criado pelo
 `devflow` depois da definição do escopo, é entrada e saída de
 cada agente. É commitado durante o trabalho como ponto de
 salvamento e consultado para retomada e auditoria. É excluído
-no encerramento com autorização humana. A aprovação do humano
-é do plano apresentado na conversa, não do arquivo físico.
+no encerramento com autorização humana.
+
+O planejamento é produzido pelos agentes e consolidado pelo
+`devflow`. O `devflow` apresenta ao humano o recorte do
+planejamento que requer decisão. O Arquivo de Planejamento é a
+implementação operacional desse planejamento, usada pelos agentes
+durante a execução. O humano não precisa ler o arquivo integralmente,
+e os agentes não devem pressupor que ele acompanha seu conteúdo.
 
 ##### Formato do arquivo
 
@@ -130,39 +136,34 @@ do histórico da conversa.
 ### Etapas/Fases
 
 As etapas descrevem o tipo de trabalho realizado, seu resultado e
-os agentes que podem participar. A ordem, os gates e os retornos
+suas entradas e saídas. A ordem, os gates e os retornos
 ficam no [Fluxo das Etapas/Fases](#fluxo-das-etapasfases).
 
 #### Planejamento
 
-Define o escopo técnico, registra as decisões e produz o plano
-de implementação, os critérios de teste e os insumos de domínio.
-O resultado é um plano que pode ser revisado e apresentado ao
-humano para aprovação.
+Define o escopo técnico, organiza as decisões e produz o
+planejamento necessário para a execução. O resultado é um
+planejamento consolidado, com critérios e insumos para orientar
+as etapas seguintes.
 
 #### Construção
 
-Implementa o plano aprovado e integra as alterações entre as
-especialidades. Usa TDD, com testes primeiro, código depois e
-análise de refatoração ao final. Os testes são especificação
-executável, conforme a skill `tests-as-spec`.
+Realiza as alterações previstas no planejamento e integra os
+resultados produzidos durante a execução. O resultado é uma
+implementação coerente com o escopo e as decisões registradas.
 
 #### Revisão
 
-Revisão não é uma etapa independente. Ocorre no fim do
-Planejamento e da Construção, com instâncias novas do `rev`.
-Avalia o plano ou a implementação contra os insumos aprovados.
-
-O `rev` não corrige. Produz achados no formato
-`achado · ação · severidade`, que são encaminhados ao especialista
-responsável.
+Revisa o planejamento e a implementação contra o escopo, as
+decisões e os critérios definidos. Não é uma etapa independente.
+O resultado é um conjunto de achados que orienta decisões de
+correção.
 
 #### Testes
 
-Verifica o comportamento implementado segundo o plano e as
-especificações de Testes por Especialidade, incluindo a
-implementação e os testes produzidos. Produz as evidências do
-ciclo para registro no Arquivo de Planejamento.
+Verifica o comportamento implementado e a cobertura prevista para
+o ciclo. O resultado é um conjunto de evidências sobre a
+implementação e os testes executados.
 
 ### Fluxo das Etapas/Fases
 
@@ -197,10 +198,9 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 0. **Commits e pontos de salvamento**
    - O `eng-software` é o **único committer** do workflow.
      Especialistas (`dba`, `sec`, `qa`, `front`, `rev`,
-     `curador-produto`) são subagentes: editam arquivos e
-     reportam `[arquivos alterados + resumo]` ao solicitante.
-     O `eng-software` revisa o diff do especialista antes de
-     commitar.
+     `curador-produto`) apenas editam arquivos e
+     reportam `[arquivos alterados + resumo]` ao solicitante, `eng-software` revisa o
+     diff do especialista antes de commitar.
    - O `eng-software` carrega e segue a skill
      `git-workflow-and-versioning`: commits atômicos por unidade
      lógica, higiene pré-commit e mensagens Conventional Commit.
@@ -212,10 +212,8 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - **Nunca executa** tarefas de domínio.
 
 2. **Contrato de retorno**
-   - Todo agente persiste o resultado no arquivo e retorna resumo
-     curto, com no máximo cinco linhas.
-   - A última linha informa `Skills: skill1, skill2` ou
-     `Skills: nenhuma`.
+   - Todo agente persiste o resultado no Arquivo de Planejamento e retorna um resumo de handoff autocontido, proporcional à tarefa. O resumo informa apenas o resultado, os arquivos ou artefatos alterados, decisões ou impactos, bloqueios ou perguntas pendentes e as skills usadas. Deve ter até cinco itens curtos e exceder esse limite apenas quando a omissão impedir a retomada do trabalho. Detalhes ficam no arquivo de planejamento.
+   - A última linha informa `Skills: skill1, skill2` ou `Skills: nenhuma`.
 
 3. **Instâncias**
    - Voltas por gate de refatoração, re-revisões e reexecuções usam
@@ -227,18 +225,31 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - Perguntas dos agentes passam pelo `devflow`.
    - A mediação usa a skill `question-orchestration`, o Checklist
      estrutural, a Continuidade da mediação e o Prompt-improver
-     para handoff, conforme `harness-conf/agents/devflow.md`.
+     para handoff.
+   - O `devflow` pode usar a skill `humanizer-br` para melhorar
+     a clareza das perguntas, respostas e resumos destinados ao
+     humano. A skill não decide requisitos nem altera decisões.
 
 5. **Falhas**
    - Falhas de agentes são registradas e encaminhadas ao `devflow`.
-   - O `devflow` consulta o humano sobre corrigir e retentar,
-     ajustar o escopo ou pular com registro.
+   - O `devflow` tenta reexecutar ou encaminhar o trabalho a outro
+     agente quando isso não altera premissas nem planejamento.
 
-6. **Agnosticismo dos agentes**
+6. **Escalonamento ao humano**
+   - O `devflow` consulta o humano apenas quando o problema pode
+     alterar uma premissa, o escopo, o comportamento esperado,
+     a arquitetura, o design de alto nível ou o planejamento
+     apresentado.
+   - Detalhes específicos de implementação, formatação dos
+     arquivos de trabalho e registros usados apenas pelos agentes
+     não são repassados ao humano quando puderem ser resolvidos
+     dentro do planejamento existente.
+
+7. **Agnosticismo dos agentes**
    - Os prompts dos agentes descrevem capacidades, nunca fases.
    - Apenas o `devflow` conhece o workflow.
 
-7. **Seleção de modelo, estado e contexto**
+8. **Seleção de modelo**
    - Ao iniciar, o `devflow` sugere um modelo por etapa.
      O humano define se prefere um modelo único, modelos por
      fase ou outro arranjo. O mapa combinado fica registrado
@@ -246,15 +257,21 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - Se o harness suportar seleção de modelo por chamada,
      o mapa é aplicado em cada spawn. Sem esse suporte, o
      workflow pausa antes de uma fase que exija outro modelo.
+
+9. **Estado do workflow**
    - O estado vive no arquivo de planejamento e na memória de
-     longo prazo. Cada spawn recebe briefing autocontido, com
-     ponteiros para os blocos relevantes.
-   - No OpenCode com o plugin DCP, a tool `compress` é o
-     mecanismo preferido de compactação. `/compact` é fallback.
-   - A auto-compactação por threshold é rede de segurança.
-     Se disparar, o agente lê trechos por offset/limit, faz
-     consultas direcionadas e não reinsere arquivos e logs
-     completos no contexto.
+     longo prazo.
+   - O arquivo preserva o `Status`, as perguntas, as evidências,
+     o histórico e os registros necessários para o handoff.
+
+10. **Gestão de contexto**
+   - Cada spawn recebe um briefing autocontido e apenas os trechos
+     necessários do estado persistido.
+   - O harness escolhe o mecanismo adequado para compactar,
+     recuperar ou limitar o contexto em cada ambiente.
+   - O workflow não depende de uma ferramenta específica de
+     compactação. O agente lê trechos direcionados e não reinsere
+     arquivos e logs completos no contexto.
 
 #### Fluxo Detalhado
 
@@ -268,7 +285,9 @@ o humano conforme as regras de falha.
    - O `curador-produto` verifica as Diretrizes e Regras de
      Produto e registra as lacunas encontradas.
    - Os especialistas elaboram o plano de implementação, os
-     critérios de teste e os demais insumos de domínio.
+     critérios de teste, consultando as especificações de Testes
+     por Especialidade quando aplicável, e os demais insumos de
+     domínio.
    - Agentes com dúvidas salvam o progresso parcial e retornam
      ao `devflow` para mediação.
    - Decisões não triviais são mediadas com o humano. Arquivos
@@ -280,17 +299,24 @@ o humano conforme as regras de falha.
    - O `devflow` aciona uma nova instância do `rev`.
    - O `rev` revisa o plano com as skills de domínio aplicáveis,
      usando o plano e os insumos originais do humano.
+   - Os achados seguem o formato `achado · ação · severidade`.
    - O `devflow` encaminha os achados aos especialistas
      responsáveis e solicita nova revisão quando necessário.
-   - O humano aprova o plano apresentado na conversa. A aprovação
-     não é do arquivo físico.
-   - O humano controla as re-revisões. Não há loops automáticos.
+   - O `devflow` consolida o planejamento e apresenta ao humano
+     o recorte necessário para decisão. O humano decide sobre o
+     planejamento apresentado, não sobre o arquivo operacional.
+   - O `devflow` decide as re-revisões conforme os achados e os
+     critérios do fluxo. Só consulta o humano se a decisão alterar
+     premissas ou planejamento. Não há loops automáticos.
    - O `devflow` atualiza o `Status` para Construção.
 
 3. **Construção**
-   - O `devflow` aciona os especialistas conforme o plano aprovado.
-   - O `eng-software` coordena TDD, integração e commits.
-   - A construção segue o plano sem novas consultas ao humano,
+   - O `devflow` aciona os especialistas conforme o planejamento
+     consolidado após a decisão do humano.
+   - O `eng-software` coordena TDD, integração e commits,
+     consultando a skill `tests-as-spec` para tratar testes como
+     especificação executável.
+   - A construção segue o planejamento sem novas consultas ao humano,
      exceto quando o gate de refatoração for acionado.
    - Se a integração exigir mudança no plano, o `eng-software`
      consulta o humano. O plano pode ser mantido, receber um
@@ -301,14 +327,17 @@ o humano conforme as regras de falha.
 4. **Revisão da construção**
    - O `devflow` aciona uma nova instância do `rev` para verificar
      a implementação contra o plano e as especificações.
-   - O `rev` não corrige. Os achados são encaminhados aos
+   - O `rev` não corrige. Os achados, no formato
+     `achado · ação · severidade`, são encaminhados aos
      especialistas responsáveis.
-   - Depois das correções, o humano decide se haverá nova revisão.
-     Não há loops automáticos.
+   - Depois das correções, o `devflow` decide se haverá nova
+     revisão conforme os critérios do fluxo. Não há loops
+     automáticos.
    - O `devflow` atualiza o `Status` para Testes.
 
 5. **Testes**
-   - O `qa` executa `testes-produto` e os testes previstos no plano.
+   - O `qa` executa `testes-produto` e os testes previstos no plano,
+     conforme as especificações de Testes por Especialidade.
      Não analisa código.
    - O `sec` executa o roteiro manual de segurança.
    - A evidência do agregador usa o formato JSON
