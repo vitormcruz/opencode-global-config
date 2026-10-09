@@ -52,6 +52,12 @@ referenciados aqui:
 
 ## Ideação
 
+A Ideação transforma uma necessidade, hipótese ou história em um escopo
+com requisitos e critérios de aceitação revisados antes do Desenvolvimento.
+O fluxo é independente do Desenvolvimento e pode preparar uma história
+para execução imediata ou para um ciclo futuro.
+
+[Consultar o Workflow de Definição de Escopo](./workflow-definicao-escopo.md)
 
 
 ## Desenvolvimento
@@ -68,7 +74,6 @@ referenciados aqui:
   - [Agentes e responsabilidades](#agentes-e-responsabilidades)
   - [Premissas](#premissas)
   - [Fluxo Detalhado](#fluxo-detalhado)
-- [Notas de Implementação](#notas-de-implementacao)
 
 
 ### Contratos do Workflow
@@ -378,21 +383,3 @@ o humano conforme as regras de falha.
    - O `devflow` confirma que os gates foram concluídos.
    - O humano autoriza a exclusão do Arquivo de Planejamento e
      dos artefatos auxiliares.
-
-
-## Notas de Implementação
-
-### Interação agente–humano por plataforma
-
-| Plataforma | Como spawna | Comunicação |
-|---|---|---|
-| **Copilot CLI** | `task(agent_type=...)` | Devflow media |
-| **OpenCode** | Subagentes | Devflow media |
-
-Subagentes retornam perguntas; `devflow` avalia e apresenta
-ao humano. Exceção: agentes não mediados (ex: analista)
-conversam direto com o humano.
-
-**Mediação ao spawnar:** `curador-produto`, quando
-spawnado, faz perguntas ao humano via `devflow`
-(mediação), não diretamente.
