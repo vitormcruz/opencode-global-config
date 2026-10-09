@@ -232,7 +232,7 @@ def test_smart_planner_does_not_generate_handoff_prompts(repo_root: Path) -> Non
     )
 
     assert "prompt-improver" not in content
-    assert "não gere prompts ou arquivos de handoff" in content
+    assert "não gere prompts ou arquivos de handoff" in content.lower()
     assert "Não cria prompts nem arquivos de handoff" in content
 
 
@@ -277,6 +277,7 @@ def test_smart_planner_has_central_premise_capable_for_cheap(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    normalized = collapsed(content)
     assert "Premissa Central" in content
     assert "modelo mais capaz" in content
     assert "modelo barato" in content
@@ -302,15 +303,18 @@ def test_smart_planner_delegates_initial_context_triage(
 
 
 @pytest.mark.unit
-def test_smart_planner_orchestrates_independent_executor_and_reviewer(
+def test_smart_planner_applies_instance_policy_and_independent_reviewer(
     repo_root: Path,
 ) -> None:
     content = smart_planner_file(repo_root).read_text(encoding="utf-8")
+    normalized = collapsed(content)
 
     assert "Pergunte ao humano se pode iniciar a execução" in content
     assert "**executor** e o do **revisor**" in content
-    assert "instância nova do executor" in content
-    assert "nova instância independente do revisor" in content
+    assert "instância registrada ou criar outra" in content
+    assert "Reutilize quando o objetivo" in content
+    assert "Se houver dúvida entre reutilizar e criar, crie outra" in content
+    assert "nova instância independente do revisor" in normalized
     assert "ela nunca corrige diretamente" in content
 
 

@@ -204,12 +204,45 @@ Ao spawnar um agente, instrua-o a:
    perguntar.** Se encontrar ponto de decisão, salve
    progresso parcial e retorne com perguntas.
 
-### Instância nova a cada fase
+### Política de instâncias
 
-Spawne **instância nova** do agente a cada chamada.
-Nenhum agente executor carrega contexto de fases
-anteriores. **Obrigatório** em voltas (gate de refatoração,
-re-revisões) e **recomendado** em todas as transições.
+Use uma instância por **unidade de trabalho coerente**, não uma
+instância por fase ou por chamada. A unidade mantém o mesmo objetivo,
+os mesmos critérios de aceitação, os mesmos artefatos lógicos, o mesmo
+papel do agente e as mesmas premissas do plano. A mudança de fase,
+sozinha, não obriga a criar uma instância nova.
+
+Antes de cada spawn ou retomada, leia o Arquivo de Planejamento e
+decida:
+
+- **Reutilizar** quando for continuação do mesmo objetivo, pergunta,
+  correção local ou extensão dos mesmos artefatos, com contexto
+  relevante e confiável;
+- **Criar** quando houver mudança de escopo, comportamento, arquitetura
+  ou premissa, tarefa independente ou paralela, troca de modelo,
+  permissões ou capacidade, ou perda de confiabilidade do contexto;
+- **Criar** para toda revisão, sem reutilizar a instância do executor;
+- **Reutilizar** uma instância após falha transitória quando o estado
+  permanecer confiável;
+- **Criar** após falha com estado parcial, contraditório ou
+  contaminado.
+
+Um contexto longo, mas ainda útil, deve ser reduzido por compactação ou
+seleção de trechos antes da troca de instância. Uma instância nova
+recebe briefing autocontido com o estado persistido. Uma instância
+reutilizada recebe somente o estado novo e os trechos necessários.
+Quando houver dúvida entre reutilizar e criar, crie uma instância nova.
+Considere o custo total da tarefa, incluindo contexto acumulado,
+latência e retrabalho, em vez de comparar apenas os tokens da próxima
+chamada.
+
+Antes de trocar ou criar uma instância, registre no Arquivo de
+Planejamento a unidade de trabalho, o papel do agente, o último
+handoff e o motivo da decisão. Nunca retome uma sessão arbitrária ou
+sem referência no plano. Se a plataforma não permitir reutilizar a
+instância registrada, crie outra com o mesmo estado persistido.
+Só faça o spawn ou a retomada depois que essa decisão estiver
+registrada e o briefing correspondente estiver pronto.
 
 ### Falha de agente
 
@@ -240,10 +273,15 @@ da sessão via SDK.
 
 ## Política de sessão e contexto
 
-Sessão nova sempre. Nunca retome a sessão anterior, nem na
-mesma fase. O estado vive no arquivo de planejamento e na
-memória de longo prazo. Cada spawn recebe briefing
-autocontido com ponteiros para os blocos relevantes.
+O estado vive no arquivo de planejamento e na memória de longo
+prazo. O `devflow` pode reutilizar uma instância registrada quando a
+unidade de trabalho, o papel e o contexto continuarem válidos. Ele
+não retoma sessões arbitrárias nem depende do histórico da conversa
+para reconstruir o estado.
+
+Cada nova instância recebe briefing autocontido com ponteiros para os
+blocos relevantes. Cada instância reutilizada recebe somente as
+mudanças desde o último handoff e os trechos necessários.
 
 A auto-compactação por threshold é rede de segurança, não
 plano. Se disparar, a fronteira foi perdida. Leia trechos
@@ -294,7 +332,8 @@ Se tudo OK → `Status: PLANEJAMENTO`.
 
 ### 3. REVISÃO DO PLANO
 
-Instâncias limpas — sem histórico da conversa anterior.
+A revisão usa uma instância independente do executor. O histórico do
+executor não é usado como contexto da revisão.
 
 | Passo | Agente | Ação |
 |-------|--------|------|
@@ -331,7 +370,8 @@ resolução.
 
 ### 5. REVISÃO DA CONSTRUÇÃO
 
-Instâncias limpas.
+A revisão usa uma instância independente do executor. O histórico do
+executor não é usado como contexto da revisão.
 
 | Passo | Agente | Ação |
 |-------|--------|------|

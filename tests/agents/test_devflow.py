@@ -196,6 +196,23 @@ def test_devflow_defines_scope_before_creating_plan(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
+def test_devflow_applies_instance_policy(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.split())
+
+    assert "unidade de trabalho coerente" in content
+    assert (
+        "**Criar** para toda revisão, sem reutilizar a instância do executor"
+        in normalized
+    )
+    assert (
+        "Quando houver dúvida entre reutilizar e criar, crie uma instância nova"
+        in normalized
+    )
+    assert "Só faça o spawn ou a retomada depois" in content
+
+
+@pytest.mark.unit
 def test_scope_workflow_is_independent_and_has_no_plan_contract(
     repo_root: Path,
 ) -> None:

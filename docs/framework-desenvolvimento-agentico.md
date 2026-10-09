@@ -189,8 +189,8 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 - **redução de consumo de tokens** via delegação focada;
 - **qualidade** através de gates de revisão obrigatórios;
 - **governança** com o humano no loop em pontos-chave;
-- **higiene de contexto** — cada fase roda em instância
-  nova, usando o arquivo de planejamento como handoff.
+- **higiene de contexto** — cada unidade de trabalho usa a instância
+  adequada, com o arquivo de planejamento como handoff.
 
 
 #### Premissas
@@ -216,10 +216,34 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
    - A última linha informa `Skills: skill1, skill2` ou `Skills: nenhuma`.
 
 3. **Instâncias**
-   - Voltas por gate de refatoração, re-revisões e reexecuções usam
-     instâncias novas.
-   - Cada transição deve preferir uma instância nova.
-   - O workflow nunca retoma uma sessão anterior, nem na mesma fase.
+   - Uma instância representa uma unidade de trabalho coerente,
+     formada pelo mesmo objetivo, critérios de aceitação, artefatos
+     lógicos, papel do agente e premissas do plano.
+   - A mudança de fase, sozinha, não obriga a criar uma instância nova.
+     O `devflow` reutiliza a instância quando o trabalho continua no
+     mesmo objetivo e o contexto permanece relevante e confiável.
+   - Uma nova instância é criada quando há mudança de escopo,
+     comportamento, arquitetura ou premissa, tarefa independente ou
+     paralela, troca de modelo ou capacidade, ou perda de confiança no
+     contexto.
+   - Toda revisão usa uma instância nova e não reutiliza a instância do
+     executor. Correções após revisão podem reutilizar o executor
+     quando continuam na mesma unidade de trabalho.
+   - Falhas transitórias podem ser reexecutadas na mesma instância.
+     Falhas com estado parcial, contraditório ou contaminado exigem
+     outra instância.
+   - Quando houver dúvida entre reutilizar e criar, o `devflow` cria
+     uma instância nova. A decisão considera o custo total da tarefa,
+     incluindo contexto acumulado, latência e retrabalho, não apenas
+     os tokens da próxima chamada.
+   - Antes de trocar ou criar uma instância, o estado e o último
+     handoff são persistidos no Arquivo de Planejamento. Instâncias
+     novas recebem briefing autocontido. Instâncias reutilizadas
+     recebem apenas as mudanças e os trechos necessários.
+   - O workflow nunca retoma uma sessão arbitrária ou sem referência
+     no Arquivo de Planejamento. Se o harness não permitir reutilizar a
+     instância registrada, o `devflow` cria outra com o estado
+     persistido.
 
 4. **Mediação de perguntas**
    - Perguntas dos agentes passam pelo `devflow`.
