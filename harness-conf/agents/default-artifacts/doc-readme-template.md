@@ -1,6 +1,7 @@
 <!-- TEMPLATE: especificação do produto que vira o README.md da pasta de
      documentação do projeto-alvo. Define escopo, elementos de especificação
-     e regras de documentação. Ponto de partida da curadoria; copie e adapte
+     e regras de documentação. Ponto de partida das Diretrizes e Regras de
+     Produto; copie e adapte
      seção por seção com o humano. -->
 # Especificação do Produto
 

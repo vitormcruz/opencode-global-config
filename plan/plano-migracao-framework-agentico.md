@@ -177,3 +177,45 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 - Permanecem para as próximas fatias a validação ativa dos links, a
   integração das Instruções por Agente à nova estrutura e o desacoplamento
   dos agentes operacionais e do `AGENTS.md` raiz.
+
+### 4.6. Estrutura única das Diretrizes no `AGENTS.md` — 2026-10-13
+
+- O `AGENTS.md` deve ter uma única seção de nível 2 chamada
+  **Diretrizes e Regras de Produto**, localizada no final do arquivo.
+- Essa seção reúne o link para a Especificação do Produto, a descrição dos
+  artefatos gerados, a subseção **Testes por Especialidade** e a subseção
+  **Instruções por Agente**.
+- Os nomes dos agentes ficam um nível abaixo de **Instruções por Agente**.
+  A hierarquia deve deixar explícito que testes e instruções fazem parte das
+  Diretrizes e Regras de Produto.
+- Prompts, skills, templates e testes devem consultar os nomes lógicos das
+  subseções, sem depender do nível Markdown ou de uma posição física fixa.
+- O scaffold deve gerar a mesma hierarquia quando criar o índice no
+  `AGENTS.md`.
+
+### 4.7. Condensação da Construção no Fluxo — 2026-10-13
+
+- O item `4.1` reúne a execução da construção e a sequência técnica dos
+  agentes previstos no plano (`dba`, `front` quando aplicável e
+  `eng-software`).
+- O item `4.2` passa a tratar apenas do gate de refatoração, das mudanças no
+  planejamento e da transição para a Revisão da Construção.
+- Depois de cada correção, o `devflow` sempre consulta o humano antes de
+  iniciar uma nova revisão. Somente uma resposta afirmativa permite
+  re-revisão; essa decisão impede loops infinitos.
+- Na Finalização, o ciclo de correção e revalidação também exige um gate
+  humano antes de cada nova revalidação. Se o humano mandar parar, o Fluxo
+  registra as lacunas e preserva o Arquivo de Planejamento e os artefatos
+  auxiliares, sem declarar conclusão.
+- A tabela de agentes continua descrevendo apenas as etapas genéricas do
+  Desenvolvimento. **Inicialização** permanece no Fluxo Detalhado e na
+  implementação do `devflow`, não como coluna ou etapa genérica.
+
+### 4.8. Terminologia e referências — 2026-10-13
+
+- Referências ativas a **Mapa do Produto** devem usar **Diretrizes e Regras
+  de Produto** e **Especificação do Produto**, conforme o documento citado.
+- A migração alcança `AGENTS.md`, os prompts que consultam documentação, o
+  Fluxo de Definição de Escopo, o scaffold e os testes dos contratos.
+- Ocorrências históricas no próprio plano e nomes técnicos legados, como
+  `scaffold_mapa.py` e `test_mapa_produto.py`, permanecem sem renomeação.

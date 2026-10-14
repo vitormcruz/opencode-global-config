@@ -1,10 +1,5 @@
 # Regras do Repo — opencode-global-config
 
-## Mapa do Produto
-
-Consulte [`docs/README.md`](docs/README.md), fonte de verdade do produto,
-antes de planejar ou implementar mudanças neste repo.
-
 ## Descoberta de Código e Documentação
 
 - Use SEMPRE o codebase-memory CLI (CÓDIGO) antes de grep/glob; grep/glob
@@ -186,20 +181,6 @@ Todos suportam `--yes` e `--check-only`.
   (suíte meta em `testes-produto/tests/`, que roda quando os scripts
   mudam).
 
-## Testes por Especialidade
-
-| Especialidade | Script |
-|---------------|--------|
-| backend | `testes-produto/backend` |
-| segurança | `testes-produto/seguranca` |
-
-Agregador: `testes-produto`
-
-Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
-`curador-produto`.
-
-Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-especialidade)
-
 ## README
 
 - Mantenha a seção de dependências do `README.md` atualizada sempre que
@@ -230,17 +211,6 @@ Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-espe
   seus testes (`tests/harnesses/`, `tests/lib/`). Verifique também o
   outro harness quando a mudança afetar o contrato entre plataformas.
 
-## Mapa do Produto e Artefatos Gerados
-
-- Neste projeto, `docs/README.md` é o Mapa do Produto e a fonte de verdade
-  dos elementos de especificação ativos.
-- `harness-conf/agents/default-artifacts/` contém artefatos gerados por este
-  projeto para provisionar e orientar outros projetos. Eles são saídas deste
-  repositório, mas não definem os agentes, workflows ou elementos de
-  especificação ativos deste produto.
-- Alterações no Mapa do Produto deste projeto não alteram esses artefatos
-  automaticamente. A evolução deles exige decisão e escopo próprios.
-
 ## Commits
 
 - Conventional Commits em PT-BR: `tipo(escopo): descrição curta`, tipos:
@@ -249,7 +219,38 @@ Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-espe
   pedir.
 - Descubra a linguagem do projeto pelo contexto; use PT-BR por padrão.
 
-## Instruções por Agente
+## Diretrizes e Regras de Produto
+
+Consulte a Especificação do Produto em [`docs/README.md`](docs/README.md) e
+as demais Diretrizes e Regras de Produto antes de planejar ou implementar
+mudanças neste repo.
+
+- Neste projeto, `docs/README.md` é a Especificação do Produto e integra as
+  Diretrizes e Regras de Produto, fonte de verdade dos elementos de
+  especificação ativos.
+- `harness-conf/agents/default-artifacts/` contém artefatos gerados por este
+  projeto para provisionar e orientar outros projetos. Eles são saídas deste
+  repositório, mas não definem os agentes, workflows ou elementos de
+  especificação ativos deste produto.
+- Alterações nas Diretrizes e Regras de Produto deste projeto não alteram
+  esses artefatos automaticamente. A evolução deles exige decisão e escopo
+  próprios.
+
+### Testes por Especialidade
+
+| Especialidade | Script |
+|---------------|--------|
+| backend | `testes-produto/backend` |
+| segurança | `testes-produto/seguranca` |
+
+Agregador: `testes-produto`
+
+Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
+`curador-produto`.
+
+Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-especialidade)
+
+### Instruções por Agente
 
 Toda vez que um agente desta seção for utilizado, ele deve
 consultar a subseção com seu nome antes de executar a tarefa.
@@ -261,30 +262,30 @@ diretamente pelo humano.
 `SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
 instrução adicional. Esta seção não contém comando de suíte.
 
-### eng-software
+#### eng-software
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### dba
+#### dba
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### front
+#### front
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### sec
+#### sec
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### qa
+#### qa
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### rev
+#### rev
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### curador-produto
+#### curador-produto
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO

@@ -224,9 +224,9 @@ def test_testes_produto_scaffold_creates_section(tmp_path: Path) -> None:
 
     assert status == 0
     content = destination.read_text(encoding="utf-8")
-    assert "## Mapa do Produto" in content
-    assert "[`docs/README.md`](docs/README.md)" in content
-    assert "## Testes por Especialidade" in content
+    assert "## Diretrizes e Regras de Produto" in content
+    assert "[Especificação do Produto](docs/README.md)" in content
+    assert "### Testes por Especialidade" in content
     assert "## Harness por Agente" not in content
 
 
@@ -273,8 +273,8 @@ def test_testes_produto_scaffold_is_idempotent(tmp_path: Path) -> None:
 
     assert first_status == 0
     assert second_status == 0
-    assert content.count("## Mapa do Produto") == 1
-    assert content.count("## Testes por Especialidade") == 1
+    assert content.count("## Diretrizes e Regras de Produto") == 1
+    assert content.count("### Testes por Especialidade") == 1
 
 
 @pytest.mark.unit
@@ -287,8 +287,8 @@ def test_testes_produto_scaffold_is_short_snippet_with_spec_link(
     content = destination.read_text(encoding="utf-8")
 
     assert status == 0
-    assert "## Mapa do Produto" in content
-    assert "[`docs/README.md`](docs/README.md)" in content
+    assert "## Diretrizes e Regras de Produto" in content
+    assert "[Especificação do Produto](docs/README.md)" in content
     assert "docs/testes-por-especialidade.md" in content
     assert "docs/README.md#testes-por-especialidade" not in content
     assert "docs/testes-produto.md" not in content
@@ -343,7 +343,7 @@ def test_doc_and_testes_produto_flags_create_both_scaffolds(tmp_path: Path) -> N
 
     assert status == 0
     assert "## Definição de Escopo" in doc.read_text(encoding="utf-8")
-    assert "## Testes por Especialidade" in agents.read_text(encoding="utf-8")
+    assert "### Testes por Especialidade" in agents.read_text(encoding="utf-8")
 
 
 @pytest.mark.unit
@@ -448,9 +448,9 @@ def test_instructions_template_covers_workflow_agents(
         repo_root / "harness-conf" / "agents/default-artifacts/instrucoes-por-agente-template.md"
     ).read_text(encoding="utf-8")
 
-    assert "## Instruções por Agente" in content
+    assert "### Instruções por Agente" in content
     for agent in WORKFLOW_AGENTS:
-        assert f"### {agent}" in content
+        assert f"#### {agent}" in content
     assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content
     assert "testes-produto" not in content
     assert "testes-produto/backend" not in content

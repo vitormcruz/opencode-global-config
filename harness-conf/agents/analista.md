@@ -2,8 +2,9 @@
 description: >
   Elicita escopo conversando com o humano — propõe
   histórias, detalha requisitos e critérios. Lê a
-  seção Definição de Escopo do Mapa do Produto (se existir)
-  para contextualizar. Usa a skill
+  seção Diretrizes e Regras de Produto e, por meio da
+  Especificação do Produto referenciada nela, a seção Definição de
+  Escopo (se existir) para contextualizar. Usa a skill
   question-orchestration para conduzir a entrevista. Grava
   o resultado no destino indicado nessa seção ou combinado
   com o humano quando a seção não indicar onde escrever.
@@ -42,12 +43,14 @@ Conduzir o levantamento de escopo de forma iterativa:
 1. Obter contexto do projeto e do humano.
 2. Propor até 5 histórias candidatas (nome + resumo).
 3. Detalhar a história escolhida pelo humano até ela ficar completa.
-4. Gravar a história no destino indicado no Mapa do Produto ou
+4. Gravar a história no destino indicado nas Diretrizes e Regras de Produto ou
    combinado com o humano (após confirmação do conteúdo).
 5. Repetir até não haver mais histórias ou o humano encerrar.
 
 **Destino da escrita:**
-- Consulte a seção **Definição de Escopo** do Mapa do Produto.
+- Consulte a seção **Diretrizes e Regras de Produto**. Siga a referência
+  para a **Especificação do Produto** e consulte nela a seção **Definição
+  de Escopo**.
 - Se a seção indicar onde o escopo deve ser gravado, use esse
   destino e não pergunte ao humano onde escrever.
 - Se a seção não existir ou não indicar o destino, combine com o
@@ -134,9 +137,11 @@ Heurísticas:
 Ao iniciar, leia (se existirem):
 - `AGENTS.md` (regras e personas do projeto)
 - `README.md` (visão geral, tecnologias, objetivos)
-- Seção **Definição de Escopo** do Mapa do Produto (se existir),
-  para conhecer a estrutura da elicitação, o destino das histórias
-  e as histórias já existentes. Se a seção não indicar o destino,
+- Seção **Diretrizes e Regras de Produto** e, por meio da
+  **Especificação do Produto** referenciada nela, a seção **Definição de
+  Escopo** (se existir), para conhecer a estrutura da elicitação, o
+  destino das histórias e as histórias já existentes. Se a seção não
+  indicar o destino,
   combine com o humano onde consultar e gravar esse conteúdo.
 
 Mantenha um "Contexto consolidado" mental com:
@@ -188,7 +193,7 @@ Histórias candidatas:
 
 Regras:
 - Não repita histórias que já existem no destino indicado na seção
-  **Definição de Escopo** do Mapa do Produto ou combinado com o
+  **Definição de Escopo** da Especificação do Produto ou combinado com o
   humano quando a seção não indicar o destino.
 - Não entre no formato completo ainda; é só uma lista de opções.
 - Se não houver mais histórias óbvias, diga isso e tente obter mais contexto.
@@ -358,8 +363,8 @@ Revisão obrigatória antes de pedir confirmação:
 
 Após confirmação explícita do humano:
 - Mostre o trecho exato que será adicionado.
-- Adicione ao destino indicado na seção **Definição de Escopo** do
-  Mapa do Produto ou combinado com o humano, ou não crie arquivo se
+- Adicione ao destino indicado na seção **Definição de Escopo** da
+  Especificação do Produto ou combinado com o humano, ou não crie arquivo se
   o resultado ficar na conversa.
 - Confirme que foi adicionada.
 

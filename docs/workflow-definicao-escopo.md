@@ -7,14 +7,15 @@ diretamente com o humano para definir histórias, requisitos e
 critérios de aceitação.
 
 O resultado pode permanecer na conversa ou ser gravado no
-destino indicado na seção Definição de Escopo do Mapa do Produto.
-Se a seção não indicar o destino, o `analista` combina com o
-humano onde gravar o resultado.
+destino indicado nas Diretrizes e Regras de Produto, seguindo a
+referência para a seção Definição de Escopo da Especificação do
+Produto. Se a seção não indicar o destino, o `analista` combina
+com o humano onde gravar o resultado.
 
 **Premissa:** a documentação do produto em
-`docs/README.md` e os Testes por Especialidade já estão
-presentes e válidos antes deste workflow para consulta
-durante a elicitação.
+`AGENTS.md`, a Especificação do Produto, os Testes por Especialidade
+e as Instruções por Agente já estão presentes e válidos antes deste
+workflow para consulta durante a elicitação.
 
 ## Agentes
 
@@ -26,16 +27,16 @@ durante a elicitação.
 ## Premissas
 
 1. **Documentação do produto já está disponível** —
-   `docs/README.md` e Testes por Especialidade existem e
-   estão válidos. Este workflow assume isso como
-   pré-condição.
+   as Diretrizes e Regras de Produto existem e estão válidas.
+   Este workflow assume isso como pré-condição.
 2. **`analista` nunca edita `docs/README.md`** — apenas
-   lê a seção Definição de Escopo para contextualizar
-   a elicitação.
-3. **Destino do escopo** — a seção Definição de Escopo do Mapa
-   do Produto indica onde gravar a história. Se a seção não
-   indicar o destino, o `analista` combina com o humano onde
-   consultar histórias existentes e onde gravar o resultado.
+   lê a Especificação do Produto referenciada nas Diretrizes e
+   Regras de Produto e consulta a seção Definição de Escopo para
+   contextualizar a elicitação.
+3. **Destino do escopo** — a seção Definição de Escopo da
+   Especificação do Produto indica onde gravar a história. Se a
+   seção não indicar o destino, o `analista` combina com o humano
+   onde consultar histórias existentes e onde gravar o resultado.
    Se o humano preferir manter o resultado na conversa, nenhum
    arquivo é criado.
 
@@ -46,10 +47,11 @@ durante a elicitação.
 O humano inicia o `analista` diretamente. O analista conduz a
 elicitação sem um orquestrador intermediário:
 
-1. Analista carrega `question-orchestration` no modo direto
-   e lê a seção Definição de Escopo do Mapa do Produto + o
-   que o humano forneceu
-2. Compara: bate com o definido na seção?
+1. Analista carrega `question-orchestration` no modo direto e
+   consulta as Diretrizes e Regras de Produto, seguindo a referência
+   para a seção Definição de Escopo da Especificação do Produto, além
+   de ler o que o humano forneceu
+2. Compara: bate com o definido na seção Definição de Escopo?
 3. Se faltar → elicita com humano
 4. Define se o resultado fica na conversa ou em um arquivo
    indicado pelo humano

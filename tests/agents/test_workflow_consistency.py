@@ -989,7 +989,7 @@ def test_work_records_require_executor_and_model(repo_root: Path) -> None:
 
 @pytest.mark.unit
 def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
-    """O Mapa do Produto registra workflows como documentação não executável."""
+    """As Diretrizes de Produto registram workflows como documentação."""
 
     product_map = (repo_root / "docs" / "README.md").read_text(
         encoding="utf-8"
@@ -1014,17 +1014,18 @@ def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_agents_md_distinguishes_product_map_from_generated_artifacts(
+def test_agents_md_distinguishes_product_guidelines_from_generated_artifacts(
     repo_root: Path,
 ) -> None:
-    """O AGENTS.md separa o mapa ativo dos artefatos gerados do projeto."""
+    """O AGENTS.md separa as diretrizes ativas dos artefatos gerados."""
 
     agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
-    section = agents.split("## Mapa do Produto e Artefatos Gerados", 1)[1]
-    section = section.split("## Commits", 1)[0]
+    section = agents.split("## Diretrizes e Regras de Produto", 1)[1]
     section = " ".join(section.split())
 
-    assert "`docs/README.md` é o Mapa do Produto" in section
+    assert agents.count("\n## Diretrizes e Regras de Produto\n") == 1
+    assert "`docs/README.md` é a Especificação do Produto e integra as Diretrizes"
+    " e Regras de Produto" in section
     assert "artefatos gerados por este projeto" in section
     assert "não definem os agentes, workflows ou elementos de" in section
     assert "A evolução deles exige decisão e escopo próprios" in section

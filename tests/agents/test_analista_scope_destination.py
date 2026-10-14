@@ -12,20 +12,24 @@ def analista_content(repo_root: Path) -> str:
 
 
 @pytest.mark.unit
-def test_analista_uses_product_map_scope_section_for_destination(
+def test_analista_uses_product_guidelines_scope_section_for_destination(
     repo_root: Path,
 ) -> None:
     content = analista_content(repo_root)
     normalized = " ".join(content.split())
 
-    assert "seção **Definição de Escopo** do Mapa do Produto" in content
+    assert "seção **Diretrizes e Regras de Produto**" in content
+    assert (
+        "seção **Definição de Escopo** da Especificação do Produto"
+        in normalized
+    )
     assert "não pergunte ao humano onde escrever" in normalized
     assert "BACKLOG.md" not in content
     assert "Arquivo de Planejamento" not in content
 
 
 @pytest.mark.unit
-def test_analista_combines_destination_with_human_when_map_has_no_destination(
+def test_analista_combines_destination_with_human_when_guidelines_have_no_destination(
     repo_root: Path,
 ) -> None:
     normalized = " ".join(analista_content(repo_root).split())

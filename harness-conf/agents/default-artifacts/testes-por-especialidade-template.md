@@ -19,7 +19,8 @@ exit 1 = fail. Sem argumentos.
 O agregador chama as quatro suítes e consolida o relatório.
 Falha se qualquer suíte falhar. 
 
-Critérios, orçamento e ferramentas saem da entrevista de curadoria.
+Critérios, orçamento e ferramentas saem da definição das Diretrizes e
+Regras de Produto.
 Fingerprint e cache ficam em `testes-produto/target/` e não são
 versionados.
 

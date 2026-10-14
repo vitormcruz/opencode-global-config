@@ -10,34 +10,34 @@ orientar ações para agentes específicos em fases delimitadas
 Se o humano recusar instrução para um agente, registre
 `SEM INSTRUÇÕES A PEDIDO DO HUMANO`.
 
-### eng-software
+#### eng-software
 
 Sempre execute os testes automatizados relacionados às modificações feitas
 por você para verificar se ocorreu alguma regressão. Corrija imediatamente
 qualquer erro encontrado.
 
-### dba
+#### dba
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### front
+#### front
 
 Sempre execute os testes automatizados relacionados às modificações feitas
 por você para verificar se ocorreu alguma regressão. Corrija imediatamente
 qualquer erro encontrado.
 
-### sec
+#### sec
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### qa
+#### qa
 
 Execute script agregador dos testes por especialidade na **etapa de testes**. 
 
-### rev
+#### rev
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### curador-produto
+#### curador-produto
 
 Valide a evidência de execução do script agregador dos testes por especialidade na **etapa de testes apenas**.

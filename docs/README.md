@@ -1,4 +1,4 @@
-# Mapa do Produto
+# Especificação do Produto
 
 Este documento é a fonte de verdade do produto. Define o escopo do que será
 construído, os artefatos que devem ser produzidos em cada ciclo de
@@ -173,7 +173,7 @@ exit 1 = fail. Sem argumentos.
 O agregador `testes-produto` chama as suítes definidas nesta seção e
 consolida o relatório. Falha se qualquer suíte falhar.
 
-Critérios e ferramentas saem da entrevista de curadoria.
+Critérios e ferramentas saem da definição das Diretrizes e Regras de Produto.
 
 **PROIBIDO:** bypassar, comentar, remover ou condicionar
 qualquer verificação. Ferramenta ausente não justifica
@@ -192,9 +192,9 @@ remoção — reporte finding com instrução de instalação.
    seção é a especificação executável deles: os testes dos
    scripts cobrem exatamente o que ela define (suítes,
    interface JSON, proibições). Rodam SOMENTE
-   quando os scripts mudam — por exemplo, curadoria
-   alterando ferramentas ou critérios por orientação do
-   humano —, nunca no ciclo normal de desenvolvimento.
+   quando os scripts mudam — por exemplo, as Diretrizes e Regras
+   de Produto alterando ferramentas ou critérios por orientação
+   do humano —, nunca no ciclo normal de desenvolvimento.
 
 O `AGENTS.md` do projeto mantém apenas a tabela índice das
 suítes com link para esta seção

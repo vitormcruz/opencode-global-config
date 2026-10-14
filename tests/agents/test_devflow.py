@@ -125,13 +125,15 @@ def test_development_workflow_defines_curator_ownership(
 
 
 @pytest.mark.unit
-def test_devflow_mediates_but_does_not_execute_curation(
+def test_devflow_mediates_product_rules_definition_without_editing_docs(
     repo_root: Path,
 ) -> None:
     content = devflow_content(repo_root)
     normalized = " ".join(content.lower().split())
 
-    assert "aciona e medeia o trabalho de curadoria" in normalized
+    assert "aciona e medeia a definição das diretrizes e regras de produto" in (
+        normalized
+    )
     assert "não edita nem valida `docs/readme.md` ou `agents.md`" in normalized
     assert "curador-produto: allow" in content
 
@@ -162,7 +164,7 @@ def test_devflow_contract_does_not_instruct_agents_to_use_grill_me(
 
 
 @pytest.mark.unit
-def test_devflow_construction_has_no_curator_or_suite_evidence(
+def test_devflow_construction_routes_product_rules_when_in_scope(
     repo_root: Path,
 ) -> None:
     content = devflow_content(repo_root)
@@ -170,20 +172,35 @@ def test_devflow_construction_has_no_curator_or_suite_evidence(
 
     assert "evidências de harness" not in lower or "fase testes" in lower
     assert "sem modificações — harness não executado" not in content
+    assert "`curador-produto`" in content
     assert "4.1" in content
     assert "`dba`" in content
     assert "`front`" in content
     assert "normaliza" in lower
+    assert "se esse for o escopo" not in lower
 
 
 @pytest.mark.unit
-def test_devflow_gate_curadoria(repo_root: Path) -> None:
+def test_devflow_validates_product_rules_before_scope_confirmation(
+    repo_root: Path,
+) -> None:
     content = devflow_content(repo_root)
 
-    assert "gate de curadoria" in content.lower()
-    assert "Tratar a curadoria agora?" in content
+    assert "Verificação inicial das Diretrizes e Regras de Produto" in content
+    assert "Ao receber uma solicitação e antes de confirmar ou completar o" in content
+    assert (
+        "Deseja transformar o escopo deste ciclo na definição das"
+        in content
+    )
+    assert "Status: PLANEJAMENTO" in content
+    assert "Se a resposta for sim" in content
     assert "curador-produto" in content
     assert "docs/README.md" in content
+    assert "### 1. INICIALIZAÇÃO" in content
+    assert "### 2. PLANEJAMENTO" in content
+    assert content.index("Verificação inicial das Diretrizes") < content.index(
+        "### Definição de escopo antes do plano"
+    )
 
 
 @pytest.mark.unit
@@ -192,7 +209,34 @@ def test_devflow_defines_scope_before_creating_plan(repo_root: Path) -> None:
 
     assert "## Definição de escopo antes do plano" in content
     assert "Só depois que o humano confirmar que o escopo está definido" in content
-    assert "crie o Arquivo de Planejamento com `Status: VALIDAÇÃO`" in content
+    assert "crie o Arquivo de Planejamento com" in content
+    assert "`Status: PLANEJAMENTO`" in content
+    assert "registre nele o escopo recebido, a verificação das Diretrizes" in content
+
+
+@pytest.mark.unit
+def test_devflow_requires_human_confirmation_before_rereview(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+
+    assert content.count('Perguntar explicitamente ao humano: **"Resubmeter para revisão?"**') == 2
+    assert "Somente com resposta afirmativa repetir a fase 3" in content
+    assert "Somente com resposta afirmativa repetir a fase 5" in content
+    assert "Humano controla re-revisões" in content
+
+
+@pytest.mark.unit
+def test_devflow_has_human_stop_gate_for_finalization_revalidation(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.split())
+
+    assert '"Continuar a revalidação?"' in normalized
+    assert "interromper o Fluxo" in normalized
+    assert "registrar as lacunas restantes" in normalized
+    assert "preservar o Arquivo de Planejamento" in normalized
 
 
 @pytest.mark.unit
@@ -223,7 +267,7 @@ def test_scope_workflow_is_independent_and_has_no_plan_contract(
 
     assert "devflow" not in content
     assert "Arquivo de Planejamento" not in content
-    assert "seção Definição de Escopo do Mapa do Produto" in content
+    assert "seção Definição de Escopo da Especificação do Produto" in content
     assert "nenhum arquivo é criado" in normalized
 
 

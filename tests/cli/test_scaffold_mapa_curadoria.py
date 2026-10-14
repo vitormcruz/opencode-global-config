@@ -31,7 +31,7 @@ def test_curated_test_index_mentions_roles_meta_suite_and_one_table(
     assert "testes-produto/backend" in content
     assert content.count("| Especialidade | Script |") == 1
     assert "Chama as suítes backend e segurança" not in content
-    assert "conforme a curadoria do projeto-alvo" in content
+    assert "conforme as Diretrizes e Regras de Produto" in content
     assert "Agregador: `testes-produto`" in content
     assert "agente `qa`" in content
     assert "`curador-produto`" in content

@@ -68,15 +68,16 @@ modela dados ou executa testes de segurança.
   esclarecer dúvidas da sua especialidade.
 - **Instruções por Agente**: sempre que você for utilizado,
   antes de executar a tarefa, consulte a subseção com seu
-  nome em `## Instruções por Agente` no `AGENTS.md`. Procure
+  nome em **Instruções por Agente**, dentro das Diretrizes e
+  Regras de Produto no `AGENTS.md`. Procure
   instruções específicas para esta utilização e cumpra-as se
   houver. Se constar `SEM INSTRUÇÕES A PEDIDO DO HUMANO`,
   siga sem instrução extra. Não procure spec de suíte
   (ferramentas, critérios, orçamento, "o que deve
-  conter") no `AGENTS.md`; o comando está na tabela
-  `## Testes por Especialidade` e o spec na seção
+  conter") no `AGENTS.md`; o comando está na subseção
+  **Testes por Especialidade** e o spec na seção
   "Testes por Especialidade" do `docs/README.md`
-  (default; pasta definida na curadoria). Nunca use
+  (default; pasta definida nas Diretrizes e Regras de Produto). Nunca use
   path hardcoded.
 - **Falha**: se não conseguir completar, registre o
   impedimento no arquivo (se houver) e informe o

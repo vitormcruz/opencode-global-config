@@ -110,18 +110,19 @@ DOC_TEMPLATE = dedent(
     """
 )
 
-MAPA_PRODUTO_TEMPLATE = dedent(
+DIRETRIZES_REGRAS_TEMPLATE = dedent(
     """
-    ## Mapa do Produto
+    ## Diretrizes e Regras de Produto
 
-    Consulte [`docs/README.md`](docs/README.md), fonte de verdade do produto,
-    antes de planejar ou implementar mudanças neste repo.
+    Consulte a [Especificação do Produto](docs/README.md), parte das
+    Diretrizes e Regras de Produto, antes de planejar ou implementar mudanças
+    neste repo.
     """
 )
 
 TESTES_PRODUTO_TEMPLATE = dedent(
     """
-    ## Testes por Especialidade
+    ### Testes por Especialidade
 
     | Especialidade | Script |
     |---------------|--------|
@@ -132,7 +133,8 @@ TESTES_PRODUTO_TEMPLATE = dedent(
 
     Agregador: `testes-produto`
 
-    Chama as suítes definidas na tabela, conforme a curadoria do projeto-alvo,
+    Chama as suítes definidas na tabela, conforme as Diretrizes e Regras de Produto
+    do projeto-alvo,
     e consolida o relatório. O agente `qa` executa; o `curador-produto` valida
     a evidência. Testes dos scripts: `testes-produto/tests/`.
 
@@ -177,16 +179,19 @@ def scaffold_testes_produto(destination: Path) -> str:
 
     _append_scaffold(
         destination,
-        marker="## Mapa do Produto",
-        template=MAPA_PRODUTO_TEMPLATE,
-        created_message="Índice do mapa do produto criado em: {destination}",
+        marker="## Diretrizes e Regras de Produto",
+        template=DIRETRIZES_REGRAS_TEMPLATE,
+        created_message=(
+            "Índice das Diretrizes e Regras de Produto criado em: {destination}"
+        ),
         existing_message=(
-            "Índice do mapa do produto já existe em {destination}. Nada a fazer."
+            "Índice das Diretrizes e Regras de Produto já existe em "
+            "{destination}. Nada a fazer."
         ),
     )
     return _append_scaffold(
         destination,
-        marker="## Testes por Especialidade",
+        marker="### Testes por Especialidade",
         template=TESTES_PRODUTO_TEMPLATE,
         created_message="Scaffold de testes-produto criado em: {destination}",
         existing_message=(

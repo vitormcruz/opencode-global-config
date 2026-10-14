@@ -101,7 +101,7 @@ def test_curador_produto_owns_documentation_indexes(
     curador_content: str,
 ) -> None:
     assert "link geral para `docs/README.md`" in curador_content
-    assert "## Instruções por Agente" in curador_content
+    assert "Instruções por Agente" in curador_content
     normalized = " ".join(curador_content.split()).lower()
     assert "sem copiar a especificação detalhada para o `agents.md`" in (
         normalized

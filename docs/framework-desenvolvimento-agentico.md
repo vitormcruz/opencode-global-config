@@ -84,18 +84,25 @@ uma seção própria e deve permanecer verificável.
 #### 1. Diretrizes e Regras de Produto
 
 As [Diretrizes e Regras de Produto](#diretrizes-e-regras-de-produto)
-são insumos para o Fluxo.
-O `devflow` verifica se elas existem e sugere sua criação quando
-estão ausentes. O processo pode continuar sem elas, mas o `devflow`
-deve alertar que os agentes perderam essa âncora de desenvolvimento.
-Quando existem, os agentes baseiam a implementação nas diretrizes.
+são insumos para o Fluxo. Ao receber uma solicitação, antes da
+confirmação definitiva do escopo, o `devflow` aciona o
+`curador-produto` para verificar se elas estão adequadas ao ciclo.
+
+Se estiverem adequadas, o Fluxo continua com o escopo original. Se
+houver lacunas, o `devflow` pergunta ao humano se o escopo do ciclo
+deve passar a ser a definição das Diretrizes e Regras de Produto.
+Se o humano recusar, o escopo original permanece e a lacuna é
+registrada no Arquivo de Planejamento. Se aceitar, o `devflow`
+medeia a definição do trabalho com o `curador-produto`. O escopo
+resultante segue as mesmas fases, gates e regras de acionamento dos
+demais escopos.
 
 #### 2. Novo escopo
 
-Antes da criação do Arquivo de Planejamento, o `devflow`
-confirma se o novo escopo está definido. Se o humano quiser fazer
-uma elicitação especializada, pode recomendar o `analista`, seguindo o
-fluxo da [Ideação](#ideacao).
+Na entrada do Fluxo, o `devflow` verifica primeiro as Diretrizes e
+Regras de Produto. Depois, confirma se o novo escopo está definido.
+Se o humano quiser fazer uma elicitação especializada, pode
+recomendar o `analista`, seguindo o fluxo da [Ideação](#ideacao).
 
 Se o humano preferir continuar, o `devflow` ajuda a definir o
 escopo por perguntas mediadas. O plano só nasce depois dessa
@@ -177,16 +184,16 @@ implementação e os testes executados.
 A tabela a seguir identifica os agentes, as fases em que participam no Fluxo de Desenvolvimento e a responsabilidade de cada um por
 fase.
 
-| Agente            | Planejamento             | Construção                | Revisão                      | Testes                 |
-|-------------------|--------------------------|---------------------------|------------------------------|------------------------|
-| `devflow`         | Roteia e mantém status   | Roteia e mantém status    | Roteia a revisão             | Roteia e mantém status |
-| `curador-produto` | Valida diretrizes       | —                         | Valida aderência             | Valida evidências     |
-| `eng-software`    | Planeja o código         | TDD e integração          | Corrige achados              | —                      |
-| `front`           | Prototipa telas          | Implementa a UI           | Corrige achados visuais      | —                      |
-| `dba`             | Modela dados             | Atualiza modelo e scripts | Corrige achados de dados     | —                      |
-| `sec`             | Analisa requisitos       | Gera configurações        | Corrige achados de segurança | Executa roteiro manual |
-| `rev`             | —                        | —                         | Faz revisão independente     | —                      |
-| `qa`              | Planeja testes           | —                         | —                            | Executa as suítes      |
+| Agente            | Planejamento             | Construção                | Revisão                        | Testes                 |
+|-------------------|--------------------------|---------------------------|--------------------------------|------------------------|
+| `devflow`         | Roteia e mantém status   | Roteia e mantém status    | Roteia a revisão               | Roteia e mantém status |
+| `curador-produto` | Valida diretrizes        | —                          | Valida aderência às diretrizes| Valida evidências     |
+| `eng-software`    | Planeja o código         | TDD e integração          | Corrige achados                | —                      |
+| `front`           | Prototipa telas          | Implementa a UI           | Corrige achados visuais        | —                      |
+| `dba`             | Modela dados             | Atualiza modelo e scripts | Corrige achados de dados       | —                      |
+| `sec`             | Analisa requisitos       | Gera configurações        | Corrige achados de segurança   | Executa roteiro manual |
+| `rev`             | —                        | —                         | Faz revisão independente       | —                      |
+| `qa`              | Planeja testes           | —                         | —                              | Executa as suítes      |
 
 A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 
@@ -313,48 +320,45 @@ conforme as regras de falha.
 
 1. **Inicialização**
 
-   1.1. **Entrada e verificação do escopo**: O humano apresenta ao `devflow` uma nova
-   funcionalidade ou um escopo que deseja desenvolver. O `devflow` verifica se o escopo está
-   definido na conversa atual ou em um artefato indicado pelo humano.
+   1.1. **Verificação inicial das Diretrizes e Regras de Produto**:
+   Ao receber uma solicitação, o `devflow` primeiro aciona o
+   `curador-produto` para verificar se a Especificação do Produto, os
+   Testes por Especialidade e as Instruções por Agente estão adequados.
+   Se houver um escopo apresentado, ele serve de contexto para a
+   verificação. O `curador-produto` retorna o resultado e as lacunas
+   encontradas.
 
-   1.2. **Escopo ausente**: Se o escopo não estiver definido, o `devflow` informa que o
-   `analista` pode ser mais adequado para conduzir a elicitação e pergunta ao humano se deseja
-   utilizar esse Fluxo.
+   1.2. **Lacunas nas diretrizes**: Se houver lacuna, o `devflow`
+   pergunta ao humano se deseja transformar o escopo do ciclo na
+   definição das Diretrizes e Regras de Produto. Se o humano recusar,
+   o escopo original permanece e a lacuna é registrada em
+   `## Perguntas`. Se aceitar, o escopo passa a ser a definição das
+   Diretrizes e Regras de Produto, e o `devflow` medeia com o
+   `curador-produto` o detalhamento do trabalho, das decisões e das
+   aprovações necessárias.
 
-   1.2.1. **Humano utiliza o `analista`**: A definição ocorre fora deste Fluxo de
-   Desenvolvimento. O `devflow` aguarda o retorno do humano com o escopo definido na conversa
-   ou registrado em um artefato.
+   1.3. **Entrada e definição do escopo**: Depois da verificação e da
+   decisão sobre as lacunas, o humano apresenta ou confirma o escopo.
+   Se o escopo não estiver definido, o `devflow` informa que o
+   `analista` pode ser mais adequado para conduzir a elicitação e
+   pergunta ao humano se deseja utilizar esse Fluxo. Se o humano
+   utilizar o `analista`, o `devflow` aguarda o retorno com o escopo
+   definido na conversa ou em um artefato. Se preferir continuar com
+   o `devflow`, ele conduz perguntas mediadas até o escopo estar
+   definido. Se o escopo já estiver definido, o `devflow` confirma o
+   entendimento com o humano.
 
-   1.2.2. **Humano continua com o `devflow`**: O `devflow` conduz perguntas mediadas para
-   organizar e completar o escopo. O humano responde até que o escopo esteja definido.
+   1.4. **Criação do Arquivo de Planejamento**: Depois que o escopo e
+   a decisão sobre as diretrizes estiverem definidos, o `devflow`
+   cria o Arquivo de Planejamento e registra o escopo, sua origem
+   quando aplicável, o resultado da verificação e as decisões
+   iniciais. O arquivo recebe `Status: PLANEJAMENTO`. O Fluxo não
+   cria o arquivo antes da definição do escopo.
 
-   Se o escopo já estiver definido, o `devflow` o confirma com o humano antes de prosseguir.
+2. **Planejamento**
 
-   1.3. **Criação do Arquivo de Planejamento**: Depois que o escopo estiver definido ou
-   confirmado, o `devflow` cria o Arquivo de Planejamento e registra o escopo recebido, sua
-   origem quando aplicável e as decisões iniciais necessárias para a validação. O arquivo recebe
-   `Status: VALIDAÇÃO`. O Fluxo não cria o arquivo antes da definição do escopo.
-
-2. **Validação**
-
-   2.1. **Curadoria e resultado**: O `devflow` aciona o `curador-produto` para verificar as
-   Diretrizes e Regras de Produto, incluindo a Especificação do Produto, os Testes por
-   Especialidade e as Instruções por Agente. O `curador-produto` registra as lacunas no Arquivo
-   de Planejamento e retorna um relatório ao `devflow`.
-
-   2.2. **Tratamento das lacunas**: Se houver lacuna, o `devflow` consulta o humano sobre tratar
-   a curadoria antes de continuar. Se o humano aprovar, o `curador-produto` realiza o trabalho
-   mediado pelo `devflow` e, ao concluir, o `devflow` aciona o `curador-produto` para revalidar
-   as diretrizes. Se o humano não aprovar, o `devflow` registra a lacuna na seção `## Perguntas`
-   e continua conforme a decisão registrada.
-
-   2.3. **Transição para o Planejamento**: Quando a validação terminar, com as diretrizes
-   completas ou com as lacunas registradas, o `devflow` atualiza o arquivo para
-   `Status: PLANEJAMENTO`.
-
-3. **Planejamento**
-
-   3.1. **Consultas especializadas**: O `devflow` aciona os agentes na seguinte ordem:
+   2.1. **Consultas especializadas**: O `devflow` aciona os agentes
+   responsáveis pelos itens do escopo e do plano, na seguinte ordem:
 
    1. `eng-software` para planejar a implementação;
    2. `front`, se houver interface de usuário, para prototipar as telas;
@@ -365,34 +369,37 @@ conforme as regras de falha.
 
    Cada agente registra o resultado no Arquivo de Planejamento e retorna um resumo curto.
 
-   3.2. **Dúvidas e decisões**: Agentes com dúvidas salvam o progresso parcial e retornam ao
+   2.2. **Dúvidas e decisões**: Agentes com dúvidas salvam o progresso parcial e retornam ao
    `devflow` para mediação. Decisões não triviais são mediadas com o humano. Arquivos grandes
    podem exigir divisão de escopo e desvios de identidade visual exigem nova aprovação.
 
-   3.3. **Transição para a revisão do plano**: Depois de consolidar os retornos, o `devflow`
+   2.3. **Transição para a revisão do plano**: Depois de consolidar os retornos, o `devflow`
    atualiza o arquivo para `Status: REVISÃO DO PLANO`.
 
-4. **Revisão do plano**
+3. **Revisão do plano**
 
-   4.1. **Revisão e achados**: O `devflow` aciona uma nova instância do `rev`. O `rev` revisa o
+   3.1. **Revisão e achados**: O `devflow` aciona uma nova instância do `rev`. O `rev` revisa o
    plano com as skills de domínio aplicáveis, usando o plano e os insumos originais do humano,
    e retorna os achados no formato `achado · ação · severidade`. O `devflow` registra o
    resultado e encaminha cada achado ao especialista responsável.
 
-   4.2. **Correções e re-revisão**: Quando os achados exigirem correção, o `devflow` aciona o
-   especialista responsável e, depois das correções, uma nova instância do `rev` para verificar
-   a resolução. O `devflow` decide, conforme os achados e os critérios do Fluxo, se é necessária
-   outra revisão. Só consulta o humano quando a decisão alterar premissas ou planejamento. Não
-   há loops automáticos.
+   3.2. **Correções e re-revisão**: Quando os achados exigirem correção, o `devflow` aciona o
+   especialista responsável. Depois da correção, o `devflow` apresenta ao humano o resultado e
+   pergunta se deve acionar uma nova instância do `rev`. Somente uma resposta afirmativa permite
+   nova revisão. Se o humano recusar, o Fluxo segue para a apresentação e aprovação do plano. O
+   humano controla as re-revisões e impede loops infinitos.
 
-   4.3. **Aprovação e transição**: O `devflow` consolida o planejamento e apresenta ao humano o
+   3.3. **Aprovação e transição**: O `devflow` consolida o planejamento e apresenta ao humano o
    recorte que requer decisão. O humano decide sobre o planejamento apresentado, não sobre o
    arquivo operacional. Depois da aprovação, o `devflow` atualiza o arquivo para
    `Status: CONSTRUÇÃO`.
 
-5. **Construção**
+4. **Construção**
 
-   5.1. **Execução da construção**: O `devflow` aciona os agentes na seguinte ordem:
+   4.1. **Execução da construção**: O `devflow` aciona, na sequência
+   técnica prevista no plano, os agentes responsáveis pelos itens da
+   construção. Cada agente produz os artefatos atribuídos ao seu
+   escopo, quando previstos no plano:
 
    1. `dba` para produzir ou atualizar o modelo de dados, as migrações e os demais artefatos de
       banco previstos no plano;
@@ -400,40 +407,40 @@ conforme as regras de falha.
    3. `eng-software` para conduzir TDD, integrar os artefatos, normalizar o lote e criar o
       commit conforme a skill `git-workflow-and-versioning`.
 
-   5.2. **Gate e transição**: Se a execução atingir o gate de refatoração ou exigir mudança
+   4.2. **Gate e transição**: Se a execução atingir o gate de refatoração ou exigir mudança
    significativa no plano, o `eng-software` informa o `devflow`. O Fluxo retorna ao Planejamento
    quando a mudança alterar premissas ou comportamento. Um ajuste mínimo pode ser registrado no
    plano conforme os critérios do Fluxo. Quando a construção for concluída, o `devflow` atualiza
    o arquivo para `Status: REVISÃO DA CONSTRUÇÃO`.
 
-6. **Revisão da construção**
+5. **Revisão da construção**
 
-   6.1. **Revisão e achados**: O `devflow` aciona uma nova instância do `rev` para verificar a
+   5.1. **Revisão e achados**: O `devflow` aciona uma nova instância do `rev` para verificar a
    implementação contra o plano, as especificações e os artefatos produzidos. O `rev` não
    corrige a implementação, retorna os achados no formato `achado · ação · severidade`, e o
    `devflow` os encaminha aos especialistas responsáveis.
 
-   6.2. **Correção e re-revisão**: O especialista responsável corrige os achados. Depois, o
-   `devflow` aciona uma nova instância do `rev` quando for necessária nova verificação e decide,
-   conforme os critérios do Fluxo, se haverá outra revisão. Só consulta o humano quando a decisão
-   alterar premissas ou planejamento. Não há loops automáticos.
+   5.2. **Correção e re-revisão**: O especialista responsável corrige os achados. Depois, o
+   `devflow` apresenta ao humano o resultado e pergunta se deve acionar uma nova instância do
+   `rev`. Somente uma resposta afirmativa permite nova revisão. Se o humano recusar, o Fluxo segue
+   para Testes. O humano controla as re-revisões e impede loops infinitos.
 
-   6.3. **Transição para Testes**: Quando a revisão da construção terminar, o `devflow` atualiza
+   5.3. **Transição para Testes**: Quando a revisão da construção terminar, o `devflow` atualiza
    o arquivo para `Status: TESTES`.
 
-7. **Testes**
+6. **Testes**
 
-   7.1. **Execução e evidência**: O `devflow` aciona o `qa` para executar `testes-produto` e os
+   6.1. **Execução e evidência**: O `devflow` aciona o `qa` para executar `testes-produto` e os
    testes previstos no plano, conforme a especificação de Testes por Especialidade. O `qa` não
    analisa código e registra no Arquivo de Planejamento a evidência do agregador no formato JSON
    `{ status, findings[] }`.
 
-   7.2. **Segurança e validação da evidência**: Depois da execução, o `devflow` aciona o `sec`
+   6.2. **Segurança e validação da evidência**: Depois da execução, o `devflow` aciona o `sec`
    para executar o roteiro manual de segurança e registrar o resultado. Em seguida, aciona o
    `curador-produto` para validar a evidência do agregador contra a especificação de Testes por
    Especialidade.
 
-   7.3. **Falhas e retorno**: Se houver falha, o `devflow` encaminha a correção conforme a
+   6.3. **Falhas e retorno**: Se houver falha, o `devflow` encaminha a correção conforme a
    especialidade:
 
    - backend: `eng-software`;
@@ -445,21 +452,25 @@ conforme as regras de falha.
    commit. A correção retorna à execução dos testes. Se a falha exigir mudança de escopo ou
    comportamento, o `devflow` retorna ao Planejamento. Caso contrário, retorna à Construção.
 
-   7.4. **Transição para Finalização**: Quando os testes e a validação das evidências terminarem,
+   6.4. **Transição para Finalização**: Quando os testes e a validação das evidências terminarem,
    o `devflow` atualiza o arquivo para `Status: FINALIZAÇÃO`.
 
-8. **Finalização**
+7. **Finalização**
 
-   8.1. **Revisão final e lacunas**: O `devflow` aciona o `curador-produto` para revisar as
+   7.1. **Revisão final e lacunas**: O `devflow` aciona o `curador-produto` para revisar as
    especificações e verificar se os artefatos obrigatórios estão presentes. O `curador-produto`
    retorna as lacunas encontradas. Se houver lacunas, o `devflow` aciona o `eng-software` para
    criar ou atualizar os artefatos de especificação necessários.
 
-   8.2. **Revalidação**: Depois das correções, o `devflow` aciona o `curador-produto` para
-   revalidar as especificações. O ciclo de correção e revalidação continua enquanto houver
-   lacunas registradas.
+   7.2. **Revalidação**: Depois de cada correção, antes de iniciar uma nova
+   revalidação, o `devflow` pergunta ao humano se deseja continuar. Se a
+   resposta for afirmativa, aciona o `curador-produto` para revalidar as
+   especificações. Se a resposta for negativa, interrompe o Fluxo, registra
+   as lacunas restantes e preserva o Arquivo de Planejamento e os artefatos
+   auxiliares. Se a revalidação encontrar novas lacunas, o mesmo gate deve
+   ser aplicado antes de outro ciclo de correção e revalidação.
 
-   8.3. **Conclusão e exclusão do planejamento**: Quando os gates forem concluídos, o `devflow`
+   7.3. **Conclusão e exclusão do planejamento**: Quando os gates forem concluídos, o `devflow`
    informa ao humano que o Fluxo foi concluído e solicita autorização para excluir o Arquivo de
    Planejamento e os artefatos auxiliares. Após a autorização, o `curador-produto` exclui o
    Arquivo de Planejamento e os artefatos auxiliares.
