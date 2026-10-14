@@ -121,14 +121,14 @@ def test_curador_produto_references_default_artifacts(
         in curador_content
     )
     assert (
-        "default-artifacts/instrucoes-por-agente-template.md"
+        "default-artifacts/diretrizes-regras-produto-agents-md-template.md"
         in curador_content
     )
     # O curador explica o papel de cada template, não só os paths.
     normalized = " ".join(curador_content.split()).lower()
     assert "especificação do produto que vira o" in normalized
     assert "especificação própria das suítes de validação" in normalized
-    assert "snippet das instruções por agente" in normalized
+    assert "seção completa de diretrizes e regras de produto" in normalized
     product_spec = (
         repo_root
         / "harness-conf/agents/default-artifacts/doc-readme-template.md"
@@ -384,7 +384,8 @@ def test_curador_produto_interviews_spec_then_instructions(
     assert "pa11y" in curador_content
     assert "axe-core" in curador_content
     assert "o harness efetivo fica no" not in curador_content.lower()
-    assert "não é copiada para o" in curador_content.lower()
+    normalized = " ".join(curador_content.split()).lower()
+    assert "a especificação detalhada não é copiada para o" in normalized
 
 
 # --- Remoção dos agentes antigos ---

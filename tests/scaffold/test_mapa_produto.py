@@ -75,14 +75,17 @@ def test_doc_scaffold_creates_required_sections(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_doc_scaffold_is_idempotent(tmp_path: Path) -> None:
     destination = tmp_path / "test-doc.md"
+    tests_destination = tmp_path / "testes-por-especialidade.md"
 
     first_status, _, _ = run_scaffold("--doc", str(destination))
     second_status, _, _ = run_scaffold("--doc", str(destination))
     content = destination.read_text(encoding="utf-8")
+    tests_content = tests_destination.read_text(encoding="utf-8")
 
     assert first_status == 0
     assert second_status == 0
     assert content.count("## Definição de Escopo") == 1
+    assert tests_content.count("# Testes por Especialidade") == 1
 
 
 @pytest.mark.unit
@@ -231,20 +234,19 @@ def test_testes_produto_scaffold_creates_section(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_testes_produto_scaffold_lists_specialties_and_orchestrator(
+def test_testes_produto_scaffold_references_separate_specification(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "AGENTS.md"
 
     status, _, _ = run_scaffold("--testes-produto", str(destination))
     content = destination.read_text(encoding="utf-8")
-
     assert status == 0
-    for specialty in SPECIALTIES:
-        assert f"| {specialty} " in content
-    assert "testes-produto" in content
+    assert status == 0
+    assert "docs/testes-por-especialidade.md" in content
+    assert "| Especialidade | Script |" not in content
     for script in SPECIALTY_SCRIPTS:
-        assert script in content
+        assert script not in content
 
 
 @pytest.mark.unit
@@ -304,13 +306,18 @@ def test_doc_scaffold_references_testes_por_especialidade_spec(
     tmp_path: Path,
 ) -> None:
     destination = tmp_path / "test-doc.md"
+    tests_destination = tmp_path / "testes-por-especialidade.md"
 
     status, _, _ = run_scaffold("--doc", str(destination))
     content = destination.read_text(encoding="utf-8")
+    tests_content = tests_destination.read_text(encoding="utf-8")
 
     assert status == 0
     assert "testes-por-especialidade.md" in content
     assert "## Testes por Especialidade" in content
+    assert "# Testes por Especialidade" in tests_content
+    assert "## Contrato das Suítes" in tests_content
+    assert "testes-produto/backend" in tests_content
     assert "{ status, findings[] }" not in content
     assert "testes-produto/target/" not in content
     assert "PROIBIDO" not in content
@@ -320,13 +327,16 @@ def test_doc_scaffold_references_testes_por_especialidade_spec(
 @pytest.mark.unit
 def test_doc_scaffold_does_not_absorb_test_spec(tmp_path: Path) -> None:
     destination = tmp_path / "test-doc.md"
+    tests_destination = tmp_path / "testes-por-especialidade.md"
 
     status, _, _ = run_scaffold("--doc", str(destination))
     content = destination.read_text(encoding="utf-8")
+    tests_content = tests_destination.read_text(encoding="utf-8")
     assert status == 0
     assert "## Dois níveis de teste" not in content
     assert "testes-produto/backend" not in content
     assert "testes-produto/seguranca" not in content
+    assert "## Dois níveis de teste" in tests_content
 
 
 @pytest.mark.unit
@@ -343,6 +353,7 @@ def test_doc_and_testes_produto_flags_create_both_scaffolds(tmp_path: Path) -> N
 
     assert status == 0
     assert "## Definição de Escopo" in doc.read_text(encoding="utf-8")
+    assert (tmp_path / "testes-por-especialidade.md").is_file()
     assert "### Testes por Especialidade" in agents.read_text(encoding="utf-8")
 
 
@@ -441,18 +452,24 @@ def test_doc_readme_template_declares_two_test_levels(
 
 
 @pytest.mark.unit
-def test_instructions_template_covers_workflow_agents(
+def test_guidelines_agents_template_covers_workflow_agents(
     repo_root: Path,
 ) -> None:
     content = (
-        repo_root / "harness-conf" / "agents/default-artifacts/instrucoes-por-agente-template.md"
+        repo_root
+        / "harness-conf/agents/default-artifacts/"
+        "diretrizes-regras-produto-agents-md-template.md"
     ).read_text(encoding="utf-8")
 
+    assert "## Diretrizes e Regras de Produto" in content
+    assert "docs/README.md" in content
+    assert "docs/testes-por-especialidade.md" in content
+    assert "### Testes por Especialidade" in content
     assert "### Instruções por Agente" in content
     for agent in WORKFLOW_AGENTS:
         assert f"#### {agent}" in content
     assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content
-    assert "testes-produto" not in content
+    assert "| Especialidade | Script |" not in content
     assert "testes-produto/backend" not in content
     assert "harness/agregar" not in content
 
@@ -487,6 +504,12 @@ def test_interface_testes_produto_describes_standard_json_interface(
 def test_default_artifact_templates_declare_their_role(
     repo_root: Path,
 ) -> None:
+    assert not (
+        repo_root
+        / "harness-conf/agents/default-artifacts/"
+        "instrucoes-por-agente-template.md"
+    ).exists()
+
     roles = {
         "harness-conf/agents/default-artifacts/doc-readme-template.md": (
             "especificação do produto que vira o readme.md da pasta de documentação"
@@ -499,9 +522,9 @@ def test_default_artifact_templates_declare_their_role(
         ),
         (
             "harness-conf/agents/default-artifacts/"
-            "instrucoes-por-agente-template.md"
+            "diretrizes-regras-produto-agents-md-template.md"
         ): (
-            'snippet da seção "instruções por agente"'
+            "seção completa de diretrizes e regras de produto gravada no agents.md"
         ),
     }
     for relative_path, role in roles.items():
@@ -521,7 +544,10 @@ def test_default_testes_produto_artifacts_do_not_cite_plan_ids(
     artifact_paths = (
         "harness-conf/agents/default-artifacts/doc-readme-template.md",
         "harness-conf/agents/default-artifacts/testes-por-especialidade-template.md",
-        "harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md",
+        (
+            "harness-conf/agents/default-artifacts/"
+            "diretrizes-regras-produto-agents-md-template.md"
+        ),
         "harness-conf/agents/references/interface-testes-produto.md",
     )
     for relative_path in artifact_paths:

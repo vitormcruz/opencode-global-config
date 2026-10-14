@@ -32,19 +32,19 @@ def test_agents_references_product_guidelines(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_agents_contains_specialty_tests_index_without_base_reference(
+def test_agents_references_specialty_tests_without_copying_spec(
     repo_root: Path,
 ) -> None:
     agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
 
     assert "### Testes por Especialidade" in agents
-    assert "| Especialidade | Script |" in agents
-    assert "testes-produto/backend" in agents
-    assert "testes-produto/seguranca" in agents
-    assert "Agregador: `testes-produto`" in agents
     assert (
-        "[`docs/README.md#testes-por-especialidade`]"
-        "(docs/README.md#testes-por-especialidade)"
+        "[`docs/testes-por-especialidade.md`]"
+        "(docs/testes-por-especialidade.md)"
     ) in agents
+    assert "| Especialidade | Script |" not in agents
+    assert "testes-produto/backend" not in agents
+    assert "testes-produto/seguranca" not in agents
+    assert (repo_root / "docs" / "testes-por-especialidade.md").is_file()
     assert "### Instruções por Agente" in agents
     assert "AGENTS.base.md" not in agents

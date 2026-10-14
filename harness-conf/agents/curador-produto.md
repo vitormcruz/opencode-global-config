@@ -116,18 +116,18 @@ da anterior.
 ### 2. Especificar suítes e instruções
 
 Especificar as suítes em `docs/testes-por-especialidade.md` e gravar no
-`AGENTS.md` o link geral para `docs/README.md`, a tabela índice com link
-para a especificação de testes e as instruções. O `docs/README.md`
-referencia a especificação de testes, sem copiar seu conteúdo.
+`AGENTS.md` o link geral para `docs/README.md`, a referência ao arquivo de
+testes e as instruções. O `AGENTS.md` e o `docs/README.md` apenas
+referenciam a especificação de testes, sem copiar seu conteúdo.
 
 **Defaults**: leia `default-artifacts/doc-readme-template.md`
 (especificação do produto que vira o `docs/README.md` do projeto-alvo),
 `default-artifacts/testes-por-especialidade-template.md`
 (especificação própria das suítes de validação, gravada em
 `docs/testes-por-especialidade.md`) e
-`default-artifacts/instrucoes-por-agente-template.md` (snippet das
-Instruções por Agente gravado no `AGENTS.md`, com uma subseção por
-agente do workflow).
+`default-artifacts/diretrizes-regras-produto-agents-md-template.md`
+(seção completa de Diretrizes e Regras de Produto gravada no
+`AGENTS.md`, com o índice dos artefatos e uma subseção por agente).
 
 **Interface**: consulte
 `agents/references/interface-testes-produto.md` para JSON
@@ -156,13 +156,13 @@ suíte `-m all` (separação por path, sem marker novo).
    frontend) e o agregador `testes-produto` na especificação
    `<pasta>/testes-por-especialidade.md`. pa11y, axe-core ou ambos:
    a entrevista decide.
-4. Depois, a subseção **Instruções por Agente**, dentro das
+4. Depois, a subseção **Instruções por Agente**, dentro da seção de
    Diretrizes e Regras de Produto no `AGENTS.md`, item a item.
    Sem instrução:
    `SEM INSTRUÇÕES A PEDIDO DO HUMANO`.
-5. Grave no `AGENTS.md` só o índice + links +
-   instruções. A seção detalhada não é copiada para o
-   `AGENTS.md`.
+5. Grave no `AGENTS.md` a seção conforme o template de Diretrizes,
+   com índice, links e instruções. A especificação detalhada não é
+   copiada para o `AGENTS.md`.
 6. Linguagem/tecnologia dos scripts: pergunte ao humano.
 7. Ferramenta oferecida: analise risco, toolchain, tempo,
    severidade e fingerprint.

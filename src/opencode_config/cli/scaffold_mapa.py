@@ -103,10 +103,11 @@ DOC_TEMPLATE = dedent(
 
     ## Testes por Especialidade
 
-    A especificação das suítes fica em
+    A especificação das suítes fica no arquivo independente
     `testes-por-especialidade.md`, no mesmo diretório deste arquivo.
-    Consulte esse documento para definir testes da aplicação, testes dos
-    scripts de teste, interface JSON, critérios, orçamento e proibições.
+    Consulte [Testes por Especialidade](testes-por-especialidade.md)
+    para definir testes da aplicação, testes dos scripts de teste,
+    interface JSON, critérios, orçamento e proibições.
     """
 )
 
@@ -124,21 +125,87 @@ TESTES_PRODUTO_TEMPLATE = dedent(
     """
     ### Testes por Especialidade
 
-    | Especialidade | Script |
-    |---------------|--------|
-    | backend | testes-produto/backend |
-    | dados | testes-produto/dados |
-    | segurança | testes-produto/seguranca |
-    | frontend | testes-produto/frontend |
-
-    Agregador: `testes-produto`
-
-    Chama as suítes definidas na tabela, conforme as Diretrizes e Regras de Produto
-    do projeto-alvo,
-    e consolida o relatório. O agente `qa` executa; o `curador-produto` valida
-    a evidência. Testes dos scripts: `testes-produto/tests/`.
+    A especificação das suítes fica no arquivo independente
+    `docs/testes-por-especialidade.md`. Esta subseção apenas referencia
+    o arquivo e não reproduz sua tabela, seus critérios ou seus scripts.
 
     Spec: [docs/testes-por-especialidade.md](docs/testes-por-especialidade.md)
+    """
+)
+
+TESTES_ESPECIALIDADE_TEMPLATE = dedent(
+    """
+    # Testes por Especialidade
+
+    Este documento define as suítes de validação do produto, o contrato
+    de saída, os critérios, os limites, as ferramentas e o agregador.
+
+    ## Contrato das Suítes
+
+    Scripts por especialidade e o agregador `testes-produto`.
+    Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
+    exit 1 = fail. Sem argumentos.
+
+    O agregador chama as suítes definidas neste documento e consolida
+    o relatório. Falha se qualquer suíte falhar.
+
+    **PROIBIDO:** bypassar, comentar, remover ou condicionar qualquer
+    verificação. Ferramenta ausente não justifica remoção. Reporte o
+    finding com instrução de instalação.
+
+    ## Dois níveis de teste
+
+    1. **Testes da aplicação:** validam o produto em desenvolvimento e
+       rodam via as suítes e o agregador `testes-produto`.
+    2. **Testes dos scripts de teste:** validam os scripts das suítes e
+       o agregador quando esses scripts mudam.
+
+    ## backend
+
+    **Arquivo:** `testes-produto/backend`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## dados
+
+    **Arquivo:** `testes-produto/dados`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## segurança
+
+    **Arquivo:** `testes-produto/seguranca`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## frontend
+
+    **Arquivo:** `testes-produto/frontend`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## Agregador
+
+    **Arquivo:** `testes-produto`
+
+    Chama as suítes definidas acima e consolida o relatório.
+    `status` é `fail` se qualquer suíte falhar.
     """
 )
 
@@ -161,9 +228,9 @@ def _append_scaffold(
 
 
 def scaffold_doc(destination: Path) -> str:
-    """Cria o scaffold de documentação sem duplicar a seção principal."""
+    """Cria README e a especificação de testes no mesmo diretório."""
 
-    return _append_scaffold(
+    doc_result = _append_scaffold(
         destination,
         marker="## Definição de Escopo",
         template=DOC_TEMPLATE,
@@ -172,6 +239,20 @@ def scaffold_doc(destination: Path) -> str:
             "Scaffold do /doc/README.md já existe em {destination}. Nada a fazer."
         ),
     )
+    tests_destination = destination.with_name("testes-por-especialidade.md")
+    tests_result = _append_scaffold(
+        tests_destination,
+        marker="# Testes por Especialidade",
+        template=TESTES_ESPECIALIDADE_TEMPLATE,
+        created_message=(
+            "Scaffold de Testes por Especialidade criado em: {destination}"
+        ),
+        existing_message=(
+            "Scaffold de Testes por Especialidade já existe em "
+            "{destination}. Nada a fazer."
+        ),
+    )
+    return f"{doc_result}\n{tests_result}"
 
 
 def scaffold_testes_produto(destination: Path) -> str:

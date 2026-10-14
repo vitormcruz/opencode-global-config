@@ -25,6 +25,8 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
 - [ ] `docs/framework-desenvolvimento-agentico.md`: Documento em construção com as três dimensões (Governança, Ideação, Desenvolvimento).
 - [ ] `docs/workflow-agentes-dev.md`: Documento legado a ser atualizado ou substituído após a conclusão do novo framework.
 - [ ] `docs/README.md`: Atualizar estrutura para refletir a Especificação do Produto (separando Testes por Especialidade em arquivo próprio).
+- [x] `docs/testes-por-especialidade.md`: Criar a especificação própria das
+  suítes ao lado da Especificação do Produto.
 
 ### 2.2. Agente Guardião da Governança (`curador-produto`)
 - [x] `harness-conf/agents/curador-produto.md`:
@@ -44,8 +46,13 @@ Este documento registra as anotações, decisões, impactos e etapas necessária
   - Remover seção `## Testes por Especialidade` (passa a apenas linkar o arquivo dedicado).
 - [x] `harness-conf/agents/default-artifacts/testes-por-especialidade-template.md`:
   - Adaptar para servir de template do arquivo independente `docs/testes-por-especialidade.md`.
-- [ ] `harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md`:
-  - Integrar à nova estrutura da seção `## Diretrizes e Regras de Produto`.
+- [x] `harness-conf/agents/default-artifacts/diretrizes-regras-produto-agents-md-template.md`:
+  - Criar o template completo da seção `## Diretrizes e Regras de Produto`
+    gravada no `AGENTS.md`, incorporando as Instruções por Agente e apenas
+    referenciando os dois arquivos de especificação.
+- [x] `harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md`:
+  - Remover o template separado depois de incorporar seu conteúdo ao
+    template completo das Diretrizes.
 
 ### 2.4. Agentes Operacionais (Desacoplamento e Agnosticismo)
 Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação para consultar `AGENTS.md -> ## Diretrizes e Regras de Produto`:
@@ -58,16 +65,16 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 - [ ] `harness-conf/agents/devflow.md`
 
 ### 2.5. Raiz do Repositório (`AGENTS.md`)
-- [ ] Reestruturar a âncora de governança para o bloco em destaque `## Diretrizes e Regras de Produto`, com links para a especificação geral, testes por especialidade e instruções inline.
+- [x] Reestruturar a âncora de governança para o bloco em destaque `## Diretrizes e Regras de Produto`, com links para a especificação geral, o arquivo independente de testes e instruções inline. A especificação de testes não é reproduzida.
 
 ### 2.6. Tooling e Código de Scaffold
 - [x] `src/opencode_config/cli/scaffold_mapa.py`:
   - Atualizar as constantes de documentação para referenciar o contrato separado.
   - Remover do scaffold do README a cópia detalhada da especificação de testes.
   - Atualizar o índice de testes para apontar para `docs/testes-por-especialidade.md`.
-- [ ] `src/opencode_config/cli/scaffold_mapa.py`:
-  - Decidir e implementar, se necessário, a geração direta do arquivo dedicado
-    `testes-por-especialidade.md`.
+- [x] `src/opencode_config/cli/scaffold_mapa.py`:
+  - Gerar `testes-por-especialidade.md` no mesmo diretório do README e manter
+    no `AGENTS.md` somente a referência para esse arquivo.
 
 ### 2.7. Suíte de Testes Automatizados
 - [x] `tests/scaffold/test_mapa_produto.py`: Atualizar asserções de templates e scaffolds.
@@ -85,7 +92,8 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 1. **Fase 1 — Conceitualização (Em andamento)**:
    - Concluir redação de Governança, Ideação e Desenvolvimento no novo framework (`docs/framework-desenvolvimento-agentico.md`).
 2. **Fase 2 — Adaptação dos Templates (parcialmente concluída)**:
-   - Ajustar `doc-readme-template.md`, `testes-por-especialidade-template.md` e `instrucoes-por-agente-template.md`.
+   - Ajustar `doc-readme-template.md`, `testes-por-especialidade-template.md` e
+     `diretrizes-regras-produto-agents-md-template.md`.
 3. **Fase 3 — Atualização do `curador-produto` (parcialmente concluída)**:
    - Implementar novas regras e validação ativa de links no prompt do agente curador.
 4. **Fase 4 — Desacoplamento dos Agentes Operacionais**:
@@ -122,9 +130,10 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   - ferramentas;
   - escopo de cada especialidade;
   - agregador.
-- O arquivo **Instruções por Agente** funciona como um ponto de
-  configuração por repositório. Ele reúne as instruções específicas que
-  o responsável pelo projeto decidir fixar para cada agente.
+- A subseção **Instruções por Agente**, dentro das Diretrizes e Regras de
+  Produto, funciona como um ponto de configuração por repositório. Ela
+  reúne as instruções específicas que o responsável pelo projeto decidir
+  fixar para cada agente.
 - Ainda está em decisão quais regras do framework serão obrigatórias para
   todos os agentes e quais poderão ser definidas ou ajustadas nesse
   ponto de configuração.
@@ -154,14 +163,16 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   compatível com a arquitetura se essa referência curta for mantida.
 - `testes-por-especialidade-template.md` já é uma especificação
   independente e não atribui mais a execução a um agente ou fase
-  específicos. As instruções operacionais continuam no template de
-  Instruções por Agente.
-- `instrucoes-por-agente-template.md` já recebeu as instruções de
-  execução do `qa` e de validação do `curador-produto`. Essas instruções
-  devem ser tratadas como defaults ajustáveis por projeto.
+  específicos.
+- `diretrizes-regras-produto-agents-md-template.md` reúne a estrutura da
+  seção das Diretrizes e as instruções de execução do `qa` e de validação
+  do `curador-produto`. Essas instruções devem ser tratadas como defaults
+  ajustáveis por projeto.
 - O framework já descreve os três documentos, mas a redação deve deixar
-  explícito que o template de testes define o contrato e o template de
-  instruções oferece um ponto de configuração por repositório.
+  explícito que `doc-readme-template.md` e
+  `testes-por-especialidade-template.md` definem arquivos próprios, enquanto
+  o template das Diretrizes define a seção que os referencia e contém as
+  Instruções por Agente.
 
 ### 4.5. Atualização desta revisão — 2026-10-09
 
@@ -182,9 +193,11 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 
 - O `AGENTS.md` deve ter uma única seção de nível 2 chamada
   **Diretrizes e Regras de Produto**, localizada no final do arquivo.
-- Essa seção reúne o link para a Especificação do Produto, a descrição dos
-  artefatos gerados, a subseção **Testes por Especialidade** e a subseção
-  **Instruções por Agente**.
+- Essa seção reúne o link para a Especificação do Produto, a referência ao
+  arquivo independente de Testes por Especialidade, a descrição dos
+  artefatos gerados e a subseção **Instruções por Agente**.
+- A subseção **Testes por Especialidade** contém somente a referência ao
+  arquivo próprio. Não copia tabela, critérios, ferramentas ou scripts.
 - Os nomes dos agentes ficam um nível abaixo de **Instruções por Agente**.
   A hierarquia deve deixar explícito que testes e instruções fazem parte das
   Diretrizes e Regras de Produto.
@@ -219,3 +232,25 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   Fluxo de Definição de Escopo, o scaffold e os testes dos contratos.
 - Ocorrências históricas no próprio plano e nomes técnicos legados, como
   `scaffold_mapa.py` e `test_mapa_produto.py`, permanecem sem renomeação.
+
+### 4.9. Template da seção de Diretrizes no `AGENTS.md` — 2026-10-14
+
+- `doc-readme-template.md` continua definindo o arquivo da Especificação do
+  Produto.
+- `testes-por-especialidade-template.md` continua definindo o arquivo
+  independente de Testes por Especialidade e o contrato das suítes.
+- `instrucoes-por-agente-template.md` deixa de existir como template separado.
+- `diretrizes-regras-produto-agents-md-template.md` passa a definir a seção
+  completa `## Diretrizes e Regras de Produto` no `AGENTS.md`, incluindo o
+  índice dos dois arquivos independentes e a subseção **Instruções por
+  Agente**. A seção não replica a especificação de testes.
+
+### 4.10. Referência única para Testes por Especialidade — 2026-10-14
+
+- `docs/testes-por-especialidade.md` é criado ao lado de `docs/README.md` e
+  concentra a especificação detalhada das suítes.
+- `docs/README.md` mantém apenas uma referência para esse arquivo.
+- `AGENTS.md` mantém apenas uma referência para esse arquivo dentro das
+  Diretrizes e Regras de Produto.
+- O scaffold cria os dois arquivos juntos e nunca copia a especificação
+  detalhada para o README ou para o `AGENTS.md`.

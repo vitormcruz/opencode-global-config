@@ -45,10 +45,11 @@ referenciados aqui:
   uma alteração concluída.
   [Consultar template](../harness-conf/agents/default-artifacts/testes-por-especialidade-template.md)
 
-- **Instruções por Agente:** registra as orientações específicas que cada
-  agente deve seguir em um repositório. Fica dentro do `AGENTS.md`, junto
-  da seção de Diretrizes e Regras de Produto, para servir de reforço aos agentes.
-  [Consultar template](../harness-conf/agents/default-artifacts/instrucoes-por-agente-template.md)
+- **Seção de Diretrizes no `AGENTS.md`:** reúne o índice da Especificação
+  do Produto, a referência ao arquivo de Testes por Especialidade e as
+  Instruções por Agente. O template define como essa seção deve ficar no
+  projeto-alvo.
+  [Consultar template](../harness-conf/agents/default-artifacts/diretrizes-regras-produto-agents-md-template.md)
 
 ## Ideação
 

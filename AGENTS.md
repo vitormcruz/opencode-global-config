@@ -238,17 +238,11 @@ mudanças neste repo.
 
 ### Testes por Especialidade
 
-| Especialidade | Script |
-|---------------|--------|
-| backend | `testes-produto/backend` |
-| segurança | `testes-produto/seguranca` |
+A especificação das suítes fica no arquivo independente
+`docs/testes-por-especialidade.md`. Esta subseção apenas referencia o
+arquivo e não reproduz seu conteúdo.
 
-Agregador: `testes-produto`
-
-Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
-`curador-produto`.
-
-Spec: [`docs/README.md#testes-por-especialidade`](docs/README.md#testes-por-especialidade)
+Spec: [`docs/testes-por-especialidade.md`](docs/testes-por-especialidade.md)
 
 ### Instruções por Agente
 
