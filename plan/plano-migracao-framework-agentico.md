@@ -254,3 +254,34 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
   Diretrizes e Regras de Produto.
 - O scaffold cria os dois arquivos juntos e nunca copia a especificação
   detalhada para o README ou para o `AGENTS.md`.
+
+## 5. Histórico de commits para revisão
+
+A próxima revisão do Framework deve consultar os commits abaixo. A relação
+inclui todos os commits que alteraram o novo documento do Framework ou este
+plano durante a construção e o refinamento do fluxo. Commits automáticos de
+checkpoint não fazem parte da relação.
+
+| Data | Commit | Foco da alteração |
+|---|---|---|
+| 2026-10-06 | `4ec6bb9664af260e07a0e80b0608b5f8317c1243` | Cria o Framework de Desenvolvimento Agêntico e o diagrama base |
+| 2026-10-07 | `b93209e2b016a485a90198caa856a5d1809c1b05` | Organiza a Governança de Produto |
+| 2026-10-07 | `bb76f943b83538accb91e2dd0817e23f1ae2e7dd` | Atualiza as Diretrizes de Produto |
+| 2026-10-07 | `27dc35dbab0efa103f79389322599e5aa109e30a` | Separa Especificações e Instruções |
+| 2026-10-07 | `0c78873768d8d9a3e0e5c80e493f1096647ab171` | Atualiza Diretrizes e templates |
+| 2026-10-07 | `ba6a4da91e0ddd91c0f12566a214e14b5f838ae1` | Salva ajustes nos contratos |
+| 2026-10-08 | `d4c1179f67ea1f1b40f3ea7fdd7fd35a885d636f` | Reorganiza contratos do workflow |
+| 2026-10-08 | `2af77702fb6767af76aab5bbee65a4fc4d1fd08d` | Consolida o contrato do planejamento |
+| 2026-10-08 | `f7846faaf1ac65737798fabc5540cb1c0d73461f` | Reorganiza o ciclo de desenvolvimento |
+| 2026-10-08 | `9bf58f25a0952cc4d5512517afaf616f6569d092` | Consolida o ciclo de desenvolvimento |
+| 2026-10-08 | `be2963b65300a0d582616802d078c1689ddaae19` | Agrupa as etapas do desenvolvimento |
+| 2026-10-09 | `b5a5e57837ae80f84aad15f9e3017fc8e1ad5a11` | Separa o fluxo das etapas |
+| 2026-10-09 | `b94dcc00feba1e7e27e33b40fa78c39ba4e90ffc` | Organiza as premissas do fluxo |
+| 2026-10-09 | `e25e1d19ea876761aa4c40ed7adb3e65e3c05bec` | Registra ajustes do fluxo |
+| 2026-10-09 | `539e246b1ab191bb16d03d1e6ebc6746ae80053e` | Atualiza o plano de migração |
+| 2026-10-09 | `79ab1f5ae56b331be278ae9fcd9b9664ab00320e` | Ajusta a política de instâncias |
+| 2026-10-09 | `5531cc8bd0062779aaae1fbe37969b42b3c44f61` | Descreve a etapa de Ideação |
+| 2026-10-09 | `8e1664cab1da5d54211e87a0a737ffa452f23f32` | Detalha o fluxo de desenvolvimento |
+| 2026-10-09 | `fa0752b1c9fff3f6d29293605d35ce599dcd3066` | Simplifica o fluxo textual |
+| 2026-10-14 | `42e52a3de1411a93af5a6e53473b9fa48e104731` | Consolida Diretrizes e gates humanos |
+| 2026-10-14 | `e4059adee26300be3ef9267302e50168275845ea` | Separa a especificação de testes |

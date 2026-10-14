@@ -319,6 +319,8 @@ alterar a ordem das chamadas, as decisões ou as transições de
 `Status`. Se houver falha, re-spawna o agente ou consulta o humano
 conforme as regras de falha.
 
+![Fluxo Detalhado de Desenvolvimento Agêntico](./svgImage/FluxoDetalhado.svg)
+
 1. **Inicialização**
 
    1.1. **Verificação inicial das Diretrizes e Regras de Produto**:
