@@ -146,6 +146,21 @@ O arquivo é o handoff entre instâncias. Os agentes consultam o
 arquivo para recuperar o contexto do Fluxo, em vez de depender
 do histórico da conversa.
 
+##### Status válidos
+
+O campo `Status` representa o ponto atual do Fluxo e pode assumir:
+
+- `PLANEJAMENTO`;
+- `REVISÃO DO PLANO`;
+- `CONSTRUÇÃO`;
+- `GATE-REFATORAÇÃO — volta ao planejamento`;
+- `REVISÃO DA CONSTRUÇÃO`;
+- `TESTES`;
+- `FINALIZAÇÃO`.
+
+`INICIALIZAÇÃO` não recebe um `Status` próprio. Ela é uma rotina de
+entrada do `devflow`.
+
 ### Etapas/Fases
 
 As etapas descrevem o tipo de trabalho realizado, seu resultado e
@@ -411,10 +426,16 @@ conforme as regras de falha.
       commit conforme a skill `git-workflow-and-versioning`.
 
    4.2. **Gate e transição**: Se a execução atingir o gate de refatoração ou exigir mudança
-   significativa no plano, o `eng-software` informa o `devflow`. O Fluxo retorna ao Planejamento
-   quando a mudança alterar premissas ou comportamento. Um ajuste mínimo pode ser registrado no
-   plano conforme os critérios do Fluxo. Quando a construção for concluída, o `devflow` atualiza
-   o arquivo para `Status: REVISÃO DA CONSTRUÇÃO`.
+   significativa no plano, o `eng-software` informa o `devflow`, que apresenta ao humano o
+   impacto da integração. O humano decide entre:
+
+   1. manter o planejamento e ajustar apenas a implementação;
+   2. aprovar um ajuste mínimo e registrá-lo no Arquivo de Planejamento;
+   3. retornar ao Planejamento para revisar as premissas, o comportamento ou a arquitetura.
+
+   O `devflow` não escolhe sozinho entre essas opções. A Construção só prossegue depois da
+   decisão humana. Quando a construção for concluída, o `devflow` atualiza o arquivo para
+   `Status: REVISÃO DA CONSTRUÇÃO`.
 
 5. **Revisão da construção**
 
@@ -452,7 +473,11 @@ conforme as regras de falha.
    - frontend: `front`.
 
    Depois da correção, o `devflow` aciona o `eng-software` para normalizar o lote e criar o
-   commit. A correção retorna à execução dos testes. Se a falha exigir mudança de escopo ou
+   commit. Em seguida, reexecuta obrigatoriamente os testes automáticos determinísticos. Uma
+   falha não pode ser aceita ou contornada: a fase só avança quando os testes passam. Se a mesma
+   falha persistir por três execuções consecutivas, o `devflow` pergunta ao humano se deve
+   interromper novas tentativas para realizar uma análise diagnóstica adicional. Essa análise
+   não autoriza seguir sem aprovação dos testes. Se a falha exigir mudança de escopo ou
    comportamento, o `devflow` retorna ao Planejamento. Caso contrário, retorna à Construção.
 
    6.4. **Transição para Finalização**: Quando os testes e a validação das evidências terminarem,

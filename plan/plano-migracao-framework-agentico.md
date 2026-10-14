@@ -255,6 +255,27 @@ Remover caminhos físicos hardcoded (`docs/README.md`) e padronizar orientação
 - O scaffold cria os dois arquivos juntos e nunca copia a especificação
   detalhada para o README ou para o `AGENTS.md`.
 
+### 4.11. Fonte de verdade para a sincronização futura — 2026-10-14
+
+- `docs/framework-desenvolvimento-agentico.md` é a fonte de verdade para
+  revisar e ajustar o `devflow`, os agentes, os workflows relacionados e os
+  testes de contrato.
+- O `devflow` e os agentes ainda não foram todos atualizados para refletir
+  as mudanças do Framework. A próxima execução deste plano deve tratar essa
+  sincronização como trabalho pendente.
+- A revisão futura deve partir integralmente do novo Framework, e não
+  presumir que o workflow antigo ou os prompts atuais já estejam
+  sincronizados com ele.
+- A regra de autonomia do Framework prevalece: detalhes de execução,
+  implementação e ajustes locais permanecem com os agentes e o `devflow`.
+  O humano só deve ser consultado quando houver mudança de premissa,
+  escopo, comportamento, arquitetura, planejamento ou outra decisão fora
+  do trabalho aprovado.
+- Em falhas de testes automáticos determinísticos, o `devflow` deve
+  reexecutar os testes até obter aprovação. Após três falhas consecutivas
+  da mesma execução, deve consultar o humano sobre uma análise diagnóstica
+  adicional, sem aceitar a falha nem avançar para a Finalização.
+
 ## 5. Histórico de commits para revisão
 
 A próxima revisão do Framework deve consultar os commits abaixo. A relação
@@ -285,3 +306,4 @@ checkpoint não fazem parte da relação.
 | 2026-10-09 | `fa0752b1c9fff3f6d29293605d35ce599dcd3066` | Simplifica o fluxo textual |
 | 2026-10-14 | `42e52a3de1411a93af5a6e53473b9fa48e104731` | Consolida Diretrizes e gates humanos |
 | 2026-10-14 | `e4059adee26300be3ef9267302e50168275845ea` | Separa a especificação de testes |
+| 2026-10-14 | `e1125984c16cf30f76679ca3fcda3945887d6dad` | Adiciona diagrama de raias do fluxo detalhado |
