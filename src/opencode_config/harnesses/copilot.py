@@ -177,21 +177,14 @@ def _is_agent_type(value: str) -> bool:
     return not _MODEL_ID.match(value)
 
 
-def _delegation_instructions(allowed_agent_types: Collection[str]) -> list[str]:
-    """Descreve a chamada Copilot task sem confundir agente e modelo."""
+def _delegation_block(policy: str, agent_type_qualifier: str) -> list[str]:
+    """Corpo comum da secao Delegacao de subagentes."""
 
-    if not allowed_agent_types:
-        return []
-
-    # O frontmatter do Copilot oferece apenas o alias generico `agent`; a
-    # allowlist precisa ser publicada no contrato de delegacao do perfil.
-    agent_types = ", ".join(allowed_agent_types)
     return [
         "",
         "## Delegacao de subagentes",
         "",
-        "Use a ferramenta `task` somente com estes `agent_type` Copilot:",
-        f"`{agent_types}`.",
+        policy,
         "",
         "Os campos `prompt`, `description`, `name` e `mode` "
         "(`sync` ou `background`) sao separados.",
@@ -202,7 +195,7 @@ def _delegation_instructions(allowed_agent_types: Collection[str]) -> list[str]:
         "Formato da chamada:",
         "```text",
         "task(",
-        '  agent_type="<um agent_type permitido>",',
+        f'  agent_type="<um agent_type {agent_type_qualifier}>",',
         '  prompt="<instrucoes>",',
         '  description="<resumo>",',
         '  name="<nome opcional>",',
@@ -212,6 +205,33 @@ def _delegation_instructions(allowed_agent_types: Collection[str]) -> list[str]:
         "```",
         "",
     ]
+
+
+def _delegation_instructions(allowed_agent_types: Collection[str]) -> list[str]:
+    """Descreve a chamada Copilot task sem confundir agente e modelo."""
+
+    if not allowed_agent_types:
+        return []
+
+    # O frontmatter do Copilot oferece apenas o alias generico `agent`; a
+    # allowlist precisa ser publicada no contrato de delegacao do perfil.
+    agent_types = ", ".join(allowed_agent_types)
+    policy = (
+        "Use a ferramenta `task` somente com estes `agent_type` "
+        f"Copilot: `{agent_types}`."
+    )
+    return _delegation_block(policy, "permitido")
+
+
+def _open_delegation_instructions() -> list[str]:
+    """Descreve a delegacao aberta: qualquer perfil disponivel."""
+
+    policy = (
+        "Delegacao aberta: use a ferramenta `task` com qualquer "
+        "`agent_type` Copilot disponivel (perfis sincronizados do "
+        "repo e agentes builtin); nao ha lista restritiva."
+    )
+    return _delegation_block(policy, "disponivel")
 
 
 def _write_utf8(path: Path, content: str) -> None:
@@ -347,7 +367,11 @@ def convert_agent_frontmatter(
     converted.append("---")
 
     body = "\n".join(lines[end + 1:])
-    body_lines = _delegation_instructions(allowed_agent_types)
+    body_lines = (
+        _open_delegation_instructions()
+        if task_rules.get("*") == "allow"
+        else _delegation_instructions(allowed_agent_types)
+    )
     if body:
         body_lines.extend(["", body])
     converted.extend(body_lines)

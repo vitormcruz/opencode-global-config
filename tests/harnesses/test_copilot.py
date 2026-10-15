@@ -44,12 +44,15 @@ def test_copilot_adapter_converts_agent_frontmatter(
     agent = (
         tmp_path / ".copilot" / "agents" / "eng-software.agent.md"
     ).read_text(encoding="utf-8")
-    assert 'tools: ["read", "edit", "execute", "search", "web"]' in agent
+    assert (
+        'tools: ["read", "edit", "execute", "search", "web", "agent"]'
+        in agent
+    )
     assert "temperature:" not in agent
 
 
 @pytest.mark.unit
-def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
+def test_copilot_adapter_keeps_delegation_open_for_wildcard_allow(
     monkeypatch: pytest.MonkeyPatch,
     repo_root: Path,
     tmp_path: Path,
@@ -62,12 +65,56 @@ def test_copilot_adapter_maps_task_permissions_to_copilot_agent_types(
         tmp_path / ".copilot" / "agents" / "curador-produto.agent.md"
     ).read_text(encoding="utf-8")
     assert "name: curador-produto" in agent
-    # curador-produto spawna apenas eng-software (task: eng-software:
-    # allow); a allowlist publicada na prosa reflete exatamente isso.
+    # curador-produto tem task: "*": allow (delegação aberta); a
+    # prosa publicada não restringe a lista de agent_type.
     assert "Delegacao de subagentes" in agent
-    assert "`eng-software`" in agent
-    assert "dba, eng-software, front, qa, rev, sec" not in agent
+    assert "qualquer `agent_type`" in agent
+    assert "somente com estes" not in agent
+    assert "`eng-software`" not in agent
     assert "gpt-5.6-luna" not in agent
+
+
+@pytest.mark.unit
+def test_copilot_adapter_publishes_open_delegation_for_wildcard_allow(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    agents = repo / "harness-conf" / "agents"
+    agents.mkdir(parents=True)
+    (repo / "harness-conf" / "commands").mkdir()
+    (repo / "harness-conf" / "skills").mkdir()
+    (repo / "harness-conf" / "opencode.json").write_text("{}", encoding="utf-8")
+    (repo / ".github").mkdir()
+    (agents / "orquestrador.md").write_text(
+        """---
+description: Orquestrador
+permission:
+  edit: allow
+  bash: allow
+  webfetch: deny
+  task:
+    "*": allow
+---
+Orquestrador
+""",
+        encoding="utf-8",
+    )
+
+    status, _, error = run_adapter(monkeypatch, repo, tmp_path)
+
+    assert status == 0
+    assert error == ""
+    agent = (
+        tmp_path / ".copilot" / "agents" / "orquestrador.agent.md"
+    ).read_text(encoding="utf-8")
+    assert (
+        'tools: ["read", "edit", "execute", "search", "web", "agent"]'
+        in agent
+    )
+    assert "Delegacao de subagentes" in agent
+    assert "qualquer `agent_type`" in agent
+    assert "somente com estes" not in agent
 
 
 @pytest.mark.unit
@@ -768,9 +815,10 @@ def test_copilot_adapter_excludes_removed_agents_from_delegation_prose(
 ) -> None:
     """A prosa de delegação não cita agentes excluídos do repo.
 
-    smart-planner usa ``"*": deny`` com lista nomeada de delegação;
-    `worker` e `revisor` saíram da lista com a exclusão dos agentes
-    (2026-09-28) e não podem reaparecer na prosa do adapter.
+    Sob a delegação aberta (ADR
+    docs/adr/0012-permissoes-task-abertas.md) a prosa não publica
+    lista de agent_type; nenhum nome, incluindo `worker` e
+    `revisor` (excluídos em 2026-09-28), pode reaparecer na seção.
     """
 
     status, _, error = run_adapter(monkeypatch, repo_root, tmp_path)
@@ -781,15 +829,13 @@ def test_copilot_adapter_excludes_removed_agents_from_delegation_prose(
         tmp_path / ".copilot" / "agents" / "smart-planner.agent.md"
     ).read_text(encoding="utf-8")
     assert "Delegacao de subagentes" in agent
-    prose = re.search(
-        r"estes `agent_type` Copilot:\n+`([^`]*)`", agent
+    delegation = re.search(
+        r"## Delegacao de subagentes.*?(?=\n## |\Z)", agent, re.DOTALL
     )
-    assert prose is not None, "Prosa de delegação ausente"
-    entries = {name.strip() for name in prose.group(1).split(",")}
-    assert "eng-software" in entries
-    assert "revisor-historia" in entries
-    assert "worker" not in entries
-    assert "revisor" not in entries
+    assert delegation is not None, "Seção de delegação ausente"
+    assert "estes `agent_type`" not in delegation.group(0)
+    assert "worker" not in delegation.group(0)
+    assert "revisor" not in delegation.group(0)
 
 
 @pytest.mark.unit
