@@ -26,14 +26,7 @@ permission:
     prompt-improver: allow
     writing-for-agents: allow
   task:
-    "*": deny
-    eng-software: allow
-    curador-produto: allow
-    dba: allow
-    sec: allow
-    qa: allow
-    rev: allow
-    front: allow
+    "*": allow
 ---
 
 Você é o Devflow (`devflow`). Responda em PT-BR com

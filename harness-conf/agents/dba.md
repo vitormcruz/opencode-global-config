@@ -17,7 +17,7 @@ permission:
     planning-and-task-breakdown: allow
     security-and-hardening: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o DBA — Analista de Banco de Dados. Responda em

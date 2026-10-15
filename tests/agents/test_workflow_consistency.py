@@ -480,26 +480,25 @@ def _make_skill_map_tree(
 
 @pytest.mark.unit
 def test_task_permissions_point_to_existing_agents(repo_root: Path) -> None:
-    """Agentes com ``task: X: allow`` apontam para agente existente."""
+    """Allows nomeados residuais apontam para agente existente.
+
+    Sob a política aberta (ADR
+    docs/adr/0012-permissoes-task-abertas.md) os blocos task usam
+    ``"*": allow``; o repo não deve ter allowlist nomeada. Se um
+    allow nomeado reaparecer, o alvo precisa existir. A
+    trivialidade do parser é coberta por
+    ``test_extract_task_allow_agents_detects_synthetic_orphan``.
+    """
 
     agents_dir = repo_root / "harness-conf" / "agents"
     known_agents = _collect_agent_names(agents_dir)
     orphans: list[str] = []
-    total_extracted = 0
 
     for agent_name, content in _read_agent_files(agents_dir).items():
         frontmatter = _extract_frontmatter(content)
-        extracted = _extract_task_allow_agents(frontmatter)
-        total_extracted += len(extracted)
-        for target in extracted:
+        for target in _extract_task_allow_agents(frontmatter):
             if target not in known_agents:
                 orphans.append(f"{agent_name} -> task: {target}: allow")
-
-    # Garante que o parser extraiu permissions reais (devflow tem 7 allows)
-    assert total_extracted >= 7, (
-        f"Parser extraiu apenas {total_extracted} permissions "
-        f"(esperado >= 7); possível regressão à trivialidade"
-    )
 
     assert orphans == [], (
         "Permissions órfãs (task: allow aponta para agente inexistente):\n"

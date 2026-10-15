@@ -16,8 +16,7 @@ permission:
     spec-driven-development: allow
     spec-executavel: allow
   task:
-    "*": deny
-    revisor-historia: allow
+    "*": allow
 ---
 Você é um analista de backlog. (PT-BR; use acentuação no texto exibido ao humano.)
 

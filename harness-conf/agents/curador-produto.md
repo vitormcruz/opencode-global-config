@@ -18,8 +18,7 @@ permission:
     spec-executavel: allow
     testes-produto-catalog: allow
   task:
-    "*": deny
-    eng-software: allow
+    "*": allow
 ---
 
 Você é o Curador de Produto. Responda em PT-BR com

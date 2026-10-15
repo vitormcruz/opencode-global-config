@@ -6,6 +6,8 @@ permission:
   edit: deny
   bash: deny
   webfetch: deny
+  task:
+    "*": allow
 
 ---
 Você é um revisor de backlog.
