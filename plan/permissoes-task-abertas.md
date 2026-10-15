@@ -60,7 +60,7 @@ Estado inicial dos blocos `permission.task` (10 arquivos):
 
 ### Phase 1: Política aberta e guardas
 
-- [ ] Task 1: Trocar `permission.task` para `"*": allow` nos agentes
+- [x] Task 1: Trocar `permission.task` para `"*": allow` nos agentes
   - **Description:** substituir o bloco `permission.task` atual por
     `task:\n    "*": allow` nos 10 agentes que têm bloco (remover denies e
     allowlists nomeadas) e adicionar o bloco a `revisor-historia.md`.
@@ -74,10 +74,12 @@ Estado inicial dos blocos `permission.task` (10 arquivos):
   - **Verification:** `grep -rn '"\*": deny' harness-conf/agents/` vazio;
     `.venv/bin/pytest tests/agents/ -m all`
   - **Dependencies:** None
-  - **Files likely touched:** `harness-conf/agents/{analista,curador-produto,dba,devflow,eng-software,front,qa,rev,revisor-historia,sec,smart-planner}.md`
+  - **Files likely touched:** `harness-conf/agents/{analista,curador-produto,
+    dba,devflow,eng-software,front,qa,rev,revisor-historia,sec,
+    smart-planner}.md`
   - **Estimated scope:** S (11 arquivos, mudança mecânica)
 
-- [ ] Task 2: Reescrever a guarda de `test_task_spawnable_modes.py`
+- [x] Task 2: Reescrever a guarda de `test_task_spawnable_modes.py`
   - **Description:** inverter a política do teste: reprovar qualquer
     entrada `deny` em `permission.task` e aprovar wildcard allow
     (anti-regressão da decisão de política aberta); manter a validação de
@@ -95,12 +97,12 @@ Estado inicial dos blocos `permission.task` (10 arquivos):
   - **Estimated scope:** M
 
 ### Checkpoint: after Tasks 1-2
-- [ ] `.venv/bin/pytest tests/agents/ -m all` passa
-- [ ] Commit local: `feat(agents): abre permissoes de delegacao task`
+- [x] `.venv/bin/pytest tests/agents/ -m all` passa
+- [x] Commit local: `feat(agents): abre permissoes de delegacao task`
 
 ### Phase 2: Adapter Copilot e registro da decisão
 
-- [ ] Task 3: Adapter Copilot sem allowlist restritiva
+- [x] Task 3: Adapter Copilot sem allowlist restritiva
   - **Description:** o adapter Copilot deriva do frontmatter a instrução
     "use a ferramenta task somente com estes agent_type". Com wildcard
     allow, passar a instruir o uso com qualquer perfil Copilot
@@ -119,7 +121,7 @@ Estado inicial dos blocos `permission.task` (10 arquivos):
     `tests/harnesses/` (teste específico do adapter Copilot)
   - **Estimated scope:** M
 
-- [ ] Task 4: ADR 0012 registrando a decisão
+- [x] Task 4: ADR 0012 registrando a decisão
   - **Description:** criar `docs/adr/0012-permissoes-task-abertas.md`
     autocontida: contexto (bloqueio de agentes de projetos consumidores),
     decisão (delegação aberta com `"*": allow`), decisão complementar
@@ -138,18 +140,18 @@ Estado inicial dos blocos `permission.task` (10 arquivos):
   - **Estimated scope:** S
 
 ### Checkpoint: after Tasks 3-4
-- [ ] `.venv/bin/pytest -m all` (suíte completa do ambiente) passa
-- [ ] Commit local: `feat(harnesses): adapter copilot sem allowlist de task` +
+- [x] `.venv/bin/pytest -m all` (suíte completa do ambiente) passa
+- [x] Commit local: `feat(harnesses): adapter copilot sem allowlist de task` +
   `docs(adr): registra decisao de permissoes task abertas`
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Spawn de agente `mode: primary` falha em runtime ("Unknown subagent type") — comportamento do opencode que motivou a guarda antiga | Médio: erro explícito na sessão do orquestrador | Aceito pela decisão D1; os prompts dos orquestradores já instruem instância nova de executor/revisor; o erro é claro e acionável |
-| Regressão futura: alguém reintroduz allowlist estática | Alto: reproduz o bloqueio de agentes de projeto | Guarda anti-regressão na Task 2 + ADR 0012 |
-| Adapter Copilot emitir lista restritiva residual | Médio: comportamento divergente entre harnesses | Task 3 com teste dedicado ao caso wildcard allow |
-| Teste de consistência (`test_workflow_consistency.py`) validar algo sobre permissions task | Baixo: suíte falha | Verificar na execução; hoje valida só o mapa de skills |
+| Spawn de `mode: primary` falha em runtime | Médio: erro na sessão | Aceito pela D1; erro claro e acionável |
+| Regressão: reintroduzir allowlist estática | Alto: reproduz o bloqueio de projeto | Guarda na Task 2 + ADR 0012 |
+| Adapter Copilot com lista restritiva | Médio: divergência de harnesses | Task 3 com teste do wildcard allow |
+| Consistência tocar permissions task | Baixo: suíte falha | Verificar na execução; valida só o mapa de skills |
 
 ## Open Questions
 
@@ -158,6 +160,47 @@ skills mantido)
 
 ## Status
 
-- Fase: execução (plano aprovado pelo humano em 2026-10-14).
+- Fase: execução concluída (2026-10-14). Plano aprovado pelo humano
+  em 2026-10-14.
 - Executor: `eng-software` com `zai-coding-plan/glm-5.3-flash`.
 - Revisor: `rev` com `zai-coding-plan/glm-5.3`.
+
+### Registro de execução
+
+- Tasks 1-4 concluídas; critérios verificados e marcados.
+- **Desvio de sequenciamento (decisão do executor):** o checkpoint 1
+  previa commit após Tasks 1-2, mas os testes do adapter Copilot
+  (`tests/harnesses/test_copilot.py`) integram com o frontmatter real
+  dos agentes e falhavam com a política nova antes da Task 3. Como é
+  proibido commitar sem testes verdes, a Task 3 foi construída antes
+  do primeiro commit; a suíte completa (`-m all`) roda verde antes de
+  cada commit e os commits mantêm as unidades lógicas previstas.
+- **Ampliação da Task 4 (padrão do repo):** ADR numerada exige
+  fixture Concordion real e registro em `build.gradle`
+  (`tests/product_tests/test_concordion_spec_infra.py` valida na
+  suíte). Criados `src/test/groovy/Adr0012Fixture.groovy` e entrada
+  `'Adr0012Fixture'` na suíte backend; fixture executada via gradle
+  com veredito pass (1 teste, 0 falhas).
+- **Mudanças de spec aprovadas aplicadas em testes preexistentes**
+  (guardas que sancionavam a política antiga, risco previsto na
+  tabela): `tests/agents/test_smart_planner.py`
+  (wildcard allow no lugar da allowlist nomeada),
+  `tests/agents/test_workflow_consistency.py` (guarda anti-trivialidade
+  de allows nomeados removida; parser protegido por fixture sintética
+  existente) e `tests/harnesses/test_copilot.py`
+  (`test_copilot_adapter_excludes_removed_agents_from_delegation_prose`
+  passa a validar o invariant da prosa aberta: seção de delegação sem
+  enumeração de nomes).
+
+### Evidências de Testes — execução
+
+- [x] `.venv/bin/pytest tests/agents/ -m all`: 185 passed.
+- [x] `.venv/bin/pytest tests/harnesses/ -m all`: 76 passed.
+- [x] `.venv/bin/pytest -m all` (suíte completa): executada antes de
+  cada commit; verde (skips de plataforma declarados pela própria
+  suíte quando aplicáveis).
+- [x] `ruff check src tests`: All checks passed.
+- [x] `gradle test -PproductSpecialty=backend --tests 'Adr0012Fixture'`:
+  1 teste, 0 falhas (veredito pass).
+- [x] TDD Task 3: teste sintético de wildcard allow e teste de prosa
+  aberta falharam antes do código (RED confirmado) e passaram depois.
