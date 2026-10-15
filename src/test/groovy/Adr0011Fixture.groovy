@@ -31,10 +31,13 @@ class Adr0011Fixture {
             entrada ==~ /@tarquinen\/opencode-dcp@\d+\.\d+\.\d+/
     }
 
-    // A config propria do plugin existe sem gatilho operante: autoUpdate
-    // desligado, gate allow na tool compress (rollback rapido deny),
-    // compactacao por decisao do agente (modo manual desligado, pois ele
-    // bloqueia a tool) e limites de contexto so como valores inertes.
+    // A config propria do plugin existe com o ping informativo do
+    // ADR: autoUpdate desligado, gate allow na tool compress (rollback
+    // rapido deny), compactacao por decisao do agente (modo manual
+    // desligado, pois ele bloqueia a tool), ping soft em 130k com
+    // frequencia 10, limite inferior inerte (turn/iteration nudges
+    // nunca disparam) e overrides de prompt habilitados (texto PT-BR
+    // do ping sincronizado pelo adapter).
     private boolean configPropriaValida() {
         def config = lerArquivo('harness-conf/dcp.jsonc')
         if (config == null) {
@@ -51,13 +54,17 @@ class Adr0011Fixture {
             compress?.permission == 'allow' &&
             parsed.get('manualMode')?.enabled != true &&
             maximo != null && (maximo instanceof Number) &&
-            ((Number) maximo).longValue() >= 1000000000L &&
+            ((Number) maximo).longValue() == 130000L &&
             minimo != null && (minimo instanceof Number) &&
-            ((Number) minimo).longValue() >= 1000000000L
+            ((Number) minimo).longValue() >= 1000000000L &&
+            compress?.nudgeForce == 'soft' &&
+            compress?.nudgeFrequency == 10 &&
+            parsed.experimental?.customPrompts == true
     }
 
-    // As duas strategies do OpenCode declaram o destino dcp.jsonc; o
-    // adapter Copilot nao declara nenhum destino DCP (fora do escopo).
+    // As duas strategies do OpenCode declaram os destinos dcp.jsonc e
+    // do prompt do ping; o adapter Copilot nao declara nenhum destino
+    // DCP (fora do escopo).
     private boolean destinoSomenteNoOpencode() {
         def opencode = lerArquivo('src/opencode_config/harnesses/opencode.py')
         def copilot = lerArquivo('src/opencode_config/harnesses/copilot.py')
@@ -65,6 +72,7 @@ class Adr0011Fixture {
             return false
         }
         return opencode.count('"dcp.jsonc"') >= 2 &&
+            opencode.count('context-limit-nudge.md') >= 2 &&
             !copilot.contains('dcp')
     }
 

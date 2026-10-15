@@ -52,6 +52,12 @@ _POSIX_DESTINATIONS: tuple[tuple[str, str], ...] = (
     (f"{HARNESS_CONF_DIR}/opencode.json", "opencode.json"),
     (f"{HARNESS_CONF_DIR}/dcp.jsonc", "dcp.jsonc"),
     (f"{HARNESS_CONF_DIR}/skills", "skills"),
+    # Prompt editavel do ping informativo do DCP: o plugin so le overrides
+    # do subdiretorio `overrides/` de `dcp-prompts/` (nunca da raiz).
+    (
+        f"{HARNESS_CONF_DIR}/dcp-prompts/context-limit-nudge.md",
+        "dcp-prompts/overrides/context-limit-nudge.md",
+    ),
     ("scripts", "scripts"),
 )
 
@@ -63,6 +69,12 @@ _WINDOWS_DESTINATIONS: tuple[tuple[str, str], ...] = (
     (f"{HARNESS_CONF_DIR}/opencode.json", "opencode.json"),
     (f"{HARNESS_CONF_DIR}/dcp.jsonc", "dcp.jsonc"),
     (f"{HARNESS_CONF_DIR}/skills", "skills"),
+    # Prompt editavel do ping informativo do DCP: o plugin so le overrides
+    # do subdiretorio `overrides/` de `dcp-prompts/` (nunca da raiz).
+    (
+        f"{HARNESS_CONF_DIR}/dcp-prompts/context-limit-nudge.md",
+        "dcp-prompts/overrides/context-limit-nudge.md",
+    ),
 )
 
 _EXA_EXPORT = (
@@ -455,6 +467,9 @@ class OpenCodeAdapter:
         for source, destination in strategy.destinations():
             source_path = resolved_repository / source
             destination_path = config_dir / destination
+            # Destinos aninhados (ex.: dcp-prompts/overrides/) exigem o
+            # diretorio pai antes da materializacao (copia Windows nao cria).
+            destination_path.parent.mkdir(parents=True, exist_ok=True)
             if (
                 destination == "opencode.json"
                 and not ai_memory_enabled

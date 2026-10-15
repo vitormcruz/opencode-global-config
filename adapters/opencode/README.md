@@ -12,11 +12,12 @@ opencode-adapter --yes
 ```
 
 No Linux/WSL, o adapter cria ou atualiza links em `~/.config/opencode/`
-para os agentes, comandos, skills, `dcp.jsonc` e `opencode.json` de
+para os agentes, comandos, skills, `dcp.jsonc`, o prompt do ping do DCP
+(`dcp-prompts/overrides/context-limit-nudge.md`) e `opencode.json` de
 `harness-conf/` (e para `scripts/`, que fica na raiz do repo) deste
 repositório, e garante as env vars no `~/.bashrc`.
 
-No Windows, o adapter materializa cópia sincronizada dos cinco destinos
+No Windows, o adapter materializa cópia sincronizada dos seis destinos
 de `harness-conf/` em `%USERPROFILE%\.config\opencode` a cada execução e
 persiste `OPENCODE_ENABLE_EXA` em `HKCU\Environment` com broadcast de
 `WM_SETTINGCHANGE` (novos processos, sem logoff).

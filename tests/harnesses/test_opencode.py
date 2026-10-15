@@ -28,6 +28,11 @@ def make_repository(root: Path) -> Path:
     (repository / "scripts").mkdir()
     (harness / "opencode.json").write_text("{}", encoding="utf-8")
     (harness / "dcp.jsonc").write_text("{}", encoding="utf-8")
+    (harness / "dcp-prompts").mkdir()
+    (harness / "dcp-prompts" / "context-limit-nudge.md").write_text(
+        "ping\n",
+        encoding="utf-8",
+    )
     (harness / "AGENTS.base.md").write_text(
         "# Regras Globais\n\nConteudo da base.\n",
         encoding="utf-8",
