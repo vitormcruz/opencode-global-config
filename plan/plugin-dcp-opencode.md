@@ -3471,3 +3471,156 @@ aplicados com aprovação humana; achado 4 mantido como está.
       regenerado no user-space
 - [x] Commit único: base + plano (Conventional Commits; sem push)
 
+## Investigação ping x compress (eng, 2026-10-15)
+
+Pergunta do humano: o ping informativo de 130k está FORÇANDO
+compressão (o agente comprime logo após o ping, tratando o aviso como
+ordem)? Investigação FÁTICA, somente leitura. Nenhuma correção proposta
+aqui (decisão é do humano).
+
+### Método e fontes
+
+1. sqlite `~/.local/share/opencode/opencode.db`, URI `file:...?mode=ro`;
+   método QA-ACC-5 (Consultas A e B, mapeamento `mNNNN`) e série
+   `step-finish` (método da Task 2 / QA-ACC-1).
+2. Código do plugin 3.1.15 no cache npm:
+   `lib/messages/inject/inject.ts` e `inject/utils.ts`,
+   `lib/token-utils.ts`, `lib/state/persistence.ts`.
+3. Estado persistido do plugin:
+   `~/.local/share/opencode/storage/plugin/dcp/<sessionId>.json`.
+4. Log do plugin (`~/.config/opencode/logs/dcp/`): VAZIO (logger
+   desabilitado; nenhuma emissão registrada por log).
+
+Janela do ping (W0): commit `82737aa` de 2026-10-15 08:11:53 (feat) e
+`6c59375` de 08:16 (docs); materialização ~08:16. Requisições a partir
+daí rodam com o ping ativo.
+
+### Limitação de fonte: o ping não é persistido
+
+O nudge é injetado em memória no envio ao LLM (anexado à última text
+part da mensagem âncora, ou part sintética) e NUNCA grava no sqlite. O
+literal do ping no banco aparece só em citações (a construção da
+emenda de 10-14, o desenho no devflow e esta investigação). Evidência
+de emissão usada, em ordem de força:
+
+- (a) citação do ping no reasoning/text do agente no turno da
+  compressão (4 casos, verbatim abaixo);
+- (b) reconstrução da condição de disparo: uso corrente > 130000 pela
+  fórmula do plugin (input + output + reasoning + cache.read +
+  cache.write do último step assistant com output > 0) e âncora nova a
+  cada 10 posições de mensagem (`nudgeFrequency` = 10); a âncora
+  recebe o nudge em TODA requisição subsequente até a limpeza
+  (reinjeção);
+- (c) estado persistido: a âncora vive em
+  `storage/plugin/dcp/<sid>.json` e é APAGADA quando a última mensagem
+  assistant contém `compress` (`inject.ts`); hoje as 3 sessões-alvo
+  mostram 0 âncoras, coerente com limpeza pós-compress.
+
+### Sessões com requisição acima de 130k na janela do ping
+
+Varredura exaustiva: exatamente 3 sessões tiveram requisição com uso
+acima de 130k a partir de W0. Nenhuma outra sessão cruzou 130k na
+janela (`jolly-otter` terminou 08:16:29 com uso 130.150, 26 s antes do
+commit, sem ping possível; esta investigação ficou abaixo).
+
+| sessão (agente) | ping emitido (âncoras) | compress pós-W0 |
+|---|---|---|
+| quiet-cactus (devflow) | 1: 10:42, 1ª requisição pós-retomada (ociosa desde 08:16, uso 152k) | 1: 10:42:25 |
+| misty-squid (smart-planner) | 2: 10:43 (1ª req pós-retomada, 163k); 12:20 (138k) | 3: 10:43:29; 19:21:33; 19:21:58 |
+| nimble-orchid (build) | 2: 20:29:18 (uso 139k); 20:35:49 (uso 181k) | 1: 20:36:46 |
+
+Correlação e citações verbatim do reasoning/text no turno de cada
+compress:
+
+- quiet-cactus 10:42:25: compress no MESMO turno do ping. Reasoning:
+  "The DCP ping fired in MY OWN session (context above 130k)"; "per
+  policy: my context > 130k, ping received". Text visível ao humano:
+  "O ping acabou de disparar nesta sessão, 130k cravados...
+  Aplicando a política".
+- misty-squid 10:43:29: compress no mesmo turno. Reasoning: "the
+  system reminder about context compression (>130k)... The reminder
+  says 130k informational".
+- misty-squid 12:20:51: âncora IGNORADA por ~7 h (nenhuma requisição
+  no período; humano ausente).
+- misty-squid 19:21:33 e 19:21:58: âncora de 12:20 REINJETADA na
+  primeira requisição do retorno (uso 141k); compress no mesmo turno.
+  Reasoning: "Context reminder: 130k+. I should consider
+  compressing".
+- nimble-orchid 20:29:18: âncora IGNORADA por 10 requisições /
+  ~6,5 min (uso subiu 139k para 181k).
+- nimble-orchid 20:36:46: compress 1 min após a âncora 20:35:49.
+  Reasoning: "The reminder is informational. But the AGENTS policy
+  says at ~150k weight compression. We're >130k. Hmm. Let me do a
+  modest compression".
+
+Totais: 3 sessões com ping; 5 âncoras distintas; 5 compress pós-W0;
+4 de 5 compress na mesma requisição do ping (ou reinjeção) ou 1 min
+depois; 2 de 5 âncoras ignoradas (7 h e 6,5 min / 10 requisições).
+
+### Teor das compressões (Consulta B, QA-ACC-5)
+
+| quando | faixa | idade do conteúdo | início do sumário |
+|---|---|---|---|
+| 10:42:25 quiet-cactus | m0001..m0111 | antigas (99 de 198 msgs) | "# Ciclo plugin DCP: estado consolidado" |
+| 10:43:29 misty-squid | m0001..m0048 | antigas (48 de 100) | "RESCATE DE SESSÃO ANTIGA DO OPENCODE (concluído)" |
+| 19:21:33 misty-squid | m0051..m0062 | médias | "FASE: BEAMFORMING + FAMÍLIA AX3000 (concluída)" |
+| 19:21:58 misty-squid | m0072 + m0075 | meia-idade (dumps do mesmo dia, ~7 h) | "DUMPS DE BUSCA PREÇOS/ALTERNATIVAS" |
+| 20:36:46 nimble-orchid | m0091..m0092 + m0095..m0105 | parte recente | "CRASH 0xC4 E PRIMEIRA CACADA A DUMP" |
+
+Em todos os casos `status = completed`; sumários coerentes com o
+conteúdo das faixas (amostragem lida).
+
+### Era anterior (contexto, não teste da hipótese)
+
+- Era 100k (09-29 materialização a 10-04): gatilho numérico ativo com
+  nudge do upstream (texto em inglês, não o ping PT-BR). quiet-cactus
+  recebeu ~7 âncoras reconstruídas entre 09-27 e 09-29 (uso 132k a
+  209k) e NUNCA comprimiu nesse período: nudge antigo ignorado
+  repetidamente.
+- Era limites inertes (10-04 a W0): nenhuma emissão possível; 11
+  compress ocorreram por decisão pura do agente (ex.: nimble-orchid
+  10-14 19:59 com uso 102k e 20:55 com uso 120k, abaixo até de 130k).
+- Conclusão do contexto: compress existe sem ping (38 eventos
+  pós-cutoff até hoje, 33 deles pré-ping); ping sem compress também
+  existe (as 2 âncoras ignoradas). As variáveis não foram separadas
+  experimentalmente em nenhuma direção.
+
+### Veredito estrito
+
+1. "Compress acontece sistematicamente em janela curta após ping":
+   CONFIRMADA como padrão de adjacência (4 de 5 compress na mesma
+   requisição do ping, ou com reinjeção, ou 1 min depois; o ping é
+   citado expressamente no reasoning nos 4 casos). NÃO confirmada como
+   sistemática: 2 de 5 âncoras foram ignoradas (7 h; 6,5 min e 10
+   requisições), o que refuta força de ordem.
+2. "Compress independente do ping": REFUTADA como única explicação na
+   janela do ping: 100% das compress pós-W0 (5 de 5) ocorreram com o
+   ping presente no envio. Mas o fenômeno não é causado só pelo ping:
+   33 compress pré-ping existem.
+3. Viés de amostragem identificado: em quiet-cactus e misty-squid as
+   sessões estavam ociosas com uso acima de 130k; a primeira
+   requisição do retorno SEMPRE recebe ping, então a compressa "logo
+   após o ping" é parcialmente efeito de design (todo retorno a sessão
+   grande cruza com o ping), não prova de força do aviso.
+4. Efeito colateral observável: o ping antecipa compress para a faixa
+   130k-150k (2 compress com uso 137k-141k, abaixo do degrau de 150k
+   da política) e, em 2 dos 5 eventos, alcançou conteúdo recente
+   (faixa criada minutos antes em nimble-orchid; dumps do mesmo dia em
+   misty-squid), em vez de só conteúdo antigo.
+5. Nos textos o agente sempre enquadra o ping como informativo e
+   invoca a política como justificativa; não há citação que trate o
+   ping como ordem.
+
+### Evidências (eng-software) — INVESTIGAÇÃO PING X COMPRESS
+
+- [x] Consultas sqlite em modo ro (QA-ACC-5 A/B, série step-finish,
+      varredura exaustiva de sessões acima de 130k na janela)
+- [x] Inspeção somente leitura do código do plugin 3.1.15 e do estado
+      `storage/plugin/dcp/`; logs do plugin vazios (registrado)
+- [x] Nenhuma escrita no banco, no user-space ou na config; único
+      arquivo alterado: este plano
+- [x] Correção de percurso de leitura: slug não é único
+      (`quiet-cactus` aparece em 5 sessões); filtrar por id completo
+- [x] Verificação de forma: nenhuma linha nova acima de 120 colunas;
+      `git diff --check` limpo
+
