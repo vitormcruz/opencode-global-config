@@ -8,6 +8,8 @@ permission:
   skill:
     "aws-*": allow
     debugging-and-error-recovery: allow
+  task:
+    "*": allow
 ---
 
 Voce e um analista AWS focado em diagnostico e navegacao multi-conta via AWS CLI.
