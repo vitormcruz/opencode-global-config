@@ -158,6 +158,6 @@ skills mantido)
 
 ## Status
 
-- Fase: plano completo, aguardando aprovação do humano.
-- Executor sugerido: `eng-software`; revisor sugerido: `rev`.
-- Modelos: a definir com o humano na orquestração.
+- Fase: execução (plano aprovado pelo humano em 2026-10-14).
+- Executor: `eng-software` com `zai-coding-plan/glm-5.3-flash`.
+- Revisor: `rev` com `zai-coding-plan/glm-5.3`.
