@@ -17,6 +17,25 @@ class Adr0012Fixture {
         return Files.isRegularFile(arquivo) ? arquivo.getText('UTF-8') : null
     }
 
+    // Entradas indentadas do bloco task do frontmatter (linhas de 4+
+    // espacos apos "  task:", ate a primeira linha menos indentada).
+    private List<String> entradasDoBlocoTask(String conteudo) {
+        def linhas = conteudo.split('\n', -1)
+        def inicio = linhas.findIndexOf { it == '  task:' }
+        if (inicio < 0) {
+            return []
+        }
+        def entradas = []
+        for (int i = inicio + 1; i < linhas.length; i++) {
+            def linha = linhas[i]
+            if (!linha.startsWith('    ')) {
+                break
+            }
+            entradas << linha
+        }
+        return entradas
+    }
+
     // Nenhum agente declara deny na secao permission.task (wildcard ou
     // nomeada); todo bloco task declarado usa o wildcard "*": allow.
     private boolean delegacaoAbertaNosAgentes() {
@@ -25,7 +44,7 @@ class Adr0012Fixture {
             return false
         }
         def arquivos = Files.list(agentes).toList().findAll {
-            it.name.endsWith('.md')
+            it.fileName.toString().endsWith('.md')
         }
         if (arquivos.empty) {
             return false
@@ -33,7 +52,10 @@ class Adr0012Fixture {
         return arquivos.every { arquivo ->
             def conteudo = arquivo.getText('UTF-8')
             def semTask = !conteudo.contains('  task:')
+            def denyNomeadoEmTask = entradasDoBlocoTask(conteudo)
+                .any { it.contains('deny') }
             return !conteudo.contains('"*": deny') &&
+                !denyNomeadoEmTask &&
                 (semTask || conteudo.contains('    "*": allow'))
         }
     }
