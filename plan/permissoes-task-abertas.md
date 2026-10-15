@@ -160,8 +160,9 @@ skills mantido)
 
 ## Status
 
-- Fase: correção pós-revisão (2026-10-14). Revisão independente aprovou a
-  execução com 2 achados de melhoria; o humano aceitou corrigir ambos.
+- Fase: correção pós-revisão executada (2026-10-14). Revisão independente
+  aprovou a execução com 2 achados de melhoria; o humano aceitou corrigir
+  ambos e as correções foram aplicadas, validadas e commitadas.
 - Executor: `eng-software` com `zai-coding-plan/glm-5.3-flash`.
 - Revisor: `rev` com `zai-coding-plan/glm-5.3`.
 - Correções aceitas: (1) adicionar bloco `permission.task` com wildcard
@@ -197,6 +198,40 @@ skills mantido)
   passa a validar o invariant da prosa aberta: seção de delegação sem
   enumeração de nomes).
 
+### Registro de execução — correções pós-revisão
+
+- Correção 1: `harness-conf/agents/aws-analista.md` (12º agente do
+  diretório, fora da enumeração original) recebeu
+  `task:\n    "*": allow` no frontmatter; nada mais mudou no arquivo.
+- Correção 2: `Adr0012Fixture.groovy` ganhou o helper
+  `entradasDoBlocoTask()` e a validação `denyNomeadoEmTask()`: deny
+  nomeado dentro da seção `task` reprova; denies legítimos em outras
+  seções (skill, bash, edit, webfetch) seguem aprovando.
+- **Bug latente corrigido na mesma fixture:** `it.name` não existe em
+  `java.nio.file.Path` e interrompia `delegacaoAbertaNosAgentes()` com
+  `MissingPropertyException` assim que executada de fato; trocado por
+  `it.fileName.toString()`. Nunca tinha falhado porque a spec Concordion
+  da ADR não avalia asserções (achado abaixo).
+- TDD da Correção 2 (runner JUnit temporário, não commitado, chamando
+  `executarVerificacoes()` diretamente): com a lógica antiga e um agente
+  sintético com `legado: deny` na seção task, o veredito foi `pass`
+  (falso positivo confirmado por execução: `expected:<fail> but
+  was:<pass>`); com a lógica nova, `fail` com o sintético e `pass` no
+  repo real sem ele.
+- ADR 0012: sem ajuste de prosa; a seção de asserções executáveis já
+  descreve a cobertura nova (nenhum `deny` na seção `permission.task`,
+  wildcard ou nomeada).
+- **Achado sistêmico reportado ao humano (decisão pendente):** specs
+  Concordion escritas com `#execute=`/`#assertEquals=` não avaliam
+  asserção nenhuma (0 successes, 0 failures; o Concordion trata os
+  links como âncoras comuns), de modo que o veredito `pass` do gradle
+  não exercita a fixture. Afeta `Adr0012Fixture` e as demais ADRs nesse
+  formato, inclusive `BackendFixture`. As ADRs 0006/0008 usam a sintaxe
+  ativa `[texto](- "metodo()")`, sancionada por
+  `tests/product_tests/test_concordion_spec_infra.py`, e executam de
+  verdade (Successes: 2). Consertar as demais specs é decisão de escopo
+  do humano.
+
 ### Evidências de Testes — execução
 
 - [x] `.venv/bin/pytest tests/agents/ -m all`: 185 passed.
@@ -209,3 +244,19 @@ skills mantido)
   1 teste, 0 falhas (veredito pass).
 - [x] TDD Task 3: teste sintético de wildcard allow e teste de prosa
   aberta falharam antes do código (RED confirmado) e passaram depois.
+
+### Evidências de Testes — correções pós-revisão
+
+- [x] TDD Correção 2: RED confirmado (`expected:<fail> but was:<pass>`
+  com lógica antiga e deny nomeado sintético na seção task); GREEN
+  depois (`fail` com o sintético, `pass` sem ele, sem falso positivo
+  nos denies legítimos de skill/bash/edit/webfetch).
+- [x] `gradle test -PproductSpecialty=backend --tests 'Adr0012Fixture'`:
+  BUILD SUCCESSFUL (veredito pass).
+- [x] `.venv/bin/pytest -m all` (suíte completa): 964 passed, 31
+  deselected, 1 warning pré-existente (flutuação de versão de plugin,
+  fora de escopo).
+- [x] `ruff check src tests`: All checks passed.
+- [x] Largura de linha ≤ 120 colunas nos arquivos editados.
+- [x] Commits: `35d8fa8` (feat agents, aws-analista), `689ce4f`
+  (test backend, fixture ADR 0012), chore(plan) a seguir.
