@@ -160,10 +160,15 @@ skills mantido)
 
 ## Status
 
-- Fase: execução concluída (2026-10-14). Plano aprovado pelo humano
-  em 2026-10-14.
+- Fase: correção pós-revisão (2026-10-14). Revisão independente aprovou a
+  execução com 2 achados de melhoria; o humano aceitou corrigir ambos.
 - Executor: `eng-software` com `zai-coding-plan/glm-5.3-flash`.
 - Revisor: `rev` com `zai-coding-plan/glm-5.3`.
+- Correções aceitas: (1) adicionar bloco `permission.task` com wildcard
+  allow a `harness-conf/agents/aws-analista.md` (12º agente, fora da
+  enumeração original do plano); (2) fortalecer a fixture
+  `Adr0012Fixture.groovy` para reprovar denies nomeados na seção `task`,
+  alinhando a implementação à cobertura descrita na ADR 0012.
 
 ### Registro de execução
 
