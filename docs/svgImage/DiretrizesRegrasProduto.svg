@@ -1,153 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 940" width="100%" height="100%" style="font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; text-rendering: geometricPrecision;">
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="930" viewBox="0 0 960 930" role="img" aria-labelledby="title desc">
+  <title id="title">Diretrizes e Regras de Produto: referências e conteúdo</title>
+  <desc id="desc">Duas setas saem do cabeçalho do AGENTS.md e apontam para a Especificação do Produto e os Testes por Especialidade. As Instruções por Agente ficam em uma área própria dentro do contorno do AGENTS.md e não originam essas referências. Os três grupos incluem exemplos ilustrativos, não prescrições de ferramentas ou instruções universais.</desc>
   <defs>
-    <filter id="shadow" x="-8%" y="-8%" width="116%" height="116%">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.08"/>
-    </filter>
-    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="16" flood-color="#2563eb" flood-opacity="0.08"/>
-    </filter>
+    <style>
+      svg{fill:#20344c}text{font-family:"Segoe UI",Arial,sans-serif}
+      .name{font-size:23px;font-weight:650;text-anchor:middle}
+      .small{font-size:18px;fill:#586b80}
+      .leaf{font-size:20px}
+      .icon{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .branch{fill:none;stroke:#b8c6d8;stroke-width:1.5}
+    </style>
+    <marker id="arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 11 6 1 11Z" fill="#315ed4"/></marker>
+    <g id="file" class="icon"><path d="M4 1h10l6 6v16H4ZM14 1v6h6M8 12h8M8 17h8"/></g>
+    <g id="agent" class="icon"><path d="M12 2v4M3 13H1M23 13h-2"/><circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none"/><rect x="3" y="6" width="18" height="15" rx="5"/><circle cx="8" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M8 17h8"/></g>
+    <g id="spec" class="icon"><path d="M5 3H3v20h18V3h-2"/><rect x="7" y="1" width="10" height="4" rx="1"/><path d="M6 10l1.5 1.5L10 9M13 10h5M6 17l1.5 1.5L10 16M13 17h5"/></g>
+    <g id="tests" class="icon"><path d="M8 2h8M10 2v7L3 19q-2 3 2 3h14q4 0 2-3L14 9V2M7 14h10"/><path d="M9 18l2 2 4-4"/></g>
   </defs>
+  <rect width="960" height="930" fill="#fff"/>
+  <text x="480" y="42" font-size="30" font-weight="650" text-anchor="middle">Diretrizes e Regras de Produto</text>
 
-  <!-- Fundo branco -->
-  <rect width="100%" height="100%" fill="#ffffff"/>
+  <path d="M36 76H924V860H632V208H36Z" fill="#f4f7fc" stroke="#bbcce3" stroke-width="2" stroke-linejoin="round"/>
+  <use href="#file" transform="translate(53 104) scale(1.9)" color="#315ed4"/>
+  <text x="113" y="130" font-size="31" font-weight="650">AGENTS.md</text>
+  <text x="113" y="169" font-size="20" fill="#586b80">Seção de Diretrizes e Regras de Produto</text>
 
-  <!-- ================= CONTAINER PRINCIPAL (DIRETRIZES E REGRAS) ================= -->
-  <ellipse cx="600" cy="470" rx="570" ry="440" fill="#f8fafc" stroke="#2563eb" stroke-width="3" filter="url(#glow)"/>
+  <circle cx="176" cy="208" r="4" fill="#315ed4"/>
+  <circle cx="472" cy="208" r="4" fill="#315ed4"/>
+  <path d="M176 212V268" fill="none" stroke="#315ed4" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M472 212V268" fill="none" stroke="#315ed4" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="191" y="244" class="small">referencia</text>
+  <text x="487" y="244" class="small">referencia</text>
+  <text x="778" y="248" font-size="18" font-weight="600" fill="#586b80" text-anchor="middle">NO PRÓPRIO ARQUIVO</text>
 
-  <!-- Título Superior -->
-  <g filter="url(#shadow)">
-    <rect x="375" y="25" width="450" height="54" rx="27" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
-    <text x="600" y="59" font-size="21" fill="#1e3a8a" font-weight="bold" text-anchor="middle">Diretrizes e Regras de Produto</text>
-  </g>
+  <path d="M40 274H284L312 302V850H40Z" fill="#fff" stroke="#d2dcea" stroke-width="1.5"/>
+  <path d="M284 274V302H312" fill="#edf3ff" stroke="#d2dcea" stroke-width="1.5"/>
+  <circle cx="176" cy="345" r="44" fill="#edf3ff"/>
+  <use href="#spec" transform="translate(152 321) scale(2)" color="#315ed4"/>
+  <text x="176" y="413" class="name">Especificação</text>
+  <text x="176" y="443" class="name">do Produto</text>
+  <text x="60" y="484" class="small">Exemplos de artefatos</text>
+  <path d="M60 505V759M60 535H74M60 609H74M60 683H74M60 757H74" class="branch"/>
+  <rect x="74" y="508" width="222" height="54" rx="9" fill="#f7f9fd"/>
+  <text x="88" y="542" class="leaf">Histórias de usuário</text>
+  <rect x="74" y="582" width="222" height="54" rx="9" fill="#f7f9fd"/>
+  <text x="88" y="616" class="leaf">Regras de negócio</text>
+  <rect x="74" y="656" width="222" height="54" rx="9" fill="#f7f9fd"/>
+  <text x="88" y="690" class="leaf">Modelo de dados ER</text>
+  <rect x="74" y="730" width="222" height="54" rx="9" fill="#f7f9fd"/>
+  <text x="88" y="764" class="leaf">Critérios de aceite</text>
 
-  <!-- ================= 1. ESPECIFICAÇÃO DO PRODUTO (TOPO ESQUERDA) ================= -->
-  <!-- Spokes -->
-  <!-- Histórias de Usuário (Top-Left Externo) -->
-  <line x1="365" y1="220" x2="335" y2="176" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="230" y="136" width="210" height="40" rx="20" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
-    <text x="248" y="161" font-size="18">📝</text>
-    <text x="276" y="161" font-size="15" fill="#0369a1" font-weight="bold">Histórias de Usuário</text>
-  </g>
+  <path d="M336 274H580L608 302V850H336Z" fill="#fff" stroke="#d2dcea" stroke-width="1.5"/>
+  <path d="M580 274V302H608" fill="#eef8f3" stroke="#d2dcea" stroke-width="1.5"/>
+  <circle cx="472" cy="345" r="44" fill="#eef8f3"/>
+  <use href="#tests" transform="translate(448 321) scale(2)" color="#25745e"/>
+  <text x="472" y="413" class="name">Testes por</text>
+  <text x="472" y="443" class="name">Especialidade</text>
+  <text x="356" y="484" class="small">Exemplos de validação</text>
+  <path d="M356 503V760M356 534H370M356 608H370M356 682H370M356 756H370" class="branch"/>
+  <rect x="370" y="500" width="222" height="66" rx="9" fill="#f1f8f4"/>
+  <text x="384" y="524" font-size="18" fill="#4d6a5e">Qualidade</text>
+  <text x="384" y="551" font-size="19" font-weight="600">SonarQube / lint</text>
+  <rect x="370" y="574" width="222" height="66" rx="9" fill="#f1f8f4"/>
+  <text x="384" y="598" font-size="18" fill="#4d6a5e">Segurança</text>
+  <text x="384" y="625" font-size="19" font-weight="600">Semgrep / SAST</text>
+  <rect x="370" y="648" width="222" height="66" rx="9" fill="#f1f8f4"/>
+  <text x="384" y="672" font-size="18" fill="#4d6a5e">Comportamento</text>
+  <text x="384" y="699" font-size="19" font-weight="600">pytest / JUnit</text>
+  <rect x="370" y="722" width="222" height="66" rx="9" fill="#f1f8f4"/>
+  <text x="384" y="746" font-size="18" fill="#4d6a5e">Desempenho</text>
+  <text x="384" y="773" font-size="19" font-weight="600">k6 / carga</text>
 
-  <!-- Modelo de Dados ER (Left Externo) -->
-  <line x1="326" y1="280" x2="295" y2="280" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="90" y="260" width="205" height="40" rx="20" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
-    <text x="108" y="285" font-size="18">🗄️</text>
-    <text x="136" y="285" font-size="15" fill="#0369a1" font-weight="bold">Modelo de Dados ER</text>
-  </g>
+  <circle cx="778" cy="345" r="44" fill="#fff1d8"/>
+  <use href="#agent" transform="translate(754 321) scale(2)" color="#95631c"/>
+  <text x="778" y="413" class="name">Instruções</text>
+  <text x="778" y="443" class="name">por Agente</text>
+  <text x="650" y="484" class="small">Exemplos de instruções</text>
+  <path d="M650 503V797M650 538H662M650 624H662M650 710H662M650 796H662" class="branch"/>
+  <rect x="662" y="500" width="246" height="76" rx="9" fill="#fff"/>
+  <text x="676" y="526" font-size="18" fill="#80551c">sec · ao fim da tarefa</text>
+  <text x="676" y="555" font-size="20" font-weight="600">Rodar SAST</text>
+  <rect x="662" y="586" width="246" height="76" rx="9" fill="#fff"/>
+  <text x="676" y="612" font-size="18" fill="#80551c">sec · na revisão</text>
+  <text x="676" y="641" font-size="19" font-weight="600">Agrupar por criticidade</text>
+  <rect x="662" y="672" width="246" height="76" rx="9" fill="#fff"/>
+  <text x="676" y="698" font-size="18" fill="#80551c">eng-software · alterações</text>
+  <text x="676" y="727" font-size="20" font-weight="600">Rodar regressão</text>
+  <rect x="662" y="758" width="246" height="76" rx="9" fill="#fff"/>
+  <text x="676" y="784" font-size="18" fill="#80551c">qa · na validação</text>
+  <text x="676" y="813" font-size="20" font-weight="600">Testes de aceite</text>
 
-  <!-- Regras de Negócio (Subido na Diagonal para a Direita) -->
-  <line x1="452" y1="225" x2="495" y2="195" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="495" y="162" width="195" height="40" rx="20" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
-    <text x="513" y="187" font-size="18">📋</text>
-    <text x="541" y="187" font-size="15" fill="#0369a1" font-weight="bold">Regras de Negócio</text>
-  </g>
-
-  <!-- Critérios de Aceite (Puxado mais para a Esquerda) -->
-  <line x1="405" y1="354" x2="425" y2="415" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="330" y="415" width="205" height="40" rx="20" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
-    <text x="348" y="440" font-size="18">✅</text>
-    <text x="376" y="440" font-size="15" fill="#0369a1" font-weight="bold">Critérios de Aceite</text>
-  </g>
-
-  <!-- Círculo Central 1 -->
-  <g filter="url(#shadow)">
-    <circle cx="400" cy="280" r="76" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
-    <circle cx="400" cy="280" r="68" fill="#f0f9ff"/>
-    <text x="400" y="254" font-size="28" text-anchor="middle">📄</text>
-    <text x="400" y="283" font-size="16" fill="#0369a1" font-weight="bold" text-anchor="middle">Especificação</text>
-    <text x="400" y="304" font-size="16" fill="#0369a1" font-weight="bold" text-anchor="middle">do Produto</text>
-  </g>
-
-
-  <!-- ================= 2. TESTES POR ESPECIALIDADE (TOPO DIREITA) ================= -->
-  <!-- Spokes -->
-  <!-- SonarQube / Lint (Top-Right Externo) -->
-  <line x1="835" y1="220" x2="865" y2="176" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="760" y="136" width="205" height="40" rx="20" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
-    <text x="778" y="161" font-size="18">🔍</text>
-    <text x="806" y="161" font-size="15" fill="#047857" font-weight="bold">SonarQube / Lint</text>
-  </g>
-
-  <!-- K6 Performance (Right Externo) -->
-  <line x1="874" y1="280" x2="905" y2="280" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="905" y="260" width="195" height="40" rx="20" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
-    <text x="923" y="285" font-size="18">⚡</text>
-    <text x="951" y="285" font-size="15" fill="#047857" font-weight="bold">K6 (Performance)</text>
-  </g>
-
-  <!-- Semgrep / SAST (Centro) -->
-  <line x1="735" y1="285" x2="700" y2="305" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="520" y="288" width="180" height="40" rx="20" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
-    <text x="537" y="313" font-size="18">🛡️</text>
-    <text x="565" y="313" font-size="15" fill="#047857" font-weight="bold">Semgrep (SAST)</text>
-  </g>
-
-  <!-- Pytest / JUnit (Puxado mais para a Direita) -->
-  <line x1="790" y1="354" x2="770" y2="415" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="675" y="415" width="225" height="40" rx="20" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
-    <text x="693" y="440" font-size="18">🧪</text>
-    <text x="721" y="440" font-size="15" fill="#047857" font-weight="bold">Pytest / JUnit (DONE)</text>
-  </g>
-
-  <!-- Círculo Central 2 -->
-  <g filter="url(#shadow)">
-    <circle cx="800" cy="280" r="76" fill="#ffffff" stroke="#059669" stroke-width="3"/>
-    <circle cx="800" cy="280" r="68" fill="#f0fdf4"/>
-    <text x="800" y="254" font-size="28" text-anchor="middle">🧪</text>
-    <text x="800" y="283" font-size="16" fill="#047857" font-weight="bold" text-anchor="middle">Testes por</text>
-    <text x="800" y="304" font-size="16" fill="#047857" font-weight="bold" text-anchor="middle">Especialidade</text>
-  </g>
-
-
-  <!-- ================= 3. INSTRUÇÕES POR AGENTE (EMBAIXO CENTRO) ================= -->
-  <!-- Spokes -->
-  <!-- sec: ao fim da tarefa (Left) -->
-  <line x1="535" y1="595" x2="435" y2="574" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="210" y="546" width="225" height="56" rx="16" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
-    <text x="322" y="569" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">🔍 sec: ao fim da tarefa,</text>
-    <text x="322" y="589" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">rodar SAST</text>
-  </g>
-
-  <!-- sec: na revisão (Right) -->
-  <line x1="665" y1="595" x2="765" y2="574" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="765" y="546" width="255" height="56" rx="16" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
-    <text x="892" y="569" font-size="13" fill="#b45309" font-weight="bold" text-anchor="middle">⚠️ sec: na revisão,</text>
-    <text x="892" y="589" font-size="13" fill="#b45309" font-weight="bold" text-anchor="middle">agrupar violações por criticidade</text>
-  </g>
-
-  <!-- eng: após alterações (Bottom-Left) -->
-  <line x1="550" y1="670" x2="435" y2="715" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="295" y="715" width="230" height="56" rx="16" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
-    <text x="410" y="738" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">💻 eng: após alterações,</text>
-    <text x="410" y="758" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">rodar regressão</text>
-  </g>
-
-  <!-- qa: na validação (Bottom-Right) -->
-  <line x1="650" y1="670" x2="765" y2="715" stroke="#94a3b8" stroke-width="2"/>
-  <g filter="url(#shadow)">
-    <rect x="675" y="715" width="230" height="56" rx="16" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
-    <text x="790" y="738" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">🧪 qa: na validação,</text>
-    <text x="790" y="758" font-size="13.5" fill="#b45309" font-weight="bold" text-anchor="middle">rodar testes de aceite</text>
-  </g>
-
-  <!-- Círculo Central 3 -->
-  <g filter="url(#shadow)">
-    <circle cx="600" cy="620" r="76" fill="#ffffff" stroke="#d97706" stroke-width="3"/>
-    <circle cx="600" cy="620" r="68" fill="#fefce8"/>
-    <text x="600" y="594" font-size="28" text-anchor="middle">🤖</text>
-    <text x="600" y="623" font-size="16" fill="#b45309" font-weight="bold" text-anchor="middle">Instruções</text>
-    <text x="600" y="644" font-size="16" fill="#b45309" font-weight="bold" text-anchor="middle">por Agente</text>
-  </g>
+  <text x="40" y="902" font-size="18" fill="#586b80">Exemplos ilustrativos. Cada produto define os artefatos, as ferramentas e as instruções.</text>
 </svg>
