@@ -1048,10 +1048,30 @@ def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
     workflow_rules = product_map.split(
         "##### Workflows de Agentes de IA", 1
     )[1].split("##### UPSTREAM.md", 1)[0]
+    assert "##### Workflow de Definição de Escopo" in product_map
+    assert "##### Workflow Agêntico Simples" in product_map
+    scope_rules = " ".join(
+        product_map.split("##### Workflow de Definição de Escopo", 1)[1]
+        .split("##### Workflow Agêntico Simples", 1)[0]
+        .split()
+    )
+    simple_workflow_rules = " ".join(
+        product_map.split("##### Workflow Agêntico Simples", 1)[1]
+        .split("##### UPSTREAM.md", 1)[0]
+        .split()
+    )
 
     assert (
         "| Workflows de Agentes de IA | Markdown | eng-software | "
         "docs/framework-desenvolvimento-agentico.md |"
+    ) in elements_section
+    assert (
+        "| Workflow de Definição de Escopo | Markdown | eng-software | "
+        "docs/workflow-definicao-escopo.md |"
+    ) in elements_section
+    assert (
+        "| Workflow Agêntico Simples | Markdown | eng-software | "
+        "docs/workflow-agentico-simples.md |"
     ) in elements_section
     assert "especificações documentais, não especificações executáveis" in (
         workflow_rules
@@ -1061,6 +1081,32 @@ def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
     assert "writing-for-agents" in workflow_rules
     assert "harness-conf/agents/" in workflow_rules
     assert "docs/workflow-*.md" not in workflow_rules
+    assert "workflow independente de elicitação" in scope_rules
+    assert "`analista` conversa diretamente com o humano" in scope_rules
+    assert "especificação documental, não executável" in scope_rules
+    assert "não usa Concordion" in scope_rules
+    assert "não pertence às suítes `testes-produto`" in scope_rules
+    assert "eng-software" in scope_rules
+    assert "writing-for-agents" in scope_rules
+    assert "Alterações nos agentes ligados" in scope_rules
+    assert "consistência é verificada pelos testes estruturais" in scope_rules
+    assert "ciclo genérico de planejar, executar e revisar" in (
+        simple_workflow_rules
+    )
+    assert "versão simplificada" in simple_workflow_rules
+    assert "outro framework agêntico" in simple_workflow_rules
+    assert "Não substitui o Framework de Desenvolvimento Agêntico" in (
+        simple_workflow_rules
+    )
+    assert "especificação documental, não executável" in (
+        simple_workflow_rules
+    )
+    assert "não usa Concordion" in simple_workflow_rules
+    assert "não pertence às suítes `testes-produto`" in (
+        simple_workflow_rules
+    )
+    assert "eng-software" in simple_workflow_rules
+    assert "writing-for-agents" in simple_workflow_rules
 
 
 @pytest.mark.unit

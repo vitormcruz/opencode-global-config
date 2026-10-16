@@ -146,6 +146,26 @@ O analista deve elicitar, para cada história de usuário:
 - A consistência entre agentes e o Framework deve ser verificada pelos
   testes estruturais do repositório.
 
+##### Workflow de Definição de Escopo
+- É um workflow independente de elicitação em que o `analista` conversa
+  diretamente com o humano.
+- É uma especificação documental, não executável: não usa Concordion e não
+  pertence às suítes `testes-produto`.
+- O `eng-software` mantém este workflow; antes de criá-lo ou revisá-lo,
+  carrega `writing-for-agents`.
+- Alterações nos agentes ligados ao workflow devem ser refletidas nele e
+  vice-versa; a consistência é verificada pelos testes estruturais do
+  repositório.
+
+##### Workflow Agêntico Simples
+- É um ciclo genérico de planejar, executar e revisar uma mudança aprovada;
+  é uma versão simplificada de outro framework agêntico.
+- Não substitui o Framework de Desenvolvimento Agêntico.
+- É uma especificação documental, não executável: não usa Concordion e não
+  pertence às suítes `testes-produto`.
+- O `eng-software` mantém este workflow; antes de criá-lo ou revisá-lo,
+  carrega `writing-for-agents`.
+
 ##### UPSTREAM.md (skills externas)
 - Regra canônica na seção "Upstream de Skills Externas" do `AGENTS.md`;
   este documento referencia, não duplica
