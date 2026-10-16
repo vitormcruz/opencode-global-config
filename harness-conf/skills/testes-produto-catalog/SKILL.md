@@ -87,7 +87,8 @@ validada pelo `curador-produto`.
 
 ## Instruções
 
-Itens abaixo não são suíte; vivem em `## Instruções por Agente` se o
+Itens abaixo não são suíte; vivem na subseção **Instruções por Agente**,
+dentro das Diretrizes e Regras de Produto, se o
 humano aprovar.
 
 - Smoke tests e regressão incremental (construção).

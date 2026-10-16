@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1260" viewBox="0 0 960 1260" role="img" aria-labelledby="title desc">
+  <title id="title">Quem faz o quê no fluxo</title>
+  <desc id="desc">Sete momentos em ordem: inicialização, planejamento, revisão do plano, construção, revisão da construção, testes e finalização. O devflow coordena os especialistas e mantém o estado no Arquivo de Planejamento. Cada linha separa o trabalho dos agentes da decisão humana. Inicialização é rotina de entrada, não um Status do planejamento. Toda revisão usa uma instância nova. Falhas exigem correção e novos testes. O plano só é excluído com autorização humana e após concluir os gates.</desc>
+  <defs><style>
+    svg{fill:#172b42}text{font-family:"Segoe UI",Arial,sans-serif}
+    .body{font-size:18px;fill:#475b70}.heading{font-size:22px;font-weight:650}.label{font-size:18px;font-weight:600;fill:#275ccc}
+    .decision{font-size:18px;fill:#784a12}.number{font-size:18px;fill:#275ccc;font-weight:600;text-anchor:middle}
+  </style></defs>
+  <rect width="960" height="1260" fill="#fff"/>
+  <text x="40" y="48" class="label" letter-spacing="1.6">RESPONSABILIDADES E APROVAÇÕES</text>
+  <text x="40" y="91" font-size="34" font-weight="650">Quem faz o quê no fluxo</text>
+  <text x="40" y="123" class="body">O devflow coordena e mantém o estado. Os agentes executam.</text>
+  <text x="104" y="173" class="label">TRABALHO DOS AGENTES</text>
+  <text x="656" y="173" font-size="18" font-weight="600" fill="#8a5208">DECISÃO HUMANA</text>
+  <path d="M60 218V1053" stroke="#d6e0ee" stroke-width="2"/>
+
+  <rect x="88" y="194" width="524" height="128" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="194" width="284" height="128" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="224" r="19" fill="#edf2fb"/><text x="60" y="231" class="number">1</text>
+  <text x="108" y="226" class="heading">Inicialização</text>
+  <text x="108" y="255" class="body">curador-produto verifica as diretrizes.</text>
+  <text x="108" y="281" class="body">devflow confirma o escopo e cria o plano.</text>
+  <text x="108" y="307" class="body">O plano só nasce depois do escopo.</text>
+  <text x="656" y="244" class="decision">Decide sobre lacunas</text>
+  <text x="656" y="272" class="decision">e confirma o escopo.</text>
+
+  <rect x="88" y="338" width="524" height="112" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="338" width="284" height="112" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="368" r="19" fill="#edf2fb"/><text x="60" y="375" class="number">2</text>
+  <text x="108" y="370" class="heading">Planejamento</text>
+  <text x="108" y="400" class="body">eng-software → front* → dba → sec → qa</text>
+  <text x="108" y="429" class="body">Cada agente registra sua parte no plano.</text>
+  <text x="656" y="382" class="decision">Decide questões que</text>
+  <text x="656" y="410" class="decision">alteram o planejamento.</text>
+
+  <rect x="88" y="466" width="524" height="112" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="466" width="284" height="112" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="496" r="19" fill="#edf2fb"/><text x="60" y="503" class="number">3</text>
+  <text x="108" y="498" class="heading">Revisão do plano</text>
+  <text x="108" y="528" class="body">rev revisa. Especialistas corrigem.</text>
+  <text x="108" y="557" class="body">Toda revisão usa uma instância nova.</text>
+  <text x="656" y="510" class="decision">Autoriza cada nova revisão.</text>
+  <text x="656" y="538" class="decision">Aprova o planejamento.</text>
+
+  <rect x="88" y="594" width="524" height="112" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="594" width="284" height="112" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="624" r="19" fill="#edf2fb"/><text x="60" y="631" class="number">4</text>
+  <text x="108" y="626" class="heading">Construção</text>
+  <text x="108" y="656" class="body">dba e front* produzem seus artefatos.</text>
+  <text x="108" y="685" class="body">eng-software faz TDD, integra e commita.</text>
+  <text x="656" y="638" class="decision">Decide no gate</text>
+  <text x="656" y="666" class="decision">de refatoração.</text>
+
+  <rect x="88" y="722" width="524" height="112" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="722" width="284" height="112" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="752" r="19" fill="#edf2fb"/><text x="60" y="759" class="number">5</text>
+  <text x="108" y="754" class="heading">Revisão da construção</text>
+  <text x="108" y="784" class="body">rev revisa. Especialistas corrigem.</text>
+  <text x="108" y="813" class="body">Toda revisão usa uma instância nova.</text>
+  <text x="656" y="766" class="decision">Autoriza cada</text>
+  <text x="656" y="794" class="decision">nova revisão.</text>
+
+  <rect x="88" y="850" width="524" height="132" rx="10" fill="#edf7f3"/>
+  <rect x="636" y="850" width="284" height="132" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="880" r="19" fill="#edf2fb"/><text x="60" y="887" class="number">6</text>
+  <text x="108" y="884" class="heading">Testes</text>
+  <text x="108" y="916" class="body">qa executa → sec testa →</text>
+  <text x="108" y="945" class="body">curador-produto valida as evidências.</text>
+  <text x="656" y="890" class="decision">Após 3 falhas iguais</text>
+  <text x="656" y="918" class="decision">consecutivas, decide</text>
+  <text x="656" y="946" class="decision">se pausa para diagnóstico.</text>
+
+  <rect x="88" y="998" width="524" height="128" rx="10" fill="#f7f9fc"/>
+  <rect x="636" y="998" width="284" height="128" rx="10" fill="#fcf6eb"/>
+  <circle cx="60" cy="1028" r="19" fill="#edf2fb"/><text x="60" y="1035" class="number">7</text>
+  <text x="108" y="1030" class="heading">Finalização</text>
+  <text x="108" y="1060" class="body">curador-produto revisa as especificações.</text>
+  <text x="108" y="1089" class="body">eng-software corrige lacunas.</text>
+  <text x="656" y="1035" class="decision">Autoriza cada revalidação</text>
+  <text x="656" y="1063" class="decision">e, com gates concluídos,</text>
+  <text x="656" y="1091" class="decision">a exclusão do plano.</text>
+
+  <text x="40" y="1170" class="label" letter-spacing="1">MEMÓRIA TEMPORÁRIA DO CICLO</text>
+  <text x="40" y="1201" font-size="19">Arquivo de Planejamento · status, decisões, evidências e handoffs</text>
+  <text x="40" y="1236" class="body">* front participa quando há interface. Falhas exigem correção e novos testes.</text>
+</svg>

@@ -1,9 +1,5 @@
 # Regras do Repo — opencode-global-config
 
-As regras globais (que valem para todos os harnesses) vivem em
-`harness-conf/AGENTS.base.md`. Este arquivo cobre apenas o específico
-deste repo.
-
 ## Descoberta de Código e Documentação
 
 - Use SEMPRE o codebase-memory CLI (CÓDIGO) antes de grep/glob; grep/glob
@@ -133,12 +129,14 @@ Todos suportam `--yes` e `--check-only`.
 ## Sincronização Workflow ↔ Agentes
 
 - As definições de agentes ficam em `harness-conf/agents/` e devem estar
-  sempre sincronizadas com os workflows em `docs/workflow-agentes-dev.md`
-  e `docs/workflow-definicao-escopo.md`.
-- **Ao criar ou modificar um agente:** leia primeiro os workflows e
-  verifique alinhamento com o papel definido para aquele agente.
-- **Ao alterar um workflow:** identifique quais agentes precisam ser
-  atualizados e liste-os ao humano.
+  sempre sincronizadas com o Framework em
+  `docs/framework-desenvolvimento-agentico.md` e com o workflow de escopo em
+  `docs/workflow-definicao-escopo.md`.
+- **Ao criar ou modificar um agente:** leia primeiro o Framework e o
+  workflow de escopo e verifique alinhamento com o papel definido para
+  aquele agente.
+- **Ao alterar o Framework ou o workflow de escopo:** identifique quais
+  agentes precisam ser atualizados e liste-os ao humano.
 - Correções mecânicas de formatação (largura de linha, typo) podem ser
   aplicadas em qualquer arquivo, inclusive agentes e workflows, com
   registro no plano.
@@ -157,6 +155,11 @@ Todos suportam `--yes` e `--check-only`.
   conftest para `unit or integration`). No WSL/Linux, use
   `.venv/bin/pytest -m all`; no Windows, use
   `.\.venv\Scripts\pytest.exe -m all`.
+- Rode SEMPRE pela `.venv` do checkout atual (cada worktree tem a sua).
+  Não existe `.venv`? Crie: `python -m venv .venv` e, nela,
+  `python -m pip install -r requirements-dev.txt -e .`. Nunca use o Python
+  global nem `PYTHONPATH` para contornar; o `tests/conftest.py` aborta a
+  execução nesses casos.
 - Execute os testes no ambiente alvo. `-m agent_eval` requer Docker e o
   llama-server local do Qwen3-0.6B no WSL/Linux; `-m integration` exige as
   ferramentas e binários que cada teste declara como premissa.
@@ -165,10 +168,10 @@ Todos suportam `--yes` e `--check-only`.
   iniciar manualmente:
   `python3 tests/integration/model/local_model_server.py --up`.
 - Rode sempre a suíte completa do ambiente corrente, sem deixar teste de
-  fora. `skipif` por plataforma (ex.: "exige symlink (POSIX)") é mecanismo
-  da suíte, declarado no próprio teste, que o relatório mostra como skip
-  com motivo onde a capacidade não se aplica; não autoriza deixar de rodar
-  teste nem reduzir a seleção.
+  fora. `requires_posix` e `requires_windows` são marcadores de plataforma
+  declarados no próprio teste. O relatório mostra como skip, com motivo,
+  o que não se aplica ao sistema corrente; isso não autoriza deixar de
+  rodar teste nem reduzir a seleção.
 - Nenhum teste pode usar `skip`: sem pré-requisito externo disponível, use
   `pytest.fail` com mensagem clara e acionável. Silenciar testes esconde
   problemas de ambiente.
@@ -181,20 +184,6 @@ Todos suportam `--yes` e `--check-only`.
   (suíte meta em `testes-produto/tests/`, que roda quando os scripts
   mudam).
 
-## Testes por Especialidade
-
-| Especialidade | Script |
-|---------------|--------|
-| backend | `testes-produto/backend` |
-| segurança | `testes-produto/seguranca` |
-
-Agregador: `testes-produto`
-
-Executado pelo agente `qa` na fase Testes; a evidência é validada pelo
-`curador-produto`.
-
-Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
-
 ## README
 
 - Mantenha a seção de dependências do `README.md` atualizada sempre que
@@ -204,8 +193,8 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
 
 ## Sincronização dos Adaptadores
 
-- A fonte canônica fica em `harness-conf/` (agentes, skills, commands,
-  `opencode.json`, `AGENTS.base.md`); infra do repo fica na raiz
+-   A fonte canônica fica em `harness-conf/` (agentes, skills, commands e
+  configurações dos harnesses); infra do repo fica na raiz
   (`scripts/`, `src/`, `tests/`, `docs/`, `adapters/`, `plan/`).
 - O comportamento canônico fica em `src/opencode_config/harnesses/`:
   contrato `HarnessAdapter`, registry e factory com injeção de strategy
@@ -233,35 +222,70 @@ Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especi
   pedir.
 - Descubra a linguagem do projeto pelo contexto; use PT-BR por padrão.
 
-## Instruções por Agente
+## Diretrizes e Regras de Produto
 
-Cada agente lê a própria subseção no início de qualquer
-tarefa. Esta seção não contém comando de suíte.
+Consulte a Especificação do Produto em [`docs/README.md`](docs/README.md) e
+as demais Diretrizes e Regras de Produto antes de planejar ou implementar
+mudanças neste repo.
 
-### eng-software
+- Neste projeto, `docs/README.md` é a Especificação do Produto e integra as
+  Diretrizes e Regras de Produto, fonte de verdade dos elementos de
+  especificação ativos.
+- `harness-conf/agents/default-artifacts/` contém artefatos gerados por este
+  projeto para provisionar e orientar outros projetos. Eles são saídas deste
+  repositório, mas não definem os agentes, workflows ou elementos de
+  especificação ativos deste produto.
+- Alterações nas Diretrizes e Regras de Produto deste projeto não alteram
+  esses artefatos automaticamente. A evolução deles exige decisão e escopo
+  próprios.
+
+### Testes por Especialidade
+
+A especificação das suítes fica no arquivo independente
+`docs/testes-por-especialidade.md`. Esta subseção apenas referencia o
+arquivo e não reproduz seu conteúdo.
+
+Spec: [`docs/testes-por-especialidade.md`](docs/testes-por-especialidade.md)
+
+### Instruções por Agente
+
+Toda vez que um agente desta seção for utilizado, ele deve
+consultar a subseção com seu nome antes de executar a tarefa.
+Deve procurar instruções específicas para aquela utilização e
+cumpri-las quando existirem. A consulta vale para quem o
+acionou.
+
+`SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
+instrução adicional. Esta seção não contém comando de suíte.
+
+#### eng-software
+
+Sempre execute os testes automatizados relacionados às modificações feitas
+por você para verificar se ocorreu alguma regressão. Corrija imediatamente
+qualquer erro encontrado.
+
+#### dba
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### dba
+#### front
+
+Sempre execute os testes automatizados relacionados às modificações feitas
+por você para verificar se ocorreu alguma regressão. Corrija imediatamente
+qualquer erro encontrado.
+
+#### sec
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### front
+#### qa
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### sec
+#### rev
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
-### qa
-
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
-
-### rev
-
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
-
-### curador-produto
+#### curador-produto
 
 SEM INSTRUÇÕES A PEDIDO DO HUMANO

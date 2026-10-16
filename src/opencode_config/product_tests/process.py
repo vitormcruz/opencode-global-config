@@ -31,6 +31,13 @@ class ProcessResult:
 Runner = Callable[..., ProcessResult]
 
 
+def _utf8_environment(env: Mapping[str, str] | None) -> dict[str, str]:
+    child_environment = dict(os.environ if env is None else env)
+    child_environment.setdefault("PYTHONUTF8", "1")
+    child_environment.setdefault("PYTHONIOENCODING", "utf-8")
+    return child_environment
+
+
 def _read_stream(
     stream: object,
     name: str,
@@ -66,7 +73,7 @@ def run_process(
         process = subprocess.Popen(  # nosec B603
             arguments,
             cwd=cwd,
-            env=None if env is None else dict(env),
+            env=_utf8_environment(env),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

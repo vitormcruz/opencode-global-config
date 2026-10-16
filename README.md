@@ -136,11 +136,16 @@ alterado automaticamente. Execute o rollback e o bootstrap para recriá-lo. O
 rollback preserva o volume.
 
 Sem Docker, o bootstrap avisa e orienta a instalação de um runtime em user-space,
-sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. Em Linux,
-use Docker rootless. No WSL, use Docker Desktop com integração WSL. Consulte
-<https://docs.docker.com/engine/security/rootless/> ou
-<https://docs.docker.com/desktop/setup/install/>. Depois de iniciar o runtime,
-execute o bootstrap novamente.
+sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. O Docker
+esperado é o Docker Engine rootless (user-space), usado diretamente no Linux ou
+dentro da distro WSL. Docker Desktop não é suportado nem esperado.
+Consulte <https://docs.docker.com/engine/security/rootless/>. Depois de
+iniciar o runtime, execute o bootstrap novamente.
+
+**Windows:** o bootstrap só detecta `docker` no PATH do Windows. Sem ele, não
+provisiona o ai-memory, não usa o Docker do WSL, avisa a ausência do Docker e
+segue sem declarar o MCP. Para provisionar com o Docker do WSL, execute o
+bootstrap dentro do WSL.
 
 No Linux/WSL, o adapter mantém `opencode.json` como symlink canônico quando o
 Docker publica a porta em loopback. Com o fallback da bridge internal, ele
@@ -233,7 +238,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
-| ai-memory | Docker rootless; no WSL, Docker Desktop integrado | Docker Desktop em escopo do usuário |
+| ai-memory | Docker Engine rootless; no WSL, Docker Engine rootless na distro | sem `docker` no PATH do Windows, não provisiona e não usa o Docker do WSL; para usá-lo, rode o bootstrap dentro do WSL |
 | ruff | `pipx install ruff` | `pipx install ruff` |
 | shellcheck | `pipx install shellcheck-py` | release oficial no cache user-space |
 | pwsh | arquivo portatil em user-space | arquivo zip em user-space |
@@ -244,6 +249,12 @@ user-space conforme a seleção interativa ou `--yes`:
 | bandit | `pipx install bandit` | `pipx install bandit` |
 | JDK | OpenJDK portatil no cache user-space | OpenJDK portatil no cache user-space |
 | Gradle | distribuicao portatil no cache user-space | distribuicao portatil no cache user-space |
+
+O build Gradle usa o mirror Maven indicado por
+`GRADLE_MAVEN_MIRROR`. Se a variável não existir, ele lê o primeiro
+mirror com `mirrorOf=*` ou `mirrorOf=central` em `~/.m2/settings.xml`; sem mirror configurado, usa
+Maven Central. Em rede corporativa, configure o mirror aprovado antes de
+executar as specs Concordion.
 
 `pytest` é opcional na seleção interativa, mas entra no conjunto instalado por
 `--yes`. O AWS CLI v2 é obrigatório para `aws-analista`, `aws-sso-login` e
@@ -381,14 +392,48 @@ Taxonomia de markers agnóstica de SO e harness (detalhes em
 
 `-m all` é tradução literal de atalho feita pelo conftest antes da seleção;
 nunca inclui `agent_eval` e não acrescenta nem remove nada além do token
-`all`. Teste que exige capacidade de SO declara `skipif` no próprio teste
-(ex.: "exige symlink (POSIX)"): a suíte não o executa onde a capacidade não
-se aplica e o relatório mostra o skip com o motivo.
+`all`. Teste que exige um sistema operacional usa no próprio teste
+`requires_posix` ou `requires_windows`: a suíte não o executa onde a
+premissa não se aplica e o relatório mostra o skip com o motivo.
 
 No Windows, use o executável da virtualenv pelo PowerShell:
 
 ```powershell
 .\.venv\Scripts\pytest.exe -m all
+```
+
+### Rede e mirrors corporativos
+
+Os testes seguem a configuração global do usuário e nunca desligam TLS:
+
+- npm: `~/.npmrc` real (`--userconfig`), mesmo com HOME isolado.
+- Gradle: `GRADLE_MAVEN_MIRROR` ou o mirror `*`/`central` de
+  `~/.m2/settings.xml`; sem mirror, usa o Maven Central.
+- `crwl`: servidor HTTP local em `127.0.0.1`. O `litellm`, dependência do
+  crawl4ai, baixa tabelas do GitHub ao ser importado; o bootstrap grava
+  `LITELLM_LOCAL_MODEL_COST_MAP=True` e
+  `LITELLM_LOCAL_ANTHROPIC_BETA_HEADERS=True` no ambiente do usuário
+  (`HKCU\Environment` no Windows, bloco no perfil do shell no Linux/WSL)
+  sempre que o `crwl` está presente ou foi instalado, e os testes as
+  definem no subprocesso. Shells já abertos só as veem após reabrir.
+- pip, git e Maven leem a própria configuração global.
+
+Máquina sem mirror configurado usa a internet direta. Mirror configurado
+e inacessível (por exemplo, fora da VPN) faz o teste falhar com o registro
+configurado na mensagem; não há fallback silencioso para a internet.
+
+### Ambiente Python dos testes
+
+A suíte só roda na `.venv` do próprio checkout, com `opencode_config`
+instalado em modo editável a partir dele. O `tests/conftest.py` encerra a
+execução (código 3) com instruções quando o interpretador não é a `.venv`
+do checkout ou o pacote vem de outro clone (`pip install -e .` no Python
+global vale para a máquina inteira e aponta para um único clone). Cada
+worktree precisa da própria `.venv`:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -e .
 ```
 
 ### Testes de integração (Camada 2)

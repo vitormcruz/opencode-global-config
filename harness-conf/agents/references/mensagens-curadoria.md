@@ -1,27 +1,24 @@
-# Mensagens Pré-definidas — Curadoria
+# Mensagens Pré-definidas — Diretrizes e Regras de Produto
 
-## docs/README.md ou Testes por Especialidade não encontrado(s)
+## Artefatos de produto ou testes não encontrado(s)
 
-Este projeto ainda não possui o **docs/README.md** e/ou a
-seção **Testes por Especialidade** — o artefato que
-sustenta este workflow de desenvolvimento.
+Este projeto ainda não possui a **Especificação do Produto**,
+a especificação de **Testes por Especialidade** e/ou a referência
+de **Testes por Especialidade** no `AGENTS.md`.
 
-O **docs/README.md** é o contrato mínimo de especificação
-e documentação do projeto: define o quê deve existir, como
-é confeccionado e onde fica. Contém 4 seções obrigatórias:
-Definição de Escopo, Elementos de Especificação,
-Estratégias de Indexação de Código e **Testes por
-Especialidade** — que traduz regras de qualidade em suítes
-(backend, dados, segurança, frontend) e no agregador
-`testes-produto`. O `AGENTS.md` mantém só a tabela índice
-com link para a seção. Sem esse artefato, eu (curador) não
-tenho critério objetivo para validar aderência.
+A **Especificação do Produto** é o contrato mínimo de especificação
+e documentação do projeto. Define o escopo, os elementos de
+especificação e as regras de documentação. A especificação de
+**Testes por Especialidade** define as suítes, a interface, os
+critérios, os orçamentos e as proibições de validação. O
+`AGENTS.md` mantém as referências para esses documentos, o índice
+das suítes e as Instruções por Agente. Sem esses artefatos, eu
+(`curador-produto`) não tenho critério objetivo para validar
+aderência.
 
-**Recomendação:** trate a curadoria agora, sem sair do workflow —
-responda ao `devflow` que quer tratar, e as fases de desenvolvimento
-conduzirão o trabalho: o `devflow` media o processo seção a seção com
-sua aprovação, o `curador-produto` especifica os artefatos, o
-`eng-software` implementa os scripts e o `qa` executa o
-`testes-produto` na fase Testes. Se preferir seguir
-sem os artefatos agora, a lacuna será registrada no arquivo de
-planejamento e o desenvolvimento continua.
+**Recomendação:** defina as Diretrizes e Regras de Produto agora.
+Escolha se quer tratar essa questão agora. O
+`curador-produto` especifica os artefatos, o `eng-software`
+implementa os scripts e o `qa` executa `testes-produto` quando
+solicitado. Se preferir seguir sem os artefatos agora, a lacuna será
+registrada e a tarefa segue sem essa validação.

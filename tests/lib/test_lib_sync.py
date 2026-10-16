@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from platform_requirements import requires_symlink
+from platform_requirements import requires_posix
 from opencode_config.lib.sync import (
     backup_copy,
     backup_copy_with_timestamp,
@@ -117,7 +117,7 @@ def test_backup_uses_incremental_suffix_when_name_is_taken(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_backup_accepts_symlink_destination(tmp_path: Path) -> None:
     real = tmp_path / "real.txt"
     real.write_text("conteudo", encoding="utf-8")
@@ -147,7 +147,7 @@ def test_copy_path_reproduces_tree_and_file(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_copy_path_preserves_symlink(tmp_path: Path) -> None:
     real = tmp_path / "real.txt"
     real.write_text("conteudo", encoding="utf-8")
@@ -162,7 +162,7 @@ def test_copy_path_preserves_symlink(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_remove_path_handles_file_symlink_and_directory(
     tmp_path: Path,
 ) -> None:
@@ -255,7 +255,7 @@ def test_paths_equal_detects_extra_entry_in_tree(tmp_path: Path) -> None:
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_link_one_creates_symlink_and_backs_up_divergent_destination(
     tmp_path: Path,
 ) -> None:
@@ -275,7 +275,7 @@ def test_link_one_creates_symlink_and_backs_up_divergent_destination(
 
 
 @pytest.mark.integration
-@requires_symlink
+@requires_posix
 def test_link_one_is_noop_when_already_pointing_to_source(
     tmp_path: Path,
 ) -> None:

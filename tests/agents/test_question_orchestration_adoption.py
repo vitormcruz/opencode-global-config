@@ -51,16 +51,16 @@ def test_domain_agents_no_longer_reference_grill_me(
 
 
 @pytest.mark.unit
-def test_dev_workflow_matches_question_orchestration_adoption(
+def test_framework_matches_question_orchestration_adoption(
     repo_root: Path,
 ) -> None:
-    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
-        encoding="utf-8"
-    )
+    framework = (
+        repo_root / "docs" / "framework-desenvolvimento-agentico.md"
+    ).read_text(encoding="utf-8")
 
-    assert "question-orchestration" in workflow
-    assert "grill-me" not in workflow
-    assert "Pergunta skill para analista" not in workflow
+    assert "question-orchestration" in framework
+    assert "Perguntas dos agentes passam pelo `devflow`." in framework
+    assert "grill-me" not in framework.lower()
 
 
 @pytest.mark.unit
@@ -72,6 +72,18 @@ def test_scope_definition_workflow_references_question_orchestration(
     )
 
     assert "question-orchestration" in workflow
+
+
+@pytest.mark.unit
+def test_scope_definition_workflow_does_not_reference_curation(
+    repo_root: Path,
+) -> None:
+    workflow = (
+        repo_root / "docs/workflow-definicao-escopo.md"
+    ).read_text(encoding="utf-8").lower()
+
+    assert "curadoria" not in workflow
+    assert "curador-produto" not in workflow
 
 
 @pytest.mark.unit

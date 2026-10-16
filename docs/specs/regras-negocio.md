@@ -19,6 +19,11 @@ existente. Esta edição não cria testes.
    ausente ou provisionamento incompleto desativa os hooks e remove as
    declarações MCP gerenciadas de todos os harnesses. Após resolver o
    pré-requisito, a reexecução conclui o provisionamento antes de habilitar MCP.
+   O Docker esperado é o Docker Engine direto (Linux/rootless) ou dentro do
+   WSL; Docker Desktop não é suportado nem esperado. No Windows o bootstrap só
+   detecta `docker` no PATH do Windows: sem ele, não provisiona o ai-memory e
+   não usa o Docker do WSL; para provisionar com o Docker do WSL, rode o
+   bootstrap dentro do WSL.
    - **Verificação:** `tests/bootstrap/test_ai_memory_provision.py`,
      `tests/harnesses/test_opencode.py` e `tests/harnesses/test_copilot.py`.
    - **Fonte:** P1, SEC-09, ADR-0008 e SEC-01..SEC-11/SEC-21 em

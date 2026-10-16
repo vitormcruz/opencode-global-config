@@ -13,7 +13,9 @@ from .detect import DependencyDetection, DependencyStatus, detect_dependencies
 from .installers import (
     InstallContext,
     InstallResult,
+    ensure_crwl_environment,
     install_dependencies,
+    is_pytest_cov_ready,
     is_pytest_environment_ready,
 )
 
@@ -227,8 +229,30 @@ def _ensure_pytest_detection(
     )
 
 
-def run_bootstrap(
-    *,
+def _ensure_pytest_cov_detection(
+    detections: Sequence[DependencyDetection],
+    context: InstallContext,
+) -> tuple[DependencyDetection, ...]:
+    if not any(detection.name == "pytest-cov" for detection in detections):
+        return tuple(detections)
+    ready = is_pytest_cov_ready(context)
+    return tuple(
+        replace(
+            detection,
+            status=(
+                DependencyStatus.PRESENT
+                if ready
+                else DependencyStatus.MISSING
+            ),
+            error="",
+        )
+        if detection.name == "pytest-cov"
+        else detection
+        for detection in detections
+    )
+
+
+def run_bootstrap(    *,
     context: InstallContext | None = None,
     repo_root: Path | None = None,
     environment: EnvironmentKind | None = None,
@@ -261,6 +285,7 @@ def run_bootstrap(
         )
     )
     found = _ensure_pytest_detection(found, active_context)
+    found = _ensure_pytest_cov_detection(found, active_context)
     if not quiet:
         output.write(render_detection_table(found))
 
@@ -307,4 +332,14 @@ def run_bootstrap(
     )
     if docling_available:
         _docling_model_guidance(selected_environment, output)
+    crwl_available = any(
+        detection.name == "crwl"
+        and detection.status is DependencyStatus.PRESENT
+        for detection in found
+    ) or any(
+        result.name == "crwl" and result.success
+        for result in install_results
+    )
+    if crwl_available:
+        ensure_crwl_environment(active_context)
     return BootstrapResult(found, selected, install_results, manual)

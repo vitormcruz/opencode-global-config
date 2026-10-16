@@ -438,3 +438,37 @@ def test_detect_dependencies_uses_only_declarative_specs(
     assert [result.name for result in results] == ["one", "two"]
     assert all(result.status is DependencyStatus.PRESENT for result in results)
     assert all(result.install_method == "metodo WSL" for result in results)
+
+
+@pytest.mark.unit
+def test_java_is_detected_with_dash_version_for_java8_runtimes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from opencode_config.bootstrap.registry import ALL_DEPENDENCY_REGISTRY
+
+    spec = next(s for s in ALL_DEPENDENCY_REGISTRY if s.name == "java")
+    monkeypatch.setattr(
+        "opencode_config.bootstrap.detect.shutil.which",
+        lambda command, path=None: f"/mock/bin/{command}",
+    )
+
+    def java8_runner(command, **_kwargs):
+        accepted = tuple(command[1:]) == ("-version",)
+        return CommandResult(
+            args=tuple(command),
+            returncode=0 if accepted else 1,
+            stdout="",
+            stderr=(
+                'openjdk version "1.8.0_504"'
+                if accepted
+                else "Unrecognized option: --version"
+            ),
+        )
+
+    detection = detect_dependency(
+        spec,
+        EnvironmentKind.WINDOWS,
+        runner=java8_runner,
+    )
+
+    assert detection.status is DependencyStatus.PRESENT

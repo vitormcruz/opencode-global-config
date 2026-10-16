@@ -172,6 +172,8 @@ def _run_git(upstream_dir: Path, *arguments: str) -> str:
     run_options = {
         "check": True,
         "text": True,
+        "encoding": "utf-8",
+        "errors": "replace",
         "timeout": SKILL_COMMAND_TIMEOUT_SECONDS,
     }
     if "--progress" in arguments:
@@ -706,6 +708,8 @@ def _run_documented_command(
                 cwd=repo_root,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
             )
         else:
@@ -720,6 +724,8 @@ def _run_documented_command(
                 cwd=repo_root,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=SKILL_COMMAND_TIMEOUT_SECONDS,
             )
     except subprocess.TimeoutExpired as problem:
@@ -924,6 +930,8 @@ def _clone_upstream(
     clone_options = {
         "check": True,
         "text": True,
+        "encoding": "utf-8",
+        "errors": "replace",
         "timeout": SKILL_COMMAND_TIMEOUT_SECONDS,
     }
     if show_progress:

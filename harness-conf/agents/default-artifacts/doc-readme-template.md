@@ -1,14 +1,20 @@
-<!-- TEMPLATE: spec completa que vira o docs/README.md do projeto-alvo
-     (Definição de Escopo, Elementos de Especificação, Estratégias de
-     Indexação de Código e Testes por Especialidade). Ponto de partida
-     da curadoria; copie e adapte seção por seção com o humano. -->
-# Mapa do Produto
+<!-- TEMPLATE: especificação do produto que vira o README.md da pasta de
+     documentação do projeto-alvo. Define escopo, elementos de especificação
+     e regras de documentação. Ponto de partida das Diretrizes e Regras de
+     Produto; copie e adapte
+     seção por seção com o humano. -->
+# Especificação do Produto
 
-Este documento é a fonte de verdade do produto. Define o escopo do que será
-construído, os artefatos que devem ser produzidos em cada ciclo de
-desenvolvimento e as regras que governam como esses artefatos são criados e
-mantidos. É lido por agentes e humanos antes de qualquer ciclo de
-implementação.
+Este documento define como o escopo deve ser definido/elicitado, o que é usado como documentação de 
+especificação, seu formato e onde essa documentação repousa no repositório. Isso serve para:
+
+  1. Dar perenidade as informações do projeto, facilitando a comunicação e o entendimento do que 
+     o produto trata e faz;
+  2. Contextualizar e criar cercas par agentes de desenvolvimento que atuem neste produto.
+
+Adicionalmente, consulte o documento de [Testes por Especialidade](testes-por-especialidade.md) que possui
+a descrição de testes que precisam ser feitos sempre que modificações forem feitas no produto, de modo a 
+garantir a sua qualidade e conformidade.
 
 ## Definição de Escopo
 
@@ -31,9 +37,9 @@ O analista deve elicitar:
 - Requisitos Não Funcionais gerais (transversais, sem história específica) são:
     - Consolidados em `docs/specs/rnf-gerais.md`
     - Derivados em Critérios de Aceitação no mesmo arquivo, com uma seção para cada RNF
-- O humano pode iniciar o workflow imediatamente após elicitar uma história — nesse caso
-  a história fica apenas no arquivo de planejamento do devflow e pode ser descartada após o ciclo.
-- O humano pode também elicitar múltiplas histórias antecipadamente para iniciar os workflows
+- O humano pode iniciar a implementação imediatamente após elicitar uma história — nesse caso
+  a história fica apenas no arquivo de planejamento e pode ser descartada após o ciclo.
+- O humano pode também elicitar múltiplas histórias antecipadamente para iniciar os trabalhos
   posteriormente, uma por vez — nesse caso o analista salva cada história em `docs/backlog/`
   (um arquivo Markdown por história).
 
@@ -131,148 +137,3 @@ O analista deve elicitar:
 - Formato: bloco Mermaid (C4Context para L1, C4Container para L2)
 - Regenerar sempre que um ADR for adicionado ou superseded
 - Não editar manualmente — é artefato gerado
-
----
-
-## Estratégias de Indexação de Código
-
-| Ferramenta | Uso | Instalação |
-|-----------|-----|-----------|
-| codebase-memory CLI | Grafo de código e docs; navegação estrutural e consulta de seções. | `codebase-memory-mcp cli` |
-
----
-
-## Testes por Especialidade
-
-Scripts por especialidade e o agregador `testes-produto`.
-Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
-exit 1 = fail. Sem argumentos.
-
-O agregador `testes-produto` chama as quatro suítes e
-consolida o relatório. Falha se qualquer suíte falhar.
-Quem o executa na fase Testes é o agente `qa`; o
-`curador-produto` valida a evidência.
-
-Critérios, orçamento e ferramentas saem da entrevista de
-curadoria. Fingerprint e cache ficam em `testes-produto/target/`
-e não são versionados.
-
-**PROIBIDO:** bypassar, comentar, remover ou condicionar
-qualquer verificação. Ferramenta ausente não justifica
-remoção — reporte finding com instrução de instalação.
-
-### Dois níveis de teste
-
-1. **Testes da aplicação** — validam o produto em
-   desenvolvimento. Rodam via suítes/agregador
-   `testes-produto`, executados pelo agente `qa` na fase
-   Testes do workflow, sempre que se desenvolve funcionalidade.
-2. **Testes dos scripts de teste** — os scripts de suíte e
-   o agregador são código e têm testes próprios, em
-   `testes-produto/tests/`, fora da suíte `-m all` (separação por
-   path, sem marker novo). Esta
-   seção é a especificação executável deles: os testes dos
-   scripts cobrem exatamente o que ela define (suítes,
-   interface JSON, proibições). Rodam SOMENTE
-   quando os scripts mudam — por exemplo, curadoria
-   alterando ferramentas ou critérios por orientação do
-   humano —, nunca no ciclo normal de desenvolvimento.
-
-O `AGENTS.md` do projeto mantém apenas a tabela índice das
-suítes com link para esta seção
-(`docs/README.md#testes-por-especialidade`).
-
-### backend
-
-**Arquivo:** `testes-produto/backend`
-
-**Descrição:** Testes e análise do backend.
-
-**O que deve conter:**
-- Comandos de teste do projeto (unitários + integração)
-- Relatório de cobertura de testes
-- Análise estática, se o projeto tiver
-- Specs executáveis da especialidade (quando o projeto usa spec
-  executável), rodadas via Concordion com tradutor Python interno à
-  suíte; spec falhando = bloqueante
-
-**Ferramentas:** definidas na entrevista
-
-**Critérios:** definidos na entrevista
-
-**Orçamento:** tetos da entrevista; ver interface padronizada
-
-### dados
-
-**Arquivo:** `testes-produto/dados`
-
-**Descrição:** Validação de schema e modelo de dados.
-
-**O que deve conter:**
-- Validação de existência de documentos de especificação
-- Validação de sintaxe do modelo (DBML ou equivalente)
-- Conferência entre modelo e schema atual
-- Specs executáveis da especialidade (quando o projeto usa spec
-  executável), rodadas via Concordion com tradutor Python interno à
-  suíte; spec falhando = bloqueante
-
-**Ferramentas:** definidas na entrevista
-
-**Critérios:** definidos na entrevista
-
-**Orçamento:** tetos da entrevista; ver interface padronizada
-
-### segurança
-
-**Arquivo:** `testes-produto/seguranca`
-
-**Descrição:** Segurança — secrets, dependências, OWASP.
-
-**O que deve conter:**
-- Secrets scan no repositório
-- Auditoria de dependências
-- Verificação de vulnerabilidades conhecidas
-- Specs executáveis da especialidade (quando o projeto usa spec
-  executável), rodadas via Concordion com tradutor Python interno à
-  suíte; spec falhando = bloqueante
-
-**Ferramentas:** definidas na entrevista
-
-**Critérios:** definidos na entrevista
-
-**Orçamento:** tetos da entrevista; ver interface padronizada
-
-### frontend
-
-**Arquivo:** `testes-produto/frontend`
-
-**Descrição:** Testes, lint, build e acessibilidade do
-frontend.
-
-**O que deve conter:**
-- Testes frontend
-- Lint e build
-- Verificação de acessibilidade
-- Cobertura da suíte de UI, se houver
-- `pa11y`, `axe-core` ou ambos: a entrevista decide
-- Specs executáveis da especialidade (quando o projeto usa spec
-  executável), rodadas via Concordion com tradutor Python interno à
-  suíte; spec falhando = bloqueante
-
-**Ferramentas:** definidas na entrevista
-
-**Critérios:** definidos na entrevista
-
-**Orçamento:** tetos da entrevista; ver interface padronizada
-
-### Agregador
-
-**Arquivo:** `testes-produto`
-
-Chama as quatro suítes (`testes-produto/backend`,
-`testes-produto/dados`, `testes-produto/seguranca`,
-`testes-produto/frontend`) e consolida o
-relatório no fim. `status` é `fail` se qualquer suíte
-falhar. Não reabre entrevista nem inventa check.
-Executado pelo agente `qa` na fase Testes do workflow; o
-`curador-produto` valida a evidência da execução.

@@ -77,7 +77,7 @@ Quando o humano oferece uma ferramenta, analise estes pontos:
 - Chama as quatro suítes (backend, dados, segurança, frontend)
   e consolida `findings`
 - `status` é `fail` se qualquer suíte falhar
-- Execução na fase Testes do workflow: agente `qa` (o script
+- Execução: o agente `qa` executa quando acionado (o script
   apenas agrega suítes)
 - Evidência da execução validada pelo `curador-produto`
 - Não substitui a entrevista de ferramentas por especialidade

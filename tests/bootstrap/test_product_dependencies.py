@@ -1,5 +1,6 @@
 import pytest
 
+from platform_requirements import requires_posix
 from opencode_config.bootstrap.registry import (
     PRODUCT_DEPENDENCY_REGISTRY,
 )
@@ -226,6 +227,7 @@ def build_tar_with_symlink(tmp_path, link_name, link_target):
 
 
 @pytest.mark.unit
+@requires_posix
 def test_extract_archive_accepts_symlinks_inside_the_jdk_tarball(
     tmp_path,
     monkeypatch,

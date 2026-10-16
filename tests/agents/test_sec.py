@@ -19,9 +19,9 @@ def test_sec_records_manual_script_during_planning(sec_content: str) -> None:
 
 
 @pytest.mark.unit
-def test_sec_executes_only_manual_script_in_test_phase(sec_content: str) -> None:
+def test_sec_executes_only_manual_script_when_testing(sec_content: str) -> None:
     lower = sec_content.lower()
-    assert "fase testes" in lower or "fase de testes" in lower
+    assert "ao executar testes" in lower or "execução dos testes" in lower
     assert "só o roteiro" in lower or "somente o roteiro" in lower or (
         "apenas o roteiro" in lower
     )

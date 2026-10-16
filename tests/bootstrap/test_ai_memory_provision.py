@@ -12,6 +12,7 @@ from urllib.error import HTTPError
 
 import pytest
 
+from platform_requirements import requires_posix
 from opencode_config.bootstrap import ai_memory
 from opencode_config.bootstrap.installers import InstallContext
 from opencode_config.harnesses import HarnessDefinition
@@ -34,6 +35,12 @@ def make_context(home: Path) -> InstallContext:
         ),
         current_environment={"PATH": "/usr/bin"},
     )
+
+
+WINDOWS_TOOLS = {
+    "powershell.exe": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+    "docker": "C:/Program Files/Docker/docker.exe",
+}
 
 
 class FakeAiMemoryRunner:
@@ -156,7 +163,7 @@ class FakeAiMemoryRunner:
     def _inspect_container(self, arguments: tuple[str, ...]) -> CommandResult:
         if not self.container_available:
             return self._result(arguments, 1, "container not found")
-        source = self.home / ".local" / "share" / "ai-memory"
+        source = str(self.home / ".local" / "share" / "ai-memory")
         inspected = {
             "Config": {
                 "Image": self.container_image,
@@ -194,7 +201,7 @@ class FakeAiMemoryRunner:
             "Mounts": [
                 {
                     "Type": "bind",
-                    "Source": str(source),
+                    "Source": source,
                     "Destination": "/data",
                 }
             ],
@@ -338,6 +345,39 @@ def test_ai_memory_without_docker_warns_and_cleans_active_hooks(
 
 
 @pytest.mark.unit
+def test_docker_guidance_for_windows_points_to_path_and_wsl_without_desktop() -> None:
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.WINDOWS)
+
+    assert "PATH" in message
+    assert "WSL" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+    assert "por enquanto" not in message
+    assert "a partir do Windows" not in message
+
+
+@pytest.mark.unit
+def test_docker_guidance_for_wsl_asks_for_rootless_engine_without_desktop() -> None:
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.WSL)
+
+    assert "WSL" in message
+    assert "rootless" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+
+
+@pytest.mark.unit
+def test_docker_guidance_for_linux_never_suggests_docker_desktop() -> None:
+    """Caracterização: protege o Linux contra regressão para Docker Desktop."""
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.LINUX)
+
+    assert "rootless" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+
+
+@pytest.mark.unit
+@requires_posix
 def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -376,9 +416,7 @@ def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
     assert (context.paths.data_dir / "ai-memory").is_dir()
     assert stat.S_IMODE((context.paths.data_dir / "ai-memory").stat().st_mode) == 0o700
     assert (
-        context.paths.data_dir
-        / "ai-memory"
-        / shared_ai_memory.AI_MEMORY_READY_MARKER
+        context.paths.data_dir / "ai-memory" / shared_ai_memory.AI_MEMORY_READY_MARKER
     ).is_file()
     docker_run = next(command for command in runner.commands if command[1] == "run")
     assert "127.0.0.1:49374:49374" in docker_run
@@ -436,6 +474,7 @@ def test_ai_memory_waits_for_container_health_before_endpoint_probe(
 
 
 @pytest.mark.unit
+@requires_posix
 def test_ai_memory_uses_internal_bridge_url_when_docker_does_not_publish_loopback(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -477,9 +516,7 @@ def test_ai_memory_uses_internal_bridge_url_when_docker_does_not_publish_loopbac
     assert url_marker.read_text(encoding="utf-8").strip() == expected_url
     assert stat.S_IMODE(url_marker.parent.stat().st_mode) == 0o700
     assert not (
-        context.paths.data_dir
-        / "ai-memory"
-        / shared_ai_memory.AI_MEMORY_URL_MARKER
+        context.paths.data_dir / "ai-memory" / shared_ai_memory.AI_MEMORY_URL_MARKER
     ).exists()
     assert shared_ai_memory.ai_memory_mcp_url(context.paths.home) == expected_url
 
@@ -658,11 +695,7 @@ def test_ai_memory_windows_verifies_both_user_space_wrapper_assets(
     monkeypatch.setattr(
         ai_memory.shutil,
         "which",
-        lambda name, **_kwargs: (
-            "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
-            if name == "powershell.exe"
-            else "C:/Program Files/Docker/docker.exe"
-        ),
+        lambda name, **_kwargs: WINDOWS_TOOLS.get(name),
     )
     downloads: list[str] = []
 
@@ -685,11 +718,7 @@ def test_ai_memory_windows_verifies_both_user_space_wrapper_assets(
     for asset_name, contents in asset_contents.items():
         assert (bin_directory / asset_name).read_bytes() == contents
     expected_state_marker = (
-        home
-        / ".local"
-        / "state"
-        / "ai-memory"
-        / shared_ai_memory.AI_MEMORY_URL_MARKER
+        home / ".local" / "state" / "ai-memory" / shared_ai_memory.AI_MEMORY_URL_MARKER
     )
     assert shared_ai_memory._mcp_url_marker(context.paths) == expected_state_marker
     assert shared_ai_memory.ai_memory_mcp_url(home) == result.mcp_url
@@ -770,9 +799,7 @@ def test_ai_memory_download_hash_mismatch_blocks_installation(
     assert not result.provisioned
     assert not (context.paths.bin_dir / "ai-memory").exists()
     assert not (
-        context.paths.data_dir
-        / "ai-memory"
-        / shared_ai_memory.AI_MEMORY_READY_MARKER
+        context.paths.data_dir / "ai-memory" / shared_ai_memory.AI_MEMORY_READY_MARKER
     ).exists()
     assert "SHA256" in result.message
 
@@ -1088,6 +1115,7 @@ def _read_security_spec_table(repo_root: Path, requirement: str) -> dict[str, st
 
 
 @pytest.mark.unit
+@requires_posix
 def test_ai_memory_security_spec_tables_use_bootstrap_values(
     repo_root: Path,
     tmp_path: Path,

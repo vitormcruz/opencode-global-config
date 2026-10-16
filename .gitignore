@@ -29,3 +29,8 @@ __pycache__/
 build/
 .gradle/
 target/
+# O projeto usa o Gradle provisionado no cache user-space; não versiona
+# wrappers gerados por ferramentas locais.
+gradle/
+gradlew
+gradlew.bat

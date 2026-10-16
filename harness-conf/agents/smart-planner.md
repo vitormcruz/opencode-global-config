@@ -244,20 +244,29 @@ Após o plano completo ser aprovado:
    inicie a instância com o modelo registrado para o papel.
    Caso contrário, instrua a troca manual para o modelo
    escolhido e aguarde a confirmação humana antes do spawn.
-5. Crie uma instância nova do executor. Dê-lhe como contexto
-   o plano aprovado, o estado persistido e a instrução de
-   executar somente o escopo aprovado. Instrua-o também a
-   carregar e seguir a skill `git-workflow-and-versioning`
-   para decidir checkpoints, agrupamento e mensagens de
-   commit. O briefing é enviado diretamente no spawn; não
-   gere prompts ou arquivos de handoff como saída normal.
+5. Para cada unidade de trabalho, decida entre reutilizar a
+   instância registrada ou criar outra conforme a política de
+   instâncias do workflow. Reutilize quando o objetivo, o papel, o
+   modelo, as capacidades e o contexto continuarem válidos. Crie
+   outra quando houver mudança de escopo, comportamento, arquitetura,
+   premissa, modelo, capacidade ou confiabilidade do contexto. Dê ao
+   executor o plano aprovado, o estado persistido e a instrução de
+   executar somente o escopo aprovado. Ao reutilizar, envie apenas as
+   mudanças desde o último handoff. Ao criar, envie um briefing
+   autocontido. Instrua-o também a carregar e seguir a skill
+   `git-workflow-and-versioning` para decidir checkpoints,
+   agrupamento e mensagens de commit. Não gere prompts ou arquivos de
+   handoff como saída normal.
 6. Quando o executor concluir, crie uma **nova instância**
    independente do revisor, com o modelo do revisor. Ela
    compara o resultado com o plano e reporta aprovação ou
    achados; ela nunca corrige diretamente.
-7. Se houver achados, crie uma nova instância do executor
-   para corrigir somente os achados aceitos no plano e, em
-   seguida, uma nova instância independente do revisor.
+7. Se houver achados, corrija somente os achados aceitos no plano.
+   Reutilize a instância do executor se a correção pertencer à mesma
+   unidade de trabalho e o contexto continuar confiável. Crie outra
+   quando houver mudança de premissa, replanejamento ou perda de
+   confiabilidade. Em seguida, crie uma nova instância independente
+   do revisor. Se houver dúvida entre reutilizar e criar, crie outra.
    Nunca reutilize a instância revisora anterior.
 
 ## Revisão Independente

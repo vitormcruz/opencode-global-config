@@ -103,90 +103,109 @@ DOC_TEMPLATE = dedent(
 
     ## Testes por Especialidade
 
-    Scripts por especialidade e o agregador `testes-produto`.
-    Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
-    exit 1 = fail. Sem argumentos. O agregador chama as suítes
-    definidas nesta seção e consolida o relatório; falha se qualquer
-    suíte falhar. Critérios e ferramentas saem da entrevista de
-    curadoria.
+    A especificação das suítes fica no arquivo independente
+    `testes-por-especialidade.md`, no mesmo diretório deste arquivo.
+    Consulte [Testes por Especialidade](testes-por-especialidade.md)
+    para definir testes da aplicação, testes dos scripts de teste,
+    interface JSON, critérios, orçamento e proibições.
+    """
+)
 
-    **PROIBIDO:** bypassar, comentar, remover ou condicionar
-    qualquer verificação. Ferramenta ausente não justifica
-    remoção — reporte finding com instrução de instalação.
+DIRETRIZES_REGRAS_TEMPLATE = dedent(
+    """
+    ## Diretrizes e Regras de Produto
 
-    ### backend
-
-    **Arquivo:** `testes-produto/backend`
-
-    - pytest completo, ruff, shellcheck, PSScriptAnalyzer e pytest-cov
-    - cobertura mínima de 70%
-    - Specs executáveis da especialidade backend em Concordion-Markdown,
-      rodadas via Concordion com tradutor Python interno à suíte
-
-    ### segurança
-
-    **Arquivo:** `testes-produto/seguranca`
-
-    - gitleaks, pip-audit e bandit
-    - Specs executáveis da especialidade segurança em Concordion-Markdown,
-      rodadas via Concordion com tradutor Python interno à suíte
-
-    ### Agregador
-
-    **Arquivo:** `testes-produto`
-
-    Chama as suítes definidas nesta seção, conforme a curadoria do
-    projeto-alvo, consolida `findings` e não chama Concordion diretamente.
-    O agente `qa` executa o agregador na fase Testes; o `curador-produto`
-    valida a evidência. A suíte meta vive em `testes-produto/tests/`.
-    Artefatos temporários de uma instalação genérica ficam em
-    `testes-produto/target/` e não são versionados.
-
-    ### Dois níveis de teste
-
-    1. **Testes da aplicação** — validam o produto em
-       desenvolvimento. Rodam via suítes/agregador
-       `testes-produto` na fase Testes do workflow, sempre
-       que se desenvolve funcionalidade.
-    2. **Testes dos scripts de teste** — os scripts de suíte
-       e o agregador são código e têm testes próprios.
-       Esta seção é a especificação executável deles: os
-       testes dos scripts cobrem exatamente o que ela define.
-       Rodam SOMENTE quando os scripts mudam, nunca no ciclo
-       normal de desenvolvimento.
-
-    O `AGENTS.md` do projeto mantém apenas a tabela índice das
-    suítes com link para esta seção
-    (`docs/README.md#testes-por-especialidade`).
-
-    ### Suítes
-
-    - backend: `testes-produto/backend`
-    - segurança: `testes-produto/seguranca`
-    - Agregador: `testes-produto`
-
-    Novas especialidades entram por curadoria do projeto-alvo.
+    Consulte a [Especificação do Produto](docs/README.md), parte das
+    Diretrizes e Regras de Produto, antes de planejar ou implementar mudanças
+    neste repo.
     """
 )
 
 TESTES_PRODUTO_TEMPLATE = dedent(
     """
-    ## Testes por Especialidade
+    ### Testes por Especialidade
 
-    | Especialidade | Script |
-    |---------------|--------|
-    | backend | testes-produto/backend |
-    | dados | testes-produto/dados |
-    | segurança | testes-produto/seguranca |
-    | frontend | testes-produto/frontend |
+    A especificação das suítes fica no arquivo independente
+    `docs/testes-por-especialidade.md`. Esta subseção apenas referencia
+    o arquivo e não reproduz sua tabela, seus critérios ou seus scripts.
 
-    Agregador: `testes-produto`
+    Spec: [docs/testes-por-especialidade.md](docs/testes-por-especialidade.md)
+    """
+)
 
-    Chama as suítes definidas na tabela, conforme a curadoria do projeto-alvo,
-    e consolida o relatório. O agente `qa` executa; o `curador-produto` valida
-    a evidência. Testes dos scripts: `testes-produto/tests/`.
+TESTES_ESPECIALIDADE_TEMPLATE = dedent(
+    """
+    # Testes por Especialidade
 
-    Spec: [docs/README.md#testes-por-especialidade](docs/README.md#testes-por-especialidade)
+    Este documento define as suítes de validação do produto, o contrato
+    de saída, os critérios, os limites, as ferramentas e o agregador.
+
+    ## Contrato das Suítes
+
+    Scripts por especialidade e o agregador `testes-produto`.
+    Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
+    exit 1 = fail. Sem argumentos.
+
+    O agregador chama as suítes definidas neste documento e consolida
+    o relatório. Falha se qualquer suíte falhar.
+
+    **PROIBIDO:** bypassar, comentar, remover ou condicionar qualquer
+    verificação. Ferramenta ausente não justifica remoção. Reporte o
+    finding com instrução de instalação.
+
+    ## Dois níveis de teste
+
+    1. **Testes da aplicação:** validam o produto em desenvolvimento e
+       rodam via as suítes e o agregador `testes-produto`.
+    2. **Testes dos scripts de teste:** validam os scripts das suítes e
+       o agregador quando esses scripts mudam.
+
+    ## backend
+
+    **Arquivo:** `testes-produto/backend`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## dados
+
+    **Arquivo:** `testes-produto/dados`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## segurança
+
+    **Arquivo:** `testes-produto/seguranca`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## frontend
+
+    **Arquivo:** `testes-produto/frontend`
+
+    **Ferramentas:** definidas na entrevista.
+
+    **Critérios:** definidos na entrevista.
+
+    **Orçamento:** definido na entrevista.
+
+    ## Agregador
+
+    **Arquivo:** `testes-produto`
+
+    Chama as suítes definidas acima e consolida o relatório.
+    `status` é `fail` se qualquer suíte falhar.
     """
 )
 
@@ -209,9 +228,9 @@ def _append_scaffold(
 
 
 def scaffold_doc(destination: Path) -> str:
-    """Cria o scaffold de documentação sem duplicar a seção principal."""
+    """Cria README e a especificação de testes no mesmo diretório."""
 
-    return _append_scaffold(
+    doc_result = _append_scaffold(
         destination,
         marker="## Definição de Escopo",
         template=DOC_TEMPLATE,
@@ -220,14 +239,40 @@ def scaffold_doc(destination: Path) -> str:
             "Scaffold do /doc/README.md já existe em {destination}. Nada a fazer."
         ),
     )
+    tests_destination = destination.with_name("testes-por-especialidade.md")
+    tests_result = _append_scaffold(
+        tests_destination,
+        marker="# Testes por Especialidade",
+        template=TESTES_ESPECIALIDADE_TEMPLATE,
+        created_message=(
+            "Scaffold de Testes por Especialidade criado em: {destination}"
+        ),
+        existing_message=(
+            "Scaffold de Testes por Especialidade já existe em "
+            "{destination}. Nada a fazer."
+        ),
+    )
+    return f"{doc_result}\n{tests_result}"
 
 
 def scaffold_testes_produto(destination: Path) -> str:
-    """Cria o scaffold de testes-produto sem duplicar a tabela."""
+    """Cria os índices de documentação e testes sem duplicar seções."""
 
+    _append_scaffold(
+        destination,
+        marker="## Diretrizes e Regras de Produto",
+        template=DIRETRIZES_REGRAS_TEMPLATE,
+        created_message=(
+            "Índice das Diretrizes e Regras de Produto criado em: {destination}"
+        ),
+        existing_message=(
+            "Índice das Diretrizes e Regras de Produto já existe em "
+            "{destination}. Nada a fazer."
+        ),
+    )
     return _append_scaffold(
         destination,
-        marker="## Testes por Especialidade",
+        marker="### Testes por Especialidade",
         template=TESTES_PRODUTO_TEMPLATE,
         created_message="Scaffold de testes-produto criado em: {destination}",
         existing_message=(

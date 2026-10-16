@@ -85,7 +85,7 @@
 
 ### Conversa sobre plano
 - Plano e artefatos de estado são do agente; o humano não os lê.
-- Toda pergunta, decisão ou discussão é autocontida: traga a fase atual,
+- Toda pergunta, decisão ou discussão é autocontida: traga o contexto atual,
   o trecho relevante e o escopo da questão, em termos simples.
 - Traduza sempre: o humano só conhece os conceitos discutidos com ele.
   Nunca use número, código, sigla ou identificador interno do plano na
@@ -125,27 +125,10 @@
 - Agente de codificação: para descoberta de código, carregue a skill
   `code-explorer-priority` e siga o CLI-first.
 
-## Roteamento de agentes
-- Tarefa de especialidade vai ao agente especialista:
-
-| Agente | Função |
-|---|---|
-| `devflow` | Orquestrador: roteia fases e mantém o Status; nunca executa tarefa de domínio |
-| `eng-software` | Engenheiro de software: planeja e constrói código com TDD; único committer |
-| `front` | Engenheiro frontend: prototipa telas, implementa UI e revisa identidade visual |
-| `curador-produto` | Curador de produto: mantém docs/README.md e testes por especialidade; valida evidências |
-| `dba` | Banco de dados: modela dados e revisa artefatos e scripts de BD |
-| `sec` | Segurança: analisa requisitos, gera configurações, revisa e testa |
-| `rev` | Revisor integrativo: revisão solo com skills de domínio; reporta, não corrige |
-| `qa` | Testador: planeja e executa testes; não analisa código |
-
-- Agente genérico recebendo tarefa de especialista: sugira ao humano a
-  troca para o agente certo.
-
 ## Autonomia
 - Violação de regra objetiva do repo (formatação, largura de linha,
   estilo): corrija de imediato, sem escalar ao humano.
-- Escale ao humano apenas decisão de escopo, comportamento ou risco.
+- Devolva a quem o acionou a decisão de escopo, comportamento ou risco.
 
 ## Geração de arquivos MD
 - Limite cada linha a 120 colunas; use word-wrap para garantir.
@@ -204,7 +187,7 @@
 - Compactação de contexto ou desvio do protocolo de perguntas (volume,
   ritmo, uso da tool): recarregue a skill `question-orchestration` antes
   da próxima resposta ao humano. A recarga vale para quem conduz conversa
-  de decisão com o humano usando a skill (`smart-planner`, `devflow`,
+  de decisão com o humano usando a skill (`smart-planner`,
   `analista` em entrevista direta); demais agentes de domínio não
   recarregam o protocolo e seguem as regras gerais de comunicação do
   arquivo global, recarregado a cada sessão.

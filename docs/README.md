@@ -1,4 +1,4 @@
-# Mapa do Produto
+# Especificação do Produto
 
 Este documento é a fonte de verdade do produto. Define o escopo do que será
 construído, os artefatos que devem ser produzidos em cada ciclo de
@@ -30,11 +30,11 @@ O analista deve elicitar, para cada história de usuário:
     - Consolidados em `docs/specs/rnf-gerais.md`
     - Derivados em Critérios de Aceitação no mesmo arquivo, com uma
       seção para cada RNF
-- O humano pode iniciar o workflow imediatamente após elicitar uma
+- O humano pode iniciar a implementação imediatamente após elicitar uma
   história — nesse caso a história fica apenas no arquivo de planejamento
-  do devflow e pode ser descartada após o ciclo.
+  e pode ser descartada após o ciclo.
 - O humano pode também elicitar múltiplas histórias antecipadamente para
-  iniciar os workflows posteriormente, uma por vez — nesse caso o
+  iniciar os trabalhos posteriormente, uma por vez — nesse caso o
   analista salva cada história em `docs/backlog/` (um arquivo Markdown
   por história).
 
@@ -52,6 +52,9 @@ O analista deve elicitar, para cada história de usuário:
 | Arquitetura (Diagrama Gerado) | Mermaid — C4 L1/L2/L3 gerado dos ADRs | eng-software | docs/adr/diagrama-c4-l1.md, docs/adr/diagrama-c4-l2.md, docs/adr/diagrama-c4-l3.md |
 | UPSTREAM.md (skills externas) | Markdown padronizado | eng-software | harness-conf/skills/<skill>/UPSTREAM.md |
 | README — Dependências | Markdown (seção do README) | eng-software | README.md |
+| Workflows de Agentes de IA | Markdown | eng-software | docs/framework-desenvolvimento-agentico.md |
+| Workflow de Definição de Escopo | Markdown | eng-software | docs/workflow-definicao-escopo.md |
+| Workflow Agêntico Simples | Markdown | eng-software | docs/workflow-agentico-simples.md |
 
 ### Regras de Documentação
 
@@ -128,6 +131,41 @@ O analista deve elicitar, para cada história de usuário:
 - Regenerar sempre que um ADR for adicionado ou superseded
 - Não editar manualmente — é artefato gerado
 
+##### Workflows de Agentes de IA
+- O Framework de Desenvolvimento Agêntico é a fonte de verdade do fluxo agêntico
+  e documenta os papéis dos agentes, a sequência de trabalho,
+  os handoffs, os gates e os contratos entre fases.
+- Apenas o `devflow` conhece o Fluxo; os demais agentes são agnósticos.
+- São especificações documentais, não especificações executáveis. Não usam
+  Concordion e não pertencem às suítes `testes-produto`.
+- O `eng-software` mantém o Framework deste produto. Antes de criar ou
+  revisar o Framework, carrega `writing-for-agents`.
+- Toda alteração em `harness-conf/agents/` deve ser refletida no Framework
+  relacionado.
+- Toda alteração no Framework deve ser refletida nos agentes relacionados.
+- A consistência entre agentes e o Framework deve ser verificada pelos
+  testes estruturais do repositório.
+
+##### Workflow de Definição de Escopo
+- É um workflow independente de elicitação em que o `analista` conversa
+  diretamente com o humano.
+- É uma especificação documental, não executável: não usa Concordion e não
+  pertence às suítes `testes-produto`.
+- O `eng-software` mantém este workflow; antes de criá-lo ou revisá-lo,
+  carrega `writing-for-agents`.
+- Alterações nos agentes ligados ao workflow devem ser refletidas nele e
+  vice-versa; a consistência é verificada pelos testes estruturais do
+  repositório.
+
+##### Workflow Agêntico Simples
+- É um ciclo genérico de planejar, executar e revisar uma mudança aprovada;
+  é uma versão simplificada de outro framework agêntico.
+- Não substitui o Framework de Desenvolvimento Agêntico.
+- É uma especificação documental, não executável: não usa Concordion e não
+  pertence às suítes `testes-produto`.
+- O `eng-software` mantém este workflow; antes de criá-lo ou revisá-lo,
+  carrega `writing-for-agents`.
+
 ##### UPSTREAM.md (skills externas)
 - Regra canônica na seção "Upstream de Skills Externas" do `AGENTS.md`;
   este documento referencia, não duplica
@@ -141,123 +179,9 @@ O analista deve elicitar, para cada história de usuário:
 
 ---
 
-## Estratégias de Indexação de Código
-
-| Ferramenta | Uso | Instalação |
-|-----------|-----|-----------|
-| codebase-memory CLI | Grafo de código e docs; navegação estrutural e consulta de seções. | `codebase-memory-mcp cli` |
-
----
-
 ## Testes por Especialidade
 
-Scripts por especialidade e o agregador `testes-produto`.
-Interface JSON: `{ status, findings[] }`. Exit 0 = pass,
-exit 1 = fail. Sem argumentos.
-
-O agregador `testes-produto` chama as suítes definidas nesta seção e
-consolida o relatório. Falha se qualquer suíte falhar.
-
-Critérios e ferramentas saem da entrevista de curadoria.
-
-**PROIBIDO:** bypassar, comentar, remover ou condicionar
-qualquer verificação. Ferramenta ausente não justifica
-remoção — reporte finding com instrução de instalação.
-
-### Dois níveis de teste
-
-1. **Testes da aplicação** — validam o produto em
-   desenvolvimento. Rodam via suítes/agregador
-   `testes-produto`, executados pelo agente `qa` na fase
-   Testes do workflow, sempre que se desenvolve funcionalidade.
-2. **Testes dos scripts de teste** — os scripts de suíte e
-   o agregador são código e têm testes próprios, em
-   `testes-produto/tests/`, fora da suíte `-m all` (separação por
-   path, sem marker novo). Esta
-   seção é a especificação executável deles: os testes dos
-   scripts cobrem exatamente o que ela define (suítes,
-   interface JSON, proibições). Rodam SOMENTE
-   quando os scripts mudam — por exemplo, curadoria
-   alterando ferramentas ou critérios por orientação do
-   humano —, nunca no ciclo normal de desenvolvimento.
-
-O `AGENTS.md` do projeto mantém apenas a tabela índice das
-suítes com link para esta seção
-(`docs/README.md#testes-por-especialidade`).
-
-### backend
-
-**Arquivo:** `testes-produto/backend`
-
-**Descrição:** Testes e análise do pacote Python e dos scripts do repo.
-
-**O que deve conter:**
-- Suíte pytest completa do ambiente corrente (`-m all`, executável do
-  `.venv` do SO); teste falho = bloqueante
-- Análise estática Python: ruff; violação = bloqueante
-- Análise estática shell: shellcheck nos scripts `.sh`; violação =
-  bloqueante
-- Análise estática PowerShell: PSScriptAnalyzer nos scripts `.ps1`;
-  violação = bloqueante
-- Cobertura: pytest-cov; cobertura total abaixo de 70% = bloqueante.
-  Enquanto o repo estiver abaixo de 70%, o ciclo de construção
-  implementa testes até atingir o mínimo (não é finding passivo)
-- Specs executáveis da especialidade backend (Concordion-Markdown de
-  `docs/specs/`), rodadas via Concordion com tradutor Python interno
-  à suíte; spec falhando = bloqueante
-
-**Ferramentas:** pytest (`.venv` do SO), ruff, shellcheck,
-PSScriptAnalyzer, pytest-cov, Concordion (tradutor Python)
-
-**Critérios:** qualquer teste falho, violação de lint ou cobertura
-abaixo de 70% = finding bloqueante. Ferramenta ausente = finding
-bloqueante com instrução de instalação (não remove o check).
-
-### segurança
-
-**Arquivo:** `testes-produto/seguranca`
-
-**Descrição:** Segurança — secrets, dependências, análise estática de
-segurança.
-
-**O que deve conter:**
-- Secrets scan: gitleaks no repositório inteiro; segredo detectado =
-  bloqueante
-- Auditoria de dependências Python: pip-audit (cruza dependências com
-  bases de CVE/OSV); vulnerabilidade high/critical = bloqueante;
-  demais severidades = melhoria
-- SAST: bandit no código Python próprio; achado high/critical =
-  bloqueante; demais = melhoria
-- Specs executáveis da especialidade segurança (ex.: asserções de
-  threat model e ADRs de segurança em Concordion-Markdown), rodadas
-  via Concordion com tradutor Python interno à suíte; spec falhando
-  = bloqueante
-
-**Ferramentas:** gitleaks, pip-audit, bandit, Concordion (tradutor
-Python)
-
-**Critérios:** segredo detectado, vulnerabilidade high/critical ou
-achado SAST high/critical = finding bloqueante. Ferramenta ausente =
-finding bloqueante com instrução de instalação (não remove o check).
-Ferramentas com rede seguem retry 3x; esgotado = finding bloqueante
-com instrução de rede.
-
-### Agregador
-
-**Arquivo:** `testes-produto`
-
-Chama as suítes definidas nesta seção (`testes-produto/backend` e
-`testes-produto/seguranca`) e consolida o relatório no fim.
-`status` é `fail` se qualquer suíte falhar. Não reabre entrevista
-nem inventa check. Executado pelo agente `qa` na fase Testes do
-workflow; o `curador-produto` valida a evidência da execução.
-
-- Interface JSON `{ status, findings[] }` em stdout, UTF-8; progresso
-  em stderr; exit 0 = pass, 1 = fail; sem argumentos; idempotente
-- Suíte que não executa (crash ou exit inesperado) = finding
-  bloqueante com instrução de correção
-- Retry de rede é interno a cada suíte (3 tentativas; esgotado =
-  finding bloqueante com instrução de rede)
-- Os scripts de suíte e o agregador são código de produção: entram
-  no mesmo scan e no mesmo nível de qualidade (ruff, pytest,
-  cobertura) — proibido afrouxar o gate para código de teste
+A especificação das suítes fica no arquivo independente
+[Testes por Especialidade](testes-por-especialidade.md). Este README
+apenas referencia o arquivo e não reproduz seus critérios, ferramentas
+ou scripts.

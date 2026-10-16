@@ -368,13 +368,16 @@ def _docker_executable(context: InstallContext) -> str | None:
 def _docker_installation_guidance(environment: EnvironmentKind) -> str:
     if environment is EnvironmentKind.WINDOWS:
         return (
-            "Docker ausente. Instale Docker Desktop em escopo do usuário, "
-            "inicie o runtime e reexecute o bootstrap; não use sudo."
+            "Docker ausente no PATH do Windows. Sem `docker` no PATH do "
+            "Windows, o bootstrap não provisiona o ai-memory e não usa o "
+            "Docker do WSL. Para provisionar com o Docker do WSL, rode o "
+            "bootstrap dentro do WSL; não use sudo."
         )
     if environment is EnvironmentKind.WSL:
         return (
-            "Docker ausente. Instale Docker Desktop no Windows, habilite a "
-            "integração WSL e reexecute o bootstrap; não use sudo."
+            "Docker ausente. Instale e inicie o Docker Engine rootless "
+            "(user-space) na distro WSL, depois reexecute o bootstrap; "
+            "não use sudo."
         )
     return (
         "Docker ausente. Instale e inicie Docker rootless em user-space, "

@@ -4,7 +4,7 @@
 
 Este documento define um ciclo genérico de planejar, executar e revisar uma mudança aprovada.
 Ele não substitui os workflows especializados nem define fases, especialidades ou agentes do
-`workflow-agentes-dev.md`.
+`docs/framework-desenvolvimento-agentico.md`.
 
 ## Papéis
 

@@ -38,7 +38,7 @@ def test_eng_software_requires_clean_code_skills_on_build(
     assert "| code-simplification |" in required
     assert "Sempre que escrever código produtivo" in required
     assert "| code-simplification |" not in optional
-    assert "obrigatórias em toda construção" in content
+    assert "obrigatórias sempre que houver código produtivo" in content
 
 
 @pytest.mark.unit

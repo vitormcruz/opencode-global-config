@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Ciclo com arcos circulares e retornos distintos</title>
+  <desc id="desc">Setas azuis contínuas avançam do Planejamento para a aprovação humana do plano, da aprovação para a Construção e da Construção para os Testes. O percurso pela aprovação usa dois trechos do mesmo círculo. O retorno dos Testes ao Planejamento usa um arco de igual raio. Setas laranja-escuras tracejadas indicam correção e replanejamento. A aprovação termina no topo da Construção, distante do indicador de revisão. Os indicadores de revisão usam apenas conexões cinza sem setas. Testes aprovados levam à Finalização. Nova revisão requer autorização humana.</desc>
+  <defs>
+    <style>
+      svg{fill:#20344c}text{font-family:"Segoe UI",Arial,sans-serif}
+      .name{font-size:25px;font-weight:650;text-anchor:middle}
+      .label{font-size:18px;fill:#586b80;text-anchor:middle}
+      .return-label{font-size:18px;font-weight:650;fill:#c2410c;text-anchor:middle}
+      .icon{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .forward{fill:none;stroke:#1d4ed8;stroke-width:4;stroke-linecap:round;marker-end:url(#forward)}
+      .return{fill:none;stroke:#c2410c;stroke-width:3;stroke-dasharray:9 7;marker-end:url(#return)}
+    </style>
+    <marker id="forward" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="17" markerHeight="17" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 11 6 1 11Z" fill="#1d4ed8"/></marker>
+    <marker id="return" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="15" markerHeight="15" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 11 6 1 11Z" fill="#c2410c"/></marker>
+    <marker id="done" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="15" markerHeight="15" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 11 6 1 11Z" fill="#16704a"/></marker>
+    <g id="plan" class="icon"><rect x="3" y="3" width="18" height="20" rx="2"/><rect x="7" y="1" width="10" height="4" rx="1" fill="#edf3ff"/><path d="M7 10h10M7 15h10M7 20h6"/></g>
+    <g id="code" class="icon"><rect x="1" y="2" width="22" height="18" rx="3"/><path d="M1 7h22M8 11l-3 3 3 3M16 11l3 3-3 3M13 10l-2 8"/></g>
+    <g id="tests" class="icon"><path d="M8 2h8M10 2v7L3 19q-2 3 2 3h14q4 0 2-3L14 9V2M7 14h10"/><path d="M9 18l2 2 4-4"/></g>
+    <g id="review" class="icon"><circle cx="10" cy="10" r="7"/><path d="M15 15l7 7M7 10l2 2 4-4"/></g>
+    <g id="human" class="icon"><circle cx="12" cy="6" r="4"/><path d="M3 22v-3a9 9 0 0 1 18 0v3"/></g>
+  </defs>
+  <rect width="960" height="720" fill="#fff"/>
+
+  <path d="M549.998 145.415A245.521 245.521 0 0 1 670.988 197.462" class="forward"/>
+  <path d="M720.862 251.847A245.521 245.521 0 0 1 758.807 346.009" class="forward"/>
+  <path d="M691 457C556 565 420 565 294 457" class="forward"/>
+  <text x="489" y="563" font-size="18" fill="#1d4ed8" text-anchor="middle">validar</text>
+  <path d="M220.874 352.005A245.521 245.521 0 0 1 402.326 153.119" class="return"/>
+  <text x="174" y="242" class="return-label">Replanejar</text>
+  <path d="M711 357Q640 271 520 214" class="return"/>
+  <rect x="555" y="258" width="126" height="32" rx="16" fill="#fff"/>
+  <text x="618" y="280" class="return-label">Replanejar</text>
+  <path d="M301 411Q486 347 679 411" class="return"/>
+  <rect x="439" y="367" width="102" height="32" rx="16" fill="#fff"/>
+  <text x="490" y="389" class="return-label">Corrigir</text>
+
+  <text x="480" y="45" class="name">Planejamento</text>
+  <circle cx="480" cy="146" r="70" fill="#edf3ff" stroke="#cad9f4" stroke-width="1.5"/>
+  <use href="#plan" transform="translate(450 115) scale(2.5)" color="#315ed4"/>
+  <path d="M413 124 396 116" stroke="#64748b" stroke-width="2"/>
+  <circle cx="371" cy="106" r="25" fill="#fff" stroke="#bbc5d3" stroke-width="1.5"/>
+  <use href="#review" transform="translate(358 93) scale(1.08)" color="#64748b"/>
+  <text x="326" y="75" class="label">Revisão</text>
+
+  <circle cx="700" cy="225" r="34" fill="#f5f0ff" stroke="#b79ae3" stroke-width="1.8"/>
+  <use href="#human" transform="translate(684 208) scale(1.35)" color="#6d28d9"/>
+  <text x="805" y="215" font-size="20" font-weight="650" fill="#6d28d9" text-anchor="middle">Aprovação</text>
+  <text x="805" y="242" font-size="18" fill="#6d28d9" text-anchor="middle">do plano</text>
+
+  <circle cx="760" cy="424" r="72" fill="#edf3ff" stroke="#cad9f4" stroke-width="1.5"/>
+  <use href="#code" transform="translate(728 396) scale(2.7)" color="#315ed4"/>
+  <text x="760" y="539" class="name">Construção</text>
+  <path d="M828 446 842 450" stroke="#64748b" stroke-width="2"/>
+  <circle cx="868" cy="454" r="24" fill="#fff" stroke="#bbc5d3" stroke-width="1.5"/>
+  <use href="#review" transform="translate(855 441) scale(1.08)" color="#64748b"/>
+  <text x="868" y="507" class="label">Revisão</text>
+
+  <circle cx="220" cy="424" r="72" fill="#eef8f3" stroke="#c7e0d3" stroke-width="1.5"/>
+  <use href="#tests" transform="translate(190 393) scale(2.5)" color="#25745e"/>
+  <text x="220" y="539" class="name">Testes</text>
+  <path d="M148 424H104Q82 424 82 446V608Q82 630 104 630H178" fill="none" stroke="#16704a" stroke-width="3" marker-end="url(#done)"/>
+  <text x="145" y="611" font-size="18" fill="#16704a" text-anchor="middle">aprovados</text>
+  <circle cx="220" cy="630" r="29" fill="#eef8f3" stroke="#c7e0d3" stroke-width="1.5"/>
+  <path d="M206 630 216 640 236 620" fill="none" stroke="#16704a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="267" y="638" font-size="23" font-weight="600" fill="#24644f">Finalização</text>
+
+  <path d="M482 630H527" class="forward"/>
+  <text x="543" y="637" font-size="18" fill="#1d4ed8">Avanço</text>
+  <path d="M666 630H711" class="return"/>
+  <text x="727" y="637" font-size="18" fill="#c2410c">Retorno</text>
+  <text x="480" y="691" font-size="18" fill="#586b80" text-anchor="middle">Nova revisão só com autorização humana.</text>
+</svg>

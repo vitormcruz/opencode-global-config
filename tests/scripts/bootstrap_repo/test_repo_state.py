@@ -10,9 +10,16 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Iterator
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
+
+from fake_winreg import FakeWinreg
+from platform_requirements import requires_windows
+from opencode_config.adapters import opencode as opencode_cli
+from opencode_config.lib import windows_env
+from opencode_config.lib.sync import paths_equal
 
 
 pytestmark = pytest.mark.integration
@@ -25,6 +32,7 @@ class RepoState:
     config_dir: Path
     bashrc: Path
     environment: dict[str, str]
+    registry: FakeWinreg | None
 
 
 @pytest.fixture(scope="module")
@@ -35,8 +43,19 @@ def bootstrapped_repo_state(
     home.mkdir()
     try:
         bashrc = home / ".bashrc"
-        bashrc.touch()
+        if os.name == "posix":
+            bashrc.touch()
         environment = os.environ.copy()
+        fake_bin = home / "bin"
+        fake_bin.mkdir()
+        fake_opencode = fake_bin / (
+            "opencode.cmd" if os.name == "nt" else "opencode"
+        )
+        if os.name == "nt":
+            fake_opencode.write_text("@echo off\r\nexit /b 0\r\n", encoding="ascii")
+        else:
+            fake_opencode.write_text("#!/bin/sh\nexit 0\n", encoding="ascii")
+            fake_opencode.chmod(0o755)
         environment.update(
             {
                 "HOME": str(home),
@@ -46,31 +65,19 @@ def bootstrapped_repo_state(
                 "OPENCODE_SKIP_CODEBASE_MEMORY": "1",
                 "OPENCODE_SKIP_DOCTREE": "1",
                 "PYTHONPATH": str(repo_root / "src"),
+                "PATH": f"{fake_bin}{os.pathsep}{environment.get('PATH', '')}",
             }
         )
 
-        try:
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "opencode_config.adapters.opencode",
-                    "--yes",
-                    "--repo-root",
-                    str(repo_root),
-                ],
-                cwd=repo_root,
-                env=environment,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-        except OSError as problem:
-            pytest.fail(
-                "Nao foi possivel executar o adapter OpenCode com Python 3.10+: "
-                f"{problem}. Instale Python 3.10+ e execute pytest no ambiente "
-                "configurado."
-            )
+        state = RepoState(
+            repository=repo_root,
+            home=home,
+            config_dir=home / ".config" / "opencode",
+            bashrc=bashrc,
+            environment=environment,
+            registry=FakeWinreg() if os.name == "nt" else None,
+        )
+        result = _run_opencode_adapter(state)
 
         if result.returncode != 0:
             pytest.fail(
@@ -86,12 +93,43 @@ def bootstrapped_repo_state(
             config_dir=home / ".config" / "opencode",
             bashrc=bashrc,
             environment=environment,
+            registry=state.registry,
         )
     finally:
         shutil.rmtree(home, ignore_errors=True)
 
 
 def _run_opencode_adapter(state: RepoState) -> subprocess.CompletedProcess[str]:
+    if os.name == "nt":
+        if state.registry is None:
+            pytest.fail("O teste Windows precisa de um registro falso.")
+        with (
+            patch.dict(sys.modules, {"winreg": state.registry}),
+            patch.object(Path, "home", return_value=state.home),
+            patch(
+                "opencode_config.harnesses.opencode.shutil.which",
+                return_value=str(state.home / "bin" / "opencode.cmd"),
+            ),
+            patch.object(
+                windows_env,
+                "broadcast_environment_change",
+                return_value=None,
+            ),
+        ):
+            status, stdout, stderr = opencode_cli.run_cli(
+                [
+                    "--yes",
+                    "--repo-root",
+                    str(state.repository),
+                ]
+            )
+        return subprocess.CompletedProcess(
+            args=[],
+            returncode=status,
+            stdout=stdout,
+            stderr=stderr,
+        )
+
     try:
         return subprocess.run(
             [
@@ -132,22 +170,35 @@ def test_repo_state_config_directory_exists(
     assert bootstrapped_repo_state.config_dir.is_dir()
 
 
-def test_repo_state_agents_symlink_points_to_repo(
+def _assert_materialized_path(destination: Path, source: Path) -> None:
+    if os.name == "posix":
+        assert destination.is_symlink()
+        assert destination.resolve() == source.resolve()
+        return
+
+    assert destination.exists()
+    assert not destination.is_symlink()
+    assert paths_equal(source, destination)
+
+
+def test_repo_state_agents_materialization_matches_platform(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "agents"
-    assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "harness-conf" / "agents"
-    ).resolve()
+    _assert_materialized_path(
+        destination,
+        bootstrapped_repo_state.repository / "harness-conf" / "agents",
+    )
 
 
-def test_repo_state_commands_symlink_points_to_repo(
+def test_repo_state_commands_materialization_matches_platform(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "commands"
-    assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "harness-conf" / "commands"
-    ).resolve()
+    _assert_materialized_path(
+        destination,
+        bootstrapped_repo_state.repository / "harness-conf" / "commands",
+    )
 
 
 def test_repo_state_opencode_json_matches_a_valid_provisioning_state(
@@ -182,22 +233,27 @@ def test_repo_state_opencode_json_matches_a_valid_provisioning_state(
     assert "ai-memory" not in actual.get("mcp", {})
 
 
-def test_repo_state_skills_symlink_points_to_repo(
+def test_repo_state_skills_materialization_matches_platform(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "skills"
-    assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "harness-conf" / "skills"
-    ).resolve()
+    _assert_materialized_path(
+        destination,
+        bootstrapped_repo_state.repository / "harness-conf" / "skills",
+    )
 
 
-def test_repo_state_scripts_symlink_points_to_repo(
+def test_repo_state_scripts_materialization_matches_platform(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     destination = bootstrapped_repo_state.config_dir / "scripts"
-    assert destination.is_symlink() and destination.resolve() == (
-        bootstrapped_repo_state.repository / "scripts"
-    ).resolve()
+    if os.name == "posix":
+        assert destination.is_symlink()
+        assert destination.resolve() == (
+            bootstrapped_repo_state.repository / "scripts"
+        ).resolve()
+    else:
+        assert not destination.exists()
 
 
 def test_repo_state_global_agents_file_is_not_a_symlink(
@@ -211,9 +267,20 @@ def test_repo_state_global_agents_file_is_not_a_symlink(
 def test_repo_state_bashrc_enables_exa(
     bootstrapped_repo_state: RepoState,
 ) -> None:
-    assert "OPENCODE_ENABLE_EXA=1" in bootstrapped_repo_state.bashrc.read_text(
-        encoding="utf-8"
-    )
+    if os.name == "posix":
+        assert "OPENCODE_ENABLE_EXA=1" in (
+            bootstrapped_repo_state.bashrc.read_text(encoding="utf-8")
+        )
+    else:
+        assert not bootstrapped_repo_state.bashrc.exists()
+
+
+@requires_windows
+def test_repo_state_windows_persists_exa_in_fake_registry(
+    bootstrapped_repo_state: RepoState,
+) -> None:
+    assert bootstrapped_repo_state.registry is not None
+    assert bootstrapped_repo_state.registry.values["OPENCODE_ENABLE_EXA"] == "1"
 
 
 def test_repo_state_does_not_create_legacy_test_library_directory(
@@ -235,7 +302,7 @@ def test_repo_state_doctree_instruction_does_not_exist(
     ).exists()
 
 
-def test_repo_state_opencode_json_is_readable_via_symlink(
+def test_repo_state_opencode_json_is_readable(
     bootstrapped_repo_state: RepoState,
 ) -> None:
     assert (bootstrapped_repo_state.config_dir / "opencode.json").is_file()
