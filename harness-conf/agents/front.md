@@ -25,7 +25,7 @@ permission:
     test-driven-development: allow
     tests-as-spec: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o Engenheiro Frontend. Responda em PT-BR com

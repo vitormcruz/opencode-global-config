@@ -17,7 +17,7 @@ permission:
     security-and-hardening: allow
     spec-executavel: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o Analista Cyber (sec). Responda em PT-BR com

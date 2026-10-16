@@ -76,6 +76,9 @@ No Linux/WSL, o `configurar-repo.sh` cria links simbolicos em
 - `~/.config/opencode/commands` -> `harness-conf/commands`
 - `~/.config/opencode/opencode.json` -> `harness-conf/opencode.json`
 - `~/.config/opencode/dcp.jsonc` -> `harness-conf/dcp.jsonc`
+- `~/.config/opencode/dcp-prompts/overrides/context-limit-nudge.md`
+  -> `harness-conf/dcp-prompts/context-limit-nudge.md` (texto do ping
+  informativo do DCP)
 - `~/.config/opencode/skills` -> `harness-conf/skills`
 - `~/.config/opencode/scripts` -> `scripts` (infra do repo, fica na raiz)
 
@@ -90,8 +93,9 @@ e a execução paralela de chamadas independentes.
 Se ja existir algo nesses destinos, o script move o conteudo anterior para um
 backup em `~/.config/opencode-backup/<timestamp>` antes de recriar os links.
 
-No Windows, os cinco destinos de `harness-conf/` (agents, commands,
-skills, `opencode.json`, `dcp.jsonc`) sao materializados como copia
+No Windows, os seis destinos de `harness-conf/` (agents, commands,
+skills, `opencode.json`, `dcp.jsonc`,
+`dcp-prompts/context-limit-nudge.md`) sao materializados como copia
 sincronizada em `%USERPROFILE%\.config\opencode` a cada execucao do
 bootstrap, com backup do conteudo divergente. Divergencias entre
 execucoes sao realinhadas no proximo sync.
@@ -186,14 +190,18 @@ bootstrap; uma execução completa não deve usá-las:
 - `@tarquinen/opencode-dcp` (spec pinada, versão fixa): compactação
   acionável pelo agente. Registra a tool `compress`: o próprio agente
   substitui trechos antigos por resumo, sem apagar o histórico. A
-  chamada é decisão do agente: o `dcp.jsonc` canônico não tem gatilho
-  operante (limites inertes, sem nudges). O bootstrap
-  materializa `opencode.json` e a config canônica
-  `harness-conf/dcp.jsonc` (destino `~/.config/opencode/dcp.jsonc`).
+  chamada é decisão do agente; acima de 130k tokens o plugin emite
+  APENAS um aviso informativo (ping, modo soft, a cada 10 requisições
+  acima do limite), com texto PT-BR editável pelo repo
+  (`harness-conf/dcp-prompts/context-limit-nudge.md`). O bootstrap
+  materializa `opencode.json`, a config canônica
+  `harness-conf/dcp.jsonc` (destino `~/.config/opencode/dcp.jsonc`) e
+  o prompt do ping (destino
+  `~/.config/opencode/dcp-prompts/overrides/context-limit-nudge.md`).
   Rollback rápido: `compress.permission = "deny"` no `dcp.jsonc`
   desregistra a tool (reinicie o OpenCode); remoção completa tira a
-  spec do array `plugin` e o destino do adapter. Bump de versão é nova
-  importação, com revisão de segurança reexecutada. Decisão e
+  spec do array `plugin` e os destinos do adapter. Bump de versão é
+  nova importação, com revisão de segurança reexecutada. Decisão e
   asserções: `docs/adr/0011-compactacao-dcp-opencode.md`.
 - `opencode-task-model@1.3.1` (PROVISÓRIO): adiciona `model`, `reasoning`
   e `background` por chamada na tool `task`. Instalado porque o

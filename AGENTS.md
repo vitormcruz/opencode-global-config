@@ -30,10 +30,11 @@ bash ./scripts/bootstrap_repo/configurar-repo.sh --yes
   (OpenCode, Copilot CLI).
 - No Linux/WSL, o adapter OpenCode cria links em `~/.config/opencode`
   apontando para `harness-conf/` (`agents`, `commands`, `skills`,
-  `opencode.json`, `dcp.jsonc`) e para `scripts/` (infra do repo, na
-  raiz). No Windows, materializa cópia sincronizada dos cinco destinos
-  de `harness-conf/` em `%USERPROFILE%\.config\opencode` a cada
-  execução.
+  `opencode.json`, `dcp.jsonc`,
+  `dcp-prompts/context-limit-nudge.md`) e para `scripts/` (infra do
+  repo, na raiz). No Windows, materializa cópia sincronizada dos seis
+  destinos de `harness-conf/` em `%USERPROFILE%\.config\opencode` a
+  cada execução.
 - O `AGENTS.md` global é gerado pelo adapter (arquivo regular: base +
   blocos gerenciados por terceiros, como o codebase-memory-mcp): nunca
   symlink, nunca editado à mão.

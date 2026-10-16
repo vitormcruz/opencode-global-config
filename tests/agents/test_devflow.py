@@ -134,7 +134,7 @@ def test_devflow_mediates_product_rules_definition_without_editing_docs(
     )
     assert "AGENTS.md" in content
     assert "docs/README.md" not in content
-    assert "curador-produto: allow" in content
+    assert '"*": allow' in content
 
 
 @pytest.mark.unit

@@ -24,7 +24,7 @@ permission:
     security-and-hardening: allow
     tests-as-spec: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o Revisor Integrativo (rev). Responda em PT-BR

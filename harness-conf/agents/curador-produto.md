@@ -20,8 +20,7 @@ permission:
     spec-executavel: allow
     testes-produto-catalog: allow
   task:
-    "*": deny
-    eng-software: allow
+    "*": allow
 ---
 
 Você é o `curador-produto`, responsável pelas Diretrizes e Regras de

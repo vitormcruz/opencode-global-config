@@ -20,7 +20,7 @@ permission:
     test-driven-development: allow
     tests-as-spec: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o Testador (QA). Responda em PT-BR com acentuação.

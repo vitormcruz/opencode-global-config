@@ -16,15 +16,7 @@ permission:
     planning-and-task-breakdown: allow
     writing-for-agents: allow
   task:
-    "*": deny
-    eng-software: allow
-    front: allow
-    curador-produto: allow
-    dba: allow
-    sec: allow
-    qa: allow
-    rev: allow
-    revisor-historia: allow
+    "*": allow
 ---
 
 Você é o Planejador Interativo. Responda em PT-BR com

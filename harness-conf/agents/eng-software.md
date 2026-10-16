@@ -25,7 +25,7 @@ permission:
     tests-as-spec: allow
     writing-for-agents: allow
   task:
-    "*": deny
+    "*": allow
 ---
 
 Você é o Engenheiro de Software. Responda em PT-BR com

@@ -150,8 +150,8 @@
   muitas chamadas; com contexto pequeno ou pouco trabalho restante, o
   custo da compactação supera a economia: não compacte.
 - Comprima por decisão própria quando o contexto estiver grande e o
-  conteúdo antigo já não servir à tarefa corrente, sem esperar limite
-  ou aviso.
+  conteúdo antigo já não servir à tarefa corrente, sem esperar ordem;
+  o aviso de 130k tokens apenas sinaliza o tamanho, a decisão é sua.
 - A inclinação cresce com o contexto: o desperdício também cresce.
   Estime o tamanho sem medidor (volume de arquivos lidos, tamanho
   das saídas de ferramentas, número de turnos); passado ~150k

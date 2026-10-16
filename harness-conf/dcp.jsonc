@@ -2,12 +2,15 @@
     "compress": {
         "permission": "allow",
         "mode": "range",
-        "maxContextLimit": 999999999,
+        "maxContextLimit": 130000,
         "minContextLimit": 999999999,
+        "nudgeForce": "soft",
+        "nudgeFrequency": 10,
         "protectUserMessages": false
     },
     "experimental": {
-        "allowSubAgents": true
+        "allowSubAgents": true,
+        "customPrompts": true
     },
     "autoUpdate": false
 }

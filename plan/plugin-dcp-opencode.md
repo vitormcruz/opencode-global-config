@@ -91,6 +91,67 @@ caminho de nudge nunca dispara; `overMinLimit` só alimenta nudge,
 conferido no código). O teste, o ADR-0011, a fixture e o README foram
 emendados para este desenho.
 
+## Emenda (2026-10-14): ping informativo em 130k
+
+Decisão do humano (aprovada em 2026-10-14): acima de 130 mil tokens o
+plugin emite APENAS um aviso informativo (ping), em modo soft, sem
+forçar compressão, a cada 10 requisições acima do limite; o texto do
+ping é editável pelo repo, em PT-BR, apontando para a política;
+`minContextLimit` segue inerte (999999999). Motivo: o agente não tem
+medidor de contexto em sessões reais; o ping sinaliza o tamanho e a
+decisão de comprimir segue do agente pela política vigente. A coleta
+natural da validação funcional continua valendo (eventos iniciados
+pelo agente), agora com o ping como sinal auxiliar.
+
+Correção de execução (confirmação no código do plugin 3.1.15,
+`lib/prompts/store.ts`): a chave que habilita overrides de prompt é
+`experimental.customPrompts` (default false) e o override global é lido
+SOMENTE de `dcp-prompts/overrides/` (nunca da raiz `dcp-prompts/`, onde
+vivem `defaults/` e o README). A spec aprovada marcava o caminho da
+raiz como "provável"; o destino materializado correto é
+`~/.config/opencode/dcp-prompts/overrides/context-limit-nudge.md`.
+Efeito colateral benigno de `customPrompts: true`: no primeiro boot o
+plugin cria `dcp-prompts/defaults/` no user-space com os prompts
+default do upstream e um README; nada disso entra no repo (o adapter
+materializa só o arquivo do override).
+
+Artefatos desta emenda: `harness-conf/dcp.jsonc` (130k/soft/10/
+customPrompts on), `harness-conf/dcp-prompts/context-limit-nudge.md`
+(novo, texto verbatim aprovado), `src/opencode_config/harnesses/
+opencode.py` (destino novo nas duas strategies + criação do diretório
+pai antes da materialização), `tests/harnesses/test_opencode_dcp.py`
+(4 testes novos + asserções emendadas), `harness-conf/AGENTS.base.md`
+(bullet de compactação), `docs/adr/0011-compactacao-dcp-opencode.md` +
+fixture Concordion, README.md / AGENTS.md /
+adapters/opencode/README.md (coerência: seis destinos, descrição do
+ping). Mudança de spec aprovada pelo humano no pacote: as asserções do
+teste de conteúdo do `dcp.jsonc` foram atualizadas (130k/soft/10/
+override on).
+
+### Evidências (eng-software) — EMENDA DO PING (2026-10-14)
+
+- [x] Testes novos: 4 em `tests/harnesses/test_opencode_dcp.py`
+      (conteúdo do ping; symlink POSIX; cópia Windows com backup;
+      idempotência Windows); RED confirmado (5 falhas) antes do código
+- [x] Testes totais: 968 passed com `.venv/bin/pytest -m all`
+      (31 agent_eval deselecionados pela taxonomia ADR-0005)
+- [x] Análise estática: `ruff check .` sem achado; `git diff --check`
+      limpo
+- [x] Fixture Concordion `Adr0011Fixture` emendada e verde
+      (`gradle test --tests Adr0011Fixture`: 1 teste, 0 falhas)
+- [x] Bootstrap executado: symlink em
+      `~/.config/opencode/dcp-prompts/overrides/context-limit-nudge.md`
+      confirmado; `dcp-prompts/defaults/` criado pelo plugin (6 prompts
+      + README) com `customPrompts` on
+- [x] Smoke headless (scratch `/tmp/opencode/dcp-ping-smoke`, config
+      global default): sessão respondeu, exit 0, sem erro de validação
+      da config nova; ping não disparado (contexto < 130k)
+- [x] Commits: `82737aa` feat(harness), `073045f` docs(plan); sem push
+- Gate de refatoração: cenário "nada muda" no desenho; a única
+  correção de percurso foi o caminho do override (raiz →
+  `overrides/`), confirmado no código do plugin 3.1.15 antes da
+  implementação e registrado acima
+
 ## Validação funcional (design sem limite fixo, 2026-10-04)
 
 Critérios comportamentais da decisão governante (QA-ACC-1 redefinido).

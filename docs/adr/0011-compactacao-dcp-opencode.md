@@ -1,8 +1,9 @@
 # ADR-0011: Compactação de contexto por decisão do agente
 
 - **Status:** Aceita
-- **Data:** 2026-10-04
-- **Escopo:** `harness-conf/dcp.jsonc`, `harness-conf/AGENTS.base.md`,
+- **Data:** 2026-10-14
+- **Escopo:** `harness-conf/dcp.jsonc`, `harness-conf/dcp-prompts/`,
+  `harness-conf/AGENTS.base.md`,
   `src/opencode_config/harnesses/opencode.py`, `README.md`
 
 ## Contexto
@@ -48,16 +49,26 @@ de etapa seguinte dá mais peso à compactação; aos 200k tokens, o
 agente assume desperdício e comprime se necessário. Os degraus são
 peso no julgamento do agente, nunca gatilho automático.
 
-No OpenCode, o `dcp.jsonc` canônico não configura nenhum gatilho
-operante: os limites de contexto do plugin existem apenas como valores
-inertes (inatingíveis, portanto sem nudges) e o modo manual do plugin
-permanece desligado, pois ele bloqueia a execução da tool pelo agente
-até um comando do humano. Assim, a única via de compressão é a decisão
-do próprio agente, guiado pela política da seção "Compactação de
-contexto" do `AGENTS.base.md`. O arquivo é sincronizado pelo adapter
-OpenCode para o user-space (symlink POSIX, cópia sincronizada
-Windows), nas tuplas de destinos das strategies, sem mudança no
-contrato `HarnessAdapter`. O Copilot não recebe destino DCP.
+No OpenCode, o `dcp.jsonc` canônico configura um único sinal de
+tamanho: um aviso informativo (ping) dispara acima de 130 mil tokens,
+em modo soft (não força compressão), a cada 10 requisições acima do
+limite. O texto do aviso é autoral do repo, em PT-BR, e aponta para a
+política desta decisão; ele chega ao user-space como override de
+prompt do plugin, sincronizado pelo adapter OpenCode
+(`harness-conf/dcp-prompts/context-limit-nudge.md` →
+`~/.config/opencode/dcp-prompts/overrides/context-limit-nudge.md`;
+symlink POSIX, cópia sincronizada Windows), com a chave
+`experimental.customPrompts` ligada. O limite inferior permanece
+inerte (`minContextLimit` inatingível), de modo que os lembretes de
+turno e iteração do plugin nunca disparam. O modo manual do plugin
+continua desligado, pois ele bloqueia a execução da tool pelo agente
+até um comando do humano. Assim, a decisão de comprimir segue sendo
+exclusivamente do próprio agente, guiado pela política da seção
+"Compactação de contexto" do `AGENTS.base.md`; o ping apenas informa o
+tamanho. O arquivo é sincronizado pelo adapter OpenCode (symlink
+POSIX, cópia sincronizada Windows), nas tuplas de destinos das
+strategies, sem mudança no contrato `HarnessAdapter`. O Copilot não
+recebe destino DCP.
 
 A auto-compactação nativa do OpenCode permanece ativa como rede de
 segurança: se disparar, uma fronteira foi perdida.
@@ -67,12 +78,15 @@ segurança: se disparar, uma fronteira foi perdida.
 - A chamada de compactação acontece no momento certo pelo critério de
   quem vê o contexto: o próprio agente, guiado pela política da seção
   "Compactação de contexto" do `AGENTS.base.md`.
-- Nenhum parâmetro numérico operante para calibrar por modelo ou
-  janela; a manutenção do comportamento é textual (a política), não de
-  constantes. Os limites inertes no config blindam contra defaults do
-  upstream em bump.
-- O gatilho automático do DCP (nudges acima de limite) fica inoperante;
-  a decisão do agente é o único caminho da compressão.
+- O ping tem um único parâmetro operante (130 mil tokens, frequência
+  10, força soft); calibração por modelo continua fora (sem
+  `modelMaxLimits`/`modelMinLimits`). Os demais limites inertes no
+  config blindam contra defaults do upstream em bump. O texto do ping
+  é conteúdo versionado do repo, não constante do plugin.
+- O único gatilho ativo do plugin é o ping informativo acima de 130k,
+  sem força de compressão; os lembretes de turno e iteração ficam
+  inertes (limite inferior inatingível). A decisão do agente é o
+  único caminho da compressão.
 - O modo manual do plugin não serve a este desenho: além de suprimir o
   caminho automático, ele exige comando do humano antes de cada
   compressão, o que retiraria do agente a decisão.
@@ -115,10 +129,12 @@ diretiva `assertEquals` fixa o veredito esperado.
 - A fixture valida a decisão implementada: a spec do plugin está
   pinada no array `plugin` de `harness-conf/opencode.json`; o
   `harness-conf/dcp.jsonc` não opera em modo manual
-  (`manualMode` ausente ou desligado) e não tem gatilho operante
-  (limites de contexto só como valores inertes), com `autoUpdate`
-  desligado e gate `allow` na tool `compress`; as duas strategies do
-  OpenCode declaram o destino `dcp.jsonc` e o adapter Copilot não
+  (`manualMode` ausente ou desligado), tem o ping informativo em 130k
+  (`maxContextLimit` = 130000, `nudgeForce` = "soft",
+  `nudgeFrequency` = 10), limite inferior inerte,
+  `experimental.customPrompts` ligado, `autoUpdate` desligado e gate
+  `allow` na tool `compress`; as duas strategies do OpenCode declaram
+  o destino `dcp.jsonc` e o prompt do ping, e o adapter Copilot não
   declara nenhum destino DCP; o `README.md` documenta o plugin para o
   humano.
 - O veredito agregado da implementação é [pass](#assertEquals=veredito).
