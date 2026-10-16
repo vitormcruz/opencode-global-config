@@ -147,7 +147,7 @@ class DockerSession:
         if self._docker is None:
             raise ContainerTestError(
                 "Docker não encontrado no PATH.\n"
-                "Instale Docker Desktop (ou Docker Engine) e execute novamente:\n"
+                "Instale Docker Engine (nativo ou dentro do WSL) e execute novamente:\n"
                 "  docker --version\n"
                 "  pytest -m agent_eval"
             )
@@ -174,7 +174,7 @@ class DockerSession:
             suffix = f"\nDetalhes: {detail}" if detail else ""
             raise ContainerTestError(
                 "Docker daemon não está em execução.\n"
-                "Inicie Docker Desktop (ou o serviço Docker) e execute:\n"
+                "Inicie o serviço Docker Engine (nativo ou dentro do WSL) e execute:\n"
                 "  docker info\n"
                 "  pytest -m agent_eval"
                 f"{suffix}"

@@ -345,6 +345,38 @@ def test_ai_memory_without_docker_warns_and_cleans_active_hooks(
 
 
 @pytest.mark.unit
+def test_docker_guidance_for_windows_points_to_path_and_wsl_without_desktop() -> None:
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.WINDOWS)
+
+    assert "PATH" in message
+    assert "WSL" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+    assert "por enquanto" not in message
+    assert "a partir do Windows" not in message
+
+
+@pytest.mark.unit
+def test_docker_guidance_for_wsl_asks_for_rootless_engine_without_desktop() -> None:
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.WSL)
+
+    assert "WSL" in message
+    assert "rootless" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+
+
+@pytest.mark.unit
+def test_docker_guidance_for_linux_never_suggests_docker_desktop() -> None:
+    """Caracterização: protege o Linux contra regressão para Docker Desktop."""
+    message = ai_memory._docker_installation_guidance(EnvironmentKind.LINUX)
+
+    assert "rootless" in message
+    assert "não use sudo" in message
+    assert "Docker Desktop" not in message
+
+
+@pytest.mark.unit
 @requires_posix
 def test_ai_memory_provision_downloads_verified_wrapper_and_restricts_container(
     monkeypatch: pytest.MonkeyPatch,
