@@ -136,11 +136,16 @@ alterado automaticamente. Execute o rollback e o bootstrap para recriá-lo. O
 rollback preserva o volume.
 
 Sem Docker, o bootstrap avisa e orienta a instalação de um runtime em user-space,
-sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. Em Linux,
-use Docker rootless. No WSL, use Docker Desktop com integração WSL. Consulte
-<https://docs.docker.com/engine/security/rootless/> ou
-<https://docs.docker.com/desktop/setup/install/>. Depois de iniciar o runtime,
-execute o bootstrap novamente.
+sem `sudo`. O bootstrap não declara `mcp.ai-memory` em nenhum harness. O Docker
+esperado é o Docker Engine rootless (user-space), usado diretamente no Linux ou
+dentro da distro WSL. Docker Desktop não é suportado nem esperado.
+Consulte <https://docs.docker.com/engine/security/rootless/>. Depois de
+iniciar o runtime, execute o bootstrap novamente.
+
+**Windows:** o bootstrap só detecta `docker` no PATH do Windows. Sem ele, não
+provisiona o ai-memory, não usa o Docker do WSL, avisa a ausência do Docker e
+segue sem declarar o MCP. Para provisionar com o Docker do WSL, execute o
+bootstrap dentro do WSL.
 
 No Linux/WSL, o adapter mantém `opencode.json` como symlink canônico quando o
 Docker publica a porta em loopback. Com o fallback da bridge internal, ele
@@ -233,7 +238,7 @@ user-space conforme a seleção interativa ou `--yes`:
 | `libgomp.so.1` | pacote Debian fixado, extraido no cache | nao aplicavel |
 | entry points do repo | `pipx install --editable .` | igual ao Linux |
 | Copilot CLI | npm com prefixo user-space | npm com prefixo user-space |
-| ai-memory | Docker rootless; no WSL, Docker Desktop integrado | Docker Desktop em escopo do usuário |
+| ai-memory | Docker Engine rootless; no WSL, Docker Engine rootless na distro | sem `docker` no PATH do Windows, não provisiona e não usa o Docker do WSL; para usá-lo, rode o bootstrap dentro do WSL |
 | ruff | `pipx install ruff` | `pipx install ruff` |
 | shellcheck | `pipx install shellcheck-py` | release oficial no cache user-space |
 | pwsh | arquivo portatil em user-space | arquivo zip em user-space |

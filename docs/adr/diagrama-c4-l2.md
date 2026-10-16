@@ -21,7 +21,7 @@ C4Container
     System_Ext(opencode_runtime, "OpenCode", "Harness consumidor do MCP ai-memory")
     System_Ext(copilot_runtime, "Copilot CLI", "Harness consumidor do MCP ai-memory")
     System_Ext(dependencias, "Dependências locais", "CLIs e runtimes do registro do bootstrap")
-    System_Ext(docker, "Docker Engine", "Runtime local do container ai-memory")
+    System_Ext(docker, "Docker Engine", "Runtime local do container ai-memory (Engine nativo ou dentro do WSL; sem Docker Desktop)")
     System_Ext(ai_memory, "ai-memory MCP", "Servidor na rede internal; loopback publicado ou IPv4 privado da bridge")
     System_Ext(upstreams, "Repositórios upstream", "Fontes Git de conteúdo externo não confiável")
 

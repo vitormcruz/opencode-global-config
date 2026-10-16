@@ -103,6 +103,15 @@ remove os wrappers e hooks gerados, remove as declarações gerenciadas, restaur
 - **Rede Docker com egress aberto:** rejeitada. O container não precisa de rota
   externa durante a operação normal.
 
+## Nota de 2026-10-16: expectativa de Docker
+
+Ajuste de expectativa por decisão do humano, sem novo runtime nem mudança de
+comportamento do bootstrap. O Docker esperado é o Docker Engine, usado
+diretamente (Linux/rootless) ou dentro do WSL (também rootless). Docker Desktop
+não é suportado nem esperado. No Windows, o bootstrap só detecta `docker` no
+PATH do Windows: sem ele, não provisiona o ai-memory e não usa o Docker do WSL.
+Para provisionar com o Docker do WSL, o bootstrap é executado dentro do WSL.
+
 ## Asserções executáveis
 
 A fixture lê os valores das tabelas e os compara com a configuração, o código

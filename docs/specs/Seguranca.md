@@ -140,7 +140,11 @@ preserva o volume.
 ### SEC-09: Docker ausente (origem: [requisitos de E10][origem-sec])
 
 Sem Docker, o bootstrap desativa a declaração MCP nos dois harnesses e informa
-uma instalação em user-space sem elevação.
+uma instalação em user-space sem elevação. O Docker esperado é o Docker Engine,
+direto (Linux/rootless) ou dentro do WSL; Docker Desktop não é suportado nem
+esperado. No Windows, o bootstrap só detecta `docker` no PATH do Windows: sem
+ele, não provisiona o ai-memory e não usa o Docker do WSL; para provisionar com
+o Docker do WSL, rode o bootstrap dentro do WSL.
 
 | Entrada | Resultado esperado |
 |---|---|
