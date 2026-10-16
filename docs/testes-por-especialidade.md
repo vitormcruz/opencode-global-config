@@ -20,7 +20,7 @@ referenciam este arquivo. Eles não reproduzem esta especificação.
 
 1. **Testes da aplicação**: validam o produto em desenvolvimento.
    Rodam via suítes e agregador `testes-produto`, executados pelo agente
-   `qa` na etapa de Testes do Fluxo, sempre que uma funcionalidade é
+   `qa` quando solicitado, sempre que uma funcionalidade é
    desenvolvida.
 2. **Testes dos scripts de teste**: os scripts de suíte e o agregador são
    código e têm testes próprios em `testes-produto/tests/`, fora da suíte
@@ -44,8 +44,7 @@ referenciam este arquivo. Eles não reproduzem esta especificação.
 - Análise estática PowerShell: PSScriptAnalyzer nos scripts `.ps1`;
   violação = bloqueante
 - Cobertura: pytest-cov; cobertura total abaixo de 70% = bloqueante.
-  Enquanto o repositório estiver abaixo de 70%, o ciclo de construção
-  implementa testes até atingir o mínimo
+  Enquanto o repositório estiver abaixo de 70%, implemente testes até atingir o mínimo
 - Specs executáveis da especialidade backend, rodadas via Concordion com
   tradutor Python interno à suíte; spec falhando = bloqueante
 
@@ -88,7 +87,7 @@ instrução de rede.
 Chama as suítes definidas neste documento (`testes-produto/backend` e
 `testes-produto/seguranca`) e consolida o relatório no fim.
 `status` é `fail` se qualquer suíte falhar. Não reabre entrevista
-nem inventa check. O agente `qa` executa na etapa de Testes do Fluxo;
+nem inventa check. O agente `qa` executa quando solicitado;
 o `curador-produto` valida a evidência da execução.
 
 - Interface JSON `{ status, findings[] }` em stdout, UTF-8; progresso

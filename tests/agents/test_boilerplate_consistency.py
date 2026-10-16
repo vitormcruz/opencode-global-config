@@ -117,8 +117,13 @@ def test_evidencias_intro_is_identical_between_all_workflow_agents(
         )
 
     assert "suítes por especialidade" in baseline
-    assert "Construção" in baseline
-    assert "Revisão" in baseline
+    assert "## Evidências de Testes — <fase>" in baseline
+    assert "Preencha o marcador com o valor indicado por quem o acionou." in (
+        baseline
+    )
+    assert "por conta própria" in baseline
+    assert "na Construção" not in baseline
+    assert "na Revisão" not in baseline
     assert "Evidências de Testes" in baseline
     assert "Evidências de Harness" not in baseline
 

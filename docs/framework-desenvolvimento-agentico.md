@@ -137,8 +137,8 @@ Para permitir a retomada do Fluxo, mantém:
 - o executor e o modelo utilizados nos registros de trabalho;
 - o histórico das alterações relevantes.
 
-O agente que conclui uma fase atualiza o `Status` antes de
-retornar. Na construção, o arquivo registra etapas concluídas.
+O `devflow` atualiza o `Status` quando o agente que conclui
+uma fase retorna. Na construção, o arquivo registra etapas concluídas.
 Na revisão, registra os resumos dos agentes. Alterações no plano
 ocorrem na Revisão do Plano ou no gate de refatoração.
 
@@ -299,7 +299,7 @@ A disposição dos agentes no processo de desenvolvimento foi otimizada para:
 
 8. **Agnosticismo dos agentes**
    - Os prompts dos agentes descrevem capacidades, nunca fases.
-   - Apenas o `devflow` conhece o Fluxo.
+   - Apenas o `devflow` conhece o Fluxo. Essa regra torna os demais agnósticos: não o mencionam e não encaminham pergunta nem falha a ele. No Fluxo, o `devflow` sempre medeia. Fora do Fluxo, ou no uso parcial, o agente responde a quem o acionou e segue utilizável.
 
 9. **Seleção de modelo**
    - Ao iniciar, o `devflow` sugere um modelo por etapa.

@@ -30,11 +30,11 @@ O analista deve elicitar, para cada história de usuário:
     - Consolidados em `docs/specs/rnf-gerais.md`
     - Derivados em Critérios de Aceitação no mesmo arquivo, com uma
       seção para cada RNF
-- O humano pode iniciar o workflow imediatamente após elicitar uma
+- O humano pode iniciar a implementação imediatamente após elicitar uma
   história — nesse caso a história fica apenas no arquivo de planejamento
-  do devflow e pode ser descartada após o ciclo.
+  e pode ser descartada após o ciclo.
 - O humano pode também elicitar múltiplas histórias antecipadamente para
-  iniciar os workflows posteriormente, uma por vez — nesse caso o
+  iniciar os trabalhos posteriormente, uma por vez — nesse caso o
   analista salva cada história em `docs/backlog/` (um arquivo Markdown
   por história).
 
@@ -52,7 +52,9 @@ O analista deve elicitar, para cada história de usuário:
 | Arquitetura (Diagrama Gerado) | Mermaid — C4 L1/L2/L3 gerado dos ADRs | eng-software | docs/adr/diagrama-c4-l1.md, docs/adr/diagrama-c4-l2.md, docs/adr/diagrama-c4-l3.md |
 | UPSTREAM.md (skills externas) | Markdown padronizado | eng-software | harness-conf/skills/<skill>/UPSTREAM.md |
 | README — Dependências | Markdown (seção do README) | eng-software | README.md |
-| Workflows de Agentes de IA | Markdown | eng-software | docs/workflow-*.md |
+| Workflows de Agentes de IA | Markdown | eng-software | docs/framework-desenvolvimento-agentico.md |
+| Workflow de Definição de Escopo | Markdown | eng-software | docs/workflow-definicao-escopo.md |
+| Workflow Agêntico Simples | Markdown | eng-software | docs/workflow-agentico-simples.md |
 
 ### Regras de Documentação
 
@@ -130,18 +132,19 @@ O analista deve elicitar, para cada história de usuário:
 - Não editar manualmente — é artefato gerado
 
 ##### Workflows de Agentes de IA
-- Os workflows documentam os papéis dos agentes, a sequência de trabalho,
+- O Framework de Desenvolvimento Agêntico é a fonte de verdade do fluxo agêntico
+  e documenta os papéis dos agentes, a sequência de trabalho,
   os handoffs, os gates e os contratos entre fases.
+- Apenas o `devflow` conhece o Fluxo; os demais agentes são agnósticos.
 - São especificações documentais, não especificações executáveis. Não usam
   Concordion e não pertencem às suítes `testes-produto`.
-- O `eng-software` mantém os workflows deste produto. Antes de criar ou
-  revisar um workflow, carrega `writing-for-agents`.
-- Toda alteração em `harness-conf/agents/` deve ser refletida nos workflows
-  relacionados.
-- Toda alteração em `docs/workflow-*.md` deve ser refletida nos agentes
-  relacionados.
-- A consistência entre agentes e workflows deve ser verificada pelos testes
-  estruturais do repositório.
+- O `eng-software` mantém o Framework deste produto. Antes de criar ou
+  revisar o Framework, carrega `writing-for-agents`.
+- Toda alteração em `harness-conf/agents/` deve ser refletida no Framework
+  relacionado.
+- Toda alteração no Framework deve ser refletida nos agentes relacionados.
+- A consistência entre agentes e o Framework deve ser verificada pelos
+  testes estruturais do repositório.
 
 ##### UPSTREAM.md (skills externas)
 - Regra canônica na seção "Upstream de Skills Externas" do `AGENTS.md`;

@@ -48,3 +48,6 @@ def test_agents_references_specialty_tests_without_copying_spec(
     assert (repo_root / "docs" / "testes-por-especialidade.md").is_file()
     assert "### Instruções por Agente" in agents
     assert "AGENTS.base.md" not in agents
+    assert "testes automatizados relacionados às modificações" in agents
+    assert "script agregador" not in agents.lower()
+    assert "etapa de Testes apenas" not in agents

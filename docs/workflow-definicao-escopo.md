@@ -29,7 +29,7 @@ workflow para consulta durante a elicitação.
 1. **Documentação do produto já está disponível** —
    as Diretrizes e Regras de Produto existem e estão válidas.
    Este workflow assume isso como pré-condição.
-2. **`analista` nunca edita `docs/README.md`** — apenas
+2. **`analista` nunca edita a Especificação do Produto** — apenas
    lê a Especificação do Produto referenciada nas Diretrizes e
    Regras de Produto e consulta a seção Definição de Escopo para
    contextualizar a elicitação.
@@ -45,7 +45,7 @@ workflow para consulta durante a elicitação.
 ### Elicitação
 
 O humano inicia o `analista` diretamente. O analista conduz a
-elicitação sem um orquestrador intermediário:
+elicitação diretamente com o humano:
 
 1. Analista carrega `question-orchestration` no modo direto e
    consulta as Diretrizes e Regras de Produto, seguindo a referência
@@ -80,7 +80,7 @@ sequenceDiagram
     Note over Humano,ana: ELICITAÇÃO
 
     Humano ->> ana: Solicita definição de escopo
-    Note right of ana: Lê docs/README.md<br/>(seção Definição de Escopo)
+    Note right of ana: Lê a Especificação do Produto<br/>(seção Definição de Escopo)
 
     ana ->> ana: Compara com o que o humano forneceu
 
@@ -105,6 +105,6 @@ sequenceDiagram
 
 ## Regras Críticas
 
-- `analista` **nunca** edita `docs/README.md`
-- `docs/README.md` contém a seção Definição de Escopo
+- `analista` **nunca** edita a Especificação do Produto
+- A Especificação do Produto contém a seção Definição de Escopo
   **antes** da atuação do `analista`

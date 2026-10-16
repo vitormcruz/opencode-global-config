@@ -31,9 +31,8 @@ Consulte a especificação em
 Toda vez que um agente desta seção for utilizado, ele deve
 consultar a subseção com seu nome antes de executar a tarefa.
 Deve procurar instruções específicas para aquela utilização e
-cumpri-las quando existirem. A consulta vale tanto quando o
-agente é acionado pelo `devflow` quanto quando é chamado
-diretamente pelo humano.
+cumpri-las quando existirem. A consulta vale para quem o
+acionou.
 
 `SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
 instrução adicional. Esta seção não contém o contrato detalhado
@@ -61,7 +60,7 @@ SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
 #### qa
 
-Execute o script agregador dos testes por especialidade na etapa de Testes.
+SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
 #### rev
 
@@ -69,5 +68,4 @@ SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
 #### curador-produto
 
-Valide a evidência de execução do script agregador dos testes por
-especialidade na etapa de Testes apenas.
+SEM INSTRUÇÕES A PEDIDO DO HUMANO

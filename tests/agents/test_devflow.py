@@ -22,9 +22,29 @@ def question_protocol_content(repo_root: Path) -> str:
     )
 
 
+def framework_content(repo_root: Path) -> str:
+    """Lê o Framework commitado, fonte de verdade do desenvolvimento."""
+
+    return (
+        repo_root / "docs/framework-desenvolvimento-agentico.md"
+    ).read_text(encoding="utf-8")
+
+
 @pytest.mark.unit
 def test_devflow_has_mediation_section(repo_root: Path) -> None:
     assert "Função de mediação" in devflow_content(repo_root)
+
+
+@pytest.mark.unit
+def test_framework_agnosticism_does_not_name_devflow_in_specialists(
+    repo_root: Path,
+) -> None:
+    content = framework_content(repo_root)
+
+    assert "Apenas o `devflow` conhece o Fluxo." in content
+    assert "não o mencionam e não encaminham pergunta nem falha a ele" in content
+    assert "No Fluxo, o `devflow` sempre medeia." in content
+    assert "o agente responde a quem o acionou e segue utilizável" in content
 
 
 @pytest.mark.unit
@@ -75,53 +95,28 @@ def test_devflow_does_not_reference_smart_planner(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
-def test_development_workflow_references_question_protocol_skill(
+def test_framework_references_question_protocol_skill(
     repo_root: Path,
 ) -> None:
-    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
-        encoding="utf-8"
-    )
+    framework = framework_content(repo_root)
 
-    assert "question-orchestration" in workflow
-    assert "no máximo 4 perguntas por rodada" not in workflow
-    assert "Checklist estrutural" in workflow
-    assert "Continuidade da mediação" in workflow
-    assert "Prompt-improver para handoff" in workflow
-    assert "Grill-me sob demanda" not in workflow
+    assert "question-orchestration" in framework
+    assert "Perguntas dos agentes passam pelo `devflow`." in framework
+    assert "grill-me" not in framework.lower()
 
 
 @pytest.mark.unit
-def test_development_workflow_mermaid_notes_use_supported_syntax(
-    repo_root: Path,
-) -> None:
-    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
-        encoding="utf-8"
+def test_devflow_mediates_curator_ownership(repo_root: Path) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert "aciona e medeia a definição das diretrizes e regras de produto" in (
+        normalized
     )
-    mermaid = workflow.split("```mermaid", 1)[1].split("```", 1)[0]
-
-    for line in mermaid.splitlines():
-        if line.strip().startswith("Note over "):
-            assert re.search(r"Note over [^:]+,\s+", line) is None
-
-
-@pytest.mark.unit
-def test_development_workflow_defines_curator_ownership(
-    repo_root: Path,
-) -> None:
-    workflow = (repo_root / "docs/workflow-agentes-dev.md").read_text(
-        encoding="utf-8"
+    assert "curador-produto" in content
+    assert "não edita nem valida os artefatos das diretrizes e regras de produto" in (
+        normalized
     )
-    normalized = " ".join(workflow.split())
-
-    for section in (
-        "Definição de Escopo",
-        "Elementos de Especificação",
-        "Estratégias de Indexação de Código",
-        "Testes por Especialidade",
-    ):
-        assert section in workflow
-    assert "O `curador-produto` cria e mantém" in normalized
-    assert "O `devflow` apenas aciona e medeia" in normalized
 
 
 @pytest.mark.unit
@@ -134,7 +129,11 @@ def test_devflow_mediates_product_rules_definition_without_editing_docs(
     assert "aciona e medeia a definição das diretrizes e regras de produto" in (
         normalized
     )
-    assert "não edita nem valida `docs/readme.md` ou `agents.md`" in normalized
+    assert "não edita nem valida os artefatos das diretrizes e regras de produto" in (
+        normalized
+    )
+    assert "AGENTS.md" in content
+    assert "docs/README.md" not in content
     assert "curador-produto: allow" in content
 
 
@@ -143,6 +142,20 @@ def test_devflow_contract_has_item_six(repo_root: Path) -> None:
     content = devflow_content(repo_root)
     assert re.search(r"^6\.", content, re.MULTILINE) is not None
     assert "Não precisa concluir a tarefa" in content
+
+
+@pytest.mark.unit
+def test_devflow_informs_spawned_agents_of_evidence_phase(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert (
+        "informar a cada agente acionado o valor de `<fase>` do título "
+        "`## evidências de testes — <fase>`, conforme definido pelo framework"
+        in normalized
+    )
 
 
 @pytest.mark.unit
@@ -195,7 +208,9 @@ def test_devflow_validates_product_rules_before_scope_confirmation(
     assert "Status: PLANEJAMENTO" in content
     assert "Se a resposta for sim" in content
     assert "curador-produto" in content
-    assert "docs/README.md" in content
+    assert "docs/README.md" not in content
+    assert "Especificação do Produto" in content
+    assert "Diretrizes e Regras de Produto" in content
     assert "### 1. INICIALIZAÇÃO" in content
     assert "### 2. PLANEJAMENTO" in content
     assert content.index("Verificação inicial das Diretrizes") < content.index(
@@ -219,11 +234,60 @@ def test_devflow_requires_human_confirmation_before_rereview(
     repo_root: Path,
 ) -> None:
     content = devflow_content(repo_root)
+    normalized = " ".join(content.split())
 
-    assert content.count('Perguntar explicitamente ao humano: **"Resubmeter para revisão?"**') == 2
-    assert "Somente com resposta afirmativa repetir a fase 3" in content
-    assert "Somente com resposta afirmativa repetir a fase 5" in content
+    assert normalized.count('**"Resubmeter para revisão?"**') >= 2
+    assert normalized.count("Somente uma resposta afirmativa") >= 2
+    assert "não aciona uma nova revisão automaticamente" in normalized
     assert "Humano controla re-revisões" in content
+
+
+@pytest.mark.unit
+def test_devflow_requires_deterministic_retries_and_blocks_finalization(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert "reexecução obrigatória dos testes automáticos determinísticos" in (
+        normalized
+    )
+    assert "não pode avançar para `status: finalização` enquanto houver falha" in (
+        normalized
+    )
+    assert "três falhas consecutivas" in normalized
+    assert "análise diagnóstica adicional" in normalized
+    assert "sem aprovação dos testes" in normalized
+
+
+@pytest.mark.unit
+def test_devflow_mediates_the_three_option_refactoring_gate(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert "gate de refatoração" in normalized
+    assert "manter o plano e ajustar apenas a implementação" in normalized
+    assert "aprovar um ajuste mínimo do plano e registrá-lo" in normalized
+    assert "retornar ao planejamento" in normalized
+    assert "medeia a decisão" in normalized
+    assert "executor não escolhe" in normalized
+    assert "só prossegue depois da resposta humana" in normalized
+
+
+@pytest.mark.unit
+def test_devflow_does_not_silently_skip_agent_failures(
+    repo_root: Path,
+) -> None:
+    content = devflow_content(repo_root)
+    normalized = " ".join(content.lower().split())
+
+    assert "falha de agente" in normalized
+    assert "não pode ser pulada silenciosamente" in normalized
+    assert "corrigir e retentar" in normalized
+    assert "encaminhe o trabalho a outro agente" in normalized
+    assert "pular com registro" not in normalized
 
 
 @pytest.mark.unit
@@ -272,16 +336,15 @@ def test_scope_workflow_is_independent_and_has_no_plan_contract(
 
 
 @pytest.mark.unit
-def test_development_workflow_does_not_link_scope_workflow(
+def test_framework_links_scope_workflow_from_ideation(
     repo_root: Path,
 ) -> None:
-    content = (
-        repo_root / "docs" / "workflow-agentes-dev.md"
-    ).read_text(encoding="utf-8")
+    content = framework_content(repo_root)
+    normalized = " ".join(content.split())
 
-    assert "workflow-definicao-escopo.md" not in content
-    assert "O Arquivo de Planejamento só é criado depois que o escopo está" in content
-    assert "lacuna" in content.lower()
+    assert "[Consultar o Fluxo de Definição de Escopo]" in content
+    assert "./workflow-definicao-escopo.md" in content
+    assert "O plano só nasce depois dessa definição." in normalized
 
 
 @pytest.mark.unit
@@ -313,7 +376,7 @@ def test_devflow_evidence_validated_at_end_of_test_phase(
 
     assert "curador-produto" in content
     assert "testes-produto" in content
-    assert "orquestrador" in lower
+    assert "roteador stateless" in lower
     assert "val-harness" not in content
     assert "re-executar" in lower
 

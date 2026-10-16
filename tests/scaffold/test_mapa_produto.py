@@ -358,7 +358,7 @@ def test_doc_and_testes_produto_flags_create_both_scaffolds(tmp_path: Path) -> N
 
 
 @pytest.mark.unit
-def test_curador_produto_contains_three_doc_template_sections(
+def test_curador_produto_contains_product_specification_sections(
     repo_root: Path,
 ) -> None:
     content = (repo_root / "harness-conf" / "agents/curador-produto.md").read_text(
@@ -367,7 +367,8 @@ def test_curador_produto_contains_three_doc_template_sections(
 
     assert "Definição de Escopo" in content
     assert "Elementos de Especificação" in content
-    assert "Estratégias de Indexação de Código" in content
+    assert "Regras de Documentação" in content
+    assert "Estratégias de Indexação de Código" not in content
 
 
 @pytest.mark.unit
@@ -469,6 +470,8 @@ def test_guidelines_agents_template_covers_workflow_agents(
     for agent in WORKFLOW_AGENTS:
         assert f"#### {agent}" in content
     assert "SEM INSTRUÇÕES A PEDIDO DO HUMANO" in content
+    assert "script agregador" not in content.lower()
+    assert "etapa de Testes apenas" not in content
     assert "| Especialidade | Script |" not in content
     assert "testes-produto/backend" not in content
     assert "harness/agregar" not in content

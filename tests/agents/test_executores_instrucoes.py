@@ -6,6 +6,7 @@ import pytest
 
 EXECUTORS = ("dba", "front", "rev", "eng-software", "qa", "sec")
 INSTRUCTION_AGENTS = (*EXECUTORS, "curador-produto")
+SPEC_AGENTS = INSTRUCTION_AGENTS
 
 
 def _agent_text(repo_root: Path, name: str) -> str:
@@ -48,39 +49,59 @@ def test_agents_consult_own_instructions_when_used(
 
 
 @pytest.mark.unit
-def test_workflow_defines_per_use_instruction_lookup(repo_root: Path) -> None:
-    workflow = _flat(
-        (repo_root / "docs/workflow-agentes-dev.md").read_text(
-            encoding="utf-8"
-        )
-    )
+def test_devflow_does_not_require_own_instruction_lookup(
+    repo_root: Path,
+) -> None:
+    content = _flat(_agent_text(repo_root, "devflow"))
 
-    assert "### 6. instruções por agente" in workflow
-    assert "toda vez que esse agente for utilizado" in workflow
-    assert "antes de executar a tarefa" in workflow
-    assert "procura instruções para aquela utilização" in workflow
-    assert "independentemente da fase" in workflow
+    assert "## instruções por agente" not in content
+    assert "procure instruções específicas para o devflow" not in content
+
+
+@pytest.mark.unit
+def test_specialists_return_to_caller_without_naming_devflow(
+    repo_root: Path,
+) -> None:
+    specialists = (*EXECUTORS, "curador-produto")
+    for name in specialists:
+        content = _agent_text(repo_root, name)
+        assert "devflow" not in content.lower(), name
+        assert "quem o acionou" in content.lower(), name
+
+    silent = (
+        repo_root / "AGENTS.md",
+        repo_root
+        / "harness-conf/agents/default-artifacts"
+        / "diretrizes-regras-produto-agents-md-template.md",
+        repo_root
+        / "harness-conf/agents/default-artifacts"
+        / "doc-readme-template.md",
+    )
+    for path in silent:
+        assert "devflow" not in path.read_text(encoding="utf-8").lower(), path.name
 
 
 @pytest.mark.unit
 def test_executors_resolve_suite_spec_via_agents_link(
     repo_root: Path,
 ) -> None:
-    for name in EXECUTORS:
+    for name in SPEC_AGENTS:
         content = _agent_text(repo_root, name)
         lower = _flat(content)
         assert "Testes por Especialidade" in content, name
-        assert "docs/README.md" in content, name
-        assert "docs/testes-produto.md" not in content, name
-        assert "path hardcoded" in lower, name
-        assert "o que deve conter" in lower, name
+        assert "AGENTS.md" in content, name
+        assert "Diretrizes e Regras de Produto" in content, name
+        assert "subseção" in lower, name
+        assert "referenciado" in lower or "referência" in lower, name
+        assert "docs/README.md" not in content, name
+        assert "docs/testes-por-especialidade.md" not in content, name
 
 
 @pytest.mark.unit
 def test_key_agents_declare_two_test_levels(repo_root: Path) -> None:
     for name in ("devflow", "qa", "eng-software", "curador-produto"):
         lower = _flat(_agent_text(repo_root, name))
-        assert "dois níveis de teste" in lower, name
+        assert lower.count("dois níveis de teste") == 1, name
         assert "testes da aplicação" in lower, name
         assert "testes dos scripts" in lower, name
         assert "somente quando os scripts mudam" in lower, name

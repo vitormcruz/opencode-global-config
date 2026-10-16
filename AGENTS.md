@@ -128,12 +128,14 @@ Todos suportam `--yes` e `--check-only`.
 ## Sincronização Workflow ↔ Agentes
 
 - As definições de agentes ficam em `harness-conf/agents/` e devem estar
-  sempre sincronizadas com os workflows em `docs/workflow-agentes-dev.md`
-  e `docs/workflow-definicao-escopo.md`.
-- **Ao criar ou modificar um agente:** leia primeiro os workflows e
-  verifique alinhamento com o papel definido para aquele agente.
-- **Ao alterar um workflow:** identifique quais agentes precisam ser
-  atualizados e liste-os ao humano.
+  sempre sincronizadas com o Framework em
+  `docs/framework-desenvolvimento-agentico.md` e com o workflow de escopo em
+  `docs/workflow-definicao-escopo.md`.
+- **Ao criar ou modificar um agente:** leia primeiro o Framework e o
+  workflow de escopo e verifique alinhamento com o papel definido para
+  aquele agente.
+- **Ao alterar o Framework ou o workflow de escopo:** identifique quais
+  agentes precisam ser atualizados e liste-os ao humano.
 - Correções mecânicas de formatação (largura de linha, typo) podem ser
   aplicadas em qualquer arquivo, inclusive agentes e workflows, com
   registro no plano.
@@ -249,16 +251,17 @@ Spec: [`docs/testes-por-especialidade.md`](docs/testes-por-especialidade.md)
 Toda vez que um agente desta seção for utilizado, ele deve
 consultar a subseção com seu nome antes de executar a tarefa.
 Deve procurar instruções específicas para aquela utilização e
-cumpri-las quando existirem. A consulta vale tanto quando o
-agente é acionado pelo `devflow` quanto quando é chamado
-diretamente pelo humano.
+cumpri-las quando existirem. A consulta vale para quem o
+acionou.
 
 `SEM INSTRUÇÕES A PEDIDO DO HUMANO` significa que não há
 instrução adicional. Esta seção não contém comando de suíte.
 
 #### eng-software
 
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
+Sempre execute os testes automatizados relacionados às modificações feitas
+por você para verificar se ocorreu alguma regressão. Corrija imediatamente
+qualquer erro encontrado.
 
 #### dba
 
@@ -266,7 +269,9 @@ SEM INSTRUÇÕES A PEDIDO DO HUMANO
 
 #### front
 
-SEM INSTRUÇÕES A PEDIDO DO HUMANO
+Sempre execute os testes automatizados relacionados às modificações feitas
+por você para verificar se ocorreu alguma regressão. Corrija imediatamente
+qualquer erro encontrado.
 
 #### sec
 

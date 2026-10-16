@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from fnmatch import fnmatchcase
 from pathlib import Path
 
@@ -225,6 +226,8 @@ def _extract_backtick_references(text: str) -> set[str]:
 # Helpers de leitura
 # ---------------------------------------------------------------------------
 
+_EXCLUDED_WORKFLOW_DOCS = {"workflow-agentes-dev.md"}
+
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8").replace("\r", "")
@@ -236,7 +239,7 @@ def _read_workflow_docs(docs_dir: Path) -> dict[str, str]:
     return {
         p.name: _read_text(p)
         for p in sorted(docs_dir.glob("workflow-*.md"))
-        if p.is_file()
+        if p.is_file() and p.name not in _EXCLUDED_WORKFLOW_DOCS
     }
 
 
@@ -623,6 +626,34 @@ def test_skill_tables_reference_existing_skills(repo_root: Path) -> None:
 
 
 @pytest.mark.unit
+def test_read_workflow_docs_does_not_open_legacy_workflow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """O workflow legado não participa nem sequer da leitura dos docs."""
+
+    legacy_workflow = tmp_path / "workflow-agentes-dev.md"
+    retained_workflow = tmp_path / "workflow-definicao-escopo.md"
+    legacy_workflow.write_text("workflow legado", encoding="utf-8")
+    retained_workflow.write_text("workflow mantido", encoding="utf-8")
+
+    opened_paths: list[Path] = []
+    original_read_text = _read_text
+
+    def record_read(path: Path) -> str:
+        opened_paths.append(path)
+        return original_read_text(path)
+
+    monkeypatch.setattr(sys.modules[__name__], "_read_text", record_read)
+
+    workflow_docs = _read_workflow_docs(tmp_path)
+
+    assert workflow_docs == {
+        retained_workflow.name: "workflow mantido",
+    }
+    assert legacy_workflow not in opened_paths
+
+
+@pytest.mark.unit
 def test_workflow_agent_references_exist(repo_root: Path) -> None:
     """Workflows não citam agentes fantasmas (removidos/inexistentes)."""
 
@@ -974,17 +1005,34 @@ def test_extract_skill_permission_entries_parses_quoted_wildcard() -> None:
 
 
 @pytest.mark.unit
-def test_work_records_require_executor_and_model(repo_root: Path) -> None:
-    workflow = (repo_root / "docs" / "workflow-agentes-dev.md").read_text(
-        encoding="utf-8"
-    )
-    planning_section = workflow.split(
-        "### Arquivo de planejamento", 1
-    )[1].split("### Schema do arquivo de planejamento", 1)[0]
-    normalized_section = " ".join(planning_section.split())
+def test_framework_work_records_require_executor_and_model(
+    repo_root: Path,
+) -> None:
+    framework = (
+        repo_root / "docs" / "framework-desenvolvimento-agentico.md"
+    ).read_text(encoding="utf-8")
+    file_format = framework.split("##### Formato do arquivo", 1)[1].split(
+        "##### Status válidos", 1
+    )[0]
+    normalized_section = " ".join(file_format.split())
 
-    assert "cada subseção de registro de trabalho informa" in normalized_section
-    assert "`Executor: <agente> / <modelo>`" in normalized_section
+    assert "o executor e o modelo utilizados nos registros de trabalho" in (
+        normalized_section
+    )
+
+
+@pytest.mark.unit
+def test_devflow_uses_framework_governance_contract(repo_root: Path) -> None:
+    devflow = (
+        repo_root / "harness-conf" / "agents" / "devflow.md"
+    ).read_text(encoding="utf-8")
+    normalized = " ".join(devflow.split())
+
+    assert "Diretrizes e Regras de Produto" in devflow
+    assert "Especificação do Produto" in devflow
+    assert "Testes por Especialidade" in devflow
+    assert "Instruções por Agente" in devflow
+    assert "unidade de trabalho coerente" in normalized
 
 
 @pytest.mark.unit
@@ -1003,14 +1051,16 @@ def test_workflows_are_product_specification_elements(repo_root: Path) -> None:
 
     assert (
         "| Workflows de Agentes de IA | Markdown | eng-software | "
-        "docs/workflow-*.md |"
+        "docs/framework-desenvolvimento-agentico.md |"
     ) in elements_section
     assert "especificações documentais, não especificações executáveis" in (
         workflow_rules
     )
+    assert "fonte de verdade do fluxo agêntico" in workflow_rules
+    assert "Apenas o `devflow` conhece o Fluxo" in workflow_rules
     assert "writing-for-agents" in workflow_rules
     assert "harness-conf/agents/" in workflow_rules
-    assert "docs/workflow-*.md" in workflow_rules
+    assert "docs/workflow-*.md" not in workflow_rules
 
 
 @pytest.mark.unit
@@ -1029,3 +1079,19 @@ def test_agents_md_distinguishes_product_guidelines_from_generated_artifacts(
     assert "artefatos gerados por este projeto" in section
     assert "não definem os agentes, workflows ou elementos de" in section
     assert "A evolução deles exige decisão e escopo próprios" in section
+
+
+@pytest.mark.unit
+def test_agents_md_points_to_active_workflow_sources(
+    repo_root: Path,
+) -> None:
+    """A sincronização aponta apenas para as fontes ativas do workflow."""
+
+    agents = (repo_root / "AGENTS.md").read_text(encoding="utf-8")
+    synchronization = agents.split(
+        "## Sincronização Workflow ↔ Agentes", 1
+    )[1].split("## Regras Obrigatórias Para Testes", 1)[0]
+
+    assert "`docs/framework-desenvolvimento-agentico.md`" in synchronization
+    assert "`docs/workflow-definicao-escopo.md`" in synchronization
+    assert "docs/workflow-agentes-dev.md" not in synchronization

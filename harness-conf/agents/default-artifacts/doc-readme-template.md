@@ -37,9 +37,9 @@ O analista deve elicitar:
 - Requisitos Não Funcionais gerais (transversais, sem história específica) são:
     - Consolidados em `docs/specs/rnf-gerais.md`
     - Derivados em Critérios de Aceitação no mesmo arquivo, com uma seção para cada RNF
-- O humano pode iniciar o workflow imediatamente após elicitar uma história — nesse caso
-  a história fica apenas no arquivo de planejamento do devflow e pode ser descartada após o ciclo.
-- O humano pode também elicitar múltiplas histórias antecipadamente para iniciar os workflows
+- O humano pode iniciar a implementação imediatamente após elicitar uma história — nesse caso
+  a história fica apenas no arquivo de planejamento e pode ser descartada após o ciclo.
+- O humano pode também elicitar múltiplas histórias antecipadamente para iniciar os trabalhos
   posteriormente, uma por vez — nesse caso o analista salva cada história em `docs/backlog/`
   (um arquivo Markdown por história).
 

@@ -83,10 +83,20 @@ def test_curador_produto_contains_scope_definition(
 
 
 @pytest.mark.unit
-def test_curador_produto_contains_indexing_strategies(
+def test_curador_produto_uses_product_specification_sections_without_indexing(
     curador_content: str,
 ) -> None:
-    assert "Estratégias de Indexação" in curador_content
+    assert "Regras de Documentação" in curador_content
+    assert "Estratégias de Indexação" not in curador_content
+
+
+@pytest.mark.unit
+def test_curador_produto_validates_specification_links(
+    curador_normalized: str,
+) -> None:
+    assert "validar ativamente" in curador_normalized
+    assert "integridade dos links" in curador_normalized
+    assert "links das especificações" in curador_normalized
 
 
 @pytest.mark.unit
@@ -97,17 +107,25 @@ def test_curador_produto_references_testes_produto_interface(
 
 
 @pytest.mark.unit
-def test_curador_produto_owns_documentation_indexes(
+def test_curador_produto_waits_for_caller_before_revalidation_or_deletion(
     curador_content: str,
 ) -> None:
-    assert "link geral para `docs/README.md`" in curador_content
+    assert "link geral para a Especificação do Produto" in curador_content
+    assert "referência para a especificação correspondente" in curador_content
     assert "Instruções por Agente" in curador_content
     normalized = " ".join(curador_content.split()).lower()
     assert "sem copiar a especificação detalhada para o `agents.md`" in (
         normalized
     )
+    assert "quando quem o acionou solicita" in normalized
     assert "devflow" not in normalized
-    assert "orquestrador" not in normalized
+    assert "não inicia revalidação" in normalized
+    assert "não exclui" in normalized
+    assert "docs/readme.md" not in normalized
+    assert "docs/testes-por-especialidade.md" not in normalized
+    assert "ao fim de um ciclo de desenvolvimento" not in normalized
+    assert "### 6. revisão final de documentação" not in normalized
+    assert "finalização" not in normalized
 
 
 @pytest.mark.unit
@@ -126,7 +144,7 @@ def test_curador_produto_references_default_artifacts(
     )
     # O curador explica o papel de cada template, não só os paths.
     normalized = " ".join(curador_content.split()).lower()
-    assert "especificação do produto que vira o" in normalized
+    assert "especificação do produto do projeto-alvo" in normalized
     assert "especificação própria das suítes de validação" in normalized
     assert "seção completa de diretrizes e regras de produto" in normalized
     product_spec = (
@@ -192,7 +210,8 @@ def test_curador_produto_persists_and_returns_after_approval(
 ) -> None:
     assert "persista o resultado" in curador_normalized
     assert "retorne o resumo ao solicitante" in curador_normalized
-    assert "docs/testes-por-especialidade.md" in curador_content
+    assert "documento de testes" in curador_normalized
+    assert "docs/testes-por-especialidade.md" not in curador_normalized
     assert "docs/testes-produto.md" not in curador_content
 
 
@@ -286,7 +305,7 @@ def test_curador_produto_validates_aggregator_evidence(
 ) -> None:
     assert "agregador" in curador_normalized
     assert "testes-produto" in curador_normalized
-    assert "fase testes" in curador_normalized
+    assert "evidência" in curador_normalized
 
 
 @pytest.mark.unit
@@ -367,10 +386,9 @@ def test_curador_produto_has_catalog_conditional(
 def test_curador_produto_does_not_validate_after_construction(
     curador_normalized: str,
 ) -> None:
-    assert "fase testes" in curador_normalized
-    assert "não valida evidências na construção" in curador_normalized or (
-        "não valida" in curador_normalized
-        and "construção" in curador_normalized
+    assert "não valida mérito do que editou" in curador_normalized
+    assert "valida a evidência do agregador quando solicitado" in (
+        curador_normalized
     )
 
 
@@ -379,8 +397,10 @@ def test_curador_produto_interviews_spec_then_instructions(
     curador_content: str,
 ) -> None:
     assert "Instruções por Agente" in curador_content
-    assert "pasta" in curador_content.lower()
-    assert "docs/" in curador_content
+    assert "AGENTS.md" in curador_content
+    assert "referência" in curador_content.lower()
+    assert "docs/README.md" not in curador_content
+    assert "docs/testes-por-especialidade.md" not in curador_content
     assert "pa11y" in curador_content
     assert "axe-core" in curador_content
     assert "o harness efetivo fica no" not in curador_content.lower()
@@ -432,8 +452,10 @@ def test_mensagens_curadoria_documents_separate_test_spec(
     ).read_text(encoding="utf-8")
 
     assert "Testes por Especialidade" in content
-    assert "docs/testes-por-especialidade.md" in content
-    assert "índice das suítes" in content
+    assert "AGENTS.md" in content
+    assert "referências para esses documentos" in content
+    assert "docs/testes-por-especialidade.md" not in content
+    assert "índice das suítes" in " ".join(content.split())
     assert "docs/testes-produto.md" not in content
 
 

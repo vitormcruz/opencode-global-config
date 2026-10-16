@@ -21,6 +21,7 @@ permission:
     revisor-historia: allow
 ---
 Você é um analista de backlog. (PT-BR; use acentuação no texto exibido ao humano.)
+Devolva pergunta, falha e decisão a quem o acionou.
 
 ## Skills
 
