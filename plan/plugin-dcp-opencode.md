@@ -1,11 +1,13 @@
 # Plano: incorporação do plugin DCP (Dynamic Context Pruning) ao OpenCode
 
-Status: VALIDAÇÃO FUNCIONAL EM CURSO — design final de compactação
-por decisão do agente, SEM limite fixo de tokens (decisão humana de
-2026-09-30; ver `## Decisão governante`). Fases 0-3 concluídas,
-C3 PASS, materialização no user-space confirmada. Restante: validação
-funcional comportamental (eventos iniciados pelo agente + fallback) e
-fechamento do ciclo.
+Status: ENCERRADO (2026-10-16) — registros formais fechados
+(FINALIZAÇÃO, item 7). Decisão humana de 2026-10-15: "Está funcionando
+bem o plugin e a compressão, podemos encerrar a tarefa." C4 FECHADO
+por decisão humana (5 eventos reais; ping informativo, não ordem);
+Tasks 10-13 e QA-ACC-3/4 fechados por remissão às evidências; backlog
+do C5 resolvido. Agregador: re-execução pulada ("pula"). Exclusão
+deste plano e dos artefatos auxiliares autorizada ("exclui"), a
+executar após o commit de fechamento; push no fim de tudo.
 
 Workflow aberto em 2026-09-27. Escopo original: até a aprovação do plano.
 EXTENDIDO em 2026-09-28 pelo humano (item 13 de `## Perguntas`): após a
@@ -242,8 +244,9 @@ de feat.
       70,4%; recusa correta quando não compensa
 - [x] (d) fallback com mensagem de compactação redigida (literal
       registrada acima)
-- [ ] (a) em sessões reais: coleta natural pós-restart (consulta de
-      monitoramento existente)
+- [x] (a) em sessões reais: coleta natural suprida (5 eventos na
+      investigação ping x compress; C4 FECHADO em 2026-10-16 por
+      decisão humana; FINALIZAÇÃO, item 7)
 
 ## Insumo do humano (2026-09-27)
 
@@ -811,9 +814,12 @@ Task 10: ativar e rodar um ciclo real.
   CONTRA a recomendação de eng/sec/qa; risco experimental aceito).
 - Critérios de aceitação:
   - [x] evidência de ativação (config materializada, tool visível);
-  - [ ] sessão longa sem erro atribuível ao DCP;
-  - [ ] fluxo multiagente exercitado (spawns via tool `task`), com
-    sessões filhas validadas no QA-ACC-3.
+  - [x] sessão longa sem erro atribuível ao DCP (sessões reais na
+    investigação ping x compress: 5 compress `completed`, 0 erro
+    atribuível; FINALIZAÇÃO, item 7);
+  - [x] fluxo multiagente exercitado (spawns via tool `task`), com
+    sessões filhas validadas no QA-ACC-3 (fechamento por remissão;
+    FINALIZAÇÃO, item 7).
 - Dependências: C3.
 - Escopo: S.
 
@@ -824,10 +830,14 @@ Task 11: medir e comparar.
   coerência dos sumários.
 - Critérios de aceitação: definidos pelo GANCHO-QA (QA-ACC-1 a 5;
   literais numéricos endossados na Pergunta 11). Destaques:
-  - [ ] queda de contexto por evento e na média (QA-ACC-1);
-  - [ ] prompt cache preservado, sem loop de nudge (QA-ACC-2 e 4);
-  - [ ] fluxo multiagente sem regressão, sessões filhas validadas via
-    `session.parent_id` (QA-ACC-3; Pergunta 8).
+  - [x] queda de contexto por evento e na média (QA-ACC-1; suprida
+    pela validação funcional 2026-10-04 + investigação: 5 eventos
+    reais; FINALIZAÇÃO, item 7);
+  - [x] prompt cache preservado, sem loop de nudge (QA-ACC-2 e 4;
+    fechamento por remissão; 0 loop observado; FINALIZAÇÃO, item 7);
+  - [x] fluxo multiagente sem regressão, sessões filhas validadas via
+    `session.parent_id` (QA-ACC-3; fechamento por remissão;
+    FINALIZAÇÃO, item 7).
 - Dependências: Task 10.
 - Escopo: M.
 
@@ -837,6 +847,12 @@ Checkpoint C4 (gate de adoção):
   comportamental, seção `## Validação funcional`): adotar ou reverter
   pelos critérios comportamentais (eventos iniciados pelo agente,
   blocos antigos, queda ≥ 20% do total, fallback demonstrado).
+- Veredito de fechamento (2026-10-16): FECHADO POR DECISÃO HUMANA
+  (2026-10-15, "podemos encerrar a tarefa"). Critério de ≥ 3 eventos
+  de compress iniciados pelo agente em sessões reais: ATENDIDO (5
+  eventos na investigação ping x compress; ping confirmado
+  informativo, não ordem); validação funcional PASS (2026-10-04) com
+  fallback demonstrado. Detalhe: FINALIZAÇÃO, item 7.
 
 #### Fase 5: Rollout geral e fechamento
 
@@ -850,11 +866,13 @@ Task 12: generalizar, documentar e fazer a retro.
   documentação; registrar lições para o ciclo vizinho de otimização de
   custo.
 - Critérios de aceitação:
-  - [ ] fechamento do `harness-conf/dcp.jsonc` (estado final do
-    design) commitado, com bootstrap executado;
-  - [ ] documentação final coerente (README, AGENTS.base.md, ADR);
-  - [ ] itens pendentes em backlog (ex.: pin da spec do quota plugin,
-    risco aceito pré-existente citado pelo sec).
+  - [x] fechamento do `harness-conf/dcp.jsonc` (estado final do
+    design) commitado (`82737aa`, emenda do ping), com bootstrap
+    executado;
+  - [x] documentação final coerente (cadeia conferida; FINALIZAÇÃO,
+    item 3);
+  - [x] itens pendentes em backlog encerrados/resolvidos
+    (FINALIZAÇÃO, item 7).
 - Dependências: C4.
 - Arquivos prováveis: `harness-conf/dcp.jsonc`.
 - Escopo: S.
@@ -872,12 +890,13 @@ Task 13: verificar defasagem da versão pinada (Pergunta 7).
   (toda evolução funcional cria testes) exige a suíte correspondente
   na mesma mudança.
 - Critérios de aceitação:
-  - [ ] procedimento manual registrado (comandos salvos no plano) e
-    primeira execução com resultado arquivado;
-  - [ ] relatório com versão pinada, versão do registry, versão do
-    cache e veredito (em dia ou defasada);
-  - [ ] bump, se decidido pelo humano, com checklist SEC reexecutado e
-    aprovado antes da troca da spec.
+  - [x] procedimento manual registrado (descrição da task; natureza
+    declarada no achado 6 do rev) e primeira execução com resultado
+    registrado (Fase 0, 2026-09-28);
+  - [x] relatório com versão pinada, versão do registry, versão do
+    cache e veredito: EM DIA (3.1.15 nos três pontos; Task 1);
+  - [x] bump: n/a neste ciclo (nenhum bump decidido; a regra vale
+    para bump futuro).
 - Verificação: relatório registrado nesta seção; inspeção da spec no
   config canônico.
 - Dependências: C4.
@@ -2154,6 +2173,14 @@ ciclo vizinho, 2026-09-23).
     (eficaz = QA-ACC-1 pass no evento); 0 loops no piloto;
   - após compressão eficaz, nudges cessam até novo cruzamento do
     limite.
+
+  FECHAMENTO (2026-10-16): QA-ACC-3 e QA-ACC-4 encerrados por remissão
+  às evidências existentes — método documentado e exequibilidade
+  evidenciada (sessões filhas `parent_id` e régua step-finish
+  confirmadas na Fase 0; spawns reais na investigação ping x
+  compress), monitoramento registrado (consulta da fase TESTES;
+  investigação: 0 loop, 0 erro atribuível). Detalhe: FINALIZAÇÃO,
+  item 7.
 - **QA-ACC-5 — coerência do sumário** (manual, pós-fato; gate `allow`
   decidido na Pergunta 5, sem auditoria no momento da compressão;
   fonte: histórico sqlite):
@@ -3623,4 +3650,197 @@ conteúdo das faixas (amostragem lida).
       (`quiet-cactus` aparece em 5 sessões); filtrar por id completo
 - [x] Verificação de forma: nenhuma linha nova acima de 120 colunas;
       `git diff --check` limpo
+
+## FINALIZAÇÃO (curador-produto, 2026-10-15)
+
+Revisão final de artefatos de spec do ciclo, executada em 2026-10-16.
+Escopo: `docs/README.md`, `docs/testes-por-especialidade.md`, cadeia de
+documentação do ciclo e completude deste plano como registro histórico.
+Nenhum arquivo editado além deste plano; nada commitado.
+
+### 1. docs/README.md (Especificação do Produto)
+
+Leitura integral do estado atual (187 linhas, pós-commit `a1370f1` de
+2026-10-16, ciclo paralelo de agentes). Nenhuma menção a compactação,
+plugin DCP ou dependência de bootstrap afetada pelo ciclo: a spec não
+exige mudança por causa do DCP. A lacuna pré-registrada (Pergunta 2c da
+VALIDAÇÃO; achado (a) da Task 9) é a ÚNICA menção desatualizada:
+
+- Linha 113 cita "ADRs novos (`docs/adr/0007`–`0009`)"; existem 0010,
+  0011 (este ciclo) e 0012.
+
+DECISÃO HUMANA APLICADA: remoção da linha, sem substituição. Decisão
+humana de 2026-10-15 (conversa), literal:
+
+> Não deveria ter essa frase, os novos adrs não devem ter convenção
+> diferente
+
+APLICADO pelo curador-produto em 2026-10-16: linha removida do
+`docs/README.md` sem substituição. As linhas vizinhas já cobrem o
+significado (asserção executável obrigatória em todo ADR novo; legados
+0001-0006 retrofitados). Nenhuma outra edição no arquivo. A proposta de
+substituição genérica e a alternativa de estender a faixa, descritas
+abaixo, foram superadas pela decisão humana. Linha removida:
+
+```markdown
+- Os ADRs novos (`docs/adr/0007`–`0009`) seguem a mesma convenção
+```
+
+### 2. docs/testes-por-especialidade.md
+
+CONFIRMADO: o ciclo não criou nem alterou suíte de especialidade.
+Histórico do arquivo (`git log`): `03eed17`, `e4059ad` (criação da spec
+separada) e `a1370f1` (2026-10-16, ciclo paralelo) — nenhum commit do
+ciclo DCP. Os testes do ciclo vivem em `tests/harnesses/` (suíte pytest
+do repo, dentro da especialidade backend existente) e na fixture
+Concordion `Adr0011Fixture` (backend), sem mudança de spec.
+
+### 3. Cadeia de documentação do ciclo
+
+- `docs/adr/0011-compactacao-dcp-opencode.md`: OK. Status Aceita
+  (2026-10-14); asserção executável; confere com o `dcp.jsonc`
+  (ping 130k soft 10, limite inferior inerte, modo manual ausente,
+  gate `allow`).
+- `README.md` raiz (seções Plugins e Dependências): OK. Entrada do DCP
+  com o ping e os destinos do prompt; "seis destinos" no Windows; DCP
+  fora de Dependências (resolvido pelo OpenCode, não pelo bootstrap).
+- `harness-conf/AGENTS.base.md`, seção "Compactação de contexto": OK.
+  Escada por capacidade + ping informativo + inclinação crescente
+  150k/200k + recarga de skills; coerente com o ADR-0011.
+- `docs/workflow-agentes-dev.md`, premissa 7: SUBSTITUÍDO. Arquivo
+  removido em 2026-10-16 pelo ciclo paralelo (commit `a1370f1`); a
+  gestão de contexto virou a premissa 11 do Framework, agnóstica a
+  ferramenta. Mudança paralela legítima; coerente com o design (a
+  política por capacidade vive no `AGENTS.base.md`); nenhuma
+  inconsistência com este ciclo.
+- `harness-conf/dcp.jsonc`: OK. `maxContextLimit` 130000,
+  `minContextLimit` 999999999, `nudgeForce` soft, `nudgeFrequency` 10,
+  `customPrompts` on, `allow`, `range`, `autoUpdate` false.
+- `harness-conf/dcp-prompts/context-limit-nudge.md`: OK. Texto
+  informativo coerente com a política (150k/200k).
+- `docs/specs/regras-negocio.md` (RN-011): OK. Pendência antiga P2(a)
+  da VALIDAÇÃO resolvida pelo ciclo vizinho (arquivo existe); RN-011
+  compatível com o design (avaliação por etapa, sem gatilho).
+
+### 4. Completude do plano como registro histórico
+
+Substância íntegra: decisão governante + emendas (2026-09-30, 10-04,
+10-14), Perguntas 1-13 com desfechos, VALIDAÇÃO, planejamento
+eng/sec/qa, três passagens do rev na revisão do plano, revisão da
+construção + remediação, Fases 0-4 com evidências, fase TESTES (qa:
+agregador; sec: roteiro APTO COM RESSALVAS), investigação ping x
+compress (commit `5ffe2fd`) e decisão humana de encerramento no Status.
+
+Lacunas de REGISTRO formal (a substância existe; nenhum retrabalho
+técnico; responsável pelo fechamento: devflow):
+
+1. Gate C4 sem veredito formal de fechamento: ficou EM COLETA na fase
+   TESTES; a validação funcional (2026-10-04) deu PASS com ressalva de
+   coleta natural; a ressalva foi suprida (5 eventos reais na
+   investigação) e o encerramento veio por decisão humana (Status).
+   Falta marcar o checkbox "(a) em sessões reais" das Evidências da
+   validação funcional e registrar o C4 como fechado por decisão
+   humana.
+2. Tasks 10 (critérios 2-3), 11, 12 e 13 com critérios `[ ]` abertos:
+   a Task 11 foi superseded de fato pela validação funcional +
+   investigação, sem anotação nos próprios critérios; a Task 12 foi
+   executada de fato (config final commitada, bootstrap executado, docs
+   coerentes) sem marcação; a Task 13 teve execução factual parcial (a
+   Fase 0 registrou pin = registry = cache = 3.1.15 em 2026-09-28), sem
+   relatório próprio.
+3. QA-ACC-3 (multiagente) e QA-ACC-4 sem fechamento formal posterior à
+   fase TESTES; o comportamento real pós-ping documentado na
+   investigação cobre o espírito dos critérios, mas o plano não os
+   fecha.
+4. Backlog do C5 (ex.: pin do quota plugin) citado como candidato,
+   sem registro formal de backlog.
+
+### 5. Validação da evidência do agregador (fase Testes)
+
+| Item | Esperado | Evidência | Status |
+|------|----------|-----------|--------|
+| agregador | testes-produto | Presente e completa | OK |
+
+Evidência (2026-09-29): comando `python3 -m testes-produto`; status
+`pass`; exit 0; 2 execuções idempotentes; finding único `melhoria`
+(bandit, pré-existente, não atribuível ao ciclo).
+
+Observação (não bloqueante, decisão do humano): a última execução
+completa do agregador é anterior à emenda do ping (2026-10-14), que
+mudou código produto e registrou suíte pytest 968 passed, ruff e
+fixture Gradle, sem nova passada do agregador. Recomendado, antes do
+arquivamento, re-executar `testes-produto` e persistir (executor: qa).
+
+### 6. Veredito final
+
+OK para encerrar o ciclo. Pendências: (a) RESOLVIDA em 2026-10-16 —
+decisão humana de 2026-10-15 aplicada no item 1 (remoção sem
+substituição); (b) fechamento dos
+registros do item 4 pelo devflow; (c) opcional (decisão humana):
+re-execução do agregador pós-emenda do ping (item 5). Nenhuma lacuna
+bloqueante; nenhum especialista precisa ser re-spawnado para
+retrabalho técnico. A exclusão deste plano e de artefatos auxiliares
+segue dependendo de decisão humana explícita, após (a) e (b).
+
+### 7. Fechamento dos registros formais (eng-software, 2026-10-16)
+
+Executa o item 4 desta seção (responsabilidade devflow/eng-software).
+Nada novo a produzir: todo fechamento é por remissão a evidência já
+registrada neste plano; checkboxes emendados in loco com remissão a
+este item.
+
+Decisões humanas de encerramento (2026-10-15, literais):
+
+1. "Está funcionando bem o plugin e a compressão, podemos encerrar a
+   tarefa."
+2. Agregador testes-produto: re-execução PULADA ("pula"); pendência
+   (c) do item 6 resolvida sem execução.
+3. Plano e artefatos auxiliares: EXCLUSÃO autorizada ("exclui"), a
+   executar após o commit de fechamento.
+4. Push: "no fim de tudo push", após a exclusão do plano.
+
+Gate C4 — FECHADO POR DECISÃO HUMANA (2026-10-15): critério de ≥ 3
+eventos de compress iniciados pelo agente em sessões reais ATENDIDO
+(5 eventos documentados na investigação ping x compress; ping
+confirmado informativo, não ordem: 2 de 5 âncoras ignoradas e o
+agente sempre invoca a política, nunca trata o ping como ordem);
+validação funcional (2026-10-04) com PASS e fallback demonstrado em
+sandbox (mensagem de compactação redigida). Veredito registrado no
+checkpoint C4; checkbox "(a) em sessões reais" marcado.
+
+Tasks 10-13 — checkboxes marcados com remissão à evidência registrada:
+
+- Task 10: materialização confirmada no bootstrap de 2026-09-29;
+  sessões reais sem erro atribuível (investigação: 5 compress
+  `completed`, 0 erro atribuível); fluxo multiagente pelo fechamento
+  do QA-ACC-3.
+- Task 11: superseded de fato pela decisão governante e suprida pela
+  validação funcional (2026-10-04) + investigação (5 eventos reais,
+  0 loop).
+- Task 12: executada de fato; config final commitada (`82737aa`),
+  bootstrap executado, cadeia de documentação conferida (item 3).
+- Task 13: primeira execução registrada na Fase 0 (2026-09-28); em
+  dia, 3.1.15 nos três pontos (pin, registry, cache); nenhum bump no
+  ciclo.
+
+QA-ACC-3 e QA-ACC-4 — fechados por remissão às evidências existentes:
+método documentado e exequibilidade evidenciada (sessões filhas
+`parent_id` e régua step-finish confirmadas na Fase 0; spawns reais de
+3 agentes distintos exercitados na investigação); monitoramento
+registrado (consulta da fase TESTES; investigação: 0 loop de nudge,
+0 erro atribuível, sumários coerentes e `completed`).
+
+Backlog do C5 — encerrado/resolvido:
+
+- Pin da spec do quota plugin (risco aceito pré-existente citado pelo
+  sec): permanece risco aceito FORA do escopo deste ciclo (nota sobre
+  a Pergunta 7); lição registrada: artefatos de revisão do sec não
+  devem viver só em /tmp.
+- Faixa de ADRs no `docs/README.md` (achado (a) da Task 9): RESOLVIDA
+  pela remoção do bullet, decisão humana de 2026-10-15 aplicada pelo
+  curador (item 1 desta seção).
+
+Estado final: ciclo ENCERRADO. Exclusão deste plano e dos artefatos
+auxiliares autorizada ("exclui"), a executar após o commit de
+fechamento; push no fim de tudo.
 
