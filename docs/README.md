@@ -110,7 +110,6 @@ O analista deve elicitar, para cada história de usuário:
   novo: valida que a decisão está implementada
 - Os ADRs legados (`docs/adr/0001`–`0006`) foram retrofitados com fixtures
   Concordion e a seção "Asserções executáveis"
-- Os ADRs novos (`docs/adr/0007`–`0009`) seguem a mesma convenção
 - ADRs nunca são deletados — apenas superseded (novo ADR referencia o
   anterior)
 
